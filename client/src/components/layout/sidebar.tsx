@@ -10,7 +10,6 @@ import {
   Users,
   Calendar,
   Package,
-  ShoppingCart,
   Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,7 +29,6 @@ const farmManagementNavigation = [
   { name: "Farm Plot Mapping", href: "/farm-plots", icon: MapPin },
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
   { name: "Input Management", href: "/input-management", icon: Package },
-  { name: "Procurement", href: "/procurement", icon: ShoppingCart },
 ];
 
 export default function Sidebar() {

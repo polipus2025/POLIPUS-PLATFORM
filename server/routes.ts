@@ -12,7 +12,7 @@ import {
   insertCropPlanSchema,
   insertHarvestRecordSchema,
   insertInputDistributionSchema,
-  insertProcurementSchema,
+
   insertLraIntegrationSchema,
   insertMoaIntegrationSchema,
   insertCustomsIntegrationSchema,
@@ -459,38 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Procurement routes
-  app.get("/api/procurements", async (req, res) => {
-    try {
-      const { farmerId, status } = req.query;
-      let procurements;
-      
-      if (farmerId) {
-        procurements = await storage.getProcurementsByFarmer(parseInt(farmerId as string));
-      } else if (status) {
-        procurements = await storage.getProcurementsByStatus(status as string);
-      } else {
-        procurements = await storage.getProcurements();
-      }
-      
-      res.json(procurements);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch procurements" });
-    }
-  });
 
-  app.post("/api/procurements", async (req, res) => {
-    try {
-      const validatedData = insertProcurementSchema.parse(req.body);
-      const procurement = await storage.createProcurement(validatedData);
-      res.status(201).json(procurement);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to create procurement" });
-    }
-  });
 
   // Government Integration Routes
   

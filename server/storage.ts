@@ -10,7 +10,7 @@ import {
   cropPlanning,
   harvestRecords,
   inputDistribution,
-  procurement,
+
   lraIntegration,
   moaIntegration,
   customsIntegration,
@@ -26,7 +26,7 @@ import {
   type CropPlan,
   type HarvestRecord,
   type InputDistribution,
-  type Procurement,
+
   type LraIntegration,
   type MoaIntegration,
   type CustomsIntegration,
@@ -42,7 +42,7 @@ import {
   type InsertCropPlan,
   type InsertHarvestRecord,
   type InsertInputDistribution,
-  type InsertProcurement,
+
   type InsertLraIntegration,
   type InsertMoaIntegration,
   type InsertCustomsIntegration,
@@ -145,13 +145,7 @@ export interface IStorage {
   createInputDistribution(distribution: InsertInputDistribution): Promise<InputDistribution>;
   updateInputDistribution(id: number, distribution: Partial<InputDistribution>): Promise<InputDistribution | undefined>;
   
-  // Procurement methods
-  getProcurements(): Promise<Procurement[]>;
-  getProcurement(id: number): Promise<Procurement | undefined>;
-  getProcurementsByFarmer(farmerId: number): Promise<Procurement[]>;
-  getProcurementsByStatus(status: string): Promise<Procurement[]>;
-  createProcurement(procurement: InsertProcurement): Promise<Procurement>;
-  updateProcurement(id: number, procurement: Partial<Procurement>): Promise<Procurement | undefined>;
+
 
   // Government Integration methods
   // LRA Integration methods
@@ -207,7 +201,6 @@ export class MemStorage implements IStorage {
   private cropPlans: Map<number, CropPlan>;
   private harvestRecords: Map<number, HarvestRecord>;
   private inputDistributions: Map<number, InputDistribution>;
-  private procurements: Map<number, Procurement>;
   private lraIntegrations: Map<number, LraIntegration>;
   private moaIntegrations: Map<number, MoaIntegration>;
   private customsIntegrations: Map<number, CustomsIntegration>;
@@ -223,7 +216,6 @@ export class MemStorage implements IStorage {
   private currentCropPlanId: number;
   private currentHarvestRecordId: number;
   private currentInputDistributionId: number;
-  private currentProcurementId: number;
   private currentLraIntegrationId: number;
   private currentMoaIntegrationId: number;
   private currentCustomsIntegrationId: number;
@@ -241,7 +233,6 @@ export class MemStorage implements IStorage {
     this.cropPlans = new Map();
     this.harvestRecords = new Map();
     this.inputDistributions = new Map();
-    this.procurements = new Map();
     this.lraIntegrations = new Map();
     this.moaIntegrations = new Map();
     this.customsIntegrations = new Map();
@@ -257,7 +248,6 @@ export class MemStorage implements IStorage {
     this.currentCropPlanId = 1;
     this.currentHarvestRecordId = 1;
     this.currentInputDistributionId = 1;
-    this.currentProcurementId = 1;
     this.currentLraIntegrationId = 1;
     this.currentMoaIntegrationId = 1;
     this.currentCustomsIntegrationId = 1;
@@ -352,6 +342,9 @@ export class MemStorage implements IStorage {
     const commodity: Commodity = {
       ...insertCommodity,
       id,
+      farmerId: insertCommodity.farmerId || null,
+      farmerName: insertCommodity.farmerName || null,
+      harvestDate: insertCommodity.harvestDate || null,
       createdAt: new Date(),
       status: insertCommodity.status || "pending"
     };
@@ -394,6 +387,7 @@ export class MemStorage implements IStorage {
     const inspection: Inspection = {
       ...insertInspection,
       id,
+      nextInspectionDate: insertInspection.nextInspectionDate || null,
       createdAt: new Date(),
       notes: insertInspection.notes || null,
       deficiencies: insertInspection.deficiencies || null,
@@ -440,6 +434,8 @@ export class MemStorage implements IStorage {
     const certification: Certification = {
       ...insertCertification,
       id,
+      exportDestination: insertCertification.exportDestination || null,
+      exporterName: insertCertification.exporterName || null,
       createdAt: new Date(),
       status: insertCertification.status || "active"
     };
@@ -472,6 +468,9 @@ export class MemStorage implements IStorage {
     const alert: Alert = {
       ...insertAlert,
       id,
+      isRead: insertAlert.isRead || null,
+      relatedEntity: insertAlert.relatedEntity || null,
+      relatedEntityId: insertAlert.relatedEntityId || null,
       createdAt: new Date(),
       priority: insertAlert.priority || "medium"
     };
@@ -498,6 +497,8 @@ export class MemStorage implements IStorage {
     const report: Report = {
       ...insertReport,
       id,
+      parameters: insertReport.parameters || null,
+      filePath: insertReport.filePath || null,
       generatedAt: new Date(),
       status: insertReport.status || "completed"
     };
@@ -598,7 +599,8 @@ export class MemStorage implements IStorage {
       id: this.currentFarmerId++,
       ...farmer,
       agreementSigned: farmer.agreementSigned ?? false,
-      status: farmer.status || 'active'
+      status: farmer.status || 'active',
+      createdAt: new Date()
     };
     this.farmers.set(newFarmer.id, newFarmer);
     return newFarmer;
@@ -629,9 +631,10 @@ export class MemStorage implements IStorage {
   async createFarmPlot(plot: InsertFarmPlot): Promise<FarmPlot> {
     const newPlot: FarmPlot = {
       id: this.currentFarmPlotId++,
-      plotId: `PLT-${Date.now()}-${this.currentFarmPlotId.toString().padStart(3, '0')}`,
       ...plot,
-      status: plot.status || 'active'
+      plotId: plot.plotId || `PLT-${Date.now()}-${this.currentFarmPlotId.toString().padStart(3, '0')}`,
+      status: plot.status || 'active',
+      createdAt: new Date()
     };
     this.farmPlots.set(newPlot.id, newPlot);
     return newPlot;
@@ -667,7 +670,8 @@ export class MemStorage implements IStorage {
     const newPlan: CropPlan = {
       id: this.currentCropPlanId++,
       ...plan,
-      status: plan.status || 'planned'
+      status: plan.status || 'planned',
+      createdAt: new Date()
     };
     this.cropPlans.set(newPlan.id, newPlan);
     return newPlan;
@@ -705,7 +709,8 @@ export class MemStorage implements IStorage {
   async createHarvestRecord(record: InsertHarvestRecord): Promise<HarvestRecord> {
     const newRecord: HarvestRecord = {
       id: this.currentHarvestRecordId++,
-      ...record
+      ...record,
+      createdAt: new Date()
     };
     this.harvestRecords.set(newRecord.id, newRecord);
     return newRecord;
@@ -741,7 +746,8 @@ export class MemStorage implements IStorage {
     const newDistribution: InputDistribution = {
       id: this.currentInputDistributionId++,
       ...distribution,
-      repaymentStatus: distribution.repaymentStatus || 'pending'
+      repaymentStatus: distribution.repaymentStatus || 'pending',
+      createdAt: new Date()
     };
     this.inputDistributions.set(newDistribution.id, newDistribution);
     return newDistribution;
@@ -756,43 +762,7 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  // Procurement methods
-  async getProcurements(): Promise<Procurement[]> {
-    return Array.from(this.procurements.values());
-  }
 
-  async getProcurement(id: number): Promise<Procurement | undefined> {
-    return this.procurements.get(id);
-  }
-
-  async getProcurementsByFarmer(farmerId: number): Promise<Procurement[]> {
-    return Array.from(this.procurements.values()).filter(p => p.farmerId === farmerId);
-  }
-
-  async getProcurementsByStatus(status: string): Promise<Procurement[]> {
-    return Array.from(this.procurements.values()).filter(p => p.status === status);
-  }
-
-  async createProcurement(procurement: InsertProcurement): Promise<Procurement> {
-    const newProcurement: Procurement = {
-      id: this.currentProcurementId++,
-      procurementId: `PROC-${Date.now()}-${this.currentProcurementId.toString().padStart(3, '0')}`,
-      ...procurement,
-      status: procurement.status || 'pending',
-      paymentStatus: procurement.paymentStatus || 'pending'
-    };
-    this.procurements.set(newProcurement.id, newProcurement);
-    return newProcurement;
-  }
-
-  async updateProcurement(id: number, procurement: Partial<Procurement>): Promise<Procurement | undefined> {
-    const existing = this.procurements.get(id);
-    if (!existing) return undefined;
-    
-    const updated = { ...existing, ...procurement };
-    this.procurements.set(id, updated);
-    return updated;
-  }
 
   // Government Integration methods
   // LRA Integration methods
@@ -816,6 +786,7 @@ export class MemStorage implements IStorage {
     const newIntegration: LraIntegration = {
       id: this.currentLraIntegrationId++,
       ...integration,
+      notes: integration.notes || null,
       syncStatus: integration.syncStatus || 'pending',
       paymentStatus: integration.paymentStatus || 'pending',
       createdAt: new Date()
@@ -854,6 +825,9 @@ export class MemStorage implements IStorage {
     const newIntegration: MoaIntegration = {
       id: this.currentMoaIntegrationId++,
       ...integration,
+      farmerId: integration.farmerId || null,
+      notes: integration.notes || null,
+      sustainabilityRating: integration.sustainabilityRating || null,
       syncStatus: integration.syncStatus || 'pending',
       inspectionStatus: integration.inspectionStatus || 'pending',
       createdAt: new Date()
@@ -892,6 +866,7 @@ export class MemStorage implements IStorage {
     const newIntegration: CustomsIntegration = {
       id: this.currentCustomsIntegrationId++,
       ...integration,
+      notes: integration.notes || null,
       syncStatus: integration.syncStatus || 'pending',
       clearanceStatus: integration.clearanceStatus || 'pending',
       documentStatus: integration.documentStatus || 'incomplete',
@@ -927,6 +902,10 @@ export class MemStorage implements IStorage {
     const newLog: GovernmentSyncLog = {
       id: this.currentGovernmentSyncLogId++,
       ...log,
+      requestPayload: log.requestPayload || null,
+      responsePayload: log.responsePayload || null,
+      errorMessage: log.errorMessage || null,
+      syncDuration: log.syncDuration || null,
       syncDate: new Date()
     };
     this.governmentSyncLogs.set(newLog.id, newLog);

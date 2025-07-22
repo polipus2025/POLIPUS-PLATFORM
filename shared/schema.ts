@@ -161,28 +161,7 @@ export const inputDistribution = pgTable("input_distribution", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const procurement = pgTable("procurement", {
-  id: serial("id").primaryKey(),
-  procurementId: text("procurement_id").notNull().unique(),
-  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
-  cropType: text("crop_type").notNull(),
-  quantityProcured: decimal("quantity_procured", { precision: 10, scale: 2 }).notNull(),
-  unit: text("unit").notNull(),
-  qualityGrade: text("quality_grade").notNull(),
-  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }).notNull(),
-  totalAmount: decimal("total_amount", { precision: 12, scale: 2 }).notNull(),
-  procurementDate: timestamp("procurement_date").notNull(),
-  buyer: text("buyer").notNull(),
-  paymentTerms: text("payment_terms"), // immediate, 30_days, 60_days
-  paymentStatus: text("payment_status").default("pending"), // pending, partial, paid
-  deliveryLocation: text("delivery_location"),
-  transportationCost: decimal("transportation_cost", { precision: 10, scale: 2 }),
-  qualityDeductions: decimal("quality_deductions", { precision: 10, scale: 2 }),
-  finalSettlement: decimal("final_settlement", { precision: 12, scale: 2 }),
-  settlementDate: timestamp("settlement_date"),
-  status: text("status").notNull().default("pending"), // pending, completed, cancelled
-  createdAt: timestamp("created_at").defaultNow(),
-});
+
 
 // Insert schemas
 export const insertFarmerSchema = createInsertSchema(farmers).omit({
@@ -210,10 +189,7 @@ export const insertInputDistributionSchema = createInsertSchema(inputDistributio
   createdAt: true,
 });
 
-export const insertProcurementSchema = createInsertSchema(procurement).omit({
-  id: true,
-  createdAt: true,
-});
+
 
 export const insertCommoditySchema = createInsertSchema(commodities).omit({
   id: true,
@@ -279,7 +255,7 @@ export type FarmPlot = typeof farmPlots.$inferSelect;
 export type CropPlan = typeof cropPlanning.$inferSelect;
 export type HarvestRecord = typeof harvestRecords.$inferSelect;
 export type InputDistribution = typeof inputDistribution.$inferSelect;
-export type Procurement = typeof procurement.$inferSelect;
+
 
 // Farm Management Platform insert types
 export type InsertFarmer = z.infer<typeof insertFarmerSchema>;
@@ -287,7 +263,7 @@ export type InsertFarmPlot = z.infer<typeof insertFarmPlotSchema>;
 export type InsertCropPlan = z.infer<typeof insertCropPlanSchema>;
 export type InsertHarvestRecord = z.infer<typeof insertHarvestRecordSchema>;
 export type InsertInputDistribution = z.infer<typeof insertInputDistributionSchema>;
-export type InsertProcurement = z.infer<typeof insertProcurementSchema>;
+
 
 // Government Integration Tables
 export const lraIntegration = pgTable("lra_integration", {

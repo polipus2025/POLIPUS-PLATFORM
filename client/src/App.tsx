@@ -15,7 +15,6 @@ import Farmers from "@/pages/farmers";
 import FarmPlots from "@/pages/farm-plots";
 import CropPlanning from "@/pages/crop-planning";
 import InputManagement from "@/pages/input-management";
-import Procurement from "@/pages/procurement";
 import GovernmentIntegration from "@/pages/government-integration";
 import NotFound from "@/pages/not-found";
 
@@ -32,7 +31,6 @@ function Router() {
       <Route path="/farm-plots" component={FarmPlots} />
       <Route path="/crop-planning" component={CropPlanning} />
       <Route path="/input-management" component={InputManagement} />
-      <Route path="/procurement" component={Procurement} />
       <Route path="/government-integration" component={GovernmentIntegration} />
       <Route component={NotFound} />
     </Switch>

@@ -404,7 +404,7 @@ export class MemStorage implements IStorage {
     await this.createAuthUser({
       username: "admin001",
       email: "admin@lacra.gov.lr",
-      passwordHash: "$2a$12$xjFQgVr7e1k1Q2aB3X4uv.JGHkXY8zP9qW3uL5mN7oR1sT8fG6h2Q", // password: admin123
+      passwordHash: "$2b$12$LnySIutQDeheakSPx1lqQu3Vf8L9BpXMc8cjfPaghmVhST50Gk/Mi", // password: admin123
       role: "regulatory_admin",
       firstName: "Samuel",
       lastName: "Johnson",
@@ -416,7 +416,7 @@ export class MemStorage implements IStorage {
     await this.createAuthUser({
       username: "officer001",
       email: "jkollie@lacra.gov.lr",
-      passwordHash: "$2a$12$yHgFdR8i2j2K3bC4Y5zvx.KHIXZ9aQ0rX4vM6nO8pS2tU9gI7j3R", // password: officer123
+      passwordHash: "$2b$12$mYsdX33joO7IOAP0qMKQXuOJ3A6xAIVluKg7DGEBi5GUDlad5Euv2", // password: officer123
       role: "regulatory_staff",
       firstName: "James",
       lastName: "Kollie",
@@ -429,7 +429,7 @@ export class MemStorage implements IStorage {
     await this.createAuthUser({
       username: "FRM-2024-001",
       email: "mtuah@farmer.lr",
-      passwordHash: "$2a$12$zIhGeSj3k3L4cD5Z6aw.LJHJYa0bR1sY5wN7oP9qT3uV0hJ8k4S", // password: farmer123
+      passwordHash: "$2b$12$mxUvlJUoGVvket8r7HLly.4sDiNutPca/aXAPQ/HPFKQdv3fHqeiy", // password: farmer123
       role: "farmer",
       firstName: "Moses",
       lastName: "Tuah",
@@ -442,7 +442,7 @@ export class MemStorage implements IStorage {
     await this.createAuthUser({
       username: "AGT-2024-001",
       email: "skonneh@lacra.gov.lr",
-      passwordHash: "$2a$12$aJkIfTl4l4M5dE6a7bx.MKIKZb1cS2tZ6xO8pQ0rU4vW1iK9l5T", // password: agent123
+      passwordHash: "$2b$12$Y.OrHwvUnu936nLRU72EQOX8qN4s5dS/PHh.uH8EofHj4SoXCTuTe", // password: agent123
       role: "field_agent",
       firstName: "Sarah",
       lastName: "Konneh",

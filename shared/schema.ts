@@ -479,3 +479,137 @@ export type InsertAnalyticsData = z.infer<typeof insertAnalyticsDataSchema>;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type InsertSystemAudit = z.infer<typeof insertSystemAuditSchema>;
 export type InsertAuditReport = z.infer<typeof insertAuditReportSchema>;
+
+// GPS Farm Mapping for EUDR Compliance
+export const farmGpsMapping = pgTable("farm_gps_mapping", {
+  id: serial("id").primaryKey(),
+  farmPlotId: integer("farm_plot_id").references(() => farmPlots.id),
+  mappingId: varchar("mapping_id").notNull().unique(),
+  farmerId: integer("farmer_id").references(() => farmers.id),
+  coordinates: text("coordinates").notNull(), // JSON array of GPS coordinates for polygon
+  centerLatitude: decimal("center_latitude", { precision: 10, scale: 8 }).notNull(),
+  centerLongitude: decimal("center_longitude", { precision: 11, scale: 8 }).notNull(),
+  totalAreaHectares: decimal("total_area_hectares", { precision: 10, scale: 4 }).notNull(),
+  boundaryType: varchar("boundary_type").notNull().default("polygon"), // polygon, circle, custom
+  mappingMethod: varchar("mapping_method").notNull(), // gps_survey, satellite_imagery, drone_mapping
+  accuracyLevel: varchar("accuracy_level").notNull(), // high, medium, low
+  elevationMeters: decimal("elevation_meters", { precision: 8, scale: 2 }),
+  slope: decimal("slope", { precision: 5, scale: 2 }), // percentage
+  soilType: varchar("soil_type"),
+  drainageStatus: varchar("drainage_status"),
+  accessRoads: text("access_roads"), // JSON array of road access points
+  nearbyWaterSources: text("nearby_water_sources"), // JSON array of water sources
+  eudrCompliantDate: timestamp("eudr_compliant_date"),
+  lastVerificationDate: timestamp("last_verification_date"),
+  verificationStatus: varchar("verification_status").notNull().default("pending"), // verified, pending, failed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  metadata: text("metadata"), // JSON string for additional mapping data
+});
+
+// Deforestation Monitoring for EUDR
+export const deforestationMonitoring = pgTable("deforestation_monitoring", {
+  id: serial("id").primaryKey(),
+  monitoringId: varchar("monitoring_id").notNull().unique(),
+  farmGpsMappingId: integer("farm_gps_mapping_id").references(() => farmGpsMapping.id),
+  monitoringDate: timestamp("monitoring_date").notNull(),
+  satelliteImageryDate: timestamp("satellite_imagery_date"),
+  forestCoveragePercentage: decimal("forest_coverage_percentage", { precision: 5, scale: 2 }),
+  deforestationDetected: boolean("deforestation_detected").notNull().default(false),
+  deforestationArea: decimal("deforestation_area", { precision: 10, scale: 4 }), // hectares
+  riskLevel: varchar("risk_level").notNull().default("low"), // low, medium, high, critical
+  complianceStatus: varchar("compliance_status").notNull().default("compliant"), // compliant, non_compliant, under_review
+  satelliteSource: varchar("satellite_source"), // sentinel, landsat, planet, etc.
+  imageResolution: varchar("image_resolution"), // meters per pixel
+  detectionMethod: varchar("detection_method").notNull(), // automated, manual, hybrid
+  alertGenerated: boolean("alert_generated").notNull().default(false),
+  followUpRequired: boolean("follow_up_required").notNull().default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  metadata: text("metadata"), // JSON string for satellite data and analysis
+});
+
+// EUDR Compliance Tracking
+export const eudrCompliance = pgTable("eudr_compliance", {
+  id: serial("id").primaryKey(),
+  complianceId: varchar("compliance_id").notNull().unique(),
+  farmGpsMappingId: integer("farm_gps_mapping_id").references(() => farmGpsMapping.id),
+  commodityId: integer("commodity_id").references(() => commodities.id),
+  dueDiligenceStatement: text("due_diligence_statement").notNull(),
+  riskAssessment: varchar("risk_assessment").notNull(), // negligible, low, standard, enhanced
+  supplierDeclaration: text("supplier_declaration"),
+  geoLocationData: text("geo_location_data").notNull(), // JSON with precise coordinates
+  productionDate: timestamp("production_date"),
+  harvestDate: timestamp("harvest_date"),
+  eudrDeadlineCompliance: boolean("eudr_deadline_compliance").notNull().default(false),
+  traceabilityScore: decimal("traceability_score", { precision: 5, scale: 2 }), // 0-100
+  documentationComplete: boolean("documentation_complete").notNull().default(false),
+  thirdPartyVerification: boolean("third_party_verification").notNull().default(false),
+  verificationDate: timestamp("verification_date"),
+  verificationBody: varchar("verification_body"),
+  certificateNumber: varchar("certificate_number"),
+  validityPeriod: timestamp("validity_period"),
+  complianceStatus: varchar("compliance_status").notNull().default("pending"), // compliant, non_compliant, pending
+  lastReviewDate: timestamp("last_review_date"),
+  nextReviewDate: timestamp("next_review_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  metadata: text("metadata"), // JSON string for additional compliance data
+});
+
+// Geofencing and Monitoring Zones
+export const geofencingZones = pgTable("geofencing_zones", {
+  id: serial("id").primaryKey(),
+  zoneId: varchar("zone_id").notNull().unique(),
+  zoneName: varchar("zone_name").notNull(),
+  zoneType: varchar("zone_type").notNull(), // protected_area, restricted_zone, monitoring_area, buffer_zone
+  coordinates: text("coordinates").notNull(), // JSON array of GPS coordinates for zone boundary
+  centerLatitude: decimal("center_latitude", { precision: 10, scale: 8 }).notNull(),
+  centerLongitude: decimal("center_longitude", { precision: 11, scale: 8 }).notNull(),
+  radiusMeters: decimal("radius_meters", { precision: 10, scale: 2 }),
+  protectionLevel: varchar("protection_level").notNull(), // strict, moderate, advisory
+  monitoringFrequency: varchar("monitoring_frequency").notNull().default("daily"), // hourly, daily, weekly, monthly
+  alertThreshold: decimal("alert_threshold", { precision: 5, scale: 2 }), // percentage change trigger
+  legalStatus: varchar("legal_status"), // national_park, forest_reserve, private_conservation
+  managingAuthority: varchar("managing_authority"),
+  establishedDate: timestamp("established_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  metadata: text("metadata"), // JSON string for zone-specific data
+});
+
+// GPS Mapping insert schemas
+export const insertFarmGpsMappingSchema = createInsertSchema(farmGpsMapping).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDeforestationMonitoringSchema = createInsertSchema(deforestationMonitoring).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertEudrComplianceSchema = createInsertSchema(eudrCompliance).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertGeofencingZoneSchema = createInsertSchema(geofencingZones).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// GPS Mapping types
+export type FarmGpsMapping = typeof farmGpsMapping.$inferSelect;
+export type DeforestationMonitoring = typeof deforestationMonitoring.$inferSelect;
+export type EudrCompliance = typeof eudrCompliance.$inferSelect;
+export type GeofencingZone = typeof geofencingZones.$inferSelect;
+
+export type InsertFarmGpsMapping = z.infer<typeof insertFarmGpsMappingSchema>;
+export type InsertDeforestationMonitoring = z.infer<typeof insertDeforestationMonitoringSchema>;
+export type InsertEudrCompliance = z.infer<typeof insertEudrComplianceSchema>;
+export type InsertGeofencingZone = z.infer<typeof insertGeofencingZoneSchema>;

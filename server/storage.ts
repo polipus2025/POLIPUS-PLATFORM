@@ -19,6 +19,10 @@ import {
   auditLogs,
   systemAudits,
   auditReports,
+  farmGpsMapping,
+  deforestationMonitoring,
+  eudrCompliance,
+  geofencingZones,
   type Commodity,
   type Inspection,
   type Certification,
@@ -39,6 +43,10 @@ import {
   type AuditLog,
   type SystemAudit,
   type AuditReport,
+  type FarmGpsMapping,
+  type DeforestationMonitoring,
+  type EudrCompliance,
+  type GeofencingZone,
   type InsertCommodity,
   type InsertInspection,
   type InsertCertification,
@@ -58,7 +66,11 @@ import {
   type InsertAnalyticsData,
   type InsertAuditLog,
   type InsertSystemAudit,
-  type InsertAuditReport
+  type InsertAuditReport,
+  type InsertFarmGpsMapping,
+  type InsertDeforestationMonitoring,
+  type InsertEudrCompliance,
+  type InsertGeofencingZone
 } from "@shared/schema";
 
 export interface IStorage {
@@ -222,6 +234,43 @@ export interface IStorage {
   generateFarmPerformanceAnalytics(farmerId?: number): Promise<AnalyticsData[]>;
   generateRegionalAnalytics(county?: string): Promise<AnalyticsData[]>;
   generateSystemHealthMetrics(): Promise<AnalyticsData[]>;
+
+  // GPS Farm Mapping methods
+  getFarmGpsMappings(): Promise<FarmGpsMapping[]>;
+  getFarmGpsMapping(id: number): Promise<FarmGpsMapping | undefined>;
+  getFarmGpsMappingByFarmPlot(farmPlotId: number): Promise<FarmGpsMapping | undefined>;
+  getFarmGpsMappingsByFarmer(farmerId: number): Promise<FarmGpsMapping[]>;
+  createFarmGpsMapping(mapping: InsertFarmGpsMapping): Promise<FarmGpsMapping>;
+  updateFarmGpsMapping(id: number, mapping: Partial<FarmGpsMapping>): Promise<FarmGpsMapping | undefined>;
+
+  // Deforestation Monitoring methods
+  getDeforestationMonitorings(): Promise<DeforestationMonitoring[]>;
+  getDeforestationMonitoring(id: number): Promise<DeforestationMonitoring | undefined>;
+  getDeforestationMonitoringsByMapping(farmGpsMappingId: number): Promise<DeforestationMonitoring[]>;
+  getDeforestationMonitoringsByRiskLevel(riskLevel: string): Promise<DeforestationMonitoring[]>;
+  createDeforestationMonitoring(monitoring: InsertDeforestationMonitoring): Promise<DeforestationMonitoring>;
+  updateDeforestationMonitoring(id: number, monitoring: Partial<DeforestationMonitoring>): Promise<DeforestationMonitoring | undefined>;
+
+  // EUDR Compliance methods
+  getEudrCompliances(): Promise<EudrCompliance[]>;
+  getEudrCompliance(id: number): Promise<EudrCompliance | undefined>;
+  getEudrComplianceByCommodity(commodityId: number): Promise<EudrCompliance[]>;
+  getEudrComplianceByMapping(farmGpsMappingId: number): Promise<EudrCompliance | undefined>;
+  createEudrCompliance(compliance: InsertEudrCompliance): Promise<EudrCompliance>;
+  updateEudrCompliance(id: number, compliance: Partial<EudrCompliance>): Promise<EudrCompliance | undefined>;
+
+  // Geofencing Zones methods
+  getGeofencingZones(): Promise<GeofencingZone[]>;
+  getGeofencingZone(id: number): Promise<GeofencingZone | undefined>;
+  getGeofencingZonesByType(zoneType: string): Promise<GeofencingZone[]>;
+  createGeofencingZone(zone: InsertGeofencingZone): Promise<GeofencingZone>;
+  updateGeofencingZone(id: number, zone: Partial<GeofencingZone>): Promise<GeofencingZone | undefined>;
+
+  // EUDR and GPS Analysis methods
+  checkEudrCompliance(farmGpsMappingId: number): Promise<{ compliant: boolean; riskLevel: string; issues: string[] }>;
+  detectDeforestation(farmGpsMappingId: number): Promise<{ detected: boolean; area: number; riskLevel: string }>;
+  validateGpsCoordinates(coordinates: string): Promise<{ valid: boolean; area: number; issues: string[] }>;
+  generateTraceabilityReport(commodityId: number): Promise<{ score: number; documentation: any; compliance: any }>;
 }
 
 export class MemStorage implements IStorage {
@@ -244,6 +293,10 @@ export class MemStorage implements IStorage {
   private auditLogs: Map<number, AuditLog>;
   private systemAudits: Map<number, SystemAudit>;
   private auditReports: Map<number, AuditReport>;
+  private farmGpsMappings: Map<number, FarmGpsMapping>;
+  private deforestationMonitorings: Map<number, DeforestationMonitoring>;
+  private eudrCompliances: Map<number, EudrCompliance>;
+  private geofencingZones: Map<number, GeofencingZone>;
   private currentUserId: number;
   private currentCommodityId: number;
   private currentInspectionId: number;
@@ -263,6 +316,10 @@ export class MemStorage implements IStorage {
   private currentAuditLogId: number;
   private currentSystemAuditId: number;
   private currentAuditReportId: number;
+  private currentFarmGpsMappingId: number;
+  private currentDeforestationMonitoringId: number;
+  private currentEudrComplianceId: number;
+  private currentGeofencingZoneId: number;
 
   constructor() {
     this.users = new Map();
@@ -284,6 +341,10 @@ export class MemStorage implements IStorage {
     this.auditLogs = new Map();
     this.systemAudits = new Map();
     this.auditReports = new Map();
+    this.farmGpsMappings = new Map();
+    this.deforestationMonitorings = new Map();
+    this.eudrCompliances = new Map();
+    this.geofencingZones = new Map();
     this.currentUserId = 1;
     this.currentCommodityId = 1;
     this.currentInspectionId = 1;
@@ -303,6 +364,10 @@ export class MemStorage implements IStorage {
     this.currentAuditLogId = 1;
     this.currentSystemAuditId = 1;
     this.currentAuditReportId = 1;
+    this.currentFarmGpsMappingId = 1;
+    this.currentDeforestationMonitoringId = 1;
+    this.currentEudrComplianceId = 1;
+    this.currentGeofencingZoneId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
@@ -1471,6 +1536,389 @@ export class MemStorage implements IStorage {
 
     this.analyticsData.set(systemHealth.id, systemHealth);
     return [systemHealth];
+  }
+
+  // GPS Farm Mapping methods
+  async getFarmGpsMappings(): Promise<FarmGpsMapping[]> {
+    return Array.from(this.farmGpsMappings.values());
+  }
+
+  async getFarmGpsMapping(id: number): Promise<FarmGpsMapping | undefined> {
+    return this.farmGpsMappings.get(id);
+  }
+
+  async getFarmGpsMappingByFarmPlot(farmPlotId: number): Promise<FarmGpsMapping | undefined> {
+    return Array.from(this.farmGpsMappings.values()).find(mapping => mapping.farmPlotId === farmPlotId);
+  }
+
+  async getFarmGpsMappingsByFarmer(farmerId: number): Promise<FarmGpsMapping[]> {
+    return Array.from(this.farmGpsMappings.values()).filter(mapping => mapping.farmerId === farmerId);
+  }
+
+  async createFarmGpsMapping(mapping: InsertFarmGpsMapping): Promise<FarmGpsMapping> {
+    const newMapping: FarmGpsMapping = {
+      id: this.currentFarmGpsMappingId++,
+      farmPlotId: mapping.farmPlotId ?? null,
+      farmerId: mapping.farmerId ?? null,
+      mappingId: mapping.mappingId,
+      coordinates: mapping.coordinates,
+      centerLatitude: mapping.centerLatitude,
+      centerLongitude: mapping.centerLongitude,
+      totalAreaHectares: mapping.totalAreaHectares,
+      boundaryType: mapping.boundaryType ?? "polygon",
+      mappingMethod: mapping.mappingMethod,
+      accuracyLevel: mapping.accuracyLevel,
+      elevationMeters: mapping.elevationMeters ?? null,
+      slope: mapping.slope ?? null,
+      soilType: mapping.soilType ?? null,
+      drainageStatus: mapping.drainageStatus ?? null,
+      accessRoads: mapping.accessRoads ?? null,
+      nearbyWaterSources: mapping.nearbyWaterSources ?? null,
+      eudrCompliantDate: mapping.eudrCompliantDate ?? null,
+      lastVerificationDate: mapping.lastVerificationDate ?? null,
+      verificationStatus: mapping.verificationStatus ?? "pending",
+      metadata: mapping.metadata ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.farmGpsMappings.set(newMapping.id, newMapping);
+    return newMapping;
+  }
+
+  async updateFarmGpsMapping(id: number, mapping: Partial<FarmGpsMapping>): Promise<FarmGpsMapping | undefined> {
+    const existingMapping = this.farmGpsMappings.get(id);
+    if (!existingMapping) return undefined;
+
+    const updatedMapping = { ...existingMapping, ...mapping, updatedAt: new Date() };
+    this.farmGpsMappings.set(id, updatedMapping);
+    return updatedMapping;
+  }
+
+  // Deforestation Monitoring methods
+  async getDeforestationMonitorings(): Promise<DeforestationMonitoring[]> {
+    return Array.from(this.deforestationMonitorings.values());
+  }
+
+  async getDeforestationMonitoring(id: number): Promise<DeforestationMonitoring | undefined> {
+    return this.deforestationMonitorings.get(id);
+  }
+
+  async getDeforestationMonitoringsByMapping(farmGpsMappingId: number): Promise<DeforestationMonitoring[]> {
+    return Array.from(this.deforestationMonitorings.values()).filter(monitoring => monitoring.farmGpsMappingId === farmGpsMappingId);
+  }
+
+  async getDeforestationMonitoringsByRiskLevel(riskLevel: string): Promise<DeforestationMonitoring[]> {
+    return Array.from(this.deforestationMonitorings.values()).filter(monitoring => monitoring.riskLevel === riskLevel);
+  }
+
+  async createDeforestationMonitoring(monitoring: InsertDeforestationMonitoring): Promise<DeforestationMonitoring> {
+    const newMonitoring: DeforestationMonitoring = {
+      id: this.currentDeforestationMonitoringId++,
+      monitoringId: monitoring.monitoringId,
+      farmGpsMappingId: monitoring.farmGpsMappingId ?? null,
+      monitoringDate: monitoring.monitoringDate,
+      satelliteImageryDate: monitoring.satelliteImageryDate ?? null,
+      forestCoveragePercentage: monitoring.forestCoveragePercentage ?? null,
+      deforestationDetected: monitoring.deforestationDetected ?? false,
+      deforestationArea: monitoring.deforestationArea ?? null,
+      riskLevel: monitoring.riskLevel ?? "low",
+      complianceStatus: monitoring.complianceStatus ?? "compliant",
+      satelliteSource: monitoring.satelliteSource ?? null,
+      imageResolution: monitoring.imageResolution ?? null,
+      detectionMethod: monitoring.detectionMethod,
+      alertGenerated: monitoring.alertGenerated ?? false,
+      followUpRequired: monitoring.followUpRequired ?? false,
+      notes: monitoring.notes ?? null,
+      metadata: monitoring.metadata ?? null,
+      createdAt: new Date(),
+    };
+    this.deforestationMonitorings.set(newMonitoring.id, newMonitoring);
+    return newMonitoring;
+  }
+
+  async updateDeforestationMonitoring(id: number, monitoring: Partial<DeforestationMonitoring>): Promise<DeforestationMonitoring | undefined> {
+    const existingMonitoring = this.deforestationMonitorings.get(id);
+    if (!existingMonitoring) return undefined;
+
+    const updatedMonitoring = { ...existingMonitoring, ...monitoring };
+    this.deforestationMonitorings.set(id, updatedMonitoring);
+    return updatedMonitoring;
+  }
+
+  // EUDR Compliance methods
+  async getEudrCompliances(): Promise<EudrCompliance[]> {
+    return Array.from(this.eudrCompliances.values());
+  }
+
+  async getEudrCompliance(id: number): Promise<EudrCompliance | undefined> {
+    return this.eudrCompliances.get(id);
+  }
+
+  async getEudrComplianceByCommodity(commodityId: number): Promise<EudrCompliance[]> {
+    return Array.from(this.eudrCompliances.values()).filter(compliance => compliance.commodityId === commodityId);
+  }
+
+  async getEudrComplianceByMapping(farmGpsMappingId: number): Promise<EudrCompliance | undefined> {
+    return Array.from(this.eudrCompliances.values()).find(compliance => compliance.farmGpsMappingId === farmGpsMappingId);
+  }
+
+  async createEudrCompliance(compliance: InsertEudrCompliance): Promise<EudrCompliance> {
+    const newCompliance: EudrCompliance = {
+      id: this.currentEudrComplianceId++,
+      complianceId: compliance.complianceId,
+      farmGpsMappingId: compliance.farmGpsMappingId ?? null,
+      commodityId: compliance.commodityId ?? null,
+      dueDiligenceStatement: compliance.dueDiligenceStatement,
+      riskAssessment: compliance.riskAssessment,
+      supplierDeclaration: compliance.supplierDeclaration ?? null,
+      geoLocationData: compliance.geoLocationData,
+      productionDate: compliance.productionDate ?? null,
+      harvestDate: compliance.harvestDate ?? null,
+      eudrDeadlineCompliance: compliance.eudrDeadlineCompliance ?? false,
+      traceabilityScore: compliance.traceabilityScore ?? null,
+      documentationComplete: compliance.documentationComplete ?? false,
+      thirdPartyVerification: compliance.thirdPartyVerification ?? false,
+      verificationDate: compliance.verificationDate ?? null,
+      verificationBody: compliance.verificationBody ?? null,
+      certificateNumber: compliance.certificateNumber ?? null,
+      validityPeriod: compliance.validityPeriod ?? null,
+      complianceStatus: compliance.complianceStatus ?? "pending",
+      lastReviewDate: compliance.lastReviewDate ?? null,
+      nextReviewDate: compliance.nextReviewDate ?? null,
+      metadata: compliance.metadata ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.eudrCompliances.set(newCompliance.id, newCompliance);
+    return newCompliance;
+  }
+
+  async updateEudrCompliance(id: number, compliance: Partial<EudrCompliance>): Promise<EudrCompliance | undefined> {
+    const existingCompliance = this.eudrCompliances.get(id);
+    if (!existingCompliance) return undefined;
+
+    const updatedCompliance = { ...existingCompliance, ...compliance, updatedAt: new Date() };
+    this.eudrCompliances.set(id, updatedCompliance);
+    return updatedCompliance;
+  }
+
+  // Geofencing Zones methods
+  async getGeofencingZones(): Promise<GeofencingZone[]> {
+    return Array.from(this.geofencingZones.values());
+  }
+
+  async getGeofencingZone(id: number): Promise<GeofencingZone | undefined> {
+    return this.geofencingZones.get(id);
+  }
+
+  async getGeofencingZonesByType(zoneType: string): Promise<GeofencingZone[]> {
+    return Array.from(this.geofencingZones.values()).filter(zone => zone.zoneType === zoneType);
+  }
+
+  async createGeofencingZone(zone: InsertGeofencingZone): Promise<GeofencingZone> {
+    const newZone: GeofencingZone = {
+      id: this.currentGeofencingZoneId++,
+      zoneId: zone.zoneId,
+      zoneName: zone.zoneName,
+      zoneType: zone.zoneType,
+      coordinates: zone.coordinates,
+      centerLatitude: zone.centerLatitude,
+      centerLongitude: zone.centerLongitude,
+      radiusMeters: zone.radiusMeters ?? null,
+      protectionLevel: zone.protectionLevel,
+      monitoringFrequency: zone.monitoringFrequency ?? "daily",
+      alertThreshold: zone.alertThreshold ?? null,
+      legalStatus: zone.legalStatus ?? null,
+      managingAuthority: zone.managingAuthority ?? null,
+      establishedDate: zone.establishedDate ?? null,
+      isActive: zone.isActive ?? true,
+      metadata: zone.metadata ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.geofencingZones.set(newZone.id, newZone);
+    return newZone;
+  }
+
+  async updateGeofencingZone(id: number, zone: Partial<GeofencingZone>): Promise<GeofencingZone | undefined> {
+    const existingZone = this.geofencingZones.get(id);
+    if (!existingZone) return undefined;
+
+    const updatedZone = { ...existingZone, ...zone, updatedAt: new Date() };
+    this.geofencingZones.set(id, updatedZone);
+    return updatedZone;
+  }
+
+  // EUDR and GPS Analysis methods
+  async checkEudrCompliance(farmGpsMappingId: number): Promise<{ compliant: boolean; riskLevel: string; issues: string[] }> {
+    const mapping = await this.getFarmGpsMapping(farmGpsMappingId);
+    if (!mapping) {
+      return { compliant: false, riskLevel: "high", issues: ["Farm GPS mapping not found"] };
+    }
+
+    const issues: string[] = [];
+    let riskLevel = "low";
+
+    // Check verification status
+    if (mapping.verificationStatus !== "verified") {
+      issues.push("GPS mapping not verified");
+      riskLevel = "medium";
+    }
+
+    // Check EUDR compliance date
+    if (!mapping.eudrCompliantDate) {
+      issues.push("EUDR compliance date not set");
+      riskLevel = "high";
+    }
+
+    // Check for recent deforestation monitoring
+    const monitorings = await this.getDeforestationMonitoringsByMapping(farmGpsMappingId);
+    const recentMonitoring = monitorings.find(m => 
+      m.monitoringDate && new Date(m.monitoringDate) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    );
+
+    if (!recentMonitoring) {
+      issues.push("No recent deforestation monitoring");
+      riskLevel = "medium";
+    } else if (recentMonitoring.deforestationDetected) {
+      issues.push("Deforestation detected in recent monitoring");
+      riskLevel = "critical";
+    }
+
+    const compliant = issues.length === 0;
+    return { compliant, riskLevel, issues };
+  }
+
+  async detectDeforestation(farmGpsMappingId: number): Promise<{ detected: boolean; area: number; riskLevel: string }> {
+    const monitorings = await this.getDeforestationMonitoringsByMapping(farmGpsMappingId);
+    const latestMonitoring = monitorings.sort((a, b) => 
+      new Date(b.monitoringDate || 0).getTime() - new Date(a.monitoringDate || 0).getTime()
+    )[0];
+
+    if (!latestMonitoring) {
+      return { detected: false, area: 0, riskLevel: "unknown" };
+    }
+
+    return {
+      detected: latestMonitoring.deforestationDetected || false,
+      area: parseFloat(latestMonitoring.deforestationArea?.toString() || "0"),
+      riskLevel: latestMonitoring.riskLevel || "low"
+    };
+  }
+
+  async validateGpsCoordinates(coordinates: string): Promise<{ valid: boolean; area: number; issues: string[] }> {
+    const issues: string[] = [];
+    let area = 0;
+
+    try {
+      const coords = JSON.parse(coordinates);
+      
+      if (!Array.isArray(coords) || coords.length < 3) {
+        issues.push("Invalid coordinate format - minimum 3 points required for polygon");
+        return { valid: false, area: 0, issues };
+      }
+
+      // Basic validation for latitude and longitude ranges
+      for (const coord of coords) {
+        if (!Array.isArray(coord) || coord.length !== 2) {
+          issues.push("Invalid coordinate point format");
+          continue;
+        }
+
+        const [lng, lat] = coord;
+        if (lat < -90 || lat > 90) {
+          issues.push(`Invalid latitude: ${lat}`);
+        }
+        if (lng < -180 || lng > 180) {
+          issues.push(`Invalid longitude: ${lng}`);
+        }
+      }
+
+      // Calculate approximate area using shoelace formula
+      if (issues.length === 0) {
+        let totalArea = 0;
+        for (let i = 0; i < coords.length; i++) {
+          const j = (i + 1) % coords.length;
+          totalArea += coords[i][0] * coords[j][1];
+          totalArea -= coords[j][0] * coords[i][1];
+        }
+        area = Math.abs(totalArea) / 2;
+        
+        // Convert to approximate hectares (very rough calculation)
+        area = area * 111000 * 111000 / 10000; // Convert to hectares
+      }
+
+    } catch (error) {
+      issues.push("Invalid JSON format for coordinates");
+    }
+
+    return { valid: issues.length === 0, area, issues };
+  }
+
+  async generateTraceabilityReport(commodityId: number): Promise<{ score: number; documentation: any; compliance: any }> {
+    const commodity = await this.getCommodity(commodityId);
+    if (!commodity) {
+      return { score: 0, documentation: null, compliance: null };
+    }
+
+    const eudrCompliances = await this.getEudrComplianceByCommodity(commodityId);
+    const latestCompliance = eudrCompliances[0];
+
+    let score = 0;
+    const documentation: any = {
+      commodity: commodity,
+      eudrCompliance: latestCompliance,
+      gpsMapping: null,
+      deforestationMonitoring: null
+    };
+
+    const compliance: any = {
+      eudrCompliant: false,
+      gpsVerified: false,
+      deforestationClear: false,
+      documentationComplete: false
+    };
+
+    if (latestCompliance) {
+      score += 25; // Base score for having EUDR compliance record
+      
+      if (latestCompliance.documentationComplete) {
+        score += 25;
+        compliance.documentationComplete = true;
+      }
+      
+      if (latestCompliance.eudrDeadlineCompliance) {
+        score += 25;
+        compliance.eudrCompliant = true;
+      }
+
+      if (latestCompliance.farmGpsMappingId) {
+        const gpsMapping = await this.getFarmGpsMapping(latestCompliance.farmGpsMappingId);
+        documentation.gpsMapping = gpsMapping;
+        
+        if (gpsMapping?.verificationStatus === "verified") {
+          score += 15;
+          compliance.gpsVerified = true;
+        }
+
+        // Check deforestation monitoring
+        if (gpsMapping) {
+          const monitorings = await this.getDeforestationMonitoringsByMapping(gpsMapping.id);
+          const latestMonitoring = monitorings.sort((a, b) => 
+            new Date(b.monitoringDate || 0).getTime() - new Date(a.monitoringDate || 0).getTime()
+          )[0];
+          
+          documentation.deforestationMonitoring = latestMonitoring;
+          
+          if (latestMonitoring && !latestMonitoring.deforestationDetected) {
+            score += 10;
+            compliance.deforestationClear = true;
+          }
+        }
+      }
+    }
+
+    return { score: Math.min(score, 100), documentation, compliance };
   }
 }
 

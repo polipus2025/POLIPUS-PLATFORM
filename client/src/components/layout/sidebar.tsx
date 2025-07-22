@@ -10,7 +10,8 @@ import {
   Users,
   Calendar,
   Package,
-  Building2
+  Building2,
+  Satellite
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ const navigation = [
 const farmManagementNavigation = [
   { name: "Farmer Onboarding", href: "/farmers", icon: Users },
   { name: "Farm Plot Mapping", href: "/farm-plots", icon: MapPin },
+  { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
   { name: "Input Management", href: "/input-management", icon: Package },
 ];

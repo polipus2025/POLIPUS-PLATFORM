@@ -18,6 +18,7 @@ import FarmPlots from "@/pages/farm-plots";
 import CropPlanning from "@/pages/crop-planning";
 import InputManagement from "@/pages/input-management";
 import GovernmentIntegration from "@/pages/government-integration";
+import GpsMapping from "@/pages/gps-mapping";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/crop-planning" component={CropPlanning} />
       <Route path="/input-management" component={InputManagement} />
       <Route path="/government-integration" component={GovernmentIntegration} />
+      <Route path="/gps-mapping" component={GpsMapping} />
       <Route component={NotFound} />
     </Switch>
   );

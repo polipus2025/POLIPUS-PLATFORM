@@ -20,7 +20,11 @@ import {
   insertAnalyticsDataSchema,
   insertAuditLogSchema,
   insertSystemAuditSchema,
-  insertAuditReportSchema
+  insertAuditReportSchema,
+  insertFarmGpsMappingSchema,
+  insertDeforestationMonitoringSchema,
+  insertEudrComplianceSchema,
+  insertGeofencingZoneSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -837,6 +841,242 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(report);
     } catch (error) {
       res.status(500).json({ message: "Failed to update audit report" });
+    }
+  });
+
+  // GPS Farm Mapping routes
+  app.get('/api/farm-gps-mappings', async (req, res) => {
+    try {
+      const { farmerId, farmPlotId } = req.query;
+      let mappings;
+      
+      if (farmerId) {
+        mappings = await storage.getFarmGpsMappingsByFarmer(parseInt(farmerId as string));
+      } else {
+        mappings = await storage.getFarmGpsMappings();
+      }
+      
+      res.json(mappings);
+    } catch (error) {
+      console.error('Error fetching GPS mappings:', error);
+      res.status(500).json({ message: 'Failed to fetch GPS mappings' });
+    }
+  });
+
+  app.get('/api/farm-gps-mappings/:id', async (req, res) => {
+    try {
+      const mapping = await storage.getFarmGpsMapping(parseInt(req.params.id));
+      if (!mapping) {
+        return res.status(404).json({ message: 'GPS mapping not found' });
+      }
+      res.json(mapping);
+    } catch (error) {
+      console.error('Error fetching GPS mapping:', error);
+      res.status(500).json({ message: 'Failed to fetch GPS mapping' });
+    }
+  });
+
+  app.post('/api/farm-gps-mappings', async (req, res) => {
+    try {
+      const validatedData = insertFarmGpsMappingSchema.parse(req.body);
+      const mapping = await storage.createFarmGpsMapping(validatedData);
+      res.status(201).json(mapping);
+    } catch (error) {
+      console.error('Error creating GPS mapping:', error);
+      res.status(500).json({ message: 'Failed to create GPS mapping' });
+    }
+  });
+
+  app.put('/api/farm-gps-mappings/:id', async (req, res) => {
+    try {
+      const updatedMapping = await storage.updateFarmGpsMapping(parseInt(req.params.id), req.body);
+      if (!updatedMapping) {
+        return res.status(404).json({ message: 'GPS mapping not found' });
+      }
+      res.json(updatedMapping);
+    } catch (error) {
+      console.error('Error updating GPS mapping:', error);
+      res.status(500).json({ message: 'Failed to update GPS mapping' });
+    }
+  });
+
+  // Deforestation Monitoring routes
+  app.get('/api/deforestation-monitoring', async (req, res) => {
+    try {
+      const { farmGpsMappingId, riskLevel } = req.query;
+      let monitorings;
+      
+      if (farmGpsMappingId) {
+        monitorings = await storage.getDeforestationMonitoringsByMapping(parseInt(farmGpsMappingId as string));
+      } else if (riskLevel) {
+        monitorings = await storage.getDeforestationMonitoringsByRiskLevel(riskLevel as string);
+      } else {
+        monitorings = await storage.getDeforestationMonitorings();
+      }
+      
+      res.json(monitorings);
+    } catch (error) {
+      console.error('Error fetching deforestation monitoring:', error);
+      res.status(500).json({ message: 'Failed to fetch deforestation monitoring' });
+    }
+  });
+
+  app.get('/api/deforestation-monitoring/:id', async (req, res) => {
+    try {
+      const monitoring = await storage.getDeforestationMonitoring(parseInt(req.params.id));
+      if (!monitoring) {
+        return res.status(404).json({ message: 'Deforestation monitoring not found' });
+      }
+      res.json(monitoring);
+    } catch (error) {
+      console.error('Error fetching deforestation monitoring:', error);
+      res.status(500).json({ message: 'Failed to fetch deforestation monitoring' });
+    }
+  });
+
+  app.post('/api/deforestation-monitoring', async (req, res) => {
+    try {
+      const validatedData = insertDeforestationMonitoringSchema.parse(req.body);
+      const monitoring = await storage.createDeforestationMonitoring(validatedData);
+      res.status(201).json(monitoring);
+    } catch (error) {
+      console.error('Error creating deforestation monitoring:', error);
+      res.status(500).json({ message: 'Failed to create deforestation monitoring' });
+    }
+  });
+
+  // EUDR Compliance routes
+  app.get('/api/eudr-compliance', async (req, res) => {
+    try {
+      const { commodityId, farmGpsMappingId } = req.query;
+      let compliances;
+      
+      if (commodityId) {
+        compliances = await storage.getEudrComplianceByCommodity(parseInt(commodityId as string));
+      } else if (farmGpsMappingId) {
+        const compliance = await storage.getEudrComplianceByMapping(parseInt(farmGpsMappingId as string));
+        compliances = compliance ? [compliance] : [];
+      } else {
+        compliances = await storage.getEudrCompliances();
+      }
+      
+      res.json(compliances);
+    } catch (error) {
+      console.error('Error fetching EUDR compliance:', error);
+      res.status(500).json({ message: 'Failed to fetch EUDR compliance' });
+    }
+  });
+
+  app.get('/api/eudr-compliance/:id', async (req, res) => {
+    try {
+      const compliance = await storage.getEudrCompliance(parseInt(req.params.id));
+      if (!compliance) {
+        return res.status(404).json({ message: 'EUDR compliance not found' });
+      }
+      res.json(compliance);
+    } catch (error) {
+      console.error('Error fetching EUDR compliance:', error);
+      res.status(500).json({ message: 'Failed to fetch EUDR compliance' });
+    }
+  });
+
+  app.post('/api/eudr-compliance', async (req, res) => {
+    try {
+      const validatedData = insertEudrComplianceSchema.parse(req.body);
+      const compliance = await storage.createEudrCompliance(validatedData);
+      res.status(201).json(compliance);
+    } catch (error) {
+      console.error('Error creating EUDR compliance:', error);
+      res.status(500).json({ message: 'Failed to create EUDR compliance' });
+    }
+  });
+
+  // Geofencing Zones routes
+  app.get('/api/geofencing-zones', async (req, res) => {
+    try {
+      const { zoneType } = req.query;
+      let zones;
+      
+      if (zoneType) {
+        zones = await storage.getGeofencingZonesByType(zoneType as string);
+      } else {
+        zones = await storage.getGeofencingZones();
+      }
+      
+      res.json(zones);
+    } catch (error) {
+      console.error('Error fetching geofencing zones:', error);
+      res.status(500).json({ message: 'Failed to fetch geofencing zones' });
+    }
+  });
+
+  app.get('/api/geofencing-zones/:id', async (req, res) => {
+    try {
+      const zone = await storage.getGeofencingZone(parseInt(req.params.id));
+      if (!zone) {
+        return res.status(404).json({ message: 'Geofencing zone not found' });
+      }
+      res.json(zone);
+    } catch (error) {
+      console.error('Error fetching geofencing zone:', error);
+      res.status(500).json({ message: 'Failed to fetch geofencing zone' });
+    }
+  });
+
+  app.post('/api/geofencing-zones', async (req, res) => {
+    try {
+      const validatedData = insertGeofencingZoneSchema.parse(req.body);
+      const zone = await storage.createGeofencingZone(validatedData);
+      res.status(201).json(zone);
+    } catch (error) {
+      console.error('Error creating geofencing zone:', error);
+      res.status(500).json({ message: 'Failed to create geofencing zone' });
+    }
+  });
+
+  // GPS Analysis and Validation routes
+  app.post('/api/gps/validate-coordinates', async (req, res) => {
+    try {
+      const { coordinates } = req.body;
+      if (!coordinates) {
+        return res.status(400).json({ message: 'Coordinates required' });
+      }
+      
+      const validation = await storage.validateGpsCoordinates(coordinates);
+      res.json(validation);
+    } catch (error) {
+      console.error('Error validating GPS coordinates:', error);
+      res.status(500).json({ message: 'Failed to validate GPS coordinates' });
+    }
+  });
+
+  app.get('/api/gps/check-eudr-compliance/:farmGpsMappingId', async (req, res) => {
+    try {
+      const complianceCheck = await storage.checkEudrCompliance(parseInt(req.params.farmGpsMappingId));
+      res.json(complianceCheck);
+    } catch (error) {
+      console.error('Error checking EUDR compliance:', error);
+      res.status(500).json({ message: 'Failed to check EUDR compliance' });
+    }
+  });
+
+  app.get('/api/gps/detect-deforestation/:farmGpsMappingId', async (req, res) => {
+    try {
+      const deforestationCheck = await storage.detectDeforestation(parseInt(req.params.farmGpsMappingId));
+      res.json(deforestationCheck);
+    } catch (error) {
+      console.error('Error detecting deforestation:', error);
+      res.status(500).json({ message: 'Failed to detect deforestation' });
+    }
+  });
+
+  app.get('/api/gps/traceability-report/:commodityId', async (req, res) => {
+    try {
+      const report = await storage.generateTraceabilityReport(parseInt(req.params.commodityId));
+      res.json(report);
+    } catch (error) {
+      console.error('Error generating traceability report:', error);
+      res.status(500).json({ message: 'Failed to generate traceability report' });
     }
   });
 

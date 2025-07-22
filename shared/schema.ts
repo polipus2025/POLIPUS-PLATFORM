@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -265,6 +265,82 @@ export type InsertHarvestRecord = z.infer<typeof insertHarvestRecordSchema>;
 export type InsertInputDistribution = z.infer<typeof insertInputDistributionSchema>;
 
 
+// Analytics and Audit System Tables
+export const analyticsData = pgTable("analytics_data", {
+  id: serial("id").primaryKey(),
+  dataType: text("data_type").notNull(), // commodity_trends, compliance_metrics, regional_analysis, farm_performance
+  entityType: text("entity_type").notNull(), // commodity, farmer, county, system
+  entityId: integer("entity_id"),
+  metricName: text("metric_name").notNull(),
+  metricValue: decimal("metric_value", { precision: 15, scale: 4 }).notNull(),
+  aggregationType: text("aggregation_type").notNull(), // sum, avg, count, percentage
+  timeframe: text("timeframe").notNull(), // daily, weekly, monthly, quarterly, yearly
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  metadata: jsonb("metadata"), // Additional context data
+  generatedAt: timestamp("generated_at").defaultNow(),
+});
+
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  auditType: text("audit_type").notNull(), // data_access, system_change, compliance_review, security_event
+  entityType: text("entity_type").notNull(), // user, commodity, farmer, system_config
+  entityId: text("entity_id").notNull(),
+  action: text("action").notNull(), // create, update, delete, view, export, sync
+  userId: text("user_id").notNull(),
+  userRole: text("user_role").notNull(),
+  organizationType: text("organization_type").notNull(), // agritrace_admin, lacra_officer, external_auditor
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  beforeData: jsonb("before_data"),
+  afterData: jsonb("after_data"),
+  accessReason: text("access_reason"),
+  complianceFlags: text("compliance_flags").array(),
+  riskLevel: text("risk_level").notNull().default("low"), // low, medium, high, critical
+  auditTimestamp: timestamp("audit_timestamp").defaultNow(),
+});
+
+export const systemAudits = pgTable("system_audits", {
+  id: serial("id").primaryKey(),
+  auditId: text("audit_id").notNull().unique(),
+  auditType: text("audit_type").notNull(), // compliance_audit, data_integrity, security_review, performance_audit
+  auditScope: text("audit_scope").notNull(), // full_system, county_specific, commodity_specific, user_access
+  auditStatus: text("audit_status").notNull().default("scheduled"), // scheduled, in_progress, completed, failed
+  auditorId: text("auditor_id").notNull(),
+  auditorName: text("auditor_name").notNull(),
+  organizationType: text("organization_type").notNull().default("agritrace_admin"),
+  targetEntities: jsonb("target_entities"), // Entities being audited
+  auditFindings: jsonb("audit_findings"), // Detailed findings
+  complianceScore: decimal("compliance_score", { precision: 5, scale: 2 }),
+  riskAssessment: text("risk_assessment"),
+  recommendedActions: jsonb("recommended_actions"),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const auditReports = pgTable("audit_reports", {
+  id: serial("id").primaryKey(),
+  reportId: text("report_id").notNull().unique(),
+  systemAuditId: integer("system_audit_id").references(() => systemAudits.id),
+  reportType: text("report_type").notNull(), // executive_summary, detailed_findings, compliance_report, security_assessment
+  reportTitle: text("report_title").notNull(),
+  reportStatus: text("report_status").notNull().default("draft"), // draft, under_review, approved, published
+  executiveSummary: text("executive_summary"),
+  keyFindings: jsonb("key_findings"),
+  complianceGaps: jsonb("compliance_gaps"),
+  riskMatrix: jsonb("risk_matrix"),
+  recommendations: jsonb("recommendations"),
+  actionPlan: jsonb("action_plan"),
+  confidentialityLevel: text("confidentiality_level").notNull().default("internal"), // public, internal, confidential, restricted
+  accessRestrictions: text("access_restrictions").array(),
+  approvedBy: text("approved_by"),
+  approvalDate: timestamp("approval_date"),
+  publishedDate: timestamp("published_date"),
+  generatedAt: timestamp("generated_at").defaultNow(),
+});
+
 // Government Integration Tables
 export const lraIntegration = pgTable("lra_integration", {
   id: serial("id").primaryKey(),
@@ -371,3 +447,35 @@ export type InsertLraIntegration = z.infer<typeof insertLraIntegrationSchema>;
 export type InsertMoaIntegration = z.infer<typeof insertMoaIntegrationSchema>;
 export type InsertCustomsIntegration = z.infer<typeof insertCustomsIntegrationSchema>;
 export type InsertGovernmentSyncLog = z.infer<typeof insertGovernmentSyncLogSchema>;
+
+// Analytics and Audit insert schemas
+export const insertAnalyticsDataSchema = createInsertSchema(analyticsData).omit({
+  id: true,
+  generatedAt: true,
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  auditTimestamp: true,
+});
+
+export const insertSystemAuditSchema = createInsertSchema(systemAudits).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAuditReportSchema = createInsertSchema(auditReports).omit({
+  id: true,
+  generatedAt: true,
+});
+
+// Analytics and Audit types
+export type AnalyticsData = typeof analyticsData.$inferSelect;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type SystemAudit = typeof systemAudits.$inferSelect;
+export type AuditReport = typeof auditReports.$inferSelect;
+
+export type InsertAnalyticsData = z.infer<typeof insertAnalyticsDataSchema>;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type InsertSystemAudit = z.infer<typeof insertSystemAuditSchema>;
+export type InsertAuditReport = z.infer<typeof insertAuditReportSchema>;

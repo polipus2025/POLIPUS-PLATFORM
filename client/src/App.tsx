@@ -10,6 +10,8 @@ import Commodities from "@/pages/commodities";
 import Inspections from "@/pages/inspections";
 import Certifications from "@/pages/certifications";
 import Reports from "@/pages/reports";
+import Analytics from "@/pages/analytics";
+import AuditSystem from "@/pages/audit-system";
 import DataEntry from "@/pages/data-entry";
 import Farmers from "@/pages/farmers";
 import FarmPlots from "@/pages/farm-plots";
@@ -26,6 +28,8 @@ function Router() {
       <Route path="/inspections" component={Inspections} />
       <Route path="/certifications" component={Certifications} />
       <Route path="/reports" component={Reports} />
+      <Route path="/analytics" component={Analytics} />
+      <Route path="/audit-system" component={AuditSystem} />
       <Route path="/data-entry" component={DataEntry} />
       <Route path="/farmers" component={Farmers} />
       <Route path="/farm-plots" component={FarmPlots} />

@@ -15,6 +15,10 @@ import {
   moaIntegration,
   customsIntegration,
   governmentSyncLog,
+  analyticsData,
+  auditLogs,
+  systemAudits,
+  auditReports,
   type Commodity,
   type Inspection,
   type Certification,
@@ -31,6 +35,10 @@ import {
   type MoaIntegration,
   type CustomsIntegration,
   type GovernmentSyncLog,
+  type AnalyticsData,
+  type AuditLog,
+  type SystemAudit,
+  type AuditReport,
   type InsertCommodity,
   type InsertInspection,
   type InsertCertification,
@@ -46,7 +54,11 @@ import {
   type InsertLraIntegration,
   type InsertMoaIntegration,
   type InsertCustomsIntegration,
-  type InsertGovernmentSyncLog
+  type InsertGovernmentSyncLog,
+  type InsertAnalyticsData,
+  type InsertAuditLog,
+  type InsertSystemAudit,
+  type InsertAuditReport
 } from "@shared/schema";
 
 export interface IStorage {
@@ -187,6 +199,29 @@ export interface IStorage {
     moa: { status: string; lastSync: Date | null };
     customs: { status: string; lastSync: Date | null };
   }>;
+
+  // Analytics methods (AgriTrace360™ Admin only)
+  getAnalyticsData(dataType?: string, timeframe?: string): Promise<AnalyticsData[]>;
+  generateAnalyticsReport(entityType: string, entityId?: number, timeframe?: string): Promise<AnalyticsData[]>;
+  createAnalyticsData(data: InsertAnalyticsData): Promise<AnalyticsData>;
+  
+  // Audit methods (AgriTrace360™ Admin only)
+  getAuditLogs(auditType?: string, userId?: string, startDate?: Date, endDate?: Date): Promise<AuditLog[]>;
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getSystemAudits(status?: string): Promise<SystemAudit[]>;
+  getSystemAudit(id: number): Promise<SystemAudit | undefined>;
+  createSystemAudit(audit: InsertSystemAudit): Promise<SystemAudit>;
+  updateSystemAudit(id: number, audit: Partial<SystemAudit>): Promise<SystemAudit | undefined>;
+  getAuditReports(confidentialityLevel?: string): Promise<AuditReport[]>;
+  getAuditReport(id: number): Promise<AuditReport | undefined>;
+  createAuditReport(report: InsertAuditReport): Promise<AuditReport>;
+  updateAuditReport(id: number, report: Partial<AuditReport>): Promise<AuditReport | undefined>;
+  
+  // Admin analytics methods
+  generateComplianceTrends(timeframe: string): Promise<AnalyticsData[]>;
+  generateFarmPerformanceAnalytics(farmerId?: number): Promise<AnalyticsData[]>;
+  generateRegionalAnalytics(county?: string): Promise<AnalyticsData[]>;
+  generateSystemHealthMetrics(): Promise<AnalyticsData[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -205,6 +240,10 @@ export class MemStorage implements IStorage {
   private moaIntegrations: Map<number, MoaIntegration>;
   private customsIntegrations: Map<number, CustomsIntegration>;
   private governmentSyncLogs: Map<number, GovernmentSyncLog>;
+  private analyticsData: Map<number, AnalyticsData>;
+  private auditLogs: Map<number, AuditLog>;
+  private systemAudits: Map<number, SystemAudit>;
+  private auditReports: Map<number, AuditReport>;
   private currentUserId: number;
   private currentCommodityId: number;
   private currentInspectionId: number;
@@ -220,6 +259,10 @@ export class MemStorage implements IStorage {
   private currentMoaIntegrationId: number;
   private currentCustomsIntegrationId: number;
   private currentGovernmentSyncLogId: number;
+  private currentAnalyticsDataId: number;
+  private currentAuditLogId: number;
+  private currentSystemAuditId: number;
+  private currentAuditReportId: number;
 
   constructor() {
     this.users = new Map();
@@ -237,6 +280,10 @@ export class MemStorage implements IStorage {
     this.moaIntegrations = new Map();
     this.customsIntegrations = new Map();
     this.governmentSyncLogs = new Map();
+    this.analyticsData = new Map();
+    this.auditLogs = new Map();
+    this.systemAudits = new Map();
+    this.auditReports = new Map();
     this.currentUserId = 1;
     this.currentCommodityId = 1;
     this.currentInspectionId = 1;
@@ -252,6 +299,10 @@ export class MemStorage implements IStorage {
     this.currentMoaIntegrationId = 1;
     this.currentCustomsIntegrationId = 1;
     this.currentGovernmentSyncLogId = 1;
+    this.currentAnalyticsDataId = 1;
+    this.currentAuditLogId = 1;
+    this.currentSystemAuditId = 1;
+    this.currentAuditReportId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
@@ -1101,6 +1152,325 @@ export class MemStorage implements IStorage {
       'cashew': '0801.32.00'
     };
     return hsCodes[commodityType] || '0000.00.00';
+  }
+
+  // Analytics methods (AgriTrace360™ Admin only)
+  async getAnalyticsData(dataType?: string, timeframe?: string): Promise<AnalyticsData[]> {
+    let results = Array.from(this.analyticsData.values());
+    
+    if (dataType) {
+      results = results.filter(data => data.dataType === dataType);
+    }
+    
+    if (timeframe) {
+      results = results.filter(data => data.timeframe === timeframe);
+    }
+    
+    return results.sort((a, b) => b.generatedAt.getTime() - a.generatedAt.getTime());
+  }
+
+  async generateAnalyticsReport(entityType: string, entityId?: number, timeframe?: string): Promise<AnalyticsData[]> {
+    let results = Array.from(this.analyticsData.values()).filter(data => data.entityType === entityType);
+    
+    if (entityId !== undefined) {
+      results = results.filter(data => data.entityId === entityId);
+    }
+    
+    if (timeframe) {
+      results = results.filter(data => data.timeframe === timeframe);
+    }
+    
+    return results;
+  }
+
+  async createAnalyticsData(data: InsertAnalyticsData): Promise<AnalyticsData> {
+    const newData: AnalyticsData = {
+      id: this.currentAnalyticsDataId++,
+      ...data,
+      generatedAt: new Date()
+    };
+    this.analyticsData.set(newData.id, newData);
+    return newData;
+  }
+
+  // Audit methods (AgriTrace360™ Admin only)
+  async getAuditLogs(auditType?: string, userId?: string, startDate?: Date, endDate?: Date): Promise<AuditLog[]> {
+    let results = Array.from(this.auditLogs.values());
+    
+    if (auditType) {
+      results = results.filter(log => log.auditType === auditType);
+    }
+    
+    if (userId) {
+      results = results.filter(log => log.userId === userId);
+    }
+    
+    if (startDate) {
+      results = results.filter(log => log.auditTimestamp >= startDate);
+    }
+    
+    if (endDate) {
+      results = results.filter(log => log.auditTimestamp <= endDate);
+    }
+    
+    return results.sort((a, b) => b.auditTimestamp.getTime() - a.auditTimestamp.getTime());
+  }
+
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const newLog: AuditLog = {
+      id: this.currentAuditLogId++,
+      ...log,
+      ipAddress: log.ipAddress || null,
+      userAgent: log.userAgent || null,
+      beforeData: log.beforeData || null,
+      afterData: log.afterData || null,
+      accessReason: log.accessReason || null,
+      complianceFlags: log.complianceFlags || null,
+      auditTimestamp: new Date()
+    };
+    this.auditLogs.set(newLog.id, newLog);
+    return newLog;
+  }
+
+  async getSystemAudits(status?: string): Promise<SystemAudit[]> {
+    let results = Array.from(this.systemAudits.values());
+    
+    if (status) {
+      results = results.filter(audit => audit.auditStatus === status);
+    }
+    
+    return results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getSystemAudit(id: number): Promise<SystemAudit | undefined> {
+    return this.systemAudits.get(id);
+  }
+
+  async createSystemAudit(audit: InsertSystemAudit): Promise<SystemAudit> {
+    const newAudit: SystemAudit = {
+      id: this.currentSystemAuditId++,
+      ...audit,
+      targetEntities: audit.targetEntities || null,
+      auditFindings: audit.auditFindings || null,
+      complianceScore: audit.complianceScore || null,
+      riskAssessment: audit.riskAssessment || null,
+      recommendedActions: audit.recommendedActions || null,
+      startedAt: audit.startedAt || null,
+      completedAt: audit.completedAt || null,
+      createdAt: new Date()
+    };
+    this.systemAudits.set(newAudit.id, newAudit);
+    return newAudit;
+  }
+
+  async updateSystemAudit(id: number, audit: Partial<SystemAudit>): Promise<SystemAudit | undefined> {
+    const existing = this.systemAudits.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...audit };
+    this.systemAudits.set(id, updated);
+    return updated;
+  }
+
+  async getAuditReports(confidentialityLevel?: string): Promise<AuditReport[]> {
+    let results = Array.from(this.auditReports.values());
+    
+    if (confidentialityLevel) {
+      results = results.filter(report => report.confidentialityLevel === confidentialityLevel);
+    }
+    
+    return results.sort((a, b) => b.generatedAt.getTime() - a.generatedAt.getTime());
+  }
+
+  async getAuditReport(id: number): Promise<AuditReport | undefined> {
+    return this.auditReports.get(id);
+  }
+
+  async createAuditReport(report: InsertAuditReport): Promise<AuditReport> {
+    const newReport: AuditReport = {
+      id: this.currentAuditReportId++,
+      ...report,
+      systemAuditId: report.systemAuditId || null,
+      executiveSummary: report.executiveSummary || null,
+      keyFindings: report.keyFindings || null,
+      complianceGaps: report.complianceGaps || null,
+      riskMatrix: report.riskMatrix || null,
+      recommendations: report.recommendations || null,
+      actionPlan: report.actionPlan || null,
+      accessRestrictions: report.accessRestrictions || null,
+      approvedBy: report.approvedBy || null,
+      approvalDate: report.approvalDate || null,
+      publishedDate: report.publishedDate || null,
+      generatedAt: new Date()
+    };
+    this.auditReports.set(newReport.id, newReport);
+    return newReport;
+  }
+
+  async updateAuditReport(id: number, report: Partial<AuditReport>): Promise<AuditReport | undefined> {
+    const existing = this.auditReports.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...report };
+    this.auditReports.set(id, updated);
+    return updated;
+  }
+
+  // Admin analytics methods
+  async generateComplianceTrends(timeframe: string): Promise<AnalyticsData[]> {
+    const commodities = Array.from(this.commodities.values());
+    const inspections = Array.from(this.inspections.values());
+    
+    const complianceRate = commodities.length > 0 
+      ? (commodities.filter(c => c.status === 'compliant').length / commodities.length) * 100
+      : 0;
+
+    const analyticsData: AnalyticsData = {
+      id: this.currentAnalyticsDataId++,
+      dataType: "compliance_metrics",
+      entityType: "system",
+      entityId: null,
+      metricName: "compliance_rate",
+      metricValue: complianceRate.toString(),
+      aggregationType: "percentage",
+      timeframe,
+      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+      endDate: new Date(),
+      metadata: {
+        totalCommodities: commodities.length,
+        totalInspections: inspections.length,
+        compliantCommodities: commodities.filter(c => c.status === 'compliant').length
+      },
+      generatedAt: new Date()
+    };
+
+    this.analyticsData.set(analyticsData.id, analyticsData);
+    return [analyticsData];
+  }
+
+  async generateFarmPerformanceAnalytics(farmerId?: number): Promise<AnalyticsData[]> {
+    const farmers = farmerId 
+      ? [this.farmers.get(farmerId)].filter(Boolean) as Farmer[]
+      : Array.from(this.farmers.values());
+    
+    const analytics: AnalyticsData[] = [];
+
+    for (const farmer of farmers) {
+      const farmerPlots = Array.from(this.farmPlots.values()).filter(p => p.farmerId === farmer.id);
+      const farmerCommodities = Array.from(this.commodities.values()).filter(c => c.farmerId === farmer.id.toString());
+      
+      const totalArea = farmerPlots.reduce((sum, plot) => sum + parseFloat(plot.area), 0);
+      const avgYield = farmerCommodities.length > 0 
+        ? farmerCommodities.reduce((sum, c) => sum + parseFloat(c.quantity), 0) / farmerCommodities.length
+        : 0;
+
+      const performanceData: AnalyticsData = {
+        id: this.currentAnalyticsDataId++,
+        dataType: "farm_performance",
+        entityType: "farmer",
+        entityId: farmer.id,
+        metricName: "average_yield",
+        metricValue: avgYield.toString(),
+        aggregationType: "avg",
+        timeframe: "monthly",
+        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        endDate: new Date(),
+        metadata: {
+          farmerId: farmer.id,
+          farmerName: `${farmer.firstName} ${farmer.lastName}`,
+          totalPlots: farmerPlots.length,
+          totalArea,
+          totalCommodities: farmerCommodities.length
+        },
+        generatedAt: new Date()
+      };
+
+      this.analyticsData.set(performanceData.id, performanceData);
+      analytics.push(performanceData);
+    }
+
+    return analytics;
+  }
+
+  async generateRegionalAnalytics(county?: string): Promise<AnalyticsData[]> {
+    const commodities = county 
+      ? Array.from(this.commodities.values()).filter(c => c.county === county)
+      : Array.from(this.commodities.values());
+    
+    const countiesByData: { [key: string]: { count: number; compliant: number } } = {};
+    
+    commodities.forEach(commodity => {
+      if (!countiesByData[commodity.county]) {
+        countiesByData[commodity.county] = { count: 0, compliant: 0 };
+      }
+      countiesByData[commodity.county].count++;
+      if (commodity.status === 'compliant') {
+        countiesByData[commodity.county].compliant++;
+      }
+    });
+
+    const analytics: AnalyticsData[] = [];
+
+    Object.entries(countiesByData).forEach(([countyName, data]) => {
+      const complianceRate = data.count > 0 ? (data.compliant / data.count) * 100 : 0;
+
+      const regionalData: AnalyticsData = {
+        id: this.currentAnalyticsDataId++,
+        dataType: "regional_analysis",
+        entityType: "county",
+        entityId: null,
+        metricName: "county_compliance_rate",
+        metricValue: complianceRate.toString(),
+        aggregationType: "percentage",
+        timeframe: "monthly",
+        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        endDate: new Date(),
+        metadata: {
+          county: countyName,
+          totalCommodities: data.count,
+          compliantCommodities: data.compliant
+        },
+        generatedAt: new Date()
+      };
+
+      this.analyticsData.set(regionalData.id, regionalData);
+      analytics.push(regionalData);
+    });
+
+    return analytics;
+  }
+
+  async generateSystemHealthMetrics(): Promise<AnalyticsData[]> {
+    const totalUsers = this.users.size;
+    const totalCommodities = this.commodities.size;
+    const totalInspections = this.inspections.size;
+    const totalFarmers = this.farmers.size;
+    const totalSyncLogs = this.governmentSyncLogs.size;
+
+    const systemHealth: AnalyticsData = {
+      id: this.currentAnalyticsDataId++,
+      dataType: "system_health",
+      entityType: "system",
+      entityId: null,
+      metricName: "system_activity",
+      metricValue: totalCommodities.toString(),
+      aggregationType: "count",
+      timeframe: "daily",
+      startDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      endDate: new Date(),
+      metadata: {
+        totalUsers,
+        totalCommodities,
+        totalInspections,
+        totalFarmers,
+        totalSyncLogs,
+        systemStatus: "operational"
+      },
+      generatedAt: new Date()
+    };
+
+    this.analyticsData.set(systemHealth.id, systemHealth);
+    return [systemHealth];
   }
 }
 

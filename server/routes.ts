@@ -16,7 +16,11 @@ import {
   insertLraIntegrationSchema,
   insertMoaIntegrationSchema,
   insertCustomsIntegrationSchema,
-  insertGovernmentSyncLogSchema
+  insertGovernmentSyncLogSchema,
+  insertAnalyticsDataSchema,
+  insertAuditLogSchema,
+  insertSystemAuditSchema,
+  insertAuditReportSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -630,6 +634,209 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(status);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch government compliance status" });
+    }
+  });
+
+  // Analytics routes (AgriTrace360™ Admin only)
+  app.get("/api/analytics", async (req, res) => {
+    try {
+      const { dataType, timeframe } = req.query;
+      const data = await storage.getAnalyticsData(
+        dataType as string,
+        timeframe as string
+      );
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics data" });
+    }
+  });
+
+  app.post("/api/analytics", async (req, res) => {
+    try {
+      const validatedData = insertAnalyticsDataSchema.parse(req.body);
+      const analytics = await storage.createAnalyticsData(validatedData);
+      res.status(201).json(analytics);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid analytics data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create analytics data" });
+    }
+  });
+
+  app.get("/api/analytics/compliance-trends", async (req, res) => {
+    try {
+      const { timeframe = "monthly" } = req.query;
+      const trends = await storage.generateComplianceTrends(timeframe as string);
+      res.json(trends);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate compliance trends" });
+    }
+  });
+
+  app.get("/api/analytics/farm-performance", async (req, res) => {
+    try {
+      const { farmerId } = req.query;
+      const performance = await storage.generateFarmPerformanceAnalytics(
+        farmerId ? parseInt(farmerId as string) : undefined
+      );
+      res.json(performance);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate farm performance analytics" });
+    }
+  });
+
+  app.get("/api/analytics/regional", async (req, res) => {
+    try {
+      const { county } = req.query;
+      const regional = await storage.generateRegionalAnalytics(county as string);
+      res.json(regional);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate regional analytics" });
+    }
+  });
+
+  app.get("/api/analytics/system-health", async (req, res) => {
+    try {
+      const health = await storage.generateSystemHealthMetrics();
+      res.json(health);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate system health metrics" });
+    }
+  });
+
+  // Audit routes (AgriTrace360™ Admin only)
+  app.get("/api/audit/logs", async (req, res) => {
+    try {
+      const { auditType, userId, startDate, endDate } = req.query;
+      const logs = await storage.getAuditLogs(
+        auditType as string,
+        userId as string,
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined
+      );
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  app.post("/api/audit/logs", async (req, res) => {
+    try {
+      const validatedData = insertAuditLogSchema.parse(req.body);
+      const log = await storage.createAuditLog(validatedData);
+      res.status(201).json(log);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid audit log data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create audit log" });
+    }
+  });
+
+  app.get("/api/audit/system-audits", async (req, res) => {
+    try {
+      const { status } = req.query;
+      const audits = await storage.getSystemAudits(status as string);
+      res.json(audits);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch system audits" });
+    }
+  });
+
+  app.get("/api/audit/system-audits/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const audit = await storage.getSystemAudit(id);
+      
+      if (!audit) {
+        return res.status(404).json({ message: "System audit not found" });
+      }
+      
+      res.json(audit);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch system audit" });
+    }
+  });
+
+  app.post("/api/audit/system-audits", async (req, res) => {
+    try {
+      const validatedData = insertSystemAuditSchema.parse(req.body);
+      const audit = await storage.createSystemAudit(validatedData);
+      res.status(201).json(audit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid system audit data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create system audit" });
+    }
+  });
+
+  app.patch("/api/audit/system-audits/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const audit = await storage.updateSystemAudit(id, req.body);
+      
+      if (!audit) {
+        return res.status(404).json({ message: "System audit not found" });
+      }
+      
+      res.json(audit);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update system audit" });
+    }
+  });
+
+  app.get("/api/audit/reports", async (req, res) => {
+    try {
+      const { confidentialityLevel } = req.query;
+      const reports = await storage.getAuditReports(confidentialityLevel as string);
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch audit reports" });
+    }
+  });
+
+  app.get("/api/audit/reports/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const report = await storage.getAuditReport(id);
+      
+      if (!report) {
+        return res.status(404).json({ message: "Audit report not found" });
+      }
+      
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch audit report" });
+    }
+  });
+
+  app.post("/api/audit/reports", async (req, res) => {
+    try {
+      const validatedData = insertAuditReportSchema.parse(req.body);
+      const report = await storage.createAuditReport(validatedData);
+      res.status(201).json(report);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid audit report data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create audit report" });
+    }
+  });
+
+  app.patch("/api/audit/reports/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const report = await storage.updateAuditReport(id, req.body);
+      
+      if (!report) {
+        return res.status(404).json({ message: "Audit report not found" });
+      }
+      
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update audit report" });
     }
   });
 

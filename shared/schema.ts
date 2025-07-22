@@ -61,13 +61,18 @@ export const alerts = pgTable("alerts", {
 
 export const reports = pgTable("reports", {
   id: serial("id").primaryKey(),
+  reportId: text("report_id").notNull().unique(),
   title: text("title").notNull(),
-  type: text("type").notNull(), // compliance, inspection, export, county
-  parameters: text("parameters"), // JSON string of report parameters
+  type: text("type").notNull(), // compliance, inspection, export, county, eudr_compliance, government_sync, export_analysis, gps_mapping
+  dateRange: text("date_range"),
   generatedBy: text("generated_by").notNull(),
+  department: text("department"),
+  summary: text("summary"),
+  data: text("data"), // JSON string of report data
+  parameters: text("parameters"), // JSON string of report parameters
   generatedAt: timestamp("generated_at").defaultNow(),
   filePath: text("file_path"),
-  status: text("status").notNull().default("pending"), // pending, completed, failed
+  status: text("status").notNull().default("pending"), // pending, completed, failed, draft, published
 });
 
 // Farm Management Platform Tables

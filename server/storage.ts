@@ -414,6 +414,51 @@ export class MemStorage implements IStorage {
       message: "Certificate EXP-2024-0156 for coffee export has been approved",
       priority: "low"
     });
+
+    // Create sample commodities for testing government synchronization
+    this.createCommodity({
+      batchNumber: "COF-2024-001",
+      name: "Arabica Coffee Beans",
+      type: "Coffee",
+      county: "Lofa County",
+      quantity: "2500",
+      unit: "kg",
+      qualityGrade: "Premium",
+      status: "pending_inspection"
+    });
+
+    this.createCommodity({
+      batchNumber: "COC-2024-045",
+      name: "Premium Cocoa Beans",
+      type: "Cocoa",
+      county: "Grand Gedeh County",
+      quantity: "1800",
+      unit: "kg",
+      qualityGrade: "Grade A",
+      status: "approved"
+    });
+
+    this.createCommodity({
+      batchNumber: "RUB-2024-023",
+      name: "Natural Rubber Latex",
+      type: "Rubber",
+      county: "Margibi County",
+      quantity: "5000",
+      unit: "kg",
+      qualityGrade: "Grade 1",
+      status: "in_transit"
+    });
+
+    this.createCommodity({
+      batchNumber: "RIC-2024-156",
+      name: "Jasmine Rice",
+      type: "Rice",
+      county: "Bong County",
+      quantity: "3200",
+      unit: "kg",
+      qualityGrade: "Premium",
+      status: "certified"
+    });
   }
 
   // User methods

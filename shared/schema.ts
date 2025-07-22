@@ -15,6 +15,10 @@ export const commodities = pgTable("commodities", {
   farmerId: text("farmer_id"),
   farmerName: text("farmer_name"),
   harvestDate: timestamp("harvest_date"),
+  gpsCoordinates: text("gps_coordinates"), // "lat,lng,alt" format
+  gpsAccuracy: text("gps_accuracy"), // high, medium, low
+  plotId: text("plot_id"), // linked farm plot
+  district: text("district"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

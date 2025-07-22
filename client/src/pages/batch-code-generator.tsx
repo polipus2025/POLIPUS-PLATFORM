@@ -29,7 +29,10 @@ import {
   MapPin,
   Calendar,
   User,
-  Leaf
+  Leaf,
+  Crosshair,
+  Navigation,
+  Satellite
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -79,6 +82,11 @@ interface BatchCodeForm {
   unit: string;
   qualityGrade: string;
   harvestDate: string;
+  latitude: string;
+  longitude: string;
+  altitude: string;
+  gpsAccuracy: string;
+  plotId: string;
   notes: string;
 }
 
@@ -92,10 +100,16 @@ export default function BatchCodeGenerator() {
     unit: "kg",
     qualityGrade: "",
     harvestDate: "",
+    latitude: "",
+    longitude: "",
+    altitude: "",
+    gpsAccuracy: "high",
+    plotId: "",
     notes: ""
   });
   const [generatedBatchCode, setGeneratedBatchCode] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [gpsLoading, setGpsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -105,6 +119,10 @@ export default function BatchCodeGenerator() {
 
   const { data: commodities = [], isLoading: commoditiesLoading } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
+  });
+
+  const { data: farmPlots = [] } = useQuery<any[]>({
+    queryKey: ["/api/farm-plots"],
   });
 
   const createCommodityMutation = useMutation({
@@ -128,6 +146,11 @@ export default function BatchCodeGenerator() {
         unit: "kg",
         qualityGrade: "",
         harvestDate: "",
+        latitude: "",
+        longitude: "",
+        altitude: "",
+        gpsAccuracy: "high",
+        plotId: "",
         notes: ""
       });
       setGeneratedBatchCode("");
@@ -197,6 +220,11 @@ export default function BatchCodeGenerator() {
       farmerId: formData.farmerId && formData.farmerId !== "none" ? parseInt(formData.farmerId) : null,
       farmerName: selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}` : null,
       harvestDate: formData.harvestDate ? new Date(formData.harvestDate) : null,
+      gpsCoordinates: formData.latitude && formData.longitude 
+        ? `${formData.latitude},${formData.longitude}${formData.altitude ? `,${formData.altitude}` : ''}` 
+        : null,
+      gpsAccuracy: formData.gpsAccuracy || null,
+      plotId: formData.plotId || null,
       status: "registered",
       notes: formData.notes || null
     };
@@ -218,6 +246,95 @@ export default function BatchCodeGenerator() {
         description: "Failed to copy batch code to clipboard.",
         variant: "destructive",
       });
+    }
+  };
+
+  // Get current GPS location
+  const getCurrentLocation = () => {
+    setGpsLoading(true);
+    
+    if (!navigator.geolocation) {
+      toast({
+        title: "GPS Not Supported",
+        description: "Your browser does not support geolocation.",
+        variant: "destructive",
+      });
+      setGpsLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, altitude } = position.coords;
+        setFormData(prev => ({
+          ...prev,
+          latitude: latitude.toFixed(6),
+          longitude: longitude.toFixed(6),
+          altitude: altitude ? altitude.toFixed(2) : "",
+        }));
+        
+        toast({
+          title: "GPS Location Detected",
+          description: `Coordinates: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+        });
+        setGpsLoading(false);
+      },
+      (error) => {
+        let errorMessage = "Failed to get GPS location.";
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "GPS access denied. Please enable location permissions.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "GPS position unavailable. Please try again.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "GPS request timed out. Please try again.";
+            break;
+        }
+        
+        toast({
+          title: "GPS Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        setGpsLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
+
+  // Load GPS from selected farm plot
+  const loadPlotGPS = (plotId: string) => {
+    const plot = farmPlots.find(p => p.id === parseInt(plotId));
+    if (plot && plot.gpsCoordinates) {
+      try {
+        const coords = JSON.parse(plot.gpsCoordinates);
+        if (coords && coords.length > 0) {
+          const centerCoord = coords[0]; // Use first coordinate as center
+          setFormData(prev => ({
+            ...prev,
+            latitude: centerCoord.lat?.toString() || "",
+            longitude: centerCoord.lng?.toString() || "",
+            plotId: plotId
+          }));
+          
+          toast({
+            title: "Plot GPS Loaded",
+            description: `Coordinates loaded from ${plot.plotName}`,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "GPS Load Error",
+          description: "Failed to load GPS coordinates from plot.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -297,6 +414,18 @@ export default function BatchCodeGenerator() {
                   <span>${commodityData.farmerName}</span>
                 </div>
               ` : ''}
+              ${commodityData.gpsCoordinates ? `
+                <div class="detail-row">
+                  <span><strong>GPS:</strong></span>
+                  <span style="font-family: monospace; font-size: 10px;">${commodityData.gpsCoordinates}</span>
+                </div>
+              ` : ''}
+              ${commodityData.gpsAccuracy ? `
+                <div class="detail-row">
+                  <span><strong>Accuracy:</strong></span>
+                  <span>${commodityData.gpsAccuracy}</span>
+                </div>
+              ` : ''}
             ` : `
               <div class="detail-row">
                 <span><strong>Crop:</strong></span>
@@ -310,6 +439,12 @@ export default function BatchCodeGenerator() {
                 <span><strong>Generated:</strong></span>
                 <span>${new Date().toLocaleDateString()}</span>
               </div>
+              ${formData.latitude && formData.longitude ? `
+                <div class="detail-row">
+                  <span><strong>GPS:</strong></span>
+                  <span style="font-family: monospace; font-size: 10px;">${formData.latitude}, ${formData.longitude}</span>
+                </div>
+              ` : ''}
             `}
           </div>
           
@@ -506,6 +641,138 @@ export default function BatchCodeGenerator() {
               />
             </div>
 
+            {/* GPS Coordinates Section */}
+            <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-blue-800 flex items-center gap-2">
+                  <Satellite className="h-4 w-4" />
+                  GPS Coordinates & Location Data
+                </Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={getCurrentLocation}
+                    disabled={gpsLoading}
+                    className="text-blue-700 border-blue-300"
+                  >
+                    {gpsLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-700 mr-1"></div>
+                        Getting GPS...
+                      </>
+                    ) : (
+                      <>
+                        <Crosshair className="h-3 w-3 mr-1" />
+                        Get Current Location
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Farm Plot Selection */}
+              <div>
+                <Label htmlFor="plotId">Load from Farm Plot</Label>
+                <Select 
+                  value={formData.plotId} 
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, plotId: value }));
+                    if (value && value !== "none") {
+                      loadPlotGPS(value);
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select farm plot (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No plot selected</SelectItem>
+                    {farmPlots.map(plot => (
+                      <SelectItem key={plot.id} value={plot.id.toString()}>
+                        {plot.plotName} - {plot.cropType} ({plot.plotSize} {plot.plotSizeUnit})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* GPS Coordinates */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="latitude">Latitude</Label>
+                  <Input
+                    id="latitude"
+                    type="number"
+                    step="0.000001"
+                    value={formData.latitude}
+                    onChange={(e) => setFormData(prev => ({ ...prev, latitude: e.target.value }))}
+                    placeholder="e.g., 6.3133"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="longitude">Longitude</Label>
+                  <Input
+                    id="longitude"
+                    type="number"
+                    step="0.000001"
+                    value={formData.longitude}
+                    onChange={(e) => setFormData(prev => ({ ...prev, longitude: e.target.value }))}
+                    placeholder="e.g., -10.8074"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="altitude">Altitude (meters)</Label>
+                  <Input
+                    id="altitude"
+                    type="number"
+                    step="0.1"
+                    value={formData.altitude}
+                    onChange={(e) => setFormData(prev => ({ ...prev, altitude: e.target.value }))}
+                    placeholder="e.g., 125.5"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="gpsAccuracy">GPS Accuracy</Label>
+                  <Select value={formData.gpsAccuracy} onValueChange={(value) => 
+                    setFormData(prev => ({ ...prev, gpsAccuracy: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="high">High (±1-3m)</SelectItem>
+                      <SelectItem value="medium">Medium (±3-5m)</SelectItem>
+                      <SelectItem value="low">Low (±5-10m)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* GPS Coordinates Display */}
+              {(formData.latitude && formData.longitude) && (
+                <div className="p-3 bg-white border border-blue-200 rounded">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Navigation className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium">GPS Location:</span>
+                    <span className="font-mono text-blue-800">
+                      {formData.latitude}, {formData.longitude}
+                      {formData.altitude && ` (${formData.altitude}m)`}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    Accuracy: {formData.gpsAccuracy} • Ready for batch code generation
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Notes */}
             <div>
               <Label htmlFor="notes">Additional Notes</Label>
@@ -663,6 +930,12 @@ export default function BatchCodeGenerator() {
                           {commodity.farmerName}
                         </div>
                       )}
+                      {commodity.gpsCoordinates && (
+                        <div className="flex items-center gap-1">
+                          <Satellite className="h-3 w-3" />
+                          <span className="font-mono text-xs">{commodity.gpsCoordinates}</span>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex justify-between items-center mt-2">
@@ -720,15 +993,27 @@ export default function BatchCodeGenerator() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>GPS mapping integration with precise coordinates</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Automatic location detection and farm plot linking</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
                   <span>Printable labels with QR codes for physical tracking</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Integration with farmer profiles and GPS coordinates</span>
+                  <span>Integration with farmer profiles and plot mapping</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <span>EUDR compliance and export certificate compatibility</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>High-accuracy GPS coordinates for supply chain transparency</span>
                 </div>
               </div>
             </div>

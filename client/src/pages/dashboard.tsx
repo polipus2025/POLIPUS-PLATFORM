@@ -42,15 +42,26 @@ export default function Dashboard() {
           </div>
           <div className="flex space-x-3">
             <Select defaultValue="all">
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Counties</SelectItem>
-                <SelectItem value="lofa">Lofa County</SelectItem>
+                <SelectItem value="bomi">Bomi County</SelectItem>
                 <SelectItem value="bong">Bong County</SelectItem>
-                <SelectItem value="nimba">Nimba County</SelectItem>
+                <SelectItem value="gbarpolu">Gbarpolu County</SelectItem>
+                <SelectItem value="grand_bassa">Grand Bassa County</SelectItem>
+                <SelectItem value="grand_cape_mount">Grand Cape Mount County</SelectItem>
                 <SelectItem value="grand_gedeh">Grand Gedeh County</SelectItem>
+                <SelectItem value="grand_kru">Grand Kru County</SelectItem>
+                <SelectItem value="lofa">Lofa County</SelectItem>
+                <SelectItem value="margibi">Margibi County</SelectItem>
+                <SelectItem value="maryland">Maryland County</SelectItem>
+                <SelectItem value="montserrado">Montserrado County</SelectItem>
+                <SelectItem value="nimba">Nimba County</SelectItem>
+                <SelectItem value="rivercess">River Cess County</SelectItem>
+                <SelectItem value="river_gee">River Gee County</SelectItem>
+                <SelectItem value="sinoe">Sinoe County</SelectItem>
               </SelectContent>
             </Select>
             
@@ -154,8 +165,12 @@ export default function Dashboard() {
                           </div>
                           
                           <div>
-                            <h4 className="font-semibold mb-2">Regional Compliance</h4>
-                            <div className="space-y-2">
+                            <h4 className="font-semibold mb-2">Regional Compliance (Top Counties)</h4>
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                              <div className="flex justify-between">
+                                <span>Montserrado County</span>
+                                <Badge variant="default">96% Compliant</Badge>
+                              </div>
                               <div className="flex justify-between">
                                 <span>Lofa County</span>
                                 <Badge variant="default">94% Compliant</Badge>
@@ -165,12 +180,24 @@ export default function Dashboard() {
                                 <Badge variant="default">91% Compliant</Badge>
                               </div>
                               <div className="flex justify-between">
-                                <span>Nimba County</span>
-                                <Badge variant="secondary">82% Compliant</Badge>
+                                <span>Margibi County</span>
+                                <Badge variant="default">89% Compliant</Badge>
                               </div>
                               <div className="flex justify-between">
                                 <span>Grand Gedeh County</span>
                                 <Badge variant="default">88% Compliant</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Grand Bassa County</span>
+                                <Badge variant="default">86% Compliant</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Nimba County</span>
+                                <Badge variant="secondary">82% Compliant</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Maryland County</span>
+                                <Badge variant="secondary">79% Compliant</Badge>
                               </div>
                             </div>
                           </div>

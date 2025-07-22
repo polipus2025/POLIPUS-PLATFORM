@@ -472,8 +472,13 @@ export class MemStorage implements IStorage {
     const allCommodities = Array.from(this.commodities.values());
     const countiesData = new Map<string, { compliant: number; reviewRequired: number; nonCompliant: number; total: number }>();
 
-    // Initialize default counties
-    const defaultCounties = ['Lofa County', 'Bong County', 'Nimba County', 'Grand Gedeh County'];
+    // Initialize all 15 counties of Liberia
+    const defaultCounties = [
+      'Bomi County', 'Bong County', 'Gbarpolu County', 'Grand Bassa County', 
+      'Grand Cape Mount County', 'Grand Gedeh County', 'Grand Kru County', 
+      'Lofa County', 'Margibi County', 'Maryland County', 'Montserrado County', 
+      'Nimba County', 'River Cess County', 'River Gee County', 'Sinoe County'
+    ];
     defaultCounties.forEach(county => {
       countiesData.set(county, { compliant: 0, reviewRequired: 0, nonCompliant: 0, total: 0 });
     });

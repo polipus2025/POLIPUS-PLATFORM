@@ -12,7 +12,11 @@ import {
   insertCropPlanSchema,
   insertHarvestRecordSchema,
   insertInputDistributionSchema,
-  insertProcurementSchema
+  insertProcurementSchema,
+  insertLraIntegrationSchema,
+  insertMoaIntegrationSchema,
+  insertCustomsIntegrationSchema,
+  insertGovernmentSyncLogSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -485,6 +489,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create procurement" });
+    }
+  });
+
+  // Government Integration Routes
+  
+  // LRA Integration routes
+  app.get("/api/lra-integrations", async (req, res) => {
+    try {
+      const { status } = req.query;
+      let integrations;
+      
+      if (status) {
+        integrations = await storage.getLraIntegrationsByStatus(status as string);
+      } else {
+        integrations = await storage.getLraIntegrations();
+      }
+      
+      res.json(integrations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch LRA integrations" });
+    }
+  });
+
+  app.post("/api/lra-integrations", async (req, res) => {
+    try {
+      const validatedData = insertLraIntegrationSchema.parse(req.body);
+      const integration = await storage.createLraIntegration(validatedData);
+      res.status(201).json(integration);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create LRA integration" });
+    }
+  });
+
+  // MOA Integration routes
+  app.get("/api/moa-integrations", async (req, res) => {
+    try {
+      const { status } = req.query;
+      let integrations;
+      
+      if (status) {
+        integrations = await storage.getMoaIntegrationsByStatus(status as string);
+      } else {
+        integrations = await storage.getMoaIntegrations();
+      }
+      
+      res.json(integrations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch MOA integrations" });
+    }
+  });
+
+  app.post("/api/moa-integrations", async (req, res) => {
+    try {
+      const validatedData = insertMoaIntegrationSchema.parse(req.body);
+      const integration = await storage.createMoaIntegration(validatedData);
+      res.status(201).json(integration);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create MOA integration" });
+    }
+  });
+
+  // Customs Integration routes
+  app.get("/api/customs-integrations", async (req, res) => {
+    try {
+      const { status } = req.query;
+      let integrations;
+      
+      if (status) {
+        integrations = await storage.getCustomsIntegrationsByStatus(status as string);
+      } else {
+        integrations = await storage.getCustomsIntegrations();
+      }
+      
+      res.json(integrations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Customs integrations" });
+    }
+  });
+
+  app.post("/api/customs-integrations", async (req, res) => {
+    try {
+      const validatedData = insertCustomsIntegrationSchema.parse(req.body);
+      const integration = await storage.createCustomsIntegration(validatedData);
+      res.status(201).json(integration);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create Customs integration" });
+    }
+  });
+
+  // Government Sync Log routes
+  app.get("/api/government-sync-logs", async (req, res) => {
+    try {
+      const { syncType, entityId } = req.query;
+      let logs;
+      
+      if (syncType && entityId) {
+        logs = await storage.getGovernmentSyncLogsByEntity(parseInt(entityId as string), syncType as string);
+      } else if (syncType) {
+        logs = await storage.getGovernmentSyncLogsByType(syncType as string);
+      } else {
+        logs = await storage.getGovernmentSyncLogs();
+      }
+      
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch government sync logs" });
+    }
+  });
+
+  // Government Synchronization endpoints
+  app.post("/api/sync/lra/:commodityId", async (req, res) => {
+    try {
+      const commodityId = parseInt(req.params.commodityId);
+      const result = await storage.syncWithLRA(commodityId);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to sync with LRA" });
+    }
+  });
+
+  app.post("/api/sync/moa/:commodityId", async (req, res) => {
+    try {
+      const commodityId = parseInt(req.params.commodityId);
+      const result = await storage.syncWithMOA(commodityId);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to sync with MOA" });
+    }
+  });
+
+  app.post("/api/sync/customs/:commodityId", async (req, res) => {
+    try {
+      const commodityId = parseInt(req.params.commodityId);
+      const result = await storage.syncWithCustoms(commodityId);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to sync with Customs" });
+    }
+  });
+
+  // Government Compliance Status endpoint
+  app.get("/api/government-compliance/:commodityId", async (req, res) => {
+    try {
+      const commodityId = parseInt(req.params.commodityId);
+      const status = await storage.getGovernmentComplianceStatus(commodityId);
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch government compliance status" });
     }
   });
 

@@ -11,6 +11,10 @@ import {
   harvestRecords,
   inputDistribution,
   procurement,
+  lraIntegration,
+  moaIntegration,
+  customsIntegration,
+  governmentSyncLog,
   type Commodity,
   type Inspection,
   type Certification,
@@ -23,6 +27,10 @@ import {
   type HarvestRecord,
   type InputDistribution,
   type Procurement,
+  type LraIntegration,
+  type MoaIntegration,
+  type CustomsIntegration,
+  type GovernmentSyncLog,
   type InsertCommodity,
   type InsertInspection,
   type InsertCertification,
@@ -34,7 +42,11 @@ import {
   type InsertCropPlan,
   type InsertHarvestRecord,
   type InsertInputDistribution,
-  type InsertProcurement
+  type InsertProcurement,
+  type InsertLraIntegration,
+  type InsertMoaIntegration,
+  type InsertCustomsIntegration,
+  type InsertGovernmentSyncLog
 } from "@shared/schema";
 
 export interface IStorage {
@@ -140,6 +152,47 @@ export interface IStorage {
   getProcurementsByStatus(status: string): Promise<Procurement[]>;
   createProcurement(procurement: InsertProcurement): Promise<Procurement>;
   updateProcurement(id: number, procurement: Partial<Procurement>): Promise<Procurement | undefined>;
+
+  // Government Integration methods
+  // LRA Integration methods
+  getLraIntegrations(): Promise<LraIntegration[]>;
+  getLraIntegration(id: number): Promise<LraIntegration | undefined>;
+  getLraIntegrationByCommodity(commodityId: number): Promise<LraIntegration | undefined>;
+  getLraIntegrationsByStatus(status: string): Promise<LraIntegration[]>;
+  createLraIntegration(integration: InsertLraIntegration): Promise<LraIntegration>;
+  updateLraIntegration(id: number, integration: Partial<LraIntegration>): Promise<LraIntegration | undefined>;
+
+  // MOA Integration methods
+  getMoaIntegrations(): Promise<MoaIntegration[]>;
+  getMoaIntegration(id: number): Promise<MoaIntegration | undefined>;
+  getMoaIntegrationByCommodity(commodityId: number): Promise<MoaIntegration | undefined>;
+  getMoaIntegrationsByStatus(status: string): Promise<MoaIntegration[]>;
+  createMoaIntegration(integration: InsertMoaIntegration): Promise<MoaIntegration>;
+  updateMoaIntegration(id: number, integration: Partial<MoaIntegration>): Promise<MoaIntegration | undefined>;
+
+  // Customs Integration methods
+  getCustomsIntegrations(): Promise<CustomsIntegration[]>;
+  getCustomsIntegration(id: number): Promise<CustomsIntegration | undefined>;
+  getCustomsIntegrationByCommodity(commodityId: number): Promise<CustomsIntegration | undefined>;
+  getCustomsIntegrationsByStatus(status: string): Promise<CustomsIntegration[]>;
+  createCustomsIntegration(integration: InsertCustomsIntegration): Promise<CustomsIntegration>;
+  updateCustomsIntegration(id: number, integration: Partial<CustomsIntegration>): Promise<CustomsIntegration | undefined>;
+
+  // Government Sync Log methods
+  getGovernmentSyncLogs(): Promise<GovernmentSyncLog[]>;
+  getGovernmentSyncLogsByType(syncType: string): Promise<GovernmentSyncLog[]>;
+  getGovernmentSyncLogsByEntity(entityId: number, syncType: string): Promise<GovernmentSyncLog[]>;
+  createGovernmentSyncLog(log: InsertGovernmentSyncLog): Promise<GovernmentSyncLog>;
+
+  // Synchronization methods
+  syncWithLRA(commodityId: number): Promise<{ success: boolean; message: string }>;
+  syncWithMOA(commodityId: number): Promise<{ success: boolean; message: string }>;
+  syncWithCustoms(commodityId: number): Promise<{ success: boolean; message: string }>;
+  getGovernmentComplianceStatus(commodityId: number): Promise<{
+    lra: { status: string; lastSync: Date | null };
+    moa: { status: string; lastSync: Date | null };
+    customs: { status: string; lastSync: Date | null };
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -155,6 +208,10 @@ export class MemStorage implements IStorage {
   private harvestRecords: Map<number, HarvestRecord>;
   private inputDistributions: Map<number, InputDistribution>;
   private procurements: Map<number, Procurement>;
+  private lraIntegrations: Map<number, LraIntegration>;
+  private moaIntegrations: Map<number, MoaIntegration>;
+  private customsIntegrations: Map<number, CustomsIntegration>;
+  private governmentSyncLogs: Map<number, GovernmentSyncLog>;
   private currentUserId: number;
   private currentCommodityId: number;
   private currentInspectionId: number;
@@ -167,6 +224,10 @@ export class MemStorage implements IStorage {
   private currentHarvestRecordId: number;
   private currentInputDistributionId: number;
   private currentProcurementId: number;
+  private currentLraIntegrationId: number;
+  private currentMoaIntegrationId: number;
+  private currentCustomsIntegrationId: number;
+  private currentGovernmentSyncLogId: number;
 
   constructor() {
     this.users = new Map();
@@ -181,6 +242,10 @@ export class MemStorage implements IStorage {
     this.harvestRecords = new Map();
     this.inputDistributions = new Map();
     this.procurements = new Map();
+    this.lraIntegrations = new Map();
+    this.moaIntegrations = new Map();
+    this.customsIntegrations = new Map();
+    this.governmentSyncLogs = new Map();
     this.currentUserId = 1;
     this.currentCommodityId = 1;
     this.currentInspectionId = 1;
@@ -193,6 +258,10 @@ export class MemStorage implements IStorage {
     this.currentHarvestRecordId = 1;
     this.currentInputDistributionId = 1;
     this.currentProcurementId = 1;
+    this.currentLraIntegrationId = 1;
+    this.currentMoaIntegrationId = 1;
+    this.currentCustomsIntegrationId = 1;
+    this.currentGovernmentSyncLogId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
@@ -723,6 +792,336 @@ export class MemStorage implements IStorage {
     const updated = { ...existing, ...procurement };
     this.procurements.set(id, updated);
     return updated;
+  }
+
+  // Government Integration methods
+  // LRA Integration methods
+  async getLraIntegrations(): Promise<LraIntegration[]> {
+    return Array.from(this.lraIntegrations.values());
+  }
+
+  async getLraIntegration(id: number): Promise<LraIntegration | undefined> {
+    return this.lraIntegrations.get(id);
+  }
+
+  async getLraIntegrationByCommodity(commodityId: number): Promise<LraIntegration | undefined> {
+    return Array.from(this.lraIntegrations.values()).find(i => i.commodityId === commodityId);
+  }
+
+  async getLraIntegrationsByStatus(status: string): Promise<LraIntegration[]> {
+    return Array.from(this.lraIntegrations.values()).filter(i => i.paymentStatus === status);
+  }
+
+  async createLraIntegration(integration: InsertLraIntegration): Promise<LraIntegration> {
+    const newIntegration: LraIntegration = {
+      id: this.currentLraIntegrationId++,
+      ...integration,
+      syncStatus: integration.syncStatus || 'pending',
+      paymentStatus: integration.paymentStatus || 'pending',
+      createdAt: new Date()
+    };
+    this.lraIntegrations.set(newIntegration.id, newIntegration);
+    return newIntegration;
+  }
+
+  async updateLraIntegration(id: number, integration: Partial<LraIntegration>): Promise<LraIntegration | undefined> {
+    const existing = this.lraIntegrations.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...integration };
+    this.lraIntegrations.set(id, updated);
+    return updated;
+  }
+
+  // MOA Integration methods
+  async getMoaIntegrations(): Promise<MoaIntegration[]> {
+    return Array.from(this.moaIntegrations.values());
+  }
+
+  async getMoaIntegration(id: number): Promise<MoaIntegration | undefined> {
+    return this.moaIntegrations.get(id);
+  }
+
+  async getMoaIntegrationByCommodity(commodityId: number): Promise<MoaIntegration | undefined> {
+    return Array.from(this.moaIntegrations.values()).find(i => i.commodityId === commodityId);
+  }
+
+  async getMoaIntegrationsByStatus(status: string): Promise<MoaIntegration[]> {
+    return Array.from(this.moaIntegrations.values()).filter(i => i.inspectionStatus === status);
+  }
+
+  async createMoaIntegration(integration: InsertMoaIntegration): Promise<MoaIntegration> {
+    const newIntegration: MoaIntegration = {
+      id: this.currentMoaIntegrationId++,
+      ...integration,
+      syncStatus: integration.syncStatus || 'pending',
+      inspectionStatus: integration.inspectionStatus || 'pending',
+      createdAt: new Date()
+    };
+    this.moaIntegrations.set(newIntegration.id, newIntegration);
+    return newIntegration;
+  }
+
+  async updateMoaIntegration(id: number, integration: Partial<MoaIntegration>): Promise<MoaIntegration | undefined> {
+    const existing = this.moaIntegrations.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...integration };
+    this.moaIntegrations.set(id, updated);
+    return updated;
+  }
+
+  // Customs Integration methods
+  async getCustomsIntegrations(): Promise<CustomsIntegration[]> {
+    return Array.from(this.customsIntegrations.values());
+  }
+
+  async getCustomsIntegration(id: number): Promise<CustomsIntegration | undefined> {
+    return this.customsIntegrations.get(id);
+  }
+
+  async getCustomsIntegrationByCommodity(commodityId: number): Promise<CustomsIntegration | undefined> {
+    return Array.from(this.customsIntegrations.values()).find(i => i.commodityId === commodityId);
+  }
+
+  async getCustomsIntegrationsByStatus(status: string): Promise<CustomsIntegration[]> {
+    return Array.from(this.customsIntegrations.values()).filter(i => i.clearanceStatus === status);
+  }
+
+  async createCustomsIntegration(integration: InsertCustomsIntegration): Promise<CustomsIntegration> {
+    const newIntegration: CustomsIntegration = {
+      id: this.currentCustomsIntegrationId++,
+      ...integration,
+      syncStatus: integration.syncStatus || 'pending',
+      clearanceStatus: integration.clearanceStatus || 'pending',
+      documentStatus: integration.documentStatus || 'incomplete',
+      createdAt: new Date()
+    };
+    this.customsIntegrations.set(newIntegration.id, newIntegration);
+    return newIntegration;
+  }
+
+  async updateCustomsIntegration(id: number, integration: Partial<CustomsIntegration>): Promise<CustomsIntegration | undefined> {
+    const existing = this.customsIntegrations.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...integration };
+    this.customsIntegrations.set(id, updated);
+    return updated;
+  }
+
+  // Government Sync Log methods
+  async getGovernmentSyncLogs(): Promise<GovernmentSyncLog[]> {
+    return Array.from(this.governmentSyncLogs.values());
+  }
+
+  async getGovernmentSyncLogsByType(syncType: string): Promise<GovernmentSyncLog[]> {
+    return Array.from(this.governmentSyncLogs.values()).filter(l => l.syncType === syncType);
+  }
+
+  async getGovernmentSyncLogsByEntity(entityId: number, syncType: string): Promise<GovernmentSyncLog[]> {
+    return Array.from(this.governmentSyncLogs.values()).filter(l => l.entityId === entityId && l.syncType === syncType);
+  }
+
+  async createGovernmentSyncLog(log: InsertGovernmentSyncLog): Promise<GovernmentSyncLog> {
+    const newLog: GovernmentSyncLog = {
+      id: this.currentGovernmentSyncLogId++,
+      ...log,
+      syncDate: new Date()
+    };
+    this.governmentSyncLogs.set(newLog.id, newLog);
+    return newLog;
+  }
+
+  // Synchronization methods
+  async syncWithLRA(commodityId: number): Promise<{ success: boolean; message: string }> {
+    const commodity = await this.getCommodity(commodityId);
+    if (!commodity) {
+      return { success: false, message: 'Commodity not found' };
+    }
+
+    try {
+      // Simulate LRA API call
+      const taxAmount = parseFloat(commodity.quantity) * 0.05; // 5% tax rate
+      const lraData: InsertLraIntegration = {
+        commodityId: commodityId,
+        taxId: `TAX-${commodityId}-${Date.now()}`,
+        taxpayerTin: commodity.farmerId || 'N/A',
+        taxableAmount: commodity.quantity,
+        taxRate: "5.00",
+        taxAmount: taxAmount.toString(),
+        assessmentDate: new Date(),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        lraOfficer: 'LRA System',
+        syncStatus: 'synced',
+        lastSyncDate: new Date()
+      };
+
+      await this.createLraIntegration(lraData);
+      
+      await this.createGovernmentSyncLog({
+        syncType: 'lra',
+        entityId: commodityId,
+        syncDirection: 'outbound',
+        status: 'success',
+        syncDuration: 1200,
+        syncedBy: 'System'
+      });
+
+      return { success: true, message: 'Successfully synced with LRA' };
+    } catch (error) {
+      await this.createGovernmentSyncLog({
+        syncType: 'lra',
+        entityId: commodityId,
+        syncDirection: 'outbound',
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        syncDuration: 800,
+        syncedBy: 'System'
+      });
+      return { success: false, message: 'Failed to sync with LRA' };
+    }
+  }
+
+  async syncWithMOA(commodityId: number): Promise<{ success: boolean; message: string }> {
+    const commodity = await this.getCommodity(commodityId);
+    if (!commodity) {
+      return { success: false, message: 'Commodity not found' };
+    }
+
+    try {
+      const moaData: InsertMoaIntegration = {
+        commodityId: commodityId,
+        registrationNumber: `MOA-${commodityId}-${Date.now()}`,
+        cropType: commodity.type,
+        productionSeason: new Date().getMonth() < 6 ? 'dry' : 'rainy',
+        actualYield: commodity.quantity,
+        qualityCertification: commodity.qualityGrade,
+        sustainabilityRating: 'conventional',
+        moaOfficer: 'MOA System',
+        inspectionStatus: 'approved',
+        approvalDate: new Date(),
+        syncStatus: 'synced',
+        lastSyncDate: new Date()
+      };
+
+      await this.createMoaIntegration(moaData);
+      
+      await this.createGovernmentSyncLog({
+        syncType: 'moa',
+        entityId: commodityId,
+        syncDirection: 'outbound',
+        status: 'success',
+        syncDuration: 1500,
+        syncedBy: 'System'
+      });
+
+      return { success: true, message: 'Successfully synced with MOA' };
+    } catch (error) {
+      await this.createGovernmentSyncLog({
+        syncType: 'moa',
+        entityId: commodityId,
+        syncDirection: 'outbound',
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        syncDuration: 900,
+        syncedBy: 'System'
+      });
+      return { success: false, message: 'Failed to sync with MOA' };
+    }
+  }
+
+  async syncWithCustoms(commodityId: number): Promise<{ success: boolean; message: string }> {
+    const commodity = await this.getCommodity(commodityId);
+    if (!commodity) {
+      return { success: false, message: 'Commodity not found' };
+    }
+
+    try {
+      const exportValue = parseFloat(commodity.quantity) * 100; // Estimated $100 per unit
+      const customsData: InsertCustomsIntegration = {
+        commodityId: commodityId,
+        declarationNumber: `DEC-${commodityId}-${Date.now()}`,
+        hsCode: this.getHSCode(commodity.type),
+        exportValue: exportValue.toString(),
+        dutyAmount: (exportValue * 0.02).toString(), // 2% duty
+        portOfExit: 'Port of Monrovia',
+        destinationCountry: 'European Union',
+        exporterTin: commodity.farmerId || 'N/A',
+        customsOfficer: 'Customs System',
+        clearanceStatus: 'cleared',
+        clearanceDate: new Date(),
+        syncStatus: 'synced',
+        lastSyncDate: new Date(),
+        documentStatus: 'complete'
+      };
+
+      await this.createCustomsIntegration(customsData);
+      
+      await this.createGovernmentSyncLog({
+        syncType: 'customs',
+        entityId: commodityId,
+        syncDirection: 'outbound',
+        status: 'success',
+        syncDuration: 2000,
+        syncedBy: 'System'
+      });
+
+      return { success: true, message: 'Successfully synced with Customs' };
+    } catch (error) {
+      await this.createGovernmentSyncLog({
+        syncType: 'customs',
+        entityId: commodityId,
+        syncDirection: 'outbound',
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        syncDuration: 1100,
+        syncedBy: 'System'
+      });
+      return { success: false, message: 'Failed to sync with Customs' };
+    }
+  }
+
+  async getGovernmentComplianceStatus(commodityId: number): Promise<{
+    lra: { status: string; lastSync: Date | null };
+    moa: { status: string; lastSync: Date | null };
+    customs: { status: string; lastSync: Date | null };
+  }> {
+    const lraIntegration = await this.getLraIntegrationByCommodity(commodityId);
+    const moaIntegration = await this.getMoaIntegrationByCommodity(commodityId);
+    const customsIntegration = await this.getCustomsIntegrationByCommodity(commodityId);
+
+    return {
+      lra: {
+        status: lraIntegration?.syncStatus || 'not_synced',
+        lastSync: lraIntegration?.lastSyncDate || null
+      },
+      moa: {
+        status: moaIntegration?.syncStatus || 'not_synced',
+        lastSync: moaIntegration?.lastSyncDate || null
+      },
+      customs: {
+        status: customsIntegration?.syncStatus || 'not_synced',
+        lastSync: customsIntegration?.lastSyncDate || null
+      }
+    };
+  }
+
+  private getHSCode(commodityType: string): string {
+    const hsCodes: Record<string, string> = {
+      'cocoa': '1801.00.00',
+      'coffee': '0901.11.00',
+      'palm_oil': '1511.10.00',
+      'rubber': '4001.10.00',
+      'rice': '1006.30.00',
+      'cassava': '0714.10.00',
+      'plantain': '0803.10.00',
+      'banana': '0803.90.00',
+      'coconut': '0801.11.00',
+      'sugarcane': '1212.91.00',
+      'cashew': '0801.32.00'
+    };
+    return hsCodes[commodityType] || '0000.00.00';
   }
 }
 

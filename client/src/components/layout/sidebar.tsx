@@ -10,7 +10,8 @@ import {
   Users,
   Calendar,
   Package,
-  ShoppingCart
+  ShoppingCart,
+  Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ const navigation = [
   { name: "Commodities", href: "/commodities", icon: Leaf },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Export Certifications", href: "/certifications", icon: Tag },
+  { name: "Government Integration", href: "/government-integration", icon: Building2 },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
 ];

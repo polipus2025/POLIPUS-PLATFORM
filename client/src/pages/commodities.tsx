@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,18 +15,120 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Filter } from "lucide-react";
+import { Search, Plus, Filter, RefreshCw, Building2, CheckCircle, Clock, XCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { getCommodityIcon, getStatusColor, COUNTIES, COMMODITY_TYPES } from "@/lib/types";
 import type { Commodity } from "@shared/schema";
+
+interface GovernmentComplianceStatus {
+  lra: { status: string; lastSync: Date | null };
+  moa: { status: string; lastSync: Date | null };
+  customs: { status: string; lastSync: Date | null };
+}
 
 export default function Commodities() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCounty, setSelectedCounty] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: commodities = [], isLoading } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
   });
+
+  // Government sync mutations
+  const syncWithLRA = useMutation({
+    mutationFn: async (commodityId: number) => {
+      const response = await fetch(`/api/sync/lra/${commodityId}`, {
+        method: 'POST',
+      });
+      return response.json();
+    },
+    onSuccess: (data, commodityId) => {
+      if (data.success) {
+        toast({
+          title: "LRA Sync Successful",
+          description: `Commodity ${commodityId} synced with LRA`,
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/lra-integrations"] });
+      } else {
+        toast({
+          title: "LRA Sync Failed",
+          description: data.message,
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const syncWithMOA = useMutation({
+    mutationFn: async (commodityId: number) => {
+      const response = await fetch(`/api/sync/moa/${commodityId}`, {
+        method: 'POST',
+      });
+      return response.json();
+    },
+    onSuccess: (data, commodityId) => {
+      if (data.success) {
+        toast({
+          title: "MOA Sync Successful",
+          description: `Commodity ${commodityId} synced with MOA`,
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/moa-integrations"] });
+      } else {
+        toast({
+          title: "MOA Sync Failed",
+          description: data.message,
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const syncWithCustoms = useMutation({
+    mutationFn: async (commodityId: number) => {
+      const response = await fetch(`/api/sync/customs/${commodityId}`, {
+        method: 'POST',
+      });
+      return response.json();
+    },
+    onSuccess: (data, commodityId) => {
+      if (data.success) {
+        toast({
+          title: "Customs Sync Successful",
+          description: `Commodity ${commodityId} synced with Customs`,
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/customs-integrations"] });
+      } else {
+        toast({
+          title: "Customs Sync Failed",
+          description: data.message,
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const handleSyncAll = async (commodityId: number) => {
+    try {
+      await Promise.all([
+        syncWithLRA.mutateAsync(commodityId),
+        syncWithMOA.mutateAsync(commodityId),
+        syncWithCustoms.mutateAsync(commodityId)
+      ]);
+      toast({
+        title: "All Agencies Synced",
+        description: `Commodity ${commodityId} synced with all government agencies`,
+      });
+    } catch (error) {
+      toast({
+        title: "Sync Failed",
+        description: "Some synchronizations failed. Check individual agency status.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -66,6 +168,19 @@ export default function Commodities() {
         {statusText}
       </Badge>
     );
+  };
+
+  const getSyncStatusIcon = (status: string) => {
+    switch (status) {
+      case 'synced':
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case 'pending':
+        return <Clock className="w-4 h-4 text-yellow-600" />;
+      case 'failed':
+        return <XCircle className="w-4 h-4 text-red-600" />;
+      default:
+        return <XCircle className="w-4 h-4 text-gray-400" />;
+    }
   };
 
   return (
@@ -164,13 +279,14 @@ export default function Commodities() {
                   <TableHead>Farmer</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Harvest Date</TableHead>
+                  <TableHead>Government Sync</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCommodities.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={10} className="text-center py-8 text-gray-500">
                       {commodities.length === 0 
                         ? "No commodities registered yet. Add your first commodity to get started."
                         : "No commodities match your current filters."
@@ -210,6 +326,29 @@ export default function Commodities() {
                           ? new Date(commodity.harvestDate).toLocaleDateString()
                           : 'Not specified'
                         }
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1" title="LRA | MOA | Customs">
+                            {getSyncStatusIcon('not_synced')}
+                            {getSyncStatusIcon('not_synced')}
+                            {getSyncStatusIcon('not_synced')}
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleSyncAll(commodity.id)}
+                            disabled={syncWithLRA.isPending || syncWithMOA.isPending || syncWithCustoms.isPending}
+                            className="text-xs"
+                          >
+                            {syncWithLRA.isPending || syncWithMOA.isPending || syncWithCustoms.isPending ? (
+                              <Clock className="w-3 h-3 mr-1 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-3 h-3 mr-1" />
+                            )}
+                            Sync All
+                          </Button>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">

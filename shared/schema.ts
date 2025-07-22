@@ -288,3 +288,110 @@ export type InsertCropPlan = z.infer<typeof insertCropPlanSchema>;
 export type InsertHarvestRecord = z.infer<typeof insertHarvestRecordSchema>;
 export type InsertInputDistribution = z.infer<typeof insertInputDistributionSchema>;
 export type InsertProcurement = z.infer<typeof insertProcurementSchema>;
+
+// Government Integration Tables
+export const lraIntegration = pgTable("lra_integration", {
+  id: serial("id").primaryKey(),
+  commodityId: integer("commodity_id").references(() => commodities.id).notNull(),
+  taxId: text("tax_id").notNull().unique(),
+  taxpayerTin: text("taxpayer_tin").notNull(),
+  taxableAmount: decimal("taxable_amount", { precision: 12, scale: 2 }).notNull(),
+  taxRate: decimal("tax_rate", { precision: 5, scale: 2 }).notNull(),
+  taxAmount: decimal("tax_amount", { precision: 12, scale: 2 }).notNull(),
+  paymentStatus: text("payment_status").notNull().default("pending"), // pending, paid, overdue
+  assessmentDate: timestamp("assessment_date").notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  paymentDate: timestamp("payment_date"),
+  lraOfficer: text("lra_officer").notNull(),
+  syncStatus: text("sync_status").notNull().default("pending"), // pending, synced, failed
+  lastSyncDate: timestamp("last_sync_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const moaIntegration = pgTable("moa_integration", {
+  id: serial("id").primaryKey(),
+  commodityId: integer("commodity_id").references(() => commodities.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id),
+  registrationNumber: text("registration_number").notNull().unique(),
+  cropType: text("crop_type").notNull(),
+  productionSeason: text("production_season").notNull(),
+  estimatedYield: decimal("estimated_yield", { precision: 10, scale: 2 }),
+  actualYield: decimal("actual_yield", { precision: 10, scale: 2 }),
+  qualityCertification: text("quality_certification"),
+  sustainabilityRating: text("sustainability_rating"), // organic, conventional, transitional
+  moaOfficer: text("moa_officer").notNull(),
+  inspectionStatus: text("inspection_status").notNull().default("pending"), // pending, approved, rejected
+  approvalDate: timestamp("approval_date"),
+  syncStatus: text("sync_status").notNull().default("pending"), // pending, synced, failed
+  lastSyncDate: timestamp("last_sync_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const customsIntegration = pgTable("customs_integration", {
+  id: serial("id").primaryKey(),
+  commodityId: integer("commodity_id").references(() => commodities.id).notNull(),
+  certificationId: integer("certification_id").references(() => certifications.id),
+  declarationNumber: text("declaration_number").notNull().unique(),
+  hsCode: text("hs_code").notNull(), // Harmonized System Code
+  exportValue: decimal("export_value", { precision: 12, scale: 2 }).notNull(),
+  dutyAmount: decimal("duty_amount", { precision: 12, scale: 2 }),
+  portOfExit: text("port_of_exit").notNull(),
+  destinationCountry: text("destination_country").notNull(),
+  exporterTin: text("exporter_tin").notNull(),
+  customsOfficer: text("customs_officer").notNull(),
+  clearanceStatus: text("clearance_status").notNull().default("pending"), // pending, cleared, held, rejected
+  clearanceDate: timestamp("clearance_date"),
+  syncStatus: text("sync_status").notNull().default("pending"), // pending, synced, failed
+  lastSyncDate: timestamp("last_sync_date"),
+  documentStatus: text("document_status").notNull().default("incomplete"), // incomplete, complete, verified
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const governmentSyncLog = pgTable("government_sync_log", {
+  id: serial("id").primaryKey(),
+  syncType: text("sync_type").notNull(), // lra, moa, customs
+  entityId: integer("entity_id").notNull(),
+  syncDirection: text("sync_direction").notNull(), // outbound, inbound, bidirectional
+  status: text("status").notNull(), // success, failed, partial
+  requestPayload: text("request_payload"), // JSON string
+  responsePayload: text("response_payload"), // JSON string
+  errorMessage: text("error_message"),
+  syncDuration: integer("sync_duration"), // milliseconds
+  syncedBy: text("synced_by").notNull(),
+  syncDate: timestamp("sync_date").defaultNow(),
+});
+
+// Government Integration insert schemas
+export const insertLraIntegrationSchema = createInsertSchema(lraIntegration).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMoaIntegrationSchema = createInsertSchema(moaIntegration).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCustomsIntegrationSchema = createInsertSchema(customsIntegration).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGovernmentSyncLogSchema = createInsertSchema(governmentSyncLog).omit({
+  id: true,
+  syncDate: true,
+});
+
+// Government Integration types
+export type LraIntegration = typeof lraIntegration.$inferSelect;
+export type MoaIntegration = typeof moaIntegration.$inferSelect;
+export type CustomsIntegration = typeof customsIntegration.$inferSelect;
+export type GovernmentSyncLog = typeof governmentSyncLog.$inferSelect;
+
+export type InsertLraIntegration = z.infer<typeof insertLraIntegrationSchema>;
+export type InsertMoaIntegration = z.infer<typeof insertMoaIntegrationSchema>;
+export type InsertCustomsIntegration = z.infer<typeof insertCustomsIntegrationSchema>;
+export type InsertGovernmentSyncLog = z.infer<typeof insertGovernmentSyncLogSchema>;

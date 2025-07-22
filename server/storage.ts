@@ -554,6 +554,141 @@ export class MemStorage implements IStorage {
       }),
       status: "published"
     });
+
+    // Create sample farmers for testing
+    this.createFarmer({
+      farmerId: "FRM-2024-001",
+      firstName: "John",
+      lastName: "Kollie",
+      phoneNumber: "+231 77 123 4567",
+      idNumber: "LIB123456789",
+      county: "Lofa County",
+      district: "Voinjama",
+      village: "Zorzor Town",
+      gpsCoordinates: "8.4219,-9.8456",
+      farmSize: "5.2",
+      farmSizeUnit: "hectares",
+      status: "active",
+      agreementSigned: true,
+      agreementDate: new Date("2024-01-15")
+    });
+
+    this.createFarmer({
+      farmerId: "FRM-2024-002", 
+      firstName: "Mary",
+      lastName: "Johnson",
+      phoneNumber: "+231 88 987 6543",
+      idNumber: "LIB987654321",
+      county: "Bong County",
+      district: "Gbarnga",
+      village: "Suakoko",
+      gpsCoordinates: "7.0126,-9.4729", 
+      farmSize: "3.8",
+      farmSizeUnit: "hectares",
+      status: "active",
+      agreementSigned: true,
+      agreementDate: new Date("2024-02-20")
+    });
+
+    this.createFarmer({
+      farmerId: "FRM-2024-003",
+      firstName: "Samuel",
+      lastName: "Konneh", 
+      phoneNumber: "+231 55 555 1234",
+      idNumber: "LIB555123456",
+      county: "Grand Gedeh County",
+      district: "Zwedru",
+      village: "Tchien",
+      gpsCoordinates: "6.0726,-8.1329",
+      farmSize: "7.1",
+      farmSizeUnit: "hectares", 
+      status: "active",
+      agreementSigned: false,
+      agreementDate: null
+    });
+
+    this.createFarmer({
+      farmerId: "FRM-2024-004",
+      firstName: "Grace",
+      lastName: "Williams",
+      phoneNumber: "+231 99 876 5432",
+      idNumber: "LIB876543210", 
+      county: "Margibi County",
+      district: "Kakata",
+      village: "Salala",
+      gpsCoordinates: "6.5174,-10.3418",
+      farmSize: "2.5",
+      farmSizeUnit: "hectares",
+      status: "active",
+      agreementSigned: true,
+      agreementDate: new Date("2024-03-10")
+    });
+
+    this.createFarmer({
+      farmerId: "FRM-2024-005",
+      firstName: "David",
+      lastName: "Clarke",
+      phoneNumber: "+231 66 321 9876",
+      county: "Nimba County",
+      district: "Sanniquellie",
+      village: "Gbatala",
+      gpsCoordinates: "7.3667,-8.7167",
+      farmSize: "4.9",
+      farmSizeUnit: "hectares",
+      status: "inactive",
+      agreementSigned: false,
+      agreementDate: null
+    });
+
+    this.createFarmer({
+      farmerId: "FRM-2024-006",
+      firstName: "Janet",
+      lastName: "Cooper",
+      phoneNumber: "+231 77 444 5555",
+      idNumber: "LIB444555666",
+      county: "Grand Bassa County", 
+      district: "Buchanan",
+      village: "Compound #3",
+      gpsCoordinates: "5.8811,-10.0467",
+      farmSize: "6.3",
+      farmSizeUnit: "hectares",
+      status: "active",
+      agreementSigned: true,
+      agreementDate: new Date("2024-01-25")
+    });
+
+    this.createFarmer({
+      farmerId: "FRM-2024-007",
+      firstName: "Robert",
+      lastName: "Davis",
+      phoneNumber: "+231 88 111 2222",
+      county: "Maryland County",
+      district: "Harper",
+      village: "Pleebo",
+      gpsCoordinates: "4.3742,-7.7192",
+      farmSize: "8.7",
+      farmSizeUnit: "hectares",
+      status: "active", 
+      agreementSigned: true,
+      agreementDate: new Date("2024-04-05")
+    });
+
+    this.createFarmer({
+      farmerId: "FRM-2024-008",
+      firstName: "Monica",
+      lastName: "Taylor",
+      phoneNumber: "+231 99 333 4444",
+      idNumber: "LIB333444555",
+      county: "Gbarpolu County",
+      district: "Bopulu",
+      village: "Bokomu",
+      gpsCoordinates: "7.4953,-10.8056",
+      farmSize: "1.9",
+      farmSizeUnit: "hectares",
+      status: "active",
+      agreementSigned: false,
+      agreementDate: null
+    });
   }
 
   // User methods

@@ -12,7 +12,8 @@ import {
   Package,
   Building2,
   Satellite,
-  Shield
+  Shield,
+  QrCode
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ const farmManagementNavigation = [
   { name: "Farmer Onboarding", href: "/farmers", icon: Users },
   { name: "Farm Plot Mapping", href: "/farm-plots", icon: MapPin },
   { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
+  { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
   { name: "Input Management", href: "/input-management", icon: Package },
 ];

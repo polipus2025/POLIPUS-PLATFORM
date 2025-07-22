@@ -20,6 +20,7 @@ import InputManagement from "@/pages/input-management";
 import GovernmentIntegration from "@/pages/government-integration";
 import GpsMapping from "@/pages/gps-mapping";
 import Verification from "@/pages/verification";
+import BatchCodeGenerator from "@/pages/batch-code-generator";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/government-integration" component={GovernmentIntegration} />
       <Route path="/gps-mapping" component={GpsMapping} />
       <Route path="/verification" component={Verification} />
+      <Route path="/batch-code-generator" component={BatchCodeGenerator} />
       <Route component={NotFound} />
     </Switch>
   );

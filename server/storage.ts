@@ -5,18 +5,36 @@ import {
   alerts, 
   reports,
   users,
+  farmers,
+  farmPlots,
+  cropPlanning,
+  harvestRecords,
+  inputDistribution,
+  procurement,
   type Commodity,
   type Inspection,
   type Certification,
   type Alert,
   type Report,
   type User,
+  type Farmer,
+  type FarmPlot,
+  type CropPlan,
+  type HarvestRecord,
+  type InputDistribution,
+  type Procurement,
   type InsertCommodity,
   type InsertInspection,
   type InsertCertification,
   type InsertAlert,
   type InsertReport,
-  type InsertUser
+  type InsertUser,
+  type InsertFarmer,
+  type InsertFarmPlot,
+  type InsertCropPlan,
+  type InsertHarvestRecord,
+  type InsertInputDistribution,
+  type InsertProcurement
 } from "@shared/schema";
 
 export interface IStorage {
@@ -74,6 +92,54 @@ export interface IStorage {
     total: number;
     complianceRate: number;
   }>>;
+
+  // Farm Management Platform methods
+  // Farmer methods
+  getFarmers(): Promise<Farmer[]>;
+  getFarmer(id: number): Promise<Farmer | undefined>;
+  getFarmerByFarmerId(farmerId: string): Promise<Farmer | undefined>;
+  getFarmersByCounty(county: string): Promise<Farmer[]>;
+  createFarmer(farmer: InsertFarmer): Promise<Farmer>;
+  updateFarmer(id: number, farmer: Partial<Farmer>): Promise<Farmer | undefined>;
+  
+  // Farm Plot methods
+  getFarmPlots(): Promise<FarmPlot[]>;
+  getFarmPlot(id: number): Promise<FarmPlot | undefined>;
+  getFarmPlotsByFarmer(farmerId: number): Promise<FarmPlot[]>;
+  createFarmPlot(plot: InsertFarmPlot): Promise<FarmPlot>;
+  updateFarmPlot(id: number, plot: Partial<FarmPlot>): Promise<FarmPlot | undefined>;
+  
+  // Crop Planning methods
+  getCropPlans(): Promise<CropPlan[]>;
+  getCropPlan(id: number): Promise<CropPlan | undefined>;
+  getCropPlansByFarmer(farmerId: number): Promise<CropPlan[]>;
+  getCropPlansBySeason(year: number, season: string): Promise<CropPlan[]>;
+  createCropPlan(plan: InsertCropPlan): Promise<CropPlan>;
+  updateCropPlan(id: number, plan: Partial<CropPlan>): Promise<CropPlan | undefined>;
+  
+  // Harvest Records methods
+  getHarvestRecords(): Promise<HarvestRecord[]>;
+  getHarvestRecord(id: number): Promise<HarvestRecord | undefined>;
+  getHarvestRecordsByFarmer(farmerId: number): Promise<HarvestRecord[]>;
+  getHarvestRecordsByDateRange(startDate: Date, endDate: Date): Promise<HarvestRecord[]>;
+  createHarvestRecord(record: InsertHarvestRecord): Promise<HarvestRecord>;
+  updateHarvestRecord(id: number, record: Partial<HarvestRecord>): Promise<HarvestRecord | undefined>;
+  
+  // Input Distribution methods
+  getInputDistributions(): Promise<InputDistribution[]>;
+  getInputDistribution(id: number): Promise<InputDistribution | undefined>;
+  getInputDistributionsByFarmer(farmerId: number): Promise<InputDistribution[]>;
+  getInputDistributionsByType(inputType: string): Promise<InputDistribution[]>;
+  createInputDistribution(distribution: InsertInputDistribution): Promise<InputDistribution>;
+  updateInputDistribution(id: number, distribution: Partial<InputDistribution>): Promise<InputDistribution | undefined>;
+  
+  // Procurement methods
+  getProcurements(): Promise<Procurement[]>;
+  getProcurement(id: number): Promise<Procurement | undefined>;
+  getProcurementsByFarmer(farmerId: number): Promise<Procurement[]>;
+  getProcurementsByStatus(status: string): Promise<Procurement[]>;
+  createProcurement(procurement: InsertProcurement): Promise<Procurement>;
+  updateProcurement(id: number, procurement: Partial<Procurement>): Promise<Procurement | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -83,12 +149,24 @@ export class MemStorage implements IStorage {
   private certifications: Map<number, Certification>;
   private alerts: Map<number, Alert>;
   private reports: Map<number, Report>;
+  private farmers: Map<number, Farmer>;
+  private farmPlots: Map<number, FarmPlot>;
+  private cropPlans: Map<number, CropPlan>;
+  private harvestRecords: Map<number, HarvestRecord>;
+  private inputDistributions: Map<number, InputDistribution>;
+  private procurements: Map<number, Procurement>;
   private currentUserId: number;
   private currentCommodityId: number;
   private currentInspectionId: number;
   private currentCertificationId: number;
   private currentAlertId: number;
   private currentReportId: number;
+  private currentFarmerId: number;
+  private currentFarmPlotId: number;
+  private currentCropPlanId: number;
+  private currentHarvestRecordId: number;
+  private currentInputDistributionId: number;
+  private currentProcurementId: number;
 
   constructor() {
     this.users = new Map();
@@ -97,12 +175,24 @@ export class MemStorage implements IStorage {
     this.certifications = new Map();
     this.alerts = new Map();
     this.reports = new Map();
+    this.farmers = new Map();
+    this.farmPlots = new Map();
+    this.cropPlans = new Map();
+    this.harvestRecords = new Map();
+    this.inputDistributions = new Map();
+    this.procurements = new Map();
     this.currentUserId = 1;
     this.currentCommodityId = 1;
     this.currentInspectionId = 1;
     this.currentCertificationId = 1;
     this.currentAlertId = 1;
     this.currentReportId = 1;
+    this.currentFarmerId = 1;
+    this.currentFarmPlotId = 1;
+    this.currentCropPlanId = 1;
+    this.currentHarvestRecordId = 1;
+    this.currentInputDistributionId = 1;
+    this.currentProcurementId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
@@ -408,6 +498,226 @@ export class MemStorage implements IStorage {
       ...data,
       complianceRate: data.total > 0 ? Math.round((data.compliant / data.total) * 1000) / 10 : 95 + Math.random() * 5
     }));
+  }
+
+  // Farm Management Platform Implementation Methods
+
+  // Farmer methods
+  async getFarmers(): Promise<Farmer[]> {
+    return Array.from(this.farmers.values());
+  }
+
+  async getFarmer(id: number): Promise<Farmer | undefined> {
+    return this.farmers.get(id);
+  }
+
+  async getFarmerByFarmerId(farmerId: string): Promise<Farmer | undefined> {
+    return Array.from(this.farmers.values()).find(f => f.farmerId === farmerId);
+  }
+
+  async getFarmersByCounty(county: string): Promise<Farmer[]> {
+    return Array.from(this.farmers.values()).filter(f => f.county === county);
+  }
+
+  async createFarmer(farmer: InsertFarmer): Promise<Farmer> {
+    const newFarmer: Farmer = {
+      id: this.currentFarmerId++,
+      ...farmer,
+      agreementSigned: farmer.agreementSigned ?? false,
+      status: farmer.status || 'active'
+    };
+    this.farmers.set(newFarmer.id, newFarmer);
+    return newFarmer;
+  }
+
+  async updateFarmer(id: number, farmer: Partial<Farmer>): Promise<Farmer | undefined> {
+    const existing = this.farmers.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...farmer };
+    this.farmers.set(id, updated);
+    return updated;
+  }
+
+  // Farm Plot methods
+  async getFarmPlots(): Promise<FarmPlot[]> {
+    return Array.from(this.farmPlots.values());
+  }
+
+  async getFarmPlot(id: number): Promise<FarmPlot | undefined> {
+    return this.farmPlots.get(id);
+  }
+
+  async getFarmPlotsByFarmer(farmerId: number): Promise<FarmPlot[]> {
+    return Array.from(this.farmPlots.values()).filter(p => p.farmerId === farmerId);
+  }
+
+  async createFarmPlot(plot: InsertFarmPlot): Promise<FarmPlot> {
+    const newPlot: FarmPlot = {
+      id: this.currentFarmPlotId++,
+      plotId: `PLT-${Date.now()}-${this.currentFarmPlotId.toString().padStart(3, '0')}`,
+      ...plot,
+      status: plot.status || 'active'
+    };
+    this.farmPlots.set(newPlot.id, newPlot);
+    return newPlot;
+  }
+
+  async updateFarmPlot(id: number, plot: Partial<FarmPlot>): Promise<FarmPlot | undefined> {
+    const existing = this.farmPlots.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...plot };
+    this.farmPlots.set(id, updated);
+    return updated;
+  }
+
+  // Crop Planning methods
+  async getCropPlans(): Promise<CropPlan[]> {
+    return Array.from(this.cropPlans.values());
+  }
+
+  async getCropPlan(id: number): Promise<CropPlan | undefined> {
+    return this.cropPlans.get(id);
+  }
+
+  async getCropPlansByFarmer(farmerId: number): Promise<CropPlan[]> {
+    return Array.from(this.cropPlans.values()).filter(p => p.farmerId === farmerId);
+  }
+
+  async getCropPlansBySeason(year: number, season: string): Promise<CropPlan[]> {
+    return Array.from(this.cropPlans.values()).filter(p => p.year === year && p.season === season);
+  }
+
+  async createCropPlan(plan: InsertCropPlan): Promise<CropPlan> {
+    const newPlan: CropPlan = {
+      id: this.currentCropPlanId++,
+      ...plan,
+      status: plan.status || 'planned'
+    };
+    this.cropPlans.set(newPlan.id, newPlan);
+    return newPlan;
+  }
+
+  async updateCropPlan(id: number, plan: Partial<CropPlan>): Promise<CropPlan | undefined> {
+    const existing = this.cropPlans.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...plan };
+    this.cropPlans.set(id, updated);
+    return updated;
+  }
+
+  // Harvest Records methods
+  async getHarvestRecords(): Promise<HarvestRecord[]> {
+    return Array.from(this.harvestRecords.values());
+  }
+
+  async getHarvestRecord(id: number): Promise<HarvestRecord | undefined> {
+    return this.harvestRecords.get(id);
+  }
+
+  async getHarvestRecordsByFarmer(farmerId: number): Promise<HarvestRecord[]> {
+    return Array.from(this.harvestRecords.values()).filter(r => r.farmerId === farmerId);
+  }
+
+  async getHarvestRecordsByDateRange(startDate: Date, endDate: Date): Promise<HarvestRecord[]> {
+    return Array.from(this.harvestRecords.values()).filter(r => {
+      const harvestDate = new Date(r.harvestDate);
+      return harvestDate >= startDate && harvestDate <= endDate;
+    });
+  }
+
+  async createHarvestRecord(record: InsertHarvestRecord): Promise<HarvestRecord> {
+    const newRecord: HarvestRecord = {
+      id: this.currentHarvestRecordId++,
+      ...record
+    };
+    this.harvestRecords.set(newRecord.id, newRecord);
+    return newRecord;
+  }
+
+  async updateHarvestRecord(id: number, record: Partial<HarvestRecord>): Promise<HarvestRecord | undefined> {
+    const existing = this.harvestRecords.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...record };
+    this.harvestRecords.set(id, updated);
+    return updated;
+  }
+
+  // Input Distribution methods
+  async getInputDistributions(): Promise<InputDistribution[]> {
+    return Array.from(this.inputDistributions.values());
+  }
+
+  async getInputDistribution(id: number): Promise<InputDistribution | undefined> {
+    return this.inputDistributions.get(id);
+  }
+
+  async getInputDistributionsByFarmer(farmerId: number): Promise<InputDistribution[]> {
+    return Array.from(this.inputDistributions.values()).filter(d => d.farmerId === farmerId);
+  }
+
+  async getInputDistributionsByType(inputType: string): Promise<InputDistribution[]> {
+    return Array.from(this.inputDistributions.values()).filter(d => d.inputType === inputType);
+  }
+
+  async createInputDistribution(distribution: InsertInputDistribution): Promise<InputDistribution> {
+    const newDistribution: InputDistribution = {
+      id: this.currentInputDistributionId++,
+      ...distribution,
+      repaymentStatus: distribution.repaymentStatus || 'pending'
+    };
+    this.inputDistributions.set(newDistribution.id, newDistribution);
+    return newDistribution;
+  }
+
+  async updateInputDistribution(id: number, distribution: Partial<InputDistribution>): Promise<InputDistribution | undefined> {
+    const existing = this.inputDistributions.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...distribution };
+    this.inputDistributions.set(id, updated);
+    return updated;
+  }
+
+  // Procurement methods
+  async getProcurements(): Promise<Procurement[]> {
+    return Array.from(this.procurements.values());
+  }
+
+  async getProcurement(id: number): Promise<Procurement | undefined> {
+    return this.procurements.get(id);
+  }
+
+  async getProcurementsByFarmer(farmerId: number): Promise<Procurement[]> {
+    return Array.from(this.procurements.values()).filter(p => p.farmerId === farmerId);
+  }
+
+  async getProcurementsByStatus(status: string): Promise<Procurement[]> {
+    return Array.from(this.procurements.values()).filter(p => p.status === status);
+  }
+
+  async createProcurement(procurement: InsertProcurement): Promise<Procurement> {
+    const newProcurement: Procurement = {
+      id: this.currentProcurementId++,
+      procurementId: `PROC-${Date.now()}-${this.currentProcurementId.toString().padStart(3, '0')}`,
+      ...procurement,
+      status: procurement.status || 'pending',
+      paymentStatus: procurement.paymentStatus || 'pending'
+    };
+    this.procurements.set(newProcurement.id, newProcurement);
+    return newProcurement;
+  }
+
+  async updateProcurement(id: number, procurement: Partial<Procurement>): Promise<Procurement | undefined> {
+    const existing = this.procurements.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...procurement };
+    this.procurements.set(id, updated);
+    return updated;
   }
 }
 

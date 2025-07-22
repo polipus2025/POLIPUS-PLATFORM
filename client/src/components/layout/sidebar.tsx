@@ -7,19 +7,28 @@ import {
   Tag, 
   FileText, 
   Plus, 
-  Settings 
+  Users,
+  Calendar,
+  Package,
+  ShoppingCart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Commodities", href: "/commodities", icon: Leaf },
-  { name: "Regional Compliance", href: "/regional", icon: MapPin },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
-  { name: "Settings", href: "/settings", icon: Settings },
+];
+
+const farmManagementNavigation = [
+  { name: "Farmer Onboarding", href: "/farmers", icon: Users },
+  { name: "Farm Plot Mapping", href: "/farm-plots", icon: MapPin },
+  { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
+  { name: "Input Management", href: "/input-management", icon: Package },
+  { name: "Procurement", href: "/procurement", icon: ShoppingCart },
 ];
 
 export default function Sidebar() {
@@ -28,28 +37,63 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto">
       <nav className="p-6">
-        <ul className="space-y-2">
-          {navigation.map((item) => {
-            const isActive = location === item.href;
-            return (
-              <li key={item.name}>
-                <Link href={item.href}>
-                  <a
-                    className={cn(
-                      "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
-                      isActive
-                        ? "text-lacra-blue bg-blue-50"
-                        : "text-gray-600 hover:bg-gray-50"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
-                  </a>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {/* Regulatory Compliance Section */}
+        <div className="mb-8">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            Regulatory Compliance
+          </h3>
+          <ul className="space-y-2">
+            {navigation.map((item) => {
+              const isActive = location === item.href;
+              return (
+                <li key={item.name}>
+                  <Link href={item.href}>
+                    <a
+                      className={cn(
+                        "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                        isActive
+                          ? "text-lacra-blue bg-blue-50"
+                          : "text-gray-600 hover:bg-gray-50"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </a>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/* Farm Management Platform Section */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            Farm Management Platform
+          </h3>
+          <ul className="space-y-2">
+            {farmManagementNavigation.map((item) => {
+              const isActive = location === item.href;
+              return (
+                <li key={item.name}>
+                  <Link href={item.href}>
+                    <a
+                      className={cn(
+                        "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                        isActive
+                          ? "text-lacra-green bg-green-50"
+                          : "text-gray-600 hover:bg-gray-50"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </a>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </nav>
     </aside>
   );

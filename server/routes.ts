@@ -6,7 +6,13 @@ import {
   insertInspectionSchema, 
   insertCertificationSchema,
   insertAlertSchema,
-  insertReportSchema
+  insertReportSchema,
+  insertFarmerSchema,
+  insertFarmPlotSchema,
+  insertCropPlanSchema,
+  insertHarvestRecordSchema,
+  insertInputDistributionSchema,
+  insertProcurementSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -301,6 +307,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create report" });
+    }
+  });
+
+  // Farm Management Platform Routes
+  
+  // Farmer routes
+  app.get("/api/farmers", async (req, res) => {
+    try {
+      const { county } = req.query;
+      let farmers;
+      
+      if (county) {
+        farmers = await storage.getFarmersByCounty(county as string);
+      } else {
+        farmers = await storage.getFarmers();
+      }
+      
+      res.json(farmers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch farmers" });
+    }
+  });
+
+  app.get("/api/farmers/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const farmer = await storage.getFarmer(id);
+      
+      if (!farmer) {
+        return res.status(404).json({ message: "Farmer not found" });
+      }
+      
+      res.json(farmer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch farmer" });
+    }
+  });
+
+  app.post("/api/farmers", async (req, res) => {
+    try {
+      const validatedData = insertFarmerSchema.parse(req.body);
+      const farmer = await storage.createFarmer(validatedData);
+      res.status(201).json(farmer);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create farmer" });
+    }
+  });
+
+  // Farm Plot routes
+  app.get("/api/farm-plots", async (req, res) => {
+    try {
+      const { farmerId } = req.query;
+      let farmPlots;
+      
+      if (farmerId) {
+        farmPlots = await storage.getFarmPlotsByFarmer(parseInt(farmerId as string));
+      } else {
+        farmPlots = await storage.getFarmPlots();
+      }
+      
+      res.json(farmPlots);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch farm plots" });
+    }
+  });
+
+  app.post("/api/farm-plots", async (req, res) => {
+    try {
+      const validatedData = insertFarmPlotSchema.parse(req.body);
+      const farmPlot = await storage.createFarmPlot(validatedData);
+      res.status(201).json(farmPlot);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create farm plot" });
+    }
+  });
+
+  // Crop Plan routes
+  app.get("/api/crop-plans", async (req, res) => {
+    try {
+      const { farmerId, year, season } = req.query;
+      let cropPlans;
+      
+      if (farmerId) {
+        cropPlans = await storage.getCropPlansByFarmer(parseInt(farmerId as string));
+      } else if (year && season) {
+        cropPlans = await storage.getCropPlansBySeason(parseInt(year as string), season as string);
+      } else {
+        cropPlans = await storage.getCropPlans();
+      }
+      
+      res.json(cropPlans);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch crop plans" });
+    }
+  });
+
+  app.post("/api/crop-plans", async (req, res) => {
+    try {
+      const validatedData = insertCropPlanSchema.parse(req.body);
+      const cropPlan = await storage.createCropPlan(validatedData);
+      res.status(201).json(cropPlan);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create crop plan" });
+    }
+  });
+
+  // Input Distribution routes
+  app.get("/api/input-distributions", async (req, res) => {
+    try {
+      const { farmerId, inputType } = req.query;
+      let inputDistributions;
+      
+      if (farmerId) {
+        inputDistributions = await storage.getInputDistributionsByFarmer(parseInt(farmerId as string));
+      } else if (inputType) {
+        inputDistributions = await storage.getInputDistributionsByType(inputType as string);
+      } else {
+        inputDistributions = await storage.getInputDistributions();
+      }
+      
+      res.json(inputDistributions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch input distributions" });
+    }
+  });
+
+  app.post("/api/input-distributions", async (req, res) => {
+    try {
+      const validatedData = insertInputDistributionSchema.parse(req.body);
+      const inputDistribution = await storage.createInputDistribution(validatedData);
+      res.status(201).json(inputDistribution);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create input distribution" });
+    }
+  });
+
+  // Procurement routes
+  app.get("/api/procurements", async (req, res) => {
+    try {
+      const { farmerId, status } = req.query;
+      let procurements;
+      
+      if (farmerId) {
+        procurements = await storage.getProcurementsByFarmer(parseInt(farmerId as string));
+      } else if (status) {
+        procurements = await storage.getProcurementsByStatus(status as string);
+      } else {
+        procurements = await storage.getProcurements();
+      }
+      
+      res.json(procurements);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch procurements" });
+    }
+  });
+
+  app.post("/api/procurements", async (req, res) => {
+    try {
+      const validatedData = insertProcurementSchema.parse(req.body);
+      const procurement = await storage.createProcurement(validatedData);
+      res.status(201).json(procurement);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create procurement" });
     }
   });
 

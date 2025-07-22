@@ -11,6 +11,11 @@ import Inspections from "@/pages/inspections";
 import Certifications from "@/pages/certifications";
 import Reports from "@/pages/reports";
 import DataEntry from "@/pages/data-entry";
+import Farmers from "@/pages/farmers";
+import FarmPlots from "@/pages/farm-plots";
+import CropPlanning from "@/pages/crop-planning";
+import InputManagement from "@/pages/input-management";
+import Procurement from "@/pages/procurement";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +27,11 @@ function Router() {
       <Route path="/certifications" component={Certifications} />
       <Route path="/reports" component={Reports} />
       <Route path="/data-entry" component={DataEntry} />
+      <Route path="/farmers" component={Farmers} />
+      <Route path="/farm-plots" component={FarmPlots} />
+      <Route path="/crop-planning" component={CropPlanning} />
+      <Route path="/input-management" component={InputManagement} />
+      <Route path="/procurement" component={Procurement} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -6,6 +6,8 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 
 ### Recent Updates (January 2025)
 - **EUDR Compliance Integration**: Added EU Deforestation Regulation (EUDR) compliance dashboard with comprehensive monitoring, risk assessment, and documentation features
+- **Complete Liberian Cash Crops**: Integrated all major cash crops that can be grown in Liberia (20 commodity types) with quality grades and proper categorization
+- **All 15 Counties**: Full integration of all Liberian counties in dropdown selectors and compliance tracking
 - **Farm Management Platform**: Complete integration of farmer onboarding, plot mapping, crop planning, input management, and procurement modules
 - **Enhanced Navigation**: Dual-section navigation supporting both regulatory compliance and farm management workflows
 

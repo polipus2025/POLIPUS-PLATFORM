@@ -144,7 +144,7 @@ export default function Dashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
                             <h4 className="font-semibold mb-2">Commodity Breakdown</h4>
-                            <div className="space-y-2">
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
                               <div className="flex justify-between">
                                 <span>Cocoa</span>
                                 <Badge variant="default">92% Compliant</Badge>
@@ -160,6 +160,22 @@ export default function Dashboard() {
                               <div className="flex justify-between">
                                 <span>Rubber</span>
                                 <Badge variant="default">95% Compliant</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Cashew</span>
+                                <Badge variant="default">87% Compliant</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Rice</span>
+                                <Badge variant="secondary">74% Compliant</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Cassava</span>
+                                <Badge variant="default">91% Compliant</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Kola Nut</span>
+                                <Badge variant="default">88% Compliant</Badge>
                               </div>
                             </div>
                           </div>

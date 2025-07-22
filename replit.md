@@ -4,6 +4,11 @@
 
 AgriTrace360™ is a comprehensive web application designed for the Liberia Agriculture Commodity Regulatory Authority (LACRA) to manage and monitor agricultural commodity compliance across different counties. The system provides real-time tracking of commodities, inspections, certifications, and compliance metrics through an intuitive dashboard interface.
 
+### Recent Updates (January 2025)
+- **EUDR Compliance Integration**: Added EU Deforestation Regulation (EUDR) compliance dashboard with comprehensive monitoring, risk assessment, and documentation features
+- **Farm Management Platform**: Complete integration of farmer onboarding, plot mapping, crop planning, input management, and procurement modules
+- **Enhanced Navigation**: Dual-section navigation supporting both regulatory compliance and farm management workflows
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -43,10 +48,12 @@ The application follows a modern full-stack architecture pattern with clear sepa
 6. **Users**: System user management
 
 ### Frontend Components
-- **Dashboard**: Real-time metrics, compliance charts, and regional overviews
+- **Dashboard**: Real-time metrics, compliance charts, regional overviews, and EUDR compliance monitoring
+- **EUDR Compliance**: Comprehensive EU Deforestation Regulation compliance dashboard with risk assessments, documentation tracking, and automated alerts
+- **Farm Management Platform**: Complete suite of farmer onboarding, plot mapping, crop planning, input management, and procurement tools
 - **Data Entry Forms**: Commodity registration, inspection recording, certification issuance
 - **Data Tables**: Filterable and searchable lists for all data entities
-- **Navigation**: Sidebar navigation with active state management
+- **Navigation**: Dual-section sidebar navigation with regulatory compliance and farm management modules
 
 ### API Structure
 - **Dashboard endpoints**: `/api/dashboard/*` for metrics and analytics

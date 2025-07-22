@@ -9,12 +9,13 @@ import SystemAlerts from "@/components/dashboard/system-alerts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Download, Shield, TreePine, FileCheck, AlertTriangle } from "lucide-react";
+import { Download, Shield, TreePine, FileCheck, AlertTriangle, Building2, CheckCircle, Clock, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const [isEudrDialogOpen, setIsEudrDialogOpen] = useState(false);
+  const [selectedExporter, setSelectedExporter] = useState<string>("all");
 
   // Sample EUDR compliance data
   const eudrMetrics = {
@@ -24,6 +25,96 @@ export default function Dashboard() {
     deforestationFree: 1156,
     complianceRate: 87.3,
     pendingVerifications: 158
+  };
+
+  // Sample exporter data
+  const exporters = [
+    {
+      id: "EXP-001",
+      name: "Liberian Coffee Corporation",
+      type: "Coffee",
+      complianceStatus: "compliant",
+      licensesValid: true,
+      lastInspection: "2024-12-15",
+      nextDeadline: "2025-01-15",
+      documentsStatus: "complete",
+      riskLevel: "low"
+    },
+    {
+      id: "EXP-002", 
+      name: "West African Cocoa Traders",
+      type: "Cocoa",
+      complianceStatus: "pending",
+      licensesValid: true,
+      lastInspection: "2024-12-10", 
+      nextDeadline: "2024-12-30",
+      documentsStatus: "missing",
+      riskLevel: "medium"
+    },
+    {
+      id: "EXP-003",
+      name: "Firestone Natural Rubber Company",
+      type: "Rubber", 
+      complianceStatus: "compliant",
+      licensesValid: true,
+      lastInspection: "2024-12-12",
+      nextDeadline: "2025-02-12",
+      documentsStatus: "complete",
+      riskLevel: "low"
+    },
+    {
+      id: "EXP-004",
+      name: "Golden Veroleum Liberia",
+      type: "Palm Oil",
+      complianceStatus: "non-compliant",
+      licensesValid: false,
+      lastInspection: "2024-11-20",
+      nextDeadline: "2024-12-25",
+      documentsStatus: "incomplete",
+      riskLevel: "high"
+    },
+    {
+      id: "EXP-005",
+      name: "Liberian Rice Development Company",
+      type: "Rice",
+      complianceStatus: "compliant",
+      licensesValid: true,
+      lastInspection: "2024-12-08",
+      nextDeadline: "2025-01-08", 
+      documentsStatus: "complete",
+      riskLevel: "low"
+    }
+  ];
+
+  const getFilteredExporters = () => {
+    if (selectedExporter === "all") return exporters;
+    return exporters.filter(exp => exp.id === selectedExporter);
+  };
+
+  const getComplianceStatusBadge = (status: string) => {
+    switch (status) {
+      case "compliant":
+        return <Badge className="bg-green-100 text-green-800">Compliant</Badge>;
+      case "pending":
+        return <Badge className="bg-yellow-100 text-yellow-800">Pending Review</Badge>;
+      case "non-compliant":
+        return <Badge className="bg-red-100 text-red-800">Non-Compliant</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
+    }
+  };
+
+  const getRiskLevelBadge = (level: string) => {
+    switch (level) {
+      case "low":
+        return <Badge className="bg-green-100 text-green-800">Low Risk</Badge>;
+      case "medium":
+        return <Badge className="bg-yellow-100 text-yellow-800">Medium Risk</Badge>;
+      case "high":
+        return <Badge className="bg-red-100 text-red-800">High Risk</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
+    }
   };
 
   return (
@@ -327,6 +418,150 @@ export default function Dashboard() {
       <div className="mb-6">
         <MetricsCards />
       </div>
+
+      {/* Exporter Compliance Tracking */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-lacra-blue" />
+              Exporter Compliance Management
+            </CardTitle>
+            <Select value={selectedExporter} onValueChange={setSelectedExporter}>
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder="Select Exporter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Exporters ({exporters.length})</SelectItem>
+                {exporters.map((exporter) => (
+                  <SelectItem key={exporter.id} value={exporter.id}>
+                    {exporter.name} - {exporter.type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {getFilteredExporters().map((exporter) => (
+              <div key={exporter.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-semibold text-lg">{exporter.name}</h3>
+                    <p className="text-sm text-gray-600">ID: {exporter.id} • {exporter.type} Exporter</p>
+                  </div>
+                  <div className="flex gap-2">
+                    {getComplianceStatusBadge(exporter.complianceStatus)}
+                    {getRiskLevelBadge(exporter.riskLevel)}
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="flex items-center gap-2">
+                    {exporter.licensesValid ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className="text-sm">
+                      Licenses: {exporter.licensesValid ? 'Valid' : 'Invalid'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {exporter.documentsStatus === 'complete' ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : exporter.documentsStatus === 'missing' ? (
+                      <XCircle className="h-4 w-4 text-red-600" />
+                    ) : (
+                      <Clock className="h-4 w-4 text-yellow-600" />
+                    )}
+                    <span className="text-sm">
+                      Documents: {exporter.documentsStatus === 'complete' ? 'Complete' : 
+                                 exporter.documentsStatus === 'missing' ? 'Missing' : 'Incomplete'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm">
+                      Last Inspection: {new Date(exporter.lastInspection).toLocaleDateString()}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className={`h-4 w-4 ${
+                      new Date(exporter.nextDeadline) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
+                        ? 'text-red-600' : 'text-blue-600'
+                    }`} />
+                    <span className="text-sm">
+                      Next Deadline: {new Date(exporter.nextDeadline).toLocaleDateString()}
+                      {new Date(exporter.nextDeadline) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && 
+                        <span className="text-red-600 font-medium"> (Due Soon!)</span>
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mt-4">
+                  <Button size="sm" variant="outline" className="text-lacra-blue border-lacra-blue hover:bg-blue-50">
+                    <FileCheck className="h-4 w-4 mr-1" />
+                    View Details
+                  </Button>
+                  {exporter.complianceStatus === 'non-compliant' && (
+                    <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Urgent Action Required
+                    </Button>
+                  )}
+                  {exporter.complianceStatus === 'pending' && (
+                    <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
+                      <Clock className="h-4 w-4 mr-1" />
+                      Review Pending
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline" className="text-lacra-green border-lacra-green hover:bg-green-50">
+                    <Download className="h-4 w-4 mr-1" />
+                    Download Certificate
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Summary Stats */}
+          <div className="mt-6 pt-4 border-t">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {exporters.filter(e => e.complianceStatus === 'compliant').length}
+                </div>
+                <div className="text-sm text-gray-600">Compliant Exporters</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {exporters.filter(e => e.complianceStatus === 'pending').length}
+                </div>
+                <div className="text-sm text-gray-600">Pending Review</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">
+                  {exporters.filter(e => e.complianceStatus === 'non-compliant').length}
+                </div>
+                <div className="text-sm text-gray-600">Non-Compliant</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {exporters.filter(e => new Date(e.nextDeadline) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).length}
+                </div>
+                <div className="text-sm text-gray-600">Due Soon</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Charts and Regional Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

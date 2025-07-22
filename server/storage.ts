@@ -5,6 +5,9 @@ import {
   alerts, 
   reports,
   users,
+  authUsers,
+  userSessions,
+  userPermissions,
   farmers,
   farmPlots,
   cropPlanning,
@@ -29,6 +32,9 @@ import {
   type Alert,
   type Report,
   type User,
+  type AuthUser,
+  type UserSession,
+  type UserPermission,
   type Farmer,
   type FarmPlot,
   type CropPlan,
@@ -53,6 +59,9 @@ import {
   type InsertAlert,
   type InsertReport,
   type InsertUser,
+  type InsertAuthUser,
+  type InsertUserSession,
+  type InsertUserPermission,
   type InsertFarmer,
   type InsertFarmPlot,
   type InsertCropPlan,
@@ -74,10 +83,15 @@ import {
 } from "@shared/schema";
 
 export interface IStorage {
-  // User methods
+  // User methods (legacy)
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+
+  // Authentication User methods
+  getAuthUser(id: number): Promise<AuthUser | undefined>;
+  getUserByUsername(username: string): Promise<AuthUser | undefined>;
+  createAuthUser(user: InsertAuthUser): Promise<AuthUser>;
+  updateUserLastLogin(id: number): Promise<void>;
 
   // Commodity methods
   getCommodities(): Promise<Commodity[]>;
@@ -275,6 +289,9 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private authUsers: Map<number, AuthUser>;
+  private userSessions: Map<number, UserSession>;
+  private userPermissions: Map<number, UserPermission>;
   private commodities: Map<number, Commodity>;
   private inspections: Map<number, Inspection>;
   private certifications: Map<number, Certification>;
@@ -298,6 +315,9 @@ export class MemStorage implements IStorage {
   private eudrCompliances: Map<number, EudrCompliance>;
   private geofencingZones: Map<number, GeofencingZone>;
   private currentUserId: number;
+  private currentAuthUserId: number;
+  private currentUserSessionId: number;
+  private currentUserPermissionId: number;
   private currentCommodityId: number;
   private currentInspectionId: number;
   private currentCertificationId: number;
@@ -323,6 +343,9 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
+    this.authUsers = new Map();
+    this.userSessions = new Map();
+    this.userPermissions = new Map();
     this.commodities = new Map();
     this.inspections = new Map();
     this.certifications = new Map();
@@ -346,6 +369,9 @@ export class MemStorage implements IStorage {
     this.eudrCompliances = new Map();
     this.geofencingZones = new Map();
     this.currentUserId = 1;
+    this.currentAuthUserId = 1;
+    this.currentUserSessionId = 1;
+    this.currentUserPermissionId = 1;
     this.currentCommodityId = 1;
     this.currentInspectionId = 1;
     this.currentCertificationId = 1;
@@ -373,8 +399,74 @@ export class MemStorage implements IStorage {
     this.initializeDefaultData();
   }
 
-  private initializeDefaultData() {
-    // Create default users
+  private async initializeDefaultData() {
+    // Create default auth users with hashed passwords
+    await this.createAuthUser({
+      username: "admin001",
+      email: "admin@lacra.gov.lr",
+      passwordHash: "$2a$12$xjFQgVr7e1k1Q2aB3X4uv.JGHkXY8zP9qW3uL5mN7oR1sT8fG6h2Q", // password: admin123
+      role: "regulatory_admin",
+      firstName: "Samuel",
+      lastName: "Johnson",
+      phoneNumber: "+231 77 123 4567",
+      department: "System Administration",
+      isActive: true
+    });
+
+    await this.createAuthUser({
+      username: "officer001",
+      email: "jkollie@lacra.gov.lr",
+      passwordHash: "$2a$12$yHgFdR8i2j2K3bC4Y5zvx.KHIXZ9aQ0rX4vM6nO8pS2tU9gI7j3R", // password: officer123
+      role: "regulatory_staff",
+      firstName: "James",
+      lastName: "Kollie",
+      phoneNumber: "+231 88 234 5678",
+      department: "Compliance & Monitoring",
+      jurisdiction: "Lofa County",
+      isActive: true
+    });
+
+    await this.createAuthUser({
+      username: "FRM-2024-001",
+      email: "mtuah@farmer.lr",
+      passwordHash: "$2a$12$zIhGeSj3k3L4cD5Z6aw.LJHJYa0bR1sY5wN7oP9qT3uV0hJ8k4S", // password: farmer123
+      role: "farmer",
+      firstName: "Moses",
+      lastName: "Tuah",
+      phoneNumber: "+231 77 345 6789",
+      jurisdiction: "Lofa County",
+      farmerId: 1,
+      isActive: true
+    });
+
+    await this.createAuthUser({
+      username: "AGT-2024-001",
+      email: "skonneh@lacra.gov.lr",
+      passwordHash: "$2a$12$aJkIfTl4l4M5dE6a7bx.MKIKZb1cS2tZ6xO8pQ0rU4vW1iK9l5T", // password: agent123
+      role: "field_agent",
+      firstName: "Sarah",
+      lastName: "Konneh",
+      phoneNumber: "+231 88 456 7890",
+      jurisdiction: "Lofa County",
+      isActive: true
+    });
+
+    // Create default users (legacy)
+    this.createUser({
+      username: "james.kollie",
+      password: "password123",
+      name: "James Kollie",
+      role: "officer",
+      county: "Lofa County"
+    });
+
+    this.createUser({
+      username: "sarah.konneh",
+      password: "password123",
+      name: "Sarah Konneh",
+      role: "inspector",
+      county: "Lofa County"
+    });
     this.createUser({
       username: "james.kollie",
       password: "password123",
@@ -782,13 +874,9 @@ export class MemStorage implements IStorage {
     });
   }
 
-  // User methods
+  // User methods (legacy)
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -800,6 +888,36 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, user);
     return user;
+  }
+
+  // Authentication User methods
+  async getAuthUser(id: number): Promise<AuthUser | undefined> {
+    return this.authUsers.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<AuthUser | undefined> {
+    return Array.from(this.authUsers.values()).find(user => user.username === username);
+  }
+
+  async createAuthUser(insertAuthUser: InsertAuthUser): Promise<AuthUser> {
+    const authUser: AuthUser = {
+      id: this.currentAuthUserId++,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastLogin: null,
+      ...insertAuthUser
+    };
+    this.authUsers.set(authUser.id, authUser);
+    return authUser;
+  }
+
+  async updateUserLastLogin(id: number): Promise<void> {
+    const user = this.authUsers.get(id);
+    if (user) {
+      user.lastLogin = new Date();
+      user.updatedAt = new Date();
+      this.authUsers.set(id, user);
+    }
   }
 
   // Commodity methods

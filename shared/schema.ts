@@ -241,7 +241,44 @@ export type InsertAlert = z.infer<typeof insertAlertSchema>;
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = z.infer<typeof insertReportSchema>;
 
-// User schema (keeping existing)
+// Authentication and User Management System
+export const authUsers = pgTable("auth_users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull(), // regulatory_admin, regulatory_staff, field_agent, farmer
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  phoneNumber: text("phone_number"),
+  department: text("department"), // for regulatory staff
+  jurisdiction: text("jurisdiction"), // county/district for field agents
+  farmerId: integer("farmer_id").references(() => farmers.id), // linked farmer account
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => authUsers.id).notNull(),
+  sessionToken: text("session_token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userPermissions = pgTable("user_permissions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => authUsers.id).notNull(),
+  permission: text("permission").notNull(), // read_commodities, write_commodities, manage_farmers, etc.
+  grantedBy: integer("granted_by").references(() => authUsers.id),
+  grantedAt: timestamp("granted_at").defaultNow(),
+});
+
+// User schema (keeping existing for backward compatibility)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -272,6 +309,32 @@ export type InsertFarmPlot = z.infer<typeof insertFarmPlotSchema>;
 export type InsertCropPlan = z.infer<typeof insertCropPlanSchema>;
 export type InsertHarvestRecord = z.infer<typeof insertHarvestRecordSchema>;
 export type InsertInputDistribution = z.infer<typeof insertInputDistributionSchema>;
+
+// Authentication insert schemas
+export const insertAuthUserSchema = createInsertSchema(authUsers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserPermissionSchema = createInsertSchema(userPermissions).omit({
+  id: true,
+  grantedAt: true,
+});
+
+// Authentication types
+export type AuthUser = typeof authUsers.$inferSelect;
+export type UserSession = typeof userSessions.$inferSelect;
+export type UserPermission = typeof userPermissions.$inferSelect;
+
+export type InsertAuthUser = z.infer<typeof insertAuthUserSchema>;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+export type InsertUserPermission = z.infer<typeof insertUserPermissionSchema>;
 
 
 // Analytics and Audit System Tables

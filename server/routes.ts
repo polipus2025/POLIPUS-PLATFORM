@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { 
   insertCommoditySchema, 
   insertInspectionSchema, 
@@ -24,11 +27,284 @@ import {
   insertFarmGpsMappingSchema,
   insertDeforestationMonitoringSchema,
   insertEudrComplianceSchema,
-  insertGeofencingZoneSchema
+  insertGeofencingZoneSchema,
+  insertAuthUserSchema
 } from "@shared/schema";
 import { z } from "zod";
 
+// JWT Secret - in production, this should be in environment variables
+const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
+
+// Middleware to verify JWT tokens
+const authenticateToken = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token == null) {
+    return res.status(401).json({ message: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) {
+      return res.status(403).json({ message: 'Invalid or expired token' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Authentication routes
+  app.post("/api/auth/regulatory-login", async (req, res) => {
+    try {
+      const { username, password, role, department, userType } = req.body;
+      
+      // Validate input
+      if (!username || !password || !role) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, password, and role are required" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Verify role permissions
+      if (user.role !== role || (role !== 'regulatory_admin' && role !== 'regulatory_staff')) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Access denied for this role" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          username: user.username, 
+          role: user.role,
+          userType: 'regulatory'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          department: user.department
+        }
+      });
+
+    } catch (error) {
+      console.error('Regulatory login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.post("/api/auth/farmer-login", async (req, res) => {
+    try {
+      const { farmerId, password, county, phoneNumber, userType } = req.body;
+      
+      // Validate input
+      if (!farmerId || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Farmer ID and password are required" 
+        });
+      }
+
+      // Check if user exists - farmers use farmerId as username
+      const user = await storage.getUserByUsername(farmerId);
+      if (!user || user.role !== 'farmer') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid farmer credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid farmer credentials" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          farmerId: user.farmerId, 
+          role: user.role,
+          userType: 'farmer'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          farmerId: user.farmerId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          jurisdiction: user.jurisdiction
+        }
+      });
+
+    } catch (error) {
+      console.error('Farmer login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.post("/api/auth/field-agent-login", async (req, res) => {
+    try {
+      const { agentId, password, jurisdiction, phoneNumber, userType } = req.body;
+      
+      // Validate input
+      if (!agentId || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Agent ID and password are required" 
+        });
+      }
+
+      // Check if user exists - field agents use agentId as username
+      const user = await storage.getUserByUsername(agentId);
+      if (!user || user.role !== 'field_agent') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid field agent credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid field agent credentials" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          agentId: agentId, 
+          role: user.role,
+          userType: 'field_agent',
+          jurisdiction: user.jurisdiction
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          jurisdiction: user.jurisdiction
+        }
+      });
+
+    } catch (error) {
+      console.error('Field agent login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  app.post("/api/auth/register", authenticateToken, async (req, res) => {
+    try {
+      // Only regulatory admins can register new users
+      if (req.user.role !== 'regulatory_admin') {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Only administrators can register new users" 
+        });
+      }
+
+      const validatedData = insertAuthUserSchema.parse(req.body);
+      
+      // Hash password
+      const passwordHash = await bcrypt.hash(validatedData.passwordHash, 12);
+      
+      const userData = {
+        ...validatedData,
+        passwordHash
+      };
+
+      const user = await storage.createAuthUser(userData);
+      res.status(201).json({ success: true, user });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      } else {
+        console.error('User registration error:', error);
+        res.status(500).json({ 
+          success: false, 
+          message: "Failed to register user" 
+        });
+      }
+    }
+  });
+
   // Dashboard routes
   app.get("/api/dashboard/metrics", async (req, res) => {
     try {

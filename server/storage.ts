@@ -689,6 +689,97 @@ export class MemStorage implements IStorage {
       agreementSigned: false,
       agreementDate: null
     });
+
+    // Create sample export certificates
+    this.createCertification({
+      certificateNumber: "EXP-CERT-2024-001",
+      commodityId: 1, // Coffee
+      certificateType: "export",
+      exporterName: "Liberia Premium Coffee Exports Ltd",
+      exporterLicense: "LIC-EXP-2024-0123",
+      destinationCountry: "Germany",
+      destinationPort: "Hamburg",
+      quantity: "2500",
+      unit: "kg",
+      issuedDate: new Date("2024-12-01"),
+      expiryDate: new Date("2025-03-01"),
+      status: "active",
+      certificationBody: "LACRA Export Certification Division",
+      inspectionDate: new Date("2024-11-28"),
+      notes: "Grade A Arabica coffee beans, fully compliant with EU standards and EUDR requirements."
+    });
+
+    this.createCertification({
+      certificateNumber: "EXP-CERT-2024-002",
+      commodityId: 2, // Cocoa
+      certificateType: "export",
+      exporterName: "West Africa Cocoa Trading Company",
+      exporterLicense: "LIC-EXP-2024-0456",
+      destinationCountry: "Netherlands",
+      destinationPort: "Amsterdam",
+      quantity: "1800",
+      unit: "kg",
+      issuedDate: new Date("2024-12-10"),
+      expiryDate: new Date("2025-06-10"),
+      status: "active",
+      certificationBody: "LACRA Export Certification Division",
+      inspectionDate: new Date("2024-12-08"),
+      notes: "Premium cocoa beans with quality grade A certification for chocolate manufacturing."
+    });
+
+    this.createCertification({
+      certificateNumber: "EXP-CERT-2024-003",
+      commodityId: 3, // Rubber
+      certificateType: "export",
+      exporterName: "Liberian Rubber Exporters Association",
+      exporterLicense: "LIC-EXP-2024-0789",
+      destinationCountry: "Malaysia",
+      destinationPort: "Port Klang",
+      quantity: "5000",
+      unit: "kg",
+      issuedDate: new Date("2024-11-15"),
+      expiryDate: new Date("2025-02-15"),
+      status: "active",
+      certificationBody: "LACRA Export Certification Division",
+      inspectionDate: new Date("2024-11-12"),
+      notes: "Grade 1 natural rubber latex meeting international quality standards."
+    });
+
+    this.createCertification({
+      certificateNumber: "QUA-CERT-2024-004",
+      commodityId: 4, // Rice
+      certificateType: "quality",
+      exporterName: "Bong County Rice Cooperative",
+      exporterLicense: "LIC-QUA-2024-0321",
+      destinationCountry: "Sierra Leone",
+      destinationPort: "Freetown",
+      quantity: "3200",
+      unit: "kg",
+      issuedDate: new Date("2024-12-05"),
+      expiryDate: new Date("2025-01-05"),
+      status: "active",
+      certificationBody: "LACRA Quality Assurance Department",
+      inspectionDate: new Date("2024-12-03"),
+      notes: "Premium quality jasmine rice certified for regional export."
+    });
+
+    this.createCertification({
+      certificateNumber: "EXP-CERT-2024-005",
+      commodityId: 1, // Coffee (expired certificate)
+      certificateType: "export",
+      exporterName: "Mountain View Coffee Estates",
+      exporterLicense: "LIC-EXP-2024-0654",
+      destinationCountry: "United States",
+      destinationPort: "New York",
+      quantity: "1200",
+      unit: "kg",
+      issuedDate: new Date("2024-08-01"),
+      expiryDate: new Date("2024-11-01"),
+      status: "expired",
+      certificationBody: "LACRA Export Certification Division",
+      inspectionDate: new Date("2024-07-28"),
+      notes: "Certificate expired - renewal required for continued export operations."
+    });
   }
 
   // User methods

@@ -459,6 +459,101 @@ export class MemStorage implements IStorage {
       qualityGrade: "Premium",
       status: "certified"
     });
+
+    // Create sample reports for testing
+    this.createReport({
+      reportId: "RPT-2024-001",
+      title: "Monthly Commodity Compliance Report - December 2024",
+      type: "compliance",
+      dateRange: "2024-12-01 to 2024-12-31",
+      generatedBy: "James Kollie",
+      department: "LACRA Compliance",
+      summary: "Comprehensive compliance analysis for all commodities exported in December 2024",
+      data: JSON.stringify({
+        totalCommodities: 156,
+        compliantCommodities: 142,
+        nonCompliantCommodities: 14,
+        complianceRate: "91.0%",
+        topCounties: ["Lofa County", "Grand Gedeh County", "Margibi County"],
+        criticalIssues: ["Missing documentation", "Quality grade discrepancies"]
+      }),
+      status: "published"
+    });
+
+    this.createReport({
+      reportId: "RPT-2024-002", 
+      title: "EUDR Compliance Assessment Report",
+      type: "eudr_compliance",
+      dateRange: "2024-Q4",
+      generatedBy: "Sarah Konneh",
+      department: "LACRA Environmental Compliance",
+      summary: "EU Deforestation Regulation compliance status for all agricultural exports",
+      data: JSON.stringify({
+        totalFarms: 89,
+        compliantFarms: 76,
+        nonCompliantFarms: 13,
+        deforestationAlerts: 5,
+        riskLevel: "Medium",
+        counties: ["Lofa County", "Bong County", "Nimba County"]
+      }),
+      status: "draft"
+    });
+
+    this.createReport({
+      reportId: "RPT-2024-003",
+      title: "Government Integration Sync Status Report", 
+      type: "government_sync",
+      dateRange: "2024-12-01 to 2024-12-31",
+      generatedBy: "System Administrator",
+      department: "LACRA IT Operations",
+      summary: "Status of synchronization with LRA, MOA, and Customs agencies",
+      data: JSON.stringify({
+        lraSyncs: 45,
+        moaSyncs: 42, 
+        customsSyncs: 38,
+        successRate: "94.2%",
+        failedSyncs: 7,
+        averageSyncTime: "2.3 seconds"
+      }),
+      status: "published"
+    });
+
+    this.createReport({
+      reportId: "RPT-2024-004",
+      title: "Quarterly Export Performance Analysis",
+      type: "export_analysis", 
+      dateRange: "2024-Q4",
+      generatedBy: "Maria Johnson",
+      department: "LACRA Trade Statistics",
+      summary: "Analysis of export volumes, values, and trends for Q4 2024",
+      data: JSON.stringify({
+        totalExports: "125,000 MT",
+        exportValue: "$45.2M USD",
+        topCommodities: ["Coffee", "Cocoa", "Rubber"],
+        topDestinations: ["EU", "USA", "Regional"],
+        growthRate: "+12.5%"
+      }),
+      status: "published"
+    });
+
+    this.createReport({
+      reportId: "RPT-2024-005",
+      title: "Farm GPS Mapping Coverage Report",
+      type: "gps_mapping",
+      dateRange: "2024-12-31",
+      generatedBy: "GPS Survey Team",
+      department: "LACRA Field Operations", 
+      summary: "Current status of GPS mapping coverage across all registered farms",
+      data: JSON.stringify({
+        totalFarms: 234,
+        mappedFarms: 187,
+        coverageRate: "79.9%",
+        totalAreaMapped: "15,847 hectares",
+        pendingMappings: 47,
+        averageAccuracy: "High"
+      }),
+      status: "published"
+    });
   }
 
   // User methods

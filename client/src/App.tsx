@@ -64,12 +64,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           
           {/* Exporter Portal Routes */}
-          <Route path="/exporter-dashboard">
-            <ProtectedRoute 
-              component={ExporterDashboard} 
-              allowedUserTypes={['exporter']} 
-            />
-          </Route>
+          <Route path="/exporter-dashboard" component={ExporterDashboard} />
           
           {/* Regulatory Staff Only Routes */}
           <Route path="/commodities">

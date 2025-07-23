@@ -17,10 +17,15 @@ export async function apiRequest(
 ): Promise<any> {
   const { method = 'GET', body, headers = {} } = options || {};
   
+  // Add authorization header if token exists
+  const token = localStorage.getItem('token');
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+  
   const res = await fetch(url, {
     method,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders,
       ...headers,
     },
     body,
@@ -28,6 +33,13 @@ export async function apiRequest(
   });
 
   await throwIfResNotOk(res);
+  
+  // Check if response is HTML instead of JSON
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('text/html')) {
+    throw new Error('Received HTML response instead of JSON - possible authentication issue');
+  }
+  
   return await res.json();
 }
 
@@ -37,7 +49,15 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Add authorization header if token exists
+    const token = localStorage.getItem('token');
+    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+    
     const res = await fetch(queryKey.join("/") as string, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders,
+      },
       credentials: "include",
     });
 
@@ -46,6 +66,13 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
+    
+    // Check if response is HTML instead of JSON
+    const contentType = res.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      throw new Error('Received HTML response instead of JSON - possible authentication issue');
+    }
+    
     return await res.json();
   };
 

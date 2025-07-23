@@ -34,21 +34,46 @@ export default function ExporterDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch dashboard data
-  const { data: exportOrders = [] } = useQuery({
+  // Handle authentication check
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/exporter-login';
+    return null;
+  }
+
+  // Fetch user data first
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+
+  // Fetch dashboard data with proper error handling
+  const { data: exportOrders = [], isLoading: ordersLoading, error: ordersError } = useQuery({
     queryKey: ['/api/export-orders'],
+    enabled: !!user && !userLoading,
+    retry: 1,
+    onError: (error: any) => {
+      console.error('Export orders fetch error:', error);
+      if (error.message?.includes('<!DOCTYPE')) {
+        toast({
+          title: 'Connection Issue',
+          description: 'Please refresh the page and try again.',
+          variant: 'destructive',
+        });
+      }
+    },
   });
 
   const { data: commodities = [] } = useQuery({
     queryKey: ['/api/commodities'],
+    enabled: !!user && !userLoading,
+    retry: 1,
   });
 
   const { data: farmers = [] } = useQuery({
     queryKey: ['/api/farmers'],
-  });
-
-  const { data: user } = useQuery({
-    queryKey: ['/api/auth/user'],
+    enabled: !!user && !userLoading,
+    retry: 1,
   });
 
   // Dashboard metrics
@@ -59,10 +84,18 @@ export default function ExporterDashboard() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      return await apiRequest('/api/export-orders', {
-        method: 'POST',
-        body: JSON.stringify(orderData),
-      });
+      try {
+        return await apiRequest('/api/export-orders', {
+          method: 'POST',
+          body: JSON.stringify(orderData),
+        });
+      } catch (error: any) {
+        console.error('Create order error:', error);
+        if (error.message?.includes('<!DOCTYPE')) {
+          throw new Error('Connection issue - please refresh and try again');
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/export-orders'] });
@@ -70,6 +103,13 @@ export default function ExporterDashboard() {
       toast({
         title: 'Export Order Created',
         description: 'New export order has been submitted for LACRA approval.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error Creating Order',
+        description: error.message || 'Failed to create export order',
+        variant: 'destructive',
       });
     },
   });

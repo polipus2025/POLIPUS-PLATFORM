@@ -1,0 +1,398 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  MapPin, 
+  Search, 
+  Layers, 
+  Satellite, 
+  Map as MapIcon, 
+  Navigation,
+  Target,
+  Ruler,
+  Filter,
+  Download,
+  Eye,
+  EyeOff
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+
+interface MapLayer {
+  id: string;
+  name: string;
+  type: 'farms' | 'commodities' | 'transportation' | 'counties' | 'compliance';
+  visible: boolean;
+  color: string;
+}
+
+interface GISLocation {
+  id: string;
+  name: string;
+  type: string;
+  coordinates: [number, number];
+  properties: Record<string, any>;
+}
+
+export default function InteractiveMap() {
+  const [mapLayers, setMapLayers] = useState<MapLayer[]>([
+    { id: 'counties', name: 'County Boundaries', type: 'counties', visible: true, color: '#3B82F6' },
+    { id: 'farms', name: 'Farm Plots', type: 'farms', visible: true, color: '#10B981' },
+    { id: 'commodities', name: 'Commodity Locations', type: 'commodities', visible: true, color: '#F59E0B' },
+    { id: 'transportation', name: 'Transportation Routes', type: 'transportation', visible: false, color: '#EF4444' },
+    { id: 'compliance', name: 'Compliance Zones', type: 'compliance', visible: false, color: '#8B5CF6' }
+  ]);
+
+  const [selectedCounty, setSelectedCounty] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [mapView, setMapView] = useState<'satellite' | 'terrain' | 'roads'>('satellite');
+  const [measureMode, setMeasureMode] = useState<boolean>(false);
+
+  const { data: gisData = [] } = useQuery<GISLocation[]>({
+    queryKey: ['/api/gis/locations', selectedCounty],
+  });
+
+  const liberianCounties = [
+    'Bomi County', 'Bong County', 'Gbarpolu County', 'Grand Bassa County',
+    'Grand Cape Mount County', 'Grand Gedeh County', 'Grand Kru County',
+    'Lofa County', 'Margibi County', 'Maryland County', 'Montserrado County',
+    'Nimba County', 'River Cess County', 'River Gee County', 'Sinoe County'
+  ];
+
+  const toggleLayer = (layerId: string) => {
+    setMapLayers(prev => prev.map(layer => 
+      layer.id === layerId ? { ...layer, visible: !layer.visible } : layer
+    ));
+  };
+
+  const exportMapData = () => {
+    const visibleLayers = mapLayers.filter(layer => layer.visible);
+    const exportData = {
+      layers: visibleLayers,
+      view: mapView,
+      county: selectedCounty,
+      timestamp: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gis-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">GIS Mapping System</h2>
+          <p className="text-gray-600">Interactive geospatial analysis and monitoring</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant={measureMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMeasureMode(!measureMode)}
+          >
+            <Ruler className="h-4 w-4 mr-2" />
+            Measure
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportMapData}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-4 gap-6">
+        {/* Map Controls */}
+        <div className="lg:col-span-1 space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                Map Controls
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* County Filter */}
+              <div>
+                <Label htmlFor="county-select">County Filter</Label>
+                <Select value={selectedCounty} onValueChange={setSelectedCounty}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Counties" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Counties</SelectItem>
+                    {liberianCounties.map(county => (
+                      <SelectItem key={county} value={county}>{county}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Search */}
+              <div>
+                <Label htmlFor="search">Search Location</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="search"
+                    placeholder="Search farms, facilities..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Map View Toggle */}
+              <div>
+                <Label>Map View</Label>
+                <div className="grid grid-cols-3 gap-1 mt-2">
+                  <Button
+                    variant={mapView === 'satellite' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMapView('satellite')}
+                  >
+                    <Satellite className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={mapView === 'terrain' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMapView('terrain')}
+                  >
+                    <MapIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={mapView === 'roads' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMapView('roads')}
+                  >
+                    <Navigation className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Layer Controls */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Layers className="h-5 w-5" />
+                Map Layers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {mapLayers.map(layer => (
+                  <div key={layer.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: layer.color }}
+                      />
+                      <span className="text-sm font-medium">{layer.name}</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleLayer(layer.id)}
+                    >
+                      {layer.visible ? (
+                        <Eye className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Legend */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Legend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full" />
+                  <span>Active Farms</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+                  <span>Processing Centers</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full" />
+                  <span>Export Points</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 border-2 border-blue-700 rounded-full" />
+                  <span>Inspection Sites</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full" />
+                  <span>Compliance Zones</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Map Area */}
+        <div className="lg:col-span-3">
+          <Card className="h-[700px]">
+            <CardContent className="p-0 h-full relative">
+              {/* Map Container */}
+              <div className="w-full h-full bg-gradient-to-br from-green-100 to-blue-100 rounded-lg relative overflow-hidden">
+                
+                {/* Map Overlay - Simulated Liberia Map */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative">
+                    {/* Liberia Outline */}
+                    <svg width="600" height="400" viewBox="0 0 600 400" className="opacity-80">
+                      <defs>
+                        <pattern id="farmPattern" patternUnits="userSpaceOnUse" width="10" height="10">
+                          <circle cx="5" cy="5" r="2" fill="#10B981" opacity="0.6" />
+                        </pattern>
+                        <pattern id="transportPattern" patternUnits="userSpaceOnUse" width="20" height="4">
+                          <rect width="20" height="2" fill="#EF4444" opacity="0.7" />
+                        </pattern>
+                      </defs>
+                      
+                      {/* Liberia Country Outline */}
+                      <path
+                        d="M50 200 L150 180 L280 160 L350 140 L420 150 L480 170 L520 200 L550 250 L530 300 L480 340 L400 360 L300 350 L200 340 L120 320 L80 280 Z"
+                        fill={mapView === 'satellite' ? '#4ADE80' : mapView === 'terrain' ? '#84CC16' : '#F3F4F6'}
+                        stroke="#374151"
+                        strokeWidth="2"
+                        opacity="0.8"
+                      />
+                      
+                      {/* County Boundaries */}
+                      {mapLayers.find(l => l.id === 'counties')?.visible && (
+                        <g>
+                          <line x1="150" y1="180" x2="200" y2="250" stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" />
+                          <line x1="280" y1="160" x2="300" y2="220" stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" />
+                          <line x1="350" y1="140" x2="380" y2="200" stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" />
+                          <line x1="420" y1="150" x2="450" y2="210" stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" />
+                        </g>
+                      )}
+                      
+                      {/* Farm Plots */}
+                      {mapLayers.find(l => l.id === 'farms')?.visible && (
+                        <g>
+                          <circle cx="180" cy="200" r="8" fill="#10B981" />
+                          <circle cx="250" cy="180" r="6" fill="#10B981" />
+                          <circle cx="320" cy="190" r="7" fill="#10B981" />
+                          <circle cx="380" cy="220" r="5" fill="#10B981" />
+                          <circle cx="450" cy="240" r="6" fill="#10B981" />
+                          <circle cx="200" cy="280" r="4" fill="#10B981" />
+                          <circle cx="300" cy="270" r="5" fill="#10B981" />
+                        </g>
+                      )}
+                      
+                      {/* Commodity Processing Centers */}
+                      {mapLayers.find(l => l.id === 'commodities')?.visible && (
+                        <g>
+                          <rect x="240" y="170" width="12" height="12" fill="#F59E0B" rx="2" />
+                          <rect x="340" y="200" width="10" height="10" fill="#F59E0B" rx="2" />
+                          <rect x="420" y="230" width="14" height="14" fill="#F59E0B" rx="2" />
+                          <rect x="280" y="290" width="10" height="10" fill="#F59E0B" rx="2" />
+                        </g>
+                      )}
+                      
+                      {/* Transportation Routes */}
+                      {mapLayers.find(l => l.id === 'transportation')?.visible && (
+                        <g>
+                          <path d="M180 200 Q250 180 320 190 Q380 220 450 240" stroke="#EF4444" strokeWidth="3" fill="none" />
+                          <path d="M200 280 Q250 275 300 270 Q350 265 400 260" stroke="#EF4444" strokeWidth="3" fill="none" />
+                          <path d="M100 250 Q200 240 300 230 Q400 220 500 210" stroke="#EF4444" strokeWidth="2" fill="none" strokeDasharray="5,5" />
+                        </g>
+                      )}
+                      
+                      {/* Compliance Zones */}
+                      {mapLayers.find(l => l.id === 'compliance')?.visible && (
+                        <g>
+                          <circle cx="300" cy="200" r="50" fill="#8B5CF6" opacity="0.2" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="4,4" />
+                          <circle cx="400" cy="250" r="40" fill="#8B5CF6" opacity="0.2" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="4,4" />
+                        </g>
+                      )}
+                      
+                      {/* Location Labels */}
+                      <text x="100" y="190" fill="#374151" fontSize="12" fontWeight="bold">Monrovia</text>
+                      <text x="200" y="170" fill="#374151" fontSize="10">Lofa County</text>
+                      <text x="350" y="130" fill="#374151" fontSize="10">Nimba County</text>
+                      <text x="480" y="160" fill="#374151" fontSize="10">Grand Gedeh</text>
+                      <text x="450" y="340" fill="#374151" fontSize="10">Maryland County</text>
+                      
+                      {/* Scale */}
+                      <g transform="translate(470, 350)">
+                        <line x1="0" y1="0" x2="50" y2="0" stroke="#374151" strokeWidth="2" />
+                        <line x1="0" y1="-3" x2="0" y2="3" stroke="#374151" strokeWidth="2" />
+                        <line x1="50" y1="-3" x2="50" y2="3" stroke="#374151" strokeWidth="2" />
+                        <text x="25" y="-8" textAnchor="middle" fill="#374151" fontSize="10">50km</text>
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Map Controls Overlay */}
+                <div className="absolute top-4 right-4 flex flex-col gap-2">
+                  <Button size="sm" variant="secondary">
+                    <Target className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="secondary">
+                    <MapPin className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Coordinates Display */}
+                <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-2 rounded text-sm">
+                  <div className="flex gap-4">
+                    <span>Lat: 6.428°N</span>
+                    <span>Lon: 9.429°W</span>
+                    <span>Zoom: {mapView === 'satellite' ? '12' : '10'}</span>
+                  </div>
+                </div>
+
+                {/* Active Layers Info */}
+                <div className="absolute top-4 left-4 bg-white/90 px-3 py-2 rounded">
+                  <div className="flex gap-2 flex-wrap">
+                    {mapLayers.filter(layer => layer.visible).map(layer => (
+                      <Badge key={layer.id} variant="secondary" className="text-xs">
+                        {layer.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Measurement Tools */}
+                {measureMode && (
+                  <div className="absolute bottom-4 right-4 bg-white/90 px-3 py-2 rounded">
+                    <div className="text-sm">
+                      <div>Distance: 12.4 km</div>
+                      <div>Area: 148.7 hectares</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

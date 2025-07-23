@@ -523,33 +523,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
         liveUpdates: [
           {
             vehicleId: "TRK-LR-001",
-            timestamp: new Date(Date.now() - 2 * 60000).toISOString(),
-            event: "status_update",
-            description: "Arrived at Buchanan Port - QR Scanned",
-            location: "Buchanan Port",
-            checkpoint: "BP-001"
+            driverName: "John Kpelle",
+            coordinates: [6.3077, -10.8077],
+            status: "active",
+            speed: 45,
+            heading: 270,
+            lastUpdate: "2 min ago",
+            route: "Monrovia-Lofa",
+            cargo: "Coffee - 2.5 tons",
+            destination: "Buchanan Port",
+            eta: "1 hr 15 min"
           },
           {
             vehicleId: "TRK-LR-002",
-            timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-            event: "checkpoint_arrival",
-            description: "Reached Gbarnga Checkpoint - Documents verified",
-            location: "Gbarnga Checkpoint",
-            checkpoint: "GC-003"
+            driverName: "Mary Kollie",
+            coordinates: [7.0000, -9.4833],
+            status: "idle",
+            speed: 0,
+            heading: 180,
+            lastUpdate: "15 min ago",
+            route: "Port-Processing",
+            cargo: "Cocoa - 3.2 tons",
+            destination: "Voinjama",
+            eta: "2 hr 30 min"
           },
           {
             vehicleId: "TRK-LR-003",
-            timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
-            event: "loading_complete",
-            description: "Finished loading at Farm PLT-2024-001",
-            location: "Farm PLT-2024-001", 
-            checkpoint: "FM-001"
+            driverName: "Samuel Harris",
+            coordinates: [6.3133, -10.8074],
+            status: "maintenance",
+            speed: 0,
+            heading: 90,
+            lastUpdate: "45 min ago",
+            route: "Farm-Market",
+            cargo: "Palm Oil - 1.8 tons",
+            destination: "Monrovia",
+            eta: "3 hr 45 min"
+          },
+          {
+            vehicleId: "TRK-LR-004",
+            driverName: "James Dolo",
+            coordinates: [5.8817, -10.0464],
+            status: "active",
+            speed: 38,
+            heading: 45,
+            lastUpdate: "5 min ago",
+            route: "Export-Route",
+            cargo: "Rubber - 4.1 tons",
+            destination: "Port of Monrovia",
+            eta: "45 min"
           }
         ]
       };
       res.json(vehicleTracking);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch vehicle tracking data" });
+    }
+  });
+
+  // GIS Mapping endpoints
+  app.get('/api/gis/locations', async (req, res) => {
+    try {
+      const county = req.query.county as string;
+      const locations = [
+        {
+          id: "farm-001",
+          name: "Kollie Family Farm",
+          type: "farm",
+          coordinates: [6.4281, -9.4295],
+          properties: { cropType: "Coffee", area: "12.5 ha", owner: "John Kollie" }
+        },
+        {
+          id: "processing-001",
+          name: "Central Processing Center",
+          type: "processing",
+          coordinates: [6.3077, -10.8077],
+          properties: { capacity: "500 tons/month", commodities: ["Coffee", "Cocoa"] }
+        },
+        {
+          id: "export-001",
+          name: "Port of Monrovia",
+          type: "export",
+          coordinates: [6.3009, -10.7969],
+          properties: { type: "Seaport", capacity: "10000 TEU" }
+        }
+      ];
+      
+      const filteredLocations = county ? 
+        locations.filter(loc => loc.properties.county === county) : 
+        locations;
+      
+      res.json(filteredLocations);
+    } catch (error) {
+      console.error("Error fetching GIS locations:", error);
+      res.status(500).json({ message: "Failed to fetch GIS locations" });
+    }
+  });
+
+  app.get('/api/farm-plots/:farmerId?', async (req, res) => {
+    try {
+      const farmerId = req.params.farmerId;
+      const plots = [
+        {
+          id: 1,
+          farmerId: "FRM-001",
+          plotName: "North Coffee Plot",
+          coordinates: [[6.4281, -9.4295], [6.4285, -9.4290], [6.4280, -9.4285], [6.4276, -9.4290]],
+          area: 12.5,
+          cropType: "Coffee",
+          soilType: "Loamy",
+          elevation: 450,
+          slope: 15,
+          waterSource: "Stream",
+          accessRoad: true,
+          notes: "High quality arabica coffee plantation with good drainage"
+        },
+        {
+          id: 2,
+          farmerId: "FRM-001",
+          plotName: "South Cocoa Plot",
+          coordinates: [[6.4270, -9.4300], [6.4275, -9.4295], [6.4270, -9.4290], [6.4265, -9.4295]],
+          area: 8.3,
+          cropType: "Cocoa",
+          soilType: "Clay",
+          elevation: 380,
+          slope: 8,
+          waterSource: "Well",
+          accessRoad: true,
+          notes: "Premium cocoa with excellent fermentation facilities"
+        }
+      ];
+      
+      const filteredPlots = farmerId ? 
+        plots.filter(plot => plot.farmerId === farmerId) : 
+        plots;
+      
+      res.json(filteredPlots);
+    } catch (error) {
+      console.error("Error fetching farm plots:", error);
+      res.status(500).json({ message: "Failed to fetch farm plots" });
+    }
+  });
+
+  app.post('/api/farm-plots', async (req, res) => {
+    try {
+      // In a real implementation, this would save to database
+      const plot = {
+        id: Date.now(),
+        ...req.body,
+        createdAt: new Date()
+      };
+      res.json(plot);
+    } catch (error) {
+      console.error("Error creating farm plot:", error);
+      res.status(500).json({ message: "Failed to create farm plot" });
+    }
+  });
+
+  app.patch('/api/farm-plots/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const plot = {
+        id,
+        ...req.body,
+        updatedAt: new Date()
+      };
+      res.json(plot);
+    } catch (error) {
+      console.error("Error updating farm plot:", error);
+      res.status(500).json({ message: "Failed to update farm plot" });
+    }
+  });
+
+  app.delete('/api/farm-plots/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      // In a real implementation, this would delete from database
+      res.json({ success: true, message: `Farm plot ${id} deleted` });
+    } catch (error) {
+      console.error("Error deleting farm plot:", error);
+      res.status(500).json({ message: "Failed to delete farm plot" });
+    }
+  });
+
+  app.get('/api/transportation/routes', async (req, res) => {
+    try {
+      const routes = [
+        {
+          id: "route-001",
+          name: "Monrovia-Lofa Coffee Route",
+          waypoints: [[6.3077, -10.8077], [6.8000, -9.5000], [7.0000, -9.4833]],
+          totalDistance: 280,
+          estimatedTime: 360,
+          checkpoints: ["Monrovia Central", "Gbarnga Junction", "Voinjama Terminal"]
+        },
+        {
+          id: "route-002",
+          name: "Port Processing Route",
+          waypoints: [[6.3009, -10.7969], [6.3077, -10.8077], [6.4281, -9.4295]],
+          totalDistance: 120,
+          estimatedTime: 180,
+          checkpoints: ["Port of Monrovia", "Processing Center", "Farm Collection"]
+        }
+      ];
+      res.json(routes);
+    } catch (error) {
+      console.error("Error fetching transportation routes:", error);
+      res.status(500).json({ message: "Failed to fetch transportation routes" });
     }
   });
 

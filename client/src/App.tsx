@@ -23,6 +23,7 @@ import CropPlanning from "@/pages/crop-planning";
 
 import GovernmentIntegration from "@/pages/government-integration";
 import GpsMapping from "@/pages/gps-mapping";
+import GISMapping from "@/pages/gis-mapping";
 import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
@@ -137,6 +138,12 @@ function Router() {
             <ProtectedRoute 
               component={GpsMapping} 
               allowedUserTypes={['farmer', 'field_agent']} 
+            />
+          </Route>
+          <Route path="/gis-mapping">
+            <ProtectedRoute 
+              component={GISMapping} 
+              allowedUserTypes={['regulatory', 'farmer', 'field_agent']} 
             />
           </Route>
           <Route path="/batch-code-generator">

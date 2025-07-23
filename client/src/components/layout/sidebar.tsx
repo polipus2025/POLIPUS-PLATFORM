@@ -13,7 +13,8 @@ import {
   Satellite,
   Shield,
   QrCode,
-  Globe
+  Globe,
+  Map
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ const regulatoryNavigation = [
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Document Verification", href: "/verification", icon: Shield },
+  { name: "GIS Mapping System", href: "/gis-mapping", icon: Map },
   { name: "Government Integration", href: "/government-integration", icon: Building2 },
   { name: "International Standards", href: "/international-standards", icon: Globe },
   { name: "Reports", href: "/reports", icon: FileText },
@@ -49,6 +51,7 @@ const farmerNavigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
   { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
+  { name: "GIS Mapping System", href: "/gis-mapping", icon: Map },
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
@@ -62,6 +65,7 @@ const fieldAgentNavigation = [
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Farmer Onboarding", href: "/farmers", icon: Users },
   { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
+  { name: "GIS Mapping System", href: "/gis-mapping", icon: Map },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
 ];
 

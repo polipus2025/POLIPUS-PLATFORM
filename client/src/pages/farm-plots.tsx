@@ -251,7 +251,7 @@ export default function FarmPlotsPage() {
                                 plot.status === 'fallow' ? "secondary" : "destructive"
                               }
                             >
-                              {plot.status.charAt(0).toUpperCase() + plot.status.slice(1)}
+                              {plot.status ? plot.status.charAt(0).toUpperCase() + plot.status.slice(1) : 'Unknown'}
                             </Badge>
                           </td>
                           <td className="py-3 px-4">

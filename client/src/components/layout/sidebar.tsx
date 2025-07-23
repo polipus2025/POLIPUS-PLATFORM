@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 // Helper function to check user role and type
 const getUserInfo = () => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token') || localStorage.getItem('authToken');
   const userType = localStorage.getItem('userType');
   if (!token) return { role: null, userType: null };
   
@@ -60,16 +60,14 @@ const farmerNavigation = [
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
-// Field Agent Navigation - Inspection and verification focused
+// Field Agent Navigation - Territory-limited inspection and verification
 const fieldAgentNavigation = [
-  { name: "Dashboard", href: "/", icon: BarChart3 },
-  { name: "Commodities", href: "/commodities", icon: Leaf },
-  { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
+  { name: "Field Operations", href: "/", icon: BarChart3 },
+  { name: "Territory Inspections", href: "/inspections", icon: ClipboardCheck },
+  { name: "Farmer Registration", href: "/farmers", icon: Users },
+  { name: "GPS Territory Mapping", href: "/gps-mapping", icon: Satellite },
   { name: "Document Verification", href: "/verification", icon: Shield },
-  { name: "Farmer Onboarding", href: "/farmers", icon: Users },
-  { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
-  { name: "GIS Mapping System", href: "/gis-mapping", icon: Map },
-  { name: "Data Entry", href: "/data-entry", icon: Plus },
+  { name: "Mobile Data Entry", href: "/data-entry", icon: Plus },
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 

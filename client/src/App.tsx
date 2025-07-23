@@ -30,6 +30,7 @@ import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
 import OfflineSync from "@/pages/offline-sync";
+import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import NotFound from "@/pages/not-found";
 
 // Helper component to check user access to routes
@@ -62,9 +63,13 @@ function Router() {
       {/* Protected Routes - Require Authentication */}
       {authToken && userType ? (
         <>
-          {/* Dashboard - Available to all authenticated users */}
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/" component={Dashboard} />
+          {/* Dashboard - Role-based routing */}
+          <Route path="/dashboard">
+            {userType === 'field_agent' ? <FieldAgentDashboard /> : <Dashboard />}
+          </Route>
+          <Route path="/">
+            {userType === 'field_agent' ? <FieldAgentDashboard /> : <Dashboard />}
+          </Route>
           
           {/* Regulatory Staff Only Routes */}
           <Route path="/commodities">

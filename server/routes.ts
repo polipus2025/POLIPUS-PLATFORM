@@ -1135,10 +1135,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Inspection routes
+  // Inspection routes with jurisdiction filtering
   app.get("/api/inspections", async (req, res) => {
     try {
-      const { commodityId, inspectorId } = req.query;
+      const { commodityId, inspectorId, jurisdiction } = req.query;
       let inspections;
       
       if (commodityId) {
@@ -1147,6 +1147,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         inspections = await storage.getInspectionsByInspector(inspectorId as string);
       } else {
         inspections = await storage.getInspections();
+      }
+      
+      // Filter by jurisdiction for field agents
+      if (jurisdiction) {
+        inspections = inspections.filter(i => i.jurisdiction === jurisdiction);
       }
       
       res.json(inspections);
@@ -1342,6 +1347,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmers = await storage.getFarmersByCounty(county as string);
       } else {
         farmers = await storage.getFarmers();
+      }
+      
+      res.json(farmers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch farmers" });
+    }
+  });
+
+  // Farmer routes with jurisdiction filtering
+  app.get("/api/farmers", async (req, res) => {
+    try {
+      const { county, jurisdiction } = req.query;
+      let farmers = await storage.getFarmers();
+      
+      // Filter by county/jurisdiction for field agents
+      if (county) {
+        farmers = farmers.filter(f => f.county === county);
+      } else if (jurisdiction) {
+        farmers = farmers.filter(f => f.county === jurisdiction);
       }
       
       res.json(farmers);

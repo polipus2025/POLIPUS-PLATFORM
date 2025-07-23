@@ -18,17 +18,49 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navigation = [
+// Helper function to check user role
+const getUserRole = () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) return null;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role;
+  } catch {
+    return null;
+  }
+};
+
+// Base navigation items
+const baseNavigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Commodities", href: "/commodities", icon: Leaf },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Government Integration", href: "/government-integration", icon: Building2 },
-  { name: "International Standards", href: "/international-standards", icon: Globe },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
 ];
+
+// Admin/Staff only navigation items
+const adminStaffNavigation = [
+  { name: "International Standards", href: "/international-standards", icon: Globe },
+];
+
+// Function to get navigation items based on user role
+const getNavigationItems = (userRole: string | null) => {
+  const navigation = [...baseNavigation];
+  
+  // Add admin/staff only items for authorized users
+  if (userRole === 'regulatory_admin' || userRole === 'regulatory_staff') {
+    // Insert International Standards before Reports
+    const reportsIndex = navigation.findIndex(item => item.name === "Reports");
+    navigation.splice(reportsIndex, 0, ...adminStaffNavigation);
+  }
+  
+  return navigation;
+};
 
 const farmManagementNavigation = [
   { name: "Farmer Onboarding", href: "/farmers", icon: Users },
@@ -41,6 +73,7 @@ const farmManagementNavigation = [
 
 export default function Sidebar() {
   const [location] = useLocation();
+  const userRole = getUserRole();
 
   return (
     <aside className="w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto">
@@ -51,7 +84,7 @@ export default function Sidebar() {
             Regulatory Compliance
           </h3>
           <ul className="space-y-2">
-            {navigation.map((item) => {
+            {getNavigationItems(userRole).map((item) => {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>

@@ -1360,8 +1360,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // International Standards routes
-  app.get('/api/international-standards', async (req, res) => {
+  // Role validation middleware for international standards
+  const checkAdminStaffRole = (req: any, res: any, next: any) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    try {
+      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+      const userRole = payload.role;
+      
+      if (userRole !== 'regulatory_admin' && userRole !== 'regulatory_staff') {
+        return res.status(403).json({ 
+          message: 'Access denied. This resource is restricted to LACRA administrators and staff only.' 
+        });
+      }
+      
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+  };
+
+  // International Standards routes (protected)
+  app.get('/api/international-standards', checkAdminStaffRole, async (req, res) => {
     try {
       const { standardType, organizationName } = req.query;
       let standards;
@@ -1381,7 +1404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/international-standards/overview', async (req, res) => {
+  app.get('/api/international-standards/overview', checkAdminStaffRole, async (req, res) => {
     try {
       const standards = await storage.getInternationalStandards();
       const compliance = await storage.getStandardsCompliance();
@@ -1408,7 +1431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/international-standards/:id', async (req, res) => {
+  app.get('/api/international-standards/:id', checkAdminStaffRole, async (req, res) => {
     try {
       const standard = await storage.getInternationalStandard(parseInt(req.params.id));
       if (!standard) {
@@ -1421,7 +1444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/international-standards', async (req, res) => {
+  app.post('/api/international-standards', checkAdminStaffRole, async (req, res) => {
     try {
       const validatedData = insertInternationalStandardSchema.parse(req.body);
       const standard = await storage.createInternationalStandard(validatedData);
@@ -1432,7 +1455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/international-standards/:id/sync', async (req, res) => {
+  app.post('/api/international-standards/:id/sync', checkAdminStaffRole, async (req, res) => {
     try {
       const standardId = parseInt(req.params.id);
       
@@ -1451,8 +1474,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Standards Compliance routes
-  app.get('/api/standards-compliance', async (req, res) => {
+  // Standards Compliance routes (protected)
+  app.get('/api/standards-compliance', checkAdminStaffRole, async (req, res) => {
     try {
       const { commodityId, standardId, status } = req.query;
       let compliance;
@@ -1474,7 +1497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/standards-compliance', async (req, res) => {
+  app.post('/api/standards-compliance', checkAdminStaffRole, async (req, res) => {
     try {
       const validatedData = insertCommodityStandardsComplianceSchema.parse(req.body);
       const compliance = await storage.createStandardsCompliance(validatedData);
@@ -1485,7 +1508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/commodities/:id/check-standards-compliance', async (req, res) => {
+  app.post('/api/commodities/:id/check-standards-compliance', checkAdminStaffRole, async (req, res) => {
     try {
       const commodityId = parseInt(req.params.id);
       
@@ -1513,8 +1536,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Standards API Integration routes
-  app.get('/api/standards-api-integrations', async (req, res) => {
+  // Standards API Integration routes (protected)
+  app.get('/api/standards-api-integrations', checkAdminStaffRole, async (req, res) => {
     try {
       const { standardId } = req.query;
       let integrations;
@@ -1532,7 +1555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/standards-api-integrations', async (req, res) => {
+  app.post('/api/standards-api-integrations', checkAdminStaffRole, async (req, res) => {
     try {
       const validatedData = insertStandardsApiIntegrationSchema.parse(req.body);
       const integration = await storage.createStandardsApiIntegration(validatedData);
@@ -1543,8 +1566,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Standards Sync Log routes
-  app.get('/api/standards-sync-logs', async (req, res) => {
+  // Standards Sync Log routes (protected)
+  app.get('/api/standards-sync-logs', checkAdminStaffRole, async (req, res) => {
     try {
       const { apiIntegrationId } = req.query;
       let logs;
@@ -1562,7 +1585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/standards-sync-logs', async (req, res) => {
+  app.post('/api/standards-sync-logs', checkAdminStaffRole, async (req, res) => {
     try {
       const validatedData = insertStandardsSyncLogSchema.parse(req.body);
       const log = await storage.createStandardsSyncLog(validatedData);

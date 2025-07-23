@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,67 @@ export default function InternationalStandards() {
   const [complianceFilter, setComplianceFilter] = useState<string>("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check user role for access control
+  const checkUserRole = () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role;
+    } catch {
+      return null;
+    }
+  };
+
+  const userRole = checkUserRole();
+
+  // Redirect unauthorized users
+  useEffect(() => {
+    if (!userRole || (userRole !== 'regulatory_admin' && userRole !== 'regulatory_staff')) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access this page. This section is restricted to LACRA administrators and staff only.",
+        variant: "destructive",
+      });
+      // Redirect to dashboard after a delay
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+      return;
+    }
+  }, [userRole, toast]);
+
+  // Don't render the page content for unauthorized users
+  if (!userRole || (userRole !== 'regulatory_admin' && userRole !== 'regulatory_staff')) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <Shield className="h-6 w-6 text-red-600" />
+            </div>
+            <CardTitle className="text-red-600">Access Restricted</CardTitle>
+            <CardDescription>
+              This page is only accessible to LACRA administrators and regulatory staff.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-sm text-gray-600 mb-4">
+              You will be redirected to the dashboard shortly.
+            </p>
+            <Button 
+              onClick={() => window.location.href = "/"}
+              className="w-full"
+            >
+              Return to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Fetch overview metrics
   const { data: overview } = useQuery<StandardsOverview>({

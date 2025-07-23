@@ -17,73 +17,87 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Helper function to check user role
-const getUserRole = () => {
+// Helper function to check user role and type
+const getUserInfo = () => {
   const token = localStorage.getItem('authToken');
-  if (!token) return null;
+  const userType = localStorage.getItem('userType');
+  if (!token) return { role: null, userType: null };
   
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.role;
+    return { role: payload.role, userType };
   } catch {
-    return null;
+    return { role: null, userType: null };
   }
 };
 
-// Base navigation items
-const baseNavigation = [
+// LACRA Officer/Regulatory Staff Navigation
+const regulatoryNavigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Commodities", href: "/commodities", icon: Leaf },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Government Integration", href: "/government-integration", icon: Building2 },
+  { name: "International Standards", href: "/international-standards", icon: Globe },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
 ];
 
-// Admin/Staff only navigation items
-const adminStaffNavigation = [
-  { name: "International Standards", href: "/international-standards", icon: Globe },
-];
-
-// Function to get navigation items based on user role
-const getNavigationItems = (userRole: string | null) => {
-  const navigation = [...baseNavigation];
-  
-  // Add admin/staff only items for authorized users
-  if (userRole === 'regulatory_admin' || userRole === 'regulatory_staff') {
-    // Insert International Standards before Reports
-    const reportsIndex = navigation.findIndex(item => item.name === "Reports");
-    navigation.splice(reportsIndex, 0, ...adminStaffNavigation);
-  }
-  
-  return navigation;
-};
-
-const farmManagementNavigation = [
-  { name: "Farmer Onboarding", href: "/farmers", icon: Users },
-  { name: "Farm Plot Mapping", href: "/farm-plots", icon: MapPin },
+// Farmer Navigation - Only farm management features
+const farmerNavigation = [
+  { name: "Dashboard", href: "/", icon: BarChart3 },
+  { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
   { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
-  { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
-  { name: "Certificate Verification", href: "/verification", icon: Shield },
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
+  { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
+  { name: "Document Verification", href: "/verification", icon: Shield },
 ];
+
+// Field Agent Navigation - Inspection and verification focused
+const fieldAgentNavigation = [
+  { name: "Dashboard", href: "/", icon: BarChart3 },
+  { name: "Commodities", href: "/commodities", icon: Leaf },
+  { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
+  { name: "Document Verification", href: "/verification", icon: Shield },
+  { name: "Farmer Onboarding", href: "/farmers", icon: Users },
+  { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
+  { name: "Data Entry", href: "/data-entry", icon: Plus },
+];
+
+// Function to get navigation items based on user type and role
+const getNavigationItems = (userType: string | null, role: string | null) => {
+  switch (userType) {
+    case 'regulatory':
+      return regulatoryNavigation;
+    case 'farmer':
+      return farmerNavigation;
+    case 'field_agent':
+      return fieldAgentNavigation;
+    default:
+      return regulatoryNavigation; // Default fallback
+  }
+};
 
 export default function Sidebar() {
   const [location] = useLocation();
-  const userRole = getUserRole();
+  const { role, userType } = getUserInfo();
+
+  // Get the appropriate navigation items based on user type
+  const navigationItems = getNavigationItems(userType, role);
 
   return (
     <aside className="w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto">
       <nav className="p-6">
-        {/* Regulatory Compliance Section */}
+        {/* Main Navigation Section */}
         <div className="mb-8">
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            Regulatory Compliance
+            {userType === 'farmer' ? 'Farm Management' : 
+             userType === 'field_agent' ? 'Field Operations' : 
+             'Regulatory Compliance'}
           </h3>
           <ul className="space-y-2">
-            {getNavigationItems(userRole).map((item) => {
+            {navigationItems.map((item) => {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
@@ -92,7 +106,11 @@ export default function Sidebar() {
                       className={cn(
                         "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
                         isActive
-                          ? "text-lacra-blue bg-blue-50"
+                          ? userType === 'farmer' 
+                            ? "text-green-700 bg-green-50"
+                            : userType === 'field_agent'
+                            ? "text-orange-700 bg-orange-50" 
+                            : "text-lacra-blue bg-blue-50"
                           : "text-gray-600 hover:bg-gray-50"
                       )}
                     >
@@ -106,33 +124,19 @@ export default function Sidebar() {
           </ul>
         </div>
 
-        {/* Farm Management Platform Section */}
-        <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            Farm Management Platform
-          </h3>
-          <ul className="space-y-2">
-            {farmManagementNavigation.map((item) => {
-              const isActive = location === item.href;
-              return (
-                <li key={item.name}>
-                  <Link href={item.href}>
-                    <a
-                      className={cn(
-                        "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
-                        isActive
-                          ? "text-lacra-green bg-green-50"
-                          : "text-gray-600 hover:bg-gray-50"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.name}</span>
-                    </a>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        {/* User Role Information */}
+        <div className="mt-8 pt-4 border-t border-gray-200">
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Current Role</div>
+          <div className="text-sm font-medium text-gray-700">
+            {userType === 'farmer' ? 'Farmer' : 
+             userType === 'field_agent' ? 'Field Agent' : 
+             'LACRA Officer'}
+          </div>
+          {role && (
+            <div className="text-xs text-gray-500 mt-1 capitalize">
+              {role.replace('_', ' ')}
+            </div>
+          )}
         </div>
       </nav>
     </aside>

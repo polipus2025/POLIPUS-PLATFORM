@@ -28,6 +28,17 @@ import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
 import NotFound from "@/pages/not-found";
 
+// Helper component to check user access to routes
+function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: any) {
+  const userType = localStorage.getItem("userType");
+  
+  if (!allowedUserTypes.includes(userType)) {
+    return <NotFound />;
+  }
+  
+  return <Component {...props} />;
+}
+
 function Router() {
   // Check if user is logged in and has valid role
   const authToken = localStorage.getItem("authToken");
@@ -43,25 +54,101 @@ function Router() {
       {/* Protected Routes - Require Authentication */}
       {authToken && userType ? (
         <>
+          {/* Dashboard - Available to all authenticated users */}
           <Route path="/dashboard" component={Dashboard} />
-          <Route path="/commodities" component={Commodities} />
-          <Route path="/inspections" component={Inspections} />
-          <Route path="/certifications" component={Certifications} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/analytics" component={Analytics} />
-          <Route path="/audit-system" component={AuditSystem} />
-          <Route path="/data-entry" component={DataEntry} />
-          <Route path="/farmers" component={Farmers} />
-          <Route path="/farm-plots" component={FarmPlots} />
-          <Route path="/crop-planning" component={CropPlanning} />
-          <Route path="/government-integration" component={GovernmentIntegration} />
-          <Route path="/gps-mapping" component={GpsMapping} />
-          <Route path="/international-standards" component={InternationalStandards} />
-          <Route path="/verification" component={Verification} />
-          <Route path="/batch-code-generator" component={BatchCodeGenerator} />
-          
-          {/* Redirect authenticated users to dashboard */}
           <Route path="/" component={Dashboard} />
+          
+          {/* Regulatory Staff Only Routes */}
+          <Route path="/commodities">
+            <ProtectedRoute 
+              component={Commodities} 
+              allowedUserTypes={['regulatory', 'field_agent']} 
+            />
+          </Route>
+          <Route path="/inspections">
+            <ProtectedRoute 
+              component={Inspections} 
+              allowedUserTypes={['regulatory', 'field_agent']} 
+            />
+          </Route>
+          <Route path="/certifications">
+            <ProtectedRoute 
+              component={Certifications} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          <Route path="/reports">
+            <ProtectedRoute 
+              component={Reports} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          <Route path="/analytics">
+            <ProtectedRoute 
+              component={Analytics} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          <Route path="/audit-system">
+            <ProtectedRoute 
+              component={AuditSystem} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          <Route path="/data-entry">
+            <ProtectedRoute 
+              component={DataEntry} 
+              allowedUserTypes={['regulatory', 'field_agent']} 
+            />
+          </Route>
+          <Route path="/government-integration">
+            <ProtectedRoute 
+              component={GovernmentIntegration} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          <Route path="/international-standards">
+            <ProtectedRoute 
+              component={InternationalStandards} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          
+          {/* Farmer & Field Agent Routes */}
+          <Route path="/farmers">
+            <ProtectedRoute 
+              component={Farmers} 
+              allowedUserTypes={['farmer', 'field_agent']} 
+            />
+          </Route>
+          <Route path="/farm-plots">
+            <ProtectedRoute 
+              component={FarmPlots} 
+              allowedUserTypes={['farmer', 'field_agent']} 
+            />
+          </Route>
+          <Route path="/crop-planning">
+            <ProtectedRoute 
+              component={CropPlanning} 
+              allowedUserTypes={['farmer']} 
+            />
+          </Route>
+          <Route path="/gps-mapping">
+            <ProtectedRoute 
+              component={GpsMapping} 
+              allowedUserTypes={['farmer', 'field_agent']} 
+            />
+          </Route>
+          <Route path="/batch-code-generator">
+            <ProtectedRoute 
+              component={BatchCodeGenerator} 
+              allowedUserTypes={['farmer']} 
+            />
+          </Route>
+          
+          {/* Document Verification - Available to all */}
+          <Route path="/verification" component={Verification} />
+          
         </>
       ) : (
         <>

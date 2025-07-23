@@ -76,19 +76,19 @@ export default function GpsMapping() {
 
   const createMappingMutation = useMutation({
     mutationFn: async (data: GpsFormData) => {
-      const payload = {
-        ...data,
-        farmerId: parseInt(data.farmerId),
-        farmPlotId: data.farmPlotId ? parseInt(data.farmPlotId) : null,
-        centerLatitude: data.centerLatitude,
-        centerLongitude: data.centerLongitude,
-        totalAreaHectares: data.totalAreaHectares,
-        elevationMeters: data.elevationMeters || null,
-        slope: data.slope || null,
-        soilType: data.soilType || null,
-        drainageStatus: data.drainageStatus || null,
-      };
-      return apiRequest('POST', '/api/farm-gps-mappings', payload);
+      return apiRequest('/api/farm-gps-mappings', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...data,
+          farmerId: parseInt(data.farmerId),
+          farmPlotId: data.farmPlotId ? parseInt(data.farmPlotId) : null,
+          centerLatitude: parseFloat(data.centerLatitude),
+          centerLongitude: parseFloat(data.centerLongitude),
+          totalAreaHectares: parseFloat(data.totalAreaHectares),
+          elevationMeters: data.elevationMeters ? parseFloat(data.elevationMeters) : null,
+          slope: data.slope ? parseFloat(data.slope) : null,
+        }),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/farm-gps-mappings'] });
@@ -99,7 +99,7 @@ export default function GpsMapping() {
         description: 'GPS mapping created successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error',
         description: error.message || 'Failed to create GPS mapping',
@@ -110,23 +110,29 @@ export default function GpsMapping() {
 
   const validateCoordinatesMutation = useMutation({
     mutationFn: async (coordinates: string) => {
-      return apiRequest('POST', '/api/gps/validate-coordinates', { coordinates });
+      return apiRequest('/api/gps/validate-coordinates', {
+        method: 'POST',
+        body: JSON.stringify({ coordinates }),
+      });
     },
-    onSuccess: (data: any) => {
-      if (data.valid) {
-        toast({
-          title: 'Valid Coordinates',
-          description: `Area: ${data.area.toFixed(2)} hectares`,
-        });
-      } else {
-        toast({
-          title: 'Invalid Coordinates',
-          description: data.issues.join(', '),
-          variant: 'destructive',
-        });
-      }
+    onSuccess: (data) => {
+      toast({
+        title: 'Coordinates Valid',
+        description: `Coordinates are valid. Area: ${data.calculatedArea} hectares`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Invalid Coordinates',
+        description: error.message || 'Coordinates format is invalid',
+        variant: 'destructive',
+      });
     },
   });
+
+  const onSubmit = (data: GpsFormData) => {
+    createMappingMutation.mutate(data);
+  };
 
   const handleValidateCoordinates = () => {
     const coordinates = form.getValues('coordinates');
@@ -136,42 +142,31 @@ export default function GpsMapping() {
   };
 
   const getComplianceStatus = (mappingId: number) => {
-    const compliance = eudrCompliances.find((c: any) => c.farmGpsMappingId === mappingId);
-    const deforestation = deforestationData.find((d: any) => d.farmGpsMappingId === mappingId);
-    
-    if (deforestation?.deforestationDetected) {
-      return { status: 'critical', label: 'Deforestation Detected', color: 'bg-red-500' };
+    const eudrCompliance = eudrCompliances.find((c: any) => c.mappingId === mappingId);
+    if (eudrCompliance?.complianceStatus === 'compliant') {
+      return { label: 'Compliant', color: 'bg-green-600' };
+    } else if (eudrCompliance?.complianceStatus === 'non_compliant') {
+      return { label: 'Non-Compliant', color: 'bg-red-600' };
+    } else {
+      return { label: 'Pending', color: 'bg-yellow-600' };
     }
-    if (compliance?.complianceStatus === 'compliant') {
-      return { status: 'compliant', label: 'EUDR Compliant', color: 'bg-green-500' };
-    }
-    if (compliance?.complianceStatus === 'non_compliant') {
-      return { status: 'non-compliant', label: 'Non-Compliant', color: 'bg-red-500' };
-    }
-    return { status: 'pending', label: 'Pending Review', color: 'bg-yellow-500' };
-  };
-
-  const onSubmit = (data: GpsFormData) => {
-    createMappingMutation.mutate(data);
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading GPS mappings...</p>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">GPS Farm Mapping System</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-gray-900">GPS Farm Mapping</h1>
+          <p className="text-gray-600 mt-2">
             Real-time GPS tracking and geofencing for agricultural plots with EUDR compliance monitoring
           </p>
         </div>
@@ -227,234 +222,6 @@ export default function GpsMapping() {
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="farmPlotId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Farm Plot (Optional)</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select farm plot" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {mockFarmPlots.map((plot) => (
-                            <SelectItem key={plot.id} value={plot.id.toString()}>
-                              {plot.plotName} - {plot.cropType}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="coordinates"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GPS Coordinates (JSON Format)</FormLabel>
-                      <FormControl>
-                        <div className="space-y-2">
-                          <Textarea 
-                            placeholder='[[-10.7969, 6.3133], [-10.7969, 6.3233], [-10.7869, 6.3233], [-10.7869, 6.3133]]'
-                            rows={4}
-                            {...field} 
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={handleValidateCoordinates}
-                            disabled={!field.value || validateCoordinatesMutation.isPending}
-                          >
-                            <Navigation className="mr-2 h-4 w-4" />
-                            Validate Coordinates
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="centerLatitude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Center Latitude</FormLabel>
-                        <FormControl>
-                          <Input placeholder="6.3183" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="centerLongitude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Center Longitude</FormLabel>
-                        <FormControl>
-                          <Input placeholder="-10.7919" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="totalAreaHectares"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Total Area (Hectares)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="5.25" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="boundaryType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Boundary Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="polygon">Polygon</SelectItem>
-                            <SelectItem value="circle">Circle</SelectItem>
-                            <SelectItem value="custom">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="mappingMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mapping Method</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="gps_survey">GPS Survey</SelectItem>
-                            <SelectItem value="satellite_imagery">Satellite Imagery</SelectItem>
-                            <SelectItem value="drone_mapping">Drone Mapping</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="accuracyLevel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Accuracy Level</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="high">High</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="low">Low</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="elevationMeters"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Elevation (meters)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="250" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="slope"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Slope (%)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="15" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="soilType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Soil Type</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Loamy soil" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="drainageStatus"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Drainage Status</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Well-drained" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
@@ -522,188 +289,202 @@ export default function GpsMapping() {
         </Card>
       </div>
 
-      {/* GPS Farm Mapping System Preview */}
-      <div className="mb-6">
-        <Card className="border-2 border-green-500">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Satellite className="h-6 w-6 text-green-600" />
-              🌍 Interactive GPS Farm Mapping System
-              <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">Live Preview</Badge>
-            </CardTitle>
-            <p className="text-sm text-gray-700 font-medium">
-              Real-time satellite mapping with GPS tracking, deforestation monitoring, and EUDR compliance visualization
-            </p>
-          </CardHeader>
-          <CardContent className="p-6">
-            {/* Main Map Display */}
+      {/* Interactive GPS Map */}
+      <Card className="border-2 border-green-500">
+        <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Satellite className="h-6 w-6 text-green-600" />
+            Interactive GPS Farm Mapping System
+            <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">Live Preview</Badge>
+          </CardTitle>
+          <p className="text-sm text-gray-700 font-medium">
+            Real-time satellite mapping with GPS tracking, deforestation monitoring, and EUDR compliance visualization
+          </p>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div 
+            className="relative rounded-xl border-4 border-solid border-green-600 overflow-hidden shadow-lg"
+            style={{ height: '500px' }}
+          >
+            {/* Map Background */}
             <div 
-              className="relative rounded-xl border-4 border-dashed border-green-600 overflow-hidden shadow-lg"
+              className="absolute inset-0"
               style={{
-                height: '500px',
-                background: 'linear-gradient(135deg, #dcfce7 0%, #dbeafe 100%)',
-                position: 'relative'
+                backgroundColor: '#f2f2f2',
+                backgroundImage: `
+                  radial-gradient(circle at 25% 25%, #e8f5e8 0%, transparent 50%),
+                  radial-gradient(circle at 75% 75%, #e8f5e8 0%, transparent 50%),
+                  linear-gradient(45deg, #f0f8f0 25%, transparent 25%),
+                  linear-gradient(-45deg, #f0f8f0 25%, transparent 25%),
+                  linear-gradient(45deg, transparent 75%, #f0f8f0 75%),
+                  linear-gradient(-45deg, transparent 75%, #f0f8f0 75%)
+                `,
+                backgroundSize: '40px 40px, 40px 40px, 20px 20px, 20px 20px, 20px 20px, 20px 20px',
+                backgroundPosition: '0 0, 40px 40px, 0 0, 10px 0, 10px -10px, 0 10px'
               }}
-            >
-              {/* Satellite Grid Background */}
-              <div 
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px),
-                    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '60px 60px',
-                  opacity: 0.4
-                }}
+            />
+            
+            {/* Map Grid */}
+            <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.3 }}>
+              <defs>
+                <pattern id="mapGrid" width="50" height="50" patternUnits="userSpaceOnUse">
+                  <path d="M 50 0 L 0 0 L 0 50" fill="none" stroke="#4ade80" strokeWidth="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#mapGrid)" />
+            </svg>
+            
+            {/* Geographic Features */}
+            <svg className="absolute inset-0 w-full h-full">
+              {/* Rivers */}
+              <path
+                d="M 0 320 Q 150 300 280 280 Q 400 260 500 250 Q 600 240 700 235"
+                fill="none"
+                stroke="#3b82f6"
+                strokeWidth="8"
+                strokeLinecap="round"
+                opacity="0.6"
               />
               
-              {/* Farm Plot Areas */}
-              <div className="absolute inset-0">
-                {/* Red Alert Plot */}
-                <div 
-                  className="absolute border-4 border-red-600 bg-red-200 rounded-lg shadow-md"
-                  style={{
-                    top: '80px',
-                    left: '80px',
-                    width: '140px',
-                    height: '100px',
-                    animation: 'pulse 2s infinite'
-                  }}
-                >
-                  <div className="absolute -top-10 left-0 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold shadow-md">
-                    🚨 DEFORESTATION ALERT
-                  </div>
-                  <MapPin className="absolute top-2 left-2 h-8 w-8 text-red-700 animate-bounce" />
-                </div>
-                
-                {/* Green Compliant Plot */}
-                <div 
-                  className="absolute border-4 border-green-600 bg-green-200 rounded-lg shadow-md"
-                  style={{
-                    top: '100px',
-                    right: '80px',
-                    width: '180px',
-                    height: '120px'
-                  }}
-                >
-                  <div className="absolute -top-10 left-0 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold shadow-md">
-                    ✅ EUDR COMPLIANT
-                  </div>
-                  <MapPin className="absolute top-2 right-2 h-8 w-8 text-green-700 animate-pulse" />
-                </div>
-                
-                {/* Yellow Pending Plot */}
-                <div 
-                  className="absolute border-4 border-yellow-600 bg-yellow-200 rounded-lg shadow-md"
-                  style={{
-                    bottom: '80px',
-                    left: '100px',
-                    width: '160px',
-                    height: '110px'
-                  }}
-                >
-                  <div className="absolute -top-10 left-0 bg-yellow-600 text-white px-3 py-1 rounded text-sm font-bold shadow-md">
-                    ⚠️ PENDING VERIFICATION
-                  </div>
-                  <MapPin className="absolute bottom-2 left-2 h-8 w-8 text-yellow-700 animate-pulse" />
-                </div>
-              </div>
+              {/* Forest areas */}
+              <circle cx="120" cy="180" r="40" fill="#059669" opacity="0.3" />
+              <circle cx="650" cy="150" r="45" fill="#059669" opacity="0.3" />
               
-              {/* Central Control Panel */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white rounded-xl p-6 shadow-2xl border-2 border-gray-200 max-w-sm">
-                  <div className="text-center mb-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Satellite className="h-10 w-10 text-blue-600" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800">GPS Tracking System</h3>
-                    <p className="text-sm text-gray-600">Live Satellite Monitoring</p>
-                  </div>
-                  
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="font-medium">Compliant Farms</span>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">15 plots</Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-                        <span className="font-medium">Deforestation Alerts</span>
-                      </div>
-                      <Badge className="bg-red-100 text-red-800">3 active</Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-yellow-500 rounded-full animate-pulse"></div>
-                        <span className="font-medium">Pending Review</span>
-                      </div>
-                      <Badge className="bg-yellow-100 text-yellow-800">8 plots</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2 mt-4">
-                    <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                      <Navigation className="h-4 w-4 mr-1" />
-                      Live View
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Fullscreen
-                    </Button>
-                  </div>
+              {/* Farm Plots */}
+              <polygon
+                points="100,120 200,110 210,180 110,190"
+                fill="#10b981"
+                fillOpacity="0.3"
+                stroke="#10b981"
+                strokeWidth="3"
+                className="hover:fillOpacity-0.5 cursor-pointer transition-all duration-300"
+              />
+              <text x="140" y="145" fill="#065f46" fontSize="12" fontWeight="bold" textAnchor="middle">
+                Coffee Farm A
+              </text>
+              
+              <polygon
+                points="250,150 380,140 390,220 260,230"
+                fill="#f59e0b"
+                fillOpacity="0.3"
+                stroke="#f59e0b"
+                strokeWidth="3"
+                className="hover:fillOpacity-0.5 cursor-pointer transition-all duration-300"
+              />
+              <text x="315" y="180" fill="#92400e" fontSize="12" fontWeight="bold" textAnchor="middle">
+                Cocoa Farm B
+              </text>
+              
+              <polygon
+                points="450,100 580,90 590,170 460,180"
+                fill="#ef4444"
+                fillOpacity="0.4"
+                stroke="#ef4444"
+                strokeWidth="4"
+                strokeDasharray="8,4"
+                className="hover:fillOpacity-0.6 cursor-pointer transition-all duration-300"
+                style={{ animation: 'pulse 3s infinite' }}
+              />
+              <text x="515" y="130" fill="#7f1d1d" fontSize="12" fontWeight="bold" textAnchor="middle">
+                Palm Plot C - ALERT
+              </text>
+              
+              {/* GPS Markers */}
+              <circle cx="155" cy="155" r="6" fill="#dc2626" stroke="white" strokeWidth="2" />
+              <circle cx="320" cy="185" r="6" fill="#dc2626" stroke="white" strokeWidth="2" />
+              <circle cx="520" cy="135" r="6" fill="#dc2626" stroke="white" strokeWidth="2" />
+            </svg>
+            
+            {/* Interactive Info Panel */}
+            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-xl border w-64">
+              <h4 className="font-bold text-sm mb-3 flex items-center gap-2">
+                <Satellite className="h-4 w-4 text-blue-600" />
+                Real-Time GPS Tracking
+              </h4>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span>Total Farms:</span>
+                  <span className="font-bold">3 farms</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Total Area:</span>
+                  <span className="font-bold">16.1 hectares</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>EUDR Compliant:</span>
+                  <span className="font-bold text-green-600">67%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Active Alerts:</span>
+                  <span className="font-bold text-red-600">1 alert</span>
                 </div>
               </div>
             </div>
             
-            {/* GPS Coordinates & Controls */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 text-sm">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-blue-100 rounded-lg">
-                    <MapPin className="h-5 w-5 text-blue-600" />
-                    <span className="font-mono font-bold">6.3183°N, -10.7919°W</span>
-                    <span className="text-blue-600">(Monrovia, Liberia)</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded-lg">
-                    <Satellite className="h-5 w-5 text-green-600 animate-spin" style={{animationDuration: '3s'}} />
-                    <span className="font-medium">Last Update: 2 min ago</span>
-                  </div>
+            {/* Map Legend */}
+            <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-xl border">
+              <h4 className="font-bold text-sm mb-2">Map Legend</h4>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-3 bg-green-500 opacity-30 border-2 border-green-500 rounded"></div>
+                  <span>EUDR Compliant</span>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="border-green-300 hover:bg-green-50">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Zoom In
-                  </Button>
-                  <Button size="sm" variant="outline" className="border-green-300 hover:bg-green-50">
-                    <Navigation className="h-4 w-4 mr-1" />
-                    Center Map
-                  </Button>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-3 bg-orange-500 opacity-30 border-2 border-orange-500 rounded"></div>
+                  <span>Review Required</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-3 bg-red-500 opacity-40 border-2 border-red-500 rounded"></div>
+                  <span>Deforestation Alert</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-600 rounded-full border border-white"></div>
+                  <span>GPS Markers</span>
                 </div>
               </div>
             </div>
             
-            {/* Feature Description */}
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-900 mb-2">🚀 When Fully Implemented, This System Will Include:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-800">
-                <div>• Real-time satellite imagery integration</div>
-                <div>• Live GPS device connectivity</div>
-                <div>• Automated deforestation detection</div>
-                <div>• EUDR compliance monitoring</div>
-                <div>• Mobile app for field agents</div>
-                <div>• Export to government systems</div>
-              </div>
+            {/* Coordinate Display */}
+            <div className="absolute top-4 left-4 bg-black/80 text-white px-3 py-2 rounded-lg text-xs font-mono">
+              <div className="font-bold text-green-400">Liberia Agricultural GPS System</div>
+              <div className="mt-1">Center: 6.3183°N, 10.7919°W</div>
+              <div>Zoom Level: 1:10,000</div>
             </div>
             
-          </CardContent>
-        </Card>
-      </div>
+            {/* Scale Indicator */}
+            <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded px-3 py-2 text-xs border">
+              <div className="flex items-center gap-2">
+                <div className="w-12 h-0.5 bg-black"></div>
+                <span className="font-bold">1 km</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Map Controls */}
+          <div className="flex justify-between items-center mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2 px-3 py-2 bg-blue-100 rounded-lg">
+                <MapPin className="h-5 w-5 text-blue-600" />
+                <span className="font-mono font-bold">6.3183°N, -10.7919°W</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded-lg">
+                <Satellite className="h-5 w-5 text-green-600 animate-spin" style={{animationDuration: '3s'}} />
+                <span className="font-medium">Live Tracking Active</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="border-green-300 hover:bg-green-50">
+                <Eye className="h-4 w-4 mr-1" />
+                Fullscreen
+              </Button>
+              <Button size="sm" variant="outline" className="border-green-300 hover:bg-green-50">
+                <Navigation className="h-4 w-4 mr-1" />
+                Center Map
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* GPS Mappings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -743,29 +524,18 @@ export default function GpsMapping() {
                     <span className="text-sm capitalize">{mapping.mappingMethod?.replace('_', ' ')}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Accuracy:</span>
-                    <span className="text-sm capitalize">{mapping.accuracyLevel}</span>
+                    <span className="text-sm font-medium">Coordinates:</span>
+                    <span className="text-sm font-mono">{mapping.centerLatitude}, {mapping.centerLongitude}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Status:</span>
-                    <Badge variant={mapping.verificationStatus === 'verified' ? 'default' : 'secondary'}>
-                      {mapping.verificationStatus}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex space-x-2 pt-2">
+                  <div className="flex gap-2 mt-4">
                     <Button 
-                      variant="outline" 
                       size="sm" 
+                      variant="outline" 
                       className="flex-1"
                       onClick={() => setSelectedMapping(mapping)}
                     >
-                      <Eye className="mr-2 h-4 w-4" />
-                      View
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Details
                     </Button>
                   </div>
                 </div>
@@ -775,23 +545,7 @@ export default function GpsMapping() {
         })}
       </div>
 
-      {gpsMappings.length === 0 && (
-        <Card className="text-center py-12">
-          <CardContent>
-            <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No GPS Mappings Found</h3>
-            <p className="text-muted-foreground mb-4">
-              Start mapping farm coordinates for EUDR compliance tracking
-            </p>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create First Mapping
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Mapping Details Dialog */}
+      {/* Mapping Details Modal */}
       {selectedMapping && (
         <Dialog open={!!selectedMapping} onOpenChange={() => setSelectedMapping(null)}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -810,10 +564,6 @@ export default function GpsMapping() {
                   <span>{selectedMapping.totalAreaHectares} hectares</span>
                   <span className="text-muted-foreground">Elevation:</span>
                   <span>{selectedMapping.elevationMeters || 'N/A'} meters</span>
-                  <span className="text-muted-foreground">Slope:</span>
-                  <span>{selectedMapping.slope || 'N/A'}%</span>
-                  <span className="text-muted-foreground">Soil Type:</span>
-                  <span>{selectedMapping.soilType || 'N/A'}</span>
                 </div>
               </div>
               
@@ -826,12 +576,6 @@ export default function GpsMapping() {
                   <span className="capitalize">{selectedMapping.mappingMethod?.replace('_', ' ')}</span>
                   <span className="text-muted-foreground">Accuracy Level:</span>
                   <span className="capitalize">{selectedMapping.accuracyLevel}</span>
-                  <span className="text-muted-foreground">Verification Status:</span>
-                  <span className="capitalize">{selectedMapping.verificationStatus}</span>
-                  <span className="text-muted-foreground">Created:</span>
-                  <span>{new Date(selectedMapping.createdAt).toLocaleDateString()}</span>
-                  <span className="text-muted-foreground">Last Updated:</span>
-                  <span>{new Date(selectedMapping.updatedAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>

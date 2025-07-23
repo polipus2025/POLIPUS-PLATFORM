@@ -51,15 +51,16 @@ export default function FarmerLogin() {
     setError("");
 
     try {
-      const response = await apiRequest("POST", "/api/auth/farmer-login", {
-        farmerId: data.farmerId,
-        password: data.password,
-        county: data.county,
-        phoneNumber: data.phoneNumber,
-        userType: "farmer"
+      const result = await apiRequest("/api/auth/farmer-login", {
+        method: "POST",
+        body: JSON.stringify({
+          farmerId: data.farmerId,
+          password: data.password,
+          county: data.county,
+          phoneNumber: data.phoneNumber,
+          userType: "farmer"
+        })
       });
-
-      const result = await response.json();
 
       if (result && result.success) {
         toast({
@@ -68,7 +69,7 @@ export default function FarmerLogin() {
         });
         
         // Store session data
-        localStorage.setItem("authToken", result.token);
+        localStorage.setItem("token", result.token);
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "farmer");
         localStorage.setItem("farmerId", data.farmerId);

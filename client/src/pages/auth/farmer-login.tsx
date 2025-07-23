@@ -52,7 +52,10 @@ export default function FarmerLogin() {
 
     try {
       const response = await apiRequest("/api/auth/farmer-login", "POST", {
-        ...data,
+        farmerId: data.farmerId,
+        password: data.password,
+        county: data.county,
+        phoneNumber: data.phoneNumber,
         userType: "farmer"
       });
 
@@ -68,8 +71,8 @@ export default function FarmerLogin() {
         localStorage.setItem("userType", "farmer");
         localStorage.setItem("farmerId", data.farmerId);
         
-        // Redirect to farmer dashboard
-        window.location.href = "/farmer-dashboard";
+        // Redirect to dashboard (authenticated route)
+        window.location.href = "/dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";
@@ -215,6 +218,29 @@ export default function FarmerLogin() {
                   "Access Farmer Portal"
                 )}
               </Button>
+
+              {/* Test Credentials Helper */}
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm font-medium text-blue-800 mb-2">Test Credentials:</p>
+                <div className="text-xs text-blue-600 space-y-1 mb-2">
+                  <div>Farmer ID: <span className="font-mono bg-white px-1 rounded">FRM-2024-001</span></div>
+                  <div>Password: <span className="font-mono bg-white px-1 rounded">farmer123</span></div>
+                  <div>County: <span className="font-mono bg-white px-1 rounded">Lofa County</span></div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => {
+                    form.setValue("farmerId", "FRM-2024-001");
+                    form.setValue("password", "farmer123");
+                    form.setValue("county", "Lofa County");
+                  }}
+                >
+                  Fill Test Data
+                </Button>
+              </div>
 
               {/* Registration Link */}
               <div className="pt-4 border-t border-gray-200">

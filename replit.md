@@ -4,6 +4,23 @@
 
 AgriTrace360™ is a comprehensive web application designed for the Liberia Agriculture Commodity Regulatory Authority (LACRA) to manage and monitor agricultural commodity compliance across different counties. The system provides real-time tracking of commodities, inspections, certifications, and compliance metrics through an intuitive dashboard interface.
 
+## Access Credentials
+
+### Complete Portal Access Information
+
+**Exporter Portal Access:**
+- **URL:** http://localhost:5000/exporter-login (via Landing Page → Exporter Portal)
+- **Username:** EXP-2024-001
+- **Password:** exporter123
+- **Company:** Liberia Agri Export Ltd.
+- **Contact Person:** Marcus Bawah (Export Operations Manager)
+- **Features:** Export order management, LACRA compliance integration, farmer partnerships, analytics
+
+**Other Portal Access:**
+- **Regulatory Staff:** admin001 / admin123
+- **Field Agent:** AGT-2024-001 / agent123 (Sarah Konneh, Lofa County)
+- **Farmer Portal:** FRM-2024-001 / farmer123 (Moses Tuah, Lofa County)
+
 ### Recent Updates (January 2025)
 - **Three-Tier Authentication System**: Complete role-based authentication with separate portals for regulatory staff, farmers, and field agents
 - **JWT Security Implementation**: Secure bcrypt password hashing with JWT token-based session management

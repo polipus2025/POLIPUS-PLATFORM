@@ -295,6 +295,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/auth/exporter-login", async (req, res) => {
+    try {
+      const { username, password, userType } = req.body;
+      
+      // Validate input
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByUsername(username);
+      if (!user || user.role !== 'exporter') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid exporter credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid exporter credentials" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          exporterId: username, 
+          role: user.role,
+          userType: 'exporter'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          department: user.department,
+          jurisdiction: user.jurisdiction
+        }
+      });
+
+    } catch (error) {
+      console.error('Exporter login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Logout endpoint
   app.post("/api/auth/logout", async (req, res) => {
     try {

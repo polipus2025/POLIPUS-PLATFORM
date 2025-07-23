@@ -32,6 +32,11 @@ import {
   insertCommodityStandardsComplianceSchema,
   insertStandardsApiIntegrationSchema,
   insertStandardsSyncLogSchema,
+  insertTrackingRecordSchema,
+  insertTrackingTimelineSchema,
+  insertTrackingVerificationSchema,
+  insertTrackingAlertSchema,
+  insertTrackingReportSchema,
   insertAuthUserSchema
 } from "@shared/schema";
 import { z } from "zod";
@@ -1593,6 +1598,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error creating standards sync log:', error);
       res.status(500).json({ message: 'Failed to create standards sync log' });
+    }
+  });
+
+  // Tracking Records API
+  app.get('/api/tracking-records', authenticateToken, async (req, res) => {
+    try {
+      const { commodityId, farmerId } = req.query;
+      let records;
+      
+      if (commodityId) {
+        records = await storage.getTrackingRecordsByCommodity(parseInt(commodityId as string));
+      } else if (farmerId) {
+        records = await storage.getTrackingRecordsByFarmer(parseInt(farmerId as string));
+      } else {
+        records = await storage.getTrackingRecords();
+      }
+      
+      res.json(records);
+    } catch (error) {
+      console.error('Error fetching tracking records:', error);
+      res.status(500).json({ message: 'Failed to fetch tracking records' });
+    }
+  });
+
+  app.get('/api/tracking-records/:id', authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const record = await storage.getTrackingRecord(id);
+      
+      if (!record) {
+        return res.status(404).json({ message: 'Tracking record not found' });
+      }
+      
+      res.json(record);
+    } catch (error) {
+      console.error('Error fetching tracking record:', error);
+      res.status(500).json({ message: 'Failed to fetch tracking record' });
+    }
+  });
+
+  app.post('/api/tracking-records', authenticateToken, async (req, res) => {
+    try {
+      const validatedData = insertTrackingRecordSchema.parse(req.body);
+      const record = await storage.createTrackingRecord(validatedData);
+      res.status(201).json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      console.error('Error creating tracking record:', error);
+      res.status(500).json({ message: 'Failed to create tracking record' });
+    }
+  });
+
+  app.put('/api/tracking-records/:id', authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const record = await storage.updateTrackingRecord(id, updates);
+      
+      if (!record) {
+        return res.status(404).json({ message: 'Tracking record not found' });
+      }
+      
+      res.json(record);
+    } catch (error) {
+      console.error('Error updating tracking record:', error);
+      res.status(500).json({ message: 'Failed to update tracking record' });
+    }
+  });
+
+  // Tracking Verification API - Public endpoint for certificate verification
+  app.get('/api/tracking/verify/:trackingNumber', async (req, res) => {
+    try {
+      const trackingNumber = req.params.trackingNumber;
+      const result = await storage.verifyTrackingRecord(trackingNumber);
+      res.json(result);
+    } catch (error) {
+      console.error('Error verifying tracking record:', error);
+      res.status(500).json({ message: 'Failed to verify tracking record' });
+    }
+  });
+
+  // Tracking Timeline API
+  app.get('/api/tracking-timeline/:trackingRecordId', authenticateToken, async (req, res) => {
+    try {
+      const trackingRecordId = parseInt(req.params.trackingRecordId);
+      const timeline = await storage.getTrackingTimeline(trackingRecordId);
+      res.json(timeline);
+    } catch (error) {
+      console.error('Error fetching tracking timeline:', error);
+      res.status(500).json({ message: 'Failed to fetch tracking timeline' });
+    }
+  });
+
+  app.post('/api/tracking-timeline', authenticateToken, async (req, res) => {
+    try {
+      const validatedData = insertTrackingTimelineSchema.parse(req.body);
+      const event = await storage.createTrackingTimelineEvent(validatedData);
+      res.status(201).json(event);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      console.error('Error creating tracking timeline event:', error);
+      res.status(500).json({ message: 'Failed to create tracking timeline event' });
+    }
+  });
+
+  // Tracking Verifications API
+  app.get('/api/tracking-verifications/:trackingRecordId', authenticateToken, async (req, res) => {
+    try {
+      const trackingRecordId = parseInt(req.params.trackingRecordId);
+      const verifications = await storage.getTrackingVerifications(trackingRecordId);
+      res.json(verifications);
+    } catch (error) {
+      console.error('Error fetching tracking verifications:', error);
+      res.status(500).json({ message: 'Failed to fetch tracking verifications' });
+    }
+  });
+
+  app.post('/api/tracking-verifications', authenticateToken, async (req, res) => {
+    try {
+      const validatedData = insertTrackingVerificationSchema.parse(req.body);
+      const verification = await storage.createTrackingVerification(validatedData);
+      res.status(201).json(verification);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      console.error('Error creating tracking verification:', error);
+      res.status(500).json({ message: 'Failed to create tracking verification' });
+    }
+  });
+
+  // Tracking Alerts API
+  app.get('/api/tracking-alerts', authenticateToken, async (req, res) => {
+    try {
+      const { trackingRecordId } = req.query;
+      const alerts = await storage.getTrackingAlerts(
+        trackingRecordId ? parseInt(trackingRecordId as string) : undefined
+      );
+      res.json(alerts);
+    } catch (error) {
+      console.error('Error fetching tracking alerts:', error);
+      res.status(500).json({ message: 'Failed to fetch tracking alerts' });
+    }
+  });
+
+  app.post('/api/tracking-alerts', authenticateToken, async (req, res) => {
+    try {
+      const validatedData = insertTrackingAlertSchema.parse(req.body);
+      const alert = await storage.createTrackingAlert(validatedData);
+      res.status(201).json(alert);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      console.error('Error creating tracking alert:', error);
+      res.status(500).json({ message: 'Failed to create tracking alert' });
+    }
+  });
+
+  // Tracking Reports API
+  app.get('/api/tracking-reports', authenticateToken, async (req, res) => {
+    try {
+      const { trackingRecordId } = req.query;
+      const reports = await storage.getTrackingReports(
+        trackingRecordId ? parseInt(trackingRecordId as string) : undefined
+      );
+      res.json(reports);
+    } catch (error) {
+      console.error('Error fetching tracking reports:', error);
+      res.status(500).json({ message: 'Failed to fetch tracking reports' });
+    }
+  });
+
+  app.post('/api/tracking-reports', authenticateToken, async (req, res) => {
+    try {
+      const validatedData = insertTrackingReportSchema.parse(req.body);
+      const report = await storage.createTrackingReport(validatedData);
+      res.status(201).json(report);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      console.error('Error creating tracking report:', error);
+      res.status(500).json({ message: 'Failed to create tracking report' });
     }
   });
 

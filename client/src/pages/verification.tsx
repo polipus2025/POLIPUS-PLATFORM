@@ -1,584 +1,607 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Helmet } from "react-helmet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Shield, CheckCircle, XCircle, AlertTriangle, Download, FileText, Eye } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import type { Certification, Commodity, Report } from "@shared/schema";
+import { Search, Shield, MapPin, Clock, CheckCircle, XCircle, AlertTriangle, FileText, Download, QrCode, Leaf, Eye, Star } from "lucide-react";
+
+interface TrackingRecord {
+  id: number;
+  trackingNumber: string;
+  certificateId: number;
+  commodityId: number;
+  farmerId?: number;
+  currentStatus: string;
+  eudrCompliant: boolean;
+  deforestationRisk?: string;
+  sustainabilityScore?: number;
+  supplyChainSteps?: any[];
+  originCoordinates?: string;
+  currentLocation?: string;
+  destinationCountry?: string;
+  qrCodeData?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface TrackingTimeline {
+  id: number;
+  trackingRecordId: number;
+  eventType: string;
+  eventDescription: string;
+  eventLocation?: string;
+  eventCoordinates?: string;
+  performedBy: string;
+  officerName?: string;
+  officerRole?: string;
+  department?: string;
+  complianceChecked: boolean;
+  complianceStatus?: string;
+  eudrVerified: boolean;
+  timestamp: Date;
+}
+
+interface TrackingVerification {
+  id: number;
+  trackingRecordId: number;
+  verificationType: string;
+  verificationMethod: string;
+  verifiedBy: string;
+  verificationDate: Date;
+  verificationResult: string;
+  confidence?: number;
+  deforestationCheck: boolean;
+  legalityVerified: boolean;
+  sustainabilityVerified: boolean;
+  traceabilityVerified: boolean;
+  notes?: string;
+}
+
+interface TrackingAlert {
+  id: number;
+  trackingRecordId: number;
+  alertType: string;
+  severity: string;
+  title: string;
+  message: string;
+  status: string;
+  actionRequired: boolean;
+  actionDeadline?: Date;
+  createdAt: Date;
+}
+
+interface VerificationResult {
+  valid: boolean;
+  record: TrackingRecord | null;
+  timeline: TrackingTimeline[];
+  verifications: TrackingVerification[];
+  alerts: TrackingAlert[];
+  eudrCompliant: boolean;
+  sustainabilityScore?: number;
+}
 
 export default function Verification() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [verificationResult, setVerificationResult] = useState<any>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
+  const [showQRCode, setShowQRCode] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const { data: certifications = [] } = useQuery<Certification[]>({
-    queryKey: ["/api/certifications"],
+  // Get all tracking records for admin view
+  const { data: trackingRecords = [], isLoading: loadingRecords } = useQuery({
+    queryKey: ["/api/tracking-records"],
+    enabled: true,
   });
 
-  const { data: commodities = [] } = useQuery<Commodity[]>({
-    queryKey: ["/api/commodities"],
-  });
-
-  const { data: reports = [] } = useQuery<Report[]>({
-    queryKey: ["/api/reports"],
-  });
-
-  const handleVerification = async () => {
-    if (!searchQuery.trim()) {
+  const verifyMutation = useMutation({
+    mutationFn: async (trackingNum: string) => {
+      return await apiRequest(`/api/tracking/verify/${trackingNum}`);
+    },
+    onSuccess: (data) => {
+      setVerificationResult(data);
+      if (data.valid) {
+        toast({
+          title: "Verification Successful",
+          description: `Certificate ${data.record?.trackingNumber} verified successfully.`,
+        });
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: "The tracking number is invalid or not found.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: () => {
       toast({
-        title: "Search Required",
-        description: "Please enter a certificate number, batch code, or reference number.",
+        title: "Verification Error",
+        description: "Unable to verify tracking number. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleVerification = () => {
+    if (!trackingNumber.trim()) {
+      toast({
+        title: "Tracking Number Required",
+        description: "Please enter a tracking number to verify.",
         variant: "destructive",
       });
       return;
     }
+    verifyMutation.mutate(trackingNumber.trim());
+  };
 
-    setIsVerifying(true);
-    setHasSearched(true);
-    
-    // Simulate API delay for real-time verification
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const query = searchQuery.trim().toUpperCase();
-    
-    // Search in certifications
-    const foundCertification = certifications.find(cert => 
-      cert.certificateNumber?.toUpperCase() === query ||
-      cert.exporterName?.toUpperCase() === query
-    );
-
-    // Search in commodities by batch number
-    const foundCommodity = commodities.find(commodity => 
-      commodity.batchNumber?.toUpperCase() === query
-    );
-
-    // Search in reports
-    const foundReport = reports.find(report => 
-      report.reportId?.toUpperCase() === query
-    );
-
-    let result = null;
-
-    if (foundCertification) {
-      const relatedCommodity = commodities.find(c => c.id === foundCertification.commodityId);
-      result = {
-        type: 'certificate',
-        status: 'valid',
-        data: {
-          ...foundCertification,
-          commodity: relatedCommodity
-        },
-        verifiedAt: new Date(),
-        documentType: foundCertification.certificateType === 'export' ? 'Export Certificate' : 'Quality Certificate'
-      };
-    } else if (foundCommodity) {
-      result = {
-        type: 'commodity',
-        status: 'valid',
-        data: foundCommodity,
-        verifiedAt: new Date(),
-        documentType: 'Commodity Registration'
-      };
-    } else if (foundReport) {
-      result = {
-        type: 'report',
-        status: 'valid',
-        data: foundReport,
-        verifiedAt: new Date(),
-        documentType: 'Official Report'
-      };
-    } else {
-      result = {
-        type: 'not_found',
-        status: 'invalid',
-        data: null,
-        verifiedAt: new Date(),
-        documentType: 'Unknown'
-      };
-    }
-
-    setVerificationResult(result);
-    setIsVerifying(false);
-
-    if (result.status === 'valid') {
-      toast({
-        title: "Document Verified",
-        description: `${result.documentType} has been successfully verified.`,
-      });
-    } else {
-      toast({
-        title: "Verification Failed",
-        description: "No document found with the provided reference number.",
-        variant: "destructive",
-      });
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "active": return "bg-green-100 text-green-800";
+      case "completed": return "bg-blue-100 text-blue-800";
+      case "suspended": return "bg-yellow-100 text-yellow-800";
+      case "cancelled": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'valid':
-        return <CheckCircle className="h-6 w-6 text-green-600" />;
-      case 'invalid':
-        return <XCircle className="h-6 w-6 text-red-600" />;
-      case 'expired':
-        return <AlertTriangle className="h-6 w-6 text-yellow-600" />;
-      default:
-        return <Shield className="h-6 w-6 text-gray-400" />;
+  const getRiskColor = (risk: string) => {
+    switch (risk?.toLowerCase()) {
+      case "low": return "bg-green-100 text-green-800";
+      case "medium": return "bg-yellow-100 text-yellow-800";
+      case "high": return "bg-orange-100 text-orange-800";
+      case "critical": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const colors = {
-      active: 'text-green-700 bg-green-100',
-      expired: 'text-yellow-700 bg-yellow-100',
-      revoked: 'text-red-700 bg-red-100',
-      pending: 'text-blue-700 bg-blue-100'
-    };
-    
-    return (
-      <Badge className={`${colors[status as keyof typeof colors] || 'text-gray-600 bg-gray-100'} text-xs font-medium rounded-full`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
+  const getSeverityIcon = (severity: string) => {
+    switch (severity?.toLowerCase()) {
+      case "low": return <Shield className="h-4 w-4 text-green-600" />;
+      case "medium": return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case "high": return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+      case "critical": return <XCircle className="h-4 w-4 text-red-600" />;
+      default: return <Shield className="h-4 w-4 text-gray-600" />;
+    }
   };
 
-  const downloadVerificationReport = () => {
-    if (!verificationResult || verificationResult.status !== 'valid') return;
-
-    const content = generateVerificationReport(verificationResult);
-    const blob = new Blob([content], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `verification-report-${searchQuery}-${new Date().toISOString().split('T')[0]}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Verification Report Downloaded",
-      description: "Official verification report has been downloaded.",
-    });
-  };
-
-  const generateVerificationReport = (result: any) => {
-    const { data, verifiedAt, documentType } = result;
-    
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document Verification Report - LACRA</title>
-        <style>
-          body { font-family: 'Arial', sans-serif; margin: 0; padding: 40px; background: #f9fafb; }
-          .report { background: white; border: 3px solid #16a34a; max-width: 800px; margin: 0 auto; padding: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-          .header { text-align: center; border-bottom: 2px solid #16a34a; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { color: #16a34a; font-size: 28px; font-weight: bold; margin-bottom: 10px; }
-          .title { color: #374151; font-size: 24px; margin: 15px 0; }
-          .verified-badge { background: #16a34a; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; display: inline-block; margin: 15px 0; }
-          .content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
-          .field { margin-bottom: 15px; }
-          .label { font-weight: bold; color: #374151; font-size: 14px; }
-          .value { color: #6b7280; margin-top: 4px; }
-          .full-width { grid-column: 1 / -1; }
-          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
-          .status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-          .status.verified { background: #dcfce7; color: #166534; }
-          .verification-details { background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #0ea5e9; }
-        </style>
-      </head>
-      <body>
-        <div class="report">
-          <div class="header">
-            <div class="logo">LIBERIA AGRICULTURE COMMODITY REGULATORY AUTHORITY</div>
-            <div class="title">DOCUMENT VERIFICATION REPORT</div>
-            <div class="verified-badge">✓ VERIFIED AUTHENTIC</div>
-          </div>
-          
-          <div class="verification-details">
-            <h3 style="margin-top: 0; color: #0ea5e9;">Verification Details</h3>
-            <p><strong>Search Query:</strong> ${searchQuery}</p>
-            <p><strong>Document Type:</strong> ${documentType}</p>
-            <p><strong>Verification Date:</strong> ${verifiedAt.toLocaleString()}</p>
-            <p><strong>Status:</strong> <span class="status verified">VERIFIED AUTHENTIC</span></p>
-          </div>
-          
-          <div class="content">
-            ${result.type === 'certificate' ? `
-              <div class="field">
-                <div class="label">Certificate Number</div>
-                <div class="value">${data.certificateNumber}</div>
-              </div>
-              <div class="field">
-                <div class="label">Certificate Type</div>
-                <div class="value">${data.certificateType.charAt(0).toUpperCase() + data.certificateType.slice(1)}</div>
-              </div>
-              <div class="field">
-                <div class="label">Exporter Name</div>
-                <div class="value">${data.exporterName}</div>
-              </div>
-              <div class="field">
-                <div class="label">Commodity</div>
-                <div class="value">${data.commodity?.name || 'N/A'}</div>
-              </div>
-              <div class="field">
-                <div class="label">Issue Date</div>
-                <div class="value">${new Date(data.issuedDate).toLocaleDateString()}</div>
-              </div>
-              <div class="field">
-                <div class="label">Expiry Date</div>
-                <div class="value">${new Date(data.expiryDate).toLocaleDateString()}</div>
-              </div>
-              <div class="field">
-                <div class="label">Status</div>
-                <div class="value">${data.status}</div>
-              </div>
-              <div class="field">
-                <div class="label">Certification Body</div>
-                <div class="value">${data.certificationBody}</div>
-              </div>
-            ` : result.type === 'commodity' ? `
-              <div class="field">
-                <div class="label">Batch Number</div>
-                <div class="value">${data.batchNumber}</div>
-              </div>
-              <div class="field">
-                <div class="label">Commodity Name</div>
-                <div class="value">${data.name}</div>
-              </div>
-              <div class="field">
-                <div class="label">Type</div>
-                <div class="value">${data.type}</div>
-              </div>
-              <div class="field">
-                <div class="label">Quality Grade</div>
-                <div class="value">${data.qualityGrade}</div>
-              </div>
-              <div class="field">
-                <div class="label">County</div>
-                <div class="value">${data.county}</div>
-              </div>
-              <div class="field">
-                <div class="label">Quantity</div>
-                <div class="value">${data.quantity} ${data.unit}</div>
-              </div>
-              <div class="field">
-                <div class="label">Status</div>
-                <div class="value">${data.status}</div>
-              </div>
-              <div class="field">
-                <div class="label">Registration Date</div>
-                <div class="value">${new Date(data.createdAt).toLocaleDateString()}</div>
-              </div>
-            ` : `
-              <div class="field">
-                <div class="label">Report ID</div>
-                <div class="value">${data.reportId}</div>
-              </div>
-              <div class="field">
-                <div class="label">Title</div>
-                <div class="value">${data.title}</div>
-              </div>
-              <div class="field">
-                <div class="label">Department</div>
-                <div class="value">${data.department}</div>
-              </div>
-              <div class="field">
-                <div class="label">Date Range</div>
-                <div class="value">${data.dateRange}</div>
-              </div>
-            `}
-          </div>
-          
-          <div class="footer">
-            <p><strong>This verification report is issued by the Liberia Agriculture Commodity Regulatory Authority (LACRA)</strong></p>
-            <p>Report generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-            <p>For additional verification, contact LACRA at +231-XXX-XXXX or email verify@lacra.gov.lr</p>
-            <p><em>This document serves as official proof of verification for the referenced document.</em></p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+  const formatSustainabilityScore = (score: number) => {
+    if (score >= 90) return { color: "text-green-600", label: "Excellent" };
+    if (score >= 75) return { color: "text-blue-600", label: "Good" };
+    if (score >= 60) return { color: "text-yellow-600", label: "Fair" };
+    return { color: "text-red-600", label: "Poor" };
   };
 
   return (
-    <div className="p-6">
-      <Helmet>
-        <title>Document Verification - AgriTrace360™ LACRA</title>
-        <meta name="description" content="Real-time verification system for agricultural certificates, commodities, and official documents" />
-      </Helmet>
-
-      {/* Page Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Shield className="h-8 w-8 text-lacra-green" />
-          <h2 className="text-2xl font-bold text-neutral">Document Verification System</h2>
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Certificate Verification</h1>
+          <p className="text-gray-600 mt-2">
+            Verify agricultural commodity certificates and track their complete supply chain journey
+          </p>
         </div>
-        <p className="text-gray-600">Verify the authenticity of certificates, commodities, and official documents in real-time</p>
       </div>
 
-      {/* Verification Form */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-neutral flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Enter Document Reference
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Certificate Number, Batch Code, or Reference Number
-              </label>
-              <Input
-                type="text"
-                placeholder="e.g., EXP-CERT-2024-001, COF-2024-001, RPT-2024-001"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="text-lg"
-                onKeyPress={(e) => e.key === 'Enter' && handleVerification()}
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                Enter any certificate number, commodity batch code, or document reference number to verify its authenticity
-              </p>
-            </div>
-            
-            <Button 
-              onClick={handleVerification} 
-              disabled={isVerifying || !searchQuery.trim()}
-              className="bg-lacra-green hover:bg-green-700 text-white"
-            >
-              {isVerifying ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Verifying...
-                </>
-              ) : (
-                <>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Verify Document
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="verify" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="verify">Verify Certificate</TabsTrigger>
+          <TabsTrigger value="records">All Tracking Records</TabsTrigger>
+        </TabsList>
 
-      {/* Verification Results */}
-      {hasSearched && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-neutral flex items-center gap-2">
-              {getStatusIcon(verificationResult?.status || 'unknown')}
-              Verification Results
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isVerifying ? (
-              <div className="space-y-4">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-32 w-full" />
+        {/* Verification Tab */}
+        <TabsContent value="verify" className="space-y-6">
+          {/* Verification Input */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Enter Tracking Number
+              </CardTitle>
+              <CardDescription>
+                Enter the tracking number from your certificate to verify its authenticity and view complete traceability information
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="tracking-number">Tracking Number</Label>
+                  <Input
+                    id="tracking-number"
+                    placeholder="e.g., TRK-2024-001-LR"
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleVerification()}
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button 
+                    onClick={handleVerification} 
+                    disabled={verifyMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {verifyMutation.isPending ? "Verifying..." : "Verify Certificate"}
+                  </Button>
+                </div>
               </div>
-            ) : verificationResult ? (
-              <div className="space-y-6">
-                {verificationResult.status === 'valid' ? (
-                  <>
-                    <Alert className="border-green-200 bg-green-50">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <AlertDescription className="text-green-800">
-                        <strong>Document Verified Successfully</strong> - This {verificationResult.documentType.toLowerCase()} is authentic and issued by LACRA.
-                      </AlertDescription>
-                    </Alert>
+            </CardContent>
+          </Card>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
+          {/* Verification Results */}
+          {verificationResult && (
+            <div className="space-y-6">
+              {verificationResult.valid && verificationResult.record ? (
+                <>
+                  {/* Certificate Overview */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-green-600">
+                        <CheckCircle className="h-5 w-5" />
+                        Certificate Verified
+                      </CardTitle>
+                      <CardDescription>
+                        This certificate is authentic and issued by LACRA
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                          <label className="text-sm font-semibold text-gray-700">Document Type</label>
-                          <div className="mt-1 text-gray-900">{verificationResult.documentType}</div>
-                        </div>
-                        
-                        <div>
-                          <label className="text-sm font-semibold text-gray-700">Verification Status</label>
-                          <div className="mt-1">
-                            <Badge className="bg-green-100 text-green-800 text-sm">✓ VERIFIED AUTHENTIC</Badge>
+                          <h4 className="font-semibold text-sm text-gray-600 mb-2">CERTIFICATE DETAILS</h4>
+                          <div className="space-y-2">
+                            <p><strong>Tracking Number:</strong> {verificationResult.record.trackingNumber}</p>
+                            <p><strong>Status:</strong> 
+                              <Badge className={`ml-2 ${getStatusColor(verificationResult.record.currentStatus)}`}>
+                                {verificationResult.record.currentStatus}
+                              </Badge>
+                            </p>
+                            <p><strong>Destination:</strong> {verificationResult.record.destinationCountry || "Not specified"}</p>
                           </div>
                         </div>
-                        
+
                         <div>
-                          <label className="text-sm font-semibold text-gray-700">Verified On</label>
-                          <div className="mt-1 text-gray-900">{verificationResult.verifiedAt.toLocaleString()}</div>
+                          <h4 className="font-semibold text-sm text-gray-600 mb-2">EUDR COMPLIANCE</h4>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <strong>Compliant:</strong>
+                              {verificationResult.record.eudrCompliant ? (
+                                <Badge className="bg-green-100 text-green-800">
+                                  <CheckCircle className="h-3 w-3 mr-1" /> Yes
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-red-100 text-red-800">
+                                  <XCircle className="h-3 w-3 mr-1" /> No
+                                </Badge>
+                              )}
+                            </div>
+                            <p><strong>Deforestation Risk:</strong>
+                              <Badge className={`ml-2 ${getRiskColor(verificationResult.record.deforestationRisk || "unknown")}`}>
+                                {verificationResult.record.deforestationRisk || "Unknown"}
+                              </Badge>
+                            </p>
+                            {verificationResult.sustainabilityScore && (
+                              <div className="flex items-center gap-2">
+                                <strong>Sustainability Score:</strong>
+                                <div className={`flex items-center gap-1 ${formatSustainabilityScore(verificationResult.sustainabilityScore).color}`}>
+                                  <Star className="h-4 w-4" />
+                                  {verificationResult.sustainabilityScore}% 
+                                  ({formatSustainabilityScore(verificationResult.sustainabilityScore).label})
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-600 mb-2">LOCATION</h4>
+                          <div className="space-y-2">
+                            {verificationResult.record.originCoordinates && (
+                              <p><strong>Origin:</strong> {verificationResult.record.originCoordinates}</p>
+                            )}
+                            {verificationResult.record.currentLocation && (
+                              <p><strong>Current Location:</strong> {verificationResult.record.currentLocation}</p>
+                            )}
+                            <div className="flex gap-2 mt-4">
+                              <Button size="sm" variant="outline" onClick={() => setShowQRCode(true)}>
+                                <QrCode className="h-4 w-4 mr-1" />
+                                QR Code
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
 
-                      <div className="space-y-4">
-                        {verificationResult.type === 'certificate' && (
-                          <>
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Certificate Number</label>
-                              <div className="mt-1 text-gray-900 font-mono">{verificationResult.data.certificateNumber}</div>
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Exporter</label>
-                              <div className="mt-1 text-gray-900">{verificationResult.data.exporterName}</div>
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Status</label>
-                              <div className="mt-1">{getStatusBadge(verificationResult.data.status)}</div>
-                            </div>
-                          </>
-                        )}
+                  {/* Active Alerts */}
+                  {verificationResult.alerts.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-orange-600">
+                          <AlertTriangle className="h-5 w-5" />
+                          Active Alerts ({verificationResult.alerts.length})
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {verificationResult.alerts.map((alert) => (
+                            <Alert key={alert.id} className="border-orange-200">
+                              <div className="flex items-start gap-3">
+                                {getSeverityIcon(alert.severity)}
+                                <div className="flex-1">
+                                  <AlertTitle className="text-sm">{alert.title}</AlertTitle>
+                                  <AlertDescription className="text-sm">
+                                    {alert.message}
+                                    {alert.actionRequired && (
+                                      <Badge className="ml-2 bg-red-100 text-red-800">Action Required</Badge>
+                                    )}
+                                  </AlertDescription>
+                                </div>
+                                <Badge className={`${getRiskColor(alert.severity)}`}>
+                                  {alert.severity}
+                                </Badge>
+                              </div>
+                            </Alert>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                        {verificationResult.type === 'commodity' && (
-                          <>
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Batch Number</label>
-                              <div className="mt-1 text-gray-900 font-mono">{verificationResult.data.batchNumber}</div>
+                  {/* Supply Chain Timeline */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Clock className="h-5 w-5" />
+                        Supply Chain Timeline
+                      </CardTitle>
+                      <CardDescription>
+                        Complete traceability from farm to export
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {verificationResult.timeline.length > 0 ? (
+                        <div className="space-y-4">
+                          {verificationResult.timeline.map((event, index) => (
+                            <div key={event.id} className="flex gap-4">
+                              <div className="flex flex-col items-center">
+                                <div className={`w-3 h-3 rounded-full ${
+                                  event.complianceStatus === "compliant" ? "bg-green-500" :
+                                  event.complianceStatus === "non_compliant" ? "bg-red-500" :
+                                  "bg-yellow-500"
+                                }`} />
+                                {index < verificationResult.timeline.length - 1 && (
+                                  <div className="w-px h-12 bg-gray-300 mt-2" />
+                                )}
+                              </div>
+                              <div className="flex-1 pb-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-semibold">{event.eventDescription}</h4>
+                                  <Badge variant="outline">{event.eventType}</Badge>
+                                  {event.eudrVerified && (
+                                    <Badge className="bg-green-100 text-green-800">
+                                      <Leaf className="h-3 w-3 mr-1" /> EUDR Verified
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600">
+                                  {event.eventLocation && `📍 ${event.eventLocation} • `}
+                                  {event.officerName && `👤 ${event.officerName} • `}
+                                  📅 {new Date(event.timestamp).toLocaleString()}
+                                </p>
+                                {event.complianceChecked && (
+                                  <Badge className={`mt-2 ${getStatusColor(event.complianceStatus || "pending")}`}>
+                                    Compliance: {event.complianceStatus || "pending"}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
-                            
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Commodity</label>
-                              <div className="mt-1 text-gray-900">{verificationResult.data.name}</div>
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Quality Grade</label>
-                              <div className="mt-1 text-gray-900">{verificationResult.data.qualityGrade}</div>
-                            </div>
-                          </>
-                        )}
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-center py-8">No timeline events recorded</p>
+                      )}
+                    </CardContent>
+                  </Card>
 
-                        {verificationResult.type === 'report' && (
-                          <>
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Report ID</label>
-                              <div className="mt-1 text-gray-900 font-mono">{verificationResult.data.reportId}</div>
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm font-semibold text-gray-700">Department</label>
-                              <div className="mt-1 text-gray-900">{verificationResult.data.department}</div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3 pt-4 border-t border-gray-200">
-                      <Button 
-                        onClick={downloadVerificationReport}
-                        className="bg-lacra-blue hover:bg-blue-700 text-white"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download Verification Report
-                      </Button>
-                      
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          setSearchQuery("");
-                          setVerificationResult(null);
-                          setHasSearched(false);
-                        }}
-                        className="text-gray-600 border-gray-300"
-                      >
-                        <Search className="h-4 w-4 mr-2" />
-                        Verify Another Document
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Alert className="border-red-200 bg-red-50">
-                      <XCircle className="h-4 w-4 text-red-600" />
-                      <AlertDescription className="text-red-800">
-                        <strong>Document Not Found</strong> - No valid document found with reference number "{searchQuery}". Please check the number and try again.
-                      </AlertDescription>
-                    </Alert>
-
-                    <div className="text-center py-6">
-                      <XCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Document Not Verified</h3>
-                      <p className="text-gray-600 mb-4">
-                        The reference number you entered does not match any document in our system.
-                      </p>
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          setSearchQuery("");
-                          setVerificationResult(null);
-                          setHasSearched(false);
-                        }}
-                        className="text-lacra-blue border-lacra-blue"
-                      >
-                        Try Different Reference Number
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                Enter a reference number above and click "Verify Document" to check its authenticity.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Information Panel */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-neutral">How to Use the Verification System</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="bg-lacra-blue bg-opacity-10 rounded-full p-3 w-12 h-12 mx-auto mb-3 flex items-center justify-center">
-                <FileText className="h-6 w-6 text-lacra-blue" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Enter Reference</h3>
-              <p className="text-sm text-gray-600">
-                Enter any certificate number, batch code, or document reference number
-              </p>
+                  {/* Verification Details */}
+                  {verificationResult.verifications.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5" />
+                          Verification Details
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Type</TableHead>
+                              <TableHead>Method</TableHead>
+                              <TableHead>Result</TableHead>
+                              <TableHead>EUDR Checks</TableHead>
+                              <TableHead>Verified By</TableHead>
+                              <TableHead>Date</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {verificationResult.verifications.map((verification) => (
+                              <TableRow key={verification.id}>
+                                <TableCell>{verification.verificationType}</TableCell>
+                                <TableCell>{verification.verificationMethod}</TableCell>
+                                <TableCell>
+                                  <Badge className={
+                                    verification.verificationResult === "passed" ? "bg-green-100 text-green-800" :
+                                    verification.verificationResult === "failed" ? "bg-red-100 text-red-800" :
+                                    "bg-yellow-100 text-yellow-800"
+                                  }>
+                                    {verification.verificationResult}
+                                    {verification.confidence && ` (${verification.confidence}%)`}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-1">
+                                    {verification.deforestationCheck && (
+                                      <Badge className="bg-green-100 text-green-800 text-xs">Deforestation</Badge>
+                                    )}
+                                    {verification.legalityVerified && (
+                                      <Badge className="bg-blue-100 text-blue-800 text-xs">Legal</Badge>
+                                    )}
+                                    {verification.sustainabilityVerified && (
+                                      <Badge className="bg-purple-100 text-purple-800 text-xs">Sustainable</Badge>
+                                    )}
+                                    {verification.traceabilityVerified && (
+                                      <Badge className="bg-orange-100 text-orange-800 text-xs">Traceable</Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>{verification.verifiedBy}</TableCell>
+                                <TableCell>{new Date(verification.verificationDate).toLocaleDateString()}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              ) : (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-red-600 mb-2">Certificate Not Found</h3>
+                    <p className="text-gray-600">
+                      The tracking number "{trackingNumber}" is not valid or the certificate does not exist in our system.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
-            
-            <div className="text-center">
-              <div className="bg-lacra-green bg-opacity-10 rounded-full p-3 w-12 h-12 mx-auto mb-3 flex items-center justify-center">
-                <Shield className="h-6 w-6 text-lacra-green" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Real-time Verification</h3>
-              <p className="text-sm text-gray-600">
-                System checks authenticity against official LACRA database
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-lacra-orange bg-opacity-10 rounded-full p-3 w-12 h-12 mx-auto mb-3 flex items-center justify-center">
-                <Download className="h-6 w-6 text-lacra-orange" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Official Report</h3>
-              <p className="text-sm text-gray-600">
-                Download official verification report for your records
-              </p>
+          )}
+        </TabsContent>
+
+        {/* All Records Tab */}
+        <TabsContent value="records" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Tracking Records</CardTitle>
+              <CardDescription>
+                Complete list of all certificate tracking records in the system
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingRecords ? (
+                <div className="text-center py-8">Loading tracking records...</div>
+              ) : trackingRecords.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tracking Number</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>EUDR Compliant</TableHead>
+                      <TableHead>Risk Level</TableHead>
+                      <TableHead>Sustainability Score</TableHead>
+                      <TableHead>Destination</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {trackingRecords.map((record: TrackingRecord) => (
+                      <TableRow key={record.id}>
+                        <TableCell className="font-mono">{record.trackingNumber}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(record.currentStatus)}>
+                            {record.currentStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {record.eudrCompliant ? (
+                            <Badge className="bg-green-100 text-green-800">
+                              <CheckCircle className="h-3 w-3 mr-1" /> Yes
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-red-100 text-red-800">
+                              <XCircle className="h-3 w-3 mr-1" /> No
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getRiskColor(record.deforestationRisk || "unknown")}>
+                            {record.deforestationRisk || "Unknown"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {record.sustainabilityScore ? (
+                            <div className={`flex items-center gap-1 ${formatSustainabilityScore(record.sustainabilityScore).color}`}>
+                              <Star className="h-4 w-4" />
+                              {record.sustainabilityScore}%
+                            </div>
+                          ) : (
+                            "Not scored"
+                          )}
+                        </TableCell>
+                        <TableCell>{record.destinationCountry || "Not specified"}</TableCell>
+                        <TableCell>{new Date(record.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setTrackingNumber(record.trackingNumber);
+                              verifyMutation.mutate(record.trackingNumber);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No tracking records found</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* QR Code Dialog */}
+      <Dialog open={showQRCode} onOpenChange={setShowQRCode}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Certificate QR Code</DialogTitle>
+            <DialogDescription>
+              Scan this QR code to verify the certificate on mobile devices
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-8">
+            <div className="bg-gray-100 p-8 rounded-lg">
+              <QrCode className="h-32 w-32 text-gray-600" />
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <p className="text-center text-sm text-gray-600">
+            QR Code for: {verificationResult?.record?.trackingNumber}
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -800,3 +800,190 @@ export type InsertFarmGpsMapping = z.infer<typeof insertFarmGpsMappingSchema>;
 export type InsertDeforestationMonitoring = z.infer<typeof insertDeforestationMonitoringSchema>;
 export type InsertEudrCompliance = z.infer<typeof insertEudrComplianceSchema>;
 export type InsertGeofencingZone = z.infer<typeof insertGeofencingZoneSchema>;
+
+// =============================================
+// VERIFIABLE TRACKING SYSTEM TABLES
+// =============================================
+
+export const trackingRecords = pgTable("tracking_records", {
+  id: serial("id").primaryKey(),
+  trackingNumber: text("tracking_number").notNull().unique(),
+  certificateId: integer("certificate_id").references(() => certifications.id).notNull(),
+  commodityId: integer("commodity_id").references(() => commodities.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id),
+  currentStatus: text("current_status").notNull().default("active"), // active, completed, suspended, cancelled
+  
+  // EUDR Compliance Information
+  eudrCompliant: boolean("eudr_compliant").default(false),
+  deforestationRisk: text("deforestation_risk"), // low, medium, high, critical
+  sustainabilityScore: decimal("sustainability_score", { precision: 5, scale: 2 }),
+  
+  // Supply Chain Information
+  supplyChainSteps: jsonb("supply_chain_steps"), // Array of supply chain checkpoints
+  originCoordinates: text("origin_coordinates"), // GPS coordinates of origin
+  currentLocation: text("current_location"),
+  destinationCountry: text("destination_country"),
+  
+  // Verification Information
+  qrCodeData: text("qr_code_data"),
+  blockchainHash: text("blockchain_hash"), // Future blockchain integration
+  digitalSignature: text("digital_signature"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const trackingTimeline = pgTable("tracking_timeline", {
+  id: serial("id").primaryKey(),
+  trackingRecordId: integer("tracking_record_id").references(() => trackingRecords.id).notNull(),
+  
+  // Event Information
+  eventType: text("event_type").notNull(), // created, inspected, certified, shipped, received, verified
+  eventDescription: text("event_description").notNull(),
+  eventLocation: text("event_location"),
+  eventCoordinates: text("event_coordinates"),
+  
+  // Personnel Information
+  performedBy: text("performed_by").notNull(),
+  officerName: text("officer_name"),
+  officerRole: text("officer_role"),
+  department: text("department"),
+  
+  // Documentation
+  documentReferences: jsonb("document_references"), // Related documents/certificates
+  photoUrls: jsonb("photo_urls"), // Evidence photos
+  notes: text("notes"),
+  
+  // Compliance Status
+  complianceChecked: boolean("compliance_checked").default(false),
+  complianceStatus: text("compliance_status"), // compliant, non_compliant, pending
+  eudrVerified: boolean("eudr_verified").default(false),
+  
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const trackingVerifications = pgTable("tracking_verifications", {
+  id: serial("id").primaryKey(),
+  trackingRecordId: integer("tracking_record_id").references(() => trackingRecords.id).notNull(),
+  
+  // Verification Details
+  verificationType: text("verification_type").notNull(), // document, physical, gps, lab_test, third_party
+  verificationMethod: text("verification_method").notNull(),
+  verifiedBy: text("verified_by").notNull(),
+  verificationDate: timestamp("verification_date").notNull(),
+  
+  // Results
+  verificationResult: text("verification_result").notNull(), // passed, failed, inconclusive
+  confidence: decimal("confidence", { precision: 5, scale: 2 }), // Confidence percentage
+  
+  // EUDR Specific Verifications
+  deforestationCheck: boolean("deforestation_check").default(false),
+  legalityVerified: boolean("legality_verified").default(false),
+  sustainabilityVerified: boolean("sustainability_verified").default(false),
+  traceabilityVerified: boolean("traceability_verified").default(false),
+  
+  // Documentation
+  verificationDocuments: jsonb("verification_documents"),
+  evidenceUrls: jsonb("evidence_urls"),
+  notes: text("notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const trackingAlerts = pgTable("tracking_alerts", {
+  id: serial("id").primaryKey(),
+  trackingRecordId: integer("tracking_record_id").references(() => trackingRecords.id).notNull(),
+  
+  // Alert Information
+  alertType: text("alert_type").notNull(), // compliance, verification, timeline, location, document
+  severity: text("severity").notNull(), // low, medium, high, critical
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  
+  // Status
+  status: text("status").notNull().default("active"), // active, acknowledged, resolved, dismissed
+  acknowledgedBy: text("acknowledged_by"),
+  acknowledgedDate: timestamp("acknowledged_date"),
+  resolvedBy: text("resolved_by"),
+  resolvedDate: timestamp("resolved_date"),
+  
+  // Action Required
+  actionRequired: boolean("action_required").default(true),
+  actionDeadline: timestamp("action_deadline"),
+  actionTaken: text("action_taken"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const trackingReports = pgTable("tracking_reports", {
+  id: serial("id").primaryKey(),
+  trackingRecordId: integer("tracking_record_id").references(() => trackingRecords.id).notNull(),
+  
+  // Report Information
+  reportType: text("report_type").notNull(), // compliance, verification, timeline, export, audit
+  reportTitle: text("report_title").notNull(),
+  reportPeriod: text("report_period"),
+  
+  // Generated Information
+  generatedBy: text("generated_by").notNull(),
+  generatedDate: timestamp("generated_date").defaultNow(),
+  department: text("department"),
+  
+  // Content
+  reportData: jsonb("report_data"),
+  summary: text("summary"),
+  recommendations: text("recommendations"),
+  
+  // Export Information
+  fileUrl: text("file_url"),
+  fileFormat: text("file_format"), // pdf, excel, json
+  downloadCount: integer("download_count").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// =============================================
+// INSERT SCHEMAS FOR TRACKING SYSTEM
+// =============================================
+
+export const insertTrackingRecordSchema = createInsertSchema(trackingRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTrackingTimelineSchema = createInsertSchema(trackingTimeline).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertTrackingVerificationSchema = createInsertSchema(trackingVerifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTrackingAlertSchema = createInsertSchema(trackingAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTrackingReportSchema = createInsertSchema(trackingReports).omit({
+  id: true,
+  createdAt: true,
+});
+
+// =============================================
+// TRACKING SYSTEM TYPES
+// =============================================
+
+export type TrackingRecord = typeof trackingRecords.$inferSelect;
+export type TrackingTimeline = typeof trackingTimeline.$inferSelect;
+export type TrackingVerification = typeof trackingVerifications.$inferSelect;
+export type TrackingAlert = typeof trackingAlerts.$inferSelect;
+export type TrackingReport = typeof trackingReports.$inferSelect;
+
+export type InsertTrackingRecord = z.infer<typeof insertTrackingRecordSchema>;
+export type InsertTrackingTimeline = z.infer<typeof insertTrackingTimelineSchema>;
+export type InsertTrackingVerification = z.infer<typeof insertTrackingVerificationSchema>;
+export type InsertTrackingAlert = z.infer<typeof insertTrackingAlertSchema>;
+export type InsertTrackingReport = z.infer<typeof insertTrackingReportSchema>;

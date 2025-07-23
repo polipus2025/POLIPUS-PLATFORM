@@ -30,6 +30,11 @@ import {
   commodityStandardsCompliance,
   standardsApiIntegration,
   standardsSyncLog,
+  trackingRecords,
+  trackingTimeline,
+  trackingVerifications,
+  trackingAlerts,
+  trackingReports,
   type Commodity,
   type Inspection,
   type Certification,
@@ -61,6 +66,11 @@ import {
   type CommodityStandardsCompliance,
   type StandardsApiIntegration,
   type StandardsSyncLog,
+  type TrackingRecord,
+  type TrackingTimeline,
+  type TrackingVerification,
+  type TrackingAlert,
+  type TrackingReport,
   type InsertCommodity,
   type InsertInspection,
   type InsertCertification,
@@ -91,7 +101,12 @@ import {
   type InsertInternationalStandard,
   type InsertCommodityStandardsCompliance,
   type InsertStandardsApiIntegration,
-  type InsertStandardsSyncLog
+  type InsertStandardsSyncLog,
+  type InsertTrackingRecord,
+  type InsertTrackingTimeline,
+  type InsertTrackingVerification,
+  type InsertTrackingAlert,
+  type InsertTrackingReport
 } from "@shared/schema";
 
 export interface IStorage {
@@ -327,6 +342,50 @@ export interface IStorage {
   detectDeforestation(farmGpsMappingId: number): Promise<{ detected: boolean; area: number; riskLevel: string }>;
   validateGpsCoordinates(coordinates: string): Promise<{ valid: boolean; area: number; issues: string[] }>;
   generateTraceabilityReport(commodityId: number): Promise<{ score: number; documentation: any; compliance: any }>;
+
+  // Verifiable Tracking System methods
+  getTrackingRecords(): Promise<TrackingRecord[]>;
+  getTrackingRecord(id: number): Promise<TrackingRecord | undefined>;
+  getTrackingRecordByNumber(trackingNumber: string): Promise<TrackingRecord | undefined>;
+  getTrackingRecordsByCommodity(commodityId: number): Promise<TrackingRecord[]>;
+  getTrackingRecordsByFarmer(farmerId: number): Promise<TrackingRecord[]>;
+  createTrackingRecord(record: InsertTrackingRecord): Promise<TrackingRecord>;
+  updateTrackingRecord(id: number, record: Partial<TrackingRecord>): Promise<TrackingRecord | undefined>;
+
+  // Tracking Timeline methods
+  getTrackingTimeline(trackingRecordId: number): Promise<TrackingTimeline[]>;
+  getTrackingTimelineEvent(id: number): Promise<TrackingTimeline | undefined>;
+  createTrackingTimelineEvent(event: InsertTrackingTimeline): Promise<TrackingTimeline>;
+  updateTrackingTimelineEvent(id: number, event: Partial<TrackingTimeline>): Promise<TrackingTimeline | undefined>;
+
+  // Tracking Verification methods
+  getTrackingVerifications(trackingRecordId: number): Promise<TrackingVerification[]>;
+  getTrackingVerification(id: number): Promise<TrackingVerification | undefined>;
+  createTrackingVerification(verification: InsertTrackingVerification): Promise<TrackingVerification>;
+  updateTrackingVerification(id: number, verification: Partial<TrackingVerification>): Promise<TrackingVerification | undefined>;
+
+  // Tracking Alerts methods
+  getTrackingAlerts(trackingRecordId?: number): Promise<TrackingAlert[]>;
+  getTrackingAlert(id: number): Promise<TrackingAlert | undefined>;
+  createTrackingAlert(alert: InsertTrackingAlert): Promise<TrackingAlert>;
+  updateTrackingAlert(id: number, alert: Partial<TrackingAlert>): Promise<TrackingAlert | undefined>;
+
+  // Tracking Reports methods
+  getTrackingReports(trackingRecordId?: number): Promise<TrackingReport[]>;
+  getTrackingReport(id: number): Promise<TrackingReport | undefined>;
+  createTrackingReport(report: InsertTrackingReport): Promise<TrackingReport>;
+
+  // Verification methods for EUDR compliance
+  verifyTrackingRecord(trackingNumber: string): Promise<{
+    valid: boolean;
+    record: TrackingRecord | null;
+    timeline: TrackingTimeline[];
+    verifications: TrackingVerification[];
+    alerts: TrackingAlert[];
+    eudrCompliant: boolean;
+    sustainabilityScore?: number;
+  }>;
+  generateTrackingNumber(): Promise<string>;
 }
 
 export class MemStorage implements IStorage {
@@ -360,6 +419,11 @@ export class MemStorage implements IStorage {
   private commodityStandardsCompliances: Map<number, CommodityStandardsCompliance>;
   private standardsApiIntegrations: Map<number, StandardsApiIntegration>;
   private standardsSyncLogs: Map<number, StandardsSyncLog>;
+  private trackingRecords: Map<number, TrackingRecord>;
+  private trackingTimelines: Map<number, TrackingTimeline>;
+  private trackingVerifications: Map<number, TrackingVerification>;
+  private trackingAlerts: Map<number, TrackingAlert>;
+  private trackingReports: Map<number, TrackingReport>;
   private currentUserId: number;
   private currentAuthUserId: number;
   private currentUserSessionId: number;
@@ -390,6 +454,11 @@ export class MemStorage implements IStorage {
   private currentCommodityStandardsComplianceId: number;
   private currentStandardsApiIntegrationId: number;
   private currentStandardsSyncLogId: number;
+  private currentTrackingRecordId: number;
+  private currentTrackingTimelineId: number;
+  private currentTrackingVerificationId: number;
+  private currentTrackingAlertId: number;
+  private currentTrackingReportId: number;
 
   constructor() {
     this.users = new Map();
@@ -422,6 +491,11 @@ export class MemStorage implements IStorage {
     this.commodityStandardsCompliances = new Map();
     this.standardsApiIntegrations = new Map();
     this.standardsSyncLogs = new Map();
+    this.trackingRecords = new Map();
+    this.trackingTimelines = new Map();
+    this.trackingVerifications = new Map();
+    this.trackingAlerts = new Map();
+    this.trackingReports = new Map();
     this.currentUserId = 1;
     this.currentAuthUserId = 1;
     this.currentUserSessionId = 1;
@@ -452,6 +526,11 @@ export class MemStorage implements IStorage {
     this.currentCommodityStandardsComplianceId = 1;
     this.currentStandardsApiIntegrationId = 1;
     this.currentStandardsSyncLogId = 1;
+    this.currentTrackingRecordId = 1;
+    this.currentTrackingTimelineId = 1;
+    this.currentTrackingVerificationId = 1;
+    this.currentTrackingAlertId = 1;
+    this.currentTrackingReportId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
@@ -1304,6 +1383,182 @@ export class MemStorage implements IStorage {
       notes: "New mapping requires verification. Low-risk commodity assessment.",
       lastUpdated: new Date("2024-12-10")
     });
+
+    // Initialize tracking system data
+    this.initializeTrackingData();
+  }
+
+  // Initialize tracking system with sample data
+  private async initializeTrackingData() {
+    try {
+      // Create sample tracking records
+      const trackingRecord1 = await this.createTrackingRecord({
+        certificateId: 1,
+        commodityId: 1,
+        farmerId: 1,
+        currentStatus: "active",
+        eudrCompliant: true,
+        deforestationRisk: "low",
+        sustainabilityScore: 92,
+        originCoordinates: "8.0, -9.5",
+        currentLocation: "Port of Monrovia",
+        destinationCountry: "Netherlands",
+      });
+
+      const trackingRecord2 = await this.createTrackingRecord({
+        certificateId: 2,
+        commodityId: 2,
+        farmerId: 2,
+        currentStatus: "active",
+        eudrCompliant: true,
+        deforestationRisk: "medium",
+        sustainabilityScore: 78,
+        originCoordinates: "7.5, -8.8",
+        currentLocation: "Processing Facility - Ganta",
+        destinationCountry: "Germany",
+      });
+
+      const trackingRecord3 = await this.createTrackingRecord({
+        certificateId: 3,
+        commodityId: 3,
+        farmerId: 3,
+        currentStatus: "suspended",
+        eudrCompliant: false,
+        deforestationRisk: "high",
+        sustainabilityScore: 45,
+        originCoordinates: "6.8, -10.2",
+        currentLocation: "Farm Site - Sinoe County",
+        destinationCountry: "Belgium",
+      });
+
+      // Create timeline events
+      await this.createTrackingTimelineEvent({
+        trackingRecordId: trackingRecord1.id,
+        eventType: "harvest",
+        eventDescription: "Cocoa beans harvested from certified sustainable farm",
+        eventLocation: "Sustainable Farm - Lofa County",
+        eventCoordinates: "8.0, -9.5",
+        performedBy: "FRM-2024-001",
+        officerName: "Moses Tuah",
+        officerRole: "Farmer",
+        department: "Farm Management",
+        complianceChecked: true,
+        complianceStatus: "compliant",
+        eudrVerified: true,
+        timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+      });
+
+      await this.createTrackingTimelineEvent({
+        trackingRecordId: trackingRecord1.id,
+        eventType: "processing",
+        eventDescription: "Initial processing and quality control completed",
+        eventLocation: "Processing Center - Monrovia",
+        eventCoordinates: "6.3, -10.8",
+        performedBy: "officer001",
+        officerName: "James Kollie",
+        officerRole: "Quality Inspector",
+        department: "Compliance & Monitoring",
+        complianceChecked: true,
+        complianceStatus: "compliant",
+        eudrVerified: true,
+        timestamp: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000), // 25 days ago
+      });
+
+      await this.createTrackingTimelineEvent({
+        trackingRecordId: trackingRecord1.id,
+        eventType: "certification",
+        eventDescription: "EUDR compliance certificate issued",
+        eventLocation: "LACRA Headquarters - Monrovia",
+        eventCoordinates: "6.3, -10.8",
+        performedBy: "admin001",
+        officerName: "Samuel Johnson",
+        officerRole: "Regulatory Admin",
+        department: "System Administration",
+        complianceChecked: true,
+        complianceStatus: "compliant",
+        eudrVerified: true,
+        timestamp: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
+      });
+
+      await this.createTrackingTimelineEvent({
+        trackingRecordId: trackingRecord1.id,
+        eventType: "export_ready",
+        eventDescription: "Shipment prepared for export to Netherlands",
+        eventLocation: "Port of Monrovia",
+        eventCoordinates: "6.3, -10.8",
+        performedBy: "AGT-2024-001",
+        officerName: "Sarah Konneh",
+        officerRole: "Field Agent",
+        department: "Export Operations",
+        complianceChecked: true,
+        complianceStatus: "compliant",
+        eudrVerified: true,
+        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+      });
+
+      // Create verifications
+      await this.createTrackingVerification({
+        trackingRecordId: trackingRecord1.id,
+        verificationType: "deforestation_check",
+        verificationMethod: "satellite_imagery",
+        verifiedBy: "LACRA Remote Sensing Team",
+        verificationResult: "passed",
+        confidence: 95,
+        deforestationCheck: true,
+        legalityVerified: true,
+        sustainabilityVerified: true,
+        traceabilityVerified: true,
+        notes: "Satellite imagery confirms no deforestation in the past 5 years",
+      });
+
+      await this.createTrackingVerification({
+        trackingRecordId: trackingRecord1.id,
+        verificationType: "chain_of_custody",
+        verificationMethod: "on_site_inspection",
+        verifiedBy: "James Kollie",
+        verificationResult: "passed",
+        confidence: 98,
+        deforestationCheck: true,
+        legalityVerified: true,
+        sustainabilityVerified: true,
+        traceabilityVerified: true,
+        notes: "Complete chain of custody documented and verified",
+      });
+
+      // Create alert for non-compliant record
+      await this.createTrackingAlert({
+        trackingRecordId: trackingRecord3.id,
+        alertType: "compliance_violation",
+        severity: "high",
+        title: "EUDR Compliance Violation Detected",
+        message: "Deforestation risk assessment indicates high risk of non-compliance with EU Deforestation Regulation. Immediate action required.",
+        actionRequired: true,
+        actionDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      });
+
+      await this.createTrackingAlert({
+        trackingRecordId: trackingRecord2.id,
+        alertType: "documentation_incomplete",
+        severity: "medium",
+        title: "Additional Documentation Required",
+        message: "Supply chain documentation needs completion for full EUDR compliance verification.",
+        actionRequired: true,
+        actionDeadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+      });
+
+      // Create reports
+      await this.createTrackingReport({
+        trackingRecordId: trackingRecord1.id,
+        reportType: "compliance_report",
+        reportTitle: "EUDR Compliance Assessment Report",
+        generatedBy: "admin001",
+        reportFormat: "pdf",
+      });
+
+      console.log("✓ Tracking system initialized with sample data");
+    } catch (error) {
+      console.error("Error initializing tracking data:", error);
+    }
   }
 
   // User methods (legacy)
@@ -2969,6 +3224,273 @@ export class MemStorage implements IStorage {
     };
     this.standardsSyncLogs.set(newLog.id, newLog);
     return newLog;
+  }
+
+  // Verifiable Tracking System methods
+  async getTrackingRecords(): Promise<TrackingRecord[]> {
+    return Array.from(this.trackingRecords.values());
+  }
+
+  async getTrackingRecord(id: number): Promise<TrackingRecord | undefined> {
+    return this.trackingRecords.get(id);
+  }
+
+  async getTrackingRecordByNumber(trackingNumber: string): Promise<TrackingRecord | undefined> {
+    return Array.from(this.trackingRecords.values()).find(record => record.trackingNumber === trackingNumber);
+  }
+
+  async getTrackingRecordsByCommodity(commodityId: number): Promise<TrackingRecord[]> {
+    return Array.from(this.trackingRecords.values()).filter(record => record.commodityId === commodityId);
+  }
+
+  async getTrackingRecordsByFarmer(farmerId: number): Promise<TrackingRecord[]> {
+    return Array.from(this.trackingRecords.values()).filter(record => record.farmerId === farmerId);
+  }
+
+  async createTrackingRecord(record: InsertTrackingRecord): Promise<TrackingRecord> {
+    const trackingNumber = await this.generateTrackingNumber();
+    const newRecord: TrackingRecord = {
+      id: this.currentTrackingRecordId++,
+      trackingNumber,
+      certificateId: record.certificateId,
+      commodityId: record.commodityId,
+      farmerId: record.farmerId ?? null,
+      currentStatus: record.currentStatus ?? "active",
+      eudrCompliant: record.eudrCompliant ?? false,
+      deforestationRisk: record.deforestationRisk ?? null,
+      sustainabilityScore: record.sustainabilityScore ?? null,
+      supplyChainSteps: record.supplyChainSteps ?? null,
+      originCoordinates: record.originCoordinates ?? null,
+      currentLocation: record.currentLocation ?? null,
+      destinationCountry: record.destinationCountry ?? null,
+      qrCodeData: record.qrCodeData ?? null,
+      metadata: record.metadata ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.trackingRecords.set(newRecord.id, newRecord);
+    
+    // Create initial timeline event
+    await this.createTrackingTimelineEvent({
+      trackingRecordId: newRecord.id,
+      eventType: "created",
+      eventDescription: "Tracking record created",
+      performedBy: "system",
+      complianceChecked: false,
+      eudrVerified: false,
+      timestamp: new Date(),
+    });
+
+    return newRecord;
+  }
+
+  async updateTrackingRecord(id: number, record: Partial<TrackingRecord>): Promise<TrackingRecord | undefined> {
+    const existing = this.trackingRecords.get(id);
+    if (!existing) return undefined;
+
+    const updated = { ...existing, ...record, updatedAt: new Date() };
+    this.trackingRecords.set(id, updated);
+    return updated;
+  }
+
+  // Tracking Timeline methods
+  async getTrackingTimeline(trackingRecordId: number): Promise<TrackingTimeline[]> {
+    return Array.from(this.trackingTimelines.values())
+      .filter(event => event.trackingRecordId === trackingRecordId)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  }
+
+  async getTrackingTimelineEvent(id: number): Promise<TrackingTimeline | undefined> {
+    return this.trackingTimelines.get(id);
+  }
+
+  async createTrackingTimelineEvent(event: InsertTrackingTimeline): Promise<TrackingTimeline> {
+    const newEvent: TrackingTimeline = {
+      id: this.currentTrackingTimelineId++,
+      trackingRecordId: event.trackingRecordId,
+      eventType: event.eventType,
+      eventDescription: event.eventDescription,
+      eventLocation: event.eventLocation ?? null,
+      eventCoordinates: event.eventCoordinates ?? null,
+      performedBy: event.performedBy,
+      officerName: event.officerName ?? null,
+      officerRole: event.officerRole ?? null,
+      department: event.department ?? null,
+      complianceChecked: event.complianceChecked ?? false,
+      complianceStatus: event.complianceStatus ?? null,
+      eudrVerified: event.eudrVerified ?? false,
+      metadata: event.metadata ?? null,
+      timestamp: event.timestamp ?? new Date(),
+      createdAt: new Date(),
+    };
+    this.trackingTimelines.set(newEvent.id, newEvent);
+    return newEvent;
+  }
+
+  async updateTrackingTimelineEvent(id: number, event: Partial<TrackingTimeline>): Promise<TrackingTimeline | undefined> {
+    const existing = this.trackingTimelines.get(id);
+    if (!existing) return undefined;
+
+    const updated = { ...existing, ...event };
+    this.trackingTimelines.set(id, updated);
+    return updated;
+  }
+
+  // Tracking Verification methods
+  async getTrackingVerifications(trackingRecordId: number): Promise<TrackingVerification[]> {
+    return Array.from(this.trackingVerifications.values())
+      .filter(verification => verification.trackingRecordId === trackingRecordId);
+  }
+
+  async getTrackingVerification(id: number): Promise<TrackingVerification | undefined> {
+    return this.trackingVerifications.get(id);
+  }
+
+  async createTrackingVerification(verification: InsertTrackingVerification): Promise<TrackingVerification> {
+    const newVerification: TrackingVerification = {
+      id: this.currentTrackingVerificationId++,
+      trackingRecordId: verification.trackingRecordId,
+      verificationType: verification.verificationType,
+      verificationMethod: verification.verificationMethod,
+      verifiedBy: verification.verifiedBy,
+      verificationDate: verification.verificationDate ?? new Date(),
+      verificationResult: verification.verificationResult,
+      confidence: verification.confidence ?? null,
+      deforestationCheck: verification.deforestationCheck ?? false,
+      legalityVerified: verification.legalityVerified ?? false,
+      sustainabilityVerified: verification.sustainabilityVerified ?? false,
+      traceabilityVerified: verification.traceabilityVerified ?? false,
+      notes: verification.notes ?? null,
+      metadata: verification.metadata ?? null,
+      createdAt: new Date(),
+    };
+    this.trackingVerifications.set(newVerification.id, newVerification);
+    return newVerification;
+  }
+
+  async updateTrackingVerification(id: number, verification: Partial<TrackingVerification>): Promise<TrackingVerification | undefined> {
+    const existing = this.trackingVerifications.get(id);
+    if (!existing) return undefined;
+
+    const updated = { ...existing, ...verification };
+    this.trackingVerifications.set(id, updated);
+    return updated;
+  }
+
+  // Tracking Alerts methods
+  async getTrackingAlerts(trackingRecordId?: number): Promise<TrackingAlert[]> {
+    const alerts = Array.from(this.trackingAlerts.values());
+    return trackingRecordId 
+      ? alerts.filter(alert => alert.trackingRecordId === trackingRecordId)
+      : alerts;
+  }
+
+  async getTrackingAlert(id: number): Promise<TrackingAlert | undefined> {
+    return this.trackingAlerts.get(id);
+  }
+
+  async createTrackingAlert(alert: InsertTrackingAlert): Promise<TrackingAlert> {
+    const newAlert: TrackingAlert = {
+      id: this.currentTrackingAlertId++,
+      trackingRecordId: alert.trackingRecordId,
+      alertType: alert.alertType,
+      severity: alert.severity ?? "medium",
+      title: alert.title,
+      message: alert.message,
+      status: alert.status ?? "active",
+      actionRequired: alert.actionRequired ?? false,
+      actionDeadline: alert.actionDeadline ?? null,
+      metadata: alert.metadata ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.trackingAlerts.set(newAlert.id, newAlert);
+    return newAlert;
+  }
+
+  async updateTrackingAlert(id: number, alert: Partial<TrackingAlert>): Promise<TrackingAlert | undefined> {
+    const existing = this.trackingAlerts.get(id);
+    if (!existing) return undefined;
+
+    const updated = { ...existing, ...alert, updatedAt: new Date() };
+    this.trackingAlerts.set(id, updated);
+    return updated;
+  }
+
+  // Tracking Reports methods
+  async getTrackingReports(trackingRecordId?: number): Promise<TrackingReport[]> {
+    const reports = Array.from(this.trackingReports.values());
+    return trackingRecordId 
+      ? reports.filter(report => report.trackingRecordId === trackingRecordId)
+      : reports;
+  }
+
+  async getTrackingReport(id: number): Promise<TrackingReport | undefined> {
+    return this.trackingReports.get(id);
+  }
+
+  async createTrackingReport(report: InsertTrackingReport): Promise<TrackingReport> {
+    const newReport: TrackingReport = {
+      id: this.currentTrackingReportId++,
+      trackingRecordId: report.trackingRecordId,
+      reportType: report.reportType,
+      reportTitle: report.reportTitle,
+      reportData: report.reportData ?? null,
+      generatedBy: report.generatedBy,
+      reportFormat: report.reportFormat ?? "pdf",
+      filePath: report.filePath ?? null,
+      fileSize: report.fileSize ?? null,
+      metadata: report.metadata ?? null,
+      createdAt: new Date(),
+    };
+    this.trackingReports.set(newReport.id, newReport);
+    return newReport;
+  }
+
+  // Verification methods for EUDR compliance
+  async verifyTrackingRecord(trackingNumber: string): Promise<{
+    valid: boolean;
+    record: TrackingRecord | null;
+    timeline: TrackingTimeline[];
+    verifications: TrackingVerification[];
+    alerts: TrackingAlert[];
+    eudrCompliant: boolean;
+    sustainabilityScore?: number;
+  }> {
+    const record = await this.getTrackingRecordByNumber(trackingNumber);
+    
+    if (!record) {
+      return {
+        valid: false,
+        record: null,
+        timeline: [],
+        verifications: [],
+        alerts: [],
+        eudrCompliant: false,
+      };
+    }
+
+    const timeline = await this.getTrackingTimeline(record.id);
+    const verifications = await this.getTrackingVerifications(record.id);
+    const alerts = await this.getTrackingAlerts(record.id);
+
+    return {
+      valid: true,
+      record,
+      timeline,
+      verifications,
+      alerts,
+      eudrCompliant: record.eudrCompliant,
+      sustainabilityScore: record.sustainabilityScore || undefined,
+    };
+  }
+
+  async generateTrackingNumber(): Promise<string> {
+    const year = new Date().getFullYear();
+    const month = String(new Date().getMonth() + 1).padStart(2, '0');
+    const count = this.trackingRecords.size + 1;
+    const countStr = String(count).padStart(4, '0');
+    return `TRK-${year}-${month}-${countStr}-LR`;
   }
 }
 

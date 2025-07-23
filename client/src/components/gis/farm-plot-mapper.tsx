@@ -61,7 +61,17 @@ export default function FarmPlotMapper({ farmerId, readOnly = false }: FarmPlotM
     mutationFn: async (plot: FarmPlot) => {
       const endpoint = plot.id ? `/api/farm-plots/${plot.id}` : '/api/farm-plots';
       const method = plot.id ? 'PATCH' : 'POST';
-      return await apiRequest(method, endpoint, plot);
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(plot),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to save plot: ${response.statusText}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/farm-plots'] });
@@ -83,7 +93,13 @@ export default function FarmPlotMapper({ farmerId, readOnly = false }: FarmPlotM
 
   const deletePlotMutation = useMutation({
     mutationFn: async (plotId: number) => {
-      return await apiRequest('DELETE', `/api/farm-plots/${plotId}`);
+      const response = await fetch(`/api/farm-plots/${plotId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to delete plot: ${response.statusText}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/farm-plots'] });

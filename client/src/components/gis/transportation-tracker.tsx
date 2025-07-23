@@ -124,7 +124,7 @@ export default function TransportationTracker() {
                     <SelectValue placeholder="All Routes" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Routes</SelectItem>
+                    <SelectItem value="all">All Routes</SelectItem>
                     <SelectItem value="Monrovia-Lofa">Monrovia-Lofa</SelectItem>
                     <SelectItem value="Port-Processing">Port-Processing</SelectItem>
                     <SelectItem value="Farm-Market">Farm-Market</SelectItem>
@@ -140,7 +140,7 @@ export default function TransportationTracker() {
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="idle">Idle</SelectItem>
                     <SelectItem value="maintenance">Maintenance</SelectItem>

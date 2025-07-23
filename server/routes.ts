@@ -620,6 +620,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Farm plots endpoints
+  app.get('/api/farm-plots', async (req, res) => {
+    try {
+      const farmerId = req.query.farmerId as string;
+      const farmPlots = [
+        {
+          id: 1,
+          farmerId: "FRM-2024-001",
+          plotName: "Northern Coffee Plot",
+          coordinates: [[6.4281, -9.4295], [6.4290, -9.4290], [6.4285, -9.4280], [6.4276, -9.4285]],
+          area: 12.5,
+          cropType: "Coffee",
+          soilType: "Loamy",
+          elevation: 245,
+          slope: 15,
+          waterSource: "Stream",
+          accessRoad: true,
+          notes: "High-quality arabica plantation with good drainage",
+          plantingDate: new Date('2023-03-15'),
+          harvestDate: new Date('2023-11-30')
+        }
+      ];
+      
+      const filteredPlots = farmerId ? 
+        farmPlots.filter(plot => plot.farmerId === farmerId) : 
+        farmPlots;
+      
+      res.json(filteredPlots);
+    } catch (error) {
+      console.error("Error fetching farm plots:", error);
+      res.status(500).json({ message: "Failed to fetch farm plots" });
+    }
+  });
+
+  app.post('/api/farm-plots', async (req, res) => {
+    try {
+      const plotData = req.body;
+      const newPlot = {
+        id: Date.now(),
+        ...plotData,
+        createdAt: new Date().toISOString()
+      };
+      res.status(201).json(newPlot);
+    } catch (error) {
+      console.error("Error creating farm plot:", error);
+      res.status(500).json({ message: "Failed to create farm plot" });
+    }
+  });
+
+  app.patch('/api/farm-plots/:id', async (req, res) => {
+    try {
+      const plotId = req.params.id;
+      const updates = req.body;
+      const updatedPlot = {
+        id: parseInt(plotId),
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      res.json(updatedPlot);
+    } catch (error) {
+      console.error("Error updating farm plot:", error);
+      res.status(500).json({ message: "Failed to update farm plot" });
+    }
+  });
+
+  app.delete('/api/farm-plots/:id', async (req, res) => {
+    try {
+      const plotId = req.params.id;
+      res.json({ success: true, message: `Farm plot ${plotId} deleted successfully` });
+    } catch (error) {
+      console.error("Error deleting farm plot:", error);
+      res.status(500).json({ message: "Failed to delete farm plot" });
+    }
+  });
+
   app.get('/api/farm-plots/:farmerId?', async (req, res) => {
     try {
       const farmerId = req.params.farmerId;

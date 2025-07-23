@@ -330,7 +330,7 @@ export default function AuditSystem() {
                       <SelectValue placeholder="All Statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Statuses</SelectItem>
+                      <SelectItem value="all">All Statuses</SelectItem>
                       <SelectItem value="scheduled">Scheduled</SelectItem>
                       <SelectItem value="in_progress">In Progress</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
@@ -345,7 +345,7 @@ export default function AuditSystem() {
                       <SelectValue placeholder="All Types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="compliance_audit">Compliance Audit</SelectItem>
                       <SelectItem value="data_integrity">Data Integrity</SelectItem>
                       <SelectItem value="security_review">Security Review</SelectItem>
@@ -360,7 +360,7 @@ export default function AuditSystem() {
                       <SelectValue placeholder="All Dates" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Dates</SelectItem>
+                      <SelectItem value="all">All Dates</SelectItem>
                       <SelectItem value="today">Today</SelectItem>
                       <SelectItem value="week">This Week</SelectItem>
                       <SelectItem value="month">This Month</SelectItem>
@@ -454,7 +454,7 @@ export default function AuditSystem() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(auditLogs) && auditLogs.length > 0 && auditLogs.slice(0, 10).map((log: any) => (
+                    {Array.isArray(auditLogs) && auditLogs.length > 0 ? auditLogs.slice(0, 10).map((log: any) => (
                       <TableRow key={log.id}>
                         <TableCell>
                           {log.auditTimestamp ? format(new Date(log.auditTimestamp), 'MMM dd, HH:mm') : 'N/A'}
@@ -471,8 +471,8 @@ export default function AuditSystem() {
                         </TableCell>
                         <TableCell>{log.organizationType}</TableCell>
                       </TableRow>
-                    ))}
-                    {(!auditLogs || auditLogs.length === 0) && (
+                    )) : null}
+                    {(!auditLogs || !Array.isArray(auditLogs) || auditLogs.length === 0) && (
                       <TableRow>
                         <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                           No audit logs found
@@ -510,7 +510,7 @@ export default function AuditSystem() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(auditReports) && auditReports.length > 0 && auditReports.map((report: any) => (
+                    {Array.isArray(auditReports) && auditReports.length > 0 ? auditReports.map((report: any) => (
                       <TableRow key={report.id}>
                         <TableCell className="font-mono text-sm">{report.reportId}</TableCell>
                         <TableCell>{report.reportTitle}</TableCell>
@@ -539,8 +539,8 @@ export default function AuditSystem() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
-                    {(!auditReports || auditReports.length === 0) && (
+                    )) : null}
+                    {(!auditReports || !Array.isArray(auditReports) || auditReports.length === 0) && (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                           No audit reports found

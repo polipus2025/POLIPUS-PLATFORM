@@ -130,7 +130,7 @@ export default function InteractiveMap() {
                     <SelectValue placeholder="All Counties" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Counties</SelectItem>
+                    <SelectItem value="all">All Counties</SelectItem>
                     {liberianCounties.map(county => (
                       <SelectItem key={county} value={county}>{county}</SelectItem>
                     ))}

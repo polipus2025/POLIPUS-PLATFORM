@@ -151,9 +151,10 @@ export default function FieldAgentDashboard() {
       const inspectionPayload = {
         inspectionId: `INS-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
         commodityId: Math.floor(Math.random() * 4) + 1,
+        inspectorId: agentId,
         inspectorName: `${agentId} - Field Agent`,
         inspectorLicense: `LIC-${agentId}`,
-        inspectionDate: new Date().toISOString(),
+        inspectionDate: new Date(),
         location: `${selectedFarmer?.village || 'Farm Site'} - ${jurisdiction}`,
         inspectionType: inspectionData.inspectionType,
         commodityType: inspectionData.commodityType,
@@ -583,7 +584,8 @@ export default function FieldAgentDashboard() {
                     <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h4 className="font-medium">{farmer.firstName} {farmer.lastName}</h4>
-                        <p className="text-sm text-gray-600">{farmer.primaryCrop} - {farmer.farmSize} hectares</p>
+                        <p className="text-sm text-gray-600">{farmer.farmerId} - {farmer.farmSize} {farmer.farmSizeUnit}</p>
+                        <p className="text-xs text-orange-600">{farmer.district}, {farmer.village}</p>
                       </div>
                       <div className="flex gap-2">
                         <Badge className={
@@ -595,13 +597,25 @@ export default function FieldAgentDashboard() {
                           size="sm" 
                           variant="outline"
                           onClick={() => {
+                            const farmerDetails = `
+Farmer: ${farmer.firstName} ${farmer.lastName}
+ID: ${farmer.farmerId}
+Phone: ${farmer.phoneNumber || 'Not provided'}
+Location: ${farmer.village}, ${farmer.district}
+Farm Size: ${farmer.farmSize} ${farmer.farmSizeUnit}
+GPS: ${farmer.gpsCoordinates || 'Not recorded'}
+Agreement: ${farmer.agreementSigned ? 'Signed' : 'Pending'}
+Status: ${farmer.status}
+Registration: ${farmer.registeredBy || 'Unknown'}`;
+                            
+                            console.log('Farmer Details:', farmerDetails);
                             toast({
-                              title: 'Farmer Details',
-                              description: `Viewing details for ${farmer.firstName} ${farmer.lastName} (${farmer.farmerId})`,
+                              title: 'Farmer Profile Opened',
+                              description: `Loading complete profile for ${farmer.firstName} ${farmer.lastName}`,
                             });
                           }}
                         >
-                          View Details
+                          View Profile
                         </Button>
                       </div>
                     </div>

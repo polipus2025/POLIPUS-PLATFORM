@@ -425,6 +425,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Transportation Tracking System Endpoints
+  app.get("/api/transportation/active-shipments", async (req, res) => {
+    try {
+      const activeShipments = {
+        totalActive: 23,
+        inTransit: 18,
+        atCheckpoints: 3,
+        deliveredToday: 12,
+        shipments: [
+          {
+            id: "TRK-LR-001",
+            driverName: "John Kpelle",
+            driverLicense: "DL-2024-001",
+            cargoType: "Coffee",
+            cargoWeight: "2.5 tons",
+            batchNumber: "COF-2024-001",
+            currentLocation: "Buchanan Port",
+            destination: "Buchanan Port",
+            status: "delivered",
+            lastUpdate: "2 min ago",
+            gpsCoordinates: { lat: 5.8817, lng: -10.0464 }
+          },
+          {
+            id: "TRK-LR-002", 
+            driverName: "Mary Kollie",
+            driverLicense: "DL-2024-002",
+            cargoType: "Cocoa",
+            cargoWeight: "3.2 tons",
+            batchNumber: "COC-2024-002",
+            currentLocation: "Gbarnga Checkpoint",
+            destination: "Voinjama",
+            status: "at_checkpoint",
+            lastUpdate: "15 min ago",
+            gpsCoordinates: { lat: 7.0000, lng: -9.4833 }
+          },
+          {
+            id: "TRK-LR-003",
+            driverName: "Samuel Harris", 
+            driverLicense: "DL-2024-003",
+            cargoType: "Palm Oil",
+            cargoWeight: "1.8 tons",
+            batchNumber: "PLM-2024-001",
+            currentLocation: "Farm PLT-2024-001",
+            destination: "Monrovia",
+            status: "loading",
+            lastUpdate: "45 min ago",
+            gpsCoordinates: { lat: 6.3133, lng: -10.8074 }
+          }
+        ]
+      };
+      res.json(activeShipments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch active shipments" });
+    }
+  });
+
+  app.get("/api/transportation/vehicle-tracking", async (req, res) => {
+    try {
+      const vehicleTracking = {
+        liveUpdates: [
+          {
+            vehicleId: "TRK-LR-001",
+            timestamp: new Date(Date.now() - 2 * 60000).toISOString(),
+            event: "status_update",
+            description: "Arrived at Buchanan Port - QR Scanned",
+            location: "Buchanan Port",
+            checkpoint: "BP-001"
+          },
+          {
+            vehicleId: "TRK-LR-002",
+            timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
+            event: "checkpoint_arrival",
+            description: "Reached Gbarnga Checkpoint - Documents verified",
+            location: "Gbarnga Checkpoint",
+            checkpoint: "GC-003"
+          },
+          {
+            vehicleId: "TRK-LR-003",
+            timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+            event: "loading_complete",
+            description: "Finished loading at Farm PLT-2024-001",
+            location: "Farm PLT-2024-001", 
+            checkpoint: "FM-001"
+          }
+        ]
+      };
+      res.json(vehicleTracking);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vehicle tracking data" });
+    }
+  });
+
+  // QR Code Scanning endpoint for transportation updates
+  app.post("/api/transportation/qr-scan", async (req, res) => {
+    try {
+      const { vehicleId, checkpointId, scannerLocation, status } = req.body;
+      
+      // In a real application, this would update the vehicle's location and status
+      const scanResult = {
+        success: true,
+        vehicleId,
+        newStatus: status,
+        location: scannerLocation,
+        timestamp: new Date().toISOString(),
+        message: `Vehicle ${vehicleId} status updated to ${status} at ${scannerLocation}`
+      };
+      
+      res.json(scanResult);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process QR scan" });
+    }
+  });
+
+  // Vehicle movement update endpoint 
+  app.post("/api/transportation/movement-update", async (req, res) => {
+    try {
+      const { vehicleId, newLocation, gpsCoordinates, status, notes } = req.body;
+      
+      const movementUpdate = {
+        success: true,
+        vehicleId,
+        updatedLocation: newLocation,
+        coordinates: gpsCoordinates,
+        newStatus: status,
+        timestamp: new Date().toISOString(),
+        notes: notes || ""
+      };
+      
+      res.json(movementUpdate);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update vehicle movement" });
+    }
+  });
+
   // Commodity routes
   app.get("/api/commodities", async (req, res) => {
     try {

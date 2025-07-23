@@ -14,6 +14,8 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **All 15 Counties**: Full integration of all Liberian counties in dropdown selectors and compliance tracking
 - **Farm Management Platform**: Complete integration of farmer onboarding, plot mapping, crop planning, and input management modules
 - **Enhanced Navigation**: Dual-section navigation supporting both regulatory compliance and farm management workflows
+- **Transportation Tracking System**: Real-time GPS vehicle tracking with QR code scanning for produce movement monitoring from farm to destination
+- **Advanced Statistics & Audit System**: Role-based reporting system with comprehensive statistics dashboard and audit trail monitoring for senior officials
 
 ## User Preferences
 
@@ -63,12 +65,16 @@ The application follows a modern full-stack architecture pattern with clear sepa
 - **Government Integration**: Comprehensive synchronization dashboard for LRA, MOA, and Customs with real-time status tracking and bulk sync operations
 - **EUDR Compliance**: Comprehensive EU Deforestation Regulation compliance dashboard with risk assessments, documentation tracking, and automated alerts
 - **Farm Management Platform**: Complete suite of farmer onboarding, plot mapping, crop planning, and input management tools
+- **Transportation Tracking**: Real-time vehicle tracking system with GPS monitoring, QR code scanning, and movement status updates for complete supply chain visibility
+- **Advanced Reports System**: Role-based reporting with Statistics dashboard (senior officials) and Audit trail monitoring (administrators only)
 - **Data Entry Forms**: Commodity registration, inspection recording, certification issuance
 - **Data Tables**: Filterable and searchable lists for all data entities with government sync status indicators
 - **Navigation**: Dual-section sidebar navigation with regulatory compliance and farm management modules
 
 ### API Structure
 - **Dashboard endpoints**: `/api/dashboard/*` for metrics and analytics
+- **Transportation endpoints**: `/api/transportation/*` for vehicle tracking, QR scanning, and movement updates
+- **Statistics & Audit endpoints**: `/api/dashboard/advanced-statistics` and `/api/audit/system-logs` for role-based reporting
 - **CRUD endpoints**: RESTful operations for all data entities
 - **File operations**: Report generation and data export capabilities
 

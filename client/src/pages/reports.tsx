@@ -18,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Search, Plus, Download, FileText, Calendar, BarChart3, Eye, TrendingUp, Shield, AlertTriangle, Activity, CheckCircle } from "lucide-react";
+import { Search, Plus, Download, FileText, Calendar, BarChart3, Eye, TrendingUp, Shield, AlertTriangle, Activity, CheckCircle, Truck, MapPin, Navigation, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReportSchema, type Report, type InsertReport } from "@shared/schema";
@@ -35,6 +35,7 @@ export default function Reports() {
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
   const [isAuditDialogOpen, setIsAuditDialogOpen] = useState(false);
+  const [isTransportationDialogOpen, setIsTransportationDialogOpen] = useState(false);
   
   // Mock user role - In real app, this would come from authentication context
   const currentUserRole = "senior_official"; // Can be: "senior_official", "administrator", "regular_user"
@@ -133,7 +134,7 @@ export default function Reports() {
 
   const reportTypes = [
     { value: "compliance", label: "Compliance Report", description: "Overall compliance status across all commodities" },
-    { value: "inspection", label: "Inspection Report", description: "Quality control inspection summaries" },
+    { value: "transportation", label: "Transportation Tracking", description: "Real-time vehicle tracking and produce movement monitoring" },
     { value: "export", label: "Export Report", description: "Export certification and trade statistics" },
     { value: "county", label: "County Report", description: "Regional compliance and production data" }
   ];
@@ -153,6 +154,16 @@ export default function Reports() {
   const { data: auditData, isLoading: loadingAudit } = useQuery({
     queryKey: ["/api/audit/system-logs"],
     enabled: hasSeniorAccess(),
+  });
+
+  // Transportation tracking data
+  const { data: transportationData, isLoading: loadingTransportation } = useQuery({
+    queryKey: ["/api/transportation/active-shipments"],
+  });
+
+  const { data: vehicleTracking } = useQuery({
+    queryKey: ["/api/transportation/vehicle-tracking"],
+    refetchInterval: 30000, // Refresh every 30 seconds for real-time tracking
   });
 
   const generateStatisticsReport = () => {
@@ -533,31 +544,58 @@ export default function Reports() {
 
       {/* Quick Report Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        {reportTypes.slice(0, 2).map((type) => (
-          <Card key={type.value} className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-lacra-blue bg-opacity-10 rounded-lg flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-lacra-blue" />
-                </div>
+        {/* Compliance Report Card */}
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-lacra-blue bg-opacity-10 rounded-lg flex items-center justify-center">
+                <FileText className="h-6 w-6 text-lacra-blue" />
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-lacra-blue hover:text-blue-700"
+                onClick={() => {
+                  form.setValue("type", "compliance");
+                  form.setValue("title", `Compliance Report - ${new Date().toLocaleDateString()}`);
+                  setIsDialogOpen(true);
+                }}
+              >
+                Generate
+              </Button>
+            </div>
+            <h3 className="font-semibold text-neutral mb-2">Compliance Report</h3>
+            <p className="text-sm text-gray-500">Overall compliance status across all commodities</p>
+          </CardContent>
+        </Card>
+
+        {/* Transportation Tracking Card */}
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-2 border-lacra-green">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-lacra-green bg-opacity-10 rounded-lg flex items-center justify-center">
+                <Truck className="h-6 w-6 text-lacra-green" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs text-lacra-green border-lacra-green">
+                  Live Tracking
+                </Badge>
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-lacra-blue hover:text-blue-700"
-                  onClick={() => {
-                    form.setValue("type", type.value);
-                    form.setValue("title", `${type.label} - ${new Date().toLocaleDateString()}`);
-                    setIsDialogOpen(true);
-                  }}
+                  className="text-lacra-green hover:text-green-700"
+                  onClick={() => setIsTransportationDialogOpen(true)}
                 >
-                  Generate
+                  Track Now
                 </Button>
               </div>
-              <h3 className="font-semibold text-neutral mb-2">{type.label}</h3>
-              <p className="text-sm text-gray-500">{type.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+            <h3 className="font-semibold text-neutral mb-2">Transportation Tracking</h3>
+            <p className="text-sm text-gray-500">
+              Real-time vehicle tracking and produce movement monitoring with GPS and QR scanning
+            </p>
+          </CardContent>
+        </Card>
         
         {/* Statistics Card - Senior Access Only */}
         <Card className={`cursor-pointer hover:shadow-lg transition-shadow ${!hasSeniorAccess() ? 'opacity-50' : ''}`}>
@@ -1107,6 +1145,401 @@ export default function Reports() {
                           <Badge className="bg-green-100 text-green-800">Success</Badge>
                         </TableCell>
                         <TableCell className="font-mono text-xs">192.168.1.10</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transportation Tracking Dialog */}
+      <Dialog open={isTransportationDialogOpen} onOpenChange={setIsTransportationDialogOpen}>
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="h-5 w-5 text-lacra-green" />
+              Transportation Tracking System
+              <Badge variant="outline" className="text-xs text-lacra-green border-lacra-green">
+                Live GPS Tracking
+              </Badge>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Active Shipments Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="bg-gradient-to-r from-green-50 to-green-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-600">Active Shipments</p>
+                      <p className="text-2xl font-bold text-green-900">23</p>
+                    </div>
+                    <Truck className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600">In Transit</p>
+                      <p className="text-2xl font-bold text-blue-900">18</p>
+                    </div>
+                    <Navigation className="h-8 w-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-orange-50 to-orange-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-orange-600">At Checkpoints</p>
+                      <p className="text-2xl font-bold text-orange-900">3</p>
+                    </div>
+                    <MapPin className="h-8 w-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-purple-50 to-purple-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-600">Delivered Today</p>
+                      <p className="text-2xl font-bold text-purple-900">12</p>
+                    </div>
+                    <CheckCircle className="h-8 w-8 text-purple-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Real-time Vehicle Tracking */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Live Tracking Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Navigation className="h-5 w-5 text-lacra-green" />
+                    Live Vehicle Tracking
+                    <Badge className="bg-green-100 text-green-800 text-xs">
+                      Real-time
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-80 overflow-y-auto">
+                    <div className="border rounded-lg p-4 bg-green-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-semibold text-green-800">TRK-LR-001</span>
+                          <Badge className="ml-2 bg-green-200 text-green-800 text-xs">Moving</Badge>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          <Clock className="h-3 w-3 inline mr-1" />
+                          2 min ago
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        <MapPin className="h-3 w-3 inline mr-1" />
+                        Current: Monrovia Highway → Destination: Buchanan Port
+                      </p>
+                      <div className="flex justify-between text-xs">
+                        <span>Driver: John Kpelle</span>
+                        <span>Cargo: Coffee - 2.5 tons</span>
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <Button size="sm" variant="outline" className="text-xs">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Track Live
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-xs">
+                          QR Details
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4 bg-blue-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-semibold text-blue-800">TRK-LR-002</span>
+                          <Badge className="ml-2 bg-blue-200 text-blue-800 text-xs">At Checkpoint</Badge>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          <Clock className="h-3 w-3 inline mr-1" />
+                          15 min ago
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        <MapPin className="h-3 w-3 inline mr-1" />
+                        Current: Gbarnga Checkpoint → Destination: Voinjama
+                      </p>
+                      <div className="flex justify-between text-xs">
+                        <span>Driver: Mary Kollie</span>
+                        <span>Cargo: Cocoa - 3.2 tons</span>
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <Button size="sm" variant="outline" className="text-xs">
+                          <Eye className="h-3 w-3 mr-1" />
+                          View Location
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-xs">
+                          Scan QR
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4 bg-orange-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-semibold text-orange-800">TRK-LR-003</span>
+                          <Badge className="ml-2 bg-orange-200 text-orange-800 text-xs">Loading</Badge>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          <Clock className="h-3 w-3 inline mr-1" />
+                          45 min ago
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        <MapPin className="h-3 w-3 inline mr-1" />
+                        Current: Farm PLT-2024-001 → Destination: Monrovia
+                      </p>
+                      <div className="flex justify-between text-xs">
+                        <span>Driver: Samuel Harris</span>
+                        <span>Cargo: Palm Oil - 1.8 tons</span>
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <Button size="sm" variant="outline" className="text-xs">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Monitor Loading
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-xs">
+                          Generate QR
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* QR Code Scanning & Movement Updates */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-blue-600" />
+                    QR Scanner & Movement Updates
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* QR Scanner Section */}
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Activity className="h-8 w-8 text-blue-600" />
+                      </div>
+                      <h3 className="font-semibold mb-2">Scan Vehicle QR Code</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Scan QR code to update vehicle location and movement status
+                      </p>
+                      <Button className="bg-lacra-blue hover:bg-blue-700">
+                        <Activity className="h-4 w-4 mr-2" />
+                        Start QR Scanner
+                      </Button>
+                    </div>
+
+                    {/* Recent Movement Updates */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Recent Movement Updates</h4>
+                      <div className="space-y-3 max-h-40 overflow-y-auto">
+                        <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
+                          <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">TRK-LR-001 Status Update</p>
+                            <p className="text-xs text-gray-600">Arrived at Buchanan Port - QR Scanned</p>
+                            <p className="text-xs text-gray-500">2 minutes ago</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                          <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">TRK-LR-002 Checkpoint</p>
+                            <p className="text-xs text-gray-600">Reached Gbarnga Checkpoint - Documents verified</p>
+                            <p className="text-xs text-gray-500">15 minutes ago</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
+                          <Truck className="h-5 w-5 text-orange-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">TRK-LR-003 Loading Complete</p>
+                            <p className="text-xs text-gray-600">Finished loading at Farm PLT-2024-001</p>
+                            <p className="text-xs text-gray-500">45 minutes ago</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Movement History */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-purple-600" />
+                  Detailed Movement History & GPS Tracking
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Vehicle ID</TableHead>
+                        <TableHead>Driver</TableHead>
+                        <TableHead>Cargo Details</TableHead>
+                        <TableHead>Current Location</TableHead>
+                        <TableHead>Last QR Scan</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">TRK-LR-001</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">John Kpelle</p>
+                            <p className="text-xs text-gray-500">License: DL-2024-001</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Coffee - 2.5 tons</p>
+                            <p className="text-xs text-gray-500">Batch: COF-2024-001</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Buchanan Port</p>
+                            <p className="text-xs text-gray-500">GPS: 5.8817°N, 10.0464°W</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="text-sm">2 min ago</p>
+                            <p className="text-xs text-gray-500">Checkpoint: BP-001</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-100 text-green-800">Delivered</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              GPS
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <Activity className="h-3 w-3 mr-1" />
+                              QR
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      
+                      <TableRow>
+                        <TableCell className="font-medium">TRK-LR-002</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Mary Kollie</p>
+                            <p className="text-xs text-gray-500">License: DL-2024-002</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Cocoa - 3.2 tons</p>
+                            <p className="text-xs text-gray-500">Batch: COC-2024-002</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Gbarnga Checkpoint</p>
+                            <p className="text-xs text-gray-500">GPS: 7.0000°N, 9.4833°W</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="text-sm">15 min ago</p>
+                            <p className="text-xs text-gray-500">Checkpoint: GC-003</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-blue-100 text-blue-800">At Checkpoint</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              GPS
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <Activity className="h-3 w-3 mr-1" />
+                              QR
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+
+                      <TableRow>
+                        <TableCell className="font-medium">TRK-LR-003</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Samuel Harris</p>
+                            <p className="text-xs text-gray-500">License: DL-2024-003</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Palm Oil - 1.8 tons</p>
+                            <p className="text-xs text-gray-500">Batch: PLM-2024-001</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">Farm PLT-2024-001</p>
+                            <p className="text-xs text-gray-500">GPS: 6.3133°N, 10.8074°W</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="text-sm">45 min ago</p>
+                            <p className="text-xs text-gray-500">Checkpoint: FM-001</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-orange-100 text-orange-800">Loading</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              GPS
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs">
+                              <Activity className="h-3 w-3 mr-1" />
+                              QR
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>

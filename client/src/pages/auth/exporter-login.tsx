@@ -38,7 +38,9 @@ export default function ExporterLogin() {
           title: 'Login Successful',
           description: `Welcome back, ${data.user.firstName}!`,
         });
-        setLocation('/exporter-dashboard');
+        
+        // Force a page reload to ensure authentication state is recognized
+        window.location.href = '/exporter-dashboard';
       } else {
         setError('Access denied. Exporter credentials required.');
       }

@@ -56,15 +56,15 @@ function Router() {
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
       
+      {/* Exporter Portal Routes - Must be before protected check */}
+      <Route path="/exporter-dashboard" component={ExporterDashboard} />
+      
       {/* Protected Routes - Require Authentication */}
       {authToken && userType ? (
         <>
           {/* Dashboard - Available to all authenticated users */}
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/" component={Dashboard} />
-          
-          {/* Exporter Portal Routes */}
-          <Route path="/exporter-dashboard" component={ExporterDashboard} />
           
           {/* Regulatory Staff Only Routes */}
           <Route path="/commodities">

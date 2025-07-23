@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Shield, MapPin, Clock, CheckCircle, XCircle, AlertTriangle, FileText, Download, QrCode, Leaf, Eye, Star } from "lucide-react";
+import QRCodeLib from "qrcode";
 
 interface TrackingRecord {
   id: number;
@@ -93,8 +94,10 @@ export default function Verification() {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [qrCodeDataURL, setQRCodeDataURL] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const qrCodeRef = useRef<HTMLCanvasElement>(null);
 
   // Get all tracking records for admin view
   const { data: trackingRecords = [], isLoading: loadingRecords } = useQuery<TrackingRecord[]>({
@@ -182,6 +185,37 @@ export default function Verification() {
   const generateQRCodeData = (trackingNumber: string) => {
     return `https://lacra.gov.lr/verify/${trackingNumber}`;
   };
+
+  // Generate QR code when showing QR dialog
+  useEffect(() => {
+    if (showQRCode && verificationResult?.record) {
+      const generateQRCode = async () => {
+        try {
+          const qrData = generateQRCodeData(verificationResult.record.trackingNumber);
+          const dataURL = await QRCodeLib.toDataURL(qrData, {
+            errorCorrectionLevel: 'M',
+            type: 'image/png',
+            quality: 0.92,
+            margin: 1,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            },
+            width: 256
+          });
+          setQRCodeDataURL(dataURL);
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+          toast({
+            title: "QR Code Error",
+            description: "Failed to generate QR code",
+            variant: "destructive",
+          });
+        }
+      };
+      generateQRCode();
+    }
+  }, [showQRCode, verificationResult]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -635,14 +669,20 @@ export default function Verification() {
           </DialogHeader>
           <div className="flex flex-col items-center py-6 space-y-4">
             <div className="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-sm">
-              {/* QR Code placeholder - would normally use a QR library like qrcode.js */}
-              <div className="w-48 h-48 bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center rounded">
-                <div className="text-center">
-                  <QrCode className="h-16 w-16 text-gray-400 mx-auto mb-2" />
-                  <p className="text-xs text-gray-500">QR Code would appear here</p>
-                  <p className="text-xs text-gray-400 mt-1">Use qrcode.js library</p>
+              {qrCodeDataURL ? (
+                <img 
+                  src={qrCodeDataURL} 
+                  alt="QR Code for verification" 
+                  className="w-48 h-48 rounded"
+                />
+              ) : (
+                <div className="w-48 h-48 bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center rounded">
+                  <div className="text-center">
+                    <QrCode className="h-16 w-16 text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs text-gray-500">Generating QR Code...</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className="text-center space-y-2">
               <p className="font-medium text-sm">

@@ -86,6 +86,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Debug logging
+      console.log('Regulatory login attempt:', {
+        username,
+        requestedRole: role,
+        userRole: user.role,
+        isRegulatoryRole: ['regulatory_admin', 'regulatory_staff'].includes(role)
+      });
+
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
       if (!isValidPassword) {
@@ -95,8 +103,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Verify role permissions
-      if (user.role !== role || (role !== 'regulatory_admin' && role !== 'regulatory_staff')) {
+      // Verify role permissions - check if user has the requested role and it's a valid regulatory role
+      if (user.role !== role || !['regulatory_admin', 'regulatory_staff'].includes(role)) {
+        console.log('Role verification failed:', {
+          userRole: user.role,
+          requestedRole: role,
+          isValidRole: ['regulatory_admin', 'regulatory_staff'].includes(role)
+        });
         return res.status(403).json({ 
           success: false, 
           message: "Access denied for this role" 
@@ -222,6 +235,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user exists - field agents use agentId as username
       const user = await storage.getUserByUsername(agentId);
       if (!user || user.role !== 'field_agent') {
+        console.log('Field agent login failed:', {
+          agentId,
+          userFound: !!user,
+          userRole: user?.role
+        });
         return res.status(401).json({ 
           success: false, 
           message: "Invalid field agent credentials" 

@@ -536,30 +536,36 @@ export default function GpsMapping() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-lg h-96 overflow-hidden border-2 border-dashed border-green-300">
+            <div className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-lg h-96 overflow-hidden border-4 border-dashed border-green-500" style={{minHeight: '400px'}}>
               {/* Map Interface Mockup */}
-              <div className="absolute inset-0 bg-gradient-to-br from-green-200/30 to-blue-200/30">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-200 to-blue-200" style={{opacity: 0.3}}>
                 {/* Mock Satellite Tiles */}
-                <div className="grid grid-cols-8 grid-rows-6 h-full opacity-20">
+                <div className="grid grid-cols-8 grid-rows-6 h-full" style={{opacity: 0.3}}>
                   {Array.from({length: 48}).map((_, i) => (
-                    <div key={i} className={`border border-gray-300 ${i % 3 === 0 ? 'bg-green-300/40' : i % 5 === 0 ? 'bg-brown-200/40' : 'bg-green-200/40'}`} />
+                    <div 
+                      key={i} 
+                      className="border border-gray-400"
+                      style={{
+                        backgroundColor: i % 3 === 0 ? '#86efac' : i % 5 === 0 ? '#fde047' : '#bbf7d0'
+                      }}
+                    />
                   ))}
                 </div>
                 
                 {/* Farm Plot Boundaries */}
-                <div className="absolute top-16 left-16 w-32 h-24 border-4 border-red-500 bg-red-500/10 rounded-lg">
+                <div className="absolute top-16 left-16 w-32 h-24 border-4 border-red-500 rounded-lg" style={{backgroundColor: 'rgba(239, 68, 68, 0.1)'}}>
                   <div className="absolute -top-8 left-0 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
                     ALERT: Deforestation Detected
                   </div>
                 </div>
                 
-                <div className="absolute top-20 right-20 w-40 h-32 border-4 border-green-500 bg-green-500/10 rounded-lg">
+                <div className="absolute top-20 right-20 w-40 h-32 border-4 border-green-500 rounded-lg" style={{backgroundColor: 'rgba(34, 197, 94, 0.1)'}}>
                   <div className="absolute -top-8 left-0 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
                     ✓ EUDR Compliant
                   </div>
                 </div>
                 
-                <div className="absolute bottom-20 left-20 w-36 h-28 border-4 border-yellow-500 bg-yellow-500/10 rounded-lg">
+                <div className="absolute bottom-20 left-20 w-36 h-28 border-4 border-yellow-500 rounded-lg" style={{backgroundColor: 'rgba(234, 179, 8, 0.1)'}}>
                   <div className="absolute -top-8 left-0 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold">
                     ⚠ Needs Verification
                   </div>
@@ -572,7 +578,7 @@ export default function GpsMapping() {
                 
                 {/* Center Overlay with Controls */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6 border border-gray-300 shadow-lg max-w-md">
+                  <div className="rounded-lg p-6 border border-gray-300 shadow-lg max-w-md" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)'}}>
                     <div className="text-center mb-4">
                       <Satellite className="h-12 w-12 mx-auto text-blue-600 mb-2" />
                       <h3 className="text-lg font-semibold text-gray-800">Interactive GPS Mapping System</h3>

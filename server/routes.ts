@@ -1602,7 +1602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tracking Records API
-  app.get('/api/tracking-records', authenticateToken, async (req, res) => {
+  app.get('/api/tracking-records', async (req, res) => {
     try {
       const { commodityId, farmerId } = req.query;
       let records;

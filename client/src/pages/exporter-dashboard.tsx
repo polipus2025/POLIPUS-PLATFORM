@@ -34,10 +34,12 @@ export default function ExporterDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Handle authentication check
+  // Handle authentication check - don't redirect immediately on render
   const token = localStorage.getItem('token');
-  if (!token) {
-    window.location.href = '/exporter-login';
+  if (!token && typeof window !== 'undefined') {
+    setTimeout(() => {
+      window.location.href = '/exporter-login';
+    }, 100);
     return null;
   }
 

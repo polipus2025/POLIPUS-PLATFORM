@@ -105,12 +105,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Verify role permissions - check if user has the requested role and it's a valid regulatory role
-      if (user.role !== role || !['regulatory_admin', 'regulatory_staff'].includes(role)) {
+      // Verify role permissions - check if user role is valid for regulatory access
+      if (!['regulatory_admin', 'regulatory_staff'].includes(user.role)) {
         console.log('Role verification failed:', {
           userRole: user.role,
           requestedRole: role,
-          isValidRole: ['regulatory_admin', 'regulatory_staff'].includes(role)
+          isValidRole: ['regulatory_admin', 'regulatory_staff'].includes(user.role)
         });
         return res.status(403).json({ 
           success: false, 

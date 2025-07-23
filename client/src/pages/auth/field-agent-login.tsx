@@ -50,12 +50,13 @@ export default function FieldAgentLogin() {
     setError("");
 
     try {
-      const response = await apiRequest("POST", "/api/auth/field-agent-login", {
-        ...data,
-        userType: "field_agent"
+      const result = await apiRequest("/api/auth/field-agent-login", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          userType: "field_agent"
+        })
       });
-
-      const result = await response.json();
       
       if (result && result.success) {
         toast({
@@ -64,7 +65,7 @@ export default function FieldAgentLogin() {
         });
         
         // Store session data
-        localStorage.setItem("authToken", result.token);
+        localStorage.setItem("token", result.token);
         localStorage.setItem("userRole", "field_agent");
         localStorage.setItem("userType", "field_agent");
         localStorage.setItem("agentId", data.agentId);

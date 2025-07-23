@@ -19,6 +19,11 @@ export default function Dashboard() {
   const [isExportApplicationOpen, setIsExportApplicationOpen] = useState(false);
   const [isExportReportOpen, setIsExportReportOpen] = useState(false);
 
+  // Check user type for role-specific content
+  const userType = localStorage.getItem("userType");
+  const userRole = localStorage.getItem("userRole");
+  const token = localStorage.getItem("token");
+
   // Sample EUDR compliance data
   const eudrMetrics = {
     totalCommodities: 1247,
@@ -118,6 +123,20 @@ export default function Dashboard() {
         return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
     }
   };
+
+  // Show authentication message if not logged in
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Please log in to access the dashboard</p>
+          <Button onClick={() => window.location.href = '/regulatory-login'}>
+            Go to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

@@ -45,12 +45,13 @@ export default function RegulatoryLogin() {
     setError("");
 
     try {
-      const response = await apiRequest("POST", "/api/auth/regulatory-login", {
-        ...data,
-        userType: "regulatory"
+      const result = await apiRequest("/api/auth/regulatory-login", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          userType: "regulatory"
+        })
       });
-
-      const result = await response.json();
       
       if (result && result.success) {
         toast({
@@ -59,7 +60,7 @@ export default function RegulatoryLogin() {
         });
         
         // Store session data
-        localStorage.setItem("authToken", result.token);
+        localStorage.setItem("token", result.token);
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("userType", "regulatory");
         

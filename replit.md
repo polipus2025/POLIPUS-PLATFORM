@@ -22,8 +22,9 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **Farmer Portal:** FRM-2024-001 / farmer123 (Moses Tuah, Lofa County)
 
 ### Recent Updates (January 2025)
+- **All Login Portals Fixed**: Resolved all authentication issues across farmer, exporter, field agent, and regulatory portals. All portals now working with consistent token storage and proper session management (January 23, 2025)
 - **Exporter Portal Complete**: Fully functional exporter dashboard with comprehensive authentication, API integration, and error handling. All buttons working with real-time data simulation (January 23, 2025)
-- **Exporter Portal Authentication Fixed**: Completely resolved authentication issues including API endpoints, password hash verification, route navigation, and localStorage state management (January 23, 2025)
+- **Dashboard Authentication**: Added proper authentication checks to prevent logout issues and ensure users see appropriate content based on their role (January 23, 2025)
 - **Three-Tier Authentication System**: Complete role-based authentication with separate portals for regulatory staff, farmers, and field agents
 - **JWT Security Implementation**: Secure bcrypt password hashing with JWT token-based session management
 - **Landing Page Portal**: Professional landing page routing users to appropriate authentication portals

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Table, 
   TableBody, 
@@ -18,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Plus, Filter, RefreshCw, Building2, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCommodityIcon, getStatusColor, COUNTIES, COMMODITY_TYPES } from "@/lib/types";
+import CommodityForm from "@/components/forms/commodity-form";
 import type { Commodity } from "@shared/schema";
 
 interface GovernmentComplianceStatus {
@@ -30,6 +32,7 @@ export default function Commodities() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCounty, setSelectedCounty] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -197,10 +200,23 @@ export default function Commodities() {
             <h2 className="text-2xl font-bold text-neutral mb-2">Agricultural Commodities</h2>
             <p className="text-gray-600">Track and manage agricultural commodities across Liberian counties</p>
           </div>
-          <Button className="bg-lacra-green hover:bg-green-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Commodity
-          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-lacra-green hover:bg-green-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Commodity
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add New Commodity</DialogTitle>
+                <DialogDescription>
+                  Register a new agricultural commodity for tracking and compliance monitoring.
+                </DialogDescription>
+              </DialogHeader>
+              <CommodityForm onSuccess={() => setIsAddDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

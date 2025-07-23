@@ -16,7 +16,11 @@ import { useToast } from "@/hooks/use-toast";
 import { COUNTIES, COMMODITY_TYPES, QUALITY_GRADES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export default function CommodityForm() {
+interface CommodityFormProps {
+  onSuccess?: () => void;
+}
+
+export default function CommodityForm({ onSuccess }: CommodityFormProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -47,6 +51,7 @@ export default function CommodityForm() {
         description: "Commodity registered successfully",
       });
       form.reset();
+      onSuccess?.();
     },
     onError: (error: any) => {
       toast({

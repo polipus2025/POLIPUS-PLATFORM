@@ -27,6 +27,7 @@ import GISMapping from "@/pages/gis-mapping";
 import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
+import OfflineSync from "@/pages/offline-sync";
 import NotFound from "@/pages/not-found";
 
 // Helper component to check user access to routes
@@ -155,6 +156,9 @@ function Router() {
           
           {/* Document Verification - Available to all */}
           <Route path="/verification" component={Verification} />
+          
+          {/* Offline Sync - Available to all authenticated users */}
+          <Route path="/offline-sync" component={OfflineSync} />
           
         </>
       ) : (

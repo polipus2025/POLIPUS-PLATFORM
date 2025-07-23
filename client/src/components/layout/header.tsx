@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { SyncStatusIndicator } from "@/components/sync/sync-status-indicator";
 import type { Alert } from "@shared/schema";
 
 // Helper function to get user info
@@ -124,10 +125,8 @@ export default function Header() {
           </div>
           
           <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2 text-sm">
-              <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
-              <span className="text-gray-600">System Online</span>
-            </div>
+            {/* Sync Status Indicator */}
+            <SyncStatusIndicator />
             
             <div className="flex items-center space-x-2">
               <Bell className="h-5 w-5 text-gray-400" />

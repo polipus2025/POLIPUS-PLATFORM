@@ -14,7 +14,8 @@ import {
   Shield,
   QrCode,
   Globe,
-  Map
+  Map,
+  RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ const regulatoryNavigation = [
   { name: "International Standards", href: "/international-standards", icon: Globe },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
+  { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
 // Farmer Navigation - Only farm management features
@@ -55,6 +57,7 @@ const farmerNavigation = [
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
+  { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
 // Field Agent Navigation - Inspection and verification focused
@@ -67,6 +70,7 @@ const fieldAgentNavigation = [
   { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
   { name: "GIS Mapping System", href: "/gis-mapping", icon: Map },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
+  { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
 // Function to get navigation items based on user type and role

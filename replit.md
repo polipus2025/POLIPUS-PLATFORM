@@ -17,7 +17,8 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **Transportation Tracking System**: Real-time GPS vehicle tracking with QR code scanning for produce movement monitoring from farm to destination
 - **Advanced Statistics & Audit System**: Role-based reporting system with comprehensive statistics dashboard and audit trail monitoring for senior officials
 - **Input Management Removal**: Completely removed input management functionality from the entire platform per user request (January 2025)
-- **Role-Based Access Control**: Implemented comprehensive authorization system where users only see features re
+- **Role-Based Access Control**: Implemented comprehensive authorization system where users only see features relevant to their role - farmers see farm management tools, field agents see inspection tools, and LACRA officers see regulatory compliance features (January 2025)
+- **Offline Data Sync Mechanism**: Complete offline functionality with conflict resolution, allowing users to work without internet and sync when connectivity is restored with smart merge strategies (January 2025)
 
 ## User Preferences
 

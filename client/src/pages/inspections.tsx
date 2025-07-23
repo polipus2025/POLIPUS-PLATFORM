@@ -15,6 +15,11 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Plus, Calendar, FileText } from "lucide-react";
 import { getStatusColor } from "@/lib/types";
@@ -25,6 +30,8 @@ export default function Inspections() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedInspection, setSelectedInspection] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isNewInspectionOpen, setIsNewInspectionOpen] = useState(false);
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
 
   const { data: inspections = [], isLoading: inspectionsLoading } = useQuery<Inspection[]>({
     queryKey: ["/api/inspections"],
@@ -105,11 +112,17 @@ export default function Inspections() {
             <p className="text-gray-600">Manage quality control inspections and compliance monitoring</p>
           </div>
           <div className="flex space-x-3">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => setIsScheduleDialogOpen(true)}
+            >
               <Calendar className="h-4 w-4 mr-2" />
               Schedule Inspection
             </Button>
-            <Button className="bg-lacra-green hover:bg-green-700">
+            <Button 
+              className="bg-lacra-green hover:bg-green-700"
+              onClick={() => setIsNewInspectionOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               New Inspection
             </Button>
@@ -411,6 +424,198 @@ export default function Inspections() {
             <Button>
               <FileText className="h-4 w-4 mr-1" />
               Export Report
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Inspection Dialog */}
+      <Dialog open={isNewInspectionOpen} onOpenChange={setIsNewInspectionOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Inspection</DialogTitle>
+            <DialogDescription>
+              Schedule a new quality control inspection for a commodity batch
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Commodity</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select commodity..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {commodities.map((commodity) => (
+                      <SelectItem key={commodity.id} value={commodity.id.toString()}>
+                        {commodity.name} - {commodity.batchNumber}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Inspector Name</label>
+                <Input placeholder="Enter inspector name..." />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Inspector License</label>
+                <Input placeholder="Enter inspector license number..." />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Inspection Date</label>
+                <Input type="date" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Location</label>
+                <Input placeholder="Enter inspection location..." />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Quality Grade</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select quality grade..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Premium">Premium</SelectItem>
+                    <SelectItem value="Grade A">Grade A</SelectItem>
+                    <SelectItem value="Grade B">Grade B</SelectItem>
+                    <SelectItem value="Grade 1">Grade 1</SelectItem>
+                    <SelectItem value="Grade 2">Grade 2</SelectItem>
+                    <SelectItem value="Standard">Standard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Compliance Status</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select compliance status..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="compliant">Compliant</SelectItem>
+                    <SelectItem value="pending_review">Pending Review</SelectItem>
+                    <SelectItem value="requires_action">Requires Action</SelectItem>
+                    <SelectItem value="non_compliant">Non-Compliant</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Moisture Content (%)</label>
+                <Input placeholder="Enter moisture content..." />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Defect Rate (%)</label>
+                <Input placeholder="Enter defect rate..." />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Inspection Notes</label>
+                <Textarea 
+                  placeholder="Enter detailed inspection notes and observations..."
+                  rows={3}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Recommendations</label>
+                <Textarea 
+                  placeholder="Enter recommendations and follow-up actions..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsNewInspectionOpen(false)}>
+                Cancel
+              </Button>
+              <Button>
+                Create Inspection
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Inspection Dialog */}
+      <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Schedule Inspection</DialogTitle>
+            <DialogDescription>
+              Schedule a future quality control inspection
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Commodity</label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select commodity to inspect..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {commodities.map((commodity) => (
+                    <SelectItem key={commodity.id} value={commodity.id.toString()}>
+                      {commodity.name} - {commodity.batchNumber}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Preferred Inspector</label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select inspector..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="james_kollie">James Kollie (LIC-INS-2024-001)</SelectItem>
+                  <SelectItem value="sarah_konneh">Sarah Konneh (LIC-INS-2024-002)</SelectItem>
+                  <SelectItem value="moses_tuah">Moses Tuah (LIC-INS-2024-003)</SelectItem>
+                  <SelectItem value="mary_johnson">Mary Johnson (LIC-INS-2024-004)</SelectItem>
+                  <SelectItem value="david_clarke">David Clarke (LIC-INS-2024-005)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Scheduled Date</label>
+              <Input type="date" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Scheduled Time</label>
+              <Input type="time" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Priority Level</label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">High Priority</SelectItem>
+                  <SelectItem value="medium">Medium Priority</SelectItem>
+                  <SelectItem value="low">Low Priority</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Location</label>
+              <Input placeholder="Enter inspection location..." />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Notes</label>
+              <Textarea 
+                placeholder="Additional notes or special requirements..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button>
+              <Calendar className="h-4 w-4 mr-1" />
+              Schedule Inspection
             </Button>
           </div>
         </DialogContent>

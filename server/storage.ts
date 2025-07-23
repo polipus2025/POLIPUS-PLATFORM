@@ -610,7 +610,7 @@ export class MemStorage implements IStorage {
     await this.createAuthUser({
       username: "EXP-2024-001",
       email: "mbawah@agriliberia.com",
-      passwordHash: "$2b$12$YKSKmf5vbgpCz7B3QdwjIuKXE8FtGdnJ3Qf7LV9Zmx2Nb6Hw1QrSi", // password: exporter123
+      passwordHash: "$2b$12$IjCPMmjdZozlZiCu7mKyjuXeMxMUi9a8ti5UJiaqb8kayhBc9SqJa", // password: exporter123
       role: "exporter",
       firstName: "Marcus",
       lastName: "Bawah",

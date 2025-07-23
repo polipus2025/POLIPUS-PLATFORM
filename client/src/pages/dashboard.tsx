@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [isEudrDialogOpen, setIsEudrDialogOpen] = useState(false);
   const [selectedExporter, setSelectedExporter] = useState<string>("all");
   const [isExportApplicationOpen, setIsExportApplicationOpen] = useState(false);
+  const [isExportReportOpen, setIsExportReportOpen] = useState(false);
 
   // Sample EUDR compliance data
   const eudrMetrics = {
@@ -689,7 +690,10 @@ export default function Dashboard() {
               </DialogContent>
             </Dialog>
 
-            <Button className="bg-lacra-blue hover:bg-blue-700">
+            <Button 
+            className="bg-lacra-blue hover:bg-blue-700"
+            onClick={() => setIsExportReportOpen(true)}
+          >
               <Download className="h-4 w-4 mr-2" />
               Export Report
             </Button>
@@ -862,6 +866,99 @@ export default function Dashboard() {
         <QuickActions />
         <SystemAlerts />
       </div>
+
+      {/* Export Report Dialog */}
+      <Dialog open={isExportReportOpen} onOpenChange={setIsExportReportOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Export Compliance Report</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Report Type</label>
+              <Select defaultValue="compliance">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="compliance">Compliance Overview Report</SelectItem>
+                  <SelectItem value="eudr">EUDR Compliance Report</SelectItem>
+                  <SelectItem value="county">County-wise Compliance Report</SelectItem>
+                  <SelectItem value="commodity">Commodity-wise Report</SelectItem>
+                  <SelectItem value="inspection">Inspection Summary Report</SelectItem>
+                  <SelectItem value="export">Export Performance Report</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Time Period</label>
+              <Select defaultValue="current_month">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="this_week">This Week</SelectItem>
+                  <SelectItem value="current_month">Current Month</SelectItem>
+                  <SelectItem value="last_month">Last Month</SelectItem>
+                  <SelectItem value="quarter">Current Quarter</SelectItem>
+                  <SelectItem value="year">Current Year</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">County Filter</label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Counties</SelectItem>
+                  <SelectItem value="bomi">Bomi County</SelectItem>
+                  <SelectItem value="bong">Bong County</SelectItem>
+                  <SelectItem value="lofa">Lofa County</SelectItem>
+                  <SelectItem value="nimba">Nimba County</SelectItem>
+                  <SelectItem value="margibi">Margibi County</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Format</label>
+              <Select defaultValue="pdf">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                  <SelectItem value="csv">CSV Data</SelectItem>
+                  <SelectItem value="json">JSON Data</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="bg-blue-50 p-3 rounded border">
+              <h4 className="font-medium text-blue-900 mb-2">Report Preview</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Compliance metrics and statistics</li>
+                <li>• County-wise performance breakdown</li>
+                <li>• Recent inspection summaries</li>
+                <li>• EUDR compliance status</li>
+                <li>• Alert and recommendation summary</li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button variant="outline" onClick={() => setIsExportReportOpen(false)}>
+              Cancel
+            </Button>
+            <Button>
+              <Download className="h-4 w-4 mr-1" />
+              Generate & Download
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

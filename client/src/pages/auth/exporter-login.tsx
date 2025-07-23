@@ -20,14 +20,19 @@ export default function ExporterLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (loginData: { username: string; password: string }) => {
-      const response = await apiRequest('/api/auth/login', {
+      const response = await apiRequest('/api/auth/exporter-login', {
         method: 'POST',
         body: JSON.stringify(loginData),
       });
       return response;
     },
     onSuccess: (data) => {
-      if (data.user.role === 'exporter') {
+      if (data.success && data.user && data.user.role === 'exporter') {
+        // Store authentication token and user type
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userType', 'exporter');
+        localStorage.setItem('userData', JSON.stringify(data.user));
+        
         queryClient.setQueryData(['/api/auth/user'], data.user);
         toast({
           title: 'Login Successful',

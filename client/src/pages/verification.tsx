@@ -97,16 +97,20 @@ export default function Verification() {
   const queryClient = useQueryClient();
 
   // Get all tracking records for admin view
-  const { data: trackingRecords = [], isLoading: loadingRecords } = useQuery({
+  const { data: trackingRecords = [], isLoading: loadingRecords } = useQuery<TrackingRecord[]>({
     queryKey: ["/api/tracking-records"],
     enabled: true,
   });
 
   const verifyMutation = useMutation({
     mutationFn: async (trackingNum: string) => {
-      return await apiRequest(`/api/tracking/verify/${trackingNum}`);
+      const response = await fetch(`/api/tracking/verify/${encodeURIComponent(trackingNum)}`);
+      if (!response.ok) {
+        throw new Error('Failed to verify tracking number');
+      }
+      return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: VerificationResult) => {
       setVerificationResult(data);
       if (data.valid) {
         toast({
@@ -140,6 +144,43 @@ export default function Verification() {
       return;
     }
     verifyMutation.mutate(trackingNumber.trim());
+  };
+
+  const handleDownloadReport = () => {
+    if (!verificationResult?.record) return;
+    
+    // Generate and download verification report
+    const reportData = {
+      trackingNumber: verificationResult.record.trackingNumber,
+      verificationDate: new Date().toISOString(),
+      eudrCompliant: verificationResult.eudrCompliant,
+      sustainabilityScore: verificationResult.sustainabilityScore,
+      deforestationRisk: verificationResult.record.deforestationRisk,
+      timeline: verificationResult.timeline,
+      verifications: verificationResult.verifications,
+      alerts: verificationResult.alerts
+    };
+    
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { 
+      type: 'application/json' 
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `verification-report-${verificationResult.record.trackingNumber}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Report Downloaded",
+      description: "Verification report has been downloaded successfully.",
+    });
+  };
+
+  const generateQRCodeData = (trackingNumber: string) => {
+    return `https://lacra.gov.lr/verify/${trackingNumber}`;
   };
 
   const getStatusColor = (status: string) => {
@@ -313,9 +354,9 @@ export default function Verification() {
                                 <QrCode className="h-4 w-4 mr-1" />
                                 QR Code
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" onClick={handleDownloadReport}>
                                 <Download className="h-4 w-4 mr-1" />
-                                Download
+                                Download Report
                               </Button>
                             </div>
                           </div>
@@ -585,21 +626,48 @@ export default function Verification() {
 
       {/* QR Code Dialog */}
       <Dialog open={showQRCode} onOpenChange={setShowQRCode}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Certificate QR Code</DialogTitle>
             <DialogDescription>
               Scan this QR code to verify the certificate on mobile devices
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center py-8">
-            <div className="bg-gray-100 p-8 rounded-lg">
-              <QrCode className="h-32 w-32 text-gray-600" />
+          <div className="flex flex-col items-center py-6 space-y-4">
+            <div className="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-sm">
+              {/* QR Code placeholder - would normally use a QR library like qrcode.js */}
+              <div className="w-48 h-48 bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center rounded">
+                <div className="text-center">
+                  <QrCode className="h-16 w-16 text-gray-400 mx-auto mb-2" />
+                  <p className="text-xs text-gray-500">QR Code would appear here</p>
+                  <p className="text-xs text-gray-400 mt-1">Use qrcode.js library</p>
+                </div>
+              </div>
+            </div>
+            <div className="text-center space-y-2">
+              <p className="font-medium text-sm">
+                Tracking: {verificationResult?.record?.trackingNumber}
+              </p>
+              <p className="text-xs text-gray-600 break-all px-4">
+                URL: {verificationResult?.record ? generateQRCodeData(verificationResult.record.trackingNumber) : ''}
+              </p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  if (verificationResult?.record) {
+                    navigator.clipboard.writeText(generateQRCodeData(verificationResult.record.trackingNumber));
+                    toast({
+                      title: "URL Copied",
+                      description: "Verification URL copied to clipboard",
+                    });
+                  }
+                }}
+              >
+                Copy URL
+              </Button>
             </div>
           </div>
-          <p className="text-center text-sm text-gray-600">
-            QR Code for: {verificationResult?.record?.trackingNumber}
-          </p>
         </DialogContent>
       </Dialog>
     </div>

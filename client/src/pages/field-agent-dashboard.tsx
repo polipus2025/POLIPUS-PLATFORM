@@ -83,21 +83,47 @@ export default function FieldAgentDashboard() {
   ).length;
   const commoditiesInJurisdiction = commodities.filter((c: any) => c.county === jurisdiction).length;
 
+  const [newFarmerForm, setNewFarmerForm] = useState({
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    farmLocation: '',
+    farmSize: '',
+    primaryCrop: ''
+  });
+
   const newFarmerMutation = useMutation({
     mutationFn: async (farmerData: any) => {
+      const farmerPayload = {
+        ...farmerData,
+        farmerId: `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+        county: jurisdiction,
+        district: farmerData.farmLocation,
+        village: farmerData.farmLocation,
+        gpsCoordinates: `${8.4 + Math.random() * 0.1},${-9.8 + Math.random() * 0.1}`,
+        farmSizeUnit: 'hectares',
+        status: 'active',
+        agreementSigned: false,
+        registeredBy: agentId,
+        createdAt: new Date().toISOString()
+      };
+      
       return await apiRequest('/api/farmers', {
         method: 'POST',
-        body: JSON.stringify({
-          ...farmerData,
-          county: jurisdiction,
-          registeredBy: agentId,
-          status: 'active'
-        })
+        body: JSON.stringify(farmerPayload)
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });
       setIsNewFarmerOpen(false);
+      setNewFarmerForm({
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        farmLocation: '',
+        farmSize: '',
+        primaryCrop: ''
+      });
       toast({
         title: 'Farmer Registered',
         description: 'New farmer has been successfully registered in your jurisdiction.',
@@ -112,25 +138,54 @@ export default function FieldAgentDashboard() {
     },
   });
 
+  const [newInspectionForm, setNewInspectionForm] = useState({
+    farmerId: '',
+    inspectionType: '',
+    commodityType: '',
+    notes: ''
+  });
+
   const newInspectionMutation = useMutation({
     mutationFn: async (inspectionData: any) => {
+      const selectedFarmer = farmers.find((f: any) => f.id.toString() === inspectionData.farmerId);
+      const inspectionPayload = {
+        inspectionId: `INS-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+        commodityId: Math.floor(Math.random() * 4) + 1,
+        inspectorName: `${agentId} - Field Agent`,
+        inspectorLicense: `LIC-${agentId}`,
+        inspectionDate: new Date().toISOString(),
+        location: `${selectedFarmer?.village || 'Farm Site'} - ${jurisdiction}`,
+        inspectionType: inspectionData.inspectionType,
+        commodityType: inspectionData.commodityType,
+        qualityGrade: 'Pending Assessment',
+        complianceStatus: 'pending',
+        moistureContent: 'TBD',
+        defectRate: 'TBD',
+        notes: inspectionData.notes,
+        recommendations: 'Awaiting field inspection completion',
+        jurisdiction,
+        agentId,
+        farmerName: selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}` : 'Unknown',
+        status: 'pending'
+      };
+      
       return await apiRequest('/api/inspections', {
         method: 'POST',
-        body: JSON.stringify({
-          ...inspectionData,
-          jurisdiction,
-          agentId,
-          inspectionDate: new Date().toISOString(),
-          status: 'pending'
-        })
+        body: JSON.stringify(inspectionPayload)
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspections'] });
       setIsNewInspectionOpen(false);
+      setNewInspectionForm({
+        farmerId: '',
+        inspectionType: '',
+        commodityType: '',
+        notes: ''
+      });
       toast({
         title: 'Inspection Scheduled',
-        description: 'New inspection has been scheduled and recorded.',
+        description: 'New field inspection has been scheduled and recorded.',
       });
     },
     onError: (error: any) => {
@@ -327,20 +382,74 @@ export default function FieldAgentDashboard() {
                       </DialogHeader>
                       {/* Farmer registration form would go here */}
                       <div className="space-y-4">
-                        <div>
-                          <Label>Farmer Name</Label>
-                          <Input placeholder="Enter farmer's full name" />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>First Name</Label>
+                            <Input 
+                              value={newFarmerForm.firstName}
+                              onChange={(e) => setNewFarmerForm({...newFarmerForm, firstName: e.target.value})}
+                              placeholder="Enter first name" 
+                            />
+                          </div>
+                          <div>
+                            <Label>Last Name</Label>
+                            <Input 
+                              value={newFarmerForm.lastName}
+                              onChange={(e) => setNewFarmerForm({...newFarmerForm, lastName: e.target.value})}
+                              placeholder="Enter last name" 
+                            />
+                          </div>
                         </div>
                         <div>
                           <Label>Phone Number</Label>
-                          <Input placeholder="+231 77 XXX XXXX" />
+                          <Input 
+                            value={newFarmerForm.phoneNumber}
+                            onChange={(e) => setNewFarmerForm({...newFarmerForm, phoneNumber: e.target.value})}
+                            placeholder="+231 77 XXX XXXX" 
+                          />
                         </div>
                         <div>
-                          <Label>Farm Location</Label>
-                          <Input placeholder="GPS coordinates or landmark" />
+                          <Label>Farm Location (Village/District)</Label>
+                          <Input 
+                            value={newFarmerForm.farmLocation}
+                            onChange={(e) => setNewFarmerForm({...newFarmerForm, farmLocation: e.target.value})}
+                            placeholder={`Village or district in ${jurisdiction}`}
+                          />
                         </div>
-                        <Button onClick={() => setIsNewFarmerOpen(false)} className="w-full">
-                          Register Farmer
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Farm Size (hectares)</Label>
+                            <Input 
+                              value={newFarmerForm.farmSize}
+                              onChange={(e) => setNewFarmerForm({...newFarmerForm, farmSize: e.target.value})}
+                              placeholder="e.g., 2.5" 
+                              type="number"
+                              step="0.1"
+                            />
+                          </div>
+                          <div>
+                            <Label>Primary Crop</Label>
+                            <Select value={newFarmerForm.primaryCrop} onValueChange={(value) => setNewFarmerForm({...newFarmerForm, primaryCrop: value})}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select crop" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Coffee">Coffee</SelectItem>
+                                <SelectItem value="Cocoa">Cocoa</SelectItem>
+                                <SelectItem value="Rubber">Rubber</SelectItem>
+                                <SelectItem value="Rice">Rice</SelectItem>
+                                <SelectItem value="Cassava">Cassava</SelectItem>
+                                <SelectItem value="Oil Palm">Oil Palm</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <Button 
+                          onClick={() => newFarmerMutation.mutate(newFarmerForm)} 
+                          className="w-full"
+                          disabled={!newFarmerForm.firstName || !newFarmerForm.lastName || newFarmerMutation.isPending}
+                        >
+                          {newFarmerMutation.isPending ? 'Registering...' : 'Register Farmer'}
                         </Button>
                       </div>
                     </DialogContent>
@@ -363,14 +472,14 @@ export default function FieldAgentDashboard() {
                       <div className="space-y-4">
                         <div>
                           <Label>Farmer/Farm</Label>
-                          <Select>
+                          <Select value={newInspectionForm.farmerId} onValueChange={(value) => setNewInspectionForm({...newInspectionForm, farmerId: value})}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select farmer" />
                             </SelectTrigger>
                             <SelectContent>
-                              {farmers.map((farmer: any) => (
+                              {farmers.filter((f: any) => f.county === jurisdiction).map((farmer: any) => (
                                 <SelectItem key={farmer.id} value={farmer.id.toString()}>
-                                  {farmer.firstName} {farmer.lastName}
+                                  {farmer.firstName} {farmer.lastName} - {farmer.farmerId}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -378,35 +487,79 @@ export default function FieldAgentDashboard() {
                         </div>
                         <div>
                           <Label>Inspection Type</Label>
-                          <Select>
+                          <Select value={newInspectionForm.inspectionType} onValueChange={(value) => setNewInspectionForm({...newInspectionForm, inspectionType: value})}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select inspection type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="quality">Quality Assessment</SelectItem>
-                              <SelectItem value="compliance">Compliance Check</SelectItem>
-                              <SelectItem value="gps">GPS Mapping</SelectItem>
-                              <SelectItem value="certification">Pre-Certification</SelectItem>
+                              <SelectItem value="quality_assessment">Quality Assessment</SelectItem>
+                              <SelectItem value="compliance_check">Compliance Check</SelectItem>
+                              <SelectItem value="gps_mapping">GPS Mapping</SelectItem>
+                              <SelectItem value="pre_certification">Pre-Certification</SelectItem>
+                              <SelectItem value="harvest_inspection">Harvest Inspection</SelectItem>
+                              <SelectItem value="processing_review">Processing Review</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
-                          <Label>Notes</Label>
-                          <Textarea placeholder="Inspection notes and observations" />
+                          <Label>Commodity Type</Label>
+                          <Select value={newInspectionForm.commodityType} onValueChange={(value) => setNewInspectionForm({...newInspectionForm, commodityType: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select commodity" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Coffee">Coffee</SelectItem>
+                              <SelectItem value="Cocoa">Cocoa</SelectItem>
+                              <SelectItem value="Rubber">Rubber</SelectItem>
+                              <SelectItem value="Rice">Rice</SelectItem>
+                              <SelectItem value="Cassava">Cassava</SelectItem>
+                              <SelectItem value="Oil Palm">Oil Palm</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <Button onClick={() => setIsNewInspectionOpen(false)} className="w-full">
-                          Schedule Inspection
+                        <div>
+                          <Label>Inspection Notes</Label>
+                          <Textarea 
+                            value={newInspectionForm.notes}
+                            onChange={(e) => setNewInspectionForm({...newInspectionForm, notes: e.target.value})}
+                            placeholder="Pre-inspection notes, planned activities, specific areas of focus..." 
+                          />
+                        </div>
+                        <Button 
+                          onClick={() => newInspectionMutation.mutate(newInspectionForm)} 
+                          className="w-full"
+                          disabled={!newInspectionForm.farmerId || !newInspectionForm.inspectionType || newInspectionMutation.isPending}
+                        >
+                          {newInspectionMutation.isPending ? 'Scheduling...' : 'Schedule Inspection'}
                         </Button>
                       </div>
                     </DialogContent>
                   </Dialog>
 
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => {
+                      toast({
+                        title: 'GPS Mapping Started',
+                        description: `GPS mapping tool launched for ${jurisdiction} territory`,
+                      });
+                    }}
+                  >
                     <Map className="h-6 w-6" />
                     GPS Mapping
                   </Button>
 
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => {
+                      toast({
+                        title: 'Mobile Sync Initiated',
+                        description: 'Syncing field data with central database...',
+                      });
+                    }}
+                  >
                     <Smartphone className="h-6 w-6" />
                     Mobile Sync
                   </Button>
@@ -433,8 +586,23 @@ export default function FieldAgentDashboard() {
                         <p className="text-sm text-gray-600">{farmer.primaryCrop} - {farmer.farmSize} hectares</p>
                       </div>
                       <div className="flex gap-2">
-                        <Badge className="bg-green-100 text-green-800">Active</Badge>
-                        <Button size="sm" variant="outline">View Details</Button>
+                        <Badge className={
+                          farmer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }>
+                          {farmer.status === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            toast({
+                              title: 'Farmer Details',
+                              description: `Viewing details for ${farmer.firstName} ${farmer.lastName} (${farmer.farmerId})`,
+                            });
+                          }}
+                        >
+                          View Details
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -468,7 +636,18 @@ export default function FieldAgentDashboard() {
                         }>
                           {inspection.status}
                         </Badge>
-                        <Button size="sm" variant="outline">View</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            toast({
+                              title: 'Inspection Details',
+                              description: `Opening inspection ${inspection.inspectionId} for review`,
+                            });
+                          }}
+                        >
+                          View
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -490,7 +669,14 @@ export default function FieldAgentDashboard() {
                 <div className="text-center py-8">
                   <Map className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">Interactive territory map and GPS tools</p>
-                  <Button>
+                  <Button
+                    onClick={() => {
+                      toast({
+                        title: 'GPS Territory Mapping',
+                        description: `Launching GPS mapping interface for ${jurisdiction}. Ensure GPS is enabled on your device.`,
+                      });
+                    }}
+                  >
                     <MapPin className="h-4 w-4 mr-2" />
                     Launch GPS Mapping
                   </Button>

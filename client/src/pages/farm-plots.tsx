@@ -239,7 +239,7 @@ export default function FarmPlotsPage() {
                           </td>
                           <td className="py-3 px-4">
                             <Badge variant="outline">
-                              {plot.cropType.replace('_', ' ').toUpperCase()}
+                              {plot.cropType ? plot.cropType.replace('_', ' ').toUpperCase() : 'Unknown'}
                             </Badge>
                           </td>
                           <td className="py-3 px-4">{plot.plotSize} {plot.plotSizeUnit}</td>

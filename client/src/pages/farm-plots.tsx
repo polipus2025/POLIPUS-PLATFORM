@@ -13,6 +13,8 @@ import type { FarmPlot, Farmer } from "@shared/schema";
 export default function FarmPlotsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedPlot, setSelectedPlot] = useState<FarmPlot | null>(null);
+  const [isViewMapOpen, setIsViewMapOpen] = useState(false);
 
   const { data: farmPlots = [], isLoading } = useQuery<FarmPlot[]>({
     queryKey: ["/api/farm-plots"],
@@ -253,7 +255,15 @@ export default function FarmPlotsPage() {
                             </Badge>
                           </td>
                           <td className="py-3 px-4">
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPlot(plot);
+                                setIsViewMapOpen(true);
+                              }}
+                            >
+                              <Map className="h-4 w-4 mr-1" />
                               View Map
                             </Button>
                           </td>
@@ -266,6 +276,114 @@ export default function FarmPlotsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* View Map Dialog */}
+        <Dialog open={isViewMapOpen} onOpenChange={setIsViewMapOpen}>
+          <DialogContent className="max-w-4xl h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedPlot ? `${selectedPlot.plotName} - GPS Map View` : 'Plot Map View'}
+              </DialogTitle>
+              <DialogDescription>
+                Interactive map showing plot boundaries and GPS coordinates
+              </DialogDescription>
+            </DialogHeader>
+            {selectedPlot && (
+              <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                {/* Map Area */}
+                <div className="lg:col-span-2 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                  <div className="text-center">
+                    <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-700 mb-2">Interactive Map</h3>
+                    <p className="text-gray-500 mb-4">GPS boundary visualization would appear here</p>
+                    {selectedPlot.gpsCoordinates && (
+                      <div className="bg-white p-4 rounded border text-left">
+                        <h4 className="font-medium mb-2">GPS Boundary Points:</h4>
+                        <code className="text-xs text-gray-600 block whitespace-pre">
+                          {JSON.stringify(JSON.parse(selectedPlot.gpsCoordinates), null, 2)}
+                        </code>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Plot Information */}
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Plot Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Plot ID</label>
+                        <p className="font-mono text-sm">{selectedPlot.plotId}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Plot Name</label>
+                        <p>{selectedPlot.plotName}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Farmer</label>
+                        <p>{(() => {
+                          const farmer = farmers.find(f => f.id === selectedPlot.farmerId);
+                          return farmer ? `${farmer.firstName} ${farmer.lastName}` : "Unknown";
+                        })()}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Crop Type</label>
+                        <Badge variant="outline" className="mt-1">
+                          {selectedPlot.cropType}
+                        </Badge>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Plot Size</label>
+                        <p>{selectedPlot.plotSize} {selectedPlot.plotSizeUnit}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Soil Type</label>
+                        <p>{selectedPlot.soilType || "Not specified"}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Status</label>
+                        <Badge 
+                          variant={
+                            selectedPlot.status === 'active' ? "default" : 
+                            selectedPlot.status === 'fallow' ? "secondary" : "destructive"
+                          }
+                          className="mt-1"
+                        >
+                          {selectedPlot.status.charAt(0).toUpperCase() + selectedPlot.status.slice(1)}
+                        </Badge>
+                      </div>
+                      {selectedPlot.plantingDate && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Planting Date</label>
+                          <p>{new Date(selectedPlot.plantingDate).toLocaleDateString()}</p>
+                        </div>
+                      )}
+                      {selectedPlot.expectedHarvestDate && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Expected Harvest</label>
+                          <p>{new Date(selectedPlot.expectedHarvestDate).toLocaleDateString()}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1">
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit Plot
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsViewMapOpen(false)}>
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

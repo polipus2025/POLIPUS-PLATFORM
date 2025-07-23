@@ -152,23 +152,6 @@ export const harvestRecords = pgTable("harvest_records", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const inputDistribution = pgTable("input_distribution", {
-  id: serial("id").primaryKey(),
-  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
-  inputType: text("input_type").notNull(), // fertilizer, pesticide, seeds, tools
-  inputName: text("input_name").notNull(),
-  quantityDistributed: decimal("quantity_distributed", { precision: 10, scale: 2 }).notNull(),
-  unit: text("unit").notNull(),
-  costPerUnit: decimal("cost_per_unit", { precision: 10, scale: 2 }),
-  totalCost: decimal("total_cost", { precision: 12, scale: 2 }),
-  distributionDate: timestamp("distribution_date").notNull(),
-  supplier: text("supplier"),
-  paymentMethod: text("payment_method"), // cash, credit, loan
-  repaymentDue: timestamp("repayment_due"),
-  repaymentStatus: text("repayment_status").default("pending"), // pending, partial, paid
-  sustainabilityRating: text("sustainability_rating"), // organic, low_impact, conventional
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 
 
@@ -193,10 +176,6 @@ export const insertHarvestRecordSchema = createInsertSchema(harvestRecords).omit
   createdAt: true,
 });
 
-export const insertInputDistributionSchema = createInsertSchema(inputDistribution).omit({
-  id: true,
-  createdAt: true,
-});
 
 
 
@@ -300,7 +279,7 @@ export type Farmer = typeof farmers.$inferSelect;
 export type FarmPlot = typeof farmPlots.$inferSelect;
 export type CropPlan = typeof cropPlanning.$inferSelect;
 export type HarvestRecord = typeof harvestRecords.$inferSelect;
-export type InputDistribution = typeof inputDistribution.$inferSelect;
+
 
 
 // Farm Management Platform insert types
@@ -308,7 +287,7 @@ export type InsertFarmer = z.infer<typeof insertFarmerSchema>;
 export type InsertFarmPlot = z.infer<typeof insertFarmPlotSchema>;
 export type InsertCropPlan = z.infer<typeof insertCropPlanSchema>;
 export type InsertHarvestRecord = z.infer<typeof insertHarvestRecordSchema>;
-export type InsertInputDistribution = z.infer<typeof insertInputDistributionSchema>;
+
 
 // Authentication insert schemas
 export const insertAuthUserSchema = createInsertSchema(authUsers).omit({

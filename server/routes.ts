@@ -14,7 +14,7 @@ import {
   insertFarmPlotSchema,
   insertCropPlanSchema,
   insertHarvestRecordSchema,
-  insertInputDistributionSchema,
+
 
   insertLraIntegrationSchema,
   insertMoaIntegrationSchema,
@@ -1078,39 +1078,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create crop plan" });
-    }
-  });
-
-  // Input Distribution routes
-  app.get("/api/input-distributions", async (req, res) => {
-    try {
-      const { farmerId, inputType } = req.query;
-      let inputDistributions;
-      
-      if (farmerId) {
-        inputDistributions = await storage.getInputDistributionsByFarmer(parseInt(farmerId as string));
-      } else if (inputType) {
-        inputDistributions = await storage.getInputDistributionsByType(inputType as string);
-      } else {
-        inputDistributions = await storage.getInputDistributions();
-      }
-      
-      res.json(inputDistributions);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch input distributions" });
-    }
-  });
-
-  app.post("/api/input-distributions", async (req, res) => {
-    try {
-      const validatedData = insertInputDistributionSchema.parse(req.body);
-      const inputDistribution = await storage.createInputDistribution(validatedData);
-      res.status(201).json(inputDistribution);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to create input distribution" });
     }
   });
 

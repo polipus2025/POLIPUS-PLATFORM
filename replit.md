@@ -12,10 +12,11 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **EUDR Compliance Integration**: Added EU Deforestation Regulation (EUDR) compliance dashboard with comprehensive monitoring, risk assessment, and documentation features
 - **Complete Liberian Cash Crops**: Integrated all major cash crops that can be grown in Liberia (20 commodity types) with quality grades and proper categorization
 - **All 15 Counties**: Full integration of all Liberian counties in dropdown selectors and compliance tracking
-- **Farm Management Platform**: Complete integration of farmer onboarding, plot mapping, crop planning, and input management modules
+- **Farm Management Platform**: Complete integration of farmer onboarding, plot mapping, and crop planning modules
 - **Enhanced Navigation**: Dual-section navigation supporting both regulatory compliance and farm management workflows
 - **Transportation Tracking System**: Real-time GPS vehicle tracking with QR code scanning for produce movement monitoring from farm to destination
 - **Advanced Statistics & Audit System**: Role-based reporting system with comprehensive statistics dashboard and audit trail monitoring for senior officials
+- **Input Management Removal**: Completely removed input management functionality from the entire platform per user request (January 2025)
 
 ## User Preferences
 
@@ -64,7 +65,7 @@ The application follows a modern full-stack architecture pattern with clear sepa
 - **Dashboard**: Real-time metrics, compliance charts, regional overviews, and EUDR compliance monitoring
 - **Government Integration**: Comprehensive synchronization dashboard for LRA, MOA, and Customs with real-time status tracking and bulk sync operations
 - **EUDR Compliance**: Comprehensive EU Deforestation Regulation compliance dashboard with risk assessments, documentation tracking, and automated alerts
-- **Farm Management Platform**: Complete suite of farmer onboarding, plot mapping, crop planning, and input management tools
+- **Farm Management Platform**: Complete suite of farmer onboarding, plot mapping, and crop planning tools (input management removed)
 - **Transportation Tracking**: Real-time vehicle tracking system with GPS monitoring, QR code scanning, and movement status updates for complete supply chain visibility
 - **Advanced Reports System**: Role-based reporting with Statistics dashboard (senior officials) and Audit trail monitoring (administrators only)
 - **Data Entry Forms**: Commodity registration, inspection recording, certification issuance

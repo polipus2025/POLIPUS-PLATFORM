@@ -9,7 +9,6 @@ import {
   Plus, 
   Users,
   Calendar,
-  Package,
   Building2,
   Satellite,
   Shield,
@@ -69,7 +68,6 @@ const farmManagementNavigation = [
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Certificate Verification", href: "/verification", icon: Shield },
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
-  { name: "Input Management", href: "/input-management", icon: Package },
 ];
 
 export default function Sidebar() {

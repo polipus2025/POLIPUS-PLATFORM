@@ -12,7 +12,7 @@ import {
   farmPlots,
   cropPlanning,
   harvestRecords,
-  inputDistribution,
+
 
   lraIntegration,
   moaIntegration,
@@ -48,7 +48,7 @@ import {
   type FarmPlot,
   type CropPlan,
   type HarvestRecord,
-  type InputDistribution,
+
 
   type LraIntegration,
   type MoaIntegration,
@@ -84,7 +84,7 @@ import {
   type InsertFarmPlot,
   type InsertCropPlan,
   type InsertHarvestRecord,
-  type InsertInputDistribution,
+
 
   type InsertLraIntegration,
   type InsertMoaIntegration,
@@ -203,12 +203,7 @@ export interface IStorage {
   updateHarvestRecord(id: number, record: Partial<HarvestRecord>): Promise<HarvestRecord | undefined>;
   
   // Input Distribution methods
-  getInputDistributions(): Promise<InputDistribution[]>;
-  getInputDistribution(id: number): Promise<InputDistribution | undefined>;
-  getInputDistributionsByFarmer(farmerId: number): Promise<InputDistribution[]>;
-  getInputDistributionsByType(inputType: string): Promise<InputDistribution[]>;
-  createInputDistribution(distribution: InsertInputDistribution): Promise<InputDistribution>;
-  updateInputDistribution(id: number, distribution: Partial<InputDistribution>): Promise<InputDistribution | undefined>;
+
   
 
 
@@ -402,7 +397,7 @@ export class MemStorage implements IStorage {
   private farmPlots: Map<number, FarmPlot>;
   private cropPlans: Map<number, CropPlan>;
   private harvestRecords: Map<number, HarvestRecord>;
-  private inputDistributions: Map<number, InputDistribution>;
+
   private lraIntegrations: Map<number, LraIntegration>;
   private moaIntegrations: Map<number, MoaIntegration>;
   private customsIntegrations: Map<number, CustomsIntegration>;
@@ -437,7 +432,7 @@ export class MemStorage implements IStorage {
   private currentFarmPlotId: number;
   private currentCropPlanId: number;
   private currentHarvestRecordId: number;
-  private currentInputDistributionId: number;
+
   private currentLraIntegrationId: number;
   private currentMoaIntegrationId: number;
   private currentCustomsIntegrationId: number;
@@ -474,7 +469,7 @@ export class MemStorage implements IStorage {
     this.farmPlots = new Map();
     this.cropPlans = new Map();
     this.harvestRecords = new Map();
-    this.inputDistributions = new Map();
+
     this.lraIntegrations = new Map();
     this.moaIntegrations = new Map();
     this.customsIntegrations = new Map();
@@ -509,7 +504,7 @@ export class MemStorage implements IStorage {
     this.currentFarmPlotId = 1;
     this.currentCropPlanId = 1;
     this.currentHarvestRecordId = 1;
-    this.currentInputDistributionId = 1;
+
     this.currentLraIntegrationId = 1;
     this.currentMoaIntegrationId = 1;
     this.currentCustomsIntegrationId = 1;
@@ -2294,42 +2289,6 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  // Input Distribution methods
-  async getInputDistributions(): Promise<InputDistribution[]> {
-    return Array.from(this.inputDistributions.values());
-  }
-
-  async getInputDistribution(id: number): Promise<InputDistribution | undefined> {
-    return this.inputDistributions.get(id);
-  }
-
-  async getInputDistributionsByFarmer(farmerId: number): Promise<InputDistribution[]> {
-    return Array.from(this.inputDistributions.values()).filter(d => d.farmerId === farmerId);
-  }
-
-  async getInputDistributionsByType(inputType: string): Promise<InputDistribution[]> {
-    return Array.from(this.inputDistributions.values()).filter(d => d.inputType === inputType);
-  }
-
-  async createInputDistribution(distribution: InsertInputDistribution): Promise<InputDistribution> {
-    const newDistribution: InputDistribution = {
-      id: this.currentInputDistributionId++,
-      ...distribution,
-      repaymentStatus: distribution.repaymentStatus || 'pending',
-      createdAt: new Date()
-    };
-    this.inputDistributions.set(newDistribution.id, newDistribution);
-    return newDistribution;
-  }
-
-  async updateInputDistribution(id: number, distribution: Partial<InputDistribution>): Promise<InputDistribution | undefined> {
-    const existing = this.inputDistributions.get(id);
-    if (!existing) return undefined;
-    
-    const updated = { ...existing, ...distribution };
-    this.inputDistributions.set(id, updated);
-    return updated;
-  }
 
 
 

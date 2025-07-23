@@ -20,7 +20,7 @@ import DataEntry from "@/pages/data-entry";
 import Farmers from "@/pages/farmers";
 import FarmPlots from "@/pages/farm-plots";
 import CropPlanning from "@/pages/crop-planning";
-import InputManagement from "@/pages/input-management";
+
 import GovernmentIntegration from "@/pages/government-integration";
 import GpsMapping from "@/pages/gps-mapping";
 import InternationalStandards from "@/pages/international-standards";
@@ -54,7 +54,6 @@ function Router() {
           <Route path="/farmers" component={Farmers} />
           <Route path="/farm-plots" component={FarmPlots} />
           <Route path="/crop-planning" component={CropPlanning} />
-          <Route path="/input-management" component={InputManagement} />
           <Route path="/government-integration" component={GovernmentIntegration} />
           <Route path="/gps-mapping" component={GpsMapping} />
           <Route path="/international-standards" component={InternationalStandards} />

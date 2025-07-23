@@ -1043,6 +1043,167 @@ export class MemStorage implements IStorage {
       agreementDate: null
     });
 
+    // Create sample farm plots
+    this.createFarmPlot({
+      plotId: "PLT-2024-001",
+      farmerId: 1, // Moses Tuah
+      plotName: "North Field - Cocoa Grove",
+      cropType: "Cocoa",
+      plotSize: "2.5",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 8.0050, lng: -9.5200 },
+        { lat: 8.0070, lng: -9.5200 },
+        { lat: 8.0070, lng: -9.5180 },
+        { lat: 8.0050, lng: -9.5180 },
+        { lat: 8.0050, lng: -9.5200 }
+      ]),
+      soilType: "Forest soil",
+      plantingDate: new Date("2022-03-15"),
+      expectedHarvestDate: new Date("2025-03-15"),
+      status: "active"
+    });
+
+    this.createFarmPlot({
+      plotId: "PLT-2024-002",
+      farmerId: 1, // Moses Tuah
+      plotName: "South Field - Coffee Plantation",
+      cropType: "Coffee",
+      plotSize: "1.8",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 8.0020, lng: -9.5220 },
+        { lat: 8.0040, lng: -9.5220 },
+        { lat: 8.0040, lng: -9.5200 },
+        { lat: 8.0020, lng: -9.5200 },
+        { lat: 8.0020, lng: -9.5220 }
+      ]),
+      soilType: "Volcanic soil",
+      plantingDate: new Date("2021-06-10"),
+      expectedHarvestDate: new Date("2024-12-20"),
+      status: "active"
+    });
+
+    this.createFarmPlot({
+      plotId: "PLT-2024-003",
+      farmerId: 2, // Mary Johnson
+      plotName: "East Block - Rubber Trees",
+      cropType: "Rubber",
+      plotSize: "3.2",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 7.0100, lng: -9.4700 },
+        { lat: 7.0130, lng: -9.4700 },
+        { lat: 7.0130, lng: -9.4670 },
+        { lat: 7.0100, lng: -9.4670 },
+        { lat: 7.0100, lng: -9.4700 }
+      ]),
+      soilType: "Lateritic soil",
+      plantingDate: new Date("2020-01-20"),
+      expectedHarvestDate: new Date("2025-01-20"),
+      status: "active"
+    });
+
+    this.createFarmPlot({
+      plotId: "PLT-2024-004",
+      farmerId: 3, // Samuel Konneh
+      plotName: "Main Plot - Palm Oil Grove",
+      cropType: "Palm Oil",
+      plotSize: "5.5",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 6.0700, lng: -8.1300 },
+        { lat: 6.0750, lng: -8.1300 },
+        { lat: 6.0750, lng: -8.1250 },
+        { lat: 6.0700, lng: -8.1250 },
+        { lat: 6.0700, lng: -8.1300 }
+      ]),
+      soilType: "Alluvial soil",
+      plantingDate: new Date("2019-08-15"),
+      expectedHarvestDate: new Date("2024-08-15"),
+      status: "active"
+    });
+
+    this.createFarmPlot({
+      plotId: "PLT-2024-005",
+      farmerId: 4, // Grace Williams
+      plotName: "Small Holdings - Mixed Crops",
+      cropType: "Rice",
+      plotSize: "1.5",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 6.5150, lng: -10.3400 },
+        { lat: 6.5170, lng: -10.3400 },
+        { lat: 6.5170, lng: -10.3380 },
+        { lat: 6.5150, lng: -10.3380 },
+        { lat: 6.5150, lng: -10.3400 }
+      ]),
+      soilType: "Swamp soil",
+      plantingDate: new Date("2024-05-01"),
+      expectedHarvestDate: new Date("2024-11-01"),
+      status: "active"
+    });
+
+    this.createFarmPlot({
+      plotId: "PLT-2024-006",
+      farmerId: 6, // Janet Cooper
+      plotName: "Coastal Farm - Cassava Field",
+      cropType: "Cassava",
+      plotSize: "4.0",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 5.8800, lng: -10.0450 },
+        { lat: 5.8830, lng: -10.0450 },
+        { lat: 5.8830, lng: -10.0420 },
+        { lat: 5.8800, lng: -10.0420 },
+        { lat: 5.8800, lng: -10.0450 }
+      ]),
+      soilType: "Sandy soil",
+      plantingDate: new Date("2023-11-20"),
+      expectedHarvestDate: new Date("2024-11-20"),
+      status: "active"
+    });
+
+    this.createFarmPlot({
+      plotId: "PLT-2024-007",
+      farmerId: 7, // Robert Davis
+      plotName: "Southeast Plantation - Kola Nut",
+      cropType: "Kola Nut",
+      plotSize: "6.8",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 4.3720, lng: -7.7170 },
+        { lat: 4.3760, lng: -7.7170 },
+        { lat: 4.3760, lng: -7.7130 },
+        { lat: 4.3720, lng: -7.7130 },
+        { lat: 4.3720, lng: -7.7170 }
+      ]),
+      soilType: "Forest soil",
+      plantingDate: new Date("2021-12-10"),
+      expectedHarvestDate: new Date("2025-12-10"),
+      status: "active"
+    });
+
+    this.createFarmPlot({
+      plotId: "PLT-2024-008",
+      farmerId: 5, // David Clarke (inactive farmer)
+      plotName: "Abandoned Plot - Overgrown",
+      cropType: "Mixed",
+      plotSize: "2.9",
+      plotSizeUnit: "hectares",
+      gpsCoordinates: JSON.stringify([
+        { lat: 7.3650, lng: -8.7150 },
+        { lat: 7.3680, lng: -8.7150 },
+        { lat: 7.3680, lng: -8.7120 },
+        { lat: 7.3650, lng: -8.7120 },
+        { lat: 7.3650, lng: -8.7150 }
+      ]),
+      soilType: "Clay soil",
+      plantingDate: new Date("2020-04-01"),
+      expectedHarvestDate: null,
+      status: "fallow"
+    });
+
     // Create sample export certificates
     this.createCertification({
       certificateNumber: "EXP-CERT-2024-001",

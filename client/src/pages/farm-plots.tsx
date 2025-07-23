@@ -1,34 +1,36 @@
 import { Helmet } from "react-helmet";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Search, Map, Crop, TreePine, BarChart3 } from "lucide-react";
+import { Plus, Search, Map, Crop, TreePine, BarChart3, Eye, Edit, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { FarmPlot, Farmer } from "@shared/schema";
 
 export default function FarmPlotsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data: farmPlots = [], isLoading } = useQuery({
+  const { data: farmPlots = [], isLoading } = useQuery<FarmPlot[]>({
     queryKey: ["/api/farm-plots"],
   });
 
-  const { data: farmers = [] } = useQuery({
+  const { data: farmers = [] } = useQuery<Farmer[]>({
     queryKey: ["/api/farmers"],
   });
 
-  const filteredPlots = farmPlots.filter((plot: any) =>
-    plot.plotName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plot.plotId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plot.cropType.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPlots = farmPlots.filter((plot) =>
+    plot.plotName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    plot.plotId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    plot.cropType?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalArea = farmPlots.reduce((sum: number, plot: any) => sum + parseFloat(plot.plotSize || 0), 0);
-  const activePlots = farmPlots.filter((p: any) => p.status === 'active').length;
-  const cropTypes = new Set(farmPlots.map((p: any) => p.cropType)).size;
+  const totalArea = farmPlots.reduce((sum, plot) => sum + parseFloat(plot.plotSize || "0"), 0);
+  const activePlots = farmPlots.filter((p) => p.status === 'active').length;
+  const cropTypes = new Set(farmPlots.map((p) => p.cropType)).size;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,11 +55,79 @@ export default function FarmPlotsPage() {
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Digital Farm Plot Mapping</DialogTitle>
+                <DialogDescription>
+                  Create a new farm plot with GPS coordinates and boundary mapping
+                </DialogDescription>
               </DialogHeader>
-              <div className="p-4 text-center text-gray-600">
-                <Map className="h-12 w-12 mx-auto mb-4 text-lacra-green" />
-                <p>Farm plot mapping form will be implemented here</p>
-                <p className="text-sm mt-2">GPS coordinates, plot boundaries, and crop allocation</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Plot Name</label>
+                    <Input placeholder="e.g., North Field - Cocoa Grove" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Farmer</label>
+                    <select className="w-full p-2 border border-gray-300 rounded-md">
+                      <option value="">Select farmer...</option>
+                      {farmers.map((farmer) => (
+                        <option key={farmer.id} value={farmer.id}>
+                          {farmer.firstName} {farmer.lastName} ({farmer.farmerId})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Crop Type</label>
+                    <select className="w-full p-2 border border-gray-300 rounded-md">
+                      <option value="">Select crop...</option>
+                      <option value="Cocoa">Cocoa</option>
+                      <option value="Coffee">Coffee</option>
+                      <option value="Palm Oil">Palm Oil</option>
+                      <option value="Rubber">Rubber</option>
+                      <option value="Rice">Rice</option>
+                      <option value="Cassava">Cassava</option>
+                      <option value="Kola Nut">Kola Nut</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Plot Size (hectares)</label>
+                    <Input type="number" step="0.1" placeholder="e.g., 2.5" />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">GPS Coordinates</label>
+                    <div className="space-y-2">
+                      <Input placeholder="Latitude (e.g., 8.0050)" />
+                      <Input placeholder="Longitude (e.g., -9.5200)" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Soil Type</label>
+                    <select className="w-full p-2 border border-gray-300 rounded-md">
+                      <option value="">Select soil type...</option>
+                      <option value="Forest soil">Forest soil</option>
+                      <option value="Volcanic soil">Volcanic soil</option>
+                      <option value="Lateritic soil">Lateritic soil</option>
+                      <option value="Alluvial soil">Alluvial soil</option>
+                      <option value="Sandy soil">Sandy soil</option>
+                      <option value="Clay soil">Clay soil</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Planting Date</label>
+                    <Input type="date" />
+                  </div>
+                  <div className="flex gap-2 mt-6">
+                    <Button className="flex-1 bg-lacra-green hover:bg-green-700">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Save Plot
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
               </div>
             </DialogContent>
           </Dialog>

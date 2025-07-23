@@ -88,7 +88,7 @@ export default function GpsMapping() {
         soilType: data.soilType || null,
         drainageStatus: data.drainageStatus || null,
       };
-      return apiRequest('/api/farm-gps-mappings', 'POST', payload);
+      return apiRequest('POST', '/api/farm-gps-mappings', payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/farm-gps-mappings'] });
@@ -110,7 +110,7 @@ export default function GpsMapping() {
 
   const validateCoordinatesMutation = useMutation({
     mutationFn: async (coordinates: string) => {
-      return apiRequest('/api/gps/validate-coordinates', 'POST', { coordinates });
+      return apiRequest('POST', '/api/gps/validate-coordinates', { coordinates });
     },
     onSuccess: (data: any) => {
       if (data.valid) {
@@ -170,9 +170,9 @@ export default function GpsMapping() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">GPS Farm Mapping</h1>
+          <h1 className="text-3xl font-bold">GPS Farm Mapping System</h1>
           <p className="text-muted-foreground">
-            Manage farm GPS coordinates and monitor EUDR compliance through precise geolocation tracking
+            Real-time GPS tracking and geofencing for agricultural plots with EUDR compliance monitoring
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -518,6 +518,126 @@ export default function GpsMapping() {
               {gpsMappings.reduce((sum: number, mapping: any) => sum + parseFloat(mapping.totalAreaHectares || 0), 0).toFixed(1)}
             </div>
             <p className="text-xs text-muted-foreground">Hectares mapped</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Interactive GPS Mapping Mockup */}
+      <div className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Satellite className="h-5 w-5" />
+              Live GPS Tracking & Satellite View
+              <Badge variant="secondary" className="ml-2">Demo Preview</Badge>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Interactive satellite mapping with real-time GPS coordinates and deforestation monitoring
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-lg h-96 overflow-hidden border-2 border-dashed border-green-300">
+              {/* Map Interface Mockup */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-200/30 to-blue-200/30">
+                {/* Mock Satellite Tiles */}
+                <div className="grid grid-cols-8 grid-rows-6 h-full opacity-20">
+                  {Array.from({length: 48}).map((_, i) => (
+                    <div key={i} className={`border border-gray-300 ${i % 3 === 0 ? 'bg-green-300/40' : i % 5 === 0 ? 'bg-brown-200/40' : 'bg-green-200/40'}`} />
+                  ))}
+                </div>
+                
+                {/* Farm Plot Boundaries */}
+                <div className="absolute top-16 left-16 w-32 h-24 border-4 border-red-500 bg-red-500/10 rounded-lg">
+                  <div className="absolute -top-8 left-0 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                    ALERT: Deforestation Detected
+                  </div>
+                </div>
+                
+                <div className="absolute top-20 right-20 w-40 h-32 border-4 border-green-500 bg-green-500/10 rounded-lg">
+                  <div className="absolute -top-8 left-0 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                    ✓ EUDR Compliant
+                  </div>
+                </div>
+                
+                <div className="absolute bottom-20 left-20 w-36 h-28 border-4 border-yellow-500 bg-yellow-500/10 rounded-lg">
+                  <div className="absolute -top-8 left-0 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                    ⚠ Needs Verification
+                  </div>
+                </div>
+                
+                {/* GPS Pins */}
+                <MapPin className="absolute top-20 left-20 h-6 w-6 text-red-600 animate-pulse" />
+                <MapPin className="absolute top-24 right-24 h-6 w-6 text-green-600 animate-pulse" />
+                <MapPin className="absolute bottom-24 left-24 h-6 w-6 text-yellow-600 animate-pulse" />
+                
+                {/* Center Overlay with Controls */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6 border border-gray-300 shadow-lg max-w-md">
+                    <div className="text-center mb-4">
+                      <Satellite className="h-12 w-12 mx-auto text-blue-600 mb-2" />
+                      <h3 className="text-lg font-semibold text-gray-800">Interactive GPS Mapping System</h3>
+                      <p className="text-sm text-gray-600">Real-time satellite view with GPS tracking</p>
+                    </div>
+                    
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center justify-between p-2 bg-green-50 rounded">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <span>EUDR Compliant Farms</span>
+                        </div>
+                        <Badge variant="secondary">15 plots</Badge>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-2 bg-red-50 rounded">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                          <span>Deforestation Alerts</span>
+                        </div>
+                        <Badge variant="destructive">3 active</Badge>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-2 bg-yellow-50 rounded">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                          <span>Pending Verification</span>
+                        </div>
+                        <Badge variant="secondary">8 plots</Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-4">
+                      <Button size="sm" className="flex-1">
+                        <Navigation className="h-4 w-4 mr-1" />
+                        Live Tracking
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <Eye className="h-4 w-4 mr-1" />
+                        Full Screen
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Map Controls */}
+            <div className="flex justify-between items-center mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <span>Live GPS Coordinates: 6.3183°N, -10.7919°W</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Satellite className="h-4 w-4 text-green-600" />
+                  <span>Satellite Update: 2 min ago</span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline">Zoom In</Button>
+                <Button size="sm" variant="outline">Zoom Out</Button>
+                <Button size="sm" variant="outline">Reset View</Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

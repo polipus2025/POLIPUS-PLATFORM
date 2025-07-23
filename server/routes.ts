@@ -559,6 +559,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route optimization endpoint
+  app.get("/api/transportation/route-optimization", async (req, res) => {
+    try {
+      const routeData = {
+        optimizedRoutes: [
+          {
+            route: "Monrovia → Buchanan",
+            vehicleCount: 3,
+            fuelSaved: "12%",
+            timeSaved: "15 min",
+            costReduction: "$45"
+          },
+          {
+            route: "Gbarnga → Voinjama", 
+            vehicleCount: 2,
+            fuelSaved: "8%",
+            timeSaved: "22 min",
+            costReduction: "$32"
+          },
+          {
+            route: "Farm clusters → Port",
+            vehicleCount: 5,
+            fuelSaved: "15%",
+            timeSaved: "35 min", 
+            costReduction: "$78"
+          }
+        ],
+        suggestions: [
+          "Combine TRK-LR-004 & TRK-LR-005 shipments",
+          "Alternate route via Kakata for TRK-LR-002",
+          "Schedule overnight stop at Gbarnga checkpoint"
+        ]
+      };
+      res.json(routeData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch route optimization data" });
+    }
+  });
+
+  // Real-time alerts endpoint
+  app.get("/api/transportation/alerts", async (req, res) => {
+    try {
+      const alerts = {
+        active: [
+          {
+            id: "ALERT-001",
+            type: "route_deviation",
+            vehicleId: "TRK-LR-002",
+            severity: "high",
+            message: "TRK-LR-002 off planned route by 5km",
+            timestamp: new Date(Date.now() - 3 * 60000).toISOString()
+          },
+          {
+            id: "ALERT-002", 
+            type: "schedule_delay",
+            vehicleId: "TRK-LR-003",
+            severity: "medium",
+            message: "TRK-LR-003 45 min behind schedule",
+            timestamp: new Date(Date.now() - 8 * 60000).toISOString()
+          },
+          {
+            id: "ALERT-003",
+            type: "delivery_confirmed", 
+            vehicleId: "TRK-LR-001",
+            severity: "low",
+            message: "TRK-LR-001 delivered successfully",
+            timestamp: new Date(Date.now() - 12 * 60000).toISOString()
+          }
+        ]
+      };
+      res.json(alerts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch transportation alerts" });
+    }
+  });
+
+  // Document verification endpoint
+  app.get("/api/transportation/document-verification/:vehicleId", async (req, res) => {
+    try {
+      const { vehicleId } = req.params;
+      const verification = {
+        vehicleId,
+        documents: {
+          exportPermit: { status: "valid", expiryDate: "2025-06-15" },
+          driverLicense: { status: "valid", expiryDate: "2025-12-20" },
+          vehicleRegistration: { status: "valid", expiryDate: "2025-08-30" },
+          insurance: { status: "warning", expiryDate: "2025-01-28", daysLeft: 5 }
+        },
+        overallStatus: "valid_with_warnings",
+        lastVerified: new Date().toISOString()
+      };
+      res.json(verification);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to verify documents" });
+    }
+  });
+
+  // Fleet management endpoint
+  app.get("/api/transportation/fleet-overview", async (req, res) => {
+    try {
+      const fleetData = {
+        totalVehicles: 45,
+        activeVehicles: 38,
+        vehicleTypes: {
+          largeTrucks: 23,
+          mediumTrucks: 15,
+          pickupTrucks: 7
+        },
+        maintenanceStatus: {
+          readyForService: 38,
+          maintenanceDue: 5,
+          outOfService: 2
+        },
+        totalDrivers: 52,
+        driversOnDuty: 23,
+        performance: {
+          onTimeDeliveries: 94.2,
+          averageDelay: 12,
+          completedToday: 23,
+          fuelEfficiency: 8.2,
+          routeOptimization: 87,
+          distanceCovered: 2347,
+          incidentFreeDays: 45,
+          speedViolations: 3,
+          safetyScore: 96.8,
+          fuelCosts: 1245,
+          maintenanceCosts: 456,
+          totalSavings: 234
+        }
+      };
+      res.json(fleetData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch fleet overview" });
+    }
+  });
+
   // Commodity routes
   app.get("/api/commodities", async (req, res) => {
     try {

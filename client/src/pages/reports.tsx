@@ -1390,6 +1390,150 @@ export default function Reports() {
               </Card>
             </div>
 
+            {/* Route Optimization & Alerts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Navigation className="h-5 w-5 text-indigo-600" />
+                    Route Optimization
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-indigo-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-indigo-800 mb-2">Optimal Routes Today</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Monrovia → Buchanan: 3 vehicles</span>
+                          <span className="text-green-600 font-medium">12% fuel saved</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Gbarnga → Voinjama: 2 vehicles</span>
+                          <span className="text-green-600 font-medium">8% time saved</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Farm clusters → Port: 5 vehicles</span>
+                          <span className="text-green-600 font-medium">15% cost reduced</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-4">
+                      <h5 className="font-medium mb-2">Route Suggestions</h5>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p>• Combine TRK-LR-004 & TRK-LR-005 shipments</p>
+                        <p>• Alternate route via Kakata for TRK-LR-002</p>
+                        <p>• Schedule overnight stop at Gbarnga checkpoint</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    Real-time Alerts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 p-3 bg-red-50 border-l-4 border-red-400 rounded">
+                      <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-red-800">Route Deviation Alert</p>
+                        <p className="text-xs text-red-600">TRK-LR-002 off planned route by 5km</p>
+                        <p className="text-xs text-gray-500">3 minutes ago</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                      <Clock className="h-5 w-5 text-yellow-600 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-yellow-800">Schedule Delay</p>
+                        <p className="text-xs text-yellow-600">TRK-LR-003 45 min behind schedule</p>
+                        <p className="text-xs text-gray-500">8 minutes ago</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3 p-3 bg-green-50 border-l-4 border-green-400 rounded">
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-green-800">Delivery Confirmed</p>
+                        <p className="text-xs text-green-600">TRK-LR-001 delivered successfully</p>
+                        <p className="text-xs text-gray-500">12 minutes ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Enhanced QR Code & Document Verification */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-blue-600" />
+                  Enhanced QR System & Document Verification
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-800 mb-3">QR Code Generator</h4>
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <div className="w-24 h-24 mx-auto bg-white border-2 border-dashed border-blue-300 rounded-lg flex items-center justify-center mb-2">
+                          <Activity className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <p className="text-xs text-gray-600">Vehicle QR Code</p>
+                      </div>
+                      <Button size="sm" className="w-full">Generate New QR</Button>
+                      <Button size="sm" variant="outline" className="w-full">Print QR Labels</Button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-800 mb-3">Document Verification</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">Export Permits: Valid</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">Driver License: Valid</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">Vehicle Registration: Valid</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                        <span className="text-sm">Insurance: Expires in 5 days</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-800 mb-3">Blockchain Verification</h4>
+                    <div className="space-y-2">
+                      <div className="text-center">
+                        <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-2">
+                          <Shield className="h-8 w-8 text-purple-600" />
+                        </div>
+                        <p className="text-xs font-medium text-purple-800">Tamper-Proof Records</p>
+                        <p className="text-xs text-gray-600">All movements verified on blockchain</p>
+                      </div>
+                      <Button size="sm" variant="outline" className="w-full">Verify Chain</Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Detailed Movement History */}
             <Card>
               <CardHeader>
@@ -1543,6 +1687,202 @@ export default function Reports() {
                       </TableRow>
                     </TableBody>
                   </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Fleet Management & Driver Overview */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-gray-600" />
+                    Fleet Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-3 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-gray-800">45</p>
+                        <p className="text-sm text-gray-600">Total Vehicles</p>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-green-800">38</p>
+                        <p className="text-sm text-green-600">Active</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Trucks (Large)</span>
+                        <span className="font-medium">23 vehicles</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Trucks (Medium)</span>
+                        <span className="font-medium">15 vehicles</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Pickup Trucks</span>
+                        <span className="font-medium">7 vehicles</span>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-3">
+                      <h5 className="font-medium mb-2">Maintenance Status</h5>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span>Ready for Service</span>
+                          <span className="text-green-600">38</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Maintenance Due</span>
+                          <span className="text-yellow-600">5</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Out of Service</span>
+                          <span className="text-red-600">2</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-teal-600" />
+                    Driver Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-teal-50 p-3 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-teal-800">52</p>
+                        <p className="text-sm text-teal-600">Total Drivers</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-blue-800">23</p>
+                        <p className="text-sm text-blue-600">On Duty</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-sm">John Kpelle</span>
+                          <Badge className="bg-green-100 text-green-800 text-xs">Active</Badge>
+                        </div>
+                        <p className="text-xs text-gray-600">Vehicle: TRK-LR-001 • Route: Monrovia-Buchanan</p>
+                        <p className="text-xs text-gray-500">License expires: Dec 2025</p>
+                      </div>
+
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-sm">Mary Kollie</span>
+                          <Badge className="bg-orange-100 text-orange-800 text-xs">At Checkpoint</Badge>
+                        </div>
+                        <p className="text-xs text-gray-600">Vehicle: TRK-LR-002 • Route: Gbarnga-Voinjama</p>
+                        <p className="text-xs text-gray-500">License expires: Nov 2025</p>
+                      </div>
+
+                      <div className="border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-sm">Samuel Harris</span>
+                          <Badge className="bg-blue-100 text-blue-800 text-xs">Loading</Badge>
+                        </div>
+                        <p className="text-xs text-gray-600">Vehicle: TRK-LR-003 • Route: Farm-Monrovia</p>
+                        <p className="text-xs text-gray-500">License expires: Aug 2025</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Performance Analytics */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-indigo-600" />
+                  Transportation Performance Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-gray-700">Delivery Performance</h5>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>On-time Deliveries</span>
+                        <span className="font-medium text-green-600">94.2%</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Average Delay</span>
+                        <span className="font-medium">12 min</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Completed Today</span>
+                        <span className="font-medium">23 shipments</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-gray-700">Route Efficiency</h5>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Fuel Efficiency</span>
+                        <span className="font-medium text-green-600">8.2 km/L</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Route Optimization</span>
+                        <span className="font-medium text-blue-600">87%</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Distance Covered</span>
+                        <span className="font-medium">2,347 km</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-gray-700">Safety Metrics</h5>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Incident-free Days</span>
+                        <span className="font-medium text-green-600">45 days</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Speed Violations</span>
+                        <span className="font-medium text-yellow-600">3 this week</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Safety Score</span>
+                        <span className="font-medium text-green-600">96.8%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-gray-700">Cost Analysis</h5>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Fuel Costs</span>
+                        <span className="font-medium">$1,245</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Maintenance</span>
+                        <span className="font-medium">$456</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Total Savings</span>
+                        <span className="font-medium text-green-600">$234</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

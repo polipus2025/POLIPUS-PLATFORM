@@ -2577,6 +2577,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/export-orders/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.updateExportOrder(id, req.body);
+      if (!order) {
+        return res.status(404).json({ message: 'Export order not found' });
+      }
+      res.json(order);
+    } catch (error) {
+      console.error('Error updating export order:', error);
+      res.status(500).json({ message: 'Failed to update export order' });
+    }
+  });
+
+  app.delete('/api/export-orders/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteExportOrder(id);
+      if (!success) {
+        return res.status(404).json({ message: 'Export order not found' });
+      }
+      res.json({ message: 'Export order deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting export order:', error);
+      res.status(500).json({ message: 'Failed to delete export order' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

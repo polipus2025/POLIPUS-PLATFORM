@@ -67,7 +67,7 @@ export const reports = pgTable("reports", {
   id: serial("id").primaryKey(),
   reportId: text("report_id").notNull().unique(),
   title: text("title").notNull(),
-  type: text("type").notNull(), // compliance, inspection, export, county, eudr_compliance, government_sync, export_analysis, gps_mapping
+  type: text("type").notNull(), // compliance, inspection, export, county, eudr_compliance, government_sync, export_analysis, gps_mapping, standards_compliance
   dateRange: text("date_range"),
   generatedBy: text("generated_by").notNull(),
   department: text("department"),
@@ -520,6 +520,87 @@ export type InsertMoaIntegration = z.infer<typeof insertMoaIntegrationSchema>;
 export type InsertCustomsIntegration = z.infer<typeof insertCustomsIntegrationSchema>;
 export type InsertGovernmentSyncLog = z.infer<typeof insertGovernmentSyncLogSchema>;
 
+// International Agricultural Standards Database Integration
+export const internationalStandards = pgTable("international_standards", {
+  id: serial("id").primaryKey(),
+  standardId: text("standard_id").notNull().unique(),
+  standardName: text("standard_name").notNull(),
+  organizationName: text("organization_name").notNull(), // Fair Trade, Rainforest Alliance, UTZ, GlobalGAP, ISO, etc.
+  standardType: text("standard_type").notNull(), // certification, sustainability, quality, organic, trade
+  commodityTypes: text("commodity_types").array(), // cocoa, coffee, palm_oil, etc.
+  requirementCategories: jsonb("requirement_categories"), // Environmental, Social, Economic, Quality
+  complianceCriteria: jsonb("compliance_criteria"), // Detailed criteria structure
+  auditFrequency: text("audit_frequency"), // annual, biannual, triennial
+  validityPeriod: integer("validity_period"), // months
+  standardVersion: text("standard_version").notNull(),
+  effectiveDate: timestamp("effective_date").notNull(),
+  expiryDate: timestamp("expiry_date"),
+  contactInfo: jsonb("contact_info"), // Organization contact details
+  websiteUrl: text("website_url"),
+  apiEndpoint: text("api_endpoint"), // For direct integration
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const commodityStandardsCompliance = pgTable("commodity_standards_compliance", {
+  id: serial("id").primaryKey(),
+  commodityId: integer("commodity_id").references(() => commodities.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id),
+  standardId: integer("standard_id").references(() => internationalStandards.id).notNull(),
+  complianceId: text("compliance_id").notNull().unique(),
+  complianceStatus: text("compliance_status").notNull(), // compliant, non_compliant, pending, under_review, suspended
+  certificateNumber: text("certificate_number"),
+  certificationDate: timestamp("certification_date"),
+  expiryDate: timestamp("expiry_date"),
+  auditDate: timestamp("audit_date"),
+  auditorName: text("auditor_name"),
+  auditorOrganization: text("auditor_organization"),
+  complianceScore: decimal("compliance_score", { precision: 5, scale: 2 }), // 0-100
+  requirementsMet: jsonb("requirements_met"), // Which requirements are satisfied
+  nonComplianceIssues: jsonb("non_compliance_issues"), // Issues preventing compliance
+  correctiveActions: jsonb("corrective_actions"), // Actions to achieve compliance
+  nextAuditDate: timestamp("next_audit_date"),
+  syncStatus: text("sync_status").default("pending"), // pending, synced, failed
+  lastSyncDate: timestamp("last_sync_date"),
+  documents: jsonb("documents"), // Supporting compliance documents
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const standardsApiIntegration = pgTable("standards_api_integration", {
+  id: serial("id").primaryKey(),
+  standardId: integer("standard_id").references(() => internationalStandards.id).notNull(),
+  apiName: text("api_name").notNull(),
+  apiUrl: text("api_url").notNull(),
+  authMethod: text("auth_method"), // api_key, oauth2, basic_auth, certificate
+  authConfig: jsonb("auth_config"), // Authentication configuration
+  isActive: boolean("is_active").default(true),
+  lastSyncDate: timestamp("last_sync_date"),
+  syncFrequency: text("sync_frequency"), // daily, weekly, monthly, real_time
+  errorCount: integer("error_count").default(0),
+  lastError: text("last_error"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const standardsSyncLog = pgTable("standards_sync_log", {
+  id: serial("id").primaryKey(),
+  apiIntegrationId: integer("api_integration_id").references(() => standardsApiIntegration.id).notNull(),
+  syncType: text("sync_type").notNull(), // standards_update, compliance_check, certificate_validation
+  entityId: integer("entity_id"), // commodity or farmer ID
+  status: text("status").notNull(), // success, failed, partial
+  recordsProcessed: integer("records_processed").default(0),
+  recordsUpdated: integer("records_updated").default(0),
+  recordsAdded: integer("records_added").default(0),
+  requestPayload: text("request_payload"),
+  responsePayload: text("response_payload"),
+  errorMessage: text("error_message"),
+  syncDuration: integer("sync_duration"), // milliseconds
+  syncedBy: text("synced_by").notNull(),
+  syncDate: timestamp("sync_date").defaultNow(),
+});
+
 // Analytics and Audit insert schemas
 export const insertAnalyticsDataSchema = createInsertSchema(analyticsData).omit({
   id: true,
@@ -551,6 +632,40 @@ export type InsertAnalyticsData = z.infer<typeof insertAnalyticsDataSchema>;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type InsertSystemAudit = z.infer<typeof insertSystemAuditSchema>;
 export type InsertAuditReport = z.infer<typeof insertAuditReportSchema>;
+
+// International Standards insert schemas
+export const insertInternationalStandardSchema = createInsertSchema(internationalStandards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommodityStandardsComplianceSchema = createInsertSchema(commodityStandardsCompliance).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStandardsApiIntegrationSchema = createInsertSchema(standardsApiIntegration).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStandardsSyncLogSchema = createInsertSchema(standardsSyncLog).omit({
+  id: true,
+  syncDate: true,
+});
+
+// International Standards types
+export type InternationalStandard = typeof internationalStandards.$inferSelect;
+export type CommodityStandardsCompliance = typeof commodityStandardsCompliance.$inferSelect;
+export type StandardsApiIntegration = typeof standardsApiIntegration.$inferSelect;
+export type StandardsSyncLog = typeof standardsSyncLog.$inferSelect;
+
+export type InsertInternationalStandard = z.infer<typeof insertInternationalStandardSchema>;
+export type InsertCommodityStandardsCompliance = z.infer<typeof insertCommodityStandardsComplianceSchema>;
+export type InsertStandardsApiIntegration = z.infer<typeof insertStandardsApiIntegrationSchema>;
+export type InsertStandardsSyncLog = z.infer<typeof insertStandardsSyncLogSchema>;
 
 // GPS Farm Mapping for EUDR Compliance
 export const farmGpsMapping = pgTable("farm_gps_mapping", {

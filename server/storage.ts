@@ -26,6 +26,10 @@ import {
   deforestationMonitoring,
   eudrCompliance,
   geofencingZones,
+  internationalStandards,
+  commodityStandardsCompliance,
+  standardsApiIntegration,
+  standardsSyncLog,
   type Commodity,
   type Inspection,
   type Certification,
@@ -53,6 +57,10 @@ import {
   type DeforestationMonitoring,
   type EudrCompliance,
   type GeofencingZone,
+  type InternationalStandard,
+  type CommodityStandardsCompliance,
+  type StandardsApiIntegration,
+  type StandardsSyncLog,
   type InsertCommodity,
   type InsertInspection,
   type InsertCertification,
@@ -79,7 +87,11 @@ import {
   type InsertFarmGpsMapping,
   type InsertDeforestationMonitoring,
   type InsertEudrCompliance,
-  type InsertGeofencingZone
+  type InsertGeofencingZone,
+  type InsertInternationalStandard,
+  type InsertCommodityStandardsCompliance,
+  type InsertStandardsApiIntegration,
+  type InsertStandardsSyncLog
 } from "@shared/schema";
 
 export interface IStorage {
@@ -280,6 +292,36 @@ export interface IStorage {
   createGeofencingZone(zone: InsertGeofencingZone): Promise<GeofencingZone>;
   updateGeofencingZone(id: number, zone: Partial<GeofencingZone>): Promise<GeofencingZone | undefined>;
 
+  // International Standards methods
+  getInternationalStandards(): Promise<InternationalStandard[]>;
+  getInternationalStandard(id: number): Promise<InternationalStandard | undefined>;
+  getInternationalStandardsByType(standardType: string): Promise<InternationalStandard[]>;
+  getInternationalStandardsByOrganization(organizationName: string): Promise<InternationalStandard[]>;
+  createInternationalStandard(standard: InsertInternationalStandard): Promise<InternationalStandard>;
+  updateInternationalStandard(id: number, standard: Partial<InternationalStandard>): Promise<InternationalStandard | undefined>;
+
+  // Standards Compliance methods
+  getStandardsCompliance(): Promise<CommodityStandardsCompliance[]>;
+  getStandardsComplianceById(id: number): Promise<CommodityStandardsCompliance | undefined>;
+  getStandardsComplianceByCommodity(commodityId: number): Promise<CommodityStandardsCompliance[]>;
+  getStandardsComplianceByStandard(standardId: number): Promise<CommodityStandardsCompliance[]>;
+  getStandardsComplianceByStatus(status: string): Promise<CommodityStandardsCompliance[]>;
+  createStandardsCompliance(compliance: InsertCommodityStandardsCompliance): Promise<CommodityStandardsCompliance>;
+  updateStandardsCompliance(id: number, compliance: Partial<CommodityStandardsCompliance>): Promise<CommodityStandardsCompliance | undefined>;
+
+  // Standards API Integration methods
+  getStandardsApiIntegrations(): Promise<StandardsApiIntegration[]>;
+  getStandardsApiIntegration(id: number): Promise<StandardsApiIntegration | undefined>;
+  getStandardsApiIntegrationByStandard(standardId: number): Promise<StandardsApiIntegration[]>;
+  createStandardsApiIntegration(integration: InsertStandardsApiIntegration): Promise<StandardsApiIntegration>;
+  updateStandardsApiIntegration(id: number, integration: Partial<StandardsApiIntegration>): Promise<StandardsApiIntegration | undefined>;
+
+  // Standards Sync Log methods
+  getStandardsSyncLogs(): Promise<StandardsSyncLog[]>;
+  getStandardsSyncLog(id: number): Promise<StandardsSyncLog | undefined>;
+  getStandardsSyncLogsByIntegration(apiIntegrationId: number): Promise<StandardsSyncLog[]>;
+  createStandardsSyncLog(log: InsertStandardsSyncLog): Promise<StandardsSyncLog>;
+
   // EUDR and GPS Analysis methods
   checkEudrCompliance(farmGpsMappingId: number): Promise<{ compliant: boolean; riskLevel: string; issues: string[] }>;
   detectDeforestation(farmGpsMappingId: number): Promise<{ detected: boolean; area: number; riskLevel: string }>;
@@ -314,6 +356,10 @@ export class MemStorage implements IStorage {
   private deforestationMonitorings: Map<number, DeforestationMonitoring>;
   private eudrCompliances: Map<number, EudrCompliance>;
   private geofencingZones: Map<number, GeofencingZone>;
+  private internationalStandards: Map<number, InternationalStandard>;
+  private commodityStandardsCompliances: Map<number, CommodityStandardsCompliance>;
+  private standardsApiIntegrations: Map<number, StandardsApiIntegration>;
+  private standardsSyncLogs: Map<number, StandardsSyncLog>;
   private currentUserId: number;
   private currentAuthUserId: number;
   private currentUserSessionId: number;
@@ -340,6 +386,10 @@ export class MemStorage implements IStorage {
   private currentDeforestationMonitoringId: number;
   private currentEudrComplianceId: number;
   private currentGeofencingZoneId: number;
+  private currentInternationalStandardId: number;
+  private currentCommodityStandardsComplianceId: number;
+  private currentStandardsApiIntegrationId: number;
+  private currentStandardsSyncLogId: number;
 
   constructor() {
     this.users = new Map();
@@ -368,6 +418,10 @@ export class MemStorage implements IStorage {
     this.deforestationMonitorings = new Map();
     this.eudrCompliances = new Map();
     this.geofencingZones = new Map();
+    this.internationalStandards = new Map();
+    this.commodityStandardsCompliances = new Map();
+    this.standardsApiIntegrations = new Map();
+    this.standardsSyncLogs = new Map();
     this.currentUserId = 1;
     this.currentAuthUserId = 1;
     this.currentUserSessionId = 1;
@@ -394,6 +448,10 @@ export class MemStorage implements IStorage {
     this.currentDeforestationMonitoringId = 1;
     this.currentEudrComplianceId = 1;
     this.currentGeofencingZoneId = 1;
+    this.currentInternationalStandardId = 1;
+    this.currentCommodityStandardsComplianceId = 1;
+    this.currentStandardsApiIntegrationId = 1;
+    this.currentStandardsSyncLogId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
@@ -646,6 +704,130 @@ export class MemStorage implements IStorage {
       }),
       status: "published"
     });
+
+    // Create sample international standards
+    await this.createInternationalStandard({
+      standardName: "Fair Trade USA",
+      organizationName: "Fair Trade USA",
+      standardType: "fair_trade",
+      version: "2024.1",
+      description: "Fair Trade certification ensures farmers receive fair prices and promotes sustainable farming practices",
+      certificationRequirements: JSON.stringify([
+        "Fair pricing premiums for farmers",
+        "Community development programs",
+        "Environmental sustainability practices",
+        "Democratic organization of producer groups",
+        "No exploitation of child labor"
+      ]),
+      apiEndpoint: "https://api.fairtradeusa.org/v1",
+      lastUpdated: new Date("2024-01-15"),
+      isActive: true,
+      complianceLevel: "mandatory"
+    });
+
+    await this.createInternationalStandard({
+      standardName: "Rainforest Alliance",
+      organizationName: "Rainforest Alliance",
+      standardType: "environmental",
+      version: "2020.1",
+      description: "Rainforest Alliance certification promotes sustainable agriculture and forest conservation",
+      certificationRequirements: JSON.stringify([
+        "Forest conservation practices",
+        "Biodiversity protection",
+        "Water resource management",
+        "Climate change mitigation",
+        "Worker welfare and rights"
+      ]),
+      apiEndpoint: "https://api.ra.org/certification/v2",
+      lastUpdated: new Date("2024-02-01"),
+      isActive: true,
+      complianceLevel: "recommended"
+    });
+
+    await this.createInternationalStandard({
+      standardName: "UTZ",
+      organizationName: "UTZ Certified",
+      standardType: "quality_assurance",
+      version: "1.3",
+      description: "UTZ certification program for sustainable farming of coffee, tea, cocoa, and hazelnuts",
+      certificationRequirements: JSON.stringify([
+        "Good agricultural practices",
+        "Better crop management",
+        "Working and living conditions",
+        "Care for the environment",
+        "Traceability systems"
+      ]),
+      apiEndpoint: "https://api.utz.org/standards/v1",
+      lastUpdated: new Date("2024-01-10"),
+      isActive: true,
+      complianceLevel: "optional"
+    });
+
+    await this.createInternationalStandard({
+      standardName: "GlobalGAP",
+      organizationName: "Global Partnership for Good Agricultural Practice",
+      standardType: "quality_assurance",
+      version: "v5.4",
+      description: "GLOBALG.A.P. certification for safe and sustainable agricultural practices",
+      certificationRequirements: JSON.stringify([
+        "Food safety protocols",
+        "Environmental sustainability",
+        "Worker health and safety",
+        "Animal welfare standards",
+        "Traceability and recall procedures"
+      ]),
+      apiEndpoint: "https://api.globalgap.org/v2",
+      lastUpdated: new Date("2024-03-01"),
+      isActive: true,
+      complianceLevel: "mandatory"
+    });
+
+    await this.createInternationalStandard({
+      standardName: "ISO 22000",
+      organizationName: "International Organization for Standardization",
+      standardType: "iso_standard",
+      version: "2018",
+      description: "ISO 22000 Food Safety Management Systems standard",
+      certificationRequirements: JSON.stringify([
+        "Fair pricing premiums for farmers",
+        "Community development programs",
+        "Environmental sustainability practices",
+        "Democratic organization of producer groups",
+        "No exploitation of child labor"
+      ]),
+      apiEndpoint: "https://api.iso.org/22000/v1",
+      lastUpdated: new Date("2024-01-20"),
+      isActive: true,
+      complianceLevel: "mandatory"
+    });
+
+    // Create sample API integrations
+    const standards = await this.getInternationalStandards();
+    if (standards.length > 0) {
+      await this.createStandardsApiIntegration({
+        standardId: standards[0].id,
+        apiName: "Fair Trade Certification API",
+        apiUrl: "https://api.fairtradeusa.org/v1",
+        authMethod: "api_key",
+        connectionStatus: "active",
+        lastSyncDate: new Date("2024-12-15"),
+        errorCount: 0,
+        syncFrequency: "daily"
+      });
+
+      if (standards.length > 1) {
+        await this.createStandardsApiIntegration({
+          standardId: standards[1].id,
+          apiName: "Rainforest Alliance API",
+          apiUrl: "https://api.ra.org/certification/v2",
+          authMethod: "oauth2",
+          connectionStatus: "active",
+          lastSyncDate: new Date("2024-12-14"),
+          errorCount: 2,
+          syncFrequency: "weekly"
+        });
+      }
+    }
 
     // Create sample farmers for testing
     this.createFarmer({
@@ -2403,6 +2585,140 @@ export class MemStorage implements IStorage {
     }
 
     return { score: Math.min(score, 100), documentation, compliance };
+  }
+
+  // International Standards methods
+  async getInternationalStandards(): Promise<InternationalStandard[]> {
+    return Array.from(this.internationalStandards.values());
+  }
+
+  async getInternationalStandard(id: number): Promise<InternationalStandard | undefined> {
+    return this.internationalStandards.get(id);
+  }
+
+  async getInternationalStandardsByType(standardType: string): Promise<InternationalStandard[]> {
+    return Array.from(this.internationalStandards.values()).filter(s => s.standardType === standardType);
+  }
+
+  async getInternationalStandardsByOrganization(organizationName: string): Promise<InternationalStandard[]> {
+    return Array.from(this.internationalStandards.values()).filter(s => s.organizationName === organizationName);
+  }
+
+  async createInternationalStandard(standard: InsertInternationalStandard): Promise<InternationalStandard> {
+    const newStandard: InternationalStandard = {
+      id: this.currentInternationalStandardId++,
+      ...standard,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.internationalStandards.set(newStandard.id, newStandard);
+    return newStandard;
+  }
+
+  async updateInternationalStandard(id: number, standard: Partial<InternationalStandard>): Promise<InternationalStandard | undefined> {
+    const existing = this.internationalStandards.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...standard, updatedAt: new Date() };
+    this.internationalStandards.set(id, updated);
+    return updated;
+  }
+
+  // Standards Compliance methods
+  async getStandardsCompliance(): Promise<CommodityStandardsCompliance[]> {
+    return Array.from(this.commodityStandardsCompliances.values());
+  }
+
+  async getStandardsComplianceById(id: number): Promise<CommodityStandardsCompliance | undefined> {
+    return this.commodityStandardsCompliances.get(id);
+  }
+
+  async getStandardsComplianceByCommodity(commodityId: number): Promise<CommodityStandardsCompliance[]> {
+    return Array.from(this.commodityStandardsCompliances.values()).filter(c => c.commodityId === commodityId);
+  }
+
+  async getStandardsComplianceByStandard(standardId: number): Promise<CommodityStandardsCompliance[]> {
+    return Array.from(this.commodityStandardsCompliances.values()).filter(c => c.standardId === standardId);
+  }
+
+  async getStandardsComplianceByStatus(status: string): Promise<CommodityStandardsCompliance[]> {
+    return Array.from(this.commodityStandardsCompliances.values()).filter(c => c.complianceStatus === status);
+  }
+
+  async createStandardsCompliance(compliance: InsertCommodityStandardsCompliance): Promise<CommodityStandardsCompliance> {
+    const newCompliance: CommodityStandardsCompliance = {
+      id: this.currentCommodityStandardsComplianceId++,
+      ...compliance,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.commodityStandardsCompliances.set(newCompliance.id, newCompliance);
+    return newCompliance;
+  }
+
+  async updateStandardsCompliance(id: number, compliance: Partial<CommodityStandardsCompliance>): Promise<CommodityStandardsCompliance | undefined> {
+    const existing = this.commodityStandardsCompliances.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...compliance, updatedAt: new Date() };
+    this.commodityStandardsCompliances.set(id, updated);
+    return updated;
+  }
+
+  // Standards API Integration methods
+  async getStandardsApiIntegrations(): Promise<StandardsApiIntegration[]> {
+    return Array.from(this.standardsApiIntegrations.values());
+  }
+
+  async getStandardsApiIntegration(id: number): Promise<StandardsApiIntegration | undefined> {
+    return this.standardsApiIntegrations.get(id);
+  }
+
+  async getStandardsApiIntegrationByStandard(standardId: number): Promise<StandardsApiIntegration[]> {
+    return Array.from(this.standardsApiIntegrations.values()).filter(i => i.standardId === standardId);
+  }
+
+  async createStandardsApiIntegration(integration: InsertStandardsApiIntegration): Promise<StandardsApiIntegration> {
+    const newIntegration: StandardsApiIntegration = {
+      id: this.currentStandardsApiIntegrationId++,
+      ...integration,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.standardsApiIntegrations.set(newIntegration.id, newIntegration);
+    return newIntegration;
+  }
+
+  async updateStandardsApiIntegration(id: number, integration: Partial<StandardsApiIntegration>): Promise<StandardsApiIntegration | undefined> {
+    const existing = this.standardsApiIntegrations.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...integration, updatedAt: new Date() };
+    this.standardsApiIntegrations.set(id, updated);
+    return updated;
+  }
+
+  // Standards Sync Log methods
+  async getStandardsSyncLogs(): Promise<StandardsSyncLog[]> {
+    return Array.from(this.standardsSyncLogs.values());
+  }
+
+  async getStandardsSyncLog(id: number): Promise<StandardsSyncLog | undefined> {
+    return this.standardsSyncLogs.get(id);
+  }
+
+  async getStandardsSyncLogsByIntegration(apiIntegrationId: number): Promise<StandardsSyncLog[]> {
+    return Array.from(this.standardsSyncLogs.values()).filter(l => l.apiIntegrationId === apiIntegrationId);
+  }
+
+  async createStandardsSyncLog(log: InsertStandardsSyncLog): Promise<StandardsSyncLog> {
+    const newLog: StandardsSyncLog = {
+      id: this.currentStandardsSyncLogId++,
+      ...log,
+      createdAt: new Date()
+    };
+    this.standardsSyncLogs.set(newLog.id, newLog);
+    return newLog;
   }
 }
 

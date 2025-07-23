@@ -23,6 +23,7 @@ import CropPlanning from "@/pages/crop-planning";
 import InputManagement from "@/pages/input-management";
 import GovernmentIntegration from "@/pages/government-integration";
 import GpsMapping from "@/pages/gps-mapping";
+import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
 import NotFound from "@/pages/not-found";
@@ -56,6 +57,7 @@ function Router() {
           <Route path="/input-management" component={InputManagement} />
           <Route path="/government-integration" component={GovernmentIntegration} />
           <Route path="/gps-mapping" component={GpsMapping} />
+          <Route path="/international-standards" component={InternationalStandards} />
           <Route path="/verification" component={Verification} />
           <Route path="/batch-code-generator" component={BatchCodeGenerator} />
           

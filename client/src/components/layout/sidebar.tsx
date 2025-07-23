@@ -13,7 +13,8 @@ import {
   Building2,
   Satellite,
   Shield,
-  QrCode
+  QrCode,
+  Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ const navigation = [
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Government Integration", href: "/government-integration", icon: Building2 },
+  { name: "International Standards", href: "/international-standards", icon: Globe },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
 ];

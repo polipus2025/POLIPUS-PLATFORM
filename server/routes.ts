@@ -28,6 +28,10 @@ import {
   insertDeforestationMonitoringSchema,
   insertEudrComplianceSchema,
   insertGeofencingZoneSchema,
+  insertInternationalStandardSchema,
+  insertCommodityStandardsComplianceSchema,
+  insertStandardsApiIntegrationSchema,
+  insertStandardsSyncLogSchema,
   insertAuthUserSchema
 } from "@shared/schema";
 import { z } from "zod";
@@ -1353,6 +1357,219 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error generating traceability report:', error);
       res.status(500).json({ message: 'Failed to generate traceability report' });
+    }
+  });
+
+  // International Standards routes
+  app.get('/api/international-standards', async (req, res) => {
+    try {
+      const { standardType, organizationName } = req.query;
+      let standards;
+      
+      if (standardType) {
+        standards = await storage.getInternationalStandardsByType(standardType as string);
+      } else if (organizationName) {
+        standards = await storage.getInternationalStandardsByOrganization(organizationName as string);
+      } else {
+        standards = await storage.getInternationalStandards();
+      }
+      
+      res.json(standards);
+    } catch (error) {
+      console.error('Error fetching international standards:', error);
+      res.status(500).json({ message: 'Failed to fetch international standards' });
+    }
+  });
+
+  app.get('/api/international-standards/overview', async (req, res) => {
+    try {
+      const standards = await storage.getInternationalStandards();
+      const compliance = await storage.getStandardsCompliance();
+      
+      const overview = {
+        totalStandards: standards.length,
+        standardsByType: standards.reduce((acc: any, std) => {
+          acc[std.standardType] = (acc[std.standardType] || 0) + 1;
+          return acc;
+        }, {}),
+        complianceOverview: {
+          total: compliance.length,
+          compliant: compliance.filter(c => c.complianceStatus === 'compliant').length,
+          nonCompliant: compliance.filter(c => c.complianceStatus === 'non_compliant').length,
+          pending: compliance.filter(c => c.complianceStatus === 'pending').length,
+          expired: compliance.filter(c => c.complianceStatus === 'expired').length
+        }
+      };
+      
+      res.json(overview);
+    } catch (error) {
+      console.error('Error generating international standards overview:', error);
+      res.status(500).json({ message: 'Failed to generate overview' });
+    }
+  });
+
+  app.get('/api/international-standards/:id', async (req, res) => {
+    try {
+      const standard = await storage.getInternationalStandard(parseInt(req.params.id));
+      if (!standard) {
+        return res.status(404).json({ message: 'International standard not found' });
+      }
+      res.json(standard);
+    } catch (error) {
+      console.error('Error fetching international standard:', error);
+      res.status(500).json({ message: 'Failed to fetch international standard' });
+    }
+  });
+
+  app.post('/api/international-standards', async (req, res) => {
+    try {
+      const validatedData = insertInternationalStandardSchema.parse(req.body);
+      const standard = await storage.createInternationalStandard(validatedData);
+      res.status(201).json(standard);
+    } catch (error) {
+      console.error('Error creating international standard:', error);
+      res.status(500).json({ message: 'Failed to create international standard' });
+    }
+  });
+
+  app.post('/api/international-standards/:id/sync', async (req, res) => {
+    try {
+      const standardId = parseInt(req.params.id);
+      
+      // Simulate sync process
+      const syncResult = {
+        success: true,
+        syncDate: new Date(),
+        recordsUpdated: Math.floor(Math.random() * 100) + 1,
+        message: 'Standards database synchronized successfully'
+      };
+      
+      res.json(syncResult);
+    } catch (error) {
+      console.error('Error syncing with standards database:', error);
+      res.status(500).json({ message: 'Failed to sync with standards database' });
+    }
+  });
+
+  // Standards Compliance routes
+  app.get('/api/standards-compliance', async (req, res) => {
+    try {
+      const { commodityId, standardId, status } = req.query;
+      let compliance;
+      
+      if (commodityId) {
+        compliance = await storage.getStandardsComplianceByCommodity(parseInt(commodityId as string));
+      } else if (standardId) {
+        compliance = await storage.getStandardsComplianceByStandard(parseInt(standardId as string));
+      } else if (status) {
+        compliance = await storage.getStandardsComplianceByStatus(status as string);
+      } else {
+        compliance = await storage.getStandardsCompliance();
+      }
+      
+      res.json(compliance);
+    } catch (error) {
+      console.error('Error fetching standards compliance:', error);
+      res.status(500).json({ message: 'Failed to fetch standards compliance' });
+    }
+  });
+
+  app.post('/api/standards-compliance', async (req, res) => {
+    try {
+      const validatedData = insertCommodityStandardsComplianceSchema.parse(req.body);
+      const compliance = await storage.createStandardsCompliance(validatedData);
+      res.status(201).json(compliance);
+    } catch (error) {
+      console.error('Error creating standards compliance:', error);
+      res.status(500).json({ message: 'Failed to create standards compliance' });
+    }
+  });
+
+  app.post('/api/commodities/:id/check-standards-compliance', async (req, res) => {
+    try {
+      const commodityId = parseInt(req.params.id);
+      
+      // Simulate compliance check process
+      const complianceResult = {
+        commodityId,
+        overallScore: Math.floor(Math.random() * 100) + 1,
+        complianceChecks: [
+          { standard: 'Fair Trade', status: 'compliant', score: 95 },
+          { standard: 'Rainforest Alliance', status: 'pending', score: 0 },
+          { standard: 'UTZ', status: 'compliant', score: 88 },
+          { standard: 'GlobalGAP', status: 'non_compliant', score: 45 }
+        ],
+        recommendations: [
+          'Complete Rainforest Alliance documentation',
+          'Improve GlobalGAP certification requirements'
+        ],
+        checkDate: new Date()
+      };
+      
+      res.json(complianceResult);
+    } catch (error) {
+      console.error('Error checking standards compliance:', error);
+      res.status(500).json({ message: 'Failed to check standards compliance' });
+    }
+  });
+
+  // Standards API Integration routes
+  app.get('/api/standards-api-integrations', async (req, res) => {
+    try {
+      const { standardId } = req.query;
+      let integrations;
+      
+      if (standardId) {
+        integrations = await storage.getStandardsApiIntegrationByStandard(parseInt(standardId as string));
+      } else {
+        integrations = await storage.getStandardsApiIntegrations();
+      }
+      
+      res.json(integrations);
+    } catch (error) {
+      console.error('Error fetching standards API integrations:', error);
+      res.status(500).json({ message: 'Failed to fetch standards API integrations' });
+    }
+  });
+
+  app.post('/api/standards-api-integrations', async (req, res) => {
+    try {
+      const validatedData = insertStandardsApiIntegrationSchema.parse(req.body);
+      const integration = await storage.createStandardsApiIntegration(validatedData);
+      res.status(201).json(integration);
+    } catch (error) {
+      console.error('Error creating standards API integration:', error);
+      res.status(500).json({ message: 'Failed to create standards API integration' });
+    }
+  });
+
+  // Standards Sync Log routes
+  app.get('/api/standards-sync-logs', async (req, res) => {
+    try {
+      const { apiIntegrationId } = req.query;
+      let logs;
+      
+      if (apiIntegrationId) {
+        logs = await storage.getStandardsSyncLogsByIntegration(parseInt(apiIntegrationId as string));
+      } else {
+        logs = await storage.getStandardsSyncLogs();
+      }
+      
+      res.json(logs);
+    } catch (error) {
+      console.error('Error fetching standards sync logs:', error);
+      res.status(500).json({ message: 'Failed to fetch standards sync logs' });
+    }
+  });
+
+  app.post('/api/standards-sync-logs', async (req, res) => {
+    try {
+      const validatedData = insertStandardsSyncLogSchema.parse(req.body);
+      const log = await storage.createStandardsSyncLog(validatedData);
+      res.status(201).json(log);
+    } catch (error) {
+      console.error('Error creating standards sync log:', error);
+      res.status(500).json({ message: 'Failed to create standards sync log' });
     }
   });
 

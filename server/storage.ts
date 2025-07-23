@@ -784,6 +784,127 @@ export class MemStorage implements IStorage {
       status: "published"
     });
 
+    // Create sample inspections
+    this.createInspection({
+      inspectionId: "INS-2024-001",
+      commodityId: 1, // Coffee
+      inspectorName: "James Kollie",
+      inspectorLicense: "LIC-INS-2024-001",
+      inspectionDate: new Date("2024-12-15"),
+      location: "Processing Center - Lofa County",
+      qualityGrade: "Grade A",
+      complianceStatus: "compliant",
+      moistureContent: "11.5%",
+      defectRate: "2.1%",
+      notes: "Excellent quality coffee beans. All parameters within acceptable limits. Ready for export certification.",
+      recommendations: "Maintain current processing standards. Minor improvements in storage humidity control recommended."
+    });
+
+    this.createInspection({
+      inspectionId: "INS-2024-002",
+      commodityId: 2, // Cocoa
+      inspectorName: "Sarah Konneh",
+      inspectorLicense: "LIC-INS-2024-002",
+      inspectionDate: new Date("2024-12-12"),
+      location: "Farm Site - Grand Gedeh County",
+      qualityGrade: "Premium",
+      complianceStatus: "compliant",
+      moistureContent: "7.2%",
+      defectRate: "1.8%",
+      notes: "Premium grade cocoa beans with excellent fermentation profile. Meets all export quality standards.",
+      recommendations: "Continue current post-harvest processing methods. Consider organic certification."
+    });
+
+    this.createInspection({
+      inspectionId: "INS-2024-003",
+      commodityId: 3, // Rubber
+      inspectorName: "Moses Tuah",
+      inspectorLicense: "LIC-INS-2024-003",
+      inspectionDate: new Date("2024-12-10"),
+      location: "Rubber Processing Plant - Margibi County",
+      qualityGrade: "Grade 1",
+      complianceStatus: "pending_review",
+      moistureContent: "0.8%",
+      defectRate: "3.2%",
+      notes: "Good quality rubber latex. Minor concerns with consistency in coagulation process.",
+      recommendations: "Review coagulation timing and acid concentration. Follow-up inspection in 2 weeks."
+    });
+
+    this.createInspection({
+      inspectionId: "INS-2024-004",
+      commodityId: 4, // Rice
+      inspectorName: "Mary Johnson",
+      inspectorLicense: "LIC-INS-2024-004",
+      inspectionDate: new Date("2024-12-08"),
+      location: "Rice Mill - Bong County",
+      qualityGrade: "Premium",
+      complianceStatus: "compliant",
+      moistureContent: "14.0%",
+      defectRate: "1.5%",
+      notes: "High-quality jasmine rice with excellent grain uniformity and minimal broken kernels.",
+      recommendations: "Excellent processing standards maintained. Ready for domestic and export markets."
+    });
+
+    this.createInspection({
+      inspectionId: "INS-2024-005",
+      commodityId: 1, // Coffee (second inspection)
+      inspectorName: "David Clarke",
+      inspectorLicense: "LIC-INS-2024-005",
+      inspectionDate: new Date("2024-12-05"),
+      location: "Export Warehouse - Port of Monrovia",
+      qualityGrade: "Grade B",
+      complianceStatus: "requires_action",
+      moistureContent: "13.2%",
+      defectRate: "4.8%",
+      notes: "Moisture content slightly elevated. Some quality degradation observed in storage conditions.",
+      recommendations: "Improve warehouse ventilation and humidity control. Re-inspection required before export approval."
+    });
+
+    this.createInspection({
+      inspectionId: "INS-2024-006",
+      commodityId: 2, // Cocoa (second inspection)
+      inspectorName: "Grace Williams",
+      inspectorLicense: "LIC-INS-2024-006",
+      inspectionDate: new Date("2024-12-03"),
+      location: "Cocoa Drying Facility - Lofa County",
+      qualityGrade: "Grade A",
+      complianceStatus: "compliant",
+      moistureContent: "7.8%",
+      defectRate: "2.3%",
+      notes: "Well-processed cocoa with proper fermentation and drying. Meets international quality standards.",
+      recommendations: "Maintain current processing protocols. Consider implementing quality certification program."
+    });
+
+    this.createInspection({
+      inspectionId: "INS-2024-007",
+      commodityId: 3, // Rubber (second inspection)
+      inspectorName: "Robert Davis",
+      inspectorLicense: "LIC-INS-2024-007",
+      inspectionDate: new Date("2024-11-28"),
+      location: "Tapping Site - Nimba County",
+      qualityGrade: "Grade 2",
+      complianceStatus: "non_compliant",
+      moistureContent: "1.2%",
+      defectRate: "6.1%",
+      notes: "Quality issues identified with tapping practices and latex collection methods. Training required.",
+      recommendations: "Immediate training on proper tapping techniques. Implement quality control measures. Re-inspection in 30 days."
+    });
+
+    this.createInspection({
+      inspectionId: "INS-2024-008",
+      commodityId: 4, // Rice (second inspection)
+      inspectorName: "Janet Cooper",
+      inspectorLicense: "LIC-INS-2024-008",
+      inspectionDate: new Date("2024-11-25"),
+      location: "Paddy Field - Grand Bassa County",
+      qualityGrade: "Standard",
+      complianceStatus: "pending_review",
+      moistureContent: "22.5%",
+      defectRate: "3.8%",
+      notes: "Pre-harvest inspection shows good crop development. Some concerns with field drainage in sections.",
+      recommendations: "Improve field drainage before harvest. Monitor for pest control. Schedule post-harvest inspection."
+    });
+
     // Create sample international standards
     await this.createInternationalStandard({
       standardName: "Fair Trade USA",

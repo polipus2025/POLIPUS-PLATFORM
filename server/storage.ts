@@ -1054,6 +1054,256 @@ export class MemStorage implements IStorage {
       inspectionDate: new Date("2024-07-28"),
       notes: "Certificate expired - renewal required for continued export operations."
     });
+
+    // Create realistic GPS farm mappings
+    this.createFarmGpsMapping({
+      mappingId: "MAP-2024-001",
+      farmerId: 1,
+      farmPlotId: 1,
+      coordinates: JSON.stringify([
+        [6.3133, -10.7969],
+        [6.3233, -10.7969],
+        [6.3233, -10.7869],
+        [6.3133, -10.7869],
+        [6.3133, -10.7969]
+      ]),
+      centerLatitude: 6.3183,
+      centerLongitude: -10.7919,
+      totalAreaHectares: 5.2,
+      boundaryType: "polygon",
+      mappingMethod: "dgps_survey",
+      accuracyLevel: "high",
+      elevationMeters: 245,
+      slope: 8.5,
+      soilType: "Clay loam",
+      drainageStatus: "Well-drained",
+      verificationStatus: "verified",
+      mappingDate: new Date("2024-11-15"),
+      verificationDate: new Date("2024-11-20")
+    });
+
+    this.createFarmGpsMapping({
+      mappingId: "MAP-2024-002",
+      farmerId: 2,
+      farmPlotId: 2,
+      coordinates: JSON.stringify([
+        [7.0026, -9.4829],
+        [7.0126, -9.4829],
+        [7.0126, -9.4729],
+        [7.0026, -9.4729],
+        [7.0026, -9.4829]
+      ]),
+      centerLatitude: 7.0076,
+      centerLongitude: -9.4779,
+      totalAreaHectares: 3.8,
+      boundaryType: "polygon",
+      mappingMethod: "gps_survey",
+      accuracyLevel: "medium",
+      elevationMeters: 180,
+      slope: 12.3,
+      soilType: "Sandy loam",
+      drainageStatus: "Moderately drained",
+      verificationStatus: "pending",
+      mappingDate: new Date("2024-12-01"),
+      verificationDate: null
+    });
+
+    this.createFarmGpsMapping({
+      mappingId: "MAP-2024-003",
+      farmerId: 3,
+      farmPlotId: 3,
+      coordinates: JSON.stringify([
+        [5.9200, -8.2400],
+        [5.9300, -8.2400],
+        [5.9300, -8.2300],
+        [5.9200, -8.2300],
+        [5.9200, -8.2400]
+      ]),
+      centerLatitude: 5.9250,
+      centerLongitude: -8.2350,
+      totalAreaHectares: 7.1,
+      boundaryType: "polygon",
+      mappingMethod: "rtk_gps",
+      accuracyLevel: "very_high",
+      elevationMeters: 320,
+      slope: 15.7,
+      soilType: "Forest soil",
+      drainageStatus: "Poor drainage",
+      verificationStatus: "requires_update",
+      mappingDate: new Date("2024-10-20"),
+      verificationDate: new Date("2024-10-25")
+    });
+
+    this.createFarmGpsMapping({
+      mappingId: "MAP-2024-004",
+      farmerId: 1,
+      farmPlotId: null,
+      coordinates: JSON.stringify([
+        [6.4100, -10.8200],
+        [6.4200, -10.8200],
+        [6.4200, -10.8100],
+        [6.4100, -10.8100],
+        [6.4100, -10.8200]
+      ]),
+      centerLatitude: 6.4150,
+      centerLongitude: -10.8150,
+      totalAreaHectares: 4.9,
+      boundaryType: "polygon",
+      mappingMethod: "dgps_survey",
+      accuracyLevel: "high",
+      elevationMeters: 195,
+      slope: 6.2,
+      soilType: "Alluvial soil",
+      drainageStatus: "Well-drained",
+      verificationStatus: "verified",
+      mappingDate: new Date("2024-11-28"),
+      verificationDate: new Date("2024-12-03")
+    });
+
+    this.createFarmGpsMapping({
+      mappingId: "MAP-2024-005",
+      farmerId: 2,
+      farmPlotId: null,
+      coordinates: JSON.stringify([
+        [7.1500, -9.6000],
+        [7.1600, -9.6000],
+        [7.1600, -9.5900],
+        [7.1500, -9.5900],
+        [7.1500, -9.6000]
+      ]),
+      centerLatitude: 7.1550,
+      centerLongitude: -9.5950,
+      totalAreaHectares: 2.3,
+      boundaryType: "polygon",
+      mappingMethod: "mobile_gps",
+      accuracyLevel: "low",
+      elevationMeters: 125,
+      slope: 3.8,
+      soilType: "Sandy soil",
+      drainageStatus: "Moderately drained",
+      verificationStatus: "pending",
+      mappingDate: new Date("2024-12-10"),
+      verificationDate: null
+    });
+
+    // Create deforestation monitoring data
+    this.createDeforestationMonitoring({
+      farmGpsMappingId: 3, // MAP-2024-003 with palm oil
+      monitoringDate: new Date("2024-12-15"),
+      deforestationDetected: true,
+      affectedAreaHectares: 1.2,
+      alertLevel: "high",
+      satelliteImageUrl: "https://satellite.example.com/images/LR-001-2024-12-15.jpg",
+      vegetationLossPercentage: 18.5,
+      reportedBy: "Automated Satellite Monitoring",
+      investigationStatus: "under_investigation",
+      actionTaken: "Field inspection scheduled",
+      notes: "Significant vegetation loss detected in northeast section of farm plot. Urgent field verification required."
+    });
+
+    this.createDeforestationMonitoring({
+      farmGpsMappingId: 2, // MAP-2024-002 cocoa farm
+      monitoringDate: new Date("2024-12-10"),
+      deforestationDetected: false,
+      affectedAreaHectares: 0,
+      alertLevel: "none",
+      satelliteImageUrl: "https://satellite.example.com/images/LR-002-2024-12-10.jpg",
+      vegetationLossPercentage: 2.1,
+      reportedBy: "Automated Satellite Monitoring",
+      investigationStatus: "compliant",
+      actionTaken: "No action required",
+      notes: "Normal seasonal vegetation change. Farm maintains good forest cover."
+    });
+
+    this.createDeforestationMonitoring({
+      farmGpsMappingId: 1, // MAP-2024-001 coffee farm
+      monitoringDate: new Date("2024-12-05"),
+      deforestationDetected: false,
+      affectedAreaHectares: 0,
+      alertLevel: "none",
+      satelliteImageUrl: "https://satellite.example.com/images/LR-003-2024-12-05.jpg",
+      vegetationLossPercentage: 1.5,
+      reportedBy: "Automated Satellite Monitoring",
+      investigationStatus: "compliant",
+      actionTaken: "No action required",
+      notes: "Excellent forest conservation practices maintained. Model farm for EUDR compliance."
+    });
+
+    // Create EUDR compliance records
+    this.createEudrCompliance({
+      mappingId: 1, // MAP-2024-001
+      commodityId: 1, // Coffee
+      complianceStatus: "compliant",
+      riskAssessment: "low_risk",
+      deforestationFreeDate: new Date("2020-12-31"),
+      dueDiligenceDate: new Date("2024-11-20"),
+      documentationComplete: true,
+      geolocatedData: true,
+      supplierVerified: true,
+      complianceOfficer: "James Kollie",
+      notes: "All EUDR requirements met. Farm certified deforestation-free since 2020.",
+      lastUpdated: new Date("2024-12-15")
+    });
+
+    this.createEudrCompliance({
+      mappingId: 2, // MAP-2024-002
+      commodityId: 2, // Cocoa
+      complianceStatus: "pending_review",
+      riskAssessment: "medium_risk",
+      deforestationFreeDate: new Date("2020-12-31"),
+      dueDiligenceDate: new Date("2024-12-01"),
+      documentationComplete: false,
+      geolocatedData: true,
+      supplierVerified: false,
+      complianceOfficer: "Sarah Konneh",
+      notes: "Missing supplier verification documents. Follow-up required.",
+      lastUpdated: new Date("2024-12-10")
+    });
+
+    this.createEudrCompliance({
+      mappingId: 3, // MAP-2024-003
+      commodityId: 3, // Palm Oil
+      complianceStatus: "non_compliant",
+      riskAssessment: "high_risk",
+      deforestationFreeDate: null,
+      dueDiligenceDate: new Date("2024-10-25"),
+      documentationComplete: true,
+      geolocatedData: true,
+      supplierVerified: true,
+      complianceOfficer: "James Kollie",
+      notes: "Recent deforestation detected. Immediate corrective action required.",
+      lastUpdated: new Date("2024-12-15")
+    });
+
+    this.createEudrCompliance({
+      mappingId: 4, // MAP-2024-004
+      commodityId: 4, // Rubber
+      complianceStatus: "compliant",
+      riskAssessment: "low_risk",
+      deforestationFreeDate: new Date("2020-12-31"),
+      dueDiligenceDate: new Date("2024-12-03"),
+      documentationComplete: true,
+      geolocatedData: true,
+      supplierVerified: true,
+      complianceOfficer: "Sarah Konneh",
+      notes: "Excellent compliance record. Sustainable farming practices in place.",
+      lastUpdated: new Date("2024-12-03")
+    });
+
+    this.createEudrCompliance({
+      mappingId: 5, // MAP-2024-005
+      commodityId: 5, // Rice
+      complianceStatus: "pending_review",
+      riskAssessment: "low_risk",
+      deforestationFreeDate: new Date("2020-12-31"),
+      dueDiligenceDate: new Date("2024-12-10"),
+      documentationComplete: false,
+      geolocatedData: false,
+      supplierVerified: false,
+      complianceOfficer: "James Kollie",
+      notes: "New mapping requires verification. Low-risk commodity assessment.",
+      lastUpdated: new Date("2024-12-10")
+    });
   }
 
   // User methods (legacy)

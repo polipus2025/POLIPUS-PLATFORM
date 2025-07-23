@@ -14,6 +14,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Plus, Calendar, FileText } from "lucide-react";
 import { getStatusColor } from "@/lib/types";
@@ -22,6 +23,8 @@ import type { Inspection, Commodity } from "@shared/schema";
 export default function Inspections() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedInspection, setSelectedInspection] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   const { data: inspections = [], isLoading: inspectionsLoading } = useQuery<Inspection[]>({
     queryKey: ["/api/inspections"],
@@ -256,7 +259,15 @@ export default function Inspections() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm" className="text-lacra-blue hover:text-blue-700">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-lacra-blue hover:text-blue-700"
+                            onClick={() => {
+                              setSelectedInspection(inspection);
+                              setIsViewDialogOpen(true);
+                            }}
+                          >
                             <FileText className="h-4 w-4 mr-1" />
                             View
                           </Button>
@@ -273,6 +284,137 @@ export default function Inspections() {
           </div>
         </CardContent>
       </Card>
+
+      {/* View Inspection Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedInspection ? `Inspection Report - ${selectedInspection.inspectionId}` : 'Inspection Report'}
+            </DialogTitle>
+            <DialogDescription>
+              Detailed quality inspection report and compliance assessment
+            </DialogDescription>
+          </DialogHeader>
+          {selectedInspection && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Basic Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Inspection Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Inspection ID</label>
+                    <p className="font-mono text-sm">{selectedInspection.inspectionId}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Commodity</label>
+                    <p>{selectedInspection.commodity?.name || 'Unknown Commodity'}</p>
+                    <p className="text-sm text-gray-500">{selectedInspection.commodity?.type}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Batch Number</label>
+                    <p className="font-mono text-sm">{selectedInspection.commodity?.batchNumber}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Inspection Date</label>
+                    <p>{new Date(selectedInspection.inspectionDate).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Location</label>
+                    <p>{selectedInspection.location}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Inspector Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Inspector Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Inspector Name</label>
+                    <p>{selectedInspection.inspectorName}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">License Number</label>
+                    <p className="font-mono text-sm">{selectedInspection.inspectorLicense}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Quality Grade</label>
+                    <Badge variant="outline" className="mt-1">
+                      {selectedInspection.qualityGrade}
+                    </Badge>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Compliance Status</label>
+                    <div className="mt-1">
+                      {getStatusBadge(selectedInspection.complianceStatus)}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quality Metrics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Quality Metrics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Moisture Content</label>
+                    <p>{selectedInspection.moistureContent}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Defect Rate</label>
+                    <p>{selectedInspection.defectRate}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">County</label>
+                    <p>{selectedInspection.commodity?.county}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Quantity</label>
+                    <p>{selectedInspection.commodity?.quantity} {selectedInspection.commodity?.unit}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Inspection Notes */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Inspection Notes & Recommendations</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Inspection Notes</label>
+                    <div className="bg-gray-50 p-3 rounded border mt-1">
+                      <p className="text-sm">{selectedInspection.notes}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Recommendations</label>
+                    <div className="bg-blue-50 p-3 rounded border mt-1">
+                      <p className="text-sm">{selectedInspection.recommendations}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              Close
+            </Button>
+            <Button>
+              <FileText className="h-4 w-4 mr-1" />
+              Export Report
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

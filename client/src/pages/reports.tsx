@@ -18,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Search, Plus, Download, FileText, Calendar, BarChart3, Eye } from "lucide-react";
+import { Search, Plus, Download, FileText, Calendar, BarChart3, Eye, TrendingUp, Shield, AlertTriangle, Activity, CheckCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReportSchema, type Report, type InsertReport } from "@shared/schema";
@@ -33,6 +33,11 @@ export default function Reports() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+  const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
+  const [isAuditDialogOpen, setIsAuditDialogOpen] = useState(false);
+  
+  // Mock user role - In real app, this would come from authentication context
+  const currentUserRole = "senior_official"; // Can be: "senior_official", "administrator", "regular_user"
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -132,6 +137,47 @@ export default function Reports() {
     { value: "export", label: "Export Report", description: "Export certification and trade statistics" },
     { value: "county", label: "County Report", description: "Regional compliance and production data" }
   ];
+
+  // Function to check if user has senior access
+  const hasSeniorAccess = () => {
+    return currentUserRole === "senior_official" || currentUserRole === "administrator";
+  };
+
+  // Statistics data query for senior officials
+  const { data: statisticsData, isLoading: loadingStats } = useQuery({
+    queryKey: ["/api/dashboard/advanced-statistics"],
+    enabled: hasSeniorAccess(),
+  });
+
+  // Audit data query for senior officials
+  const { data: auditData, isLoading: loadingAudit } = useQuery({
+    queryKey: ["/api/audit/system-logs"],
+    enabled: hasSeniorAccess(),
+  });
+
+  const generateStatisticsReport = () => {
+    if (!hasSeniorAccess()) {
+      toast({
+        title: "Access Denied",
+        description: "This feature is only available to senior officials and administrators.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsStatisticsDialogOpen(true);
+  };
+
+  const generateAuditReport = () => {
+    if (!hasSeniorAccess()) {
+      toast({
+        title: "Access Denied", 
+        description: "This feature is only available to senior officials and administrators.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsAuditDialogOpen(true);
+  };
 
   const handleViewPdf = (report: Report) => {
     setSelectedReport(report);
@@ -487,7 +533,7 @@ export default function Reports() {
 
       {/* Quick Report Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        {reportTypes.map((type) => (
+        {reportTypes.slice(0, 2).map((type) => (
           <Card key={type.value} className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -512,6 +558,70 @@ export default function Reports() {
             </CardContent>
           </Card>
         ))}
+        
+        {/* Statistics Card - Senior Access Only */}
+        <Card className={`cursor-pointer hover:shadow-lg transition-shadow ${!hasSeniorAccess() ? 'opacity-50' : ''}`}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="flex items-center gap-2">
+                {hasSeniorAccess() && (
+                  <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
+                    Senior Access
+                  </Badge>
+                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-orange-600 hover:text-orange-700"
+                  onClick={generateStatisticsReport}
+                  disabled={!hasSeniorAccess()}
+                >
+                  View Stats
+                </Button>
+              </div>
+            </div>
+            <h3 className="font-semibold text-neutral mb-2">Advanced Statistics</h3>
+            <p className="text-sm text-gray-500">
+              Comprehensive analytics and performance metrics across all LACRA activities
+              {!hasSeniorAccess() && <span className="block text-red-500 text-xs mt-1">Senior officials only</span>}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Audit Trail Card - Senior Access Only */}
+        <Card className={`cursor-pointer hover:shadow-lg transition-shadow ${!hasSeniorAccess() ? 'opacity-50' : ''}`}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <Shield className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="flex items-center gap-2">
+                {hasSeniorAccess() && (
+                  <Badge variant="outline" className="text-xs text-red-600 border-red-300">
+                    Admin Only
+                  </Badge>
+                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-red-600 hover:text-red-700"
+                  onClick={generateAuditReport}
+                  disabled={!hasSeniorAccess()}
+                >
+                  View Audit
+                </Button>
+              </div>
+            </div>
+            <h3 className="font-semibold text-neutral mb-2">System Audit Trail</h3>
+            <p className="text-sm text-gray-500">
+              Complete audit logs of all system activities, user actions, and security events
+              {!hasSeniorAccess() && <span className="block text-red-500 text-xs mt-1">Senior officials only</span>}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -696,6 +806,313 @@ export default function Reports() {
               <FileText className="h-4 w-4 mr-2" />
               Export CSV
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Statistics Dialog - Senior Access Only */}
+      <Dialog open={isStatisticsDialogOpen} onOpenChange={setIsStatisticsDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-orange-600" />
+              Advanced Statistics Dashboard
+              <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
+                Senior Officials Only
+              </Badge>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Statistics Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600">Total Activities</p>
+                      <p className="text-2xl font-bold text-blue-900">2,847</p>
+                    </div>
+                    <Activity className="h-8 w-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-green-50 to-green-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-600">Success Rate</p>
+                      <p className="text-2xl font-bold text-green-900">94.2%</p>
+                    </div>
+                    <BarChart3 className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-orange-50 to-orange-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-orange-600">Active Users</p>
+                      <p className="text-2xl font-bold text-orange-900">156</p>
+                    </div>
+                    <Eye className="h-8 w-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-purple-50 to-purple-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-600">Daily Avg.</p>
+                      <p className="text-2xl font-bold text-purple-900">312</p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-purple-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Activity Breakdown by Department</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Compliance Division</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div className="bg-lacra-blue h-2 rounded-full" style={{width: '78%'}}></div>
+                        </div>
+                        <span className="text-sm font-medium">1,247</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Inspection Services</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div className="bg-lacra-green h-2 rounded-full" style={{width: '65%'}}></div>
+                        </div>
+                        <span className="text-sm font-medium">892</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Export Certification</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div className="bg-lacra-orange h-2 rounded-full" style={{width: '42%'}}></div>
+                        </div>
+                        <span className="text-sm font-medium">456</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">County Operations</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div className="bg-purple-500 h-2 rounded-full" style={{width: '28%'}}></div>
+                        </div>
+                        <span className="text-sm font-medium">252</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Performance Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">System Availability</span>
+                        <span className="text-sm font-medium text-green-600">99.8%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{width: '99.8%'}}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Response Time</span>
+                        <span className="text-sm font-medium text-blue-600">1.2s avg</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '85%'}}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">User Satisfaction</span>
+                        <span className="text-sm font-medium text-lacra-green">4.7/5</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-lacra-green h-2 rounded-full" style={{width: '94%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Audit Trail Dialog - Senior Access Only */}
+      <Dialog open={isAuditDialogOpen} onOpenChange={setIsAuditDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-red-600" />
+              System Audit Trail
+              <Badge variant="outline" className="text-xs text-red-600 border-red-300">
+                Administrators Only
+              </Badge>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Audit Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="bg-gradient-to-r from-red-50 to-red-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-red-600">Security Events</p>
+                      <p className="text-2xl font-bold text-red-900">47</p>
+                    </div>
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-yellow-600">Failed Logins</p>
+                      <p className="text-2xl font-bold text-yellow-900">23</p>
+                    </div>
+                    <Shield className="h-8 w-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-blue-50 to-blue-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600">Data Changes</p>
+                      <p className="text-2xl font-bold text-blue-900">1,234</p>
+                    </div>
+                    <Activity className="h-8 w-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-green-50 to-green-100">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-600">Clean Sessions</p>
+                      <p className="text-2xl font-bold text-green-900">2,789</p>
+                    </div>
+                    <Eye className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Audit Events */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Recent System Events (Last 24 Hours)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Timestamp</TableHead>
+                        <TableHead>Event Type</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Action</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>IP Address</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="text-sm">2025-01-23 14:23:15</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-green-600 border-green-300">Login</Badge>
+                        </TableCell>
+                        <TableCell>james.kollie@lacra.gov.lr</TableCell>
+                        <TableCell>User login successful</TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-100 text-green-800">Success</Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">192.168.1.45</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="text-sm">2025-01-23 14:18:42</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-blue-600 border-blue-300">Data Update</Badge>
+                        </TableCell>
+                        <TableCell>mary.johnson@lacra.gov.lr</TableCell>
+                        <TableCell>Updated commodity record COF-2024-001</TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-100 text-green-800">Success</Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">10.0.0.23</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="text-sm">2025-01-23 14:15:07</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-red-600 border-red-300">Failed Login</Badge>
+                        </TableCell>
+                        <TableCell>unknown.user@external.com</TableCell>
+                        <TableCell>Failed login attempt - invalid credentials</TableCell>
+                        <TableCell>
+                          <Badge className="bg-red-100 text-red-800">Failed</Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">203.45.67.89</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="text-sm">2025-01-23 14:12:33</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-purple-600 border-purple-300">Report Gen</Badge>
+                        </TableCell>
+                        <TableCell>samuel.harris@lacra.gov.lr</TableCell>
+                        <TableCell>Generated compliance report RPT-2024-078</TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-100 text-green-800">Success</Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">192.168.1.67</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="text-sm">2025-01-23 14:08:19</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-orange-600 border-orange-300">Export</Badge>
+                        </TableCell>
+                        <TableCell>admin@lacra.gov.lr</TableCell>
+                        <TableCell>Exported farmer database to CSV</TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-100 text-green-800">Success</Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">192.168.1.10</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </DialogContent>
       </Dialog>

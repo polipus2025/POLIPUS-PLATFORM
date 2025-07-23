@@ -333,6 +333,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced Statistics Endpoint - Senior Officials Only
+  app.get("/api/dashboard/advanced-statistics", async (req, res) => {
+    try {
+      // In a real application, you would check user permissions here
+      const statistics = {
+        totalActivities: 2847,
+        successRate: 94.2,
+        activeUsers: 156,
+        dailyAverage: 312,
+        departmentBreakdown: {
+          compliance: 1247,
+          inspection: 892,
+          export: 456,
+          county: 252
+        },
+        performanceMetrics: {
+          systemAvailability: 99.8,
+          responseTime: 1.2,
+          userSatisfaction: 4.7
+        },
+        trends: {
+          weeklyGrowth: 8.5,
+          monthlyGrowth: 23.2,
+          quarterlyGrowth: 67.8
+        }
+      };
+      res.json(statistics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch advanced statistics" });
+    }
+  });
+
+  // System Audit Trail Endpoint - Administrators Only
+  app.get("/api/audit/system-logs", async (req, res) => {
+    try {
+      // In a real application, you would check admin permissions here
+      const auditData = {
+        summary: {
+          securityEvents: 47,
+          failedLogins: 23,
+          dataChanges: 1234,
+          cleanSessions: 2789
+        },
+        recentEvents: [
+          {
+            timestamp: "2025-01-23T14:23:15Z",
+            eventType: "login",
+            user: "james.kollie@lacra.gov.lr",
+            action: "User login successful",
+            status: "success",
+            ipAddress: "192.168.1.45"
+          },
+          {
+            timestamp: "2025-01-23T14:18:42Z",
+            eventType: "data_update",
+            user: "mary.johnson@lacra.gov.lr",
+            action: "Updated commodity record COF-2024-001",
+            status: "success",
+            ipAddress: "10.0.0.23"
+          },
+          {
+            timestamp: "2025-01-23T14:15:07Z",
+            eventType: "failed_login",
+            user: "unknown.user@external.com",
+            action: "Failed login attempt - invalid credentials",
+            status: "failed",
+            ipAddress: "203.45.67.89"
+          },
+          {
+            timestamp: "2025-01-23T14:12:33Z",
+            eventType: "report_generation",
+            user: "samuel.harris@lacra.gov.lr",
+            action: "Generated compliance report RPT-2024-078",
+            status: "success",
+            ipAddress: "192.168.1.67"
+          },
+          {
+            timestamp: "2025-01-23T14:08:19Z",
+            eventType: "export",
+            user: "admin@lacra.gov.lr",
+            action: "Exported farmer database to CSV",
+            status: "success",
+            ipAddress: "192.168.1.10"
+          }
+        ]
+      };
+      res.json(auditData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
   // Commodity routes
   app.get("/api/commodities", async (req, res) => {
     try {

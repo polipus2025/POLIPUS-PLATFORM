@@ -275,6 +275,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Logout endpoint
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      // In a real implementation, you would invalidate the JWT token
+      // For now, we'll just confirm the logout
+      res.json({
+        success: true,
+        message: "Logged out successfully"
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   app.post("/api/auth/register", authenticateToken, async (req, res) => {
     try {
       // Only regulatory admins can register new users

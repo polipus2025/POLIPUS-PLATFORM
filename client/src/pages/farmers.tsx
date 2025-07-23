@@ -44,6 +44,8 @@ const liberianCounties = [
 export default function FarmersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedFarmer, setSelectedFarmer] = useState<any>(null);
   const { toast } = useToast();
 
   const { data: farmers = [], isLoading } = useQuery({
@@ -532,7 +534,14 @@ export default function FarmersPage() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedFarmer(farmer);
+                                setIsViewDialogOpen(true);
+                              }}
+                            >
                               <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
@@ -550,6 +559,147 @@ export default function FarmersPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* View Farmer Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Farmer Details</DialogTitle>
+            </DialogHeader>
+            {selectedFarmer && (
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <User className="h-5 w-5 text-lacra-blue" />
+                    Basic Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Farmer ID</label>
+                      <p className="text-gray-900 font-mono">{selectedFarmer.farmerId}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Full Name</label>
+                      <p className="text-gray-900">{selectedFarmer.firstName} {selectedFarmer.lastName}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                      <p className="text-gray-900">{selectedFarmer.phoneNumber || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">ID Number</label>
+                      <p className="text-gray-900">{selectedFarmer.idNumber || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Status</label>
+                      <Badge variant={selectedFarmer.status === 'active' ? "default" : "secondary"}>
+                        {selectedFarmer.status.charAt(0).toUpperCase() + selectedFarmer.status.slice(1)}
+                      </Badge>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Registration Date</label>
+                      <p className="text-gray-900">
+                        {selectedFarmer.registrationDate ? 
+                          new Date(selectedFarmer.registrationDate).toLocaleDateString() : 
+                          "Not available"
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Location Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-lacra-green" />
+                    Location Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">County</label>
+                      <p className="text-gray-900">{selectedFarmer.county}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">District</label>
+                      <p className="text-gray-900">{selectedFarmer.district || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Village</label>
+                      <p className="text-gray-900">{selectedFarmer.village || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">GPS Coordinates</label>
+                      <p className="text-gray-900 font-mono">{selectedFarmer.gpsCoordinates || "Not provided"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Farm Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-lacra-orange" />
+                    Farm Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Farm Size</label>
+                      <p className="text-gray-900">
+                        {selectedFarmer.farmSize ? 
+                          `${selectedFarmer.farmSize} ${selectedFarmer.farmSizeUnit}` : 
+                          "Not specified"
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Agreement Status</label>
+                      <Badge variant={selectedFarmer.agreementSigned ? "default" : "secondary"}>
+                        {selectedFarmer.agreementSigned ? "Signed" : "Pending"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-gray-600" />
+                    Additional Information
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded border">
+                    {selectedFarmer.notes ? (
+                      <p className="text-gray-900">{selectedFarmer.notes}</p>
+                    ) : (
+                      <p className="text-gray-500 italic">No additional notes available</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-2 pt-4 border-t">
+                  <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                    Close
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      // Navigate to farm plots for this farmer
+                      setIsViewDialogOpen(false);
+                      window.location.href = '/farm-plots';
+                    }}
+                  >
+                    <MapPin className="h-4 w-4 mr-1" />
+                    View Farm Plots
+                  </Button>
+                  <Button>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit Details
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

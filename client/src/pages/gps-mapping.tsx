@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, MapPin, Satellite, TreePine, AlertTriangle, CheckCircle, Eye, Edit, Navigation } from 'lucide-react';
+import { Plus, MapPin, Satellite, TreePine, AlertTriangle, CheckCircle, Eye, Edit, Navigation, Target, Layers, Signal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,11 +9,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import EnhancedGPSTracker from '@/components/gps/enhanced-gps-tracker';
+import GPSMapViewer from '@/components/gps/gps-map-viewer';
+import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
+import { Helmet } from 'react-helmet';
 
 // GPS mapping form schema
 const gpsFormSchema = z.object({
@@ -50,6 +55,9 @@ const mockFarmPlots = [
 export default function GpsMapping() {
   const [selectedMapping, setSelectedMapping] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('tracker');
+  const [gpsPoints, setGpsPoints] = useState<any[]>([]);
+  const [mapBoundaries, setMapBoundaries] = useState<any[][]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -73,6 +81,37 @@ export default function GpsMapping() {
       accuracyLevel: 'high',
     },
   });
+
+  // Handle GPS position updates from tracker
+  const handlePositionUpdate = (position: any) => {
+    const newPoint = {
+      id: `point-${Date.now()}`,
+      latitude: position.latitude,
+      longitude: position.longitude,
+      accuracy: position.accuracy,
+      timestamp: new Date(position.timestamp),
+      type: 'waypoint'
+    };
+    setGpsPoints(prev => [...prev, newPoint]);
+  };
+
+  // Handle boundary completion from mapper
+  const handleBoundaryComplete = (boundary: any) => {
+    const boundaryPoints = boundary.points.map((point: any) => ({
+      id: point.id,
+      latitude: point.latitude,
+      longitude: point.longitude,
+      accuracy: point.accuracy,
+      timestamp: point.timestamp,
+      type: 'boundary'
+    }));
+    setMapBoundaries(prev => [...prev, boundaryPoints]);
+    
+    toast({
+      title: "Boundary Completed",
+      description: `${boundary.name} mapped with ${boundary.points.length} points`,
+    });
+  };
 
   const createMappingMutation = useMutation({
     mutationFn: async (data: GpsFormData) => {
@@ -161,16 +200,98 @@ export default function GpsMapping() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">GPS Farm Mapping</h1>
-          <p className="text-gray-600 mt-2">
-            Real-time GPS tracking and geofencing for agricultural plots with EUDR compliance monitoring
+    <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        <title>Enhanced GPS Mapping System - AgriTrace360™</title>
+        <meta name="description" content="Professional GPS mapping system with real-time tracking, precision boundary mapping, and interactive visualization for agricultural compliance." />
+      </Helmet>
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+            <Satellite className="h-8 w-8 text-blue-600" />
+            Enhanced GPS Mapping System
+          </h1>
+          <p className="text-gray-600">
+            Professional-grade GPS tracking, precision boundary mapping, and interactive visualization for agricultural compliance and farm management.
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+
+        {/* Enhanced GPS Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="tracker" className="flex items-center gap-2">
+              <Signal className="h-4 w-4" />
+              GPS Tracker
+            </TabsTrigger>
+            <TabsTrigger value="boundary" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              Boundary Mapper
+            </TabsTrigger>
+            <TabsTrigger value="map" className="flex items-center gap-2">
+              <Layers className="h-4 w-4" />
+              Map Viewer
+            </TabsTrigger>
+            <TabsTrigger value="existing" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Existing Mappings
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Enhanced GPS Tracker Tab */}
+          <TabsContent value="tracker" className="space-y-6">
+            <EnhancedGPSTracker
+              onPositionUpdate={handlePositionUpdate}
+              onSessionComplete={(session) => {
+                toast({
+                  title: "GPS Session Complete",
+                  description: `Recorded ${session.positions.length} positions over ${session.distance.toFixed(0)}m`,
+                });
+              }}
+              accuracyThreshold={5.0}
+            />
+          </TabsContent>
+
+          {/* Precision Boundary Mapper Tab */}
+          <TabsContent value="boundary" className="space-y-6">
+            <PrecisionBoundaryMapper
+              onBoundaryComplete={handleBoundaryComplete}
+              onBoundaryUpdate={(boundary) => {
+                // Real-time boundary updates
+              }}
+              requiredAccuracy={3.0}
+              minPoints={4}
+            />
+          </TabsContent>
+
+          {/* Interactive Map Viewer Tab */}
+          <TabsContent value="map" className="space-y-6">
+            <GPSMapViewer
+              gpsPoints={gpsPoints}
+              boundaries={mapBoundaries}
+              onPointClick={(point) => {
+                toast({
+                  title: "GPS Point Selected",
+                  description: `${point.type}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`,
+                });
+              }}
+              onBoundsChange={(bounds) => {
+                // Handle map bounds change
+              }}
+            />
+          </TabsContent>
+
+          {/* Existing Mappings Tab */}
+          <TabsContent value="existing" className="space-y-6">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Existing GPS Mappings</h2>
+                <p className="text-gray-600 mt-2">
+                  View and manage existing GPS mappings with EUDR compliance monitoring
+                </p>
+              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -546,6 +667,177 @@ export default function GpsMapping() {
       </div>
 
       {/* Mapping Details Modal */}
+      {selectedMapping && (
+        <Dialog open={!!selectedMapping} onOpenChange={() => setSelectedMapping(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>GPS Mapping Details - {selectedMapping.mappingId}</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="font-semibold">Location Information</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <span className="text-muted-foreground">Center Latitude:</span>
+                  <span>{selectedMapping.centerLatitude}</span>
+                  <span className="text-muted-foreground">Center Longitude:</span>
+                  <span>{selectedMapping.centerLongitude}</span>
+                  <span className="text-muted-foreground">Total Area:</span>
+                  <span>{selectedMapping.totalAreaHectares} hectares</span>
+                  <span className="text-muted-foreground">Elevation:</span>
+                  <span>{selectedMapping.elevationMeters || 'N/A'} meters</span>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="font-semibold">Technical Details</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <span className="text-muted-foreground">Boundary Type:</span>
+                  <span className="capitalize">{selectedMapping.boundaryType}</span>
+                  <span className="text-muted-foreground">Mapping Method:</span>
+                  <span className="capitalize">{selectedMapping.mappingMethod?.replace('_', ' ')}</span>
+                  <span className="text-muted-foreground">Accuracy Level:</span>
+                  <span className="capitalize">{selectedMapping.accuracyLevel}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <h4 className="font-semibold mb-2">GPS Coordinates</h4>
+              <pre className="bg-muted p-3 rounded-md text-sm overflow-x-auto">
+                {JSON.stringify(JSON.parse(selectedMapping.coordinates), null, 2)}
+              </pre>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+            {/* Statistics Overview for Existing Mappings */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <MapPin className="h-8 w-8 text-blue-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Total Mappings</p>
+                      <p className="text-2xl font-bold text-gray-900">{gpsMappings.length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Verified</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {gpsMappings.filter((m: any) => m.verificationStatus === 'verified').length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <TreePine className="h-8 w-8 text-green-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">EUDR Compliant</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {eudrCompliances.filter((c: any) => c.complianceStatus === 'compliant').length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <AlertTriangle className="h-8 w-8 text-yellow-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Deforestation Alerts</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {deforestationData.filter((d: any) => d.riskLevel === 'high').length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Existing Mappings Grid */}
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {gpsMappings.map((mapping: any) => {
+                  const compliance = getComplianceStatus(mapping.id);
+                  const farmer = mockFarmers.find(f => f.id === mapping.farmerId);
+                  const plot = mockFarmPlots.find(p => p.id === mapping.farmPlotId);
+                  
+                  return (
+                    <Card key={mapping.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg">{mapping.mappingId}</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              {farmer?.name} - {farmer?.county}
+                            </p>
+                            {plot && (
+                              <p className="text-sm text-muted-foreground">
+                                {plot.plotName} ({plot.cropType})
+                              </p>
+                            )}
+                          </div>
+                          <Badge className={`${compliance.color} text-white`}>
+                            {compliance.label}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Area:</span>
+                            <span className="text-sm">{mapping.totalAreaHectares} ha</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Accuracy:</span>
+                            <Badge variant="outline">{mapping.accuracyLevel}</Badge>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Status:</span>
+                            <Badge variant={mapping.verificationStatus === 'verified' ? 'default' : 'secondary'}>
+                              {mapping.verificationStatus}
+                            </Badge>
+                          </div>
+                          <div className="flex gap-2 mt-4">
+                            <Button variant="outline" size="sm" className="flex-1">
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                            <Button variant="outline" size="sm" className="flex-1">
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Details Dialog */}
       {selectedMapping && (
         <Dialog open={!!selectedMapping} onOpenChange={() => setSelectedMapping(null)}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">

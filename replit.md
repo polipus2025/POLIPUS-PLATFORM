@@ -5,6 +5,9 @@
 AgriTrace360™ is a comprehensive web application designed for the Liberia Agriculture Commodity Regulatory Authority (LACRA) to manage and monitor agricultural commodity compliance across different counties. The system provides real-time tracking of commodities, inspections, certifications, and compliance metrics through an intuitive dashboard interface.
 
 ### Recent Updates (January 2025)
+- **Three-Tier Authentication System**: Complete role-based authentication with separate portals for regulatory staff, farmers, and field agents
+- **JWT Security Implementation**: Secure bcrypt password hashing with JWT token-based session management
+- **Landing Page Portal**: Professional landing page routing users to appropriate authentication portals
 - **Government Integration**: Complete integration with Liberia Revenue Authority (LRA), Ministry of Agriculture (MOA), and Customs for real-time compliance synchronization
 - **EUDR Compliance Integration**: Added EU Deforestation Regulation (EUDR) compliance dashboard with comprehensive monitoring, risk assessment, and documentation features
 - **Complete Liberian Cash Crops**: Integrated all major cash crops that can be grown in Liberia (20 commodity types) with quality grades and proper categorization
@@ -37,19 +40,23 @@ The application follows a modern full-stack architecture pattern with clear sepa
 ## Key Components
 
 ### Database Layer
-- **ORM**: Drizzle ORM with PostgreSQL dialect
+- **ORM**: Drizzle ORM with PostgreSQL dialect (in-memory storage for development)
 - **Database**: PostgreSQL (configured for Neon Database)
+- **Authentication**: JWT tokens with bcrypt password hashing
 - **Migrations**: Drizzle Kit for schema migrations
 - **Schema Location**: Shared schema definitions in `shared/schema.ts`
 
 ### Core Data Models
-1. **Commodities**: Agricultural products with batch tracking, quality grades, and compliance status
-2. **Inspections**: Quality control inspections with compliance assessments
-3. **Certifications**: Export certificates and quality certifications
-4. **Alerts**: System notifications and compliance alerts  
-5. **Reports**: Generated compliance and operational reports
-6. **Users**: System user management
-7. **Government Integration**: LRA tax assessments, MOA registrations, and Customs declarations with real-time synchronization
+1. **Authentication Users**: Role-based user accounts with JWT authentication (regulatory, farmer, field_agent)
+2. **User Sessions**: JWT token management and session tracking
+3. **User Permissions**: Role-based access control system
+4. **Commodities**: Agricultural products with batch tracking, quality grades, and compliance status
+5. **Inspections**: Quality control inspections with compliance assessments
+6. **Certifications**: Export certificates and quality certifications
+7. **Alerts**: System notifications and compliance alerts  
+8. **Reports**: Generated compliance and operational reports
+9. **Users**: Legacy system user management
+10. **Government Integration**: LRA tax assessments, MOA registrations, and Customs declarations with real-time synchronization
 
 ### Frontend Components
 - **Dashboard**: Real-time metrics, compliance charts, regional overviews, and EUDR compliance monitoring

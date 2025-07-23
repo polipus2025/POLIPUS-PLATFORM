@@ -522,128 +522,185 @@ export default function GpsMapping() {
         </Card>
       </div>
 
-      {/* Interactive GPS Mapping Mockup */}
+      {/* GPS Farm Mapping System Preview */}
       <div className="mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Satellite className="h-5 w-5" />
-              Live GPS Tracking & Satellite View
-              <Badge variant="secondary" className="ml-2">Demo Preview</Badge>
+        <Card className="border-2 border-green-500">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Satellite className="h-6 w-6 text-green-600" />
+              🌍 Interactive GPS Farm Mapping System
+              <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">Live Preview</Badge>
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Interactive satellite mapping with real-time GPS coordinates and deforestation monitoring
+            <p className="text-sm text-gray-700 font-medium">
+              Real-time satellite mapping with GPS tracking, deforestation monitoring, and EUDR compliance visualization
             </p>
           </CardHeader>
-          <CardContent>
-            <div className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-lg h-96 overflow-hidden border-4 border-dashed border-green-500" style={{minHeight: '400px'}}>
-              {/* Map Interface Mockup */}
-              <div className="absolute inset-0 bg-gradient-to-br from-green-200 to-blue-200" style={{opacity: 0.3}}>
-                {/* Mock Satellite Tiles */}
-                <div className="grid grid-cols-8 grid-rows-6 h-full" style={{opacity: 0.3}}>
-                  {Array.from({length: 48}).map((_, i) => (
-                    <div 
-                      key={i} 
-                      className="border border-gray-400"
-                      style={{
-                        backgroundColor: i % 3 === 0 ? '#86efac' : i % 5 === 0 ? '#fde047' : '#bbf7d0'
-                      }}
-                    />
-                  ))}
-                </div>
-                
-                {/* Farm Plot Boundaries */}
-                <div className="absolute top-16 left-16 w-32 h-24 border-4 border-red-500 rounded-lg" style={{backgroundColor: 'rgba(239, 68, 68, 0.1)'}}>
-                  <div className="absolute -top-8 left-0 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                    ALERT: Deforestation Detected
+          <CardContent className="p-6">
+            {/* Main Map Display */}
+            <div 
+              className="relative rounded-xl border-4 border-dashed border-green-600 overflow-hidden shadow-lg"
+              style={{
+                height: '500px',
+                background: 'linear-gradient(135deg, #dcfce7 0%, #dbeafe 100%)',
+                position: 'relative'
+              }}
+            >
+              {/* Satellite Grid Background */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px),
+                    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '60px 60px',
+                  opacity: 0.4
+                }}
+              />
+              
+              {/* Farm Plot Areas */}
+              <div className="absolute inset-0">
+                {/* Red Alert Plot */}
+                <div 
+                  className="absolute border-4 border-red-600 bg-red-200 rounded-lg shadow-md"
+                  style={{
+                    top: '80px',
+                    left: '80px',
+                    width: '140px',
+                    height: '100px',
+                    animation: 'pulse 2s infinite'
+                  }}
+                >
+                  <div className="absolute -top-10 left-0 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold shadow-md">
+                    🚨 DEFORESTATION ALERT
                   </div>
+                  <MapPin className="absolute top-2 left-2 h-8 w-8 text-red-700 animate-bounce" />
                 </div>
                 
-                <div className="absolute top-20 right-20 w-40 h-32 border-4 border-green-500 rounded-lg" style={{backgroundColor: 'rgba(34, 197, 94, 0.1)'}}>
-                  <div className="absolute -top-8 left-0 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                    ✓ EUDR Compliant
+                {/* Green Compliant Plot */}
+                <div 
+                  className="absolute border-4 border-green-600 bg-green-200 rounded-lg shadow-md"
+                  style={{
+                    top: '100px',
+                    right: '80px',
+                    width: '180px',
+                    height: '120px'
+                  }}
+                >
+                  <div className="absolute -top-10 left-0 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold shadow-md">
+                    ✅ EUDR COMPLIANT
                   </div>
+                  <MapPin className="absolute top-2 right-2 h-8 w-8 text-green-700 animate-pulse" />
                 </div>
                 
-                <div className="absolute bottom-20 left-20 w-36 h-28 border-4 border-yellow-500 rounded-lg" style={{backgroundColor: 'rgba(234, 179, 8, 0.1)'}}>
-                  <div className="absolute -top-8 left-0 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                    ⚠ Needs Verification
+                {/* Yellow Pending Plot */}
+                <div 
+                  className="absolute border-4 border-yellow-600 bg-yellow-200 rounded-lg shadow-md"
+                  style={{
+                    bottom: '80px',
+                    left: '100px',
+                    width: '160px',
+                    height: '110px'
+                  }}
+                >
+                  <div className="absolute -top-10 left-0 bg-yellow-600 text-white px-3 py-1 rounded text-sm font-bold shadow-md">
+                    ⚠️ PENDING VERIFICATION
                   </div>
+                  <MapPin className="absolute bottom-2 left-2 h-8 w-8 text-yellow-700 animate-pulse" />
                 </div>
-                
-                {/* GPS Pins */}
-                <MapPin className="absolute top-20 left-20 h-6 w-6 text-red-600 animate-pulse" />
-                <MapPin className="absolute top-24 right-24 h-6 w-6 text-green-600 animate-pulse" />
-                <MapPin className="absolute bottom-24 left-24 h-6 w-6 text-yellow-600 animate-pulse" />
-                
-                {/* Center Overlay with Controls */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="rounded-lg p-6 border border-gray-300 shadow-lg max-w-md" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(4px)'}}>
-                    <div className="text-center mb-4">
-                      <Satellite className="h-12 w-12 mx-auto text-blue-600 mb-2" />
-                      <h3 className="text-lg font-semibold text-gray-800">Interactive GPS Mapping System</h3>
-                      <p className="text-sm text-gray-600">Real-time satellite view with GPS tracking</p>
+              </div>
+              
+              {/* Central Control Panel */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-white rounded-xl p-6 shadow-2xl border-2 border-gray-200 max-w-sm">
+                  <div className="text-center mb-4">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Satellite className="h-10 w-10 text-blue-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800">GPS Tracking System</h3>
+                    <p className="text-sm text-gray-600">Live Satellite Monitoring</p>
+                  </div>
+                  
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="font-medium">Compliant Farms</span>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">15 plots</Badge>
                     </div>
                     
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-center justify-between p-2 bg-green-50 rounded">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                          <span>EUDR Compliant Farms</span>
-                        </div>
-                        <Badge variant="secondary">15 plots</Badge>
+                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="font-medium">Deforestation Alerts</span>
                       </div>
-                      
-                      <div className="flex items-center justify-between p-2 bg-red-50 rounded">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                          <span>Deforestation Alerts</span>
-                        </div>
-                        <Badge variant="destructive">3 active</Badge>
-                      </div>
-                      
-                      <div className="flex items-center justify-between p-2 bg-yellow-50 rounded">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                          <span>Pending Verification</span>
-                        </div>
-                        <Badge variant="secondary">8 plots</Badge>
-                      </div>
+                      <Badge className="bg-red-100 text-red-800">3 active</Badge>
                     </div>
                     
-                    <div className="flex gap-2 mt-4">
-                      <Button size="sm" className="flex-1">
-                        <Navigation className="h-4 w-4 mr-1" />
-                        Live Tracking
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <Eye className="h-4 w-4 mr-1" />
-                        Full Screen
-                      </Button>
+                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-yellow-500 rounded-full animate-pulse"></div>
+                        <span className="font-medium">Pending Review</span>
+                      </div>
+                      <Badge className="bg-yellow-100 text-yellow-800">8 plots</Badge>
                     </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mt-4">
+                    <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                      <Navigation className="h-4 w-4 mr-1" />
+                      Live View
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Eye className="h-4 w-4 mr-1" />
+                      Fullscreen
+                    </Button>
                   </div>
                 </div>
               </div>
             </div>
             
-            {/* Map Controls */}
-            <div className="flex justify-between items-center mt-4 p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-blue-600" />
-                  <span>Live GPS Coordinates: 6.3183°N, -10.7919°W</span>
+            {/* GPS Coordinates & Controls */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-blue-100 rounded-lg">
+                    <MapPin className="h-5 w-5 text-blue-600" />
+                    <span className="font-mono font-bold">6.3183°N, -10.7919°W</span>
+                    <span className="text-blue-600">(Monrovia, Liberia)</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded-lg">
+                    <Satellite className="h-5 w-5 text-green-600 animate-spin" style={{animationDuration: '3s'}} />
+                    <span className="font-medium">Last Update: 2 min ago</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Satellite className="h-4 w-4 text-green-600" />
-                  <span>Satellite Update: 2 min ago</span>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="border-green-300 hover:bg-green-50">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Zoom In
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-green-300 hover:bg-green-50">
+                    <Navigation className="h-4 w-4 mr-1" />
+                    Center Map
+                  </Button>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline">Zoom In</Button>
-                <Button size="sm" variant="outline">Zoom Out</Button>
-                <Button size="sm" variant="outline">Reset View</Button>
               </div>
             </div>
+            
+            {/* Feature Description */}
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-900 mb-2">🚀 When Fully Implemented, This System Will Include:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-800">
+                <div>• Real-time satellite imagery integration</div>
+                <div>• Live GPS device connectivity</div>
+                <div>• Automated deforestation detection</div>
+                <div>• EUDR compliance monitoring</div>
+                <div>• Mobile app for field agents</div>
+                <div>• Export to government systems</div>
+              </div>
+            </div>
+            
           </CardContent>
         </Card>
       </div>

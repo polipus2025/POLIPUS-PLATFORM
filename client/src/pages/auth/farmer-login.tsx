@@ -51,7 +51,7 @@ export default function FarmerLogin() {
     setError("");
 
     try {
-      const response = await apiRequest("/api/auth/farmer-login", "POST", {
+      const response = await apiRequest("POST", "/api/auth/farmer-login", {
         farmerId: data.farmerId,
         password: data.password,
         county: data.county,
@@ -59,14 +59,16 @@ export default function FarmerLogin() {
         userType: "farmer"
       });
 
-      if (response && typeof response === 'object' && 'success' in response && response.success) {
+      const result = await response.json();
+
+      if (result && result.success) {
         toast({
           title: "Login Successful",
           description: "Welcome to your Farmer Portal",
         });
         
         // Store session data
-        localStorage.setItem("authToken", (response as any).token);
+        localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "farmer");
         localStorage.setItem("farmerId", data.farmerId);

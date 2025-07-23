@@ -50,26 +50,28 @@ export default function FieldAgentLogin() {
     setError("");
 
     try {
-      const response = await apiRequest("/api/auth/field-agent-login", "POST", {
+      const response = await apiRequest("POST", "/api/auth/field-agent-login", {
         ...data,
         userType: "field_agent"
       });
 
-      if (response && typeof response === 'object' && 'success' in response && response.success) {
+      const result = await response.json();
+      
+      if (result && result.success) {
         toast({
           title: "Login Successful",
           description: "Welcome to your Field Agent Portal",
         });
         
         // Store session data
-        localStorage.setItem("authToken", (response as any).token);
+        localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "field_agent");
         localStorage.setItem("userType", "field_agent");
         localStorage.setItem("agentId", data.agentId);
         localStorage.setItem("jurisdiction", data.jurisdiction);
         
-        // Redirect to field agent dashboard
-        window.location.href = "/field-agent-dashboard";
+        // Redirect to dashboard
+        window.location.href = "/dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

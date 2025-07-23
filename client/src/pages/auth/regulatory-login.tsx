@@ -45,24 +45,26 @@ export default function RegulatoryLogin() {
     setError("");
 
     try {
-      const response = await apiRequest("/api/auth/regulatory-login", "POST", {
+      const response = await apiRequest("POST", "/api/auth/regulatory-login", {
         ...data,
         userType: "regulatory"
       });
 
-      if (response && typeof response === 'object' && 'success' in response && response.success) {
+      const result = await response.json();
+      
+      if (result && result.success) {
         toast({
           title: "Login Successful",
           description: "Welcome to AgriTrace360™ Regulatory Portal",
         });
         
         // Store session data
-        localStorage.setItem("authToken", (response as any).token);
+        localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("userType", "regulatory");
         
-        // Redirect to regulatory dashboard
-        window.location.href = "/regulatory-dashboard";
+        // Redirect to dashboard
+        window.location.href = "/dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

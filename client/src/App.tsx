@@ -9,8 +9,10 @@ import Landing from "@/pages/landing";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
+import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard";
 import Commodities from "@/pages/commodities";
+import ExporterDashboard from "@/pages/exporter-dashboard";
 import Inspections from "@/pages/inspections";
 import Certifications from "@/pages/certifications";
 import Reports from "@/pages/reports";
@@ -52,6 +54,7 @@ function Router() {
       <Route path="/regulatory-login" component={RegulatoryLogin} />
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
+      <Route path="/exporter-login" component={ExporterLogin} />
       
       {/* Protected Routes - Require Authentication */}
       {authToken && userType ? (
@@ -59,6 +62,14 @@ function Router() {
           {/* Dashboard - Available to all authenticated users */}
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/" component={Dashboard} />
+          
+          {/* Exporter Portal Routes */}
+          <Route path="/exporter-dashboard">
+            <ProtectedRoute 
+              component={ExporterDashboard} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
           
           {/* Regulatory Staff Only Routes */}
           <Route path="/commodities">

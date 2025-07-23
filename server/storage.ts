@@ -381,6 +381,21 @@ export interface IStorage {
     sustainabilityScore?: number;
   }>;
   generateTrackingNumber(): Promise<string>;
+
+  // Exporter management methods
+  getExporters(): Promise<Exporter[]>;
+  getExporter(id: number): Promise<Exporter | undefined>;
+  getExporterByExporterId(exporterId: string): Promise<Exporter | undefined>;
+  createExporter(exporter: InsertExporter): Promise<Exporter>;
+  updateExporter(id: number, exporter: Partial<Exporter>): Promise<Exporter | undefined>;
+  
+  // Export Order management methods
+  getExportOrders(): Promise<ExportOrder[]>;
+  getExportOrder(id: number): Promise<ExportOrder | undefined>;
+  getExportOrdersByExporter(exporterId: number): Promise<ExportOrder[]>;
+  getExportOrderByOrderNumber(orderNumber: string): Promise<ExportOrder | undefined>;
+  createExportOrder(order: InsertExportOrder): Promise<ExportOrder>;
+  updateExportOrder(id: number, order: Partial<ExportOrder>): Promise<ExportOrder | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -419,6 +434,8 @@ export class MemStorage implements IStorage {
   private trackingVerifications: Map<number, TrackingVerification>;
   private trackingAlerts: Map<number, TrackingAlert>;
   private trackingReports: Map<number, TrackingReport>;
+  private exporters: Map<number, Exporter>;
+  private exportOrders: Map<number, ExportOrder>;
   private currentUserId: number;
   private currentAuthUserId: number;
   private currentUserSessionId: number;
@@ -454,6 +471,8 @@ export class MemStorage implements IStorage {
   private currentTrackingVerificationId: number;
   private currentTrackingAlertId: number;
   private currentTrackingReportId: number;
+  private currentExporterId: number;
+  private currentExportOrderId: number;
 
   constructor() {
     this.users = new Map();
@@ -491,6 +510,8 @@ export class MemStorage implements IStorage {
     this.trackingVerifications = new Map();
     this.trackingAlerts = new Map();
     this.trackingReports = new Map();
+    this.exporters = new Map();
+    this.exportOrders = new Map();
     this.currentUserId = 1;
     this.currentAuthUserId = 1;
     this.currentUserSessionId = 1;
@@ -526,9 +547,12 @@ export class MemStorage implements IStorage {
     this.currentTrackingVerificationId = 1;
     this.currentTrackingAlertId = 1;
     this.currentTrackingReportId = 1;
+    this.currentExporterId = 1;
+    this.currentExportOrderId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
+    this.initializeExporterData();
   }
 
   private async initializeDefaultData() {
@@ -580,6 +604,19 @@ export class MemStorage implements IStorage {
       lastName: "Konneh",
       phoneNumber: "+231 88 456 7890",
       jurisdiction: "Lofa County",
+      isActive: true
+    });
+
+    await this.createAuthUser({
+      username: "EXP-2024-001",
+      email: "mbawah@agriliberia.com",
+      passwordHash: "$2b$12$YKSKmf5vbgpCz7B3QdwjIuKXE8FtGdnJ3Qf7LV9Zmx2Nb6Hw1QrSi", // password: exporter123
+      role: "exporter",
+      firstName: "Marcus",
+      lastName: "Bawah",
+      phoneNumber: "+231 88 567 8901",
+      jurisdiction: "Montserrado County",
+      department: "Export Operations",
       isActive: true
     });
 
@@ -3732,6 +3769,144 @@ export class MemStorage implements IStorage {
     const count = this.trackingRecords.size + 1;
     const countStr = String(count).padStart(4, '0');
     return `TRK-${year}-${month}-${countStr}-LR`;
+  }
+
+  // Exporter management methods
+  async getExporters(): Promise<Exporter[]> {
+    return Array.from(this.exporters.values());
+  }
+
+  async getExporter(id: number): Promise<Exporter | undefined> {
+    return this.exporters.get(id);
+  }
+
+  async getExporterByExporterId(exporterId: string): Promise<Exporter | undefined> {
+    return Array.from(this.exporters.values()).find(e => e.exporterId === exporterId);
+  }
+
+  async createExporter(exporter: InsertExporter): Promise<Exporter> {
+    const newExporter: Exporter = {
+      id: this.currentExporterId++,
+      ...exporter,
+      registrationDate: new Date(),
+      lastModified: new Date(),
+    };
+    this.exporters.set(newExporter.id, newExporter);
+    return newExporter;
+  }
+
+  async updateExporter(id: number, exporter: Partial<Exporter>): Promise<Exporter | undefined> {
+    const existing = this.exporters.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...exporter, lastModified: new Date() };
+    this.exporters.set(id, updated);
+    return updated;
+  }
+
+  // Export Order management methods
+  async getExportOrders(): Promise<ExportOrder[]> {
+    return Array.from(this.exportOrders.values());
+  }
+
+  async getExportOrder(id: number): Promise<ExportOrder | undefined> {
+    return this.exportOrders.get(id);
+  }
+
+  async getExportOrdersByExporter(exporterId: number): Promise<ExportOrder[]> {
+    return Array.from(this.exportOrders.values()).filter(order => order.exporterId === exporterId);
+  }
+
+  async getExportOrderByOrderNumber(orderNumber: string): Promise<ExportOrder | undefined> {
+    return Array.from(this.exportOrders.values()).find(order => order.orderNumber === orderNumber);
+  }
+
+  async createExportOrder(order: InsertExportOrder): Promise<ExportOrder> {
+    const newOrder: ExportOrder = {
+      id: this.currentExportOrderId++,
+      ...order,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.exportOrders.set(newOrder.id, newOrder);
+    return newOrder;
+  }
+
+  async updateExportOrder(id: number, order: Partial<ExportOrder>): Promise<ExportOrder | undefined> {
+    const existing = this.exportOrders.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...order, updatedAt: new Date() };
+    this.exportOrders.set(id, updated);
+    return updated;
+  }
+
+  // Initialize exporter sample data
+  private async initializeExporterData() {
+    // Create sample exporter
+    await this.createExporter({
+      exporterId: "EXP-2024-001",
+      companyName: "Liberia Agri Export Ltd.",
+      businessLicense: "BL-2024-0125",
+      taxIdNumber: "TIN-987654321",
+      contactPerson: "Marcus Bawah",
+      email: "mbawah@agriliberia.com",
+      phoneNumber: "+231 88 567 8901",
+      address: "UN Drive, Congo Town, Monrovia",
+      county: "Montserrado County",
+      district: "District 7",
+      exportLicense: "EL-2024-LAG-001",
+      licenseExpiryDate: new Date("2025-12-31"),
+      commodityTypes: ["coffee", "cocoa", "rubber", "palm_oil"],
+      bankName: "Ecobank Liberia",
+      accountNumber: "1234567890",
+      swiftCode: "ECOCBRLR",
+      isActive: true,
+      notes: "Premier agricultural commodity exporter specializing in certified organic products."
+    });
+
+    // Create sample export orders
+    await this.createExportOrder({
+      orderNumber: "EXP-ORD-2025-001",
+      exporterId: 1,
+      farmerId: 1,
+      commodityId: 1,
+      quantity: "500",
+      unit: "bags",
+      pricePerUnit: "2.50",
+      totalValue: "1250.00",
+      currency: "USD",
+      qualityGrade: "Grade A",
+      destinationCountry: "Germany",
+      destinationPort: "Hamburg",
+      shippingMethod: "Container Ship",
+      expectedShipmentDate: new Date("2025-02-15"),
+      orderStatus: "pending",
+      lacraApprovalStatus: "pending",
+      notes: "Premium coffee beans for European market"
+    });
+
+    await this.createExportOrder({
+      orderNumber: "EXP-ORD-2025-002",
+      exporterId: 1,
+      farmerId: 1,
+      commodityId: 2,
+      quantity: "1000",
+      unit: "kg",
+      pricePerUnit: "3.25",
+      totalValue: "3250.00",
+      currency: "USD",
+      qualityGrade: "Premium",
+      destinationCountry: "Netherlands",
+      destinationPort: "Rotterdam",
+      shippingMethod: "Container Ship",
+      expectedShipmentDate: new Date("2025-03-01"),
+      orderStatus: "confirmed",
+      lacraApprovalStatus: "approved",
+      lacraApprovalDate: new Date(),
+      lacraOfficerId: 1,
+      notes: "Organic cocoa beans with EUDR compliance certification"
+    });
   }
 }
 

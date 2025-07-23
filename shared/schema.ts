@@ -226,7 +226,7 @@ export const authUsers = pgTable("auth_users", {
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  role: text("role").notNull(), // regulatory_admin, regulatory_staff, field_agent, farmer
+  role: text("role").notNull(), // regulatory_admin, regulatory_staff, field_agent, farmer, exporter
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phoneNumber: text("phone_number"),
@@ -273,6 +273,79 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Exporters table for independent exporter operations
+export const exporters = pgTable("exporters", {
+  id: serial("id").primaryKey(),
+  exporterId: varchar("exporter_id", { length: 50 }).unique().notNull(),
+  companyName: varchar("company_name", { length: 255 }).notNull(),
+  businessLicense: varchar("business_license", { length: 100 }).unique().notNull(),
+  taxIdNumber: varchar("tax_id_number", { length: 50 }).unique(),
+  contactPerson: varchar("contact_person", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
+  address: text("address").notNull(),
+  county: varchar("county", { length: 100 }).notNull(),
+  district: varchar("district", { length: 100 }),
+  exportLicense: varchar("export_license", { length: 100 }).unique().notNull(),
+  licenseExpiryDate: timestamp("license_expiry_date").notNull(),
+  commodityTypes: text("commodity_types").array().notNull(), // Array of commodity types they can export
+  bankName: varchar("bank_name", { length: 255 }),
+  accountNumber: varchar("account_number", { length: 50 }),
+  swiftCode: varchar("swift_code", { length: 20 }),
+  isActive: boolean("is_active").default(true).notNull(),
+  registrationDate: timestamp("registration_date").defaultNow().notNull(),
+  lastModified: timestamp("last_modified").defaultNow().notNull(),
+  notes: text("notes"),
+});
+
+export type Exporter = typeof exporters.$inferSelect;
+export type InsertExporter = typeof exporters.$inferInsert;
+
+// Export Orders table for tracking export transactions
+export const exportOrders = pgTable("export_orders", {
+  id: serial("id").primaryKey(),
+  orderNumber: varchar("order_number", { length: 50 }).unique().notNull(),
+  exporterId: integer("exporter_id").references(() => exporters.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id),
+  commodityId: integer("commodity_id").references(() => commodities.id).notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  unit: varchar("unit", { length: 20 }).notNull(),
+  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
+  qualityGrade: varchar("quality_grade", { length: 50 }).notNull(),
+  destinationCountry: varchar("destination_country", { length: 100 }).notNull(),
+  destinationPort: varchar("destination_port", { length: 255 }).notNull(),
+  shippingMethod: varchar("shipping_method", { length: 100 }).notNull(),
+  expectedShipmentDate: timestamp("expected_shipment_date").notNull(),
+  actualShipmentDate: timestamp("actual_shipment_date"),
+  orderStatus: varchar("order_status", { length: 50 }).default("pending").notNull(), // pending, confirmed, shipped, delivered, cancelled
+  lacraApprovalStatus: varchar("lacra_approval_status", { length: 50 }).default("pending").notNull(), // pending, approved, rejected
+  lacraApprovalDate: timestamp("lacra_approval_date"),
+  lacraOfficerId: integer("lacra_officer_id"),
+  exportCertificateId: integer("export_certificate_id").references(() => certifications.id),
+  trackingNumber: varchar("tracking_number", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  notes: text("notes"),
+});
+
+export type ExportOrder = typeof exportOrders.$inferSelect;
+export type InsertExportOrder = typeof exportOrders.$inferInsert;
+
+// Schema validation for exporters and orders
+export const insertExporterSchema = createInsertSchema(exporters).omit({
+  id: true,
+  registrationDate: true,
+  lastModified: true,
+});
+
+export const insertExportOrderSchema = createInsertSchema(exportOrders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 // Farm Management Platform types
 export type Farmer = typeof farmers.$inferSelect;

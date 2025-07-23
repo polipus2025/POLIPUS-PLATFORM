@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe } from "lucide-react";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package } from "lucide-react";
 
 export default function Landing() {
   return (
@@ -69,7 +69,7 @@ export default function Landing() {
         </div>
 
         {/* Access Portals */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
           {/* Regulatory Portal */}
           <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-center pb-4">
@@ -202,6 +202,52 @@ export default function Landing() {
               >
                 <a href="/field-agent-login">
                   Access Field Agent Portal
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Exporter Portal */}
+          <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="text-center pb-4">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full group-hover:scale-110 transition-transform">
+                  <Package className="h-10 w-10 text-white" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl font-bold text-gray-900">
+                Exporter Portal
+              </CardTitle>
+              <p className="text-gray-600">
+                For licensed agricultural commodity exporters
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Package className="h-4 w-4 text-blue-600" />
+                  Export order management
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Globe className="h-4 w-4 text-purple-600" />
+                  LACRA compliance integration
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Users className="h-4 w-4 text-green-600" />
+                  Farmer network partnerships
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <BarChart3 className="h-4 w-4 text-orange-600" />
+                  Export analytics & reporting
+                </div>
+              </div>
+              <Button 
+                asChild 
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 group-hover:scale-105 transition-transform"
+              >
+                <a href="/exporter-login">
+                  Access Exporter Portal
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>

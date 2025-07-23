@@ -37,7 +37,9 @@ import {
   insertTrackingVerificationSchema,
   insertTrackingAlertSchema,
   insertTrackingReportSchema,
-  insertAuthUserSchema
+  insertAuthUserSchema,
+  insertExporterSchema,
+  insertExportOrderSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -2406,6 +2408,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error('Error creating tracking report:', error);
       res.status(500).json({ message: 'Failed to create tracking report' });
+    }
+  });
+
+  // Exporter management routes
+  app.get('/api/exporters', async (req, res) => {
+    try {
+      const exporters = await storage.getExporters();
+      res.json(exporters);
+    } catch (error) {
+      console.error('Error fetching exporters:', error);
+      res.status(500).json({ message: 'Failed to fetch exporters' });
+    }
+  });
+
+  app.get('/api/exporters/:id', async (req, res) => {
+    try {
+      const exporter = await storage.getExporter(parseInt(req.params.id));
+      if (!exporter) {
+        return res.status(404).json({ message: 'Exporter not found' });
+      }
+      res.json(exporter);
+    } catch (error) {
+      console.error('Error fetching exporter:', error);
+      res.status(500).json({ message: 'Failed to fetch exporter' });
+    }
+  });
+
+  app.post('/api/exporters', async (req, res) => {
+    try {
+      const validatedData = insertExporterSchema.parse(req.body);
+      const exporter = await storage.createExporter(validatedData);
+      res.status(201).json(exporter);
+    } catch (error) {
+      console.error('Error creating exporter:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create exporter' });
+    }
+  });
+
+  // Export Order management routes
+  app.get('/api/export-orders', async (req, res) => {
+    try {
+      const { exporterId } = req.query;
+      let orders;
+      
+      if (exporterId) {
+        orders = await storage.getExportOrdersByExporter(parseInt(exporterId as string));
+      } else {
+        orders = await storage.getExportOrders();
+      }
+      
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching export orders:', error);
+      res.status(500).json({ message: 'Failed to fetch export orders' });
+    }
+  });
+
+  app.get('/api/export-orders/:id', async (req, res) => {
+    try {
+      const order = await storage.getExportOrder(parseInt(req.params.id));
+      if (!order) {
+        return res.status(404).json({ message: 'Export order not found' });
+      }
+      res.json(order);
+    } catch (error) {
+      console.error('Error fetching export order:', error);
+      res.status(500).json({ message: 'Failed to fetch export order' });
+    }
+  });
+
+  app.post('/api/export-orders', async (req, res) => {
+    try {
+      const validatedData = insertExportOrderSchema.parse(req.body);
+      const order = await storage.createExportOrder(validatedData);
+      res.status(201).json(order);
+    } catch (error) {
+      console.error('Error creating export order:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create export order' });
+    }
+  });
+
+  app.put('/api/export-orders/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.updateExportOrder(id, req.body);
+      if (!order) {
+        return res.status(404).json({ message: 'Export order not found' });
+      }
+      res.json(order);
+    } catch (error) {
+      console.error('Error updating export order:', error);
+      res.status(500).json({ message: 'Failed to update export order' });
     }
   });
 

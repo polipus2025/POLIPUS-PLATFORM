@@ -8,8 +8,12 @@ import QuickActions from "@/components/dashboard/quick-actions";
 import SystemAlerts from "@/components/dashboard/system-alerts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Download, Shield, TreePine, FileCheck, AlertTriangle, Building2, CheckCircle, Clock, XCircle, Plus, Upload } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Download, Shield, TreePine, FileCheck, AlertTriangle, Building2, CheckCircle, Clock, XCircle, Plus, Upload, MessageSquare, Bell, Eye, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,11 +22,49 @@ export default function Dashboard() {
   const [selectedExporter, setSelectedExporter] = useState<string>("all");
   const [isExportApplicationOpen, setIsExportApplicationOpen] = useState(false);
   const [isExportReportOpen, setIsExportReportOpen] = useState(false);
+  const [isMessagesDialogOpen, setIsMessagesDialogOpen] = useState(false);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Check user type for role-specific content
   const userType = localStorage.getItem("userType");
   const userRole = localStorage.getItem("userRole");
   const token = localStorage.getItem("token");
+
+  // Fetch alerts and messages
+  const { data: alerts = [] } = useQuery({
+    queryKey: ['/api/alerts'],
+    queryFn: () => apiRequest('/api/alerts'),
+  });
+
+  const { data: unreadAlerts = [] } = useQuery({
+    queryKey: ['/api/alerts', 'unread'],
+    queryFn: () => apiRequest('/api/alerts?unreadOnly=true'),
+  });
+
+  // Mark alert as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: async (alertId: number) => {
+      return apiRequest(`/api/alerts/${alertId}/mark-read`, {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/alerts'] });
+      toast({
+        title: 'Message marked as read',
+        description: 'The message has been marked as read successfully.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to mark message as read',
+        variant: 'destructive',
+      });
+    },
+  });
 
   // Sample EUDR compliance data
   const eudrMetrics = {
@@ -153,6 +195,122 @@ export default function Dashboard() {
             <p className="text-gray-600">Real-time agricultural commodity compliance monitoring</p>
           </div>
           <div className="flex space-x-3">
+            {/* Messages Button */}
+            <Dialog open={isMessagesDialogOpen} onOpenChange={setIsMessagesDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="relative">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Messages
+                  {unreadAlerts.length > 0 && (
+                    <Badge 
+                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white px-1.5 py-0.5 text-xs rounded-full min-w-[20px] h-5"
+                    >
+                      {unreadAlerts.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Bell className="h-5 w-5" />
+                    System Messages & Alerts
+                  </DialogTitle>
+                  <DialogDescription>
+                    View and manage your system notifications and compliance alerts
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <ScrollArea className="max-h-[60vh] pr-4">
+                  <div className="space-y-4">
+                    {alerts.length > 0 ? (
+                      alerts.map((alert: any) => (
+                        <div 
+                          key={alert.id} 
+                          className={`p-4 rounded-lg border ${
+                            alert.isRead 
+                              ? 'bg-gray-50 border-gray-200' 
+                              : 'bg-blue-50 border-blue-200'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                {alert.type === 'error' && <AlertTriangle className="h-4 w-4 text-red-500" />}
+                                {alert.type === 'warning' && <AlertTriangle className="h-4 w-4 text-orange-500" />}
+                                {alert.type === 'success' && <CheckCircle className="h-4 w-4 text-green-500" />}
+                                {alert.type === 'info' && <Bell className="h-4 w-4 text-blue-500" />}
+                                {alert.type === 'mobile_request' && <MessageSquare className="h-4 w-4 text-purple-500" />}
+                                
+                                <h4 className="font-medium">{alert.title}</h4>
+                                <Badge 
+                                  className={`text-xs ${
+                                    alert.priority === 'critical' ? 'bg-red-100 text-red-800' :
+                                    alert.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                                    alert.priority === 'medium' ? 'bg-blue-100 text-blue-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}
+                                >
+                                  {alert.priority}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-700 mb-2">{alert.message}</p>
+                              
+                              {alert.source && (
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                  <span>Source: {alert.source}</span>
+                                  {alert.submittedBy && <span>By: {alert.submittedBy}</span>}
+                                  <span>
+                                    {new Date(alert.createdAt).toLocaleDateString()} at{' '}
+                                    {new Date(alert.createdAt).toLocaleTimeString()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-2 ml-4">
+                              {!alert.isRead && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => markAsReadMutation.mutate(alert.id)}
+                                  disabled={markAsReadMutation.isPending}
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  Mark Read
+                                </Button>
+                              )}
+                              {alert.isRead && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Read
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p>No messages at this time</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+                
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <div className="text-sm text-gray-600">
+                    {unreadAlerts.length} unread messages
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsMessagesDialogOpen(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Select defaultValue="all">
               <SelectTrigger className="w-48">
                 <SelectValue />

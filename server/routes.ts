@@ -1284,6 +1284,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/alerts/:id/mark-read", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.markAlertAsRead(id);
+      
+      if (success) {
+        res.json({ message: "Alert marked as read" });
+      } else {
+        res.status(404).json({ message: "Alert not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark alert as read" });
+    }
+  });
+
   app.post("/api/alerts", async (req, res) => {
     try {
       const validatedData = insertAlertSchema.parse(req.body);

@@ -196,7 +196,13 @@ export interface IStorage {
   // EUDR compliance methods
   getEudrCompliance(): Promise<EudrCompliance[]>;
   createEudrCompliance(compliance: InsertEudrCompliance): Promise<EudrCompliance>;
+  
+  // Deforestation monitoring methods
+  getDeforestationMonitorings(): Promise<DeforestationMonitoring[]>;
+  getDeforestationMonitoring(id: number): Promise<DeforestationMonitoring | undefined>;
   getDeforestationMonitoringsByMapping(mappingId: number): Promise<DeforestationMonitoring[]>;
+  getDeforestationMonitoringsByRiskLevel(riskLevel: string): Promise<DeforestationMonitoring[]>;
+  createDeforestationMonitoring(monitoring: InsertDeforestationMonitoring): Promise<DeforestationMonitoring>;
 
   // International standards methods
   getInternationalStandards(): Promise<InternationalStandard[]>;
@@ -623,6 +629,24 @@ export class DatabaseStorage implements IStorage {
 
   async getDeforestationMonitoringsByMapping(mappingId: number): Promise<DeforestationMonitoring[]> {
     return await db.select().from(deforestationMonitoring).where(eq(deforestationMonitoring.farmGpsMappingId, mappingId));
+  }
+
+  async getDeforestationMonitorings(): Promise<DeforestationMonitoring[]> {
+    return await db.select().from(deforestationMonitoring).orderBy(desc(deforestationMonitoring.id));
+  }
+
+  async getDeforestationMonitoring(id: number): Promise<DeforestationMonitoring | undefined> {
+    const [monitoring] = await db.select().from(deforestationMonitoring).where(eq(deforestationMonitoring.id, id));
+    return monitoring || undefined;
+  }
+
+  async getDeforestationMonitoringsByRiskLevel(riskLevel: string): Promise<DeforestationMonitoring[]> {
+    return await db.select().from(deforestationMonitoring).where(eq(deforestationMonitoring.riskLevel, riskLevel));
+  }
+
+  async createDeforestationMonitoring(monitoring: InsertDeforestationMonitoring): Promise<DeforestationMonitoring> {
+    const [newMonitoring] = await db.insert(deforestationMonitoring).values(monitoring).returning();
+    return newMonitoring;
   }
 
   // International standards methods

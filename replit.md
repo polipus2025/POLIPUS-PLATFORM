@@ -51,6 +51,7 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **Dynamic Certification System**: Implemented crop-specific certification display where conventional crops standards are always available for all commodities, while specialized certifications (EU standards, Fair Trade, crop-specific certifications) are shown only for relevant crops based on selection (January 24, 2025)
 - **Anonymous Abuse Reporting System**: Added comprehensive anonymous reporting system allowing users to report corruption, bribery, illegal activities, document fraud, license violations, environmental violations, and other regulatory violations to LACRA's Anti-Corruption Unit. Features secure anonymous submission with optional contact methods and detailed incident reporting forms (January 24, 2025)
 - **Export License Management System**: Added dedicated "Export License Application" menu section for exporters to manage annual license renewals. Features current license status tracking, renewal alerts, application forms for new licenses, renewal applications with operational changes documentation, and complete renewal history tracking. Essential for annual license compliance requirements (January 24, 2025)
+- **License Registration Removal**: Completely removed license registration form and functionality from exporter portal per user request. Restored exporter login page to original clean state with simple authentication interface (January 24, 2025)
 
 ## User Preferences
 

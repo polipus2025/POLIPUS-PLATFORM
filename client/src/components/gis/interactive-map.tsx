@@ -316,8 +316,8 @@ export default function InteractiveMap() {
                 {/* Map Overlay - Simulated Liberia Map */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative">
-                    {/* Liberia Outline */}
-                    <svg width="600" height="400" viewBox="0 0 600 400" className="opacity-80">
+                    {/* Accurate Liberia Map */}
+                    <svg width="600" height="400" viewBox="0 0 600 400" className="opacity-90">
                       <defs>
                         <pattern id="farmPattern" patternUnits="userSpaceOnUse" width="10" height="10">
                           <circle cx="5" cy="5" r="2" fill="#10B981" opacity="0.6" />
@@ -327,45 +327,96 @@ export default function InteractiveMap() {
                         </pattern>
                       </defs>
                       
-                      {/* Accurate Liberia Country Outline */}
+                      {/* Liberia Main Country Outline - Accurate Shape */}
                       <path
-                        d="M100 150 L120 140 L160 135 L200 130 L240 125 L280 120 L320 115 L360 118 L400 125 L440 135 L480 150 L520 170 L540 190 L550 210 L555 230 L560 250 L558 270 L550 290 L540 310 L525 330 L505 345 L480 355 L450 360 L420 362 L390 360 L360 355 L330 350 L300 345 L270 340 L240 338 L210 340 L180 345 L150 350 L125 355 L105 360 L90 350 L80 335 L75 320 L72 300 L70 280 L72 260 L75 240 L80 220 L85 200 L90 180 L95 165 Z"
-                        fill={mapView === 'satellite' ? '#22C55E' : mapView === 'terrain' ? '#84CC16' : '#F3F4F6'}
-                        stroke="#374151"
+                        d="M50 220 L80 200 L120 180 L180 160 L240 140 L300 130 L360 125 L420 130 L480 140 L520 160 L550 180 L570 200 L580 220 L585 240 L587 260 L585 280 L580 300 L570 320 L550 340 L520 350 L480 355 L440 358 L400 360 L360 358 L320 355 L280 350 L240 345 L200 340 L160 335 L120 330 L90 325 L70 315 L55 300 L45 280 L42 260 L45 240 Z"
+                        fill={mapView === 'satellite' ? '#065F46' : mapView === 'terrain' ? '#15803D' : '#F9FAFB'}
+                        stroke="#1F2937"
                         strokeWidth="2"
-                        opacity="0.8"
+                        opacity="0.9"
                       />
                       
-                      {/* Accurate County Boundaries - Major divisions */}
+                      {/* Atlantic Ocean */}
+                      <rect x="0" y="0" width="600" height="400" fill="#1E40AF" opacity="0.1" />
+                      <text x="20" y="380" fill="#1E40AF" fontSize="14" fontWeight="bold">Atlantic Ocean</text>
+                      
+                      {/* Accurate Liberian County Boundaries */}
                       {mapLayers.find(l => l.id === 'counties')?.visible && (
                         <g>
-                          {/* Montserrado County (around Monrovia) */}
-                          <path d="M100 250 Q130 240 160 245 Q190 250 180 280 Q150 290 120 285 Q100 270 100 250" 
-                                stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                          {/* Montserrado County (Western coastal - includes Monrovia) */}
+                          <path d="M50 220 L100 210 L130 215 L140 240 L130 270 L100 290 L70 300 L50 280 Z" 
+                                stroke="#DC2626" strokeWidth="2" fill="rgba(220, 38, 38, 0.1)" />
+                          <text x="90" y="250" fill="#DC2626" fontSize="11" fontWeight="bold">Montserrado</text>
                           
-                          {/* Lofa County (Northwestern) */}
-                          <path d="M120 140 Q160 135 200 130 Q180 160 150 170 Q120 165 120 140" 
-                                stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                          {/* Margibi County (Central coastal) */}
+                          <path d="M140 240 L200 235 L220 250 L210 275 L180 285 L140 280 Z" 
+                                stroke="#7C2D12" strokeWidth="2" fill="rgba(124, 45, 18, 0.1)" />
+                          <text x="170" y="260" fill="#7C2D12" fontSize="10">Margibi</text>
                           
-                          {/* Nimba County (Northern) */}
-                          <path d="M240 125 Q280 120 320 115 Q340 140 320 165 Q280 170 250 160 Q240 145 240 125" 
-                                stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                          {/* Grand Bassa County (Central coastal) */}
+                          <path d="M220 250 L280 245 L300 265 L290 295 L260 305 L220 300 L210 275 Z" 
+                                stroke="#059669" strokeWidth="2" fill="rgba(5, 150, 105, 0.1)" />
+                          <text x="250" y="275" fill="#059669" fontSize="10">Grand Bassa</text>
+                          
+                          {/* River Cess County (South central coastal) */}
+                          <path d="M300 265 L360 260 L380 280 L370 310 L340 320 L300 315 L290 295 Z" 
+                                stroke="#0891B2" strokeWidth="2" fill="rgba(8, 145, 178, 0.1)" />
+                          <text x="330" y="290" fill="#0891B2" fontSize="10">River Cess</text>
+                          
+                          {/* Sinoe County (South central) */}
+                          <path d="M380 280 L440 275 L460 295 L450 325 L420 335 L380 330 L370 310 Z" 
+                                stroke="#7C3AED" strokeWidth="2" fill="rgba(124, 58, 237, 0.1)" />
+                          <text x="410" y="305" fill="#7C3AED" fontSize="10">Sinoe</text>
+                          
+                          {/* Maryland County (Southeastern coastal) */}
+                          <path d="M460 295 L520 290 L550 310 L540 340 L510 350 L480 348 L450 340 L450 325 Z" 
+                                stroke="#BE185D" strokeWidth="2" fill="rgba(190, 24, 93, 0.1)" />
+                          <text x="500" y="320" fill="#BE185D" fontSize="10">Maryland</text>
+                          
+                          {/* Grand Kru County (Southern) */}
+                          <path d="M440 325 L480 320 L500 340 L490 360 L460 365 L430 360 L420 345 Z" 
+                                stroke="#65A30D" strokeWidth="2" fill="rgba(101, 163, 13, 0.1)" />
+                          <text x="460" y="345" fill="#65A30D" fontSize="9">Grand Kru</text>
+                          
+                          {/* River Gee County (Southern interior) */}
+                          <path d="M380 330 L440 325 L460 345 L450 365 L420 370 L390 365 L370 350 Z" 
+                                stroke="#DC2626" strokeWidth="2" fill="rgba(220, 38, 38, 0.1)" />
+                          <text x="410" y="350" fill="#DC2626" fontSize="9">River Gee</text>
                           
                           {/* Grand Gedeh County (Eastern) */}
-                          <path d="M440 135 Q480 150 520 170 Q520 200 490 220 Q460 210 440 185 Q440 160 440 135" 
-                                stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                          <path d="M460 200 L520 195 L550 215 L540 245 L520 260 L480 265 L450 250 Z" 
+                                stroke="#EA580C" strokeWidth="2" fill="rgba(234, 88, 12, 0.1)" />
+                          <text x="500" y="230" fill="#EA580C" fontSize="10">Grand Gedeh</text>
                           
-                          {/* Maryland County (Southeastern) */}
-                          <path d="M480 330 Q520 340 540 360 Q500 370 460 365 Q450 350 480 330" 
-                                stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                          {/* Nimba County (Northern) */}
+                          <path d="M360 125 L480 120 L520 140 L510 170 L480 180 L420 185 L380 175 L350 155 Z" 
+                                stroke="#1D4ED8" strokeWidth="2" fill="rgba(29, 78, 216, 0.1)" />
+                          <text x="440" y="150" fill="#1D4ED8" fontSize="11" fontWeight="bold">Nimba</text>
                           
-                          {/* River Cess County (Central coast) */}
-                          <path d="M270 340 Q310 335 350 340 Q360 360 330 370 Q290 365 270 350 Q270 340 270 340" 
-                                stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                          {/* Lofa County (Northwestern) */}
+                          <path d="M120 180 L240 170 L280 175 L300 190 L280 210 L240 215 L180 220 L140 210 Z" 
+                                stroke="#059669" strokeWidth="2" fill="rgba(5, 150, 105, 0.1)" />
+                          <text x="200" y="195" fill="#059669" fontSize="11" fontWeight="bold">Lofa</text>
+                          
+                          {/* Gbarpolu County (Northwestern) */}
+                          <path d="M80 200 L140 190 L180 195 L200 210 L180 230 L140 235 L100 230 L80 220 Z" 
+                                stroke="#B45309" strokeWidth="2" fill="rgba(180, 83, 9, 0.1)" />
+                          <text x="130" y="215" fill="#B45309" fontSize="10">Gbarpolu</text>
+                          
+                          {/* Bomi County (Western) */}
+                          <path d="M100 210 L140 205 L160 220 L150 240 L130 245 L100 240 Z" 
+                                stroke="#7C2D12" strokeWidth="2" fill="rgba(124, 45, 18, 0.1)" />
+                          <text x="120" y="225" fill="#7C2D12" fontSize="9">Bomi</text>
+                          
+                          {/* Grand Cape Mount County (Northwestern coastal) */}
+                          <path d="M50 200 L100 190 L120 200 L110 220 L90 230 L60 225 Z" 
+                                stroke="#0891B2" strokeWidth="2" fill="rgba(8, 145, 178, 0.1)" />
+                          <text x="75" y="210" fill="#0891B2" fontSize="9">G.C. Mount</text>
                           
                           {/* Bong County (Central) */}
-                          <path d="M200 200 Q250 195 300 200 Q320 230 290 250 Q240 255 200 240 Q185 220 200 200" 
-                                stroke="#3B82F6" strokeWidth="1" strokeDasharray="3,3" fill="none" />
+                          <path d="M200 235 L300 230 L340 240 L350 260 L320 275 L280 280 L240 275 L210 260 Z" 
+                                stroke="#DC2626" strokeWidth="2" fill="rgba(220, 38, 38, 0.1)" />
+                          <text x="270" y="255" fill="#DC2626" fontSize="11" fontWeight="bold">Bong</text>
                         </g>
                       )}
                       
@@ -374,68 +425,116 @@ export default function InteractiveMap() {
                         <g>
                           {/* Show highlighted farms if county is selected */}
                           {selectedCounty && selectedCounty !== 'all' ? (
-                            // County-specific farms with highlighting based on accurate geography
+                            // County-specific farms with accurate positioning
                             <>
                               {selectedCounty.includes('Lofa') && (
                                 <>
-                                  <circle cx="160" cy="150" r="10" fill="#10B981" stroke="#059669" strokeWidth="3" />
-                                  <circle cx="180" cy="160" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
-                                  <text x="170" y="140" fill="#374151" fontSize="10" textAnchor="middle" fontWeight="bold">
-                                    Lofa Farms
+                                  <circle cx="200" cy="195" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="220" cy="210" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <circle cx="180" cy="185" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="200" y="175" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
+                                    Lofa County Farms
                                   </text>
                                 </>
                               )}
                               {selectedCounty.includes('Nimba') && (
                                 <>
-                                  <circle cx="280" cy="140" r="10" fill="#10B981" stroke="#059669" strokeWidth="3" />
-                                  <circle cx="300" cy="155" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
-                                  <text x="290" y="130" fill="#374151" fontSize="10" textAnchor="middle" fontWeight="bold">
-                                    Nimba Farms
+                                  <circle cx="440" cy="150" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="460" cy="165" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <circle cx="420" cy="135" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="440" y="125" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
+                                    Nimba County Farms
                                   </text>
                                 </>
                               )}
                               {selectedCounty.includes('Montserrado') && (
                                 <>
-                                  <circle cx="140" cy="260" r="10" fill="#10B981" stroke="#059669" strokeWidth="3" />
-                                  <circle cx="160" cy="270" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
-                                  <text x="150" y="250" fill="#374151" fontSize="10" textAnchor="middle" fontWeight="bold">
+                                  <circle cx="90" cy="250" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="110" cy="265" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <circle cx="120" cy="240" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="90" y="230" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
                                     Montserrado Farms
                                   </text>
                                 </>
                               )}
-                              {selectedCounty.includes('River') && (
+                              {selectedCounty.includes('Bong') && (
                                 <>
-                                  <circle cx="320" cy="350" r="10" fill="#10B981" stroke="#059669" strokeWidth="3" />
-                                  <circle cx="340" cy="340" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
-                                  <text x="330" y="330" fill="#374151" fontSize="10" textAnchor="middle" fontWeight="bold">
-                                    River County Farms
+                                  <circle cx="270" cy="255" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="290" cy="270" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <circle cx="250" cy="240" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="270" y="225" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
+                                    Bong County Farms
                                   </text>
                                 </>
                               )}
-                              {/* Default highlighting for other counties */}
-                              {!selectedCounty.includes('Lofa') && !selectedCounty.includes('Nimba') && 
-                               !selectedCounty.includes('Montserrado') && !selectedCounty.includes('River') && (
+                              {selectedCounty.includes('Grand Bassa') && (
                                 <>
-                                  <circle cx="250" cy="220" r="10" fill="#10B981" stroke="#059669" strokeWidth="3" />
-                                  <circle cx="350" cy="250" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
-                                  <text x="300" y="210" fill="#374151" fontSize="10" textAnchor="middle" fontWeight="bold">
+                                  <circle cx="250" cy="275" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="270" cy="285" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="250" y="255" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
+                                    Grand Bassa Farms
+                                  </text>
+                                </>
+                              )}
+                              {selectedCounty.includes('River Cess') && (
+                                <>
+                                  <circle cx="330" cy="290" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="350" cy="305" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="330" y="270" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
+                                    River Cess Farms
+                                  </text>
+                                </>
+                              )}
+                              {selectedCounty.includes('Maryland') && (
+                                <>
+                                  <circle cx="500" cy="320" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="520" cy="335" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="500" y="300" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
+                                    Maryland Farms
+                                  </text>
+                                </>
+                              )}
+                              {selectedCounty.includes('Grand Gedeh') && (
+                                <>
+                                  <circle cx="500" cy="230" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="480" cy="245" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="500" y="210" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
+                                    Grand Gedeh Farms
+                                  </text>
+                                </>
+                              )}
+                              {/* Default for other counties */}
+                              {!selectedCounty.includes('Lofa') && !selectedCounty.includes('Nimba') && 
+                               !selectedCounty.includes('Montserrado') && !selectedCounty.includes('Bong') && 
+                               !selectedCounty.includes('Grand Bassa') && !selectedCounty.includes('River Cess') && 
+                               !selectedCounty.includes('Maryland') && !selectedCounty.includes('Grand Gedeh') && (
+                                <>
+                                  <circle cx="300" cy="250" r="12" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                                  <circle cx="320" cy="265" r="10" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                                  <text x="300" y="230" fill="#374151" fontSize="11" textAnchor="middle" fontWeight="bold">
                                     {selectedCounty.replace(' County', '')} Farms
                                   </text>
                                 </>
                               )}
                             </>
                           ) : (
-                            // All farms across accurate Liberia geography
+                            // All farms positioned in correct counties
                             <>
-                              <circle cx="160" cy="150" r="6" fill="#10B981" />  {/* Lofa */}
-                              <circle cx="280" cy="140" r="7" fill="#10B981" />  {/* Nimba */}
-                              <circle cx="140" cy="260" r="8" fill="#10B981" />  {/* Montserrado */}
-                              <circle cx="250" cy="220" r="6" fill="#10B981" />  {/* Bong */}
-                              <circle cx="470" cy="180" r="5" fill="#10B981" />  {/* Grand Gedeh */}
-                              <circle cx="200" cy="300" r="6" fill="#10B981" />  {/* Grand Bassa */}
-                              <circle cx="320" cy="350" r="5" fill="#10B981" />  {/* River Cess */}
-                              <circle cx="500" cy="350" r="6" fill="#10B981" />  {/* Maryland */}
-                              <circle cx="120" cy="320" r="4" fill="#10B981" />  {/* Sinoe */}
+                              <circle cx="90" cy="250" r="6" fill="#10B981" />   {/* Montserrado */}
+                              <circle cx="200" cy="195" r="7" fill="#10B981" />  {/* Lofa */}
+                              <circle cx="440" cy="150" r="8" fill="#10B981" />  {/* Nimba */}
+                              <circle cx="270" cy="255" r="6" fill="#10B981" />  {/* Bong */}
+                              <circle cx="250" cy="275" r="6" fill="#10B981" />  {/* Grand Bassa */}
+                              <circle cx="330" cy="290" r="5" fill="#10B981" />  {/* River Cess */}
+                              <circle cx="500" cy="320" r="6" fill="#10B981" />  {/* Maryland */}
+                              <circle cx="500" cy="230" r="5" fill="#10B981" />  {/* Grand Gedeh */}
+                              <circle cx="410" cy="305" r="5" fill="#10B981" />  {/* Sinoe */}
+                              <circle cx="130" cy="215" r="4" fill="#10B981" />  {/* Gbarpolu */}
+                              <circle cx="120" cy="225" r="4" fill="#10B981" />  {/* Bomi */}
+                              <circle cx="75" y="210" r="4" fill="#10B981" />    {/* Grand Cape Mount */}
+                              <circle cx="170" cy="260" r="5" fill="#10B981" />  {/* Margibi */}
+                              <circle cx="460" cy="345" r="4" fill="#10B981" />  {/* Grand Kru */}
+                              <circle cx="410" cy="350" r="4" fill="#10B981" />  {/* River Gee */}
                             </>
                           )}
                         </g>
@@ -468,19 +567,7 @@ export default function InteractiveMap() {
                         </g>
                       )}
                       
-                      {/* Accurate Location Labels */}
-                      <text x="130" y="270" fill="#374151" fontSize="12" fontWeight="bold">Monrovia</text>
-                      <text x="150" y="150" fill="#374151" fontSize="10">Lofa</text>
-                      <text x="280" y="145" fill="#374151" fontSize="10">Nimba</text>
-                      <text x="470" y="180" fill="#374151" fontSize="10">Grand Gedeh</text>
-                      <text x="500" y="350" fill="#374151" fontSize="10">Maryland</text>
-                      <text x="320" y="355" fill="#374151" fontSize="10">River Cess</text>
-                      <text x="250" y="225" fill="#374151" fontSize="10">Bong</text>
-                      <text x="200" y="300" fill="#374151" fontSize="10">Grand Bassa</text>
-                      <text x="100" y="320" fill="#374151" fontSize="10">Sinoe</text>
-                      
-                      {/* Atlantic Ocean label */}
-                      <text x="50" y="400" fill="#1E40AF" fontSize="11" fontStyle="italic">Atlantic Ocean</text>
+
                       
                       {/* Scale */}
                       <g transform="translate(470, 350)">

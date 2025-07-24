@@ -22,6 +22,7 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **Farmer Portal:** FRM-2024-001 / farmer123 (Moses Tuah, Lofa County)
 
 ### Recent Updates (January 2025)
+- **AgriTrace360 Logo Updated**: Replaced generic logo with official AgriTrace360 branding across header and landing page. New logo features modern green design with "FARM DIGITALIZATION" tagline, providing professional visual identity throughout the platform (January 24, 2025)
 - **Regulatory Portal Authentication Fixed**: Resolved 401 "Invalid credentials" error by updating password hashes in database. All authentication portals now working correctly with proper bcrypt password verification (January 24, 2025)
 - **Internal Messaging System Completed**: Comprehensive cross-portal messaging system with database integration, message prioritization, threading, role-based filtering, and unread tracking. Features include message types (general, announcement, alert, support), priority levels, and full conversation management across all user portals (January 24, 2025)
 - **Enhanced Farmer Onboarding with Profile Pictures and Land Mapping**: Implemented comprehensive farmer profile system with image upload functionality and integrated GPS land mapping. Features include real-time farm boundary generation, soil analysis, water sources tracking, elevation data, interactive map visualization dialogs, and complete land analysis reports. Backend schema updated to support profile pictures and land mapping data storage (January 24, 2025)

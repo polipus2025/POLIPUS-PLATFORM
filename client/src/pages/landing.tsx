@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
+import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import { useState, useEffect } from "react";
 
 export default function Landing() {
@@ -65,8 +66,12 @@ export default function Landing() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg">
-                  <Globe className="h-8 w-8 text-white" />
+                <div className="w-12 h-12 rounded-lg overflow-hidden">
+                  <img 
+                    src={agriTraceLogo} 
+                    alt="AgriTrace360 Logo" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">AgriTrace360™</h1>

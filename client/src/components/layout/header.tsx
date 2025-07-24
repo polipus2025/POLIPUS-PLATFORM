@@ -1,4 +1,5 @@
 import { Bell, Sprout, LogOut, User, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
+import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -162,8 +163,12 @@ export default function Header() {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-lacra-blue rounded-lg flex items-center justify-center">
-                <Sprout className="text-white text-lg" />
+              <div className="w-12 h-12 rounded-lg overflow-hidden">
+                <img 
+                  src={agriTraceLogo} 
+                  alt="AgriTrace360 Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-neutral">AgriTrace360™</h1>

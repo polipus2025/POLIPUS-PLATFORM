@@ -22,15 +22,16 @@ import { cn } from "@/lib/utils";
 
 // Helper function to check user role and type
 const getUserInfo = () => {
-  const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+  const token = localStorage.getItem('authToken');
   const userType = localStorage.getItem('userType');
-  if (!token) return { role: null, userType: null };
+  const userRole = localStorage.getItem('userRole');
+  if (!token) return { role: null, userType: null, userRole: null };
   
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return { role: payload.role, userType };
+    return { role: payload.role || userRole, userType, userRole };
   } catch {
-    return { role: null, userType: null };
+    return { role: userRole, userType, userRole };
   }
 };
 

@@ -18,8 +18,8 @@ export async function apiRequest(
   const { method = 'GET', body, headers = {} } = options || {};
   
   // Add authorization header if token exists
-  const token = localStorage.getItem('token');
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+  const token = localStorage.getItem('authToken');
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
   
   const res = await fetch(url, {
     method,
@@ -50,8 +50,8 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     // Add authorization header if token exists
-    const token = localStorage.getItem('token');
-    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+    const token = localStorage.getItem('authToken');
+    const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
     
     const res = await fetch(queryKey.join("/") as string, {
       headers: {

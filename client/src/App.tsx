@@ -65,11 +65,14 @@ function Router() {
         <>
           {/* Dashboard - Role-based routing */}
           <Route path="/dashboard">
-            {userType === 'field_agent' ? <FieldAgentDashboard /> : <Dashboard />}
+            {userType === 'field_agent' ? <FieldAgentDashboard /> : 
+             userType === 'exporter' ? <ExporterDashboard /> :
+             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
           </Route>
           <Route path="/">
             {userType === 'field_agent' ? <FieldAgentDashboard /> : 
-             userType === 'exporter' ? <ExporterDashboard /> : <Dashboard />}
+             userType === 'exporter' ? <ExporterDashboard /> :
+             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
           </Route>
           
           {/* Exporter Portal Routes */}

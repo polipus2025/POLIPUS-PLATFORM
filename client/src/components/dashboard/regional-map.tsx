@@ -22,8 +22,9 @@ export default function RegionalMap() {
   }
 
   const getStatusColor = (rate: number) => {
-    if (rate >= 95) return 'bg-success';
-    if (rate >= 85) return 'bg-warning';
+    const safeRate = rate || 0;
+    if (safeRate >= 95) return 'bg-success';
+    if (safeRate >= 85) return 'bg-warning';
     return 'bg-error';
   };
 
@@ -47,10 +48,10 @@ export default function RegionalMap() {
               {countyData.map((county) => (
                 <div key={county.county} className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3">
                   <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 ${getStatusColor(county.complianceRate)} rounded-full`}></div>
+                    <div className={`w-3 h-3 ${getStatusColor(county.complianceRate || 0)} rounded-full`}></div>
                     <span className="text-sm font-medium">{county.county}</span>
                   </div>
-                  <p className="text-xs mt-1 opacity-90">{county.complianceRate.toFixed(1)}% Compliant</p>
+                  <p className="text-xs mt-1 opacity-90">{(county.complianceRate || 0).toFixed(1)}% Compliant</p>
                 </div>
               ))}
             </div>

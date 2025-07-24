@@ -187,13 +187,13 @@ export default function Commodities() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full bg-gray-50 min-h-screen">
       <Helmet>
         <title>Commodities - AgriTrace360™ LACRA</title>
         <meta name="description" content="Agricultural commodity tracking and management system for LACRA regulatory compliance" />
       </Helmet>
 
-      <div className="p-4 lg:p-6 max-w-7xl mx-auto">
+      <div className="p-4 lg:p-6 w-full max-w-full">
         {/* Page Header */}
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
@@ -283,9 +283,9 @@ export default function Commodities() {
             Commodities ({filteredCommodities.length} of {commodities.length})
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
+        <CardContent className="p-0">
+          <div className="w-full overflow-x-auto max-w-full">
+            <Table className="w-full min-w-[800px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[200px]">Commodity Details</TableHead>

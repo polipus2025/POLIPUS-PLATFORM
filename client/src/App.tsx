@@ -35,6 +35,7 @@ import DirectorDashboard from "@/pages/director-dashboard";
 import MobileAlertDemo from "@/pages/mobile-alert-demo";
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FarmerDashboard from "@/pages/farmer-dashboard";
+import LicenseRegistration from "@/pages/license-registration";
 import NotFound from "@/pages/not-found";
 
 // Helper component to check user access to routes
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
+      <Route path="/license-registration" component={LicenseRegistration} />
       
       {/* Protected Routes - Require Authentication */}
       {authToken && userType ? (

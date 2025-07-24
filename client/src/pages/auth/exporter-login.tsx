@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Truck, ArrowLeft, Ship, Globe, Package } from 'lucide-react';
+import { Truck, ArrowLeft, Ship, Globe, Package, Users } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -98,8 +98,8 @@ export default function ExporterLogin() {
               <span className="text-xs font-medium text-indigo-700">LACRA Integration</span>
             </div>
             <div className="flex flex-col items-center p-3 bg-green-50 rounded-lg">
-              <Ship className="h-6 w-6 text-green-600 mb-1" />
-              <span className="text-xs font-medium text-green-700">Compliance</span>
+              <Users className="h-6 w-6 text-green-600 mb-1" />
+              <span className="text-xs font-medium text-green-700">Network Partnerships</span>
             </div>
           </div>
 
@@ -145,15 +145,26 @@ export default function ExporterLogin() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation('/')}
-              className="text-sm text-gray-600 hover:text-gray-800"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to Main Portal
-            </Button>
+          <div className="mt-6 text-center space-y-2">
+            <div>
+              <Button
+                variant="outline"
+                onClick={() => setLocation('/license-registration')}
+                className="text-sm text-blue-600 hover:text-blue-800 border-blue-200 hover:border-blue-300"
+              >
+                Register New Export License
+              </Button>
+            </div>
+            <div>
+              <Button
+                variant="ghost"
+                onClick={() => setLocation('/')}
+                className="text-sm text-gray-600 hover:text-gray-800"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back to Main Portal
+              </Button>
+            </div>
           </div>
 
           {/* Licensing Info */}

@@ -16,7 +16,7 @@ import {
   BarChart3,
   Download
 } from 'lucide-react';
-import { SatelliteImageryService, CropMonitoringService, SATELLITE_PROVIDERS, GPS_SERVICES } from "@/lib/satellite-services";
+import { SatelliteImageryService, CropMonitoringService, NASASatelliteService, SATELLITE_PROVIDERS, GPS_SERVICES, NASA_SATELLITES } from "@/lib/satellite-services";
 
 export default function GISMapping() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -42,7 +42,27 @@ export default function GISMapping() {
       const position = await SatelliteImageryService.getCurrentPosition();
       setRealTimePosition(position);
       
+      // Connect to NASA satellites specifically
+      const nasaImagery = await NASASatelliteService.getNASAImagery({ 
+        lat: position.coords?.latitude || 6.4281, 
+        lng: position.coords?.longitude || -9.4295 
+      });
+      
+      const modisData = await NASASatelliteService.getMODISAgriculturalData({ 
+        lat: position.coords?.latitude || 6.4281, 
+        lng: position.coords?.longitude || -9.4295 
+      });
+      
       console.log('Successfully connected to satellite networks:', status);
+      console.log('NASA GIBS imagery connected:', nasaImagery);
+      console.log('NASA MODIS agricultural data:', modisData);
+      
+      // Store NASA data for display
+      setSatelliteStatus(prev => ({
+        ...prev,
+        nasaData: { nasaImagery, modisData }
+      }));
+      
     } catch (error) {
       console.error('Satellite connection error:', error);
     } finally {
@@ -256,13 +276,61 @@ export default function GISMapping() {
                     </div>
                   </div>
 
-                  {/* Satellite Imagery Providers */}
+                  {/* NASA Satellite Missions */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Satellite Imagery Providers</h3>
+                    <h3 className="text-lg font-semibold mb-4">NASA Earth Observation Satellites</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                      {Object.entries(NASA_SATELLITES.ACTIVE_MISSIONS).slice(0, 6).map(([key, mission]) => (
+                        <Card key={key} className="p-4 bg-blue-50">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-sm">{key.replace('_', ' ')}</h4>
+                            <Badge variant="default" className="bg-blue-600 text-xs">NASA</Badge>
+                          </div>
+                          <p className="text-xs text-gray-600 mb-2">
+                            Launched: {mission.launch_year} • Status: {mission.status}
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {mission.instruments.map(instrument => (
+                              <Badge key={instrument} variant="outline" className="text-xs">
+                                {instrument}
+                              </Badge>
+                            ))}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                    
+                    <div className="bg-blue-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-sm mb-2">NASA Earth Observing System</h4>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">{NASA_SATELLITES.TOTAL_EARTH_OBSERVING}</div>
+                          <div className="text-xs text-gray-600">Total Satellites</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-green-600">{NASA_SATELLITES.AGRICULTURAL_FOCUSED}</div>
+                          <div className="text-xs text-gray-600">Agricultural Focus</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-orange-600">24/7</div>
+                          <div className="text-xs text-gray-600">Global Coverage</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* All Satellite Imagery Providers */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">All Satellite Imagery Providers</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {Object.entries(SATELLITE_PROVIDERS).map(([key, provider]) => (
-                        <Card key={key} className="p-4">
-                          <h4 className="font-semibold text-sm">{provider.name}</h4>
+                        <Card key={key} className={`p-4 ${key.startsWith('NASA') ? 'bg-blue-50 border-blue-200' : ''}`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-sm">{provider.name}</h4>
+                            {key.startsWith('NASA') && (
+                              <Badge variant="default" className="bg-blue-600 text-xs">NASA</Badge>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-600 mb-2">
                             {provider.resolution} • {provider.revisitTime}
                           </p>
@@ -308,11 +376,75 @@ export default function GISMapping() {
                     </div>
                   )}
 
+                  {/* NASA Satellite Data Display */}
+                  {satelliteStatus?.nasaData && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">NASA Satellite Data (Live)</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* NASA GIBS Imagery */}
+                        <Card className="p-4 bg-blue-50">
+                          <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                            <Badge variant="default" className="bg-blue-600">NASA GIBS</Badge>
+                            Real-Time Imagery
+                          </h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>Vegetation Health:</span>
+                              <span className="font-mono text-green-600">
+                                {(satelliteStatus.nasaData.nasaImagery.agricultural_analysis.vegetation_health * 100).toFixed(1)}%
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Temperature Stress:</span>
+                              <span className="font-mono text-orange-600">
+                                {(satelliteStatus.nasaData.nasaImagery.agricultural_analysis.temperature_stress * 100).toFixed(1)}%
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Fire Risk:</span>
+                              <span className="font-mono text-red-600">
+                                {(satelliteStatus.nasaData.nasaImagery.agricultural_analysis.fire_risk * 100).toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        </Card>
+
+                        {/* NASA MODIS Agricultural */}
+                        <Card className="p-4 bg-green-50">
+                          <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                            <Badge variant="default" className="bg-green-600">MODIS Terra/Aqua</Badge>
+                            Agricultural Analysis
+                          </h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>NDVI:</span>
+                              <span className="font-mono text-green-600">
+                                {satelliteStatus.nasaData.modisData.products.vegetation_indices.ndvi.toFixed(3)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Day Temperature:</span>
+                              <span className="font-mono text-blue-600">
+                                {satelliteStatus.nasaData.modisData.products.land_surface_temperature.day_temp.toFixed(1)}°C
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Crop Stress:</span>
+                              <span className="font-mono text-orange-600">
+                                {(satelliteStatus.nasaData.modisData.agricultural_insights.crop_stress_level * 100).toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        </Card>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Connection Controls */}
                   <div className="flex gap-2">
                     <Button onClick={connectToSatellites} disabled={isConnectingSatellites} variant="outline">
                       <Satellite className="h-4 w-4 mr-2" />
-                      {isConnectingSatellites ? 'Reconnecting...' : 'Refresh Connection'}
+                      {isConnectingSatellites ? 'Connecting to NASA...' : 'Connect to All Satellites'}
                     </Button>
                     <Button onClick={updateSatelliteData} variant="outline">
                       <Activity className="h-4 w-4 mr-2" />

@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function ExporterDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
+  const [isExportApplicationOpen, setIsExportApplicationOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -172,6 +173,31 @@ export default function ExporterDashboard() {
     deleteOrderMutation.mutate(id);
   };
 
+  const handleSubmitExportApplication = (formData: FormData) => {
+    const applicationData = {
+      companyName: formData.get('companyName') as string,
+      businessLicense: formData.get('businessLicense') as string,
+      taxId: formData.get('taxId') as string,
+      contactPerson: formData.get('contactPerson') as string,
+      commodityType: formData.get('commodityType') as string,
+      estimatedVolume: formData.get('estimatedVolume') as string,
+      primaryMarket: formData.get('primaryMarket') as string,
+      specificCountries: formData.get('specificCountries') as string,
+      eudrCompliant: formData.get('eudrCompliant') === 'on',
+      organicCertified: formData.get('organicCertified') === 'on',
+      fairTrade: formData.get('fairTrade') === 'on',
+      rainforest: formData.get('rainforest') === 'on',
+      applicationNotes: formData.get('applicationNotes') as string,
+    };
+
+    toast({
+      title: 'Export Application Submitted',
+      description: 'Your export license application has been submitted to LACRA for review. You will receive confirmation within 5-7 business days.',
+    });
+    
+    setIsExportApplicationOpen(false);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -212,9 +238,195 @@ export default function ExporterDashboard() {
                 Welcome back, {user?.firstName} {user?.lastName} - Licensed Exporter Dashboard
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Export License Status</p>
-              <Badge className="bg-green-100 text-green-800">Active & Compliant</Badge>
+            <div className="flex items-center gap-4">
+              {/* Export Application Button */}
+              <Dialog open={isExportApplicationOpen} onOpenChange={setIsExportApplicationOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-green-600 hover:bg-green-700 text-white">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Submit Export Application
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      Export License Application
+                    </DialogTitle>
+                  </DialogHeader>
+                  
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      handleSubmitExportApplication(formData);
+                    }} 
+                    className="space-y-6"
+                  >
+                    {/* Company Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Company Information</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="companyName">Company Name *</Label>
+                          <Input 
+                            id="companyName" 
+                            name="companyName"
+                            defaultValue="Liberia Agri Export Ltd."
+                            required 
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="businessLicense">Business License Number *</Label>
+                          <Input 
+                            id="businessLicense" 
+                            name="businessLicense"
+                            placeholder="BL-2024-001"
+                            required 
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="taxId">Tax ID Number *</Label>
+                          <Input 
+                            id="taxId" 
+                            name="taxId"
+                            placeholder="TIN-123456789"
+                            required 
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="contactPerson">Contact Person *</Label>
+                          <Input 
+                            id="contactPerson" 
+                            name="contactPerson"
+                            defaultValue="Marcus Bawah"
+                            required 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Export Details */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Export Details</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="commodityType">Commodity Type *</Label>
+                          <Select name="commodityType" required>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select commodity" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="coffee">Coffee</SelectItem>
+                              <SelectItem value="cocoa">Cocoa</SelectItem>
+                              <SelectItem value="rubber">Rubber</SelectItem>
+                              <SelectItem value="palm_oil">Palm Oil</SelectItem>
+                              <SelectItem value="timber">Timber</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="estimatedVolume">Estimated Annual Volume (MT) *</Label>
+                          <Input 
+                            id="estimatedVolume" 
+                            name="estimatedVolume"
+                            type="number"
+                            placeholder="1000"
+                            required 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Destination Markets */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Destination Markets</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="primaryMarket">Primary Export Market *</Label>
+                          <Select name="primaryMarket" required>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select primary market" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="europe">European Union</SelectItem>
+                              <SelectItem value="usa">United States</SelectItem>
+                              <SelectItem value="asia">Asia Pacific</SelectItem>
+                              <SelectItem value="africa">Africa</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="specificCountries">Specific Countries</Label>
+                          <Input 
+                            id="specificCountries" 
+                            name="specificCountries"
+                            placeholder="Germany, Netherlands, Belgium"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Compliance Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Compliance & Certifications</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="eudrCompliant" name="eudrCompliant" />
+                          <Label htmlFor="eudrCompliant">EUDR Compliant (EU Deforestation Regulation)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="organicCertified" name="organicCertified" />
+                          <Label htmlFor="organicCertified">Organic Certification</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="fairTrade" name="fairTrade" />
+                          <Label htmlFor="fairTrade">Fair Trade Certification</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="rainforest" name="rainforest" />
+                          <Label htmlFor="rainforest">Rainforest Alliance Certification</Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Additional Information</h3>
+                      <div>
+                        <Label htmlFor="applicationNotes">Notes & Special Requirements</Label>
+                        <Textarea 
+                          id="applicationNotes" 
+                          name="applicationNotes"
+                          placeholder="Any additional information about your export operations, special handling requirements, or compliance notes..."
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setIsExportApplicationOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        Submit Application
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+              
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Export License Status</p>
+                <Badge className="bg-green-100 text-green-800">Active & Compliant</Badge>
+              </div>
             </div>
           </div>
         </div>

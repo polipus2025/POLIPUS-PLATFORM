@@ -69,7 +69,7 @@ export default function FarmerLogin() {
         });
         
         // Store session data
-        localStorage.setItem("token", result.token);
+        localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "farmer");
         localStorage.setItem("farmerId", data.farmerId);

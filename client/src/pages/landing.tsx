@@ -341,7 +341,7 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Users className="h-4 w-4 text-green-600" />
-                  Farmer network partnerships
+                  Network partnerships
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <BarChart3 className="h-4 w-4 text-orange-600" />

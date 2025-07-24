@@ -25,75 +25,59 @@ export default function FrontPage() {
     {
       id: 1,
       title: 'Agricultural Traceability & Compliance',
-      description: 'Complete farm-to-market traceability with EUDR compliance monitoring and satellite tracking',
       icon: Wheat,
       color: 'bg-green-500',
       route: '/landing',
-      isAgriTrace: true,
-      features: ['EUDR Compliance', 'Satellite Monitoring', 'Real-time Tracking', 'Export Licensing']
+      isAgriTrace: true
     },
     {
       id: 2,
       title: 'Supply Chain Management',
-      description: 'End-to-end supply chain visibility with real-time logistics and transportation tracking',
       icon: Truck,
       color: 'bg-blue-500',
-      route: '/supply-chain',
-      features: ['Vehicle Tracking', 'Route Optimization', 'Inventory Management', 'Quality Control']
+      route: '/supply-chain'
     },
     {
       id: 3,
       title: 'Compliance & Certification',
-      description: 'Comprehensive regulatory compliance management with automated certification workflows',
       icon: Shield,
       color: 'bg-purple-500',
-      route: '/compliance',
-      features: ['Regulatory Standards', 'Certificate Management', 'Audit Trails', 'Risk Assessment']
+      route: '/compliance'
     },
     {
       id: 4,
       title: 'Analytics & Reporting',
-      description: 'Advanced data analytics with custom dashboards and comprehensive reporting tools',
       icon: BarChart3,
       color: 'bg-orange-500',
-      route: '/analytics',
-      features: ['Custom Dashboards', 'Predictive Analytics', 'Export Reports', 'Business Intelligence']
+      route: '/analytics'
     },
     {
       id: 5,
       title: 'GIS & Mapping Services',
-      description: 'Geospatial intelligence with satellite imagery and precision mapping capabilities',
       icon: MapPin,
       color: 'bg-teal-500',
-      route: '/gis-mapping',
-      features: ['Satellite Imagery', 'GPS Tracking', 'Boundary Mapping', 'Environmental Monitoring']
+      route: '/gis-mapping'
     },
     {
       id: 6,
       title: 'User Management',
-      description: 'Role-based access control with multi-tenant user management and security features',
       icon: Users,
       color: 'bg-indigo-500',
-      route: '/users',
-      features: ['Role Management', 'Access Control', 'User Profiles', 'Security Settings']
+      route: '/users'
     },
     {
       id: 7,
       title: 'Document Management',
-      description: 'Centralized document repository with version control and digital signature capabilities',
       icon: FileText,
       color: 'bg-red-500',
-      route: '/documents',
-      features: ['Digital Documents', 'Version Control', 'E-signatures', 'Template Library']
+      route: '/documents'
     },
     {
       id: 8,
       title: 'System Configuration',
-      description: 'Platform administration with system settings, integrations, and maintenance tools',
       icon: Settings,
       color: 'bg-gray-500',
-      route: '/settings',
-      features: ['System Settings', 'API Integrations', 'Backup & Restore', 'Performance Monitoring']
+      route: '/settings'
     }
   ];
 
@@ -188,7 +172,7 @@ export default function FrontPage() {
               <Card 
                 key={module.id} 
                 className={`
-                  relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-105
+                  relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-105 h-64
                   ${module.isAgriTrace ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50' : 'border-gray-200 hover:border-gray-300'}
                 `}
               >
@@ -203,25 +187,12 @@ export default function FrontPage() {
                       </Badge>
                     )}
                   </div>
-                  <CardTitle className="text-lg leading-tight">
+                  <CardTitle className="text-lg leading-tight text-center">
                     {module.title}
                   </CardTitle>
                 </CardHeader>
                 
-                <CardContent className="pt-0">
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                    {module.description}
-                  </p>
-                  
-                  <div className="space-y-2 mb-6">
-                    {module.features.map((feature, index) => (
-                      <div key={index} className="flex items-center text-xs text-gray-500">
-                        <CheckCircle className="h-3 w-3 mr-2 text-green-500" />
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
-                  
+                <CardContent className="pt-0 flex-1 flex flex-col justify-end">
                   <Link href={module.route}>
                     <Button 
                       className={`

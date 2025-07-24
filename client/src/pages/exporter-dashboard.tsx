@@ -53,15 +53,21 @@ export default function ExporterDashboard() {
       commodityType: formData.get('commodityType') as string,
       estimatedVolume: formData.get('estimatedVolume') as string,
       primaryMarket: formData.get('primaryMarket') as string,
+      plannedExportDate: formData.get('plannedExportDate') as string,
+      exportTimeframe: formData.get('exportTimeframe') as string,
+      exportUrgency: formData.get('exportUrgency') as string,
       eudrCompliant: formData.get('eudrCompliant') === 'on',
       organicCertified: formData.get('organicCertified') === 'on',
       fairTrade: formData.get('fairTrade') === 'on',
       applicationNotes: formData.get('applicationNotes') as string,
     };
 
+    const plannedDate = new Date(applicationData.plannedExportDate).toLocaleDateString();
+    const timeframe = applicationData.exportTimeframe;
+    
     toast({
       title: 'Application Submitted to LACRA',
-      description: 'Your export license application has been successfully submitted to LACRA for official review and approval. You will receive confirmation within 5-7 business days.',
+      description: `Your export license application has been successfully submitted to LACRA for official review and approval. Planned export: ${plannedDate} (${timeframe}). You will receive confirmation within 5-7 business days.`,
     });
     
     setIsExportApplicationOpen(false);
@@ -423,6 +429,53 @@ export default function ExporterDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Export Timeline */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Export Timeline</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="plannedExportDate">Planned Export Date *</Label>
+                        <Input 
+                          id="plannedExportDate" 
+                          name="plannedExportDate"
+                          type="date"
+                          min={new Date().toISOString().split('T')[0]}
+                          max={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                          required 
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Select date within 1-90 days from today</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="exportTimeframe">Export Timeframe *</Label>
+                        <Select name="exportTimeframe" required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select timeframe" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1-7">Within 1-7 days</SelectItem>
+                            <SelectItem value="8-14">Within 8-14 days</SelectItem>
+                            <SelectItem value="15-30">Within 15-30 days</SelectItem>
+                            <SelectItem value="31-60">Within 31-60 days</SelectItem>
+                            <SelectItem value="61-90">Within 61-90 days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="exportUrgency">Export Urgency Level *</Label>
+                      <Select name="exportUrgency" required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select urgency level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="routine">Routine - Standard processing time</SelectItem>
+                          <SelectItem value="priority">Priority - Expedited processing needed</SelectItem>
+                          <SelectItem value="urgent">Urgent - Immediate processing required</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 

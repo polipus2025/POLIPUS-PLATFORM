@@ -21,12 +21,14 @@ interface BoundaryMappingDemoProps {
   plotName?: string;
   farmerName?: string;
   onMappingUpdate?: (data: any) => void;
+  continuousMode?: boolean;
 }
 
 export default function BoundaryMappingDemo({ 
   plotName = "Cocoa Plot 1", 
   farmerName = "Moses Tuah",
-  onMappingUpdate 
+  onMappingUpdate,
+  continuousMode = false
 }: BoundaryMappingDemoProps) {
   const [isSimulating, setIsSimulating] = useState(false);
   const [mappingPoints, setMappingPoints] = useState<any[]>([]);
@@ -114,6 +116,12 @@ export default function BoundaryMappingDemo({
           if (newProgress >= 100) {
             setIsSimulating(false);
             console.log('✅ Cocoa plot boundary mapping simulation completed');
+            // Auto-restart after 3 seconds for continuous demo
+            if (continuousMode) {
+              setTimeout(() => {
+                startSimulation();
+              }, 3000);
+            }
             return 100;
           }
           return newProgress;
@@ -130,6 +138,11 @@ export default function BoundaryMappingDemo({
     setIsSimulating(true);
     setCurrentProgress(0);
     setMappingPoints([]);
+    setSimulationStats(prev => ({
+      ...prev,
+      area: 0,
+      perimeter: 0
+    }));
     console.log(`🎯 Starting ${plotName} boundary mapping simulation for ${farmerName}`);
   };
 
@@ -184,6 +197,11 @@ export default function BoundaryMappingDemo({
               <Satellite className="h-3 w-3 mr-1" />
               {simulationStats.satellites} Satellites
             </Badge>
+            {continuousMode && (
+              <Badge className="bg-blue-600 animate-pulse">
+                🔄 Always On Demo
+              </Badge>
+            )}
           </CardTitle>
           <p className="text-gray-700">
             Farmer: <strong>{farmerName}</strong> • Location: Lofa County, Liberia
@@ -254,6 +272,16 @@ export default function BoundaryMappingDemo({
                 Stop Mapping
               </Button>
             )}
+            <Button 
+              onClick={() => {
+                setCurrentProgress(0);
+                setMappingPoints([]);
+                setSimulationStats(prev => ({ ...prev, area: 0, perimeter: 0 }));
+              }} 
+              variant="outline"
+            >
+              Reset Demo
+            </Button>
           </div>
         </CardContent>
       </Card>

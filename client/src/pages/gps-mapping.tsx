@@ -435,6 +435,7 @@ export default function GpsMapping() {
             <BoundaryMappingDemo 
               plotName="Cocoa Plot 1"
               farmerName="Moses Tuah"
+              continuousMode={true}
               onMappingUpdate={(data) => {
                 console.log('Demo mapping update:', data);
                 toast({

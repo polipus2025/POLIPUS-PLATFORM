@@ -126,6 +126,9 @@ export const farmers = pgTable("farmers", {
   status: text("status").notNull().default("active"), // active, inactive, suspended
   agreementSigned: boolean("agreement_signed").default(false),
   agreementDate: timestamp("agreement_date"),
+  profilePicture: text("profile_picture"), // base64 encoded image or URL
+  farmBoundaries: jsonb("farm_boundaries"), // array of GPS boundary points
+  landMapData: jsonb("land_map_data"), // comprehensive land analysis data
   createdAt: timestamp("created_at").defaultNow(),
 });
 

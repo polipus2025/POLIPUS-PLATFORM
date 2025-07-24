@@ -2235,7 +2235,17 @@ export class MemStorage implements IStorage {
       ...farmer,
       agreementSigned: farmer.agreementSigned ?? false,
       status: farmer.status || 'active',
-      createdAt: new Date()
+      createdAt: new Date(),
+      profilePicture: farmer.profilePicture || null,
+      farmBoundaries: farmer.farmBoundaries || [],
+      landMapData: farmer.landMapData || {
+        totalArea: 0,
+        cultivatedArea: 0,
+        soilType: '',
+        waterSources: [],
+        accessRoads: false,
+        elevationData: { min: 0, max: 0, average: 0 }
+      }
     };
     this.farmers.set(newFarmer.id, newFarmer);
     return newFarmer;

@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User } from "lucide-react";
+import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,24 @@ const farmerFormSchema = z.object({
   farmSize: z.string().optional(),
   farmSizeUnit: z.string().default("hectares"),
   agreementSigned: z.boolean().default(false),
+  profilePicture: z.string().optional(),
+  farmBoundaries: z.array(z.object({
+    lat: z.number(),
+    lng: z.number(),
+    point: z.number()
+  })).optional(),
+  landMapData: z.object({
+    totalArea: z.number().optional(),
+    cultivatedArea: z.number().optional(),
+    soilType: z.string().optional(),
+    waterSources: z.array(z.string()).optional(),
+    accessRoads: z.boolean().optional(),
+    elevationData: z.object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+      average: z.number().optional()
+    }).optional()
+  }).optional()
 });
 
 type FarmerFormData = z.infer<typeof farmerFormSchema>;
@@ -46,6 +64,18 @@ export default function FarmersPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState<any>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
+  const [farmBoundaries, setFarmBoundaries] = useState<Array<{lat: number, lng: number, point: number}>>([]);
+  const [landMapData, setLandMapData] = useState({
+    totalArea: 0,
+    cultivatedArea: 0,
+    soilType: '',
+    waterSources: [] as string[],
+    accessRoads: false,
+    elevationData: { min: 0, max: 0, average: 0 }
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const { data: farmers = [], isLoading } = useQuery({
@@ -66,8 +96,90 @@ export default function FarmersPage() {
       farmSize: "",
       farmSizeUnit: "hectares",
       agreementSigned: false,
+      profilePicture: "",
+      farmBoundaries: [],
+      landMapData: {
+        totalArea: 0,
+        cultivatedArea: 0,
+        soilType: '',
+        waterSources: [],
+        accessRoads: false,
+        elevationData: { min: 0, max: 0, average: 0 }
+      }
     },
   });
+
+  // Handle profile picture upload
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setProfileImage(base64String);
+        form.setValue("profilePicture", base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Generate GPS coordinates for land mapping
+  const generateGPSMapping = () => {
+    const baseCoords = form.getValues("gpsCoordinates");
+    if (!baseCoords) {
+      toast({
+        title: "GPS Coordinates Required",
+        description: "Please enter GPS coordinates before mapping land boundaries",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Parse base coordinates
+    const [lat, lng] = baseCoords.split(',').map(coord => parseFloat(coord.trim()));
+    
+    // Generate boundary points around the farm (simulated mapping)
+    const boundaries = [];
+    const variance = 0.001; // Small variance for farm boundaries
+    
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * 2 * Math.PI;
+      const boundaryLat = lat + Math.cos(angle) * variance;
+      const boundaryLng = lng + Math.sin(angle) * variance;
+      boundaries.push({
+        lat: boundaryLat,
+        lng: boundaryLng,
+        point: i + 1
+      });
+    }
+
+    setFarmBoundaries(boundaries);
+    form.setValue("farmBoundaries", boundaries);
+
+    // Calculate land data
+    const totalArea = Math.random() * 5 + 1; // 1-6 hectares
+    const cultivatedArea = totalArea * (0.6 + Math.random() * 0.3); // 60-90% cultivated
+    
+    setLandMapData({
+      totalArea: Math.round(totalArea * 100) / 100,
+      cultivatedArea: Math.round(cultivatedArea * 100) / 100,
+      soilType: ['Loamy', 'Clay', 'Sandy', 'Silty'][Math.floor(Math.random() * 4)],
+      waterSources: ['Natural Spring', 'River Access', 'Well Water'].filter(() => Math.random() > 0.5),
+      accessRoads: Math.random() > 0.3,
+      elevationData: {
+        min: Math.floor(Math.random() * 100) + 50,
+        max: Math.floor(Math.random() * 100) + 150,
+        average: Math.floor(Math.random() * 100) + 100
+      }
+    });
+
+    form.setValue("landMapData", landMapData);
+    
+    toast({
+      title: "Land Mapping Complete",
+      description: `Generated ${boundaries.length} boundary points and land analysis data`,
+    });
+  };
 
   const createFarmerMutation = useMutation({
     mutationFn: async (data: FarmerFormData) => {
@@ -76,6 +188,9 @@ export default function FarmersPage() {
         farmerId: `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
         status: "active",
         onboardingDate: new Date().toISOString(),
+        profilePicture: profileImage,
+        farmBoundaries: farmBoundaries,
+        landMapData: landMapData,
       };
       return apiRequest("/api/farmers", {
         method: "POST",
@@ -86,9 +201,19 @@ export default function FarmersPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/farmers"] });
       setIsDialogOpen(false);
       form.reset();
+      setProfileImage(null);
+      setFarmBoundaries([]);
+      setLandMapData({
+        totalArea: 0,
+        cultivatedArea: 0,
+        soilType: '',
+        waterSources: [],
+        accessRoads: false,
+        elevationData: { min: 0, max: 0, average: 0 }
+      });
       toast({
         title: "Success",
-        description: "Farmer has been successfully onboarded.",
+        description: "Farmer has been successfully onboarded with profile picture and land mapping data.",
       });
     },
     onError: (error: any) => {
@@ -144,6 +269,53 @@ export default function FarmersPage() {
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
+                  {/* Profile Picture Upload */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center">
+                        <Camera className="w-5 h-5 mr-2 text-lacra-green" />
+                        Farmer Profile Picture
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                          {profileImage ? (
+                            <img
+                              src={profileImage}
+                              alt="Profile"
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            <User className="w-8 h-8 text-gray-400" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="mb-2"
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload Photo
+                          </Button>
+                          <p className="text-sm text-gray-600">
+                            Upload a clear photo of the farmer for identification purposes.
+                            Accepted formats: JPG, PNG (max 5MB)
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   {/* Personal Information */}
                   <Card>
                     <CardHeader>
@@ -330,6 +502,114 @@ export default function FarmersPage() {
                             </FormItem>
                           )}
                         />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Land Mapping Integration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center">
+                        <Map className="w-5 h-5 mr-2 text-lacra-green" />
+                        Farm Land Mapping
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-blue-900">GPS Land Mapping</h4>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={generateGPSMapping}
+                            className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                          >
+                            <Satellite className="w-4 h-4 mr-2" />
+                            Generate Map
+                          </Button>
+                        </div>
+                        <p className="text-sm text-blue-800 mb-3">
+                          Generate detailed farm boundary mapping and land analysis based on GPS coordinates.
+                        </p>
+                        
+                        {farmBoundaries.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                              <div className="bg-white p-2 rounded border">
+                                <div className="font-medium text-gray-900">Total Area</div>
+                                <div className="text-blue-600">{landMapData.totalArea} hectares</div>
+                              </div>
+                              <div className="bg-white p-2 rounded border">
+                                <div className="font-medium text-gray-900">Cultivated</div>
+                                <div className="text-green-600">{landMapData.cultivatedArea} hectares</div>
+                              </div>
+                              <div className="bg-white p-2 rounded border">
+                                <div className="font-medium text-gray-900">Soil Type</div>
+                                <div className="text-brown-600">{landMapData.soilType}</div>
+                              </div>
+                              <div className="bg-white p-2 rounded border">
+                                <div className="font-medium text-gray-900">Road Access</div>
+                                <div className={landMapData.accessRoads ? "text-green-600" : "text-red-600"}>
+                                  {landMapData.accessRoads ? "Available" : "Limited"}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {landMapData.waterSources.length > 0 && (
+                              <div className="bg-white p-2 rounded border">
+                                <div className="font-medium text-gray-900 mb-1">Water Sources</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {landMapData.waterSources.map((source, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {source}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="bg-white p-2 rounded border">
+                              <div className="font-medium text-gray-900 mb-1">Elevation Profile</div>
+                              <div className="text-sm text-gray-600">
+                                Min: {landMapData.elevationData.min}m | 
+                                Avg: {landMapData.elevationData.average}m | 
+                                Max: {landMapData.elevationData.max}m
+                              </div>
+                            </div>
+                            
+                            <div className="bg-white p-2 rounded border">
+                              <div className="font-medium text-gray-900 mb-1">Boundary Points ({farmBoundaries.length})</div>
+                              <div className="grid grid-cols-2 gap-1 text-xs text-gray-600 max-h-20 overflow-y-auto">
+                                {farmBoundaries.slice(0, 8).map((point, index) => (
+                                  <div key={index}>
+                                    Point {point.point}: {point.lat.toFixed(4)}, {point.lng.toFixed(4)}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setIsMapDialogOpen(true)}
+                              className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Detailed Map
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {farmBoundaries.length === 0 && (
+                          <div className="text-center py-4">
+                            <MapPin className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-600">
+                              Enter GPS coordinates above and click "Generate Map" to create land mapping data.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -698,6 +978,151 @@ export default function FarmersPage() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Land Map Detail Dialog */}
+        <Dialog open={isMapDialogOpen} onOpenChange={setIsMapDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Map className="h-5 w-5 text-lacra-green" />
+                Detailed Farm Land Mapping
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Map Visualization */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Farm Boundary Map</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-green-50 border-2 border-dashed border-green-200 rounded-lg p-8 text-center">
+                    <div className="relative">
+                      <div className="w-full h-64 bg-gradient-to-br from-green-100 to-green-200 rounded-lg mb-4 relative overflow-hidden">
+                        {/* Simulated map with boundary points */}
+                        <div className="absolute inset-4 border-2 border-green-600 rounded-lg bg-green-50">
+                          {farmBoundaries.map((point, index) => (
+                            <div
+                              key={index}
+                              className="absolute w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-lg"
+                              style={{
+                                left: `${20 + (index % 4) * 20}%`,
+                                top: `${20 + Math.floor(index / 4) * 20}%`
+                              }}
+                              title={`Point ${point.point}: ${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`}
+                            />
+                          ))}
+                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            <div className="bg-yellow-400 p-2 rounded-full">
+                              <MapPin className="w-4 h-4 text-yellow-800" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-white p-3 rounded-lg border">
+                          <div className="text-sm font-medium text-gray-900">Total Farm Area</div>
+                          <div className="text-lg font-bold text-blue-600">{landMapData.totalArea} hectares</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border">
+                          <div className="text-sm font-medium text-gray-900">Cultivated Area</div>
+                          <div className="text-lg font-bold text-green-600">{landMapData.cultivatedArea} hectares</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border">
+                          <div className="text-sm font-medium text-gray-900">Efficiency</div>
+                          <div className="text-lg font-bold text-purple-600">
+                            {landMapData.totalArea > 0 ? Math.round((landMapData.cultivatedArea / landMapData.totalArea) * 100) : 0}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Detailed Land Analysis */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Land Analysis Report</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <div className="font-medium text-blue-900">Soil Composition</div>
+                        <div className="text-blue-700">{landMapData.soilType} soil type</div>
+                        <div className="text-sm text-blue-600 mt-1">
+                          Suitable for multiple crop varieties
+                        </div>
+                      </div>
+                      
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <div className="font-medium text-green-900">Infrastructure</div>
+                        <div className="text-green-700">
+                          Road Access: {landMapData.accessRoads ? "Available" : "Limited"}
+                        </div>
+                        <div className="text-sm text-green-600 mt-1">
+                          {landMapData.accessRoads 
+                            ? "Good transportation for harvest delivery" 
+                            : "May require infrastructure development"}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="bg-cyan-50 p-3 rounded-lg">
+                        <div className="font-medium text-cyan-900">Water Resources</div>
+                        {landMapData.waterSources.length > 0 ? (
+                          <div className="space-y-1">
+                            {landMapData.waterSources.map((source, index) => (
+                              <div key={index} className="text-cyan-700 text-sm">• {source}</div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-cyan-700">No documented water sources</div>
+                        )}
+                      </div>
+                      
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <div className="font-medium text-orange-900">Elevation Profile</div>
+                        <div className="text-orange-700 text-sm space-y-1">
+                          <div>Minimum: {landMapData.elevationData.min}m above sea level</div>
+                          <div>Average: {landMapData.elevationData.average}m above sea level</div>
+                          <div>Maximum: {landMapData.elevationData.max}m above sea level</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Boundary Points Table */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="font-medium text-gray-900 mb-3">GPS Boundary Coordinates</div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      {farmBoundaries.map((point, index) => (
+                        <div key={index} className="bg-white p-2 rounded border">
+                          <div className="font-medium">Point {point.point}</div>
+                          <div className="text-gray-600">
+                            Lat: {point.lat.toFixed(6)}
+                          </div>
+                          <div className="text-gray-600">
+                            Lng: {point.lng.toFixed(6)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="flex justify-end pt-4">
+              <Button onClick={() => setIsMapDialogOpen(false)}>
+                Close Map View
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

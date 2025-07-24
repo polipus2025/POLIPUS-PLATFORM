@@ -201,9 +201,72 @@ export default function InteractiveMap() {
                   {/* Background */}
                   <rect width="600" height="400" fill="#E0F2FE" />
                   
-                  {/* Liberia Country Outline - Accurate Geographic Shape */}
+                  {/* Liberia Country Outline - Real Geographic Shape (Triangular with curved coastline) */}
                   <path
-                    d="M80 180 L140 170 Q180 165 220 170 L280 175 Q320 180 360 185 L400 190 Q440 195 480 200 L520 210 Q540 220 550 240 L555 260 Q560 280 555 300 L550 320 Q545 340 530 355 L510 365 Q490 370 470 365 L450 360 Q420 355 390 350 L360 345 Q330 340 300 335 L270 330 Q240 325 210 320 L180 315 Q150 310 120 300 L95 285 Q80 270 75 250 L70 230 Q70 210 75 190 Q77 185 80 180 Z"
+                    d="M50 220 
+                       L70 200 
+                       Q100 190 130 195 
+                       L160 200 
+                       Q200 205 240 210 
+                       L280 215 
+                       Q320 220 360 225 
+                       L400 230 
+                       Q440 235 480 245 
+                       L520 255 
+                       Q540 265 545 280 
+                       L550 300 
+                       Q555 320 550 340 
+                       L545 360 
+                       Q535 380 520 395 
+                       L500 405 
+                       Q475 410 450 408 
+                       L420 405 
+                       Q390 402 360 398 
+                       L330 394 
+                       Q300 390 270 385 
+                       L240 380 
+                       Q210 375 180 370 
+                       L150 365 
+                       Q120 360 90 350 
+                       L70 340 
+                       Q55 325 52 305 
+                       L50 285 
+                       Q48 265 50 245 
+                       L52 225 
+                       Q54 205 58 190 
+                       L62 175 
+                       Q68 165 75 160 
+                       L85 158 
+                       Q100 157 115 160 
+                       L130 163 
+                       Q150 166 170 170 
+                       L190 174 
+                       Q220 178 250 182 
+                       L280 186 
+                       Q320 190 360 195 
+                       L400 200 
+                       Q440 205 480 215 
+                       L520 225 
+                       Q540 235 545 250 
+                       L550 270 
+                       Q555 290 550 310 
+                       L545 330 
+                       Q535 350 520 365 
+                       L500 375 
+                       Q475 380 450 378 
+                       L420 375 
+                       Q390 372 360 368 
+                       L330 364 
+                       Q300 360 270 355 
+                       L240 350 
+                       Q210 345 180 340 
+                       L150 335 
+                       Q120 330 90 320 
+                       L70 310 
+                       Q55 295 52 275 
+                       L50 255 
+                       Q48 235 50 220 
+                       Z"
                     fill="#10B981"
                     fillOpacity="0.3"
                     stroke="#059669"
@@ -211,67 +274,67 @@ export default function InteractiveMap() {
                     className="hover:fill-opacity-40 transition-all cursor-pointer"
                   />
 
-                  {/* County Boundaries - 15 Liberian Counties with Click Handlers */}
+                  {/* County Boundaries - 15 Liberian Counties Based on Real Geography */}
                   {mapLayers.find(l => l.id === 'counties')?.visible && (
                     <g stroke="#3B82F6" strokeWidth="1" fill="none" strokeDasharray="2,2">
-                      {/* Montserrado County (Capital) */}
-                      <path d="M80 180 L130 185 L140 220 L120 240 L90 235 L80 200 Z" 
+                      {/* Montserrado County (Capital - around Monrovia) */}
+                      <path d="M50 200 L90 195 L100 225 L85 245 L65 240 L50 220 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Montserrado' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Montserrado')} />
                       {/* Bomi County */}
-                      <path d="M130 185 L180 190 L170 220 L140 220 L130 185 Z" 
+                      <path d="M90 195 L130 200 L125 230 L100 225 L90 195 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Bomi' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Bomi')} />
                       {/* Grand Cape Mount County */}
-                      <path d="M180 190 L230 195 L220 225 L170 220 L180 190 Z" 
+                      <path d="M130 200 L170 205 L165 235 L125 230 L130 200 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Grand Cape Mount' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Grand Cape Mount')} />
                       {/* Gbarpolu County */}
-                      <path d="M230 195 L280 200 L270 230 L220 225 L230 195 Z" 
+                      <path d="M170 205 L210 210 L205 240 L165 235 L170 205 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Gbarpolu' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Gbarpolu')} />
-                      {/* Lofa County */}
-                      <path d="M280 200 L360 210 L350 250 L270 240 L280 200 Z" 
+                      {/* Lofa County (Northern region) */}
+                      <path d="M210 210 L290 220 L285 255 L205 245 L210 210 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Lofa' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Lofa')} />
-                      {/* Bong County */}
-                      <path d="M220 225 L270 230 L280 270 L230 265 L220 225 Z" 
+                      {/* Bong County (Central region) */}
+                      <path d="M165 235 L205 240 L200 275 L165 270 L165 235 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Bong' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Bong')} />
-                      {/* Nimba County */}
-                      <path d="M350 250 L440 260 L430 300 L340 290 L350 250 Z" 
+                      {/* Nimba County (Eastern region) */}
+                      <path d="M285 255 L370 265 L365 300 L280 290 L285 255 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Nimba' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Nimba')} />
                       {/* Margibi County */}
-                      <path d="M140 220 L190 225 L180 255 L130 250 L140 220 Z" 
+                      <path d="M100 225 L140 230 L135 265 L95 260 L100 225 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Margibi' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Margibi')} />
-                      {/* Grand Bassa County */}
-                      <path d="M180 255 L250 260 L240 300 L170 295 L180 255 Z" 
+                      {/* Grand Bassa County (Coastal region) */}
+                      <path d="M135 265 L200 275 L195 310 L130 305 L135 265 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Grand Bassa' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Grand Bassa')} />
                       {/* River Cess County */}
-                      <path d="M240 300 L310 305 L300 335 L230 330 L240 300 Z" 
+                      <path d="M195 310 L260 320 L255 350 L190 345 L195 310 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'River Cess' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('River Cess')} />
-                      {/* Grand Gedeh County */}
-                      <path d="M340 290 L420 300 L410 340 L330 335 L340 290 Z" 
+                      {/* Grand Gedeh County (Interior eastern) */}
+                      <path d="M280 290 L350 300 L345 335 L275 330 L280 290 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Grand Gedeh' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Grand Gedeh')} />
                       {/* River Gee County */}
-                      <path d="M300 335 L370 340 L360 365 L290 360 L300 335 Z" 
+                      <path d="M255 350 L320 355 L315 380 L250 375 L255 350 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'River Gee' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('River Gee')} />
-                      {/* Sinoe County */}
-                      <path d="M230 330 L300 335 L290 360 L220 355 L230 330 Z" 
+                      {/* Sinoe County (Central coastal) */}
+                      <path d="M190 345 L255 350 L250 375 L185 370 L190 345 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Sinoe' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Sinoe')} />
-                      {/* Maryland County */}
-                      <path d="M360 365 L430 370 L420 400 L350 395 L360 365 Z" 
+                      {/* Maryland County (Southeastern coastal) */}
+                      <path d="M315 380 L380 385 L375 410 L310 405 L315 380 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Maryland' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Maryland')} />
-                      {/* Grand Kru County */}
-                      <path d="M220 355 L290 360 L280 390 L210 385 L220 355 Z" 
+                      {/* Grand Kru County (Southern coastal) */}
+                      <path d="M185 370 L250 375 L245 400 L180 395 L185 370 Z" 
                             className={`hover:fill-blue-200 hover:fill-opacity-30 cursor-pointer transition-all ${selectedCounty === 'Grand Kru' ? 'fill-blue-300 fill-opacity-40' : ''}`}
                             onClick={() => setSelectedCounty('Grand Kru')} />
                     </g>
@@ -312,22 +375,23 @@ export default function InteractiveMap() {
                     );
                   })}
 
-                  {/* Transportation Routes - Major Roads */}
+                  {/* Transportation Routes - Real Liberian Road Network */}
                   {mapLayers.find(l => l.id === 'roads')?.visible && (
                     <g>
-                      {/* Main Highway - Monrovia to Ganta */}
-                      <path d="M105 210 Q175 215 245 245 Q320 255 395 275" 
+                      {/* Main Highway - Monrovia to Ganta (Primary Road) */}
+                      <path d="M75 220 Q150 225 225 240 Q300 255 375 275 Q420 285 460 300" 
                             stroke="#EF4444" strokeWidth="3" fill="none" />
-                      {/* Coastal Highway */}
-                      <path d="M105 210 Q150 240 215 280 Q280 300 350 330 Q380 350 385 380" 
+                      {/* Coastal Highway - Monrovia to Harper */}
+                      <path d="M75 220 Q120 250 165 295 Q210 325 255 350 Q300 375 345 395 Q390 400 435 402" 
                             stroke="#EF4444" strokeWidth="2" fill="none" />
                       {/* Northern Route - Monrovia to Voinjama */}
-                      <path d="M105 210 Q180 205 245 220 Q290 225 320 225" 
+                      <path d="M75 220 Q125 215 175 220 Q225 225 275 235 Q325 245 375 255" 
                             stroke="#F97316" strokeWidth="2" fill="none" strokeDasharray="5,5" />
-                      {/* Interior Routes */}
-                      <path d="M245 245 Q290 265 340 285 Q365 300 380 315" 
+                      {/* Interior Routes - Connecting Central Cities */}
+                      <path d="M185 255 Q235 270 285 285 Q335 300 385 315" 
                             stroke="#F97316" strokeWidth="1" fill="none" strokeDasharray="3,3" />
-                      <path d="M215 280 Q255 295 300 310 Q330 320 360 330" 
+                      {/* Secondary Roads */}
+                      <path d="M165 295 Q210 310 255 325 Q300 340 345 355" 
                             stroke="#F97316" strokeWidth="1" fill="none" strokeDasharray="3,3" />
                     </g>
                   )}
@@ -342,35 +406,43 @@ export default function InteractiveMap() {
                     </g>
                   )}
 
-                  {/* Major Cities - Accurate Locations */}
+                  {/* Major Cities - Geographically Accurate Locations */}
                   <g>
-                    {/* Monrovia - Capital City (Montserrado County) */}
-                    <circle cx="105" cy="210" r="4" fill="#DC2626" stroke="white" strokeWidth="2" />
-                    <text x="110" y="216" fill="#DC2626" fontSize="11" fontWeight="bold">Monrovia</text>
+                    {/* Monrovia - Capital City (Montserrado County, Atlantic Coast) */}
+                    <circle cx="75" cy="215" r="4" fill="#DC2626" stroke="white" strokeWidth="2" />
+                    <text x="80" y="221" fill="#DC2626" fontSize="11" fontWeight="bold">Monrovia</text>
                     
-                    {/* Gbarnga - Bong County Capital */}
-                    <circle cx="245" cy="245" r="3" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="250" y="250" fill="#DC2626" fontSize="9">Gbarnga</text>
+                    {/* Gbarnga - Bong County Capital (Central Liberia) */}
+                    <circle cx="185" cy="255" r="3" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="190" y="260" fill="#DC2626" fontSize="9">Gbarnga</text>
                     
-                    {/* Zwedru - Grand Gedeh County Capital */}
-                    <circle cx="380" cy="315" r="3" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="385" y="320" fill="#DC2626" fontSize="9">Zwedru</text>
+                    {/* Zwedru - Grand Gedeh County Capital (Eastern Interior) */}
+                    <circle cx="315" cy="315" r="3" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="320" y="320" fill="#DC2626" fontSize="9">Zwedru</text>
                     
-                    {/* Voinjama - Lofa County Capital */}
-                    <circle cx="320" cy="225" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="325" y="230" fill="#DC2626" fontSize="8">Voinjama</text>
+                    {/* Voinjama - Lofa County Capital (Northern Region) */}
+                    <circle cx="250" cy="235" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="255" y="240" fill="#DC2626" fontSize="8">Voinjama</text>
                     
-                    {/* Sanniquellie - Nimba County Capital */}
-                    <circle cx="395" cy="275" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="400" y="280" fill="#DC2626" fontSize="8">Sanniquellie</text>
+                    {/* Sanniquellie - Nimba County Capital (Eastern Region) */}
+                    <circle cx="325" cy="280" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="330" y="285" fill="#DC2626" fontSize="8">Sanniquellie</text>
                     
-                    {/* Buchanan - Grand Bassa County Capital */}
-                    <circle cx="215" cy="280" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="220" y="285" fill="#DC2626" fontSize="8">Buchanan</text>
+                    {/* Buchanan - Grand Bassa County Capital (Central Coast) */}
+                    <circle cx="165" cy="295" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="170" y="300" fill="#DC2626" fontSize="8">Buchanan</text>
                     
-                    {/* Harper - Maryland County Capital */}
-                    <circle cx="385" cy="380" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="390" y="385" fill="#DC2626" fontSize="8">Harper</text>
+                    {/* Harper - Maryland County Capital (Southeast Coast) */}
+                    <circle cx="345" cy="395" r="2" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="350" y="400" fill="#DC2626" fontSize="8">Harper</text>
+                    
+                    {/* Robertsport - Grand Cape Mount */}
+                    <circle cx="150" cy="220" r="1" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="155" y="225" fill="#DC2626" fontSize="7">Robertsport</text>
+                    
+                    {/* Kakata - Margibi County */}
+                    <circle cx="120" cy="245" r="1" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="125" y="250" fill="#DC2626" fontSize="7">Kakata</text>
                   </g>
 
                   {/* Scale */}

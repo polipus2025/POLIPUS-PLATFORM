@@ -200,7 +200,7 @@ export default function GISMapping() {
 
   // Update farm plots when query succeeds
   useEffect(() => {
-    if (plotsData) {
+    if (plotsData && Array.isArray(plotsData)) {
       setFarmPlots(plotsData);
     }
   }, [plotsData]);

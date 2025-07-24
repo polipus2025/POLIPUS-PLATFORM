@@ -317,7 +317,7 @@ export default function InteractiveMap() {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative">
                     {/* Accurate Liberia Map - Using Real Geographic Data */}
-                    <svg width="600" height="400" viewBox="350 500 60 40" className="opacity-90">
+                    <svg width="600" height="400" viewBox="0 0 600 400" className="opacity-90">
                       <defs>
                         <pattern id="farmPattern" patternUnits="userSpaceOnUse" width="2" height="2">
                           <circle cx="1" cy="1" r="0.4" fill="#10B981" opacity="0.6" />
@@ -332,7 +332,7 @@ export default function InteractiveMap() {
                       </defs>
                       
                       {/* Atlantic Ocean Background */}
-                      <rect x="330" y="490" width="100" height="60" fill="url(#oceanGradient)" />
+                      <rect x="0" y="0" width="600" height="400" fill="url(#oceanGradient)" />
                       
                       {/* Accurate Liberia Country Outline - From Verified Geographic Source */}
                       <path
@@ -340,19 +340,19 @@ export default function InteractiveMap() {
                         d="M378.198,515.027l9.491,6.345l-0.227-4.805l-2.869-3.38l-2.801-2.481L378.198,515.027L378.198,515.027z"
                         fill={mapView === 'satellite' ? '#065F46' : mapView === 'terrain' ? '#15803D' : '#F3F4F6'}
                         stroke="#1F2937"
-                        strokeWidth="0.3"
+                        strokeWidth="2"
                         opacity="0.95"
-                        transform="scale(3.5) translate(-25, -25)"
+                        transform="scale(20) translate(-375, -510)"
                       />
                       
                       {/* Labels positioned accurately on the real map */}
-                      <text x="375" y="485" fill="#1E40AF" fontSize="3" fontWeight="bold">Atlantic Ocean</text>
-                      <text x="380" y="520" fill="#1F2937" fontSize="4" fontWeight="bold">LIBERIA</text>
-                      <text x="378" y="525" fill="#1F2937" fontSize="2.5">Monrovia</text>
+                      <text x="50" y="50" fill="#1E40AF" fontSize="16" fontWeight="bold">Atlantic Ocean</text>
+                      <text x="300" y="250" fill="#1F2937" fontSize="24" fontWeight="bold">LIBERIA</text>
+                      <text x="150" y="180" fill="#1F2937" fontSize="18" fontWeight="bold">Monrovia</text>
                       
                       {/* Accurate Liberian County Boundaries - Positioned on Real Map */}
                       {mapLayers.find(l => l.id === 'counties')?.visible && (
-                        <g transform="scale(3.5) translate(-25, -25)">
+                        <g transform="scale(20) translate(-375, -510)">
                           {/* Counties positioned on the actual Liberia outline */}
                           
                           {/* Montserrado County (Western coastal - includes Monrovia) */}
@@ -416,16 +416,16 @@ export default function InteractiveMap() {
                       
                       {/* Farm Plots - Positioned on Real Liberia Map */}
                       {mapLayers.find(l => l.id === 'farms')?.visible && (
-                        <g transform="scale(3.5) translate(-25, -25)">
+                        <g transform="scale(20) translate(-375, -510)">
                           {selectedCounty && selectedCounty !== 'all' ? (
                             // County-specific farms positioned on accurate geography
                             <>
                               {selectedCounty.includes('Lofa') && (
                                 <>
-                                  <circle cx="380" cy="515.5" r="1.5" fill="#10B981" stroke="#059669" strokeWidth="0.3" />
-                                  <circle cx="381.5" cy="515" r="1.2" fill="#10B981" stroke="#059669" strokeWidth="0.2" />
-                                  <circle cx="379" cy="515" r="1" fill="#10B981" stroke="#059669" strokeWidth="0.2" />
-                                  <text x="380" y="513.5" fill="#374151" fontSize="1.5" textAnchor="middle" fontWeight="bold">
+                                  <circle cx="380" cy="515.5" r="0.8" fill="#10B981" stroke="#059669" strokeWidth="0.1" />
+                                  <circle cx="381.5" cy="515" r="0.6" fill="#10B981" stroke="#059669" strokeWidth="0.08" />
+                                  <circle cx="379" cy="515" r="0.5" fill="#10B981" stroke="#059669" strokeWidth="0.08" />
+                                  <text x="380" y="513.5" fill="#374151" fontSize="0.8" textAnchor="middle" fontWeight="bold">
                                     Lofa Farms
                                   </text>
                                 </>
@@ -513,21 +513,21 @@ export default function InteractiveMap() {
                           ) : (
                             // All farms positioned accurately across real Liberia geography
                             <>
-                              <circle cx="376.5" cy="517" r="0.8" fill="#10B981" />   {/* Montserrado */}
-                              <circle cx="380" cy="515.5" r="0.9" fill="#10B981" />  {/* Lofa */}
-                              <circle cx="386" cy="516.5" r="1" fill="#10B981" />   {/* Nimba */}
-                              <circle cx="382.5" cy="518" r="0.8" fill="#10B981" />  {/* Bong */}
-                              <circle cx="382" cy="518.5" r="0.8" fill="#10B981" />  {/* Grand Bassa */}
-                              <circle cx="384" cy="519" r="0.7" fill="#10B981" />   {/* River Cess */}
-                              <circle cx="387" cy="522" r="0.8" fill="#10B981" />   {/* Maryland */}
-                              <circle cx="386.5" cy="519" r="0.7" fill="#10B981" />  {/* Grand Gedeh */}
-                              <circle cx="385" cy="521.5" r="0.7" fill="#10B981" />  {/* Sinoe */}
-                              <circle cx="379" cy="515" r="0.6" fill="#10B981" />   {/* Gbarpolu */}
-                              <circle cx="377" cy="516.5" r="0.6" fill="#10B981" />  {/* Bomi */}
-                              <circle cx="376" cy="515.5" r="0.6" fill="#10B981" />  {/* Grand Cape Mount */}
-                              <circle cx="379.5" cy="518" r="0.7" fill="#10B981" />  {/* Margibi */}
-                              <circle cx="387.5" cy="523" r="0.6" fill="#10B981" />  {/* Grand Kru */}
-                              <circle cx="385.5" cy="522" r="0.6" fill="#10B981" />  {/* River Gee */}
+                              <circle cx="376.5" cy="517" r="0.3" fill="#10B981" />   {/* Montserrado */}
+                              <circle cx="380" cy="515.5" r="0.35" fill="#10B981" />  {/* Lofa */}
+                              <circle cx="386" cy="516.5" r="0.4" fill="#10B981" />   {/* Nimba */}
+                              <circle cx="382.5" cy="518" r="0.3" fill="#10B981" />  {/* Bong */}
+                              <circle cx="382" cy="518.5" r="0.3" fill="#10B981" />  {/* Grand Bassa */}
+                              <circle cx="384" cy="519" r="0.25" fill="#10B981" />   {/* River Cess */}
+                              <circle cx="387" cy="522" r="0.3" fill="#10B981" />   {/* Maryland */}
+                              <circle cx="386.5" cy="519" r="0.25" fill="#10B981" />  {/* Grand Gedeh */}
+                              <circle cx="385" cy="521.5" r="0.25" fill="#10B981" />  {/* Sinoe */}
+                              <circle cx="379" cy="515" r="0.2" fill="#10B981" />   {/* Gbarpolu */}
+                              <circle cx="377" cy="516.5" r="0.2" fill="#10B981" />  {/* Bomi */}
+                              <circle cx="376" cy="515.5" r="0.2" fill="#10B981" />  {/* Grand Cape Mount */}
+                              <circle cx="379.5" cy="518" r="0.25" fill="#10B981" />  {/* Margibi */}
+                              <circle cx="387.5" cy="523" r="0.2" fill="#10B981" />  {/* Grand Kru */}
+                              <circle cx="385.5" cy="522" r="0.2" fill="#10B981" />  {/* River Gee */}
                             </>
                           )}
                         </g>

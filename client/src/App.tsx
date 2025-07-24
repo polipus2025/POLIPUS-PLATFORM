@@ -48,7 +48,7 @@ function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: an
 
 function Router() {
   // Check if user is logged in and has valid role
-  const authToken = localStorage.getItem("token") || localStorage.getItem("authToken");
+  const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
   return (
@@ -67,9 +67,6 @@ function Router() {
         <>
           {/* Dashboard - Role-based routing */}
           <Route path="/dashboard">
-            {userType === 'field_agent' ? <FieldAgentDashboard /> : <Dashboard />}
-          </Route>
-          <Route path="/">
             {userType === 'field_agent' ? <FieldAgentDashboard /> : <Dashboard />}
           </Route>
           
@@ -180,6 +177,8 @@ function Router() {
         <>
           {/* Redirect unauthenticated users to landing page */}
           <Route path="/" component={Landing} />
+          {/* Also handle /dashboard for logged out users */}
+          <Route path="/dashboard" component={Landing} />
         </>
       )}
       
@@ -189,7 +188,7 @@ function Router() {
 }
 
 function App() {
-  const authToken = localStorage.getItem("token") || localStorage.getItem("authToken");
+  const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
   // Check if user is on authentication pages or landing page

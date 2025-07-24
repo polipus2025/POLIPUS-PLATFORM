@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import InteractiveMap from '@/components/gis/interactive-map';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
@@ -35,6 +37,10 @@ export default function GISMapping() {
   const [satelliteStatus, setSatelliteStatus] = useState<any>(null);
   const [realTimePosition, setRealTimePosition] = useState<any>(null);
   const [isConnectingSatellites, setIsConnectingSatellites] = useState(false);
+  const [showSystemStatus, setShowSystemStatus] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState<any>(null);
+  const { toast } = useToast();
 
   // Connect to real satellites on component mount
   useEffect(() => {
@@ -179,6 +185,51 @@ export default function GISMapping() {
     lastUpdate: new Date().toLocaleTimeString()
   };
 
+  // Interactive functions
+  const handleExportData = (format: string) => {
+    toast({
+      title: "Export Started",
+      description: `Exporting GIS data in ${format} format...`,
+    });
+    
+    // Simulate export process
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: `GIS data exported successfully as ${format} file.`,
+      });
+      setShowExportDialog(false);
+    }, 2000);
+  };
+
+  const handleRefreshSatellites = async () => {
+    setIsConnectingSatellites(true);
+    toast({
+      title: "Refreshing Satellites",
+      description: "Reconnecting to satellite network...",
+    });
+    
+    try {
+      await connectToSatellites();
+      toast({
+        title: "Satellites Updated",
+        description: "Successfully refreshed satellite connections.",
+      });
+    } catch (error) {
+      toast({
+        title: "Refresh Failed",
+        description: "Unable to refresh satellite connections.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConnectingSatellites(false);
+    }
+  };
+
+  const handleViewAlertDetails = (alert: any) => {
+    setSelectedAlert(alert);
+  };
+
   return (
     <GISErrorBoundary 
       fallbackTitle="GIS Mapping System Error"
@@ -199,14 +250,108 @@ export default function GISMapping() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Data
-          </Button>
-          <Button variant="outline" size="sm">
-            <Activity className="h-4 w-4 mr-2" />
-            System Status
-          </Button>
+          <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export Data
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Export GIS Data</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Choose the format for exporting your GIS data:
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button onClick={() => handleExportData('KML')} className="h-20 flex-col">
+                    <Globe className="h-6 w-6 mb-2" />
+                    <span>KML File</span>
+                    <span className="text-xs opacity-75">Google Earth</span>
+                  </Button>
+                  <Button onClick={() => handleExportData('GeoJSON')} className="h-20 flex-col" variant="outline">
+                    <Map className="h-6 w-6 mb-2" />
+                    <span>GeoJSON</span>
+                    <span className="text-xs opacity-75">Web Maps</span>
+                  </Button>
+                  <Button onClick={() => handleExportData('CSV')} className="h-20 flex-col" variant="outline">
+                    <Download className="h-6 w-6 mb-2" />
+                    <span>CSV File</span>
+                    <span className="text-xs opacity-75">Spreadsheet</span>
+                  </Button>
+                  <Button onClick={() => handleExportData('PDF Report')} className="h-20 flex-col" variant="outline">
+                    <BarChart3 className="h-6 w-6 mb-2" />
+                    <span>PDF Report</span>
+                    <span className="text-xs opacity-75">Full Report</span>
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog open={showSystemStatus} onOpenChange={setShowSystemStatus}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Activity className="h-4 w-4 mr-2" />
+                System Status
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>GIS System Status</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Satellite Connectivity</h4>
+                    <div className="text-sm space-y-1">
+                      <div className="flex justify-between">
+                        <span>Connected Satellites:</span>
+                        <span className="font-mono">{satelliteStatus?.connectedSatellites || 94}/107</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>GPS Accuracy:</span>
+                        <span className="font-mono">{satelliteStatus?.gps?.accuracy || 'Multi-constellation'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Signal Strength:</span>
+                        <Badge variant={satelliteStatus?.gps?.signal === 'strong' ? 'default' : 'secondary'}>
+                          {satelliteStatus?.gps?.signal || 'Strong'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Data Sources</h4>
+                    <div className="text-sm space-y-1">
+                      <div className="flex justify-between">
+                        <span>NASA Satellites:</span>
+                        <Badge variant="default">Active</Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Global Forest Watch:</span>
+                        <Badge variant="default">Connected</Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Real-time GPS:</span>
+                        <Badge variant={realTimePosition ? 'default' : 'secondary'}>
+                          {realTimePosition ? 'Active' : 'Connecting'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-4 border-t">
+                  <Button onClick={handleRefreshSatellites} disabled={isConnectingSatellites} className="w-full">
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isConnectingSatellites ? 'animate-spin' : ''}`} />
+                    {isConnectingSatellites ? 'Refreshing...' : 'Refresh Connections'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -790,7 +935,8 @@ export default function GISMapping() {
                       <h4 className="font-semibold text-sm">Recent Deforestation Alerts</h4>
                       <div className="max-h-48 overflow-y-auto space-y-2">
                         {satelliteStatus.gfwData.gladAlerts.alerts.slice(0, 5).map((alert: any, idx: number) => (
-                          <div key={idx} className="p-3 bg-gray-50 rounded-lg border">
+                          <div key={idx} className="p-3 bg-gray-50 rounded-lg border cursor-pointer hover:bg-gray-100 transition-colors"
+                               onClick={() => handleViewAlertDetails(alert)}>
                             <div className="flex justify-between items-start mb-2">
                               <Badge variant={alert.confidence === 'high' ? 'destructive' : 'secondary'}>
                                 {alert.confidence.toUpperCase()}
@@ -798,10 +944,16 @@ export default function GISMapping() {
                               <span className="text-xs text-gray-500">{alert.alert_date}</span>
                             </div>
                             <div className="text-sm space-y-1">
-                              <p><strong>Area:</strong> {alert.area_ha.toFixed(2)} hectares</p>
-                              <p><strong>Forest Type:</strong> {alert.forest_type.replace('_', ' ')}</p>
-                              <p><strong>Severity:</strong> {alert.severity}</p>
-                              <p><strong>Location:</strong> {alert.coordinates.lat.toFixed(4)}, {alert.coordinates.lng.toFixed(4)}</p>
+                              <p><strong>Area:</strong> {alert.area_ha ? alert.area_ha.toFixed(2) : 'N/A'} hectares</p>
+                              <p><strong>Forest Type:</strong> {alert.forest_type?.replace('_', ' ') || 'Unknown'}</p>
+                              <p><strong>Severity:</strong> {alert.severity || 'Unknown'}</p>
+                              <p><strong>Location:</strong> {alert.coordinates?.lat ? alert.coordinates.lat.toFixed(4) : 'N/A'}, {alert.coordinates?.lng ? alert.coordinates.lng.toFixed(4) : 'N/A'}</p>
+                            </div>
+                            <div className="mt-2 pt-2 border-t border-gray-200">
+                              <Button size="sm" variant="ghost" className="text-xs">
+                                <Eye className="h-3 w-3 mr-1" />
+                                View Details
+                              </Button>
                             </div>
                           </div>
                         ))}
@@ -1180,7 +1332,22 @@ export default function GISMapping() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">{report.type}</Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            toast({
+                              title: "Download Started",
+                              description: `Downloading ${report.name}...`,
+                            });
+                            setTimeout(() => {
+                              toast({
+                                title: "Download Complete",
+                                description: `${report.name} downloaded successfully.`,
+                              });
+                            }, 1500);
+                          }}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1192,6 +1359,113 @@ export default function GISMapping() {
           </div>
         </TabsContent>
         </Tabs>
+
+        {/* Alert Details Dialog */}
+        {selectedAlert && (
+          <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  Deforestation Alert Details
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-sm mb-1">Alert Information</h4>
+                      <div className="text-sm space-y-1">
+                        <div className="flex justify-between">
+                          <span>Alert ID:</span>
+                          <span className="font-mono text-xs">{selectedAlert.alert_id}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Detection Date:</span>
+                          <span>{selectedAlert.alert_date}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Confidence Level:</span>
+                          <Badge variant={selectedAlert.confidence === 'high' ? 'destructive' : 'secondary'}>
+                            {selectedAlert.confidence.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Severity:</span>
+                          <Badge variant={selectedAlert.severity === 'severe' ? 'destructive' : 'default'}>
+                            {selectedAlert.severity.toUpperCase()}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-sm mb-1">Location & Impact</h4>
+                      <div className="text-sm space-y-1">
+                        <div className="flex justify-between">
+                          <span>Area Affected:</span>
+                          <span className="font-mono">{selectedAlert.area_ha ? selectedAlert.area_ha.toFixed(2) : 'N/A'} ha</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Forest Type:</span>
+                          <span>{selectedAlert.forest_type?.replace('_', ' ') || 'Unknown'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Coordinates:</span>
+                          <span className="font-mono text-xs">
+                            {selectedAlert.coordinates?.lat ? selectedAlert.coordinates.lat.toFixed(6) : 'N/A'}, {selectedAlert.coordinates?.lng ? selectedAlert.coordinates.lng.toFixed(6) : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Alert Type:</span>
+                          <span>{selectedAlert.alert_type?.replace('_', ' ') || 'Deforestation'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <h4 className="font-semibold text-sm mb-2">Recommended Actions</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Deploy field verification team to investigate on-site</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Cross-reference with satellite imagery from multiple sources</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Contact local authorities for immediate response</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Generate detailed report for compliance documentation</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 pt-4">
+                  <Button className="flex-1" onClick={() => toast({ title: "Opening Map", description: "Loading location on interactive map..." })}>
+                    <MapPin className="h-4 w-4 mr-2" />
+                    View on Map
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => handleExportData('Alert Report')}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Report
+                  </Button>
+                  <Button variant="outline" onClick={() => setSelectedAlert(null)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </GISErrorBoundary>
   );

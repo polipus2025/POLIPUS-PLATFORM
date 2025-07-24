@@ -74,27 +74,13 @@ export default function InteractiveMap() {
               </Select>
             </div>
 
-            {/* Search */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Search Location</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search farms, plots..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Map View */}
+            {/* Map View Mode */}
             <div>
               <label className="text-sm font-medium mb-2 block">Map View</label>
               <div className="grid grid-cols-3 gap-1">
                 <Button
-                  size="sm"
                   variant={mapView === 'satellite' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setMapView('satellite')}
                   className="text-xs"
                 >
@@ -102,8 +88,8 @@ export default function InteractiveMap() {
                   Satellite
                 </Button>
                 <Button
-                  size="sm"
                   variant={mapView === 'roadmap' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setMapView('roadmap')}
                   className="text-xs"
                 >
@@ -111,8 +97,8 @@ export default function InteractiveMap() {
                   Roadmap
                 </Button>
                 <Button
-                  size="sm"
                   variant={mapView === 'terrain' ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => setMapView('terrain')}
                   className="text-xs"
                 >
@@ -121,35 +107,103 @@ export default function InteractiveMap() {
                 </Button>
               </div>
             </div>
+
+            {/* Search Location */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Search Location</label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter location..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="text-sm"
+                />
+                <Button size="sm" variant="outline">
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Map Layers */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Map Layers</label>
+              <div className="space-y-2">
+                {mapLayers.map(layer => (
+                  <div key={layer.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: layer.color }}
+                      />
+                      <span className="text-sm">{layer.name}</span>
+                    </div>
+                    <Button
+                      variant={layer.visible ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleLayer(layer.id)}
+                      className="h-6 px-2 text-xs"
+                    >
+                      {layer.visible ? 'ON' : 'OFF'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tools */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Map Tools</label>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant={measureMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMeasureMode(!measureMode)}
+                  className="text-xs"
+                >
+                  <Target className="h-3 w-3 mr-1" />
+                  Measure
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <Filter className="h-3 w-3 mr-1" />
+                  Filter
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Layer Controls */}
+        {/* Current View Status */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Map Layers</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Current View
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {mapLayers.map(layer => (
-                <div key={layer.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full border"
-                      style={{ backgroundColor: layer.visible ? layer.color : 'transparent' }}
-                    />
-                    <span className="text-sm">{layer.name}</span>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => toggleLayer(layer.id)}
-                    className="h-6 px-2"
-                  >
-                    {layer.visible ? 'Hide' : 'Show'}
-                  </Button>
-                </div>
-              ))}
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Mode:</span>
+                <Badge variant="secondary" className="capitalize">
+                  {mapView}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">County:</span>
+                <Badge variant="outline">
+                  {selectedCounty === 'all' ? 'All Counties' : selectedCounty}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Active Layers:</span>
+                <span className="font-medium">
+                  {mapLayers.filter(l => l.visible).length}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

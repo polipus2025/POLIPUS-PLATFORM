@@ -183,19 +183,27 @@ export default function GISMapping() {
 
   // Fetch real location data
   const { data: locations } = useQuery({
-    queryKey: ['/api/gis/locations/'],
-    onSuccess: (data) => {
-      setLocationData(data);
-    }
+    queryKey: ['/api/gis/locations/']
   });
 
   // Fetch real farm plots data
   const { data: plotsData } = useQuery({
-    queryKey: ['/api/farm-plots/'],
-    onSuccess: (data) => {
-      setFarmPlots(data);
-    }
+    queryKey: ['/api/farm-plots/']
   });
+
+  // Update location data when query succeeds
+  useEffect(() => {
+    if (locations) {
+      setLocationData(locations);
+    }
+  }, [locations]);
+
+  // Update farm plots when query succeeds
+  useEffect(() => {
+    if (plotsData) {
+      setFarmPlots(plotsData);
+    }
+  }, [plotsData]);
 
   // Real data analysis functions
   const performYieldPrediction = async () => {

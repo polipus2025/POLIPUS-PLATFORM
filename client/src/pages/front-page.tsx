@@ -105,36 +105,34 @@ export default function FrontPage() {
               <Card 
                 key={module.id} 
                 className={`
-                  relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-105 h-64
+                  relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-105 h-64 flex flex-col
                   ${module.isAgriTrace ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50' : 'border-gray-200 hover:border-gray-300'}
                 `}
               >
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-full ${module.color} text-white`}>
-                      <IconComponent className="h-6 w-6" />
-                    </div>
-                    {module.isAgriTrace && (
-                      <Badge className="bg-green-600 text-white">
-                        AgriTrace360™
-                      </Badge>
-                    )}
-                  </div>
-                  {module.isAgriTrace && (
-                    <div className="flex justify-center mb-4">
+                <CardHeader className="pb-4 flex-1 flex items-center justify-center">
+                  {module.isAgriTrace ? (
+                    <div className="flex items-center justify-center h-full w-full">
                       <img 
                         src={agriTraceLogo} 
                         alt="AgriTrace360" 
-                        className="h-12 w-12 object-contain rounded"
+                        className="max-h-32 max-w-full object-contain"
                       />
                     </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-4 w-full">
+                        <div className={`p-3 rounded-full ${module.color} text-white`}>
+                          <IconComponent className="h-6 w-6" />
+                        </div>
+                      </div>
+                      <CardTitle className="text-lg leading-tight text-center">
+                        {module.title}
+                      </CardTitle>
+                    </>
                   )}
-                  <CardTitle className="text-lg leading-tight text-center">
-                    {module.title}
-                  </CardTitle>
                 </CardHeader>
                 
-                <CardContent className="pt-0 flex-1 flex flex-col justify-end">
+                <CardContent className="pt-0 p-4">
                   <Link href={module.route}>
                     <Button 
                       className={`
@@ -151,12 +149,6 @@ export default function FrontPage() {
                     </Button>
                   </Link>
                 </CardContent>
-                
-                {module.isAgriTrace && (
-                  <div className="absolute top-0 right-0 w-16 h-16 transform translate-x-4 -translate-y-4">
-                    <div className="w-full h-full bg-green-500 rounded-full opacity-20"></div>
-                  </div>
-                )}
               </Card>
             );
           })}

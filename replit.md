@@ -42,6 +42,7 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **Offline Data Sync Mechanism**: Complete offline functionality with conflict resolution, allowing users to work without internet and sync when connectivity is restored with smart merge strategies (January 2025)
 - **Enhanced GPS System**: Professional-grade GPS mapping system with real-time tracking, precision boundary mapping, interactive visualization, signal strength monitoring, satellite tracking, and comprehensive data export capabilities for agricultural compliance and farm management (January 2025)
 - **Mobile App Alert System**: Complete mobile alert integration system where field agents can submit requests via mobile app that route to director dashboard for compliance officer verification and director approval. Features emergency escalation, rule-based verification workflow, real-time metrics tracking, and comprehensive audit trail (January 24, 2025)
+- **Dashboard Message Center**: Integrated message button in dashboard header with unread count badge, opens dialog showing all system notifications and compliance alerts. Users can mark messages as read individually, with messages categorized by type and priority with color-coded badges. Includes real-time synchronization and full message history with timestamps (January 24, 2025)
 
 ## User Preferences
 

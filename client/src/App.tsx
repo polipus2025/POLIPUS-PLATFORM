@@ -31,6 +31,7 @@ import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
 import OfflineSync from "@/pages/offline-sync";
 import DirectorDashboard from "@/pages/director-dashboard";
+import MobileAlertDemo from "@/pages/mobile-alert-demo";
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import NotFound from "@/pages/not-found";
 
@@ -172,6 +173,7 @@ function Router() {
           {/* Offline Sync - Available to all authenticated users */}
           <Route path="/offline-sync" component={OfflineSync} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
+          <Route path="/mobile-alert-demo" component={MobileAlertDemo} />
           
         </>
       ) : (

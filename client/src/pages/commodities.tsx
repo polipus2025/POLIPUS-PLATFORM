@@ -187,38 +187,39 @@ export default function Commodities() {
   };
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gray-50">
       <Helmet>
         <title>Commodities - AgriTrace360™ LACRA</title>
         <meta name="description" content="Agricultural commodity tracking and management system for LACRA regulatory compliance" />
       </Helmet>
 
-      {/* Page Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-neutral mb-2">Agricultural Commodities</h2>
-            <p className="text-gray-600">Track and manage agricultural commodities across Liberian counties</p>
+      <div className="p-4 lg:p-6 max-w-7xl mx-auto">
+        {/* Page Header */}
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-neutral mb-2">Agricultural Commodities</h2>
+              <p className="text-gray-600">Track and manage agricultural commodities across Liberian counties</p>
+            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-lacra-green hover:bg-green-700 w-full lg:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Commodity
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Commodity</DialogTitle>
+                  <DialogDescription>
+                    Register a new agricultural commodity for tracking and compliance monitoring.
+                  </DialogDescription>
+                </DialogHeader>
+                <CommodityForm onSuccess={() => setIsAddDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-lacra-green hover:bg-green-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Commodity
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Add New Commodity</DialogTitle>
-                <DialogDescription>
-                  Register a new agricultural commodity for tracking and compliance monitoring.
-                </DialogDescription>
-              </DialogHeader>
-              <CommodityForm onSuccess={() => setIsAddDialogOpen(false)} />
-            </DialogContent>
-          </Dialog>
         </div>
-      </div>
 
       {/* Filters */}
       <Card className="mb-6">
@@ -287,22 +288,20 @@ export default function Commodities() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Commodity</TableHead>
-                  <TableHead>Batch Number</TableHead>
-                  <TableHead>County</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Quality Grade</TableHead>
-                  <TableHead>Farmer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Harvest Date</TableHead>
-                  <TableHead>Government Sync</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="min-w-[200px]">Commodity Details</TableHead>
+                  <TableHead className="min-w-[120px]">Batch Number</TableHead>
+                  <TableHead className="min-w-[100px]">Location</TableHead>
+                  <TableHead className="min-w-[100px]">Quantity</TableHead>
+                  <TableHead className="min-w-[120px]">Status & Grade</TableHead>
+                  <TableHead className="min-w-[150px]">Farmer & Date</TableHead>
+                  <TableHead className="min-w-[140px]">Gov Sync</TableHead>
+                  <TableHead className="min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCommodities.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                       {commodities.length === 0 
                         ? "No commodities registered yet. Add your first commodity to get started."
                         : "No commodities match your current filters."
@@ -312,40 +311,61 @@ export default function Commodities() {
                 ) : (
                   filteredCommodities.map((commodity) => (
                     <TableRow key={commodity.id} className="hover:bg-gray-50">
+                      {/* Commodity Details */}
                       <TableCell>
                         <div className="flex items-center">
                           <i className={`fas fa-${getCommodityIcon(commodity.type)} text-amber-600 mr-3`}></i>
                           <div>
                             <div className="text-sm font-medium text-gray-900">{commodity.name}</div>
-                            <div className="text-sm text-gray-500 capitalize">
+                            <div className="text-xs text-gray-500 capitalize">
                               {commodity.type.replace('_', ' ')}
                             </div>
                           </div>
                         </div>
                       </TableCell>
+                      
+                      {/* Batch Number */}
                       <TableCell className="font-mono text-sm">{commodity.batchNumber}</TableCell>
+                      
+                      {/* Location */}
                       <TableCell className="text-sm">{commodity.county}</TableCell>
+                      
+                      {/* Quantity */}
                       <TableCell className="text-sm">
-                        {commodity.quantity} {commodity.unit}
+                        <div className="font-medium">{commodity.quantity} {commodity.unit}</div>
                       </TableCell>
+                      
+                      {/* Status & Grade */}
                       <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {commodity.qualityGrade}
-                        </Badge>
+                        <div className="space-y-1">
+                          {getStatusBadge(commodity.status)}
+                          <div>
+                            <Badge variant="outline" className="text-xs">
+                              {commodity.qualityGrade}
+                            </Badge>
+                          </div>
+                        </div>
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {commodity.farmerName || 'Not specified'}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(commodity.status)}</TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {commodity.harvestDate 
-                          ? new Date(commodity.harvestDate).toLocaleDateString()
-                          : 'Not specified'
-                        }
-                      </TableCell>
+                      
+                      {/* Farmer & Date */}
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <div className="flex space-x-1" title="LRA | MOA | Customs">
+                        <div className="space-y-1">
+                          <div className="text-sm font-medium">
+                            {commodity.farmerName || 'Not specified'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {commodity.harvestDate 
+                              ? new Date(commodity.harvestDate).toLocaleDateString()
+                              : 'No date'
+                            }
+                          </div>
+                        </div>
+                      </TableCell>
+                      
+                      {/* Government Sync */}
+                      <TableCell>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-1" title="LRA | MOA | Customs">
                             {getSyncStatusIcon('not_synced')}
                             {getSyncStatusIcon('not_synced')}
                             {getSyncStatusIcon('not_synced')}
@@ -355,23 +375,25 @@ export default function Commodities() {
                             size="sm" 
                             onClick={() => handleSyncAll(commodity.id)}
                             disabled={syncWithLRA.isPending || syncWithMOA.isPending || syncWithCustoms.isPending}
-                            className="text-xs"
+                            className="text-xs w-full"
                           >
                             {syncWithLRA.isPending || syncWithMOA.isPending || syncWithCustoms.isPending ? (
                               <Clock className="w-3 h-3 mr-1 animate-spin" />
                             ) : (
                               <RefreshCw className="w-3 h-3 mr-1" />
                             )}
-                            Sync All
+                            Sync
                           </Button>
                         </div>
                       </TableCell>
+                      
+                      {/* Actions */}
                       <TableCell>
-                        <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm" className="text-lacra-blue hover:text-blue-700">
+                        <div className="flex flex-col space-y-1">
+                          <Button variant="ghost" size="sm" className="text-lacra-blue hover:text-blue-700 text-xs">
                             View
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-800">
+                          <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-800 text-xs">
                             Edit
                           </Button>
                         </div>
@@ -384,6 +406,7 @@ export default function Commodities() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

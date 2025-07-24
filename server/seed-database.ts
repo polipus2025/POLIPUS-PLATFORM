@@ -1,0 +1,188 @@
+import { storage } from "./storage";
+
+export async function seedDatabase() {
+  console.log("🌱 Seeding database with initial data...");
+
+  try {
+    // Check if data already exists
+    const existingUsers = await storage.getUserByUsername("admin001");
+    if (existingUsers) {
+      console.log("✅ Database already seeded, skipping...");
+      return;
+    }
+    // Create sample auth users
+    await storage.createAuthUser({
+      username: "admin001",
+      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      role: "regulatory_admin",
+      userType: "regulatory",
+      firstName: "Admin",
+      lastName: "User",
+      email: "admin@lacra.gov.lr",
+      isActive: true
+    });
+
+    await storage.createAuthUser({
+      username: "AGT-2024-001",
+      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      role: "field_agent",
+      userType: "field_agent",
+      firstName: "Sarah",
+      lastName: "Konneh",
+      email: "sarah.konneh@lacra.gov.lr",
+      territoryCounty: "Lofa County",
+      isActive: true
+    });
+
+    await storage.createAuthUser({
+      username: "FRM-2024-001",
+      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      role: "farmer",
+      userType: "farmer",
+      firstName: "Moses",
+      lastName: "Tuah",
+      email: "moses.tuah@farmer.lr",
+      territoryCounty: "Lofa County",
+      isActive: true
+    });
+
+    await storage.createAuthUser({
+      username: "EXP-2024-001",
+      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      role: "exporter",
+      userType: "exporter",
+      firstName: "Marcus",
+      lastName: "Bawah",
+      email: "marcus.bawah@liberiaagrieport.com",
+      companyName: "Liberia Agri Export Ltd.",
+      isActive: true
+    });
+
+    // Create sample farmers
+    await storage.createFarmer({
+      farmerId: "FRM-2024-001",
+      firstName: "John",
+      lastName: "Kollie",
+      phoneNumber: "+231 77 123 4567",
+      idNumber: "LIB123456789",
+      county: "Lofa County",
+      district: "Voinjama",
+      village: "Zorzor Town",
+      gpsCoordinates: "8.4219,-9.8456",
+      farmSize: "5.2",
+      farmSizeUnit: "hectares",
+      status: "active",
+      agreementSigned: true,
+      agreementDate: new Date("2024-01-15")
+    });
+
+    // Create sample commodities
+    await storage.createCommodity({
+      batchNumber: "COF-2024-001",
+      name: "Arabica Coffee",
+      type: "coffee",
+      variety: "Typica",
+      county: "Lofa County",
+      district: "Voinjama",
+      farmerId: "FRM-2024-001",
+      quantity: 1250.5,
+      unit: "kg",
+      harvestDate: new Date("2024-01-15"),
+      qualityGrade: "Premium",
+      moistureContent: 12.5,
+      status: "compliant",
+      gpsCoordinates: "8.4219,-9.8456",
+      storageLocation: "Cooperative Warehouse A",
+      certificationStatus: "certified",
+      exportEligible: true
+    });
+
+    await storage.createCommodity({
+      batchNumber: "COC-2024-001", 
+      name: "Cocoa",
+      type: "cocoa",
+      variety: "Trinitario",
+      county: "Grand Bassa County",
+      district: "Buchanan",
+      farmerId: "FRM-2024-002",
+      quantity: 850.0,
+      unit: "kg",
+      harvestDate: new Date("2024-02-10"),
+      qualityGrade: "Grade 1",
+      moistureContent: 7.2,
+      status: "review_required",
+      gpsCoordinates: "6.0433,-9.4347",
+      storageLocation: "Central Processing Facility",
+      certificationStatus: "pending",
+      exportEligible: false
+    });
+
+    // Create sample inspections
+    await storage.createInspection({
+      inspectionId: "INS-2024-001",
+      commodityId: 1,
+      inspectorId: "AGT-2024-001",
+      inspectorName: "Sarah Konneh",
+      inspectionDate: new Date("2024-01-16"),
+      inspectionType: "quality_control",
+      location: "Zorzor Town, Voinjama",
+      findings: "Excellent quality, meets export standards",
+      recommendations: "Approved for export certification",
+      complianceStatus: "compliant",
+      followUpRequired: false,
+      gpsCoordinates: "8.4219,-9.8456"
+    });
+
+    // Create sample certifications
+    await storage.createCertification({
+      certificateNumber: "EXP-CERT-2024-001",
+      commodityId: 1,
+      certificationType: "export_quality",
+      issuedBy: "LACRA Quality Control Division",
+      issuedDate: new Date("2024-01-17"),
+      expiryDate: new Date("2024-07-17"),
+      status: "valid",
+      qrCode: "https://verify.lacra.gov.lr/cert/EXP-CERT-2024-001",
+      metadata: {
+        qualityScore: 95,
+        moistureContent: 12.5,
+        defectRate: 0.2
+      }
+    });
+
+    // Create sample alerts
+    await storage.createAlert({
+      type: "error",
+      title: "High Priority: Batch Quality Issue",
+      message: "Batch COC-2024-001 requires immediate quality review due to moisture content exceeding standards.",
+      priority: "high",
+      isRead: false,
+      batchNumber: "COC-2024-001",
+      county: "Grand Bassa County",
+      actionRequired: true,
+      relatedEntity: "commodity",
+      entityId: 2
+    });
+
+    // Create sample tracking records
+    await storage.createTrackingRecord({
+      trackingNumber: "TRK-2025-07-24-001",
+      batchNumber: "COF-2024-001",
+      currentLocation: "Port of Monrovia",
+      status: "in_transit",
+      vehicleId: "VEH-001",
+      driverName: "Samuel Johnson",
+      gpsCoordinates: "6.3133,-10.8077",
+      temperature: 24.5,
+      humidity: 65.2,
+      estimatedArrival: new Date("2024-01-20T14:30:00Z"),
+      lastUpdated: new Date(),
+      qrCodeScanned: true
+    });
+
+    console.log("✅ Database seeded successfully!");
+  } catch (error) {
+    console.error("❌ Error seeding database:", error);
+    throw error;
+  }
+}

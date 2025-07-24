@@ -1,9 +1,57 @@
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package } from "lucide-react";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function Landing() {
+  // Time, Date, and Weather State
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [weather, setWeather] = useState({
+    condition: 'sunny',
+    temperature: '28°C',
+    location: 'Monrovia, Liberia'
+  });
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Simulate weather updates (in a real app, this would fetch from a weather API)
+  useEffect(() => {
+    const weatherConditions = [
+      { condition: 'sunny', temperature: '28°C', icon: Sun },
+      { condition: 'cloudy', temperature: '26°C', icon: Cloud },
+      { condition: 'partly-cloudy', temperature: '25°C', icon: Cloud },
+      { condition: 'rainy', temperature: '24°C', icon: CloudRain }
+    ];
+    
+    // Update weather every 5 minutes (simulated)
+    const weatherTimer = setInterval(() => {
+      const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+      setWeather(prev => ({ ...prev, ...randomWeather }));
+    }, 300000); // 5 minutes
+
+    return () => clearInterval(weatherTimer);
+  }, []);
+
+  const getWeatherIcon = () => {
+    switch (weather.condition) {
+      case 'sunny': return Sun;
+      case 'rainy': return CloudRain;
+      case 'cloudy':
+      case 'partly-cloudy':
+      default: return Cloud;
+    }
+  };
+
+  const WeatherIcon = getWeatherIcon();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50">
       <Helmet>
@@ -15,15 +63,73 @@ export default function Landing() {
       <header className="bg-white/80 backdrop-blur-sm border-b border-green-200/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg">
-                <Globe className="h-8 w-8 text-white" />
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg">
+                  <Globe className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">AgriTrace360™</h1>
+                  <p className="text-sm text-gray-600">Liberia Agriculture Commodity Regulatory Authority</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">AgriTrace360™</h1>
-                <p className="text-sm text-gray-600">Liberia Agriculture Commodity Regulatory Authority</p>
+              
+              {/* Time, Date, and Weather Widget */}
+              <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-blue-50 to-green-50 px-4 py-2 rounded-lg border border-blue-100">
+                {/* Date and Time */}
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleDateString('en-US', { 
+                        weekday: 'short',
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-green-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Weather */}
+                <div className="flex items-center space-x-2 border-l border-blue-200 pl-4">
+                  <WeatherIcon className="h-4 w-4 text-orange-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">{weather.temperature}</div>
+                    <div className="text-xs text-gray-600">{weather.location}</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Mobile compact view */}
+              <div className="lg:hidden flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-green-50 px-3 py-1 rounded-lg border border-blue-100">
+                <Clock className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-gray-900">
+                  {currentTime.toLocaleTimeString('en-US', { 
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                </span>
+                <WeatherIcon className="h-4 w-4 text-orange-600" />
+                <span className="text-sm font-medium text-gray-900">{weather.temperature}</span>
               </div>
             </div>
+            
             <div className="text-right">
               <p className="text-sm text-gray-600">Republic of Liberia</p>
               <p className="text-xs text-gray-500">Ministry of Agriculture</p>

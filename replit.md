@@ -22,6 +22,7 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **Farmer Portal:** FRM-2024-001 / farmer123 (Moses Tuah, Lofa County)
 
 ### Recent Updates (January 2025)
+- **Time, Date, and Weather Widget**: Added comprehensive real-time clock, date, and weather display to header area across all pages and portals landing page. Features gradient styling, responsive design, and weather icons with Monrovia location (January 24, 2025)
 - **All Login Portals Fixed**: Resolved all authentication issues across farmer, exporter, field agent, and regulatory portals. All portals now working with consistent token storage and proper session management (January 23, 2025)
 - **Exporter Portal Complete**: Fully functional exporter dashboard with comprehensive authentication, API integration, and error handling. All buttons working with real-time data simulation (January 23, 2025)
 - **Dashboard Authentication**: Added proper authentication checks to prevent logout issues and ensure users see appropriate content based on their role (January 23, 2025)

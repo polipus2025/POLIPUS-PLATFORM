@@ -94,27 +94,36 @@ export default function FieldAgentDashboard() {
 
   const newFarmerMutation = useMutation({
     mutationFn: async (farmerData: any) => {
-      const farmerPayload = {
-        ...farmerData,
-        farmerId: `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
-        county: jurisdiction,
-        district: farmerData.farmLocation,
-        village: farmerData.farmLocation,
-        gpsCoordinates: `${8.4 + Math.random() * 0.1},${-9.8 + Math.random() * 0.1}`,
-        farmSizeUnit: 'hectares',
-        status: 'active',
-        agreementSigned: false,
-        registeredBy: agentId,
-        createdAt: new Date().toISOString()
+      const farmerRequest = {
+        requestId: `FARM-REQ-${Date.now()}`,
+        requestType: 'farmer_registration',
+        requestedBy: agentId,
+        agentName: 'Sarah Konneh',
+        jurisdiction: jurisdiction,
+        requestedDate: new Date().toISOString(),
+        status: 'pending_approval',
+        priority: 'low',
+        farmerData: {
+          ...farmerData,
+          farmerId: `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+          county: jurisdiction,
+          district: farmerData.farmLocation,
+          village: farmerData.farmLocation,
+          gpsCoordinates: `${8.4 + Math.random() * 0.1},${-9.8 + Math.random() * 0.1}`,
+          farmSizeUnit: 'hectares',
+          registeredBy: agentId
+        },
+        requiresDirectorApproval: true,
+        messageToDirector: `Field Agent ${agentId} requests approval to register new farmer: ${farmerData.firstName} ${farmerData.lastName} for ${farmerData.primaryCrop} farming in ${jurisdiction}.`
       };
       
-      return await apiRequest('/api/farmers', {
+      return await apiRequest('/api/farmer-registration-requests', {
         method: 'POST',
-        body: JSON.stringify(farmerPayload)
+        body: JSON.stringify(farmerRequest)
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/farmer-registration-requests'] });
       setIsNewFarmerOpen(false);
       setNewFarmerForm({
         firstName: '',
@@ -125,14 +134,14 @@ export default function FieldAgentDashboard() {
         primaryCrop: ''
       });
       toast({
-        title: 'Farmer Registered',
-        description: 'New farmer has been successfully registered in your jurisdiction.',
+        title: 'Registration Request Submitted',
+        description: 'Farmer registration request has been submitted to LACRA Director for approval.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Registration Failed',
-        description: error.message || 'Failed to register farmer',
+        title: 'Request Failed',
+        description: error.message || 'Failed to submit registration request',
         variant: 'destructive',
       });
     },
@@ -148,35 +157,32 @@ export default function FieldAgentDashboard() {
   const newInspectionMutation = useMutation({
     mutationFn: async (inspectionData: any) => {
       const selectedFarmer = farmers.find((f: any) => f.id.toString() === inspectionData.farmerId);
-      const inspectionPayload = {
-        inspectionId: `INS-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
-        commodityId: Math.floor(Math.random() * 4) + 1,
-        inspectorId: agentId,
-        inspectorName: `${agentId} - Field Agent`,
-        inspectorLicense: `LIC-${agentId}`,
-        inspectionDate: new Date(),
-        location: `${selectedFarmer?.village || 'Farm Site'} - ${jurisdiction}`,
+      const inspectionRequest = {
+        requestId: `INSP-REQ-${Date.now()}`,
+        requestType: 'inspection_request',
+        requestedBy: agentId,
+        agentName: 'Sarah Konneh',
+        jurisdiction: jurisdiction,
+        requestedDate: new Date().toISOString(),
+        status: 'pending_approval',
+        priority: 'medium',
+        farmerId: inspectionData.farmerId,
+        farmerName: selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}` : 'Unknown',
         inspectionType: inspectionData.inspectionType,
         commodityType: inspectionData.commodityType,
-        qualityGrade: 'Pending Assessment',
-        complianceStatus: 'pending',
-        moistureContent: 'TBD',
-        defectRate: 'TBD',
+        location: `${selectedFarmer?.village || 'Farm Site'} - ${jurisdiction}`,
         notes: inspectionData.notes,
-        recommendations: 'Awaiting field inspection completion',
-        jurisdiction,
-        agentId,
-        farmerName: selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}` : 'Unknown',
-        status: 'pending'
+        requiresDirectorApproval: true,
+        messageToDirector: `Field Agent ${agentId} requests approval for ${inspectionData.inspectionType} inspection of ${inspectionData.commodityType} at ${selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}'s farm` : 'farm location'} in ${jurisdiction}.`
       };
       
-      return await apiRequest('/api/inspections', {
+      return await apiRequest('/api/inspection-requests', {
         method: 'POST',
-        body: JSON.stringify(inspectionPayload)
+        body: JSON.stringify(inspectionRequest)
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/inspections'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/inspection-requests'] });
       setIsNewInspectionOpen(false);
       setNewInspectionForm({
         farmerId: '',
@@ -185,14 +191,14 @@ export default function FieldAgentDashboard() {
         notes: ''
       });
       toast({
-        title: 'Inspection Scheduled',
-        description: 'New field inspection has been scheduled and recorded.',
+        title: 'Inspection Request Submitted',
+        description: 'Your inspection request has been submitted to LACRA Director for approval.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Inspection Failed',
-        description: error.message || 'Failed to schedule inspection',
+        title: 'Request Failed',
+        description: error.message || 'Failed to submit inspection request',
         variant: 'destructive',
       });
     },

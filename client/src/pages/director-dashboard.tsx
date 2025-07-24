@@ -23,8 +23,245 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+// Field Agent Approval Manager Component
+function FieldAgentApprovalManager() {
+  const { toast } = useToast();
+  
+  // Fetch inspection requests
+  const { data: inspectionRequests = [] } = useQuery({
+    queryKey: ['/api/inspection-requests'],
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Fetch farmer registration requests
+  const { data: farmerRegistrationRequests = [] } = useQuery({
+    queryKey: ['/api/farmer-registration-requests'],
+    refetchInterval: 30000,
+  });
+
+  // Approve inspection request
+  const approveInspectionMutation = useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
+      return apiRequest(`/api/inspection-requests/${id}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({
+          notes,
+          approvedBy: 'LACRA Director'
+        })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/inspection-requests'] });
+      toast({
+        title: 'Request Approved',
+        description: 'Inspection request has been approved successfully.',
+      });
+    }
+  });
+
+  // Reject inspection request
+  const rejectInspectionMutation = useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
+      return apiRequest(`/api/inspection-requests/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({
+          notes,
+          approvedBy: 'LACRA Director'
+        })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/inspection-requests'] });
+      toast({
+        title: 'Request Rejected',
+        description: 'Inspection request has been rejected.',
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Approve farmer registration
+  const approveFarmerMutation = useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
+      return apiRequest(`/api/farmer-registration-requests/${id}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({
+          notes,
+          approvedBy: 'LACRA Director'
+        })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/farmer-registration-requests'] });
+      toast({
+        title: 'Registration Approved',
+        description: 'Farmer registration request has been approved successfully.',
+      });
+    }
+  });
+
+  // Reject farmer registration
+  const rejectFarmerMutation = useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
+      return apiRequest(`/api/farmer-registration-requests/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({
+          notes,
+          approvedBy: 'LACRA Director'
+        })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/farmer-registration-requests'] });
+      toast({
+        title: 'Registration Rejected',
+        description: 'Farmer registration request has been rejected.',
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const pendingInspections = inspectionRequests.filter((req: any) => req.status === 'pending_approval');
+  const pendingFarmerRegs = farmerRegistrationRequests.filter((req: any) => req.status === 'pending_approval');
+
+  return (
+    <div className="space-y-6">
+      {/* Inspection Requests */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckSquare className="h-5 w-5" />
+            Inspection Requests ({pendingInspections.length})
+          </CardTitle>
+          <p className="text-sm text-gray-600">Field agent inspection requests requiring director approval</p>
+        </CardHeader>
+        <CardContent>
+          {pendingInspections.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No pending inspection requests</p>
+          ) : (
+            <div className="space-y-4">
+              {pendingInspections.map((request: any) => (
+                <div key={request.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-lg">{request.inspectionType} Inspection</h4>
+                      <p className="text-sm text-gray-600">
+                        Requested by: {request.agentName} • {request.jurisdiction}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Farmer: {request.farmerName} • Commodity: {request.commodityType}
+                      </p>
+                      <p className="text-sm text-gray-600">Location: {request.location}</p>
+                    </div>
+                    <Badge className={request.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                                   request.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-green-100 text-green-800'}>
+                      {request.priority}
+                    </Badge>
+                  </div>
+                  
+                  {request.notes && (
+                    <div className="bg-gray-50 p-3 rounded">
+                      <p className="text-sm"><strong>Notes:</strong> {request.notes}</p>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={() => approveInspectionMutation.mutate({ id: request.id, notes: `Approved by Director on ${new Date().toLocaleDateString()}` })}
+                      disabled={approveInspectionMutation.isPending}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Approve
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => rejectInspectionMutation.mutate({ id: request.id, notes: `Rejected by Director on ${new Date().toLocaleDateString()}` })}
+                      disabled={rejectInspectionMutation.isPending}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Farmer Registration Requests */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            Farmer Registration Requests ({pendingFarmerRegs.length})
+          </CardTitle>
+          <p className="text-sm text-gray-600">Field agent farmer registration requests requiring director approval</p>
+        </CardHeader>
+        <CardContent>
+          {pendingFarmerRegs.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No pending farmer registration requests</p>
+          ) : (
+            <div className="space-y-4">
+              {pendingFarmerRegs.map((request: any) => (
+                <div key={request.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-lg">New Farmer Registration</h4>
+                      <p className="text-sm text-gray-600">
+                        Requested by: {request.agentName} • {request.jurisdiction}
+                      </p>
+                      {request.farmerData && (
+                        <div className="mt-2 space-y-1">
+                          <p className="text-sm"><strong>Name:</strong> {request.farmerData.firstName} {request.farmerData.lastName}</p>
+                          <p className="text-sm"><strong>Phone:</strong> {request.farmerData.phoneNumber}</p>
+                          <p className="text-sm"><strong>Primary Crop:</strong> {request.farmerData.primaryCrop}</p>
+                          <p className="text-sm"><strong>Farm Size:</strong> {request.farmerData.farmSize} hectares</p>
+                          <p className="text-sm"><strong>Location:</strong> {request.farmerData.farmLocation}</p>
+                        </div>
+                      )}
+                    </div>
+                    <Badge className={request.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                                   request.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-green-100 text-green-800'}>
+                      {request.priority}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={() => approveFarmerMutation.mutate({ id: request.id, notes: `Approved by Director on ${new Date().toLocaleDateString()}` })}
+                      disabled={approveFarmerMutation.isPending}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Approve
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => rejectFarmerMutation.mutate({ id: request.id, notes: `Rejected by Director on ${new Date().toLocaleDateString()}` })}
+                      disabled={rejectFarmerMutation.isPending}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function DirectorDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -188,9 +425,10 @@ export default function DirectorDashboard() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="pending-requests">Pending Requests</TabsTrigger>
+            <TabsTrigger value="pending-requests">Mobile Requests</TabsTrigger>
+            <TabsTrigger value="field-agent-approvals">Field Agent Approvals</TabsTrigger>
             <TabsTrigger value="emergency-alerts">Emergency Alerts</TabsTrigger>
             <TabsTrigger value="verification-history">Verification History</TabsTrigger>
           </TabsList>
@@ -262,7 +500,7 @@ export default function DirectorDashboard() {
             </div>
           </TabsContent>
 
-          {/* Pending Requests Tab */}
+          {/* Mobile Requests Tab */}
           <TabsContent value="pending-requests" className="space-y-6">
             <Card>
               <CardHeader>
@@ -317,6 +555,11 @@ export default function DirectorDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Field Agent Approvals Tab */}
+          <TabsContent value="field-agent-approvals" className="space-y-6">
+            <FieldAgentApprovalManager />
           </TabsContent>
 
           {/* Emergency Alerts Tab */}

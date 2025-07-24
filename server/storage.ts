@@ -407,6 +407,18 @@ export interface IStorage {
   getExportOrderByOrderNumber(orderNumber: string): Promise<ExportOrder | undefined>;
   createExportOrder(order: InsertExportOrder): Promise<ExportOrder>;
   updateExportOrder(id: number, order: Partial<ExportOrder>): Promise<ExportOrder | undefined>;
+  deleteExportOrder(id: number): Promise<void>;
+
+  // Field Agent Approval System methods
+  getInspectionRequests(): Promise<any[]>;
+  createInspectionRequest(request: any): Promise<any>;
+  approveInspectionRequest(id: number, updates: any): Promise<any>;
+  rejectInspectionRequest(id: number, updates: any): Promise<any>;
+  
+  getFarmerRegistrationRequests(): Promise<any[]>;
+  createFarmerRegistrationRequest(request: any): Promise<any>;
+  approveFarmerRegistrationRequest(id: number, updates: any): Promise<any>;
+  rejectFarmerRegistrationRequest(id: number, updates: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -448,6 +460,8 @@ export class MemStorage implements IStorage {
   private trackingReports: Map<number, TrackingReport>;
   private exporters: Map<number, Exporter>;
   private exportOrders: Map<number, ExportOrder>;
+  private inspectionRequests: Map<number, any>;
+  private farmerRegistrationRequests: Map<number, any>;
   private currentUserId: number;
   private currentAuthUserId: number;
   private currentUserSessionId: number;
@@ -486,6 +500,8 @@ export class MemStorage implements IStorage {
   private currentTrackingReportId: number;
   private currentExporterId: number;
   private currentExportOrderId: number;
+  private currentInspectionRequestId: number;
+  private currentFarmerRegistrationRequestId: number;
 
   constructor() {
     this.users = new Map();
@@ -526,6 +542,8 @@ export class MemStorage implements IStorage {
     this.trackingReports = new Map();
     this.exporters = new Map();
     this.exportOrders = new Map();
+    this.inspectionRequests = new Map();
+    this.farmerRegistrationRequests = new Map();
     this.currentUserId = 1;
     this.currentAuthUserId = 1;
     this.currentUserSessionId = 1;
@@ -563,6 +581,8 @@ export class MemStorage implements IStorage {
     this.currentTrackingReportId = 1;
     this.currentExporterId = 1;
     this.currentExportOrderId = 1;
+    this.currentInspectionRequestId = 1;
+    this.currentFarmerRegistrationRequestId = 1;
 
     // Initialize with default data
     this.initializeDefaultData();
@@ -3921,6 +3941,112 @@ export class MemStorage implements IStorage {
       lacraOfficerId: 1,
       notes: "Organic cocoa beans with EUDR compliance certification"
     });
+  }
+
+  // Field Agent Approval System Implementation
+  async deleteExportOrder(id: number): Promise<void> {
+    this.exportOrders.delete(id);
+  }
+
+  async getInspectionRequests(): Promise<any[]> {
+    return Array.from(this.inspectionRequests.values());
+  }
+
+  async createInspectionRequest(request: any): Promise<any> {
+    const newRequest = {
+      id: this.currentInspectionRequestId++,
+      ...request,
+      createdAt: new Date().toISOString()
+    };
+    this.inspectionRequests.set(newRequest.id, newRequest);
+    return newRequest;
+  }
+
+  async approveInspectionRequest(id: number, updates: any): Promise<any> {
+    const request = this.inspectionRequests.get(id);
+    if (!request) {
+      throw new Error('Inspection request not found');
+    }
+    
+    const updatedRequest = {
+      ...request,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.inspectionRequests.set(id, updatedRequest);
+    return updatedRequest;
+  }
+
+  async rejectInspectionRequest(id: number, updates: any): Promise<any> {
+    const request = this.inspectionRequests.get(id);
+    if (!request) {
+      throw new Error('Inspection request not found');
+    }
+    
+    const updatedRequest = {
+      ...request,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.inspectionRequests.set(id, updatedRequest);
+    return updatedRequest;
+  }
+
+  async getFarmerRegistrationRequests(): Promise<any[]> {
+    return Array.from(this.farmerRegistrationRequests.values());
+  }
+
+  async createFarmerRegistrationRequest(request: any): Promise<any> {
+    const newRequest = {
+      id: this.currentFarmerRegistrationRequestId++,
+      ...request,
+      createdAt: new Date().toISOString()
+    };
+    this.farmerRegistrationRequests.set(newRequest.id, newRequest);
+    return newRequest;
+  }
+
+  async approveFarmerRegistrationRequest(id: number, updates: any): Promise<any> {
+    const request = this.farmerRegistrationRequests.get(id);
+    if (!request) {
+      throw new Error('Farmer registration request not found');
+    }
+    
+    const updatedRequest = {
+      ...request,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // When approved, create the actual farmer record
+    if (updates.status === 'approved' && request.farmerData) {
+      await this.createFarmer({
+        ...request.farmerData,
+        status: 'active',
+        registrationDate: new Date().toISOString()
+      });
+    }
+    
+    this.farmerRegistrationRequests.set(id, updatedRequest);
+    return updatedRequest;
+  }
+
+  async rejectFarmerRegistrationRequest(id: number, updates: any): Promise<any> {
+    const request = this.farmerRegistrationRequests.get(id);
+    if (!request) {
+      throw new Error('Farmer registration request not found');
+    }
+    
+    const updatedRequest = {
+      ...request,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.farmerRegistrationRequests.set(id, updatedRequest);
+    return updatedRequest;
   }
 }
 

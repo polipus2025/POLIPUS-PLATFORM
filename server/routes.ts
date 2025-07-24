@@ -2795,6 +2795,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Field Agent Request Approval System
+  // Inspection Request endpoints
+  app.get("/api/inspection-requests", async (req, res) => {
+    try {
+      const requests = await storage.getInspectionRequests();
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inspection requests" });
+    }
+  });
+
+  app.post("/api/inspection-requests", async (req, res) => {
+    try {
+      const request = await storage.createInspectionRequest(req.body);
+      
+      // Create alert for director
+      await storage.createAlert({
+        type: 'warning',
+        title: 'New Inspection Request',
+        message: req.body.messageToDirector,
+        priority: req.body.priority || 'medium',
+        relatedEntity: 'inspection_request',
+        relatedEntityId: request.id
+      });
+      
+      res.status(201).json(request);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create inspection request" });
+    }
+  });
+
+  app.post("/api/inspection-requests/:id/approve", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { notes, approvedBy } = req.body;
+      
+      const request = await storage.approveInspectionRequest(id, {
+        status: 'approved',
+        reviewedBy: approvedBy,
+        reviewNotes: notes,
+        processedAt: new Date()
+      });
+      
+      res.json(request);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to approve inspection request" });
+    }
+  });
+
+  app.post("/api/inspection-requests/:id/reject", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { notes, approvedBy } = req.body;
+      
+      const request = await storage.rejectInspectionRequest(id, {
+        status: 'rejected',
+        reviewedBy: approvedBy,
+        reviewNotes: notes,
+        processedAt: new Date()
+      });
+      
+      res.json(request);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reject inspection request" });
+    }
+  });
+
+  // Farmer Registration Request endpoints
+  app.get("/api/farmer-registration-requests", async (req, res) => {
+    try {
+      const requests = await storage.getFarmerRegistrationRequests();
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch farmer registration requests" });
+    }
+  });
+
+  app.post("/api/farmer-registration-requests", async (req, res) => {
+    try {
+      const request = await storage.createFarmerRegistrationRequest(req.body);
+      
+      // Create alert for director
+      await storage.createAlert({
+        type: 'info',
+        title: 'New Farmer Registration Request',
+        message: req.body.messageToDirector,
+        priority: req.body.priority || 'low',
+        relatedEntity: 'farmer_registration_request',
+        relatedEntityId: request.id
+      });
+      
+      res.status(201).json(request);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create farmer registration request" });
+    }
+  });
+
+  app.post("/api/farmer-registration-requests/:id/approve", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { notes, approvedBy } = req.body;
+      
+      const request = await storage.approveFarmerRegistrationRequest(id, {
+        status: 'approved',
+        reviewedBy: approvedBy,
+        reviewNotes: notes,
+        processedAt: new Date()
+      });
+      
+      res.json(request);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to approve farmer registration request" });
+    }
+  });
+
+  app.post("/api/farmer-registration-requests/:id/reject", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { notes, approvedBy } = req.body;
+      
+      const request = await storage.rejectFarmerRegistrationRequest(id, {
+        status: 'rejected',
+        reviewedBy: approvedBy,
+        reviewNotes: notes,
+        processedAt: new Date()
+      });
+      
+      res.json(request);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reject farmer registration request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

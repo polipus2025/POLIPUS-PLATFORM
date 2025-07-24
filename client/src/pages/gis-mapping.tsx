@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import InteractiveMap from '@/components/gis/interactive-map';
+import GoogleMapsLiberia from '@/components/gis/google-maps-liberia';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
 import { 
@@ -631,7 +632,10 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-0">
-          <InteractiveMap />
+          <GoogleMapsLiberia 
+            selectedCounty={selectedCounty}
+            onCountySelect={(county) => setSelectedCounty(county)}
+          />
         </TabsContent>
 
         <TabsContent value="farm-plots" className="space-y-0">

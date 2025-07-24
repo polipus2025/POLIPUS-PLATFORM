@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import { Loader } from '@googlemaps/js-api-loader';
 import { useQuery } from '@tanstack/react-query';
 
 interface MapLayer {
@@ -313,12 +314,25 @@ export default function InteractiveMap() {
               {/* Map Container */}
               <div className="w-full h-full bg-gradient-to-br from-green-100 to-blue-100 rounded-lg relative overflow-hidden">
                 
-                {/* Map Overlay - Simulated Liberia Map */}
+                {/* Google Maps Placeholder - Replaced with real Google Maps */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative">
-                    {/* Accurate Liberia Map - Using Real Geographic Data */}
-                    <svg width="600" height="400" viewBox="0 0 600 400" className="opacity-90">
-                      <defs>
+                  <div className="text-center p-8 bg-white/90 rounded-lg shadow-lg">
+                    <div className="text-lg font-semibold text-gray-800 mb-2">
+                      🗺️ Google Maps Integration
+                    </div>
+                    <div className="text-sm text-gray-600 mb-4">
+                      Real Liberia geography with accurate county boundaries and farm locations
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Requires Google Maps API key for full functionality
+                    </div>
+                  </div>
+                </div>
+
+                {/* Legacy SVG Map (hidden) */}
+                <div className="hidden">
+                  <svg width="600" height="400" viewBox="0 0 600 400">
+                    <defs>
                         <pattern id="farmPattern" patternUnits="userSpaceOnUse" width="2" height="2">
                           <circle cx="1" cy="1" r="0.4" fill="#10B981" opacity="0.6" />
                         </pattern>

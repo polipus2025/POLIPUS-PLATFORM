@@ -77,6 +77,17 @@ export default function ExporterDashboard() {
       rspopalm: formData.get('rspopalm') === 'on',
       fscTimber: formData.get('fscTimber') === 'on',
       pefc: formData.get('pefc') === 'on',
+      cashewQuality: formData.get('cashewQuality') === 'on',
+      riceQuality: formData.get('riceQuality') === 'on',
+      // Conventional Crops
+      gmpStandards: formData.get('gmpStandards') === 'on',
+      gapStandards: formData.get('gapStandards') === 'on',
+      ippmStandards: formData.get('ippmStandards') === 'on',
+      traceabilitySystem: formData.get('traceabilitySystem') === 'on',
+      residueCompliance: formData.get('residueCompliance') === 'on',
+      phytosanitaryCert: formData.get('phytosanitaryCert') === 'on',
+      gradeStandards: formData.get('gradeStandards') === 'on',
+      moistureContent: formData.get('moistureContent') === 'on',
       // Quality & Safety
       iso22000: formData.get('iso22000') === 'on',
       haccp: formData.get('haccp') === 'on',
@@ -245,6 +256,13 @@ export default function ExporterDashboard() {
                             <SelectItem value="rice">Rice</SelectItem>
                             <SelectItem value="cassava">Cassava</SelectItem>
                             <SelectItem value="cashew">Cashew</SelectItem>
+                            <SelectItem value="peanuts">Peanuts</SelectItem>
+                            <SelectItem value="sesame">Sesame Seeds</SelectItem>
+                            <SelectItem value="plantain">Plantain</SelectItem>
+                            <SelectItem value="sweet_potato">Sweet Potato</SelectItem>
+                            <SelectItem value="yam">Yam</SelectItem>
+                            <SelectItem value="ginger">Ginger</SelectItem>
+                            <SelectItem value="turmeric">Turmeric</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -599,6 +617,53 @@ export default function ExporterDashboard() {
                         <label className="flex items-center space-x-2">
                           <input type="checkbox" name="pefc" className="rounded" />
                           <span>PEFC Forest Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="cashewQuality" className="rounded" />
+                          <span>INC Cashew Quality Standards</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="riceQuality" className="rounded" />
+                          <span>IRC Rice Quality Standards</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Conventional Crops Standards */}
+                    <div className="space-y-3">
+                      <h4 className="text-md font-medium text-gray-700">Conventional Crops Standards</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="gmpStandards" className="rounded" />
+                          <span>Good Manufacturing Practices (GMP)</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="gapStandards" className="rounded" />
+                          <span>Good Agricultural Practices (GAP)</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="ippmStandards" className="rounded" />
+                          <span>Integrated Pest Management (IPM)</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="traceabilitySystem" className="rounded" />
+                          <span>Traceability System Compliance</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="residueCompliance" className="rounded" />
+                          <span>Maximum Residue Limits (MRL)</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="phytosanitaryCert" className="rounded" />
+                          <span>Phytosanitary Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="gradeStandards" className="rounded" />
+                          <span>International Grade Standards</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="moistureContent" className="rounded" />
+                          <span>Moisture Content Standards</span>
                         </label>
                       </div>
                     </div>

@@ -176,22 +176,22 @@ export default function ExporterDashboard() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-              <Ship className="h-8 w-8 text-blue-600" />
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <Ship className="h-6 w-6 lg:h-8 lg:w-8 text-blue-600" />
               Exporter Portal
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm lg:text-base">
               LACRA Licensed Exporter - {user?.firstName} {user?.lastName}
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             {/* Request Inspection Button */}
             <Dialog open={isInspectionRequestOpen} onOpenChange={setIsInspectionRequestOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg font-semibold shadow-lg">
-                  <ClipboardCheck className="h-5 w-5 mr-2" />
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
+                  <ClipboardCheck className="h-4 w-4 mr-2" />
                   Request LACRA Inspection
                 </Button>
               </DialogTrigger>
@@ -199,8 +199,8 @@ export default function ExporterDashboard() {
             {/* Report Abuse Button */}
             <Dialog open={isReportAbuseOpen} onOpenChange={setIsReportAbuseOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg font-semibold shadow-lg">
-                  <AlertTriangle className="h-5 w-5 mr-2" />
+                <Button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
                   Report Abuse
                 </Button>
               </DialogTrigger>
@@ -593,9 +593,9 @@ export default function ExporterDashboard() {
             {/* Export Application Button - Main CTA for LACRA approval */}
             <Dialog open={isExportApplicationOpen} onOpenChange={setIsExportApplicationOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 text-lg font-semibold shadow-lg">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Submit Export Application to LACRA
+                <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Submit Export Application
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

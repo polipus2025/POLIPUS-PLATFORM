@@ -47,6 +47,7 @@ export default function GISMapping() {
   const [isAnalysisDialogOpen, setIsAnalysisDialogOpen] = useState(false);
   const [locationData, setLocationData] = useState<any>(null);
   const [farmPlots, setFarmPlots] = useState<any[]>([]);
+  const [selectedCounty, setSelectedCounty] = useState<string>('');
   const { toast } = useToast();
 
   // Connect to real satellites on component mount

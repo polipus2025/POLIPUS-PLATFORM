@@ -19,6 +19,7 @@ import {
   Satellite
 } from 'lucide-react';
 import poliposLogo from '@/assets/polipos-logo.jpg';
+import agriTraceLogo from '@/assets/IMG-20250724-WA0007_1753362990630.jpg';
 
 export default function FrontPage() {
   const modules = [
@@ -119,6 +120,15 @@ export default function FrontPage() {
                       </Badge>
                     )}
                   </div>
+                  {module.isAgriTrace && (
+                    <div className="flex justify-center mb-4">
+                      <img 
+                        src={agriTraceLogo} 
+                        alt="AgriTrace360" 
+                        className="h-12 w-12 object-contain rounded"
+                      />
+                    </div>
+                  )}
                   <CardTitle className="text-lg leading-tight text-center">
                     {module.title}
                   </CardTitle>

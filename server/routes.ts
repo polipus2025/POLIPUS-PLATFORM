@@ -2629,6 +2629,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mobile Alert System Routes - Basic Implementation
+  app.post('/api/mobile-alert-requests', async (req, res) => {
+    try {
+      const { requestType, farmerId, agentId, location, description, urgencyLevel } = req.body;
+      
+      // Create sample mobile alert request
+      const mobileRequest = {
+        id: Date.now(),
+        requestType,
+        farmerId,
+        agentId,
+        location,
+        description,
+        urgencyLevel: urgencyLevel || 'normal',
+        status: 'pending',
+        requiresDirectorApproval: urgencyLevel === 'emergency' || urgencyLevel === 'high',
+        createdAt: new Date().toISOString()
+      };
+
+      // Create corresponding alert
+      const alert = {
+        id: Date.now() + 1,
+        type: 'mobile_request',
+        title: `Mobile Request: ${requestType}`,
+        message: description,
+        priority: urgencyLevel === 'emergency' ? 'critical' : urgencyLevel === 'high' ? 'high' : 'medium',
+        source: 'mobile_app',
+        submittedBy: agentId,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+
+      res.status(201).json({ mobileRequest, alert });
+    } catch (error) {
+      console.error('Error creating mobile alert request:', error);
+      res.status(500).json({ message: 'Failed to create mobile alert request' });
+    }
+  });
+
+  app.get('/api/mobile-alert-requests', async (req, res) => {
+    try {
+      // Return sample mobile alert requests for demonstration
+      const sampleRequests = [
+        {
+          id: 1,
+          requestType: 'farmer_registration',
+          farmerId: 'FRM-MOBILE-001',
+          agentId: 'AGT-2024-001',
+          location: 'Lofa County - Voinjama District',
+          description: 'New farmer registration from mobile app - Moses Konneh, 5.2 hectares of coffee farm',
+          urgencyLevel: 'high',
+          status: 'pending',
+          requiresDirectorApproval: true,
+          createdAt: new Date(Date.now() - 3600000).toISOString()
+        },
+        {
+          id: 2,
+          requestType: 'inspection_report',
+          farmerId: 'FRM-2024-003',
+          agentId: 'AGT-2024-001',
+          location: 'Lofa County - Foya Village',
+          description: 'Quality inspection completed - Coffee batch shows Grade A quality, ready for export certification',
+          urgencyLevel: 'normal',
+          status: 'pending',
+          requiresDirectorApproval: false,
+          createdAt: new Date(Date.now() - 7200000).toISOString()
+        },
+        {
+          id: 3,
+          requestType: 'urgent_notification',
+          farmerId: null,
+          agentId: 'AGT-2024-001',
+          location: 'Lofa County - Multiple locations',
+          description: 'EMERGENCY: Potential deforestation activity detected in protected area via GPS monitoring',
+          urgencyLevel: 'emergency',
+          status: 'pending',
+          requiresDirectorApproval: true,
+          createdAt: new Date(Date.now() - 1800000).toISOString()
+        }
+      ];
+      
+      res.json(sampleRequests);
+    } catch (error) {
+      console.error('Error fetching mobile alert requests:', error);
+      res.status(500).json({ message: 'Failed to fetch mobile alert requests' });
+    }
+  });
+
+  app.post('/api/mobile-alert-requests/:id/approve', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { notes, approvedBy } = req.body;
+      
+      const updatedRequest = {
+        id: parseInt(id),
+        status: 'verified',
+        verificationNotes: notes,
+        verifiedBy: approvedBy,
+        directorApproved: true,
+        processedAt: new Date().toISOString()
+      };
+
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error('Error approving mobile alert request:', error);
+      res.status(500).json({ message: 'Failed to approve request' });
+    }
+  });
+
+  app.post('/api/mobile-alert-requests/:id/reject', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { notes, approvedBy } = req.body;
+      
+      const updatedRequest = {
+        id: parseInt(id),
+        status: 'rejected',
+        verificationNotes: notes,
+        verifiedBy: approvedBy,
+        rejectionReason: notes,
+        processedAt: new Date().toISOString()
+      };
+
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error('Error rejecting mobile alert request:', error);
+      res.status(500).json({ message: 'Failed to reject request' });
+    }
+  });
+
+  app.get('/api/dashboard/director-metrics', async (req, res) => {
+    try {
+      // Sample director metrics for demonstration
+      const metrics = {
+        pendingRequests: 3,
+        emergencyAlerts: 1,
+        verifiedToday: 2,
+        mobileSources: 1,
+        responseTime: '< 2 hours',
+        approvalRate: '94%',
+        activeAgents: 12,
+        countiesCovered: 15
+      };
+      
+      res.json(metrics);
+    } catch (error) {
+      console.error('Error fetching director metrics:', error);
+      res.status(500).json({ message: 'Failed to fetch director metrics' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

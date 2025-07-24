@@ -75,6 +75,7 @@ import {
   type InsertInspection,
   type InsertCertification,
   type InsertAlert,
+  type InsertMobileAlertRequest,
   type InsertReport,
   type InsertUser,
   type InsertAuthUser,
@@ -148,7 +149,17 @@ export interface IStorage {
   getAlerts(): Promise<Alert[]>;
   getUnreadAlerts(): Promise<Alert[]>;
   createAlert(alert: InsertAlert): Promise<Alert>;
+  updateAlert(id: number, alert: Partial<Alert>): Promise<Alert | undefined>;
   markAlertAsRead(id: number): Promise<boolean>;
+
+  // Mobile Alert Request methods
+  getMobileAlertRequests(): Promise<MobileAlertRequest[]>;
+  createMobileAlertRequest(request: InsertMobileAlertRequest): Promise<MobileAlertRequest>;
+  approveMobileAlertRequest(id: number, updates: Partial<MobileAlertRequest>): Promise<MobileAlertRequest>;
+  rejectMobileAlertRequest(id: number, updates: Partial<MobileAlertRequest>): Promise<MobileAlertRequest>;
+  
+  // Director dashboard methods
+  getDirectorMetrics(): Promise<any>;
 
   // Report methods
   getReports(): Promise<Report[]>;
@@ -407,6 +418,7 @@ export class MemStorage implements IStorage {
   private inspections: Map<number, Inspection>;
   private certifications: Map<number, Certification>;
   private alerts: Map<number, Alert>;
+  private mobileAlertRequests: Map<number, MobileAlertRequest>;
   private reports: Map<number, Report>;
   private farmers: Map<number, Farmer>;
   private farmPlots: Map<number, FarmPlot>;
@@ -444,6 +456,7 @@ export class MemStorage implements IStorage {
   private currentInspectionId: number;
   private currentCertificationId: number;
   private currentAlertId: number;
+  private currentMobileAlertRequestId: number;
   private currentReportId: number;
   private currentFarmerId: number;
   private currentFarmPlotId: number;
@@ -483,6 +496,7 @@ export class MemStorage implements IStorage {
     this.inspections = new Map();
     this.certifications = new Map();
     this.alerts = new Map();
+    this.mobileAlertRequests = new Map();
     this.reports = new Map();
     this.farmers = new Map();
     this.farmPlots = new Map();

@@ -53,13 +53,42 @@ export const certifications = pgTable("certifications", {
 
 export const alerts = pgTable("alerts", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // warning, error, success, info
+  type: text("type").notNull(), // warning, error, success, info, mobile_request
   title: text("title").notNull(),
   message: text("message").notNull(),
   priority: text("priority").notNull().default("medium"), // low, medium, high, critical
   isRead: boolean("is_read").default(false),
   relatedEntity: text("related_entity"),
   relatedEntityId: integer("related_entity_id"),
+  source: text("source").default("system"), // system, mobile_app, field_agent, web
+  requestData: text("request_data"), // JSON string for mobile app requests
+  submittedBy: text("submitted_by"), // who submitted the request
+  verifiedBy: text("verified_by"), // compliance officer who verified
+  verifiedAt: timestamp("verified_at"),
+  status: text("status").default("pending"), // pending, verified, rejected, processed
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Mobile Alert Requests table for comprehensive mobile app integration
+export const mobileAlertRequests = pgTable("mobile_alert_requests", {
+  id: serial("id").primaryKey(),
+  alertId: integer("alert_id").references(() => alerts.id),
+  requestType: text("request_type").notNull(), // farmer_registration, inspection_report, compliance_issue, quality_concern, urgent_notification
+  farmerId: text("farmer_id"), // if related to a specific farmer
+  agentId: text("agent_id"), // field agent who submitted
+  location: text("location"), // GPS coordinates or location description
+  description: text("description").notNull(),
+  attachments: text("attachments"), // JSON array of file URLs/paths
+  urgencyLevel: text("urgency_level").default("normal"), // low, normal, high, emergency
+  status: text("status").default("pending"), // pending, verified, rejected, processed
+  verificationNotes: text("verification_notes"),
+  complianceOfficerNotes: text("compliance_officer_notes"),
+  directorNotes: text("director_notes"),
+  processedAt: timestamp("processed_at"),
+  requiresDirectorApproval: boolean("requires_director_approval").default(false),
+  directorApproved: boolean("director_approved"),
+  directorApprovedAt: timestamp("director_approved_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -199,6 +228,11 @@ export const insertAlertSchema = createInsertSchema(alerts).omit({
   createdAt: true,
 });
 
+export const insertMobileAlertRequestSchema = createInsertSchema(mobileAlertRequests).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertReportSchema = createInsertSchema(reports).omit({
   id: true,
   generatedAt: true,
@@ -216,6 +250,9 @@ export type InsertCertification = z.infer<typeof insertCertificationSchema>;
 
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = z.infer<typeof insertAlertSchema>;
+
+export type MobileAlertRequest = typeof mobileAlertRequests.$inferSelect;
+export type InsertMobileAlertRequest = z.infer<typeof insertMobileAlertRequestSchema>;
 
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = z.infer<typeof insertReportSchema>;

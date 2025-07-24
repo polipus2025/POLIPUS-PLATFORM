@@ -56,8 +56,8 @@ export default function ExporterDashboard() {
     };
 
     toast({
-      title: 'Export Application Submitted',
-      description: 'Your export license application has been submitted to LACRA for review. You will receive confirmation within 5-7 business days.',
+      title: 'Application Submitted to LACRA',
+      description: 'Your export license application has been successfully submitted to LACRA for official review and approval. You will receive confirmation within 5-7 business days.',
     });
     
     setIsExportApplicationOpen(false);
@@ -96,12 +96,12 @@ export default function ExporterDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            {/* Export Application Button */}
+            {/* Export Application Button - Main CTA for LACRA approval */}
             <Dialog open={isExportApplicationOpen} onOpenChange={setIsExportApplicationOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Submit Export Application
+                <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 text-lg font-semibold shadow-lg">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Submit Export Application to LACRA
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -257,6 +257,29 @@ export default function ExporterDashboard() {
           </div>
         </div>
       </div>
+
+      {/* LACRA Export Application Information */}
+      <Card className="mb-8 border-green-200 bg-green-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <div className="bg-green-100 p-3 rounded-full">
+              <FileText className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-green-800 mb-2">
+                Submit Export Requests to LACRA
+              </h3>
+              <p className="text-green-700 mb-3">
+                Use the "Submit Export Application to LACRA" button above to submit your export license requests 
+                for official LACRA review and approval. All applications are processed within 5-7 business days.
+              </p>
+              <div className="text-sm text-green-600">
+                <strong>Required documents:</strong> Company registration, commodity details, destination markets, compliance certificates
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* LACRA Compliance Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

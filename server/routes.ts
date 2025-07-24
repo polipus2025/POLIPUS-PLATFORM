@@ -3099,40 +3099,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ===========================
-  // License Registration API
-  // ===========================
-  app.post("/api/license/register", async (req, res) => {
-    try {
-      const licenseData = req.body;
-      
-      // Simulate license registration processing
-      const registrationRecord = {
-        id: Date.now(),
-        submissionDate: new Date().toISOString(),
-        status: 'pending_review',
-        applicationNumber: `APP-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
-        ...licenseData
-      };
-      
-      // In a real system, this would save to database
-      console.log('License registration submitted:', registrationRecord);
-      
-      res.status(201).json({
-        success: true,
-        message: 'License registration submitted successfully',
-        applicationNumber: registrationRecord.applicationNumber,
-        status: registrationRecord.status,
-        submissionDate: registrationRecord.submissionDate
-      });
-    } catch (error) {
-      console.error('License registration error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to submit license registration" 
-      });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;

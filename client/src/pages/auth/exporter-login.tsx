@@ -145,26 +145,15 @@ export default function ExporterLogin() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center space-y-2">
-            <div>
-              <Button
-                variant="outline"
-                onClick={() => setLocation('/license-registration')}
-                className="text-sm text-blue-600 hover:text-blue-800 border-blue-200 hover:border-blue-300"
-              >
-                Register New Export License
-              </Button>
-            </div>
-            <div>
-              <Button
-                variant="ghost"
-                onClick={() => setLocation('/')}
-                className="text-sm text-gray-600 hover:text-gray-800"
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back to Main Portal
-              </Button>
-            </div>
+          <div className="mt-6 text-center">
+            <Button
+              variant="ghost"
+              onClick={() => setLocation('/')}
+              className="text-sm text-gray-600 hover:text-gray-800"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Main Portal
+            </Button>
           </div>
 
           {/* Licensing Info */}

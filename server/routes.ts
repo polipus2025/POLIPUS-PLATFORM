@@ -1104,6 +1104,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update commodity compliance status
+  app.patch("/api/commodities/:id/compliance", async (req, res) => {
+    try {
+      const commodityId = parseInt(req.params.id);
+      const { status, qualityGrade, notes, issues, recommendations } = req.body;
+
+      // Validate input
+      if (!status || !qualityGrade) {
+        return res.status(400).json({ message: "Status and quality grade are required" });
+      }
+
+      // Validate status values
+      const validStatuses = ['pending', 'compliant', 'review_required', 'non_compliant'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid compliance status" });
+      }
+
+      // Get the current commodity
+      const commodity = await storage.getCommodity(commodityId);
+      if (!commodity) {
+        return res.status(404).json({ message: "Commodity not found" });
+      }
+
+      // Update the commodity
+      const updatedCommodity = await storage.updateCommodity(commodityId, {
+        status,
+        qualityGrade
+      });
+
+      // Create an inspection record for this compliance update
+      const inspectionData = {
+        commodityId,
+        inspectorId: "SYSTEM",
+        inspectorName: "System Update",
+        inspectionDate: new Date(),
+        qualityGrade,
+        complianceStatus: status,
+        notes: notes || "Compliance status updated via system",
+        deficiencies: issues || "",
+        recommendations: recommendations || "",
+        nextInspectionDate: new Date(Date.now() + 30 * 24 * 3600000) // 30 days from now
+      };
+
+      await storage.createInspection(inspectionData);
+
+      // Create an alert for significant status changes
+      if (status === 'non_compliant' || status === 'review_required') {
+        const alertData = {
+          type: status === 'non_compliant' ? 'error' : 'warning',
+          title: `Compliance Issue: ${commodity.name}`,
+          message: `Commodity ${commodity.batchNumber} requires attention - Status: ${status.replace('_', ' ')}`,
+          priority: status === 'non_compliant' ? 'high' : 'medium',
+          relatedEntity: 'commodity',
+          relatedEntityId: commodityId,
+          source: 'system'
+        };
+        await storage.createAlert(alertData);
+      }
+
+      res.json({
+        success: true,
+        message: "Compliance status updated successfully",
+        commodity: updatedCommodity
+      });
+
+    } catch (error) {
+      console.error("Error updating compliance status:", error);
+      res.status(500).json({ message: "Failed to update compliance status" });
+    }
+  });
+
   app.put("/api/commodities/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);

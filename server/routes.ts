@@ -1376,7 +1376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         inspections: allInspections.map(inspection => ({
           commodityType: allCommodities.find(c => c.id === inspection.commodityId)?.type || 'Unknown',
-          inspector: inspection.inspector,
+          inspector: inspection.inspector || 'Inspector Assignment Pending',
           location: inspection.location,
           result: inspection.complianceStatus === 'approved' ? 'Pass' : 'Fail',
           date: inspection.inspectionDate

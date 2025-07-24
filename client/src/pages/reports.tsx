@@ -220,6 +220,28 @@ export default function Reports() {
     }
   };
 
+  // Test download function to verify basic download works
+  const testDownload = () => {
+    const testContent = "This is a test file from AgriTrace360™\nGenerated on: " + new Date().toISOString();
+    const blob = new Blob([testContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'agritrace360_test.txt';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
+    
+    toast({
+      title: "Test Download",
+      description: "Test file downloaded successfully.",
+    });
+  };
+
   const handleDownloadExportReport = (format: 'pdf' | 'csv' | 'detailed') => {
     if (!exportData) return;
     
@@ -387,20 +409,36 @@ export default function Reports() {
       mimeType = 'text/csv';
     }
     
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Download Started",
-      description: `Export report downloaded as ${format.toUpperCase()} file.`,
-    });
+    try {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      
+      // Add to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      toast({
+        title: "Download Successful",
+        description: `Export report "${filename}" has been downloaded successfully.`,
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download the export report. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewPdf = (report: Report) => {
@@ -2389,6 +2427,14 @@ export default function Reports() {
                       >
                         <FileText className="h-4 w-4 mr-2" />
                         Download PDF
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={testDownload}
+                        className="border-green-500 text-green-600 hover:bg-green-50"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Test Download
                       </Button>
                       <Button 
                         variant="outline" 

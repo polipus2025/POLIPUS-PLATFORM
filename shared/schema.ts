@@ -1079,3 +1079,108 @@ export type InsertTrackingTimeline = z.infer<typeof insertTrackingTimelineSchema
 export type InsertTrackingVerification = z.infer<typeof insertTrackingVerificationSchema>;
 export type InsertTrackingAlert = z.infer<typeof insertTrackingAlertSchema>;
 export type InsertTrackingReport = z.infer<typeof insertTrackingReportSchema>;
+
+// =============================================
+// INTERNAL MESSAGING SYSTEM TABLES
+// =============================================
+
+// Internal Messaging System
+export const internalMessages = pgTable("internal_messages", {
+  id: serial("id").primaryKey(),
+  messageId: text("message_id").notNull().unique(),
+  subject: text("subject").notNull(),
+  content: text("content").notNull(),
+  priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
+  messageType: text("message_type").notNull().default("general"), // general, request, alert, announcement, support
+  
+  // Sender information
+  senderId: text("sender_id").notNull(),
+  senderName: text("sender_name").notNull(),
+  senderType: text("sender_type").notNull(), // farmer, field_agent, exporter, regulatory_admin, director
+  senderPortal: text("sender_portal").notNull(), // farmer_portal, field_agent_portal, exporter_portal, regulatory_portal
+  
+  // Recipient information
+  recipientId: text("recipient_id"),
+  recipientName: text("recipient_name"),
+  recipientType: text("recipient_type"), // farmer, field_agent, exporter, regulatory_admin, director, all_users
+  recipientPortal: text("recipient_portal"), // farmer_portal, field_agent_portal, exporter_portal, regulatory_portal, all_portals
+  
+  // Message status
+  status: text("status").notNull().default("sent"), // sent, delivered, read, replied, archived
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  
+  // Threading and replies
+  threadId: text("thread_id"), // for grouping related messages
+  parentMessageId: text("parent_message_id"), // for replies
+  hasReplies: boolean("has_replies").default(false),
+  
+  // Attachments and metadata
+  attachments: jsonb("attachments"), // file attachments info
+  metadata: jsonb("metadata"), // additional data like location, commodity reference, etc.
+  
+  // Scheduling and expiry
+  scheduledFor: timestamp("scheduled_for"), // for scheduled messages
+  expiresAt: timestamp("expires_at"), // for temporary messages
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Message Recipients table for group messages
+export const messageRecipients = pgTable("message_recipients", {
+  id: serial("id").primaryKey(),
+  messageId: text("message_id").notNull().references(() => internalMessages.messageId),
+  recipientId: text("recipient_id").notNull(),
+  recipientName: text("recipient_name").notNull(),
+  recipientType: text("recipient_type").notNull(),
+  recipientPortal: text("recipient_portal").notNull(),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  deliveredAt: timestamp("delivered_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Message Templates for common message types
+export const messageTemplates = pgTable("message_templates", {
+  id: serial("id").primaryKey(),
+  templateId: text("template_id").notNull().unique(),
+  templateName: text("template_name").notNull(),
+  templateType: text("template_type").notNull(), // inspection_reminder, compliance_alert, harvest_notification, etc.
+  subject: text("subject").notNull(),
+  content: text("content").notNull(),
+  variables: jsonb("variables"), // placeholders that can be replaced
+  applicableRoles: jsonb("applicable_roles"), // which user types can use this template
+  isActive: boolean("is_active").default(true),
+  createdBy: text("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Internal messaging insert schemas
+export const insertInternalMessageSchema = createInsertSchema(internalMessages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMessageRecipientSchema = createInsertSchema(messageRecipients).omit({
+  id: true,
+  deliveredAt: true,
+  createdAt: true,
+});
+
+export const insertMessageTemplateSchema = createInsertSchema(messageTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Internal messaging types
+export type InternalMessage = typeof internalMessages.$inferSelect;
+export type MessageRecipient = typeof messageRecipients.$inferSelect;
+export type MessageTemplate = typeof messageTemplates.$inferSelect;
+
+export type InsertInternalMessage = z.infer<typeof insertInternalMessageSchema>;
+export type InsertMessageRecipient = z.infer<typeof insertMessageRecipientSchema>;
+export type InsertMessageTemplate = z.infer<typeof insertMessageTemplateSchema>;

@@ -35,6 +35,7 @@ import DirectorDashboard from "@/pages/director-dashboard";
 import MobileAlertDemo from "@/pages/mobile-alert-demo";
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FarmerDashboard from "@/pages/farmer-dashboard";
+import Messaging from "@/pages/messaging";
 
 import NotFound from "@/pages/not-found";
 
@@ -194,6 +195,7 @@ function Router() {
           <Route path="/offline-sync" component={OfflineSync} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
           <Route path="/mobile-alert-demo" component={MobileAlertDemo} />
+          <Route path="/messaging" component={Messaging} />
           
         </>
       ) : (

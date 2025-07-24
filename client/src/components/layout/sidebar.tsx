@@ -16,7 +16,8 @@ import {
   Globe,
   Map,
   RefreshCw,
-  Award
+  Award,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ const regulatoryNavigation = [
   { name: "International Standards", href: "/international-standards", icon: Globe },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
@@ -59,6 +61,7 @@ const farmerNavigation = [
   { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
@@ -70,6 +73,7 @@ const fieldAgentNavigation = [
   { name: "GPS Territory Mapping", href: "/gps-mapping", icon: Satellite },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Mobile Data Entry", href: "/data-entry", icon: Plus },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
@@ -78,6 +82,7 @@ const exporterNavigation = [
   { name: "Export Dashboard", href: "/exporter-dashboard", icon: BarChart3 },
   { name: "Export License Management", href: "/export-license", icon: Award },
   { name: "Document Verification", href: "/verification", icon: Shield },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
 ];
 
 // Function to get navigation items based on user type and role

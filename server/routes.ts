@@ -3171,6 +3171,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // =============================================
+  // INTERNAL MESSAGING SYSTEM ROUTES
+  // =============================================
+
+  // Get messages for a user
+  app.get("/api/messages/:recipientId", async (req, res) => {
+    try {
+      const { recipientId } = req.params;
+      const messages = await storage.getMessages(recipientId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  // Get specific message
+  app.get("/api/messages/single/:messageId", async (req, res) => {
+    try {
+      const { messageId } = req.params;
+      const message = await storage.getMessage(messageId);
+      
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      res.json(message);
+    } catch (error) {
+      console.error("Error fetching message:", error);
+      res.status(500).json({ message: "Failed to fetch message" });
+    }
+  });
+
+  // Send new message
+  app.post("/api/messages", async (req, res) => {
+    try {
+      const messageData = {
+        ...req.body,
+        messageId: `MSG-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        threadId: req.body.threadId || `THR-${Date.now()}`
+      };
+
+      const message = await storage.sendMessage(messageData);
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Reply to message
+  app.post("/api/messages/:parentMessageId/reply", async (req, res) => {
+    try {
+      const { parentMessageId } = req.params;
+      const replyData = {
+        ...req.body,
+        messageId: `MSG-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      };
+
+      const reply = await storage.replyToMessage(parentMessageId, replyData);
+      res.status(201).json(reply);
+    } catch (error) {
+      console.error("Error sending reply:", error);
+      res.status(500).json({ message: "Failed to send reply" });
+    }
+  });
+
+  // Mark message as read
+  app.patch("/api/messages/:messageId/read", async (req, res) => {
+    try {
+      const { messageId } = req.params;
+      const { recipientId } = req.body;
+      
+      await storage.markMessageAsRead(messageId, recipientId);
+      res.json({ message: "Message marked as read" });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+
+  // Get unread messages count
+  app.get("/api/messages/:recipientId/unread-count", async (req, res) => {
+    try {
+      const { recipientId } = req.params;
+      const count = await storage.getUnreadMessagesCount(recipientId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
+  // Delete message
+  app.delete("/api/messages/:messageId", async (req, res) => {
+    try {
+      const { messageId } = req.params;
+      const deleted = await storage.deleteMessage(messageId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      res.json({ message: "Message deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+
+  // Get message templates
+  app.get("/api/message-templates", async (req, res) => {
+    try {
+      const templates = await storage.getMessageTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching message templates:", error);
+      res.status(500).json({ message: "Failed to fetch message templates" });
+    }
+  });
+
+  // Create message template
+  app.post("/api/message-templates", async (req, res) => {
+    try {
+      const templateData = {
+        ...req.body,
+        templateId: `TPL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+
+      const template = await storage.createMessageTemplate(templateData);
+      res.status(201).json(template);
+    } catch (error) {
+      console.error("Error creating message template:", error);
+      res.status(500).json({ message: "Failed to create message template" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

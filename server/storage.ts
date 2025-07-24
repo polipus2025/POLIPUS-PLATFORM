@@ -33,6 +33,9 @@ import {
   trackingVerifications,
   trackingAlerts,
   trackingReports,
+  internalMessages,
+  messageRecipients,
+  messageTemplates,
   type Commodity,
   type Inspection,
   type Certification,
@@ -100,7 +103,13 @@ import {
   type InsertTrackingTimeline,
   type InsertTrackingVerification,
   type InsertTrackingAlert,
-  type InsertTrackingReport
+  type InsertTrackingReport,
+  type InternalMessage,
+  type MessageRecipient,
+  type MessageTemplate,
+  type InsertInternalMessage,
+  type InsertMessageRecipient,
+  type InsertMessageTemplate
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -200,6 +209,17 @@ export interface IStorage {
   getMoaIntegrations(): Promise<MoaIntegration[]>;
   getCustomsIntegrations(): Promise<CustomsIntegration[]>;
   getGovernmentSyncLogs(): Promise<GovernmentSyncLog[]>;
+
+  // Internal messaging methods
+  getMessages(recipientId: string): Promise<InternalMessage[]>;
+  getMessage(messageId: string): Promise<InternalMessage | undefined>;
+  sendMessage(message: InsertInternalMessage): Promise<InternalMessage>;
+  markMessageAsRead(messageId: string, recipientId: string): Promise<void>;
+  getUnreadMessagesCount(recipientId: string): Promise<number>;
+  getMessageTemplates(): Promise<MessageTemplate[]>;
+  createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate>;
+  deleteMessage(messageId: string): Promise<boolean>;
+  replyToMessage(parentMessageId: string, reply: InsertInternalMessage): Promise<InternalMessage>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -269,7 +289,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCommodity(id: number): Promise<boolean> {
     const result = await db.delete(commodities).where(eq(commodities.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Inspection methods
@@ -355,7 +375,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAlert(id: number): Promise<boolean> {
     const result = await db.delete(alerts).where(eq(alerts.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Report methods
@@ -602,7 +622,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDeforestationMonitoringsByMapping(mappingId: number): Promise<DeforestationMonitoring[]> {
-    return await db.select().from(deforestationMonitoring).where(eq(deforestationMonitoring.mappingId, mappingId));
+    return await db.select().from(deforestationMonitoring).where(eq(deforestationMonitoring.farmGpsMappingId, mappingId));
   }
 
   // International standards methods
@@ -637,6 +657,72 @@ export class DatabaseStorage implements IStorage {
 
   async getGovernmentSyncLogs(): Promise<GovernmentSyncLog[]> {
     return await db.select().from(governmentSyncLog).orderBy(desc(governmentSyncLog.id));
+  }
+
+  // Internal messaging methods
+  async getMessages(recipientId: string): Promise<InternalMessage[]> {
+    return await db.select().from(internalMessages)
+      .where(eq(internalMessages.recipientId, recipientId))
+      .orderBy(desc(internalMessages.createdAt));
+  }
+
+  async getMessage(messageId: string): Promise<InternalMessage | undefined> {
+    const [message] = await db.select().from(internalMessages)
+      .where(eq(internalMessages.messageId, messageId));
+    return message || undefined;
+  }
+
+  async sendMessage(message: InsertInternalMessage): Promise<InternalMessage> {
+    const [newMessage] = await db.insert(internalMessages).values(message).returning();
+    return newMessage;
+  }
+
+  async markMessageAsRead(messageId: string, recipientId: string): Promise<void> {
+    await db.update(internalMessages)
+      .set({ isRead: true, readAt: new Date() })
+      .where(and(
+        eq(internalMessages.messageId, messageId),
+        eq(internalMessages.recipientId, recipientId)
+      ));
+  }
+
+  async getUnreadMessagesCount(recipientId: string): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(internalMessages)
+      .where(and(
+        eq(internalMessages.recipientId, recipientId),
+        eq(internalMessages.isRead, false)
+      ));
+    return result[0].count;
+  }
+
+  async getMessageTemplates(): Promise<MessageTemplate[]> {
+    return await db.select().from(messageTemplates)
+      .where(eq(messageTemplates.isActive, true))
+      .orderBy(desc(messageTemplates.createdAt));
+  }
+
+  async createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate> {
+    const [newTemplate] = await db.insert(messageTemplates).values(template).returning();
+    return newTemplate;
+  }
+
+  async deleteMessage(messageId: string): Promise<boolean> {
+    const result = await db.delete(internalMessages)
+      .where(eq(internalMessages.messageId, messageId));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async replyToMessage(parentMessageId: string, reply: InsertInternalMessage): Promise<InternalMessage> {
+    // First, update the parent message to indicate it has replies
+    await db.update(internalMessages)
+      .set({ hasReplies: true })
+      .where(eq(internalMessages.messageId, parentMessageId));
+
+    // Create the reply message
+    const replyWithParent = { ...reply, parentMessageId };
+    const [newReply] = await db.insert(internalMessages).values(replyWithParent).returning();
+    return newReply;
   }
 }
 

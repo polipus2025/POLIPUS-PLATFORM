@@ -188,12 +188,6 @@ export default function ExporterDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {/* Network Partnership Button */}
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
-              <Users className="h-4 w-4 mr-2" />
-              Network Partnership
-            </Button>
-            
             {/* Request Inspection Button */}
             <Dialog open={isInspectionRequestOpen} onOpenChange={setIsInspectionRequestOpen}>
               <DialogTrigger asChild>
@@ -1124,7 +1118,30 @@ export default function ExporterDashboard() {
         </Card>
       </div>
 
-
+      {/* Business Operations */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Business Operations</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <Button 
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white p-4 h-auto justify-start"
+                onClick={() => {
+                  console.log('Network Partnership clicked');
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <Users className="h-6 w-6" />
+                  <div className="text-left">
+                    <div className="font-semibold">Network Partnership</div>
+                    <div className="text-sm text-purple-100">Manage business partnerships</div>
+                  </div>
+                </div>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Recent LACRA Requests */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

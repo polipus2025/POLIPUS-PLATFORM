@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import InteractiveMap from '@/components/gis/interactive-map';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
@@ -14,7 +15,17 @@ import {
   Satellite, 
   Activity,
   BarChart3,
-  Download
+  Download,
+  TreePine,
+  AlertCircle,
+  Shield,
+  CheckCircle,
+  RefreshCw,
+  AlertTriangle,
+  MapPin,
+  Globe,
+  Zap,
+  Eye
 } from 'lucide-react';
 import { SatelliteImageryService, CropMonitoringService, NASASatelliteService, SATELLITE_PROVIDERS, GPS_SERVICES, NASA_SATELLITES } from "@/lib/satellite-services";
 
@@ -93,14 +104,16 @@ export default function GISMapping() {
         lng: position.coords?.longitude || -9.4295 
       });
       
-      console.log('Successfully connected to satellite networks:', status);
-      console.log('NASA GIBS imagery connected:', nasaImagery);
-      console.log('NASA MODIS agricultural data:', modisData);
-      console.log('NASA Landsat field analysis:', landsatData);
-      console.log('NASA SMAP soil moisture:', smapData);
-      console.log('GFW GLAD deforestation alerts:', gladAlerts);
-      console.log('GFW integrated alerts:', gfwIntegratedAlerts);
-      console.log('GFW tree cover analysis:', treeCoverAnalysis);
+      console.log('✅ Successfully connected to satellite networks:', status);
+      console.log('🛰️ NASA GIBS imagery connected:', nasaImagery);
+      console.log('🌱 NASA MODIS agricultural data:', modisData);
+      console.log('🗺️ NASA Landsat field analysis:', landsatData);
+      console.log('💧 NASA SMAP soil moisture:', smapData);
+      console.log('🌲 GFW GLAD deforestation alerts:', gladAlerts);
+      console.log('🔍 GFW integrated alerts:', gfwIntegratedAlerts);
+      console.log('📊 GFW tree cover analysis:', treeCoverAnalysis);
+      console.log('🔥 GFW fire alerts:', fireAlerts);
+      console.log('🦋 GFW biodiversity data:', biodiversityData);
       
       // Store NASA data and GFW data for display
       setSatelliteStatus((prev: any) => ({
@@ -110,7 +123,22 @@ export default function GISMapping() {
       }));
       
     } catch (error) {
-      console.error('Satellite connection error:', error);
+      console.error('❌ Satellite connection error:', error);
+      
+      // Set default satellite status even if connection fails to show UI
+      setSatelliteStatus({
+        totalSatellites: 0,
+        connectedSatellites: 0,
+        gps: { accuracy: 'Connecting...', signal: 'weak' },
+        constellations: {
+          gps: { active: 0, signal: 'connecting' },
+          glonass: { active: 0, signal: 'connecting' },
+          galileo: { active: 0, signal: 'connecting' },
+          beidou: { active: 0, signal: 'connecting' }
+        },
+        optimalCoverage: false
+      });
+      
     } finally {
       setIsConnectingSatellites(false);
     }

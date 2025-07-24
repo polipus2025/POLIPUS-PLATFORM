@@ -84,31 +84,18 @@ export default function FrontPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50">
-      <Helmet>
-        <title>Digital Agriculture Platform - Republic of Liberia</title>
-        <meta name="description" content="Comprehensive digital agriculture platform for traceability, compliance, and farm management in Liberia" />
-      </Helmet>
-
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-white border-b">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            {/* Polipos Logo */}
-            <div className="flex justify-center mb-8">
-              <img 
-                src={poliposLogo} 
-                alt="Polipos - Brightening the Future" 
-                className="h-20 w-auto object-contain"
-              />
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-white">
+      {/* Polipos Logo */}
+      <div className="flex justify-center pt-16 pb-8">
+        <img 
+          src={poliposLogo} 
+          alt="Polipos - Brightening the Future" 
+          className="h-20 w-auto object-contain"
+        />
       </div>
 
       {/* Platform Modules */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {modules.map((module) => {
             const IconComponent = module.icon;
@@ -165,10 +152,6 @@ export default function FrontPage() {
           })}
         </div>
       </div>
-
-
-
-
     </div>
   );
 }

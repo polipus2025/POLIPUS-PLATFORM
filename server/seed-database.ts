@@ -10,7 +10,8 @@ export async function seedDatabase() {
       console.log("✅ Database already seeded, skipping...");
       return;
     }
-    // Create sample auth users
+    
+    // Create sample auth users (only runs on first setup)
     await storage.createAuthUser({
       username: "admin001",
       passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
@@ -48,7 +49,7 @@ export async function seedDatabase() {
 
     await storage.createAuthUser({
       username: "EXP-2024-001",
-      passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
+      passwordHash: "$2b$12$E1wQNWg/B1lkKxljONG7AutdwOKKPEegD8AvhL8pV3FzYsnH1IYwq",
       role: "exporter",
       userType: "exporter",
       firstName: "Marcus",

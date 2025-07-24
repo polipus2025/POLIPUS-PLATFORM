@@ -87,11 +87,11 @@ export default function FrontPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Polipos Logo */}
-      <div className="flex justify-center pt-16 pb-8">
+      <div className="flex justify-center pt-12 pb-12">
         <img 
           src={poliposLogo} 
           alt="Polipos - Brightening the Future" 
-          className="h-20 w-auto object-contain"
+          className="h-32 w-auto object-contain"
         />
       </div>
 

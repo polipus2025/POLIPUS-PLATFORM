@@ -13,6 +13,7 @@ import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard";
 import Commodities from "@/pages/commodities";
 import ExporterDashboard from "@/pages/exporter-dashboard";
+import ExportLicense from "@/pages/export-license";
 import Inspections from "@/pages/inspections";
 import Certifications from "@/pages/certifications";
 import Reports from "@/pages/reports";
@@ -75,6 +76,12 @@ function Router() {
           <Route path="/exporter-dashboard">
             <ProtectedRoute 
               component={ExporterDashboard} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/export-license">
+            <ProtectedRoute 
+              component={ExportLicense} 
               allowedUserTypes={['exporter']} 
             />
           </Route>

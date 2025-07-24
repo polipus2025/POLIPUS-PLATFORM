@@ -111,11 +111,11 @@ export default function FrontPage() {
               >
                 <CardHeader className="pb-4 flex-1 flex items-center justify-center">
                   {module.isAgriTrace ? (
-                    <div className="flex items-center justify-center h-full w-full">
+                    <div className="flex items-center justify-center h-full w-full p-2">
                       <img 
                         src={agriTraceLogo} 
                         alt="AgriTrace360" 
-                        className="max-h-32 max-w-full object-contain"
+                        className="max-h-48 max-w-full object-contain"
                       />
                     </div>
                   ) : (

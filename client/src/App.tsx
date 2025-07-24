@@ -59,15 +59,24 @@ function Router() {
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
       
-      {/* Exporter Portal Routes - Must be before protected check */}
-      <Route path="/exporter-dashboard" component={ExporterDashboard} />
-      
       {/* Protected Routes - Require Authentication */}
       {authToken && userType ? (
         <>
           {/* Dashboard - Role-based routing */}
           <Route path="/dashboard">
             {userType === 'field_agent' ? <FieldAgentDashboard /> : <Dashboard />}
+          </Route>
+          <Route path="/">
+            {userType === 'field_agent' ? <FieldAgentDashboard /> : 
+             userType === 'exporter' ? <ExporterDashboard /> : <Dashboard />}
+          </Route>
+          
+          {/* Exporter Portal Routes */}
+          <Route path="/exporter-dashboard">
+            <ProtectedRoute 
+              component={ExporterDashboard} 
+              allowedUserTypes={['exporter']} 
+            />
           </Route>
           
           {/* Regulatory Staff Only Routes */}
@@ -194,6 +203,7 @@ function App() {
   // Check if user is on authentication pages or landing page
   const isAuthPage = window.location.pathname.includes("-login");
   const isLandingPage = window.location.pathname === "/" && !authToken;
+  const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   
   return (
     <QueryClientProvider client={queryClient}>

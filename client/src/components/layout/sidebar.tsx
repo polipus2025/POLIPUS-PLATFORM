@@ -71,6 +71,12 @@ const fieldAgentNavigation = [
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
+// Exporter Navigation - Only exporter-LACRA interaction features
+const exporterNavigation = [
+  { name: "Export Dashboard", href: "/exporter-dashboard", icon: BarChart3 },
+  { name: "Document Verification", href: "/verification", icon: Shield },
+];
+
 // Function to get navigation items based on user type and role
 const getNavigationItems = (userType: string | null, role: string | null) => {
   switch (userType) {
@@ -80,6 +86,8 @@ const getNavigationItems = (userType: string | null, role: string | null) => {
       return farmerNavigation;
     case 'field_agent':
       return fieldAgentNavigation;
+    case 'exporter':
+      return exporterNavigation;
     default:
       return regulatoryNavigation; // Default fallback
   }
@@ -100,6 +108,7 @@ export default function Sidebar() {
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             {userType === 'farmer' ? 'Farm Management' : 
              userType === 'field_agent' ? 'Field Operations' : 
+             userType === 'exporter' ? 'Export Operations' :
              'Regulatory Compliance'}
           </h3>
           <ul className="space-y-2">
@@ -115,7 +124,9 @@ export default function Sidebar() {
                           ? userType === 'farmer' 
                             ? "text-green-700 bg-green-50"
                             : userType === 'field_agent'
-                            ? "text-orange-700 bg-orange-50" 
+                            ? "text-orange-700 bg-orange-50"
+                            : userType === 'exporter'
+                            ? "text-purple-700 bg-purple-50"
                             : "text-lacra-blue bg-blue-50"
                           : "text-gray-600 hover:bg-gray-50"
                       )}
@@ -136,6 +147,7 @@ export default function Sidebar() {
           <div className="text-sm font-medium text-gray-700">
             {userType === 'farmer' ? 'Farmer' : 
              userType === 'field_agent' ? 'Field Agent' : 
+             userType === 'exporter' ? 'Licensed Exporter' :
              'LACRA Officer'}
           </div>
           {role && (

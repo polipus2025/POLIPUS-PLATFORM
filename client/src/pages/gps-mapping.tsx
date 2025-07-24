@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import EnhancedGPSTracker from '@/components/gps/enhanced-gps-tracker';
 import GPSMapViewer from '@/components/gps/gps-map-viewer';
 import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
+import AdvancedBoundaryMapper from '@/components/gps/advanced-boundary-mapper';
 import { Helmet } from 'react-helmet';
 import { SatelliteImageryService, CropMonitoringService, SATELLITE_PROVIDERS, GPS_SERVICES } from "@/lib/satellite-services";
 
@@ -290,7 +291,7 @@ export default function GpsMapping() {
 
         {/* Enhanced GPS Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="tracker" className="flex items-center gap-2">
               <Signal className="h-4 w-4" />
               GPS Tracker
@@ -302,6 +303,10 @@ export default function GpsMapping() {
             <TabsTrigger value="map" className="flex items-center gap-2">
               <Layers className="h-4 w-4" />
               Map Viewer
+            </TabsTrigger>
+            <TabsTrigger value="advanced" className="flex items-center gap-2">
+              <Navigation className="h-4 w-4" />
+              Advanced Mapper
             </TabsTrigger>
             <TabsTrigger value="existing" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
@@ -365,6 +370,23 @@ export default function GpsMapping() {
                 />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Advanced Boundary Mapper Tab */}
+          <TabsContent value="advanced" className="space-y-6">
+            <AdvancedBoundaryMapper
+              onBoundaryComplete={handleBoundaryComplete}
+              onPointAdded={(point) => {
+                console.log('New boundary point added:', point);
+                toast({
+                  title: "Boundary Point Added",
+                  description: `Point ${point.order}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`,
+                  duration: 2000,
+                });
+              }}
+              maxPoints={100}
+              minAccuracy={5}
+            />
           </TabsContent>
 
           {/* Existing Mappings Tab */}

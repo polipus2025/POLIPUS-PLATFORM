@@ -1,4 +1,4 @@
-import { Bell, Sprout, LogOut, User } from "lucide-react";
+import { Bell, Sprout, LogOut, User, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { SyncStatusIndicator } from "@/components/sync/sync-status-indicator";
 import type { Alert } from "@shared/schema";
+import { useState, useEffect } from "react";
 
 // Helper function to get user info
 const getUserInfo = () => {
@@ -41,6 +42,53 @@ export default function Header() {
 
   const unreadCount = alerts.length;
   const { role, userType, username, firstName, lastName } = getUserInfo();
+
+  // Time, Date, and Weather State
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [weather, setWeather] = useState({
+    condition: 'sunny',
+    temperature: '28°C',
+    location: 'Monrovia, Liberia'
+  });
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Simulate weather updates (in a real app, this would fetch from a weather API)
+  useEffect(() => {
+    const weatherConditions = [
+      { condition: 'sunny', temperature: '28°C', icon: Sun },
+      { condition: 'cloudy', temperature: '26°C', icon: Cloud },
+      { condition: 'partly-cloudy', temperature: '25°C', icon: Cloud },
+      { condition: 'rainy', temperature: '24°C', icon: CloudRain }
+    ];
+    
+    // Update weather every 5 minutes (simulated)
+    const weatherTimer = setInterval(() => {
+      const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+      setWeather(prev => ({ ...prev, ...randomWeather }));
+    }, 300000); // 5 minutes
+
+    return () => clearInterval(weatherTimer);
+  }, []);
+
+  const getWeatherIcon = () => {
+    switch (weather.condition) {
+      case 'sunny': return Sun;
+      case 'rainy': return CloudRain;
+      case 'cloudy':
+      case 'partly-cloudy':
+      default: return Cloud;
+    }
+  };
+
+  const WeatherIcon = getWeatherIcon();
 
   const handleLogout = async () => {
     try {
@@ -112,7 +160,7 @@ export default function Header() {
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="px-6 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-lacra-blue rounded-lg flex items-center justify-center">
                 <Sprout className="text-white text-lg" />
@@ -121,6 +169,61 @@ export default function Header() {
                 <h1 className="text-xl font-bold text-neutral">AgriTrace360™</h1>
                 <p className="text-sm text-gray-500">LACRA Regulatory Dashboard</p>
               </div>
+            </div>
+            
+            {/* Time, Date, and Weather Widget */}
+            <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-blue-50 to-green-50 px-4 py-2 rounded-lg border border-blue-100">
+              {/* Date and Time */}
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">
+                    {currentTime.toLocaleDateString('en-US', { 
+                      weekday: 'short',
+                      month: 'short', 
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4 text-green-600" />
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">
+                    {currentTime.toLocaleTimeString('en-US', { 
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Weather */}
+              <div className="flex items-center space-x-2 border-l border-blue-200 pl-4">
+                <WeatherIcon className="h-4 w-4 text-orange-600" />
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">{weather.temperature}</div>
+                  <div className="text-xs text-gray-600">{weather.location}</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Mobile compact view */}
+            <div className="lg:hidden flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-green-50 px-3 py-1 rounded-lg border border-blue-100">
+              <Clock className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-gray-900">
+                {currentTime.toLocaleTimeString('en-US', { 
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                })}
+              </span>
+              <WeatherIcon className="h-4 w-4 text-orange-600" />
+              <span className="text-sm font-medium text-gray-900">{weather.temperature}</span>
             </div>
           </div>
           

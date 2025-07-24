@@ -16,12 +16,16 @@ import {
   Clock, 
   AlertTriangle,
   Package,
-  Globe
+  Globe,
+  ClipboardCheck,
+  MapPin,
+  Phone
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ExporterDashboard() {
   const [isExportApplicationOpen, setIsExportApplicationOpen] = useState(false);
+  const [isInspectionRequestOpen, setIsInspectionRequestOpen] = useState(false);
   const { toast } = useToast();
 
   // Fetch user data
@@ -63,6 +67,28 @@ export default function ExporterDashboard() {
     setIsExportApplicationOpen(false);
   };
 
+  const handleSubmitInspectionRequest = (formData: FormData) => {
+    const inspectionData = {
+      facilityName: formData.get('facilityName') as string,
+      facilityAddress: formData.get('facilityAddress') as string,
+      county: formData.get('county') as string,
+      commodityType: formData.get('commodityType') as string,
+      quantity: formData.get('quantity') as string,
+      preferredDate: formData.get('preferredDate') as string,
+      contactPerson: formData.get('contactPerson') as string,
+      contactPhone: formData.get('contactPhone') as string,
+      urgencyLevel: formData.get('urgencyLevel') as string,
+      inspectionNotes: formData.get('inspectionNotes') as string,
+    };
+
+    toast({
+      title: 'Inspection Request Submitted to LACRA',
+      description: 'Your inspection request has been submitted to LACRA. A LACRA officer will be assigned and will contact you within 2-3 business days to schedule the inspection.',
+    });
+    
+    setIsInspectionRequestOpen(false);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': case 'approved': case 'verified': return 'bg-green-100 text-green-800';
@@ -96,6 +122,197 @@ export default function ExporterDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            {/* Request Inspection Button */}
+            <Dialog open={isInspectionRequestOpen} onOpenChange={setIsInspectionRequestOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg font-semibold shadow-lg">
+                  <ClipboardCheck className="h-5 w-5 mr-2" />
+                  Request LACRA Inspection
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5 text-blue-600" />
+                    Request LACRA Officer Inspection
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    handleSubmitInspectionRequest(formData);
+                  }} 
+                  className="space-y-6"
+                >
+                  {/* Facility Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Facility Information</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="facilityName">Facility/Farm Name *</Label>
+                        <Input 
+                          id="facilityName" 
+                          name="facilityName"
+                          placeholder="e.g., Liberia Agri Processing Plant"
+                          required 
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="county">County *</Label>
+                        <Select name="county" required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select county" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="montserrado">Montserrado</SelectItem>
+                            <SelectItem value="margibi">Margibi</SelectItem>
+                            <SelectItem value="bong">Bong</SelectItem>
+                            <SelectItem value="lofa">Lofa</SelectItem>
+                            <SelectItem value="nimba">Nimba</SelectItem>
+                            <SelectItem value="grand_bassa">Grand Bassa</SelectItem>
+                            <SelectItem value="sinoe">Sinoe</SelectItem>
+                            <SelectItem value="rivercess">River Cess</SelectItem>
+                            <SelectItem value="grand_gedeh">Grand Gedeh</SelectItem>
+                            <SelectItem value="maryland">Maryland</SelectItem>
+                            <SelectItem value="river_gee">River Gee</SelectItem>
+                            <SelectItem value="grand_cape_mount">Grand Cape Mount</SelectItem>
+                            <SelectItem value="gbarpolu">Gbarpolu</SelectItem>
+                            <SelectItem value="bomi">Bomi</SelectItem>
+                            <SelectItem value="grand_kru">Grand Kru</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="facilityAddress">Complete Address *</Label>
+                      <Textarea 
+                        id="facilityAddress" 
+                        name="facilityAddress"
+                        placeholder="Provide detailed address, landmarks, and GPS coordinates if available"
+                        rows={2}
+                        required 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Crop/Commodity Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Crop/Commodity Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="commodityType">Commodity Type *</Label>
+                        <Select name="commodityType" required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select commodity" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="coffee">Coffee</SelectItem>
+                            <SelectItem value="cocoa">Cocoa</SelectItem>
+                            <SelectItem value="rubber">Rubber</SelectItem>
+                            <SelectItem value="palm_oil">Palm Oil</SelectItem>
+                            <SelectItem value="rice">Rice</SelectItem>
+                            <SelectItem value="cassava">Cassava</SelectItem>
+                            <SelectItem value="cashew">Cashew</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="quantity">Estimated Quantity (MT) *</Label>
+                        <Input 
+                          id="quantity" 
+                          name="quantity"
+                          placeholder="e.g., 100"
+                          type="number"
+                          required 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Inspection Schedule */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Inspection Schedule</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="preferredDate">Preferred Inspection Date *</Label>
+                        <Input 
+                          id="preferredDate" 
+                          name="preferredDate"
+                          type="date"
+                          min={new Date().toISOString().split('T')[0]}
+                          required 
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="urgencyLevel">Urgency Level *</Label>
+                        <Select name="urgencyLevel" required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select urgency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="routine">Routine (5-7 days)</SelectItem>
+                            <SelectItem value="priority">Priority (2-3 days)</SelectItem>
+                            <SelectItem value="urgent">Urgent (Next day)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Contact Information</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="contactPerson">Contact Person *</Label>
+                        <Input 
+                          id="contactPerson" 
+                          name="contactPerson"
+                          defaultValue="Marcus Bawah"
+                          required 
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contactPhone">Phone Number *</Label>
+                        <Input 
+                          id="contactPhone" 
+                          name="contactPhone"
+                          placeholder="+231 77 123 4567"
+                          required 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Notes */}
+                  <div>
+                    <Label htmlFor="inspectionNotes">Additional Notes</Label>
+                    <Textarea 
+                      id="inspectionNotes" 
+                      name="inspectionNotes"
+                      placeholder="Any special requirements, access instructions, or additional information for the LACRA inspector..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      onClick={() => setIsInspectionRequestOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                      Submit Inspection Request
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
             {/* Export Application Button - Main CTA for LACRA approval */}
             <Dialog open={isExportApplicationOpen} onOpenChange={setIsExportApplicationOpen}>
               <DialogTrigger asChild>
@@ -258,28 +475,50 @@ export default function ExporterDashboard() {
         </div>
       </div>
 
-      {/* LACRA Export Application Information */}
-      <Card className="mb-8 border-green-200 bg-green-50">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4">
-            <div className="bg-green-100 p-3 rounded-full">
-              <FileText className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">
-                Submit Export Requests to LACRA
-              </h3>
-              <p className="text-green-700 mb-3">
-                Use the "Submit Export Application to LACRA" button above to submit your export license requests 
-                for official LACRA review and approval. All applications are processed within 5-7 business days.
-              </p>
-              <div className="text-sm text-green-600">
-                <strong>Required documents:</strong> Company registration, commodity details, destination markets, compliance certificates
+      {/* LACRA Services Information */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="bg-blue-100 p-3 rounded-full">
+                <ClipboardCheck className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                  Request LACRA Inspection
+                </h3>
+                <p className="text-blue-700 mb-3">
+                  Request a LACRA officer to inspect your crops and facilities. Required for export certification.
+                </p>
+                <div className="text-sm text-blue-600">
+                  <strong>Response time:</strong> 2-3 business days for assignment
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="bg-green-100 p-3 rounded-full">
+                <FileText className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-green-800 mb-2">
+                  Submit Export Applications
+                </h3>
+                <p className="text-green-700 mb-3">
+                  Submit export license requests for official LACRA review and approval.
+                </p>
+                <div className="text-sm text-green-600">
+                  <strong>Processing time:</strong> 5-7 business days
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* LACRA Compliance Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -353,43 +592,82 @@ export default function ExporterDashboard() {
         </Card>
       </div>
 
-      {/* Recent Export Applications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-blue-600" />
-            Recent Export Applications
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Mock recent applications */}
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h4 className="font-semibold">Coffee Export to Germany</h4>
-                <p className="text-sm text-gray-600">Application #EXP-2025-001 • 500 MT Arabica Coffee</p>
-                <p className="text-xs text-gray-500">Submitted: January 20, 2025</p>
+      {/* Recent LACRA Requests */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Recent Inspection Requests */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ClipboardCheck className="h-5 w-5 text-blue-600" />
+              Recent Inspection Requests
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <h4 className="font-semibold">Coffee Processing Facility</h4>
+                  <p className="text-sm text-gray-600">Request #INS-2025-001 • Lofa County</p>
+                  <p className="text-xs text-gray-500">Submitted: January 22, 2025</p>
+                </div>
+                <div className="text-right">
+                  <Badge className="bg-blue-100 text-blue-800">Officer Assigned</Badge>
+                  <p className="text-xs text-gray-500 mt-1">Officer: Sarah Konneh</p>
+                </div>
               </div>
-              <div className="text-right">
-                <Badge className="bg-yellow-100 text-yellow-800">Under Review</Badge>
-                <p className="text-xs text-gray-500 mt-1">Est. approval: 3-5 days</p>
-              </div>
-            </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h4 className="font-semibold">Cocoa Export to Netherlands</h4>
-                <p className="text-sm text-gray-600">Application #EXP-2025-002 • 750 MT Premium Cocoa</p>
-                <p className="text-xs text-gray-500">Submitted: January 18, 2025</p>
-              </div>
-              <div className="text-right">
-                <Badge className="bg-green-100 text-green-800">Approved</Badge>
-                <p className="text-xs text-gray-500 mt-1">Certificate issued</p>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <h4 className="font-semibold">Cocoa Storage Warehouse</h4>
+                  <p className="text-sm text-gray-600">Request #INS-2025-002 • Margibi County</p>
+                  <p className="text-xs text-gray-500">Submitted: January 20, 2025</p>
+                </div>
+                <div className="text-right">
+                  <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                  <p className="text-xs text-gray-500 mt-1">Passed inspection</p>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Recent Export Applications */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-green-600" />
+              Recent Export Applications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <h4 className="font-semibold">Coffee Export to Germany</h4>
+                  <p className="text-sm text-gray-600">Application #EXP-2025-001 • 500 MT Arabica Coffee</p>
+                  <p className="text-xs text-gray-500">Submitted: January 20, 2025</p>
+                </div>
+                <div className="text-right">
+                  <Badge className="bg-yellow-100 text-yellow-800">Under Review</Badge>
+                  <p className="text-xs text-gray-500 mt-1">Est. approval: 3-5 days</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <h4 className="font-semibold">Cocoa Export to Netherlands</h4>
+                  <p className="text-sm text-gray-600">Application #EXP-2025-002 • 750 MT Premium Cocoa</p>
+                  <p className="text-xs text-gray-500">Submitted: January 18, 2025</p>
+                </div>
+                <div className="text-right">
+                  <Badge className="bg-green-100 text-green-800">Approved</Badge>
+                  <p className="text-xs text-gray-500 mt-1">Certificate issued</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* LACRA Contact Information */}
       <Card className="mt-6">

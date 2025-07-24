@@ -18,7 +18,6 @@ import {
   Globe,
   Satellite
 } from 'lucide-react';
-import agriTraceLogo from '@/assets/IMG-20250724-WA0007_1753362990630.jpg';
 import poliposLogo from '@/assets/polipos-logo.jpg';
 
 export default function FrontPage() {
@@ -199,16 +198,9 @@ export default function FrontPage() {
                       <IconComponent className="h-6 w-6" />
                     </div>
                     {module.isAgriTrace && (
-                      <div className="flex items-center">
-                        <img 
-                          src={agriTraceLogo} 
-                          alt="AgriTrace360" 
-                          className="h-8 w-8 object-contain rounded"
-                        />
-                        <Badge className="ml-2 bg-green-600 text-white">
-                          AgriTrace360™
-                        </Badge>
-                      </div>
+                      <Badge className="bg-green-600 text-white">
+                        AgriTrace360™
+                      </Badge>
                     )}
                   </div>
                   <CardTitle className="text-lg leading-tight">
@@ -273,11 +265,6 @@ export default function FrontPage() {
                 size="lg" 
                 className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
               >
-                <img 
-                  src={agriTraceLogo} 
-                  alt="AgriTrace360" 
-                  className="h-6 w-6 mr-3 rounded"
-                />
                 Launch AgriTrace360™
                 <ArrowRight className="h-5 w-5 ml-3" />
               </Button>

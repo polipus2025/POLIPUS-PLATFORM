@@ -595,7 +595,7 @@ export default function ExporterDashboard() {
               <DialogTrigger asChild>
                 <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
                   <FileText className="h-4 w-4 mr-2" />
-                  Submit Export Application
+                  Request Export Permit
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

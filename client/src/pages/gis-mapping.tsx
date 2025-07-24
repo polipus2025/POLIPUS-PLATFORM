@@ -633,10 +633,7 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-0">
-          <GoogleMapsLiberia 
-            selectedCounty={selectedCounty}
-            onCountySelect={(county) => setSelectedCounty(county)}
-          />
+          <InteractiveMap />
         </TabsContent>
 
         <TabsContent value="farm-plots" className="space-y-0">

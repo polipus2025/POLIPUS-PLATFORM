@@ -119,24 +119,20 @@ export default function Sidebar() {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
-                  <Link href={item.href}>
-                    <a
-                      className={cn(
-                        "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
-                        isActive
-                          ? userType === 'farmer' 
-                            ? "text-green-700 bg-green-50"
-                            : userType === 'field_agent'
-                            ? "text-orange-700 bg-orange-50"
-                            : userType === 'exporter'
-                            ? "text-purple-700 bg-purple-50"
-                            : "text-lacra-blue bg-blue-50"
-                          : "text-gray-600 hover:bg-gray-50"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.name}</span>
-                    </a>
+                  <Link href={item.href} className={cn(
+                    "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                    isActive
+                      ? userType === 'farmer' 
+                        ? "text-green-700 bg-green-50"
+                        : userType === 'field_agent'
+                        ? "text-orange-700 bg-orange-50"
+                        : userType === 'exporter'
+                        ? "text-purple-700 bg-purple-50"
+                        : "text-lacra-blue bg-blue-50"
+                      : "text-gray-600 hover:bg-gray-50"
+                  )}>
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.name}</span>
                   </Link>
                 </li>
               );

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -229,15 +229,15 @@ export default function FarmersPage() {
     createFarmerMutation.mutate(data);
   };
 
-  const filteredFarmers = farmers.filter((farmer: any) =>
+  const filteredFarmers = (farmers as any[])?.filter((farmer: any) =>
     farmer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     farmer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     farmer.farmerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     farmer.county.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) || [];
 
-  const activeCanidates = farmers.filter((f: any) => f.status === 'active').length;
-  const signedAgreements = farmers.filter((f: any) => f.agreementSigned).length;
+  const activeCanidates = (farmers as any[])?.filter((f: any) => f.status === 'active').length || 0;
+  const signedAgreements = (farmers as any[])?.filter((f: any) => f.agreementSigned).length || 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -265,6 +265,9 @@ export default function FarmersPage() {
                   <User className="h-5 w-5 text-lacra-green" />
                   Farmer Onboarding Form
                 </DialogTitle>
+                <DialogDescription>
+                  Register a new farmer with profile picture and comprehensive land mapping data including GPS boundaries, soil analysis, and farm details.
+                </DialogDescription>
               </DialogHeader>
               
               <Form {...form}>
@@ -765,7 +768,7 @@ export default function FarmersPage() {
               <div className="text-center py-8">Loading farmers...</div>
             ) : filteredFarmers.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                {farmers.length === 0 ? "No farmers registered yet." : "No farmers match your search."}
+                {(farmers as any[])?.length === 0 ? "No farmers registered yet." : "No farmers match your search."}
               </div>
             ) : (
               <div className="overflow-x-auto">

@@ -51,8 +51,14 @@ export default function InteractiveMap() {
   const [mapView, setMapView] = useState<'satellite' | 'terrain' | 'roads'>('satellite');
   const [measureMode, setMeasureMode] = useState<boolean>(false);
 
-  const { data: gisData = [] } = useQuery<GISLocation[]>({
-    queryKey: ['/api/gis/locations', selectedCounty],
+  const { data: gisData = [], isLoading } = useQuery<GISLocation[]>({
+    queryKey: ['/api/gis/locations', selectedCounty || 'all'],
+    queryFn: () => {
+      const endpoint = selectedCounty && selectedCounty !== 'all' 
+        ? `/api/gis/locations/${encodeURIComponent(selectedCounty)}`
+        : '/api/gis/locations/';
+      return fetch(endpoint).then(res => res.json());
+    },
   });
 
   const liberianCounties = [
@@ -136,6 +142,12 @@ export default function InteractiveMap() {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedCounty && selectedCounty !== 'all' && (
+                  <div className="mt-2 text-sm text-blue-600">
+                    Viewing: {selectedCounty} 
+                    {isLoading && <span className="ml-2 text-gray-500">Loading...</span>}
+                  </div>
+                )}
               </div>
 
               {/* Search */}
@@ -249,12 +261,55 @@ export default function InteractiveMap() {
               </div>
             </CardContent>
           </Card>
+
+          {/* County Data Summary */}
+          {selectedCounty && selectedCounty !== 'all' && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">{selectedCounty} Data</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>Total Locations:</span>
+                    <Badge variant="secondary">{gisData.length}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Active Farms:</span>
+                    <Badge variant="secondary">{gisData.filter(d => d.type === 'farm').length}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Processing Centers:</span>
+                    <Badge variant="secondary">{gisData.filter(d => d.type === 'processing').length}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Inspection Sites:</span>
+                    <Badge variant="secondary">{gisData.filter(d => d.type === 'inspection').length}</Badge>
+                  </div>
+                  {isLoading && (
+                    <div className="text-center text-gray-500">
+                      <div className="animate-pulse">Updating data...</div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Main Map Area */}
         <div className="lg:col-span-3">
           <Card className="h-[700px]">
             <CardContent className="p-0 h-full relative">
+              {/* Loading indicator */}
+              {isLoading && (
+                <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+                  <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span className="text-sm">Loading {selectedCounty}...</span>
+                  </div>
+                </div>
+              )}
               {/* Map Container */}
               <div className="w-full h-full bg-gradient-to-br from-green-100 to-blue-100 rounded-lg relative overflow-hidden">
                 
@@ -291,16 +346,32 @@ export default function InteractiveMap() {
                         </g>
                       )}
                       
-                      {/* Farm Plots */}
+                      {/* Farm Plots - Dynamic based on county selection */}
                       {mapLayers.find(l => l.id === 'farms')?.visible && (
                         <g>
-                          <circle cx="180" cy="200" r="8" fill="#10B981" />
-                          <circle cx="250" cy="180" r="6" fill="#10B981" />
-                          <circle cx="320" cy="190" r="7" fill="#10B981" />
-                          <circle cx="380" cy="220" r="5" fill="#10B981" />
-                          <circle cx="450" cy="240" r="6" fill="#10B981" />
-                          <circle cx="200" cy="280" r="4" fill="#10B981" />
-                          <circle cx="300" cy="270" r="5" fill="#10B981" />
+                          {/* Show highlighted farms if county is selected */}
+                          {selectedCounty && selectedCounty !== 'all' ? (
+                            // County-specific farms with highlighting
+                            <>
+                              <circle cx="250" cy="180" r="10" fill="#10B981" stroke="#059669" strokeWidth="3" />
+                              <circle cx="320" cy="190" r="8" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                              <circle cx="200" cy="280" r="6" fill="#10B981" stroke="#059669" strokeWidth="2" />
+                              <text x="250" y="170" fill="#374151" fontSize="10" textAnchor="middle" fontWeight="bold">
+                                County Farms
+                              </text>
+                            </>
+                          ) : (
+                            // All farms when no county selected
+                            <>
+                              <circle cx="180" cy="200" r="8" fill="#10B981" />
+                              <circle cx="250" cy="180" r="6" fill="#10B981" />
+                              <circle cx="320" cy="190" r="7" fill="#10B981" />
+                              <circle cx="380" cy="220" r="5" fill="#10B981" />
+                              <circle cx="450" cy="240" r="6" fill="#10B981" />
+                              <circle cx="200" cy="280" r="4" fill="#10B981" />
+                              <circle cx="300" cy="270" r="5" fill="#10B981" />
+                            </>
+                          )}
                         </g>
                       )}
                       
@@ -377,6 +448,16 @@ export default function InteractiveMap() {
                       </Badge>
                     ))}
                   </div>
+                  {selectedCounty && selectedCounty !== 'all' && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant="default" className="text-xs bg-blue-600">
+                        {selectedCounty}
+                      </Badge>
+                      <span className="text-xs text-gray-600">
+                        {gisData.length} locations found
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Measurement Tools */}

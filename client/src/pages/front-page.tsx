@@ -54,10 +54,10 @@ export default function FrontPage() {
     },
     {
       id: 5,
-      title: 'GIS & Mapping Services',
-      icon: MapPin,
+      title: 'Enhanced GIS Mapping',
+      icon: Satellite,
       color: 'bg-teal-500',
-      route: '/gis-mapping'
+      route: '/enhanced-gis-mapping'
     },
     {
       id: 6,

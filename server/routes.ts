@@ -1337,6 +1337,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced export report generation with real data
+  app.post("/api/reports/export-data", async (req, res) => {
+    try {
+      const { reportType, dateRange, counties, commodities } = req.body;
+      
+      // Fetch real data from storage
+      const allCommodities = await storage.getCommodities();
+      const allInspections = await storage.getInspections();
+      const allCertifications = await storage.getCertifications();
+      
+      // Filter data based on parameters
+      let filteredCommodities = allCommodities;
+      if (counties && counties.length > 0) {
+        filteredCommodities = allCommodities.filter(c => counties.includes(c.county));
+      }
+      if (commodities && commodities.length > 0) {
+        filteredCommodities = filteredCommodities.filter(c => commodities.includes(c.type));
+      }
+      
+      // Generate comprehensive export report data
+      const exportData = {
+        summary: {
+          totalCommodities: filteredCommodities.length,
+          totalQuantity: filteredCommodities.reduce((sum, c) => sum + parseFloat(c.quantity.replace(/[^\d.]/g, '') || '0'), 0),
+          compliantCommodities: filteredCommodities.filter(c => c.status === 'compliant').length,
+          complianceRate: Math.round((filteredCommodities.filter(c => c.status === 'compliant').length / filteredCommodities.length) * 100),
+          exportReadyCommodities: filteredCommodities.filter(c => c.status === 'compliant' && c.certificationStatus === 'certified').length
+        },
+        commodityBreakdown: filteredCommodities.map(commodity => ({
+          batchNumber: commodity.batchNumber,
+          name: commodity.name,
+          type: commodity.type,
+          quantity: commodity.quantity,
+          qualityGrade: commodity.qualityGrade,
+          county: commodity.county,
+          farmer: commodity.farmer,
+          status: commodity.status,
+          certificationStatus: commodity.certificationStatus,
+          harvestDate: commodity.harvestDate,
+          exportEligible: commodity.status === 'compliant' && commodity.certificationStatus === 'certified'
+        })),
+        qualityDistribution: {
+          premium: filteredCommodities.filter(c => c.qualityGrade === 'Premium').length,
+          grade_a: filteredCommodities.filter(c => c.qualityGrade === 'Grade A').length,
+          grade_b: filteredCommodities.filter(c => c.qualityGrade === 'Grade B').length,
+          standard: filteredCommodities.filter(c => c.qualityGrade === 'Standard').length
+        },
+        countyDistribution: filteredCommodities.reduce((acc, commodity) => {
+          acc[commodity.county] = (acc[commodity.county] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        inspectionStatus: {
+          total: allInspections.filter(i => filteredCommodities.some(c => c.id === i.commodityId)).length,
+          passed: allInspections.filter(i => 
+            filteredCommodities.some(c => c.id === i.commodityId) && 
+            i.complianceStatus === 'approved'
+          ).length,
+          pending: allInspections.filter(i => 
+            filteredCommodities.some(c => c.id === i.commodityId) && 
+            i.complianceStatus === 'review_required'
+          ).length
+        },
+        certificationStatus: {
+          total: allCertifications.filter(cert => filteredCommodities.some(c => c.id === cert.commodityId)).length,
+          active: allCertifications.filter(cert => 
+            filteredCommodities.some(c => c.id === cert.commodityId) && 
+            cert.status === 'active'
+          ).length,
+          expired: allCertifications.filter(cert => 
+            filteredCommodities.some(c => c.id === cert.commodityId) && 
+            cert.status === 'expired'
+          ).length
+        },
+        exportValue: {
+          estimatedValue: filteredCommodities.reduce((sum, c) => {
+            const quantity = parseFloat(c.quantity.replace(/[^\d.]/g, '') || '0');
+            const basePrice = c.type === 'coffee' ? 2500 : c.type === 'cocoa' ? 2000 : 1500; // USD per MT
+            return sum + (quantity * basePrice);
+          }, 0),
+          currency: 'USD',
+          exchangeRate: 'LRD 155.50 = USD 1.00'
+        },
+        generatedAt: new Date().toISOString(),
+        reportParameters: {
+          reportType,
+          dateRange,
+          counties: counties || 'All Counties',
+          commodities: commodities || 'All Commodities'
+        }
+      };
+      
+      res.json(exportData);
+    } catch (error) {
+      console.error("Error generating export report data:", error);
+      res.status(500).json({ message: "Failed to generate export report data" });
+    }
+  });
+
   app.post("/api/reports", async (req, res) => {
     try {
       const validatedData = insertReportSchema.parse(req.body);

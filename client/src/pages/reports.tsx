@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Search, Plus, Download, FileText, Calendar, BarChart3, Eye, TrendingUp, Shield, AlertTriangle, Activity, CheckCircle, Truck, MapPin, Navigation, Clock } from "lucide-react";
+import { Search, Plus, Download, FileText, Calendar, BarChart3, Eye, TrendingUp, Shield, AlertTriangle, Activity, CheckCircle, Truck, MapPin, Navigation, Clock, PieChart, Package, Award } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertReportSchema, type Report, type InsertReport } from "@shared/schema";
@@ -36,12 +36,16 @@ export default function Reports() {
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
   const [isAuditDialogOpen, setIsAuditDialogOpen] = useState(false);
   const [isTransportationDialogOpen, setIsTransportationDialogOpen] = useState(false);
+  const [isExportReportDialogOpen, setIsExportReportDialogOpen] = useState(false);
+  const [exportData, setExportData] = useState<any>(null);
+  const [isGeneratingExportReport, setIsGeneratingExportReport] = useState(false);
+  const [isLoadingExportData, setIsLoadingExportData] = useState(false);
   
   // Mock user role - In real app, this would come from authentication context
   const currentUserRole = "senior_official"; // Can be: "senior_official", "administrator", "regular_user"
 
-  const queryClient = useQueryClient();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: reports = [], isLoading } = useQuery<Report[]>({
     queryKey: ["/api/reports"],
@@ -188,6 +192,215 @@ export default function Reports() {
       return;
     }
     setIsAuditDialogOpen(true);
+  };
+
+  const generateExportReport = async () => {
+    setIsGeneratingExportReport(true);
+    setIsLoadingExportData(true);
+    
+    try {
+      // Fetch real export data from the API
+      const response = await apiRequest("GET", "/api/reports/export-data");
+      setExportData(response);
+      setIsExportReportDialogOpen(true);
+      
+      toast({
+        title: "Export Report Generated",
+        description: "Comprehensive export analysis with real AgriTrace360™ data is ready.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate export report",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingExportReport(false);
+      setIsLoadingExportData(false);
+    }
+  };
+
+  const handleDownloadExportReport = (format: 'pdf' | 'csv' | 'detailed') => {
+    if (!exportData) return;
+    
+    let content = "";
+    let filename = "";
+    let mimeType = "";
+    
+    if (format === 'pdf' || format === 'detailed') {
+      // Generate HTML content for PDF-style download
+      content = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>AgriTrace360™ Export Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { text-align: center; border-bottom: 2px solid #f97316; padding-bottom: 20px; margin-bottom: 30px; }
+            .summary { background: #fff7ed; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+            .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+            .stat-box { text-align: center; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; }
+            .table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+            .table th, .table td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+            .table th { background: #f9fafb; font-weight: bold; }
+            .compliant { color: #16a34a; font-weight: bold; }
+            .non-compliant { color: #dc2626; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>AgriTrace360™ Export Analysis Report</h1>
+            <p>Generated on ${new Date().toLocaleDateString()} | LACRA Regulatory Compliance</p>
+          </div>
+          
+          <div class="summary">
+            <h2>Executive Summary</h2>
+            <div class="stats">
+              <div class="stat-box">
+                <h3>${exportData.totalCommodities}</h3>
+                <p>Total Commodities</p>
+              </div>
+              <div class="stat-box">
+                <h3>${exportData.totalValue}</h3>
+                <p>Export Value (USD)</p>
+              </div>
+              <div class="stat-box">
+                <h3>${exportData.totalWeight}</h3>
+                <p>Total Weight (MT)</p>
+              </div>
+              <div class="stat-box">
+                <h3>${exportData.complianceRate}%</h3>
+                <p>Compliance Rate</p>
+              </div>
+            </div>
+          </div>
+          
+          <h2>Commodity Details</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Commodity Type</th>
+                <th>Batch Code</th>
+                <th>Origin County</th>
+                <th>Quality Grade</th>
+                <th>Weight (MT)</th>
+                <th>Value (USD)</th>
+                <th>Compliance Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${exportData.commodities.map((commodity: any) => `
+                <tr>
+                  <td>${commodity.type}</td>
+                  <td>${commodity.batchCode}</td>
+                  <td>${commodity.originCounty}</td>
+                  <td>${commodity.qualityGrade}</td>
+                  <td>${commodity.weight}</td>
+                  <td>$${commodity.value.toLocaleString()}</td>
+                  <td class="${commodity.complianceStatus === 'Compliant' ? 'compliant' : 'non-compliant'}">
+                    ${commodity.complianceStatus}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <h2>Quality Inspections</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Commodity Type</th>
+                <th>Inspector</th>
+                <th>Location</th>
+                <th>Result</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${exportData.inspections.map((inspection: any) => `
+                <tr>
+                  <td>${inspection.commodityType}</td>
+                  <td>${inspection.inspector}</td>
+                  <td>${inspection.location}</td>
+                  <td class="${inspection.result === 'Pass' ? 'compliant' : 'non-compliant'}">
+                    ${inspection.result}
+                  </td>
+                  <td>${new Date(inspection.date).toLocaleDateString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <h2>Export Certifications</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Certification Type</th>
+                <th>Status</th>
+                <th>Expiry Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${exportData.certifications.map((cert: any) => `
+                <tr>
+                  <td>${cert.type}</td>
+                  <td class="${cert.status === 'Valid' ? 'compliant' : 'non-compliant'}">
+                    ${cert.status}
+                  </td>
+                  <td>${new Date(cert.expiryDate).toLocaleDateString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <div style="margin-top: 40px; text-align: center; color: #6b7280; font-size: 12px;">
+            <p>This report was generated by AgriTrace360™ - Agricultural Commodity Compliance Management System</p>
+            <p>Liberia Agriculture Commodity Regulatory Authority (LACRA)</p>
+          </div>
+        </body>
+        </html>
+      `;
+      filename = `AgriTrace360_Export_Report_${new Date().toISOString().split('T')[0]}.html`;
+      mimeType = 'text/html';
+    } else if (format === 'csv') {
+      // Generate CSV content
+      content = `AgriTrace360™ Export Report - Generated ${new Date().toLocaleDateString()}\n\n`;
+      content += `Summary Statistics:\n`;
+      content += `Total Commodities,${exportData.totalCommodities}\n`;
+      content += `Export Value,${exportData.totalValue}\n`;
+      content += `Total Weight,${exportData.totalWeight}\n`;
+      content += `Compliance Rate,${exportData.complianceRate}%\n\n`;
+      
+      content += `Commodity Details:\n`;
+      content += `Type,Batch Code,Origin County,Quality Grade,Weight (MT),Value (USD),Compliance Status\n`;
+      exportData.commodities.forEach((commodity: any) => {
+        content += `${commodity.type},${commodity.batchCode},${commodity.originCounty},${commodity.qualityGrade},${commodity.weight},${commodity.value},${commodity.complianceStatus}\n`;
+      });
+      
+      content += `\nInspection Results:\n`;
+      content += `Commodity Type,Inspector,Location,Result,Date\n`;
+      exportData.inspections.forEach((inspection: any) => {
+        content += `${inspection.commodityType},${inspection.inspector},${inspection.location},${inspection.result},${new Date(inspection.date).toLocaleDateString()}\n`;
+      });
+      
+      filename = `AgriTrace360_Export_Data_${new Date().toISOString().split('T')[0]}.csv`;
+      mimeType = 'text/csv';
+    }
+    
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Download Started",
+      description: `Export report downloaded as ${format.toUpperCase()} file.`,
+    });
   };
 
   const handleViewPdf = (report: Report) => {
@@ -569,8 +782,37 @@ export default function Reports() {
           </CardContent>
         </Card>
 
+        {/* Export Report with Real Data Card */}
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-2 border-lacra-orange">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-lacra-orange bg-opacity-10 rounded-lg flex items-center justify-center">
+                <Package className="h-6 w-6 text-lacra-orange" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs text-lacra-orange border-lacra-orange">
+                  Real Data
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-lacra-orange hover:text-orange-700"
+                  onClick={generateExportReport}
+                  disabled={isGeneratingExportReport}
+                >
+                  {isGeneratingExportReport ? "Generating..." : "Generate"}
+                </Button>
+              </div>
+            </div>
+            <h3 className="font-semibold text-neutral mb-2">Export Report</h3>
+            <p className="text-sm text-gray-500">
+              Comprehensive export analysis with real AgriTrace360™ commodity data
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Transportation Tracking Card */}
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-2 border-lacra-green">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-lacra-green bg-opacity-10 rounded-lg flex items-center justify-center">
@@ -1887,6 +2129,293 @@ export default function Reports() {
               </CardContent>
             </Card>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Report with Real Data Dialog */}
+      <Dialog open={isExportReportDialogOpen} onOpenChange={setIsExportReportDialogOpen}>
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-lacra-orange" />
+              AgriTrace360™ Export Report - Real Data Analysis
+              <Badge variant="outline" className="text-xs text-lacra-orange border-lacra-orange">
+                Live System Data
+              </Badge>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {isLoadingExportData ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lacra-orange mx-auto mb-4"></div>
+              <p className="text-gray-600">Generating comprehensive export report...</p>
+            </div>
+          ) : exportData ? (
+            <div className="space-y-8">
+              {/* Executive Summary */}
+              <Card className="bg-gradient-to-r from-lacra-orange to-orange-600 text-white">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4">Executive Summary</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{exportData.totalCommodities}</p>
+                      <p className="text-sm opacity-90">Total Commodities</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{exportData.totalValue}</p>
+                      <p className="text-sm opacity-90">Export Value (USD)</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{exportData.totalWeight}</p>
+                      <p className="text-sm opacity-90">Total Weight (MT)</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold">{exportData.complianceRate}%</p>
+                      <p className="text-sm opacity-90">Compliance Rate</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Commodity Breakdown */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-lacra-orange" />
+                    Export Commodity Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Commodity Type</TableHead>
+                          <TableHead>Batch Code</TableHead>
+                          <TableHead>Origin County</TableHead>
+                          <TableHead>Quality Grade</TableHead>
+                          <TableHead>Weight (MT)</TableHead>
+                          <TableHead>Value (USD)</TableHead>
+                          <TableHead>Compliance Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {exportData.commodities.map((commodity: any, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{commodity.type}</TableCell>
+                            <TableCell className="font-mono text-sm">{commodity.batchCode}</TableCell>
+                            <TableCell>{commodity.originCounty}</TableCell>
+                            <TableCell>
+                              <Badge variant={commodity.qualityGrade === 'Grade A' ? 'default' : 'secondary'}>
+                                {commodity.qualityGrade}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{commodity.weight}</TableCell>
+                            <TableCell>${commodity.value.toLocaleString()}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                className={
+                                  commodity.complianceStatus === 'Compliant' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-red-100 text-red-800'
+                                }
+                              >
+                                {commodity.complianceStatus}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Inspection Results */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-blue-600" />
+                    Quality Inspection Results
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Recent Inspections</h4>
+                      <div className="space-y-3">
+                        {exportData.inspections.map((inspection: any, index: number) => (
+                          <div key={index} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="font-medium">{inspection.commodityType}</span>
+                              <Badge variant={inspection.result === 'Pass' ? 'default' : 'destructive'}>
+                                {inspection.result}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              Inspector: {inspection.inspector}
+                            </p>
+                            <p className="text-sm text-gray-600 mb-1">
+                              Location: {inspection.location}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Date: {new Date(inspection.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Inspection Statistics</h4>
+                      <div className="space-y-4">
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="font-medium text-green-800">Passed Inspections</span>
+                          </div>
+                          <p className="text-2xl font-bold text-green-900">{exportData.inspectionStats.passed}</p>
+                        </div>
+                        <div className="bg-red-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <XCircle className="h-5 w-5 text-red-600" />
+                            <span className="font-medium text-red-800">Failed Inspections</span>
+                          </div>
+                          <p className="text-2xl font-bold text-red-900">{exportData.inspectionStats.failed}</p>
+                        </div>
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Clock className="h-5 w-5 text-blue-600" />
+                            <span className="font-medium text-blue-800">Pending Review</span>
+                          </div>
+                          <p className="text-2xl font-bold text-blue-900">{exportData.inspectionStats.pending}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Certifications & Compliance */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-green-600" />
+                    Export Certifications & International Compliance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Active Certifications</h4>
+                      <div className="space-y-2">
+                        {exportData.certifications.map((cert: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <p className="font-medium text-sm">{cert.type}</p>
+                              <p className="text-xs text-gray-500">Expires: {new Date(cert.expiryDate).toLocaleDateString()}</p>
+                            </div>
+                            <Badge 
+                              variant={cert.status === 'Valid' ? 'default' : 'destructive'}
+                              className="text-xs"
+                            >
+                              {cert.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">International Standards</h4>
+                      <div className="space-y-3">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CheckCircle className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-medium">EUDR Compliance</span>
+                          </div>
+                          <p className="text-xs text-gray-600">Deforestation risk assessment complete</p>
+                        </div>
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-medium">Fair Trade Certified</span>
+                          </div>
+                          <p className="text-xs text-gray-600">Ethical sourcing verified</p>
+                        </div>
+                        <div className="bg-orange-50 p-3 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CheckCircle className="h-4 w-4 text-orange-600" />
+                            <span className="text-sm font-medium">Organic Certification</span>
+                          </div>
+                          <p className="text-xs text-gray-600">USDA Organic standards met</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Export Destinations</h4>
+                      <div className="space-y-2">
+                        {exportData.destinations.map((dest: any, index: number) => (
+                          <div key={index} className="border rounded-lg p-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-sm">{dest.country}</span>
+                              <span className="text-xs text-gray-500">{dest.percentage}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                              <div 
+                                className="bg-lacra-orange h-2 rounded-full" 
+                                style={{ width: `${dest.percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Download Actions */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold mb-2">Export Report Actions</h3>
+                      <p className="text-sm text-gray-600">Download comprehensive export analysis report</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleDownloadExportReport('pdf')}
+                        className="border-lacra-orange text-lacra-orange hover:bg-orange-50"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Download PDF
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleDownloadExportReport('csv')}
+                        className="border-lacra-orange text-lacra-orange hover:bg-orange-50"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Export CSV
+                      </Button>
+                      <Button 
+                        onClick={() => handleDownloadExportReport('detailed')}
+                        className="bg-lacra-orange hover:bg-orange-700"
+                      >
+                        <Package className="h-4 w-4 mr-2" />
+                        Full Report
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Unable to load export data. Please try again.</p>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

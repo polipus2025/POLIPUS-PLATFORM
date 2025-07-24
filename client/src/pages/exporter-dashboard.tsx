@@ -56,9 +56,33 @@ export default function ExporterDashboard() {
       plannedExportDate: formData.get('plannedExportDate') as string,
       exportTimeframe: formData.get('exportTimeframe') as string,
       exportUrgency: formData.get('exportUrgency') as string,
+      // EU & European Standards
       eudrCompliant: formData.get('eudrCompliant') === 'on',
-      organicCertified: formData.get('organicCertified') === 'on',
-      fairTrade: formData.get('fairTrade') === 'on',
+      euOrganicCert: formData.get('euOrganicCert') === 'on',
+      globalGapCert: formData.get('globalGapCert') === 'on',
+      brcCert: formData.get('brcCert') === 'on',
+      // US Standards
+      usdaOrganicCert: formData.get('usdaOrganicCert') === 'on',
+      fdaFoodSafety: formData.get('fdaFoodSafety') === 'on',
+      sqfCert: formData.get('sqfCert') === 'on',
+      // Fair Trade & Sustainability
+      fairTradeUSA: formData.get('fairTradeUSA') === 'on',
+      fairTradeIntl: formData.get('fairTradeIntl') === 'on',
+      rainforestAlliance: formData.get('rainforestAlliance') === 'on',
+      utzCert: formData.get('utzCert') === 'on',
+      // Crop-Specific
+      sca4C: formData.get('sca4C') === 'on',
+      icoCoffee: formData.get('icoCoffee') === 'on',
+      iccoCocoa: formData.get('iccoCocoa') === 'on',
+      rspopalm: formData.get('rspopalm') === 'on',
+      fscTimber: formData.get('fscTimber') === 'on',
+      pefc: formData.get('pefc') === 'on',
+      // Quality & Safety
+      iso22000: formData.get('iso22000') === 'on',
+      haccp: formData.get('haccp') === 'on',
+      ifs: formData.get('ifs') === 'on',
+      kosherCert: formData.get('kosherCert') === 'on',
+      halalCert: formData.get('halalCert') === 'on',
       applicationNotes: formData.get('applicationNotes') as string,
     };
 
@@ -479,22 +503,131 @@ export default function ExporterDashboard() {
                     </div>
                   </div>
 
-                  {/* Compliance Certifications */}
+                  {/* Compliance & Certifications */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Compliance & Certifications</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" name="eudrCompliant" className="rounded" />
-                        <span>EUDR Compliant</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" name="organicCertified" className="rounded" />
-                        <span>Organic Certified</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" name="fairTrade" className="rounded" />
-                        <span>Fair Trade Certified</span>
-                      </label>
+                    <h3 className="text-lg font-semibold">International Compliance & Certifications</h3>
+                    
+                    {/* EU & European Standards */}
+                    <div className="space-y-3">
+                      <h4 className="text-md font-medium text-gray-700">EU & European Standards</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="eudrCompliant" className="rounded" />
+                          <span>EU Deforestation Regulation (EUDR)</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="euOrganicCert" className="rounded" />
+                          <span>EU Organic Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="globalGapCert" className="rounded" />
+                          <span>GLOBALG.A.P. Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="brcCert" className="rounded" />
+                          <span>BRC Global Standards</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* US Standards */}
+                    <div className="space-y-3">
+                      <h4 className="text-md font-medium text-gray-700">US Standards</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="usdaOrganicCert" className="rounded" />
+                          <span>USDA Organic Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="fdaFoodSafety" className="rounded" />
+                          <span>FDA Food Safety Standards</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="sqfCert" className="rounded" />
+                          <span>SQF (Safe Quality Food)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* International Fair Trade & Sustainability */}
+                    <div className="space-y-3">
+                      <h4 className="text-md font-medium text-gray-700">Fair Trade & Sustainability</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="fairTradeUSA" className="rounded" />
+                          <span>Fairtrade USA</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="fairTradeIntl" className="rounded" />
+                          <span>Fairtrade International</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="rainforestAlliance" className="rounded" />
+                          <span>Rainforest Alliance</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="utzCert" className="rounded" />
+                          <span>UTZ Certification</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Crop-Specific Certifications */}
+                    <div className="space-y-3">
+                      <h4 className="text-md font-medium text-gray-700">Crop-Specific International Standards</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="sca4C" className="rounded" />
+                          <span>4C Coffee Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="icoCoffee" className="rounded" />
+                          <span>ICO Coffee Quality Standards</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="iccoCocoa" className="rounded" />
+                          <span>ICCO Cocoa Standards</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="rspopalm" className="rounded" />
+                          <span>RSPO Palm Oil Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="fscTimber" className="rounded" />
+                          <span>FSC Forest Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="pefc" className="rounded" />
+                          <span>PEFC Forest Certification</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Quality & Safety Standards */}
+                    <div className="space-y-3">
+                      <h4 className="text-md font-medium text-gray-700">Quality & Safety Standards</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="iso22000" className="rounded" />
+                          <span>ISO 22000 Food Safety</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="haccp" className="rounded" />
+                          <span>HACCP Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="ifs" className="rounded" />
+                          <span>IFS Food Standards</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="kosherCert" className="rounded" />
+                          <span>Kosher Certification</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" name="halalCert" className="rounded" />
+                          <span>Halal Certification</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
 

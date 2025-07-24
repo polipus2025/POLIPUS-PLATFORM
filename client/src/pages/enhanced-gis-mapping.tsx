@@ -27,7 +27,22 @@ import {
   Plus,
   Eye,
   EyeOff,
-  Settings
+  Settings,
+  Truck,
+  Radio,
+  Activity,
+  Shield,
+  TreePine,
+  Flame,
+  Users,
+  Clock,
+  Bell,
+  TrendingUp,
+  BarChart3,
+  Target,
+  Zap,
+  Globe,
+  Wifi
 } from 'lucide-react';
 
 // Liberian Counties
@@ -46,6 +61,10 @@ const MAP_LAYERS = [
   { id: 'compliance', name: 'Compliance Zones', icon: CheckCircle, color: 'bg-emerald-500', active: false },
   { id: 'deforestation', name: 'Deforestation Alerts', icon: AlertTriangle, color: 'bg-red-500', active: false },
   { id: 'transportation', name: 'Transport Routes', icon: Navigation, color: 'bg-purple-500', active: false },
+  { id: 'vehicle_tracking', name: 'Vehicle Tracking', icon: Truck, color: 'bg-orange-500', active: false },
+  { id: 'fire_alerts', name: 'Fire Detection', icon: Flame, color: 'bg-red-600', active: false },
+  { id: 'forest_monitoring', name: 'Forest Monitoring', icon: TreePine, color: 'bg-green-600', active: false },
+  { id: 'field_agents', name: 'Field Agents', icon: Users, color: 'bg-indigo-500', active: false },
   { id: 'counties', name: 'County Boundaries', icon: Map, color: 'bg-gray-500', active: true }
 ];
 
@@ -58,6 +77,27 @@ const FARM_DATA = [
   { id: 'farm-005', name: 'Bong County Palm Plantation', county: 'Bong County', lat: 6.8296, lng: -9.3678, crop: 'Oil Palm', area: 67.9, compliance: 'compliant' }
 ];
 
+// Vehicle tracking data
+const VEHICLE_DATA = [
+  { id: 'truck-001', type: 'Transport Truck', lat: 6.3000, lng: -10.7900, status: 'moving', cargo: 'Cocoa beans', destination: 'Port of Monrovia' },
+  { id: 'truck-002', type: 'Field Vehicle', lat: 7.2100, lng: -9.0200, status: 'stopped', cargo: 'Equipment', destination: 'Lofa Inspection Site' },
+  { id: 'truck-003', type: 'Export Container', lat: 6.3133, lng: -10.8074, status: 'loading', cargo: 'Coffee', destination: 'Hamburg, Germany' }
+];
+
+// Deforestation alerts data
+const DEFORESTATION_ALERTS = [
+  { id: 'alert-001', lat: 7.1800, lng: -8.9500, severity: 'high', area: 2.5, date: '2025-01-20', status: 'active' },
+  { id: 'alert-002', lat: 6.9200, lng: -9.2100, severity: 'medium', area: 1.2, date: '2025-01-18', status: 'investigating' },
+  { id: 'alert-003', lat: 7.4500, lng: -8.7800, severity: 'low', area: 0.8, date: '2025-01-15', status: 'resolved' }
+];
+
+// Field agents data
+const FIELD_AGENTS = [
+  { id: 'agent-001', name: 'Sarah Konneh', lat: 7.2200, lng: -9.0100, county: 'Lofa County', status: 'active', lastUpdate: '10 min ago' },
+  { id: 'agent-002', name: 'James Tubman', lat: 6.2400, lng: -9.4500, county: 'Grand Bassa County', status: 'offline', lastUpdate: '2 hours ago' },
+  { id: 'agent-003', name: 'Mary Kollie', lat: 7.5800, lng: -8.6700, county: 'Nimba County', status: 'active', lastUpdate: '5 min ago' }
+];
+
 export default function EnhancedGISMapping() {
   const [selectedCounty, setSelectedCounty] = useState('All Counties');
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,8 +105,12 @@ export default function EnhancedGISMapping() {
   const [zoomLevel, setZoomLevel] = useState(7);
   const [mapCenter, setMapCenter] = useState({ lat: 6.4281, lng: -9.4295 }); // Liberia center
   const [selectedFarm, setSelectedFarm] = useState<any>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+  const [selectedAlert, setSelectedAlert] = useState<any>(null);
   const [layers, setLayers] = useState(MAP_LAYERS);
   const [isLoading, setIsLoading] = useState(false);
+  const [realTimeUpdates, setRealTimeUpdates] = useState(true);
+  const [alertsCount, setAlertsCount] = useState(12);
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Filter farms based on county selection
@@ -144,6 +188,16 @@ export default function EnhancedGISMapping() {
             <Badge variant="outline" className="text-green-600 border-green-600">
               {filteredFarms.length} Farms
             </Badge>
+            <Badge variant="outline" className="text-orange-600 border-orange-600">
+              {VEHICLE_DATA.length} Vehicles
+            </Badge>
+            <Badge variant="outline" className="text-red-600 border-red-600">
+              {alertsCount} Alerts
+            </Badge>
+            <Button variant="outline" size="sm" onClick={() => setRealTimeUpdates(!realTimeUpdates)}>
+              {realTimeUpdates ? <Wifi className="h-4 w-4 mr-2" /> : <Radio className="h-4 w-4 mr-2" />}
+              {realTimeUpdates ? 'Live' : 'Offline'}
+            </Button>
             <Button variant="outline" size="sm" onClick={exportData}>
               <Download className="h-4 w-4 mr-2" />
               Export Data
@@ -155,6 +209,32 @@ export default function EnhancedGISMapping() {
       <div className="flex h-[calc(100vh-80px)]">
         {/* Sidebar */}
         <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+          {/* Quick Actions */}
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Quick Actions
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" className="h-8 text-xs">
+                <Truck className="h-3 w-3 mr-1" />
+                Track Vehicle
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 text-xs">
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                View Alerts
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 text-xs">
+                <TreePine className="h-3 w-3 mr-1" />
+                Forest Monitor
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 text-xs">
+                <Users className="h-3 w-3 mr-1" />
+                Field Agents
+              </Button>
+            </div>
+          </div>
+
           {/* Controls */}
           <div className="p-4 border-b border-gray-200">
             {/* County Filter */}
@@ -363,6 +443,101 @@ export default function EnhancedGISMapping() {
                           <path d="M100 180 Q150 170 200 180 Q230 185 240 200" />
                         </g>
                       )}
+
+                      {/* Vehicle tracking markers */}
+                      {layers.find(l => l.id === 'vehicle_tracking')?.active && VEHICLE_DATA.map(vehicle => {
+                        const x = ((vehicle.lng + 11.5) / 4.5) * 400;
+                        const y = ((8.5 - vehicle.lat) / 3) * 300;
+                        
+                        return (
+                          <g key={vehicle.id}>
+                            <rect
+                              x={x - 6}
+                              y={y - 6}
+                              width="12"
+                              height="12"
+                              fill={vehicle.status === 'moving' ? '#f97316' : vehicle.status === 'stopped' ? '#dc2626' : '#eab308'}
+                              stroke="#fff"
+                              strokeWidth="2"
+                              className="cursor-pointer"
+                              onClick={() => setSelectedVehicle(vehicle)}
+                            />
+                            {vehicle.status === 'moving' && (
+                              <circle cx={x} cy={y} r="15" fill="none" stroke="#f97316" strokeWidth="1" opacity="0.5">
+                                <animate attributeName="r" from="5" to="15" dur="2s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" from="0.8" to="0" dur="2s" repeatCount="indefinite" />
+                              </circle>
+                            )}
+                          </g>
+                        );
+                      })}
+
+                      {/* Deforestation alerts */}
+                      {layers.find(l => l.id === 'deforestation')?.active && DEFORESTATION_ALERTS.map(alert => {
+                        const x = ((alert.lng + 11.5) / 4.5) * 400;
+                        const y = ((8.5 - alert.lat) / 3) * 300;
+                        
+                        return (
+                          <g key={alert.id}>
+                            <polygon
+                              points={`${x},${y-8} ${x+8},${y+8} ${x-8},${y+8}`}
+                              fill={alert.severity === 'high' ? '#dc2626' : alert.severity === 'medium' ? '#f97316' : '#eab308'}
+                              stroke="#fff"
+                              strokeWidth="2"
+                              className="cursor-pointer"
+                              onClick={() => setSelectedAlert(alert)}
+                            />
+                            {alert.severity === 'high' && (
+                              <circle cx={x} cy={y} r="20" fill="none" stroke="#dc2626" strokeWidth="2" opacity="0.3">
+                                <animate attributeName="r" from="8" to="20" dur="3s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
+                              </circle>
+                            )}
+                          </g>
+                        );
+                      })}
+
+                      {/* Field agents */}
+                      {layers.find(l => l.id === 'field_agents')?.active && FIELD_AGENTS.map(agent => {
+                        const x = ((agent.lng + 11.5) / 4.5) * 400;
+                        const y = ((8.5 - agent.lat) / 3) * 300;
+                        
+                        return (
+                          <g key={agent.id}>
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r="6"
+                              fill={agent.status === 'active' ? '#6366f1' : '#94a3b8'}
+                              stroke="#fff"
+                              strokeWidth="2"
+                              className="cursor-pointer"
+                            />
+                            {agent.status === 'active' && (
+                              <circle cx={x} cy={y} r="12" fill="none" stroke="#6366f1" strokeWidth="1" opacity="0.4">
+                                <animate attributeName="r" from="6" to="12" dur="2s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite" />
+                              </circle>
+                            )}
+                          </g>
+                        );
+                      })}
+
+                      {/* Fire/Forest monitoring alerts */}
+                      {layers.find(l => l.id === 'fire_alerts')?.active && (
+                        <g>
+                          <circle cx="120" cy="180" r="8" fill="#dc2626" stroke="#fff" strokeWidth="2" className="cursor-pointer" />
+                          <circle cx="200" cy="160" r="6" fill="#f97316" stroke="#fff" strokeWidth="2" className="cursor-pointer" />
+                        </g>
+                      )}
+
+                      {/* Compliance zones */}
+                      {layers.find(l => l.id === 'compliance')?.active && (
+                        <g fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" strokeWidth="2">
+                          <circle cx="150" cy="160" r="30" />
+                          <circle cx="200" cy="190" r="25" />
+                        </g>
+                      )}
                     </svg>
 
                     {/* Map Overlay Info */}
@@ -375,7 +550,7 @@ export default function EnhancedGISMapping() {
                     </div>
 
                     {/* Legend */}
-                    <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+                    <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg max-w-48">
                       <h4 className="text-xs font-semibold mb-2">Legend</h4>
                       <div className="space-y-1 text-xs">
                         <div className="flex items-center gap-2">
@@ -389,6 +564,26 @@ export default function EnhancedGISMapping() {
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full bg-red-500"></div>
                           <span>Non-Compliant</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-orange-500"></div>
+                          <span>Moving Vehicle</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-red-600"></div>
+                          <span>Stopped Vehicle</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-600"></div>
+                          <span>Deforestation Alert</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                          <span>Active Field Agent</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                          <span>Fire Detection</span>
                         </div>
                       </div>
                     </div>
@@ -599,6 +794,135 @@ export default function EnhancedGISMapping() {
                   <Button variant="outline" size="sm" className="flex-1">
                     <Navigation className="h-4 w-4 mr-2" />
                     Navigate
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Selected Vehicle Details Modal */}
+      {selectedVehicle && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                {selectedVehicle.type}
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedVehicle(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="font-medium text-gray-500">Status</div>
+                    <Badge 
+                      variant={selectedVehicle.status === 'moving' ? 'default' : 
+                               selectedVehicle.status === 'stopped' ? 'destructive' : 'secondary'}
+                    >
+                      {selectedVehicle.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-500">Vehicle ID</div>
+                    <div>{selectedVehicle.id}</div>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-500">Cargo</div>
+                    <div>{selectedVehicle.cargo}</div>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-500">Destination</div>
+                    <div>{selectedVehicle.destination}</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="font-medium text-gray-500 mb-1">Current Location</div>
+                  <div className="font-mono text-sm bg-gray-100 p-2 rounded">
+                    {selectedVehicle.lat.toFixed(6)}, {selectedVehicle.lng.toFixed(6)}
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Navigation className="h-4 w-4 mr-2" />
+                    Track Route
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Radio className="h-4 w-4 mr-2" />
+                    Contact Driver
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Selected Alert Details Modal */}
+      {selectedAlert && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                Deforestation Alert
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedAlert(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="font-medium text-gray-500">Severity</div>
+                    <Badge 
+                      variant={selectedAlert.severity === 'high' ? 'destructive' : 
+                               selectedAlert.severity === 'medium' ? 'secondary' : 'default'}
+                    >
+                      {selectedAlert.severity}
+                    </Badge>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-500">Alert ID</div>
+                    <div>{selectedAlert.id}</div>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-500">Area Affected</div>
+                    <div>{selectedAlert.area} hectares</div>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-500">Status</div>
+                    <div className="capitalize">{selectedAlert.status}</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="font-medium text-gray-500 mb-1">Detection Date</div>
+                  <div className="text-sm">{selectedAlert.date}</div>
+                </div>
+                
+                <div>
+                  <div className="font-medium text-gray-500 mb-1">Location</div>
+                  <div className="font-mono text-sm bg-gray-100 p-2 rounded">
+                    {selectedAlert.lat.toFixed(6)}, {selectedAlert.lng.toFixed(6)}
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Info className="h-4 w-4 mr-2" />
+                    Investigate
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Users className="h-4 w-4 mr-2" />
+                    Assign Agent
                   </Button>
                 </div>
               </div>

@@ -602,7 +602,7 @@ export default function ExporterDashboard() {
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-green-600" />
-                    Export License Application
+                    Request Export Permit
                   </DialogTitle>
                 </DialogHeader>
                 
@@ -990,7 +990,7 @@ export default function ExporterDashboard() {
                       Cancel
                     </Button>
                     <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                      Submit Application
+                      Request Export Permit
                     </Button>
                   </div>
                 </form>
@@ -1031,10 +1031,10 @@ export default function ExporterDashboard() {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-green-800 mb-2">
-                  Submit Export Applications
+                  Request Export Permits
                 </h3>
                 <p className="text-green-700 mb-3">
-                  Submit export license requests for official LACRA review and approval.
+                  Request export permits for official LACRA review and approval.
                 </p>
                 <div className="text-sm text-green-600">
                   <strong>Processing time:</strong> 5-7 business days

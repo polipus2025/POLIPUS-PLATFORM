@@ -308,19 +308,34 @@ export default function GpsMapping() {
 
           {/* Interactive Map Viewer Tab */}
           <TabsContent value="map" className="space-y-6">
-            <GPSMapViewer
-              gpsPoints={gpsPoints}
-              boundaries={mapBoundaries}
-              onPointClick={(point) => {
-                toast({
-                  title: "GPS Point Selected",
-                  description: `${point.type}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`,
-                });
-              }}
-              onBoundsChange={(bounds) => {
-                // Handle map bounds change
-              }}
-            />
+            <Card className="border-2 border-blue-500">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-green-50">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <MapPin className="h-6 w-6 text-blue-600" />
+                  Interactive GPS Map Viewer
+                  <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800">Active</Badge>
+                </CardTitle>
+                <p className="text-sm text-gray-700 font-medium">
+                  Real-time GPS visualization with satellite imagery and interactive controls
+                </p>
+              </CardHeader>
+              <CardContent className="p-6">
+                <GPSMapViewer
+                  gpsPoints={gpsPoints}
+                  boundaries={mapBoundaries}
+                  onPointClick={(point) => {
+                    toast({
+                      title: "GPS Point Selected",
+                      description: `${point.type}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`,
+                    });
+                  }}
+                  onBoundsChange={(bounds) => {
+                    // Handle map bounds change
+                    console.log('Map bounds changed:', bounds);
+                  }}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Existing Mappings Tab */}

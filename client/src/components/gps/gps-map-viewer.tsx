@@ -296,16 +296,69 @@ export default function GPSMapViewer({
                 : 'linear-gradient(45deg, rgba(34, 197, 94, 0.1), rgba(168, 85, 247, 0.1))'
             }}
           >
-            {/* Map Placeholder */}
-            <div className="text-center">
-              <Map className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg font-medium">Interactive GPS Map</p>
-              <p className="text-gray-500 text-sm mt-2">
-                Center: {mapCenter.lat.toFixed(6)}, {mapCenter.lng.toFixed(6)}
-              </p>
-              <p className="text-gray-500 text-sm">
-                Zoom: {currentZoom.toFixed(1)} | Style: {mapStyle}
-              </p>
+            {/* Interactive Map Simulation */}
+            <div className="relative w-full h-full">
+              {/* Map Grid Background */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '20px 20px'
+                }}
+              />
+              
+              {/* Location Markers */}
+              <div className="absolute inset-0">
+                {/* Sample Farm Locations */}
+                <div 
+                  className="absolute bg-green-500 rounded-full w-4 h-4 border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform"
+                  style={{ left: '30%', top: '40%' }}
+                  title="Coffee Farm - GPS: 6.314°N, 10.797°W"
+                />
+                <div 
+                  className="absolute bg-red-500 rounded-full w-4 h-4 border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform"
+                  style={{ left: '60%', top: '35%' }}
+                  title="Boundary Point - GPS: 6.316°N, 10.795°W"
+                />
+                <div 
+                  className="absolute bg-blue-500 rounded-full w-4 h-4 border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform"
+                  style={{ left: '45%', top: '60%' }}
+                  title="Processing Center - GPS: 6.312°N, 10.799°W"
+                />
+                
+                {/* Farm Boundary Visualization */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  <polygon
+                    points="30,40 60,35 70,70 25,65"
+                    fill="rgba(34, 197, 94, 0.2)"
+                    stroke="#22c55e"
+                    strokeWidth="2"
+                    strokeDasharray="5,5"
+                    transform="scale(5,5)"
+                  />
+                </svg>
+              </div>
+
+              {/* Map Info Overlay */}
+              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+                <div className="text-sm space-y-1">
+                  <div className="font-semibold text-gray-800">Live GPS Data</div>
+                  <div className="text-gray-600">Center: {mapCenter.lat.toFixed(6)}, {mapCenter.lng.toFixed(6)}</div>
+                  <div className="text-gray-600">Zoom: {currentZoom.toFixed(1)} | Style: {mapStyle}</div>
+                  <div className="text-gray-600">Points: {gpsPoints.length} | Boundaries: {boundaries.length}</div>
+                </div>
+              </div>
+
+              {/* Scale Bar */}
+              <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-16 h-1 bg-gray-800"></div>
+                  <span className="text-xs text-gray-600">100m</span>
+                </div>
+              </div>
             </div>
 
             {/* GPS Points Overlay */}

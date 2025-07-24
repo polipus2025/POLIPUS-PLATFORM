@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,15 +16,54 @@ import {
   BarChart3,
   Download
 } from 'lucide-react';
+import { SatelliteImageryService, CropMonitoringService, SATELLITE_PROVIDERS, GPS_SERVICES } from "@/lib/satellite-services";
 
 export default function GISMapping() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [satelliteStatus, setSatelliteStatus] = useState<any>(null);
+  const [realTimePosition, setRealTimePosition] = useState<any>(null);
+  const [isConnectingSatellites, setIsConnectingSatellites] = useState(false);
+
+  // Connect to real satellites on component mount
+  useEffect(() => {
+    connectToSatellites();
+    const interval = setInterval(updateSatelliteData, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const connectToSatellites = async () => {
+    setIsConnectingSatellites(true);
+    try {
+      // Get real satellite constellation status
+      const status = await SatelliteImageryService.getSatelliteStatus();
+      setSatelliteStatus(status);
+      
+      // Get current GPS position
+      const position = await SatelliteImageryService.getCurrentPosition();
+      setRealTimePosition(position);
+      
+      console.log('Successfully connected to satellite networks:', status);
+    } catch (error) {
+      console.error('Satellite connection error:', error);
+    } finally {
+      setIsConnectingSatellites(false);
+    }
+  };
+
+  const updateSatelliteData = async () => {
+    if (satelliteStatus) {
+      const updatedStatus = await SatelliteImageryService.getSatelliteStatus();
+      setSatelliteStatus(updatedStatus);
+    }
+  };
 
   const gisStats = {
     totalPlots: 1247,
     mappedArea: '15847 hectares',
     activeVehicles: 45,
     trackingAccuracy: '98.7%',
+    satellitesConnected: satelliteStatus?.totalSatellites || 0,
+    gpsAccuracy: satelliteStatus?.gps?.accuracy || 'Connecting...',
     lastUpdate: new Date().toLocaleTimeString()
   };
 
@@ -134,7 +173,7 @@ export default function GISMapping() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Map className="h-4 w-4" />
             Interactive Map
@@ -147,9 +186,13 @@ export default function GISMapping() {
             <Truck className="h-4 w-4" />
             Vehicle Tracking
           </TabsTrigger>
+          <TabsTrigger value="satellites" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Satellites
+          </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
-            Spatial Analytics
+            Analytics
           </TabsTrigger>
         </TabsList>
 
@@ -163,6 +206,136 @@ export default function GISMapping() {
 
         <TabsContent value="transportation" className="space-y-0">
           <TransportationTracker />
+        </TabsContent>
+
+        <TabsContent value="satellites" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Satellite className="h-5 w-5" />
+                Real-Time Satellite Network Status
+                {isConnectingSatellites && (
+                  <Badge variant="outline" className="ml-2">Connecting...</Badge>
+                )}
+                {satelliteStatus?.optimalCoverage && (
+                  <Badge variant="default" className="ml-2 bg-green-500">Connected</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {satelliteStatus ? (
+                <div className="space-y-6">
+                  {/* Global Navigation Satellite Systems */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Global Navigation Satellite Systems (GNSS)</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="text-center p-4 border rounded-lg bg-blue-50">
+                        <div className="text-3xl font-bold text-blue-600">{satelliteStatus.gps.available}</div>
+                        <div className="text-lg font-medium">GPS (USA)</div>
+                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.gps.healthy}</div>
+                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.gps.accuracy}</div>
+                      </div>
+                      <div className="text-center p-4 border rounded-lg bg-green-50">
+                        <div className="text-3xl font-bold text-green-600">{satelliteStatus.glonass.available}</div>
+                        <div className="text-lg font-medium">GLONASS (Russia)</div>
+                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.glonass.healthy}</div>
+                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.glonass.accuracy}</div>
+                      </div>
+                      <div className="text-center p-4 border rounded-lg bg-purple-50">
+                        <div className="text-3xl font-bold text-purple-600">{satelliteStatus.galileo.available}</div>
+                        <div className="text-lg font-medium">Galileo (EU)</div>
+                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.galileo.healthy}</div>
+                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.galileo.accuracy}</div>
+                      </div>
+                      <div className="text-center p-4 border rounded-lg bg-red-50">
+                        <div className="text-3xl font-bold text-red-600">{satelliteStatus.beidou.available}</div>
+                        <div className="text-lg font-medium">BeiDou (China)</div>
+                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.beidou.healthy}</div>
+                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.beidou.accuracy}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Satellite Imagery Providers */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Satellite Imagery Providers</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(SATELLITE_PROVIDERS).map(([key, provider]) => (
+                        <Card key={key} className="p-4">
+                          <h4 className="font-semibold text-sm">{provider.name}</h4>
+                          <p className="text-xs text-gray-600 mb-2">
+                            {provider.resolution} • {provider.revisitTime}
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {provider.capabilities.map(cap => (
+                              <Badge key={cap} variant="outline" className="text-xs">
+                                {cap.replace('_', ' ')}
+                              </Badge>
+                            ))}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Current GPS Position */}
+                  {realTimePosition && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Current GPS Position</h3>
+                      <Card className="p-4 bg-gray-50">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <div className="text-gray-600">Latitude</div>
+                            <div className="font-mono text-lg">{realTimePosition.coords.latitude.toFixed(6)}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-600">Longitude</div>
+                            <div className="font-mono text-lg">{realTimePosition.coords.longitude.toFixed(6)}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-600">Accuracy</div>
+                            <div className="font-mono text-lg">{realTimePosition.coords.accuracy.toFixed(1)}m</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-600">Altitude</div>
+                            <div className="font-mono text-lg">{realTimePosition.coords.altitude?.toFixed(1) || 'N/A'}m</div>
+                          </div>
+                        </div>
+                        <div className="mt-4 text-xs text-gray-500">
+                          Last updated: {new Date(realTimePosition.timestamp).toLocaleString()}
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Connection Controls */}
+                  <div className="flex gap-2">
+                    <Button onClick={connectToSatellites} disabled={isConnectingSatellites} variant="outline">
+                      <Satellite className="h-4 w-4 mr-2" />
+                      {isConnectingSatellites ? 'Reconnecting...' : 'Refresh Connection'}
+                    </Button>
+                    <Button onClick={updateSatelliteData} variant="outline">
+                      <Activity className="h-4 w-4 mr-2" />
+                      Update Data
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Satellite className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Connect to Satellite Networks</h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    Establish real-time connections to GPS, GLONASS, Galileo, and BeiDou satellite constellations 
+                    for precise positioning and agricultural imagery services.
+                  </p>
+                  <Button onClick={connectToSatellites} disabled={isConnectingSatellites} size="lg">
+                    <Satellite className="h-5 w-5 mr-2" />
+                    {isConnectingSatellites ? 'Connecting to Satellites...' : 'Connect to Satellite Networks'}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">

@@ -19,6 +19,7 @@ import EnhancedGPSTracker from '@/components/gps/enhanced-gps-tracker';
 import GPSMapViewer from '@/components/gps/gps-map-viewer';
 import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
 import { Helmet } from 'react-helmet';
+import { SatelliteImageryService, CropMonitoringService, SATELLITE_PROVIDERS, GPS_SERVICES } from "@/lib/satellite-services";
 
 // GPS mapping form schema
 const gpsFormSchema = z.object({
@@ -58,8 +59,49 @@ export default function GpsMapping() {
   const [activeTab, setActiveTab] = useState('tracker');
   const [gpsPoints, setGpsPoints] = useState<any[]>([]);
   const [mapBoundaries, setMapBoundaries] = useState<any[][]>([]);
+  const [satelliteStatus, setSatelliteStatus] = useState<any>(null);
+  const [realTimePosition, setRealTimePosition] = useState<any>(null);
+  const [isConnectingSatellites, setIsConnectingSatellites] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Connect to real satellites on component mount
+  useEffect(() => {
+    connectToSatellites();
+    const interval = setInterval(updateSatelliteData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const connectToSatellites = async () => {
+    setIsConnectingSatellites(true);
+    try {
+      const status = await SatelliteImageryService.getSatelliteStatus();
+      setSatelliteStatus(status);
+      const position = await SatelliteImageryService.getCurrentPosition();
+      setRealTimePosition(position);
+      toast({
+        title: "Satellite Connection Established",
+        description: `Connected to ${status.totalSatellites} satellites with optimal coverage`,
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('GPS Satellite connection error:', error);
+      toast({
+        title: "Satellite Connection Failed",
+        description: "Unable to establish satellite connection. Using last known position.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConnectingSatellites(false);
+    }
+  };
+
+  const updateSatelliteData = async () => {
+    if (satelliteStatus) {
+      const updatedStatus = await SatelliteImageryService.getSatelliteStatus();
+      setSatelliteStatus(updatedStatus);
+    }
+  };
 
   const { data: gpsMappings = [], isLoading } = useQuery<any[]>({
     queryKey: ['/api/farm-gps-mappings'],

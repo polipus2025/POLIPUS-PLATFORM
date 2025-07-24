@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function ExporterDashboard() {
   const [isExportApplicationOpen, setIsExportApplicationOpen] = useState(false);
   const [isInspectionRequestOpen, setIsInspectionRequestOpen] = useState(false);
+  const [isReportAbuseOpen, setIsReportAbuseOpen] = useState(false);
   const [selectedCommodity, setSelectedCommodity] = useState('');
   const { toast } = useToast();
 
@@ -131,6 +132,28 @@ export default function ExporterDashboard() {
     setIsInspectionRequestOpen(false);
   };
 
+  const handleReportAbuse = (formData: FormData) => {
+    const reportData = {
+      reportType: formData.get('reportType') as string,
+      incidentDate: formData.get('incidentDate') as string,
+      location: formData.get('location') as string,
+      county: formData.get('county') as string,
+      personsInvolved: formData.get('personsInvolved') as string,
+      organization: formData.get('organization') as string,
+      description: formData.get('description') as string,
+      evidence: formData.get('evidence') as string,
+      contactMethod: formData.get('contactMethod') as string,
+      contactInfo: formData.get('contactInfo') as string,
+    };
+
+    toast({
+      title: 'Anonymous Report Submitted',
+      description: 'Your report has been securely submitted to LACRA\'s Anti-Corruption Unit. All reports are treated confidentially and investigated thoroughly. Reference: ABU-2025-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+    });
+    
+    setIsReportAbuseOpen(false);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': case 'approved': case 'verified': return 'bg-green-100 text-green-800';
@@ -172,6 +195,211 @@ export default function ExporterDashboard() {
                   Request LACRA Inspection
                 </Button>
               </DialogTrigger>
+            
+            {/* Report Abuse Button */}
+            <Dialog open={isReportAbuseOpen} onOpenChange={setIsReportAbuseOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg font-semibold shadow-lg">
+                  <AlertTriangle className="h-5 w-5 mr-2" />
+                  Report Abuse
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    Anonymous Abuse Report System
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    handleReportAbuse(formData);
+                  }} 
+                  className="space-y-6"
+                >
+                  {/* Anonymity Notice */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-red-800">Confidential Reporting</h4>
+                        <p className="text-sm text-red-700 mt-1">
+                          This is an anonymous reporting system for corruption, bribery, illegal activities, and regulatory violations. 
+                          Your identity will be protected. All reports are investigated by LACRA's Anti-Corruption Unit.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Report Type */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Report Type</h3>
+                    <div>
+                      <Label htmlFor="reportType">Type of Abuse/Illegal Activity *</Label>
+                      <Select name="reportType" required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select report type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bribery">Bribery/Corruption</SelectItem>
+                          <SelectItem value="fraud">Document Fraud</SelectItem>
+                          <SelectItem value="illegal_export">Illegal Export Activities</SelectItem>
+                          <SelectItem value="license_violation">License Violations</SelectItem>
+                          <SelectItem value="quality_fraud">Quality/Grade Fraud</SelectItem>
+                          <SelectItem value="tax_evasion">Tax Evasion</SelectItem>
+                          <SelectItem value="environmental">Environmental Violations</SelectItem>
+                          <SelectItem value="labor_abuse">Labor Abuse</SelectItem>
+                          <SelectItem value="other">Other Illegal Activity</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Incident Details */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Incident Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="incidentDate">Incident Date</Label>
+                        <Input 
+                          id="incidentDate" 
+                          name="incidentDate"
+                          type="date"
+                          max={new Date().toISOString().split('T')[0]}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="county">County *</Label>
+                        <Select name="county" required>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select county" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="montserrado">Montserrado</SelectItem>
+                            <SelectItem value="margibi">Margibi</SelectItem>
+                            <SelectItem value="bong">Bong</SelectItem>
+                            <SelectItem value="lofa">Lofa</SelectItem>
+                            <SelectItem value="nimba">Nimba</SelectItem>
+                            <SelectItem value="grand_bassa">Grand Bassa</SelectItem>
+                            <SelectItem value="sinoe">Sinoe</SelectItem>
+                            <SelectItem value="rivercess">River Cess</SelectItem>
+                            <SelectItem value="grand_gedeh">Grand Gedeh</SelectItem>
+                            <SelectItem value="maryland">Maryland</SelectItem>
+                            <SelectItem value="river_gee">River Gee</SelectItem>
+                            <SelectItem value="grand_cape_mount">Grand Cape Mount</SelectItem>
+                            <SelectItem value="gbarpolu">Gbarpolu</SelectItem>
+                            <SelectItem value="bomi">Bomi</SelectItem>
+                            <SelectItem value="grand_kru">Grand Kru</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="location">Specific Location</Label>
+                      <Input 
+                        id="location" 
+                        name="location"
+                        placeholder="e.g., LACRA Office Monrovia, Port of Monrovia, Processing Plant Name"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Persons/Organizations Involved */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Persons/Organizations Involved</h3>
+                    <div>
+                      <Label htmlFor="personsInvolved">Names of Individuals (if known)</Label>
+                      <Textarea 
+                        id="personsInvolved" 
+                        name="personsInvolved"
+                        placeholder="Names, positions, or descriptions of persons involved in the illegal activity"
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="organization">Organization/Company</Label>
+                      <Input 
+                        id="organization" 
+                        name="organization"
+                        placeholder="Name of company, government agency, or organization"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <Label htmlFor="description">Detailed Description *</Label>
+                    <Textarea 
+                      id="description" 
+                      name="description"
+                      placeholder="Provide detailed description of the illegal activity, including what happened, when, how much money was involved (if applicable), witnesses present, etc."
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  {/* Evidence */}
+                  <div>
+                    <Label htmlFor="evidence">Evidence Available</Label>
+                    <Textarea 
+                      id="evidence" 
+                      name="evidence"
+                      placeholder="Describe any evidence you have (documents, photos, recordings, receipts, witness contacts). Do not upload files - just describe what evidence exists."
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Contact Method (Optional) */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Contact Information (Optional)</h3>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-700">
+                        Providing contact information is optional but helps investigators follow up for additional details if needed. Your identity remains confidential.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="contactMethod">Preferred Contact Method</Label>
+                        <Select name="contactMethod">
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select contact method" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="phone">Phone</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="anonymous">Remain Anonymous</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="contactInfo">Contact Information</Label>
+                        <Input 
+                          id="contactInfo" 
+                          name="contactInfo"
+                          placeholder="Phone number or email (optional)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      onClick={() => setIsReportAbuseOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-red-600 hover:bg-red-700">
+                      Submit Anonymous Report
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">

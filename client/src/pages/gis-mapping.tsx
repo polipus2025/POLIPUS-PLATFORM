@@ -450,19 +450,19 @@ export default function GISMapping() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <div className="text-gray-600">Latitude</div>
-                            <div className="font-mono text-lg">{realTimePosition.coords.latitude.toFixed(6)}</div>
+                            <div className="font-mono text-lg">{realTimePosition?.coords?.latitude ? realTimePosition.coords.latitude.toFixed(6) : 'Connecting...'}</div>
                           </div>
                           <div>
                             <div className="text-gray-600">Longitude</div>
-                            <div className="font-mono text-lg">{realTimePosition.coords.longitude.toFixed(6)}</div>
+                            <div className="font-mono text-lg">{realTimePosition?.coords?.longitude ? realTimePosition.coords.longitude.toFixed(6) : 'Connecting...'}</div>
                           </div>
                           <div>
                             <div className="text-gray-600">Accuracy</div>
-                            <div className="font-mono text-lg">{realTimePosition.coords.accuracy.toFixed(1)}m</div>
+                            <div className="font-mono text-lg">{realTimePosition?.coords?.accuracy ? realTimePosition.coords.accuracy.toFixed(1) + 'm' : 'Connecting...'}</div>
                           </div>
                           <div>
                             <div className="text-gray-600">Altitude</div>
-                            <div className="font-mono text-lg">{realTimePosition.coords.altitude?.toFixed(1) || 'N/A'}m</div>
+                            <div className="font-mono text-lg">{realTimePosition?.coords?.altitude ? realTimePosition.coords.altitude.toFixed(1) + 'm' : 'N/A'}</div>
                           </div>
                         </div>
                         <div className="mt-4 text-xs text-gray-500">
@@ -775,7 +775,7 @@ export default function GISMapping() {
                       <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                         <p className="text-sm text-yellow-600 font-medium">Area Affected</p>
                         <p className="text-xl font-bold text-yellow-700">
-                          {satelliteStatus.gfwData.gladAlerts.total_area_affected.toFixed(1)} ha
+                          {satelliteStatus.gfwData?.gladAlerts?.total_area_affected ? satelliteStatus.gfwData.gladAlerts.total_area_affected.toFixed(1) + ' ha' : 'Loading...'}
                         </p>
                       </div>
                       <div className="p-3 bg-red-50 rounded-lg border border-red-200">
@@ -924,25 +924,33 @@ export default function GISMapping() {
                       <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                         <p className="text-sm text-green-600 font-medium">Current Tree Cover</p>
                         <p className="text-2xl font-bold text-green-700">
-                          {satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.current_tree_cover_percent.toFixed(1)}%
+                          {satelliteStatus.gfwData?.treeCoverAnalysis?.tree_cover_stats?.current_tree_cover_percent 
+                            ? satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.current_tree_cover_percent.toFixed(1) + '%'
+                            : 'Loading...'}
                         </p>
                       </div>
                       <div className="p-3 bg-red-50 rounded-lg border border-red-200">
                         <p className="text-sm text-red-600 font-medium">Loss Since 2001</p>
                         <p className="text-2xl font-bold text-red-700">
-                          {satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.tree_cover_loss_2001_2023.toFixed(1)}%
+                          {satelliteStatus.gfwData?.treeCoverAnalysis?.tree_cover_stats?.tree_cover_loss_2001_2023 
+                            ? satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.tree_cover_loss_2001_2023.toFixed(1) + '%'
+                            : 'Loading...'}
                         </p>
                       </div>
                       <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
                         <p className="text-sm text-orange-600 font-medium">Annual Loss Rate</p>
                         <p className="text-xl font-bold text-orange-700">
-                          {satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.annual_loss_rate.toFixed(2)}%/year
+                          {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.annual_loss_rate 
+                            ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.annual_loss_rate.toFixed(2) + '%/year'
+                            : 'Loading...'}
                         </p>
                       </div>
                       <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
                         <p className="text-sm text-purple-600 font-medium">Species Risk</p>
                         <p className="text-xl font-bold text-purple-700">
-                          {satelliteStatus.gfwData.treeCoverAnalysis.biodiversity_impact.species_risk_level.toUpperCase()}
+                          {satelliteStatus.gfwData?.treeCoverAnalysis?.biodiversity_impact?.species_risk_level 
+                            ? satelliteStatus.gfwData.treeCoverAnalysis.biodiversity_impact.species_risk_level.toUpperCase()
+                            : 'Loading...'}
                         </p>
                       </div>
                     </div>
@@ -953,19 +961,25 @@ export default function GISMapping() {
                         <div className="flex justify-between">
                           <span>Primary Forest:</span>
                           <span className="font-mono text-green-600">
-                            {satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.primary_forest_extent_ha.toFixed(0)} ha
+                            {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.primary_forest_extent_ha 
+                              ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.primary_forest_extent_ha.toFixed(0) + ' ha'
+                              : 'Loading...'}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Secondary Forest:</span>
                           <span className="font-mono text-blue-600">
-                            {satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.secondary_forest_extent_ha.toFixed(0)} ha
+                            {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.secondary_forest_extent_ha 
+                              ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.secondary_forest_extent_ha.toFixed(0) + ' ha'
+                              : 'Loading...'}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Plantations:</span>
                           <span className="font-mono text-orange-600">
-                            {satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.plantation_extent_ha.toFixed(0)} ha
+                            {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.plantation_extent_ha 
+                              ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.plantation_extent_ha.toFixed(0) + ' ha'
+                              : 'Loading...'}
                           </span>
                         </div>
                       </div>
@@ -977,19 +991,25 @@ export default function GISMapping() {
                         <div className="flex justify-between">
                           <span>Estimated Carbon Loss:</span>
                           <span className="font-mono text-red-600">
-                            {(satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.estimated_carbon_loss_tons / 1000).toFixed(1)}k tons
+                            {satelliteStatus.gfwData?.treeCoverAnalysis?.carbon_implications?.estimated_carbon_loss_tons 
+                              ? (satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.estimated_carbon_loss_tons / 1000).toFixed(1) + 'k tons'
+                              : 'Loading...'}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>CO2 Emissions:</span>
                           <span className="font-mono text-red-600">
-                            {(satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.co2_emissions_tons / 1000).toFixed(1)}k tons
+                            {satelliteStatus.gfwData?.treeCoverAnalysis?.carbon_implications?.co2_emissions_tons 
+                              ? (satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.co2_emissions_tons / 1000).toFixed(1) + 'k tons'
+                              : 'Loading...'}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Carbon Density:</span>
                           <span className="font-mono text-gray-600">
-                            {satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.carbon_density_tons_per_ha.toFixed(0)} t/ha
+                            {satelliteStatus.gfwData?.treeCoverAnalysis?.carbon_implications?.carbon_density_tons_per_ha 
+                              ? satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.carbon_density_tons_per_ha.toFixed(0) + ' t/ha'
+                              : 'Loading...'}
                           </span>
                         </div>
                       </div>
@@ -1071,7 +1091,9 @@ export default function GISMapping() {
                         <div className="flex justify-between">
                           <span>Habitat Integrity:</span>
                           <span className="font-mono text-blue-600">
-                            {satelliteStatus.gfwData.biodiversityData.biodiversity_indicators.habitat_integrity_score.toFixed(1)}%
+                            {satelliteStatus.gfwData?.biodiversityData?.biodiversity_indicators?.habitat_integrity_score 
+                              ? satelliteStatus.gfwData.biodiversityData.biodiversity_indicators.habitat_integrity_score.toFixed(1) + '%'
+                              : 'Loading...'}
                           </span>
                         </div>
                         <div className="flex justify-between">

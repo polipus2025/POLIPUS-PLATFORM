@@ -109,16 +109,16 @@ export default function FrontPage() {
                   ${module.isAgriTrace ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50' : 'border-gray-200 hover:border-gray-300'}
                 `}
               >
-                <CardHeader className="pb-4 flex-1 flex items-center justify-center">
-                  {module.isAgriTrace ? (
-                    <div className="flex items-center justify-center h-full w-full">
-                      <img 
-                        src={agriTraceLogo} 
-                        alt="AgriTrace360" 
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ) : (
+                {module.isAgriTrace ? (
+                  <div className="flex-1 relative">
+                    <img 
+                      src={agriTraceLogo} 
+                      alt="AgriTrace360" 
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <CardHeader className="pb-4 flex-1 flex items-center justify-center">
                     <>
                       <div className="flex items-center justify-between mb-4 w-full">
                         <div className={`p-3 rounded-full ${module.color} text-white`}>
@@ -129,8 +129,8 @@ export default function FrontPage() {
                         {module.title}
                       </CardTitle>
                     </>
-                  )}
-                </CardHeader>
+                  </CardHeader>
+                )}
                 
                 <CardContent className="pt-0 p-4">
                   <Link href={module.route}>

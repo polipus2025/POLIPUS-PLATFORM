@@ -188,6 +188,18 @@ export default function ExporterDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            {/* Export License Management Button */}
+            <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
+              <FileText className="h-4 w-4 mr-2" />
+              Export License Management
+            </Button>
+            
+            {/* Network Partnership Button */}
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
+              <Users className="h-4 w-4 mr-2" />
+              Network Partnership
+            </Button>
+            
             {/* Request Inspection Button */}
             <Dialog open={isInspectionRequestOpen} onOpenChange={setIsInspectionRequestOpen}>
               <DialogTrigger asChild>
@@ -1118,30 +1130,7 @@ export default function ExporterDashboard() {
         </Card>
       </div>
 
-      {/* Exporter Operations */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Ship className="h-5 w-5 text-blue-600" />
-          Exporter Operations
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button 
-            className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto justify-start"
-            onClick={() => {
-              // Handle network partnership action
-              console.log('Network Partnership clicked');
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <Users className="h-6 w-6" />
-              <div className="text-left">
-                <div className="font-semibold">Network Partnership</div>
-                <div className="text-sm text-purple-100">Manage partnerships</div>
-              </div>
-            </div>
-          </Button>
-        </div>
-      </div>
+
 
       {/* Recent LACRA Requests */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

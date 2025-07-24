@@ -65,7 +65,7 @@ export default function FieldAgentLogin() {
         });
         
         // Store session data
-        localStorage.setItem("token", result.token);
+        localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "field_agent");
         localStorage.setItem("userType", "field_agent");
         localStorage.setItem("agentId", data.agentId);

@@ -39,7 +39,7 @@ export default function FieldAgentDashboard() {
   // Get field agent info from localStorage
   const agentId = localStorage.getItem("agentId");
   const jurisdiction = localStorage.getItem("jurisdiction");
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
 
   if (!token) {
     return (

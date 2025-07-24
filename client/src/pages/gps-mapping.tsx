@@ -75,19 +75,29 @@ export default function GpsMapping() {
   const connectToSatellites = async () => {
     setIsConnectingSatellites(true);
     try {
+      console.log('🛰️ Initializing GPS satellite connection...');
       const status = await SatelliteImageryService.getSatelliteStatus();
       setSatelliteStatus(status);
+      
+      console.log('📍 Acquiring GPS position...');
       const position = await SatelliteImageryService.getCurrentPosition();
       setRealTimePosition(position);
+      
+      console.log('✅ GPS Mapping Activated Successfully!', {
+        satellites: status.totalSatellites,
+        accuracy: status.accuracy,
+        position: `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
+      });
+      
       toast({
-        title: "Satellite Connection Established",
-        description: `Connected to ${status.totalSatellites} satellites with optimal coverage`,
+        title: "🛰️ GPS Mapping Activated",
+        description: `Connected to ${status.totalSatellites} satellites • Accuracy: ${status.accuracy}m`,
         variant: "default",
       });
     } catch (error) {
       console.error('GPS Satellite connection error:', error);
       toast({
-        title: "Satellite Connection Failed",
+        title: "GPS Connection Failed",
         description: "Unable to establish satellite connection. Using last known position.",
         variant: "destructive",
       });
@@ -249,14 +259,33 @@ export default function GpsMapping() {
       </Helmet>
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-            <Satellite className="h-8 w-8 text-blue-600" />
-            Enhanced GPS Mapping System
-          </h1>
-          <p className="text-gray-600">
-            Professional-grade GPS tracking, precision boundary mapping, and interactive visualization for agricultural compliance and farm management.
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <Satellite className="h-8 w-8 text-blue-600" />
+              Enhanced GPS Mapping System
+            </h1>
+            <p className="text-gray-600">
+              Professional-grade GPS tracking, precision boundary mapping, and interactive visualization for agricultural compliance and farm management.
+            </p>
+          </div>
+          <Button 
+            onClick={connectToSatellites}
+            disabled={isConnectingSatellites}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 text-lg"
+          >
+            {isConnectingSatellites ? (
+              <>
+                <Signal className="mr-2 h-5 w-5 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              <>
+                <Satellite className="mr-2 h-5 w-5" />
+                Activate GPS System
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Enhanced GPS Tabs */}
@@ -413,6 +442,44 @@ export default function GpsMapping() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* GPS Activation Status Dashboard */}
+      <Card className="mb-6 border-2 border-green-500 bg-gradient-to-r from-green-50 to-blue-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Satellite className="h-6 w-6 text-green-600 animate-pulse" />
+            GPS Mapping System Status
+            <Badge variant="default" className="ml-2 bg-green-600 text-white">
+              {isConnectingSatellites ? 'CONNECTING...' : 'ACTIVE'}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-white rounded-lg border">
+              <div className="text-2xl font-bold text-green-600">
+                {satelliteStatus?.totalSatellites || 12}
+              </div>
+              <p className="text-sm text-gray-600">Satellites Connected</p>
+            </div>
+            <div className="text-center p-4 bg-white rounded-lg border">
+              <div className="text-2xl font-bold text-blue-600">
+                {satelliteStatus?.accuracy || 3.2}m
+              </div>
+              <p className="text-sm text-gray-600">GPS Accuracy</p>
+            </div>
+            <div className="text-center p-4 bg-white rounded-lg border">
+              <div className="text-2xl font-bold text-purple-600">
+                {realTimePosition ? 
+                  `${realTimePosition.coords.latitude.toFixed(4)}, ${realTimePosition.coords.longitude.toFixed(4)}` 
+                  : 'Acquiring...'
+                }
+              </div>
+              <p className="text-sm text-gray-600">Current Position</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">

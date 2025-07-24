@@ -13,7 +13,7 @@ export async function seedDatabase() {
     // Create sample auth users
     await storage.createAuthUser({
       username: "admin001",
-      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
       role: "regulatory_admin",
       userType: "regulatory",
       firstName: "Admin",
@@ -24,7 +24,7 @@ export async function seedDatabase() {
 
     await storage.createAuthUser({
       username: "AGT-2024-001",
-      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
       role: "field_agent",
       userType: "field_agent",
       firstName: "Sarah",
@@ -36,7 +36,7 @@ export async function seedDatabase() {
 
     await storage.createAuthUser({
       username: "FRM-2024-001",
-      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
       role: "farmer",
       userType: "farmer",
       firstName: "Moses",
@@ -48,7 +48,7 @@ export async function seedDatabase() {
 
     await storage.createAuthUser({
       username: "EXP-2024-001",
-      passwordHash: "$2b$10$8K1p/a0dL3.rL7HMiYPL7uIVOgL5h/R3L8l5g3Qf3h7f9n2KJzH3.",
+      passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
       role: "exporter",
       userType: "exporter",
       firstName: "Marcus",

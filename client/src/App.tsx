@@ -34,6 +34,7 @@ import OfflineSync from "@/pages/offline-sync";
 import DirectorDashboard from "@/pages/director-dashboard";
 import MobileAlertDemo from "@/pages/mobile-alert-demo";
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
+import FarmerDashboard from "@/pages/farmer-dashboard";
 import NotFound from "@/pages/not-found";
 
 // Helper component to check user access to routes
@@ -65,13 +66,13 @@ function Router() {
         <>
           {/* Dashboard - Role-based routing */}
           <Route path="/dashboard">
-            {userType === 'farmer' ? <FarmPlots /> : 
+            {userType === 'farmer' ? <FarmerDashboard /> : 
              userType === 'field_agent' ? <FieldAgentDashboard /> : 
              userType === 'exporter' ? <ExporterDashboard /> :
              localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
           </Route>
           <Route path="/">
-            {userType === 'farmer' ? <FarmPlots /> : 
+            {userType === 'farmer' ? <FarmerDashboard /> : 
              userType === 'field_agent' ? <FieldAgentDashboard /> : 
              userType === 'exporter' ? <ExporterDashboard /> :
              localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}

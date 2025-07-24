@@ -52,7 +52,7 @@ const regulatoryNavigation = [
 
 // Farmer Navigation - Only farm management features
 const farmerNavigation = [
-  { name: "Dashboard", href: "/", icon: BarChart3 },
+  { name: "Farm Dashboard", href: "/", icon: BarChart3 },
   { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
   { name: "GPS Farm Mapping", href: "/gps-mapping", icon: Satellite },
   { name: "GIS Mapping System", href: "/gis-mapping", icon: Map },

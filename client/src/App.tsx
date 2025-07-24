@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
+import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
@@ -200,10 +201,12 @@ function Router() {
         </>
       ) : (
         <>
-          {/* Redirect unauthenticated users to landing page */}
-          <Route path="/" component={Landing} />
+          {/* Front Page - Main Landing */}
+          <Route path="/" component={FrontPage} />
+          {/* Landing page for portals */}
+          <Route path="/landing" component={Landing} />
           {/* Also handle /dashboard for logged out users */}
-          <Route path="/dashboard" component={Landing} />
+          <Route path="/dashboard" component={FrontPage} />
         </>
       )}
       
@@ -216,15 +219,16 @@ function App() {
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
-  // Check if user is on authentication pages or landing page
+  // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");
-  const isLandingPage = window.location.pathname === "/" && !authToken;
+  const isLandingPage = window.location.pathname === "/landing" && !authToken;
+  const isFrontPage = window.location.pathname === "/" && !authToken;
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage) ? (
+        {(isAuthPage || isLandingPage || isFrontPage) ? (
           // Render auth/landing pages without layout
           <div className="min-h-screen">
             <Router />

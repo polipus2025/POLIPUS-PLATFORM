@@ -352,7 +352,7 @@ export default function FarmPlotsPage() {
                           }
                           className="mt-1"
                         >
-                          {selectedPlot.status.charAt(0).toUpperCase() + selectedPlot.status.slice(1)}
+                          {selectedPlot.status ? selectedPlot.status.charAt(0).toUpperCase() + selectedPlot.status.slice(1) : 'Unknown'}
                         </Badge>
                       </div>
                       {selectedPlot.plantingDate && (

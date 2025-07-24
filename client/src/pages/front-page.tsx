@@ -110,45 +110,41 @@ export default function FrontPage() {
                 `}
               >
                 {module.isAgriTrace ? (
-                  <div className="flex-1 relative">
+                  <Link href={module.route} className="flex-1 relative block">
                     <img 
                       src={agriTraceLogo} 
                       alt="AgriTrace360" 
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-cover cursor-pointer"
                     />
-                  </div>
-                ) : (
-                  <CardHeader className="pb-4 flex-1 flex items-center justify-center">
-                    <>
-                      <div className="flex items-center justify-between mb-4 w-full">
-                        <div className={`p-3 rounded-full ${module.color} text-white`}>
-                          <IconComponent className="h-6 w-6" />
-                        </div>
-                      </div>
-                      <CardTitle className="text-lg leading-tight text-center">
-                        {module.title}
-                      </CardTitle>
-                    </>
-                  </CardHeader>
-                )}
-                
-                <CardContent className="pt-0 p-4">
-                  <Link href={module.route}>
-                    <Button 
-                      className={`
-                        w-full transition-all duration-200
-                        ${module.isAgriTrace 
-                          ? 'bg-green-600 hover:bg-green-700 text-white' 
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                        }
-                      `}
-                      size="sm"
-                    >
-                      Access Module
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
                   </Link>
-                </CardContent>
+                ) : (
+                  <>
+                    <CardHeader className="pb-4 flex-1 flex items-center justify-center">
+                      <>
+                        <div className="flex items-center justify-between mb-4 w-full">
+                          <div className={`p-3 rounded-full ${module.color} text-white`}>
+                            <IconComponent className="h-6 w-6" />
+                          </div>
+                        </div>
+                        <CardTitle className="text-lg leading-tight text-center">
+                          {module.title}
+                        </CardTitle>
+                      </>
+                    </CardHeader>
+                    
+                    <CardContent className="pt-0 p-4">
+                      <Link href={module.route}>
+                        <Button 
+                          className="w-full transition-all duration-200 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          size="sm"
+                        >
+                          Access Module
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </>
+                )}
               </Card>
             );
           })}

@@ -44,6 +44,7 @@ AgriTrace360™ is a comprehensive web application designed for the Liberia Agri
 - **Mobile App Alert System**: Complete mobile alert integration system where field agents can submit requests via mobile app that route to director dashboard for compliance officer verification and director approval. Features emergency escalation, rule-based verification workflow, real-time metrics tracking, and comprehensive audit trail (January 24, 2025)
 - **Dashboard Message Center**: Integrated message button in dashboard header with unread count badge, opens dialog showing all system notifications and compliance alerts. Users can mark messages as read individually, with messages categorized by type and priority with color-coded badges. Includes real-time synchronization and full message history with timestamps (January 24, 2025)
 - **Export Application System**: Added "Submit Export Application" button to exporter portal header, providing comprehensive export license application form with company information, export details, destination markets, compliance certifications (EUDR, Organic, Fair Trade), and professional submission workflow with confirmation notifications (January 24, 2025)
+- **Logout Routing Fix**: Resolved logout issue where users saw regulatory compliance menu instead of entity portals landing page. Fixed authentication token consistency and ensured proper redirection to landing page with entity portals for all user types (January 24, 2025)
 
 ## User Preferences
 

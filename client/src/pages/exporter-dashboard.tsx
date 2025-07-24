@@ -19,7 +19,8 @@ import {
   Globe,
   ClipboardCheck,
   MapPin,
-  Phone
+  Phone,
+  Users
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -1115,6 +1116,31 @@ export default function ExporterDashboard() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Exporter Operations */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Ship className="h-5 w-5 text-blue-600" />
+          Exporter Operations
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Button 
+            className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto justify-start"
+            onClick={() => {
+              // Handle network partnership action
+              console.log('Network Partnership clicked');
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <Users className="h-6 w-6" />
+              <div className="text-left">
+                <div className="font-semibold">Network Partnership</div>
+                <div className="text-sm text-purple-100">Manage partnerships</div>
+              </div>
+            </div>
+          </Button>
+        </div>
       </div>
 
       {/* Recent LACRA Requests */}

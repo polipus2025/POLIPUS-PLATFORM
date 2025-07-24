@@ -52,15 +52,29 @@ export default function GISMapping() {
         lat: position.coords?.latitude || 6.4281, 
         lng: position.coords?.longitude || -9.4295 
       });
+
+      // Get NASA Landsat field analysis
+      const landsatData = await NASASatelliteService.getLandsatFieldAnalysis({
+        lat: position.coords?.latitude || 6.4281, 
+        lng: position.coords?.longitude || -9.4295 
+      });
+
+      // Get NASA SMAP soil moisture data
+      const smapData = await NASASatelliteService.getSMAPSoilMoisture({
+        lat: position.coords?.latitude || 6.4281, 
+        lng: position.coords?.longitude || -9.4295 
+      });
       
       console.log('Successfully connected to satellite networks:', status);
       console.log('NASA GIBS imagery connected:', nasaImagery);
       console.log('NASA MODIS agricultural data:', modisData);
+      console.log('NASA Landsat field analysis:', landsatData);
+      console.log('NASA SMAP soil moisture:', smapData);
       
       // Store NASA data for display
-      setSatelliteStatus(prev => ({
+      setSatelliteStatus((prev: any) => ({
         ...prev,
-        nasaData: { nasaImagery, modisData }
+        nasaData: { nasaImagery, modisData, landsatData, smapData }
       }));
       
     } catch (error) {
@@ -436,6 +450,69 @@ export default function GISMapping() {
                             </div>
                           </div>
                         </Card>
+
+                        {/* NASA Landsat Analysis */}
+                        {satelliteStatus.nasaData?.landsatData && (
+                          <Card className="p-4 bg-purple-50">
+                            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                              <Badge variant="default" className="bg-purple-600">Landsat 8/9</Badge>
+                              High-Resolution Analysis
+                            </h4>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span>NDVI:</span>
+                                <span className="font-mono text-green-600">
+                                  {satelliteStatus.nasaData.landsatData.agricultural_indices.ndvi.toFixed(3)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>NDWI (Water):</span>
+                                <span className="font-mono text-blue-600">
+                                  {satelliteStatus.nasaData.landsatData.agricultural_indices.ndwi.toFixed(3)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Cloud Cover:</span>
+                                <span className="font-mono text-gray-600">
+                                  {satelliteStatus.nasaData.landsatData.scene_metadata.cloud_cover.toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+
+                        {/* NASA SMAP Soil Moisture */}
+                        {satelliteStatus.nasaData?.smapData && (
+                          <Card className="p-4 bg-yellow-50">
+                            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                              <Badge variant="default" className="bg-yellow-600">NASA SMAP</Badge>
+                              Soil Moisture Analysis
+                            </h4>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span>Surface Moisture:</span>
+                                <span className="font-mono text-blue-600">
+                                  {(satelliteStatus.nasaData.smapData.soil_moisture.surface_soil_moisture * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Root Zone:</span>
+                                <span className="font-mono text-green-600">
+                                  {(satelliteStatus.nasaData.smapData.soil_moisture.root_zone_moisture * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Irrigation Status:</span>
+                                <span className={`font-mono ${
+                                  satelliteStatus.nasaData.smapData.irrigation_guidance.current_status === 'adequate' 
+                                    ? 'text-green-600' : 'text-orange-600'
+                                }`}>
+                                  {satelliteStatus.nasaData.smapData.irrigation_guidance.current_status}
+                                </span>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
                       </div>
                     </div>
                   )}

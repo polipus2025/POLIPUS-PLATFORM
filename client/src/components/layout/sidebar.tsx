@@ -75,7 +75,7 @@ const fieldAgentNavigation = [
 // Exporter Navigation - Only exporter-LACRA interaction features
 const exporterNavigation = [
   { name: "Export Dashboard", href: "/exporter-dashboard", icon: BarChart3 },
-  { name: "Export License Application", href: "/export-license", icon: Award },
+  { name: "Export License Management", href: "/export-license", icon: Award },
   { name: "Document Verification", href: "/verification", icon: Shield },
 ];
 

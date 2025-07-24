@@ -188,12 +188,6 @@ export default function ExporterDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {/* Export License Management Button */}
-            <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
-              <FileText className="h-4 w-4 mr-2" />
-              Export License Management
-            </Button>
-            
             {/* Network Partnership Button */}
             <Button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-semibold shadow-lg">
               <Users className="h-4 w-4 mr-2" />

@@ -192,10 +192,14 @@ export interface IStorage {
   getGisLocations(): Promise<any[]>;
   getFarmGpsMapping(id: number): Promise<FarmGpsMapping | undefined>;
   createFarmGpsMapping(mapping: InsertFarmGpsMapping): Promise<FarmGpsMapping>;
+  getFarmGpsMappings(): Promise<FarmGpsMapping[]>;
+  getFarmGpsMappingsByFarmer(farmerId: number): Promise<FarmGpsMapping[]>;
+  updateFarmGpsMapping(id: number, mapping: Partial<FarmGpsMapping>): Promise<FarmGpsMapping | undefined>;
 
   // EUDR compliance methods
   getEudrCompliance(): Promise<EudrCompliance[]>;
   createEudrCompliance(compliance: InsertEudrCompliance): Promise<EudrCompliance>;
+  getEudrCompliances(): Promise<EudrCompliance[]>;
   
   // Deforestation monitoring methods
   getDeforestationMonitorings(): Promise<DeforestationMonitoring[]>;
@@ -617,6 +621,22 @@ export class DatabaseStorage implements IStorage {
     return newMapping;
   }
 
+  async getFarmGpsMappings(): Promise<FarmGpsMapping[]> {
+    return await db.select().from(farmGpsMapping).orderBy(desc(farmGpsMapping.id));
+  }
+
+  async getFarmGpsMappingsByFarmer(farmerId: number): Promise<FarmGpsMapping[]> {
+    return await db.select().from(farmGpsMapping).where(eq(farmGpsMapping.farmerId, farmerId));
+  }
+
+  async updateFarmGpsMapping(id: number, mapping: Partial<FarmGpsMapping>): Promise<FarmGpsMapping | undefined> {
+    const [updated] = await db.update(farmGpsMapping)
+      .set(mapping)
+      .where(eq(farmGpsMapping.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
   // EUDR compliance methods
   async getEudrCompliance(): Promise<EudrCompliance[]> {
     return await db.select().from(eudrCompliance).orderBy(desc(eudrCompliance.id));
@@ -625,6 +645,10 @@ export class DatabaseStorage implements IStorage {
   async createEudrCompliance(compliance: InsertEudrCompliance): Promise<EudrCompliance> {
     const [newCompliance] = await db.insert(eudrCompliance).values(compliance).returning();
     return newCompliance;
+  }
+
+  async getEudrCompliances(): Promise<EudrCompliance[]> {
+    return await db.select().from(eudrCompliance).orderBy(desc(eudrCompliance.id));
   }
 
   async getDeforestationMonitoringsByMapping(mappingId: number): Promise<DeforestationMonitoring[]> {

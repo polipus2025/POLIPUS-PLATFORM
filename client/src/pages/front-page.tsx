@@ -19,6 +19,7 @@ import {
   Satellite
 } from 'lucide-react';
 import agriTraceLogo from '@/assets/IMG-20250724-WA0007_1753362990630.jpg';
+import poliposLogo from '@/assets/polipos-logo.jpg';
 
 export default function FrontPage() {
   const modules = [
@@ -120,9 +121,9 @@ export default function FrontPage() {
             {/* Polipos Logo */}
             <div className="flex justify-center mb-8">
               <img 
-                src={agriTraceLogo} 
-                alt="Polipos - Digital Agriculture Solutions" 
-                className="h-24 w-auto object-contain rounded-lg shadow-lg"
+                src={poliposLogo} 
+                alt="Polipos - Brightening the Future" 
+                className="h-20 w-auto object-contain"
               />
             </div>
             
@@ -292,9 +293,9 @@ export default function FrontPage() {
             <div>
               <div className="flex items-center mb-4">
                 <img 
-                  src={agriTraceLogo} 
+                  src={poliposLogo} 
                   alt="Polipos" 
-                  className="h-8 w-8 mr-3 rounded"
+                  className="h-8 w-auto mr-3"
                 />
                 <span className="text-xl font-bold">Digital Agriculture Platform</span>
               </div>

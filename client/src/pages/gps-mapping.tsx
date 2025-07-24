@@ -19,6 +19,8 @@ import EnhancedGPSTracker from '@/components/gps/enhanced-gps-tracker';
 import GPSMapViewer from '@/components/gps/gps-map-viewer';
 import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
 import AdvancedBoundaryMapper from '@/components/gps/advanced-boundary-mapper';
+import RealTimeBoundaryDisplay from '@/components/gps/real-time-boundary-display';
+import BoundaryMappingDemo from '@/components/gps/boundary-mapping-demo';
 import { Helmet } from 'react-helmet';
 import { SatelliteImageryService, CropMonitoringService, SATELLITE_PROVIDERS, GPS_SERVICES } from "@/lib/satellite-services";
 
@@ -63,6 +65,8 @@ export default function GpsMapping() {
   const [satelliteStatus, setSatelliteStatus] = useState<any>(null);
   const [realTimePosition, setRealTimePosition] = useState<any>(null);
   const [isConnectingSatellites, setIsConnectingSatellites] = useState(false);
+  const [activeBoundaryPoints, setActiveBoundaryPoints] = useState<any[]>([]);
+  const [isBoundaryMapping, setIsBoundaryMapping] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -291,7 +295,7 @@ export default function GpsMapping() {
 
         {/* Enhanced GPS Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="tracker" className="flex items-center gap-2">
               <Signal className="h-4 w-4" />
               GPS Tracker
@@ -307,6 +311,10 @@ export default function GpsMapping() {
             <TabsTrigger value="advanced" className="flex items-center gap-2">
               <Navigation className="h-4 w-4" />
               Advanced Mapper
+            </TabsTrigger>
+            <TabsTrigger value="demo" className="flex items-center gap-2">
+              <Play className="h-4 w-4" />
+              Live Demo
             </TabsTrigger>
             <TabsTrigger value="existing" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
@@ -374,18 +382,67 @@ export default function GpsMapping() {
 
           {/* Advanced Boundary Mapper Tab */}
           <TabsContent value="advanced" className="space-y-6">
-            <AdvancedBoundaryMapper
-              onBoundaryComplete={handleBoundaryComplete}
-              onPointAdded={(point) => {
-                console.log('New boundary point added:', point);
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <AdvancedBoundaryMapper
+                  onBoundaryComplete={(boundary) => {
+                    handleBoundaryComplete(boundary);
+                    setActiveBoundaryPoints([]);
+                    setIsBoundaryMapping(false);
+                  }}
+                  onPointAdded={(point) => {
+                    setActiveBoundaryPoints(prev => [...prev, point]);
+                    setIsBoundaryMapping(true);
+                    console.log('New boundary point added:', point);
+                    toast({
+                      title: "Boundary Point Added",
+                      description: `Point ${point.order}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`,
+                      duration: 2000,
+                    });
+                  }}
+                  maxPoints={100}
+                  minAccuracy={5}
+                />
+              </div>
+              <div>
+                <RealTimeBoundaryDisplay 
+                  points={activeBoundaryPoints}
+                  isActive={isBoundaryMapping}
+                  onComplete={(data) => {
+                    console.log('Boundary completed with data:', data);
+                    toast({
+                      title: "Boundary Mapping Complete",
+                      description: `Area: ${data.area.toFixed(3)} hectares, Perimeter: ${data.perimeter.toFixed(1)}m`,
+                    });
+                    setActiveBoundaryPoints([]);
+                    setIsBoundaryMapping(false);
+                  }}
+                  onReset={() => {
+                    setActiveBoundaryPoints([]);
+                    setIsBoundaryMapping(false);
+                    toast({
+                      title: "Boundary Reset",
+                      description: "All boundary points cleared",
+                    });
+                  }}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Live Boundary Mapping Demo Tab */}
+          <TabsContent value="demo" className="space-y-6">
+            <BoundaryMappingDemo 
+              plotName="Cocoa Plot 1"
+              farmerName="Moses Tuah"
+              onMappingUpdate={(data) => {
+                console.log('Demo mapping update:', data);
                 toast({
-                  title: "Boundary Point Added",
-                  description: `Point ${point.order}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`,
-                  duration: 2000,
+                  title: `${data.plotName} Mapping`,
+                  description: `Point ${data.points} added for ${data.farmerName}`,
+                  duration: 1500,
                 });
               }}
-              maxPoints={100}
-              minAccuracy={5}
             />
           </TabsContent>
 

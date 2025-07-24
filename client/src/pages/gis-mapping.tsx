@@ -49,9 +49,16 @@ export default function GISMapping() {
       const status = await SatelliteImageryService.getSatelliteStatus();
       setSatelliteStatus(status);
       
-      // Get current GPS position
-      const position = await SatelliteImageryService.getCurrentPosition();
-      setRealTimePosition(position);
+      // Get current GPS position with error handling
+      let position;
+      try {
+        position = await SatelliteImageryService.getCurrentPosition();
+        setRealTimePosition(position);
+      } catch (posError) {
+        console.warn('GPS position unavailable, using default coordinates');
+        position = { coords: { latitude: 6.4281, longitude: -9.4295 } };
+        setRealTimePosition(position);
+      }
       
       // Connect to NASA satellites specifically
       const nasaImagery = await NASASatelliteService.getNASAImagery({ 
@@ -117,6 +124,7 @@ export default function GISMapping() {
       
       // Store NASA data and GFW data for display
       setSatelliteStatus((prev: any) => ({
+        ...status,
         ...prev,
         nasaData: { nasaImagery, modisData, landsatData, smapData },
         gfwData: { gladAlerts, gfwIntegratedAlerts, treeCoverAnalysis, fireAlerts, biodiversityData }

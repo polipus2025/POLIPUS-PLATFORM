@@ -159,29 +159,28 @@ export default function Header() {
   const userDisplay = getUserDisplayInfo();
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="px-3 md:px-6 py-2 md:py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-3 md:space-x-8 flex-1 min-w-0">
-            <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg overflow-hidden">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
+      <div className="px-2 sm:px-4 md:px-6 py-2 md:py-4 w-full max-w-full">
+        <div className="flex justify-between items-center w-full max-w-full">
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-1 min-w-0 max-w-[70%]">
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0 max-w-full">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 rounded overflow-hidden flex-shrink-0">
                 <img 
                   src={lacraLogo} 
-                  alt="LACRA Official Logo" 
+                  alt="LACRA" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg overflow-hidden">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 rounded overflow-hidden flex-shrink-0">
                 <img 
                   src={agriTraceLogo} 
-                  alt="AgriTrace360 Logo" 
+                  alt="AgriTrace360" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-sm md:text-xl font-bold text-neutral truncate">AgriTrace360™</h1>
-                <p className="text-xs text-gray-600 hidden md:block">LACRA - Liberia Agriculture Commodity Regulatory Authority</p>
-                <p className="text-xs md:text-sm text-gray-500 truncate">LACRA Regulatory Dashboard</p>
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <h1 className="text-xs sm:text-sm md:text-xl font-bold text-neutral truncate">AgriTrace360™</h1>
+                <p className="text-xs text-gray-500 truncate">LACRA Dashboard</p>
               </div>
             </div>
             
@@ -227,17 +226,17 @@ export default function Header() {
             </div>
             
             {/* Mobile compact view */}
-            <div className="lg:hidden flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-green-50 px-2 py-1 rounded-lg border border-blue-100 flex-shrink-0">
-              <Clock className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
-              <span className="text-xs md:text-sm font-medium text-gray-900">
+            <div className="lg:hidden flex items-center space-x-1 bg-gradient-to-r from-blue-50 to-green-50 px-1 sm:px-2 py-1 rounded border border-blue-100 flex-shrink-0">
+              <Clock className="h-3 w-3 text-green-600" />
+              <span className="text-xs font-medium text-gray-900">
                 {currentTime.toLocaleTimeString('en-US', { 
                   hour: '2-digit',
                   minute: '2-digit',
                   hour12: true
                 })}
               </span>
-              <WeatherIcon className="h-3 w-3 md:h-4 md:w-4 text-orange-600" />
-              <span className="text-xs md:text-sm font-medium text-gray-900">{weather.temperature}</span>
+              <WeatherIcon className="h-3 w-3 text-orange-600" />
+              <span className="text-xs font-medium text-gray-900">{weather.temperature}</span>
             </div>
           </div>
           

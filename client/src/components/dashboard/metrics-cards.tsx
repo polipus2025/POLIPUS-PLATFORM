@@ -59,28 +59,32 @@ export default function MetricsCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-      {cards.map((card, index) => (
-        <Card key={card.title} className="border border-gray-100">
-          <CardContent className="p-3 md:p-6">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs md:text-sm font-medium text-gray-500 truncate">{card.title}</p>
-                <p className="text-lg md:text-2xl font-bold text-neutral mt-1">{card.value}</p>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6 w-full">
+        {cards.map((card, index) => (
+          <Card key={card.title} className="border border-gray-100 w-full max-w-full">
+            <CardContent className="p-3 md:p-6 w-full">
+              <div className="flex items-center justify-between w-full">
+                <div className="min-w-0 flex-1 overflow-hidden">
+                  <p className="text-xs md:text-sm font-medium text-gray-500 truncate">{card.title}</p>
+                  <p className="text-base md:text-2xl font-bold text-neutral mt-1 truncate">{card.value}</p>
+                </div>
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 ${card.color} bg-opacity-10 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                  <card.icon className={`text-xs sm:text-sm md:text-xl ${card.color.replace('bg-', 'text-')}`} />
+                </div>
               </div>
-              <div className={`w-8 h-8 md:w-12 md:h-12 ${card.color} bg-opacity-10 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                <card.icon className={`text-sm md:text-xl ${card.color.replace('bg-', 'text-')}`} />
+              <div className="mt-2 md:mt-4 w-full">
+                <div className="flex items-center text-xs md:text-sm text-gray-600">
+                  <span className={`font-medium truncate ${index === 2 ? 'text-error' : 'text-success'}`}>
+                    {card.change}
+                  </span>
+                  <span className="ml-1 truncate">{card.changeText}</span>
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <span className={`text-sm font-medium ${index === 2 ? 'text-error' : 'text-success'}`}>
-                {card.change}
-              </span>
-              <span className="text-gray-500 text-sm ml-1">{card.changeText}</span>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

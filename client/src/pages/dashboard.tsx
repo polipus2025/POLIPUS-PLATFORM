@@ -252,11 +252,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-3 md:p-6 max-w-full overflow-x-hidden">
-      <Helmet>
-        <title>Dashboard - AgriTrace360™ LACRA</title>
-        <meta name="description" content="Real-time agricultural commodity compliance monitoring dashboard for Liberia Agriculture Commodity Regulatory Authority" />
-      </Helmet>
+    <div className="w-screen max-w-full overflow-x-hidden">
+      <div className="p-2 sm:p-4 md:p-6 w-full max-w-full">
+        <Helmet>
+          <title>Dashboard - AgriTrace360™ LACRA</title>
+          <meta name="description" content="Real-time agricultural commodity compliance monitoring dashboard for Liberia Agriculture Commodity Regulatory Authority" />
+        </Helmet>
 
       {/* Dashboard Header - Mobile Optimized */}
       <div className="mb-4 md:mb-6">
@@ -1050,6 +1051,7 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

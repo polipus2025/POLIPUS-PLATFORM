@@ -91,7 +91,7 @@ export default function FrontPage() {
         <img 
           src={poliposLogo} 
           alt="Polipos - Brightening the Future" 
-          className="h-48 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-500 cursor-pointer"
+          className="h-48 w-auto object-contain"
         />
       </div>
 
@@ -114,7 +114,7 @@ export default function FrontPage() {
                     <img 
                       src={agriTraceLogo} 
                       alt="AgriTrace360" 
-                      className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+                      className="absolute inset-0 w-full h-full object-cover cursor-pointer filter grayscale hover:grayscale-0 transition-all duration-500"
                     />
                   </Link>
                 ) : (

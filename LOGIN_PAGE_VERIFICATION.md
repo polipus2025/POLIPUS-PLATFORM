@@ -35,6 +35,24 @@
 
 ---
 
+## 💻 DESKTOP WEB ACCESS INSTRUCTIONS
+
+### **Step 1: Access the Portal**
+1. Open your desktop browser (Chrome, Firefox, Safari, Edge)
+2. Go to the main landing page: `http://localhost:5000` (or your deployed URL)
+3. Click on the appropriate portal from the landing page
+
+### **Step 2: Login**
+1. Use the exact credentials above (case-sensitive)
+2. Full desktop dashboard with all features available
+3. Enhanced navigation and larger display area
+
+### **Step 3: Navigation**
+- Full sidebar navigation menu
+- Complete dashboard with charts and analytics
+- All administrative features accessible
+- Large screen optimized layout
+
 ## 📱 MOBILE ACCESS INSTRUCTIONS
 
 ### **Step 1: Access the Portal**

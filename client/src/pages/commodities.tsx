@@ -114,20 +114,6 @@ export default function Commodities() {
     return () => clearInterval(simulationInterval);
   }, [simulationActive]);
 
-  // Auto-scroll new activities
-  useEffect(() => {
-    if (simulationActive && simulationData.recentUpdates > 0) {
-      // Trigger visual updates in commodities list
-      const randomIndex = Math.floor(Math.random() * enhancedCommodities.length);
-      if (enhancedCommodities[randomIndex]) {
-        // Simulate status change animation
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ["/api/commodities"] });
-        }, 500);
-      }
-    }
-  }, [simulationData.recentUpdates, simulationActive, enhancedCommodities.length, queryClient]);
-
   const { data: commodities = [], isLoading } = useQuery<DetailedCommodity[]>({
     queryKey: ["/api/commodities"],
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
@@ -156,6 +142,20 @@ export default function Commodities() {
 
     return baseData;
   });
+
+  // Auto-scroll new activities
+  useEffect(() => {
+    if (simulationActive && simulationData.recentUpdates > 0) {
+      // Trigger visual updates in commodities list
+      const randomIndex = Math.floor(Math.random() * enhancedCommodities.length);
+      if (enhancedCommodities[randomIndex]) {
+        // Simulate status change animation
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/commodities"] });
+        }, 500);
+      }
+    }
+  }, [simulationData.recentUpdates, simulationActive, enhancedCommodities.length, queryClient]);
 
   // Generate real-time compliance details
   function generateComplianceDetails(commodity: Commodity, isSimulation: boolean = false, lastUpdate: Date = new Date()): ComplianceDetails {

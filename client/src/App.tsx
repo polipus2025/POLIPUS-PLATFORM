@@ -38,6 +38,7 @@ import MobileAlertDemo from "@/pages/mobile-alert-demo";
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FarmerDashboard from "@/pages/farmer-dashboard";
 import Messaging from "@/pages/messaging";
+import LoginTest from "@/pages/login-test";
 
 import NotFound from "@/pages/not-found";
 
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
+      <Route path="/login-test" component={LoginTest} />
       
       {/* Protected Routes - Require Authentication */}
       {authToken && userType ? (

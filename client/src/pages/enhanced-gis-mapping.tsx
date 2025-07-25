@@ -42,7 +42,8 @@ import {
   Target,
   Zap,
   Globe,
-  Wifi
+  Wifi,
+  Leaf
 } from 'lucide-react';
 
 // Authentic Liberian Counties (ISO LR administrative divisions)

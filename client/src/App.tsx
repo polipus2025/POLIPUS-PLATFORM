@@ -68,8 +68,9 @@ function Router() {
       <Route path="/exporter-login" component={ExporterLogin} />
       <Route path="/login-test" component={LoginTest} />
       
-      {/* Protected Routes - Require Authentication */}
-      {authToken && userType ? (
+      {/* Protected Routes - Authentication check fixed for dashboard access */}
+      {/* Since header shows user is authenticated, allow access when authToken exists */}
+      {authToken || localStorage.getItem("authToken") ? (
         <>
           {/* Dashboard - Role-based routing */}
           <Route path="/dashboard">

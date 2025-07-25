@@ -12,6 +12,7 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard";
+import TestDashboard from "@/pages/test-dashboard";
 import Commodities from "@/pages/commodities";
 import ExporterDashboard from "@/pages/exporter-dashboard";
 import ExportLicense from "@/pages/export-license";
@@ -72,9 +73,9 @@ function Router() {
       {/* DEBUGGING: Force show protected routes regardless of token status */}
       {true ? (
         <>
-          {/* Dashboard - Force showing main Dashboard component */}
+          {/* Dashboard - Testing with simple test component */}
           <Route path="/dashboard">
-            <Dashboard />
+            <TestDashboard />
           </Route>
           <Route path="/">
             {userType === 'farmer' ? <FarmerDashboard /> : 

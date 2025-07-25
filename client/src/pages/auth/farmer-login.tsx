@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Leaf, MapPin, AlertCircle, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 const LIBERIAN_COUNTIES = [
   "Bomi County", "Bong County", "Gbarpolu County", "Grand Bassa County",
@@ -100,19 +101,26 @@ export default function FarmerLogin() {
       <div className="w-full max-w-md">
         <Card className="shadow-2xl border-0">
           <CardHeader className="text-center pb-6">
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center items-center gap-3 mb-4">
+              <div className="w-16 h-16 rounded-lg overflow-hidden">
+                <img 
+                  src={lacraLogo} 
+                  alt="LACRA Official Logo" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
                 <Leaf className="h-8 w-8 text-white" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">
-              Farmer Portal
+              LACRA Farmer Portal
             </CardTitle>
             <p className="text-gray-600 mt-2">
-              AgriTrace360™ Farm Management
+              Liberia Agriculture Commodity Regulatory Authority
             </p>
             <p className="text-sm text-gray-500">
-              Track crops, generate batch codes, manage plots
+              AgriTrace360™ Farm Management System
             </p>
           </CardHeader>
 

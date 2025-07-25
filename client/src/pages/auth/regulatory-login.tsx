@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, Building2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -90,19 +91,26 @@ export default function RegulatoryLogin() {
       <div className="w-full max-w-md">
         <Card className="shadow-2xl border-0">
           <CardHeader className="text-center pb-6">
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center items-center gap-3 mb-4">
+              <div className="w-16 h-16 rounded-lg overflow-hidden">
+                <img 
+                  src={lacraLogo} 
+                  alt="LACRA Official Logo" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="p-3 bg-gradient-to-r from-green-600 to-blue-600 rounded-full">
                 <Shield className="h-8 w-8 text-white" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">
-              Regulatory Portal
+              LACRA Regulatory Portal
             </CardTitle>
             <p className="text-gray-600 mt-2">
-              LACRA AgriTrace360™ System
+              Liberia Agriculture Commodity Regulatory Authority
             </p>
             <p className="text-sm text-gray-500">
-              Authorized Personnel Only
+              AgriTrace360™ | Authorized Personnel Only
             </p>
           </CardHeader>
 

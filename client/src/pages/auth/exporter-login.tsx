@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Truck, ArrowLeft, Ship, Globe, Package, Users } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import lacraLogo from '@assets/LACRA LOGO_1753406166355.jpg';
 
 export default function ExporterLogin() {
   const [, setLocation] = useLocation();
@@ -69,16 +70,26 @@ export default function ExporterLogin() {
 
       <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center pb-4">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <div className="w-16 h-16 rounded-lg overflow-hidden">
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                className="w-full h-full object-cover"
+              />
+            </div>
             <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full">
               <Ship className="h-10 w-10 text-white" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Exporter Portal
+            LACRA Exporter Portal
           </CardTitle>
           <p className="text-gray-600 mt-2">
-            Licensed Export Management System
+            Liberia Agriculture Commodity Regulatory Authority
+          </p>
+          <p className="text-sm text-gray-500">
+            AgriTrace360™ Licensed Export Management
           </p>
         </CardHeader>
 

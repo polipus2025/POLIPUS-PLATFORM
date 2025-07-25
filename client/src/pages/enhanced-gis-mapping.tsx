@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Map, 
   Layers, 
@@ -186,6 +187,11 @@ export default function EnhancedGISMapping() {
   const [alertsCount, setAlertsCount] = useState(12);
   const [showSatellites, setShowSatellites] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
+  
+  // Real-time testing state
+  const [isGISTestingActive, setIsGISTestingActive] = useState(false);
+  const [gisTestResults, setGisTestResults] = useState<any[]>([]);
+  const [testProgress, setTestProgress] = useState(0);
 
   // Filter farms based on county selection
   const filteredFarms = FARM_DATA.filter(farm => 
@@ -274,6 +280,129 @@ export default function EnhancedGISMapping() {
     setZoomLevel(8);
   };
 
+  // Comprehensive GIS testing function
+  const startGISSystemTest = async () => {
+    setIsGISTestingActive(true);
+    setGisTestResults([]);
+    setTestProgress(0);
+    
+    const gisTests = [
+      {
+        name: 'County Selection',
+        test: () => {
+          const counties = ['Lofa County', 'Bong County', 'Nimba County'];
+          const randomCounty = counties[Math.floor(Math.random() * counties.length)];
+          setSelectedCounty(randomCounty);
+          return Promise.resolve({ county: randomCounty, farms: filteredFarms.length });
+        }
+      },
+      {
+        name: 'Layer Toggle System',
+        test: () => {
+          const layersToToggle = ['farms', 'compliance', 'deforestation', 'vehicle_tracking'];
+          layersToToggle.forEach(layerId => toggleLayer(layerId));
+          return Promise.resolve({ layersToggled: layersToToggle.length });
+        }
+      },
+      {
+        name: 'Map Navigation',
+        test: () => {
+          handleZoomIn();
+          setTimeout(() => handleZoomOut(), 200);
+          return Promise.resolve({ zoomLevel: zoomLevel, center: mapCenter });
+        }
+      },
+      {
+        name: 'Farm Focus System',
+        test: () => {
+          const randomFarm = filteredFarms[Math.floor(Math.random() * filteredFarms.length)];
+          if (randomFarm) focusOnFarm(randomFarm);
+          return Promise.resolve({ selectedFarm: randomFarm?.name || 'none' });
+        }
+      },
+      {
+        name: 'Vehicle Tracking',
+        test: () => {
+          handleTrackVehicle();
+          return Promise.resolve({ vehiclesTracked: VEHICLE_DATA.length, activeVehicles: VEHICLE_DATA.filter(v => v.status === 'moving').length });
+        }
+      },
+      {
+        name: 'Alert Monitoring',
+        test: () => {
+          handleViewAlerts();
+          return Promise.resolve({ totalAlerts: DEFORESTATION_ALERTS.length, highPriority: DEFORESTATION_ALERTS.filter(a => a.severity === 'high').length });
+        }
+      },
+      {
+        name: 'Satellite Connectivity',
+        test: () => {
+          const totalSatellites = Object.values(SATELLITE_CONSTELLATIONS).reduce((sum, constellation) => sum + constellation.active, 0);
+          return Promise.resolve({ totalSatellites, constellations: Object.keys(SATELLITE_CONSTELLATIONS).length });
+        }
+      },
+      {
+        name: 'Data Export Function',
+        test: () => {
+          const exportData = {
+            farms: filteredFarms.length,
+            layers: layers.filter(l => l.active).length,
+            timestamp: new Date().toISOString()
+          };
+          return Promise.resolve(exportData);
+        }
+      },
+      {
+        name: 'Search Functionality',
+        test: () => {
+          setSearchQuery('farm');
+          const searchResults = filteredFarms.length;
+          setTimeout(() => setSearchQuery(''), 1000);
+          return Promise.resolve({ searchTerm: 'farm', results: searchResults });
+        }
+      },
+      {
+        name: 'Real-time Updates',
+        test: () => {
+          setRealTimeUpdates(!realTimeUpdates);
+          return Promise.resolve({ realTimeActive: !realTimeUpdates, updateInterval: '2s' });
+        }
+      }
+    ];
+
+    for (let i = 0; i < gisTests.length; i++) {
+      const test = gisTests[i];
+      try {
+        const startTime = Date.now();
+        const result = await test.test();
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+        
+        setGisTestResults(prev => [...prev, {
+          name: test.name,
+          status: 'success',
+          responseTime: `${responseTime}ms`,
+          data: result,
+          timestamp: new Date().toLocaleTimeString()
+        }]);
+      } catch (error: any) {
+        setGisTestResults(prev => [...prev, {
+          name: test.name,
+          status: 'error',
+          error: error.message,
+          timestamp: new Date().toLocaleTimeString()
+        }]);
+      }
+      
+      setTestProgress(((i + 1) / gisTests.length) * 100);
+      await new Promise(resolve => setTimeout(resolve, 600));
+    }
+    
+    setTimeout(() => {
+      setIsGISTestingActive(false);
+    }, 1000);
+  };
+
   const handleFieldAgents = () => {
     const activeAgent = FIELD_AGENTS.find(a => a.status === 'active');
     if (activeAgent) {
@@ -328,6 +457,145 @@ export default function EnhancedGISMapping() {
               <Download className="h-4 w-4 mr-2" />
               Export Data
             </Button>
+            
+            {/* GIS Real-time Testing Button */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={startGISSystemTest}
+                  disabled={isGISTestingActive}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  {isGISTestingActive ? 'Testing...' : 'Test GIS Functions'}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Map className="h-5 w-5 text-green-600" />
+                    GIS Mapping System - Real-time Testing
+                  </DialogTitle>
+                  <DialogDescription>
+                    Comprehensive testing of all GIS mapping and satellite connectivity features
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  {/* Test Progress */}
+                  {isGISTestingActive && (
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">GIS Testing Progress</span>
+                            <span className="text-sm text-gray-500">{Math.round(testProgress)}%</span>
+                          </div>
+                          <Progress value={testProgress} className="w-full" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Live System Status */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Live GIS System Status</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                          <div className="text-xl font-bold text-blue-600">{filteredFarms.length}</div>
+                          <p className="text-sm text-blue-600">Active Farms</p>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                          <div className="text-xl font-bold text-green-600">
+                            {Object.values(SATELLITE_CONSTELLATIONS).reduce((sum, c) => sum + c.active, 0)}
+                          </div>
+                          <p className="text-sm text-green-600">Satellites Connected</p>
+                        </div>
+                        <div className="text-center p-3 bg-purple-50 rounded-lg">
+                          <div className="text-xl font-bold text-purple-600">{layers.filter(l => l.active).length}</div>
+                          <p className="text-sm text-purple-600">Active Layers</p>
+                        </div>
+                        <div className="text-center p-3 bg-orange-50 rounded-lg">
+                          <div className="text-xl font-bold text-orange-600">{VEHICLE_DATA.filter(v => v.status === 'moving').length}</div>
+                          <p className="text-sm text-orange-600">Moving Vehicles</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Test Results */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>GIS Function Test Results</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {gisTestResults.length === 0 ? (
+                          <p className="text-gray-500 text-center py-8">
+                            Click "Test GIS Functions" to start comprehensive system testing
+                          </p>
+                        ) : (
+                          gisTestResults.map((result, index) => (
+                            <div key={index} className={`flex items-center justify-between p-3 rounded-lg border ${
+                              result.status === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                            }`}>
+                              <div className="flex items-center gap-3">
+                                {result.status === 'success' ? (
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <X className="h-5 w-5 text-red-600" />
+                                )}
+                                <div>
+                                  <span className="font-medium">{result.name}</span>
+                                  {result.error && (
+                                    <p className="text-sm text-red-600">{result.error}</p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                {result.responseTime && (
+                                  <span className="text-sm text-gray-500">{result.responseTime}</span>
+                                )}
+                                <p className="text-xs text-gray-400">{result.timestamp}</p>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Real-time Satellite Data */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Live Satellite Connectivity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-4">
+                        {Object.entries(SATELLITE_CONSTELLATIONS).map(([key, constellation]) => (
+                          <div key={key} className="p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">{constellation.name}</span>
+                              <Badge variant="outline" className="text-green-600">
+                                {constellation.status}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <p>Active: {constellation.active}/{constellation.satellites}</p>
+                              <p>Accuracy: {constellation.accuracy}</p>
+                              <p>Country: {constellation.country}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>

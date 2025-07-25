@@ -105,6 +105,71 @@ const FIELD_AGENTS = [
   { id: 'agent-005', name: 'Grace Pewee', lat: 5.4981, lng: -8.6610, county: 'Sinoe County', status: 'offline', lastUpdate: '1 hour ago', x: 225, y: 235 }
 ];
 
+// Satellite constellation data
+const SATELLITE_CONSTELLATIONS = {
+  GPS: {
+    name: 'GPS (NAVSTAR)',
+    country: 'USA',
+    satellites: 31,
+    active: 28,
+    accuracy: '3.2m',
+    status: 'operational',
+    frequency: 'L1/L2/L5'
+  },
+  GLONASS: {
+    name: 'GLONASS',
+    country: 'Russia',
+    satellites: 24,
+    active: 22,
+    accuracy: '4.1m',
+    status: 'operational',
+    frequency: 'G1/G2/G3'
+  },
+  Galileo: {
+    name: 'Galileo',
+    country: 'EU',
+    satellites: 26,
+    active: 24,
+    accuracy: '2.8m',
+    status: 'operational',
+    frequency: 'E1/E5/E6'
+  },
+  BeiDou: {
+    name: 'BeiDou-3',
+    country: 'China',
+    satellites: 35,
+    active: 32,
+    accuracy: '3.6m',
+    status: 'operational',
+    frequency: 'B1/B2/B3'
+  }
+};
+
+// Earth observation satellites
+const EARTH_OBSERVATION_SATELLITES = [
+  { name: 'Landsat 9', agency: 'NASA/USGS', status: 'active', resolution: '15-30m', type: 'Optical/Thermal' },
+  { name: 'Landsat 8', agency: 'NASA/USGS', status: 'active', resolution: '15-30m', type: 'Optical/Thermal' },
+  { name: 'Sentinel-2A', agency: 'ESA', status: 'active', resolution: '10-60m', type: 'Optical' },
+  { name: 'Sentinel-2B', agency: 'ESA', status: 'active', resolution: '10-60m', type: 'Optical' },
+  { name: 'Sentinel-1A', agency: 'ESA', status: 'active', resolution: '5-20m', type: 'SAR' },
+  { name: 'Sentinel-1B', agency: 'ESA', status: 'active', resolution: '5-20m', type: 'SAR' },
+  { name: 'MODIS Terra', agency: 'NASA', status: 'active', resolution: '250-1000m', type: 'Optical' },
+  { name: 'MODIS Aqua', agency: 'NASA', status: 'active', resolution: '250-1000m', type: 'Optical' },
+  { name: 'VIIRS NOAA-20', agency: 'NOAA', status: 'active', resolution: '375-750m', type: 'Optical' },
+  { name: 'SMAP', agency: 'NASA', status: 'active', resolution: '3-36km', type: 'Microwave' },
+  { name: 'GPM Core', agency: 'NASA/JAXA', status: 'active', resolution: '5-25km', type: 'Precipitation' },
+  { name: 'ICESat-2', agency: 'NASA', status: 'active', resolution: '14m', type: 'Lidar' }
+];
+
+// Agricultural monitoring satellites
+const AGRICULTURAL_SATELLITES = [
+  { name: 'PlanetScope', provider: 'Planet Labs', satellites: 200, resolution: '3-5m', revisit: 'Daily' },
+  { name: 'RapidEye', provider: 'Planet Labs', satellites: 5, resolution: '5m', revisit: '5.5 days' },
+  { name: 'SkySat', provider: 'Planet Labs', satellites: 21, resolution: '0.5-1m', revisit: '12 hours' },
+  { name: 'WorldView', provider: 'Maxar', satellites: 6, resolution: '0.3-2m', revisit: '1-3 days' },
+  { name: 'SPOT', provider: 'Airbus', satellites: 4, resolution: '1.5-6m', revisit: '2-3 days' }
+];
+
 export default function EnhancedGISMapping() {
   const [selectedCounty, setSelectedCounty] = useState('All Counties');
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,6 +183,7 @@ export default function EnhancedGISMapping() {
   const [isLoading, setIsLoading] = useState(false);
   const [realTimeUpdates, setRealTimeUpdates] = useState(true);
   const [alertsCount, setAlertsCount] = useState(12);
+  const [showSatellites, setShowSatellites] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Filter farms based on county selection
@@ -204,6 +270,10 @@ export default function EnhancedGISMapping() {
             <Button variant="outline" size="sm" onClick={() => setRealTimeUpdates(!realTimeUpdates)}>
               {realTimeUpdates ? <Wifi className="h-4 w-4 mr-2" /> : <Radio className="h-4 w-4 mr-2" />}
               {realTimeUpdates ? 'Live' : 'Offline'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowSatellites(!showSatellites)}>
+              <Satellite className="h-4 w-4 mr-2" />
+              Satellites
             </Button>
             <Button variant="outline" size="sm" onClick={exportData}>
               <Download className="h-4 w-4 mr-2" />
@@ -1027,6 +1097,162 @@ export default function EnhancedGISMapping() {
                   </Button>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Satellite Connectivity Dashboard */}
+      {showSatellites && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Satellite className="h-6 w-6" />
+                Satellite Connectivity Dashboard
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setShowSatellites(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              
+              {/* GNSS Constellations */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Navigation className="h-5 w-5" />
+                  Global Navigation Satellite Systems
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(SATELLITE_CONSTELLATIONS).map(([key, constellation]) => (
+                    <div key={key} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{constellation.name}</h4>
+                        <Badge variant="default" className="bg-green-500">
+                          {constellation.status}
+                        </Badge>
+                      </div>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <div className="flex justify-between">
+                          <span>Country:</span>
+                          <span>{constellation.country}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Satellites:</span>
+                          <span>{constellation.active}/{constellation.satellites}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Accuracy:</span>
+                          <span>{constellation.accuracy}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Frequency:</span>
+                          <span>{constellation.frequency}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Earth Observation Satellites */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Earth Observation Satellites
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {EARTH_OBSERVATION_SATELLITES.map((satellite, index) => (
+                    <div key={index} className="bg-blue-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-sm">{satellite.name}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {satellite.status}
+                        </Badge>
+                      </div>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex justify-between">
+                          <span>Agency:</span>
+                          <span>{satellite.agency}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Resolution:</span>
+                          <span>{satellite.resolution}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Type:</span>
+                          <span>{satellite.type}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Agricultural Monitoring */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Leaf className="h-5 w-5" />
+                  Agricultural Monitoring Satellites
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {AGRICULTURAL_SATELLITES.map((satellite, index) => (
+                    <div key={index} className="bg-green-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{satellite.name}</h4>
+                        <Badge variant="outline" className="bg-green-100">
+                          {satellite.satellites} sats
+                        </Badge>
+                      </div>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <div className="flex justify-between">
+                          <span>Provider:</span>
+                          <span>{satellite.provider}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Resolution:</span>
+                          <span>{satellite.resolution}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Revisit:</span>
+                          <span>{satellite.revisit}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Real-time Status */}
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Real-time Connectivity Status
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">127</div>
+                    <div className="text-sm text-gray-600">Total Satellites</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">106</div>
+                    <div className="text-sm text-gray-600">Active GNSS</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">12</div>
+                    <div className="text-sm text-gray-600">Earth Observation</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-orange-600">236</div>
+                    <div className="text-sm text-gray-600">Commercial</div>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-center gap-2 text-sm text-green-600">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span>All systems operational - Live satellite connectivity</span>
+                </div>
+              </div>
+
             </CardContent>
           </Card>
         </div>

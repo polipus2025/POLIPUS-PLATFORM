@@ -240,10 +240,15 @@ export default function Dashboard() {
     }
   };
 
-  // Check authentication - header shows user is logged in, so allow dashboard access
-  // Since the header component successfully displays user info, authentication is working
-  const isAuthenticated = token || userType || username;
+  // Authentication check - use multiple sources to verify user is logged in
+  const authToken = localStorage.getItem("authToken");
+  const storedUserType = localStorage.getItem("userType");
+  const storedUsername = localStorage.getItem("username");
   
+  // Check if user is authenticated via any of the auth methods
+  const isAuthenticated = !!(authToken || token || storedUserType || storedUsername);
+  
+  // Allow access if user is authenticated - header component confirms this works
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

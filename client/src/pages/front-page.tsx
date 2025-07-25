@@ -121,27 +121,26 @@ export default function FrontPage() {
                   <>
                     <CardHeader className="pb-4 flex-1 flex items-center justify-center">
                       <>
-                        <div className="flex items-center justify-between mb-4 w-full">
-                          <div className={`p-3 rounded-full ${module.color} text-white`}>
+                        <div className="flex items-center justify-center mb-4 w-full">
+                          <div className="p-3 rounded-full bg-gray-300 text-gray-500">
                             <IconComponent className="h-6 w-6" />
                           </div>
                         </div>
-                        <CardTitle className="text-lg leading-tight text-center">
+                        <CardTitle className="text-lg leading-tight text-center text-gray-500">
                           {module.title}
                         </CardTitle>
                       </>
                     </CardHeader>
                     
                     <CardContent className="pt-0 p-4">
-                      <Link href={module.route}>
-                        <Button 
-                          className="w-full transition-all duration-200 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          size="sm"
-                        >
-                          Access Module
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      </Link>
+                      <div className="w-full text-center">
+                        <Badge variant="outline" className="text-gray-500 border-gray-300 mb-2">
+                          Coming Soon
+                        </Badge>
+                        <p className="text-xs text-gray-400 mt-2">
+                          This module is under development
+                        </p>
+                      </div>
                     </CardContent>
                   </>
                 )}

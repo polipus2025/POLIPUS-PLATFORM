@@ -252,26 +252,27 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 md:p-6 max-w-full overflow-x-hidden">
       <Helmet>
         <title>Dashboard - AgriTrace360™ LACRA</title>
         <meta name="description" content="Real-time agricultural commodity compliance monitoring dashboard for Liberia Agriculture Commodity Regulatory Authority" />
       </Helmet>
 
-      {/* Dashboard Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-neutral mb-2">Compliance Overview</h2>
-            <p className="text-gray-600">Real-time agricultural commodity compliance monitoring</p>
+      {/* Dashboard Header - Mobile Optimized */}
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+          <div className="text-center md:text-left">
+            <h2 className="text-xl md:text-2xl font-bold text-neutral mb-2">Compliance Overview</h2>
+            <p className="text-sm md:text-base text-gray-600">Real-time agricultural commodity compliance monitoring</p>
           </div>
-          <div className="flex space-x-3">
-            {/* Messages Button */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full md:w-auto">
+            {/* Messages Button - Mobile Responsive */}
             <Dialog open={isMessagesDialogOpen} onOpenChange={setIsMessagesDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="relative">
+                <Button variant="outline" className="relative w-full sm:w-auto">
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  Messages
+                  <span className="hidden sm:inline">Messages</span>
+                  <span className="sm:hidden">Alerts</span>
                   {unreadAlerts.length > 0 && (
                     <Badge 
                       className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white px-1.5 py-0.5 text-xs rounded-full min-w-[20px] h-5"

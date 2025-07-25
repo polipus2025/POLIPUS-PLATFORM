@@ -2,6 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-First Responsive Design for AgriTrace360 Dashboard */
+@layer base {
+  html {
+    font-size: 16px;
+  }
+  
+  /* Mobile viewport handling */
+  @media screen and (max-width: 768px) {
+    html {
+      font-size: 14px;
+    }
+    
+    body {
+      overflow-x: hidden;
+    }
+  }
+}
+
+@layer components {
+  /* Mobile-responsive dashboard layout */
+  .dashboard-mobile {
+    @apply p-2 md:p-4 lg:p-6 max-w-full overflow-x-hidden;
+  }
+  
+  /* Mobile-responsive cards */
+  .card-mobile {
+    @apply p-3 md:p-6 rounded-lg shadow-sm border border-gray-200;
+  }
+  
+  /* Mobile-responsive grid */
+  .grid-mobile {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6;
+  }
+  
+  /* Mobile-responsive buttons */
+  .btn-mobile {
+    @apply px-3 py-2 md:px-4 md:py-2 text-sm md:text-base rounded-md font-medium;
+  }
+  
+  /* Mobile-responsive text */
+  .text-mobile-sm {
+    @apply text-xs md:text-sm;
+  }
+  
+  .text-mobile-base {
+    @apply text-sm md:text-base;
+  }
+  
+  .text-mobile-lg {
+    @apply text-base md:text-lg;
+  }
+  
+  .text-mobile-xl {
+    @apply text-lg md:text-xl;
+  }
+  
+  .text-mobile-2xl {
+    @apply text-xl md:text-2xl;
+  }
+  
+  /* Mobile-responsive spacing */
+  .space-mobile {
+    @apply space-y-3 md:space-y-6;
+  }
+  
+  /* Mobile-responsive header */
+  .header-mobile {
+    @apply sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200;
+  }
+  
+  .header-content-mobile {
+    @apply px-3 md:px-6 py-2 md:py-4 flex justify-between items-center;
+  }
+  
+  /* Mobile-responsive dialogs */
+  .dialog-mobile {
+    @apply max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto;
+  }
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(37, 47%, 4%);

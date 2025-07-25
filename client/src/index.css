@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import mobile-responsive styles */
-@import './styles/mobile-responsive.css';
-
 /* Mobile-First Responsive Design for AgriTrace360 Dashboard */
 @layer base {
   html {
@@ -43,64 +40,39 @@
 }
 
 @layer components {
-  /* Mobile-responsive dashboard layout */
-  .dashboard-mobile {
-    @apply p-2 md:p-4 lg:p-6 max-w-full overflow-x-hidden;
+  /* Mobile-First Responsive Components */
+  .mobile-container {
+    @apply w-full max-w-full overflow-x-hidden box-border;
   }
   
-  /* Mobile-responsive cards */
-  .card-mobile {
-    @apply p-3 md:p-6 rounded-lg shadow-sm border border-gray-200;
+  .mobile-safe-grid {
+    @apply grid w-full max-w-full overflow-x-hidden gap-2 sm:gap-4 md:gap-6;
   }
   
-  /* Mobile-responsive grid */
-  .grid-mobile {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6;
+  .mobile-card {
+    @apply w-full max-w-full overflow-hidden p-3 md:p-6;
   }
   
-  /* Mobile-responsive buttons */
-  .btn-mobile {
-    @apply px-3 py-2 md:px-4 md:py-2 text-sm md:text-base rounded-md font-medium;
+  .mobile-button {
+    @apply w-full sm:w-auto min-h-[44px] text-sm md:text-base px-3 py-2 md:px-4 md:py-2;
   }
   
-  /* Mobile-responsive text */
-  .text-mobile-sm {
-    @apply text-xs md:text-sm;
+  .mobile-text-safe {
+    @apply break-words max-w-full;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
   
-  .text-mobile-base {
-    @apply text-sm md:text-base;
+  .mobile-header-safe {
+    @apply w-full max-w-full overflow-x-hidden px-2 sm:px-4 md:px-6 py-2 md:py-4;
   }
   
-  .text-mobile-lg {
-    @apply text-base md:text-lg;
+  .mobile-dialog-safe {
+    @apply w-[95vw] max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto;
   }
   
-  .text-mobile-xl {
-    @apply text-lg md:text-xl;
-  }
-  
-  .text-mobile-2xl {
-    @apply text-xl md:text-2xl;
-  }
-  
-  /* Mobile-responsive spacing */
-  .space-mobile {
-    @apply space-y-3 md:space-y-6;
-  }
-  
-  /* Mobile-responsive header */
-  .header-mobile {
-    @apply sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200;
-  }
-  
-  .header-content-mobile {
-    @apply px-3 md:px-6 py-2 md:py-4 flex justify-between items-center;
-  }
-  
-  /* Mobile-responsive dialogs */
-  .dialog-mobile {
-    @apply max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto;
+  .mobile-hide-overflow {
+    @apply overflow-x-hidden max-w-full;
   }
 }
 

@@ -252,8 +252,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="w-screen max-w-full overflow-x-hidden">
-      <div className="p-2 sm:p-4 md:p-6 w-full max-w-full">
+    <div className="mobile-container">
+      <div className="mobile-header-safe">
         <Helmet>
           <title>Dashboard - AgriTrace360™ LACRA</title>
           <meta name="description" content="Real-time agricultural commodity compliance monitoring dashboard for Liberia Agriculture Commodity Regulatory Authority" />
@@ -270,7 +270,7 @@ export default function Dashboard() {
             {/* Messages Button - Mobile Responsive */}
             <Dialog open={isMessagesDialogOpen} onOpenChange={setIsMessagesDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="relative w-full sm:w-auto">
+                <Button variant="outline" className="relative mobile-button">
                   <MessageSquare className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Messages</span>
                   <span className="sm:hidden">Alerts</span>
@@ -283,7 +283,7 @@ export default function Dashboard() {
                   )}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh]">
+              <DialogContent className="mobile-dialog-safe">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Bell className="h-5 w-5" />

@@ -59,15 +59,15 @@ export default function MetricsCards() {
   ];
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6 w-full">
+    <div className="mobile-container">
+      <div className="mobile-safe-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card, index) => (
           <Card key={card.title} className="border border-gray-100 w-full max-w-full">
-            <CardContent className="p-3 md:p-6 w-full">
-              <div className="flex items-center justify-between w-full">
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <p className="text-xs md:text-sm font-medium text-gray-500 truncate">{card.title}</p>
-                  <p className="text-base md:text-2xl font-bold text-neutral mt-1 truncate">{card.value}</p>
+            <CardContent className="mobile-card">
+              <div className="flex items-center justify-between mobile-hide-overflow">
+                <div className="min-w-0 flex-1 mobile-text-safe">
+                  <p className="text-xs md:text-sm font-medium text-gray-500 mobile-text-safe">{card.title}</p>
+                  <p className="text-base md:text-2xl font-bold text-neutral mt-1 mobile-text-safe">{card.value}</p>
                 </div>
                 <div className={`w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 ${card.color} bg-opacity-10 rounded-lg flex items-center justify-center flex-shrink-0`}>
                   <card.icon className={`text-xs sm:text-sm md:text-xl ${card.color.replace('bg-', 'text-')}`} />

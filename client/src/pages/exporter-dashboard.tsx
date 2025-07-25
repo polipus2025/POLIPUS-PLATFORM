@@ -184,10 +184,21 @@ export default function ExporterDashboard() {
               Exporter Portal
             </h1>
             <p className="text-gray-600 text-sm lg:text-base">
-              LACRA Licensed Exporter - {user?.firstName} {user?.lastName}
+              LACRA Licensed Exporter - {(user as any)?.firstName || 'Unknown'} {(user as any)?.lastName || 'User'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            {/* Export Permit Submission Button */}
+            <Button 
+              asChild
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 text-sm font-semibold shadow-lg"
+            >
+              <a href="/export-permit-submission">
+                <FileText className="h-4 w-4 mr-2" />
+                Submit Export Permit
+              </a>
+            </Button>
+
             {/* Request Inspection Button */}
             <Dialog open={isInspectionRequestOpen} onOpenChange={setIsInspectionRequestOpen}>
               <DialogTrigger asChild>

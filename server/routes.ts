@@ -3308,6 +3308,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================
+  // EXPORT PERMIT SUBMISSION SYSTEM
+  // =============================================
+
+  // Export Permit Submission endpoint
+  app.post("/api/export-permits", async (req, res) => {
+    try {
+      const permitData = req.body;
+      
+      // Generate permit application ID
+      const permitId = `EXP-PERMIT-${Date.now()}`;
+      
+      // Mock permit submission process
+      const submissionResult = {
+        success: true,
+        permitId,
+        status: 'pending_review',
+        submissionDate: new Date().toISOString(),
+        estimatedProcessingTime: '5-7 business days',
+        nextSteps: [
+          'Document verification by LACRA Quality Assurance',
+          'Physical inspection scheduling (if required)',
+          'Certificate validation',
+          'Final approval by Director of Exports'
+        ],
+        tracking: {
+          lacraOfficer: 'Marcus Johnson',
+          reviewDepartment: 'Export Licensing Division',
+          contactEmail: 'exports@lacra.gov.lr',
+          contactPhone: '+231-555-0123'
+        },
+        requiredDocuments: permitData.certificates || [],
+        applicationData: {
+          ...permitData,
+          permitId,
+          submissionTimestamp: new Date().toISOString()
+        }
+      };
+      
+      // Log submission for audit trail
+      console.log(`Export permit submitted: ${permitId} by ${permitData.exporterName}`);
+      
+      res.json(submissionResult);
+    } catch (error) {
+      console.error("Error submitting export permit:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to submit export permit application",
+        error: error.message 
+      });
+    }
+  });
+
+  // Get export permit status
+  app.get("/api/export-permits/:permitId", async (req, res) => {
+    try {
+      const { permitId } = req.params;
+      
+      // Mock permit status data
+      const permitStatus = {
+        permitId,
+        status: 'under_review',
+        currentStage: 'document_verification',
+        progress: 45,
+        assignedOfficer: 'Marcus Johnson',
+        lastUpdate: new Date().toISOString(),
+        estimatedCompletion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+        statusHistory: [
+          {
+            stage: 'submitted',
+            status: 'completed',
+            timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            notes: 'Application received and registered'
+          },
+          {
+            stage: 'initial_review',
+            status: 'completed', 
+            timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+            notes: 'Preliminary documents reviewed'
+          },
+          {
+            stage: 'document_verification',
+            status: 'in_progress',
+            timestamp: new Date().toISOString(),
+            notes: 'Verifying certificates and compliance documents'
+          }
+        ],
+        documents: {
+          verified: ['phytosanitary', 'quality_control'],
+          pending: ['certificate_origin', 'eudr_certificate'],
+          rejected: []
+        }
+      };
+      
+      res.json(permitStatus);
+    } catch (error) {
+      console.error("Error fetching permit status:", error);
+      res.status(500).json({ message: "Failed to fetch permit status" });
+    }
+  });
+
+  // List export permits for exporter
+  app.get("/api/export-permits", async (req, res) => {
+    try {
+      const { exporterId, status } = req.query;
+      
+      // Mock permit list data
+      const permits = [
+        {
+          permitId: 'EXP-PERMIT-1704067200001',
+          exporterName: 'Liberia Agri Export Ltd.',
+          commodity: 'Cocoa',
+          quantity: '50 tonnes',
+          destination: 'Netherlands',
+          status: 'approved',
+          submissionDate: '2025-01-20T10:30:00Z',
+          approvalDate: '2025-01-23T14:45:00Z',
+          expiryDate: '2025-07-20T10:30:00Z'
+        },
+        {
+          permitId: 'EXP-PERMIT-1704153600002',
+          exporterName: 'Liberia Agri Export Ltd.',
+          commodity: 'Coffee',
+          quantity: '25 tonnes',
+          destination: 'Germany',
+          status: 'under_review',
+          submissionDate: '2025-01-22T08:15:00Z',
+          estimatedCompletion: '2025-01-29T17:00:00Z'
+        },
+        {
+          permitId: 'EXP-PERMIT-1704240000003',
+          exporterName: 'Liberia Agri Export Ltd.',
+          commodity: 'Rubber',
+          quantity: '100 tonnes',
+          destination: 'United States',
+          status: 'pending_documents',
+          submissionDate: '2025-01-24T12:00:00Z',
+          notes: 'Additional EUDR documentation required'
+        }
+      ];
+      
+      let filteredPermits = permits;
+      
+      if (exporterId) {
+        filteredPermits = filteredPermits.filter(permit => 
+          permit.exporterName.toLowerCase().includes(exporterId.toLowerCase())
+        );
+      }
+      
+      if (status) {
+        filteredPermits = filteredPermits.filter(permit => permit.status === status);
+      }
+      
+      res.json(filteredPermits);
+    } catch (error) {
+      console.error("Error fetching export permits:", error);
+      res.status(500).json({ message: "Failed to fetch export permits" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

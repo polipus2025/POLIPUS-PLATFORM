@@ -39,6 +39,7 @@ import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FarmerDashboard from "@/pages/farmer-dashboard";
 import Messaging from "@/pages/messaging";
 import LoginTest from "@/pages/login-test";
+import ExportPermitSubmission from "@/pages/export-permit-submission";
 
 import NotFound from "@/pages/not-found";
 
@@ -88,6 +89,12 @@ function Router() {
           <Route path="/exporter-dashboard">
             <ProtectedRoute 
               component={ExporterDashboard} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/export-permit-submission">
+            <ProtectedRoute 
+              component={ExportPermitSubmission} 
               allowedUserTypes={['exporter']} 
             />
           </Route>

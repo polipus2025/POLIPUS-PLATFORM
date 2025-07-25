@@ -68,34 +68,41 @@ const MAP_LAYERS = [
   { id: 'counties', name: 'County Boundaries', icon: Map, color: 'bg-gray-500', active: true }
 ];
 
-// Mock farm data with realistic Liberian coordinates
+// Mock farm data with realistic Liberian coordinates matching authentic map layout
 const FARM_DATA = [
-  { id: 'farm-001', name: 'Kollie Family Farm', county: 'Lofa County', lat: 7.2253, lng: -9.0039, crop: 'Cocoa', area: 15.2, compliance: 'compliant' },
-  { id: 'farm-002', name: 'Bassa Agricultural Cooperative', county: 'Grand Bassa County', lat: 6.2317, lng: -9.4737, crop: 'Coffee', area: 28.7, compliance: 'pending' },
-  { id: 'farm-003', name: 'Nimba Coffee Estate', county: 'Nimba County', lat: 7.5925, lng: -8.6582, crop: 'Coffee', area: 45.3, compliance: 'compliant' },
-  { id: 'farm-004', name: 'Montserrado Rice Fields', county: 'Montserrado County', lat: 6.3133, lng: -10.8074, crop: 'Rice', area: 12.8, compliance: 'non-compliant' },
-  { id: 'farm-005', name: 'Bong County Palm Plantation', county: 'Bong County', lat: 6.8296, lng: -9.3678, crop: 'Oil Palm', area: 67.9, compliance: 'compliant' }
+  { id: 'farm-001', name: 'Kollie Family Farm', county: 'Lofa County', lat: 7.2253, lng: -9.0039, crop: 'Cocoa', area: 15.2, compliance: 'compliant', x: 185, y: 125 },
+  { id: 'farm-002', name: 'Bassa Agricultural Cooperative', county: 'Grand Bassa County', lat: 6.2317, lng: -9.4737, crop: 'Coffee', area: 28.7, compliance: 'pending', x: 155, y: 205 },
+  { id: 'farm-003', name: 'Nimba Coffee Estate', county: 'Nimba County', lat: 7.5925, lng: -8.6582, crop: 'Coffee', area: 45.3, compliance: 'compliant', x: 225, y: 155 },
+  { id: 'farm-004', name: 'Montserrado Rice Fields', county: 'Montserrado County', lat: 6.3133, lng: -10.8074, crop: 'Rice', area: 12.8, compliance: 'non-compliant', x: 95, y: 195 },
+  { id: 'farm-005', name: 'Bong County Palm Plantation', county: 'Bong County', lat: 6.8296, lng: -9.3678, crop: 'Oil Palm', area: 67.9, compliance: 'compliant', x: 165, y: 165 },
+  { id: 'farm-006', name: 'Sinoe Rubber Plantation', county: 'Sinoe County', lat: 5.4981, lng: -8.6610, crop: 'Rubber', area: 89.5, compliance: 'compliant', x: 225, y: 235 },
+  { id: 'farm-007', name: 'Maryland Cassava Farms', county: 'Maryland County', lat: 4.7373, lng: -7.7317, crop: 'Cassava', area: 22.3, compliance: 'pending', x: 275, y: 265 },
+  { id: 'farm-008', name: 'River Cess Cocoa Co-op', county: 'River Cess County', lat: 5.9022, lng: -9.4558, crop: 'Cocoa', area: 34.7, compliance: 'compliant', x: 185, y: 215 }
 ];
 
-// Vehicle tracking data
+// Vehicle tracking data with authentic map coordinates
 const VEHICLE_DATA = [
-  { id: 'truck-001', type: 'Transport Truck', lat: 6.3000, lng: -10.7900, status: 'moving', cargo: 'Cocoa beans', destination: 'Port of Monrovia' },
-  { id: 'truck-002', type: 'Field Vehicle', lat: 7.2100, lng: -9.0200, status: 'stopped', cargo: 'Equipment', destination: 'Lofa Inspection Site' },
-  { id: 'truck-003', type: 'Export Container', lat: 6.3133, lng: -10.8074, status: 'loading', cargo: 'Coffee', destination: 'Hamburg, Germany' }
+  { id: 'truck-001', type: 'Transport Truck', lat: 6.3000, lng: -10.7900, status: 'moving', cargo: 'Cocoa beans', destination: 'Port of Monrovia', x: 110, y: 200 },
+  { id: 'truck-002', type: 'Field Vehicle', lat: 7.2100, lng: -9.0200, status: 'stopped', cargo: 'Equipment', destination: 'Lofa Inspection Site', x: 190, y: 130 },
+  { id: 'truck-003', type: 'Export Container', lat: 6.3133, lng: -10.8074, status: 'loading', cargo: 'Coffee', destination: 'Hamburg, Germany', x: 85, y: 195 },
+  { id: 'truck-004', type: 'Inspection Vehicle', lat: 6.8296, lng: -9.3678, status: 'moving', cargo: 'Field Equipment', destination: 'Bong County', x: 165, y: 165 }
 ];
 
-// Deforestation alerts data
+// Deforestation alerts data with authentic map coordinates
 const DEFORESTATION_ALERTS = [
-  { id: 'alert-001', lat: 7.1800, lng: -8.9500, severity: 'high', area: 2.5, date: '2025-01-20', status: 'active' },
-  { id: 'alert-002', lat: 6.9200, lng: -9.2100, severity: 'medium', area: 1.2, date: '2025-01-18', status: 'investigating' },
-  { id: 'alert-003', lat: 7.4500, lng: -8.7800, severity: 'low', area: 0.8, date: '2025-01-15', status: 'resolved' }
+  { id: 'alert-001', lat: 7.1800, lng: -8.9500, severity: 'high', area: 2.5, date: '2025-01-20', status: 'active', x: 210, y: 140 },
+  { id: 'alert-002', lat: 6.9200, lng: -9.2100, severity: 'medium', area: 1.2, date: '2025-01-18', status: 'investigating', x: 175, y: 175 },
+  { id: 'alert-003', lat: 7.4500, lng: -8.7800, severity: 'low', area: 0.8, date: '2025-01-15', status: 'resolved', x: 235, y: 125 },
+  { id: 'alert-004', lat: 5.8900, lng: -9.1200, severity: 'medium', area: 1.8, date: '2025-01-22', status: 'active', x: 195, y: 220 }
 ];
 
-// Field agents data
+// Field agents data with authentic map coordinates
 const FIELD_AGENTS = [
-  { id: 'agent-001', name: 'Sarah Konneh', lat: 7.2200, lng: -9.0100, county: 'Lofa County', status: 'active', lastUpdate: '10 min ago' },
-  { id: 'agent-002', name: 'James Tubman', lat: 6.2400, lng: -9.4500, county: 'Grand Bassa County', status: 'offline', lastUpdate: '2 hours ago' },
-  { id: 'agent-003', name: 'Mary Kollie', lat: 7.5800, lng: -8.6700, county: 'Nimba County', status: 'active', lastUpdate: '5 min ago' }
+  { id: 'agent-001', name: 'Sarah Konneh', lat: 7.2200, lng: -9.0100, county: 'Lofa County', status: 'active', lastUpdate: '10 min ago', x: 185, y: 125 },
+  { id: 'agent-002', name: 'James Tubman', lat: 6.2400, lng: -9.4500, county: 'Grand Bassa County', status: 'offline', lastUpdate: '2 hours ago', x: 155, y: 205 },
+  { id: 'agent-003', name: 'Mary Kollie', lat: 7.5800, lng: -8.6700, county: 'Nimba County', status: 'active', lastUpdate: '5 min ago', x: 225, y: 155 },
+  { id: 'agent-004', name: 'Moses Dukuly', lat: 6.3133, lng: -10.8074, county: 'Montserrado County', status: 'active', lastUpdate: '15 min ago', x: 95, y: 195 },
+  { id: 'agent-005', name: 'Grace Pewee', lat: 5.4981, lng: -8.6610, county: 'Sinoe County', status: 'offline', lastUpdate: '1 hour ago', x: 225, y: 235 }
 ];
 
 export default function EnhancedGISMapping() {
@@ -386,34 +393,135 @@ export default function EnhancedGISMapping() {
                   >
                     {/* Liberia Outline */}
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
-                      {/* Simplified Liberia country outline */}
+                      {/* Authentic Liberia country outline */}
                       <path
-                        d="M50 150 Q70 120 100 130 L150 125 Q180 115 200 140 L240 145 Q260 160 250 180 L245 200 Q240 220 220 225 L180 230 Q150 235 120 225 L80 215 Q60 200 50 180 Z"
+                        d="M80 120 L120 110 L140 115 L160 112 L180 118 L200 125 L220 135 L240 145 L255 160 L260 175 L258 190 L250 205 L240 220 L225 230 L200 235 L175 238 L150 240 L125 238 L100 235 L85 228 L75 215 L70 200 L68 185 L70 170 L72 155 L75 140 L78 125 Z"
                         fill="rgba(34, 197, 94, 0.1)"
                         stroke="rgba(34, 197, 94, 0.3)"
                         strokeWidth="2"
                       />
                       
-                      {/* County boundaries */}
-                      {layers.find(l => l.id === 'counties')?.active && (
-                        <g stroke="rgba(107, 114, 128, 0.4)" strokeWidth="1" fill="none">
-                          <line x1="80" y1="150" x2="200" y2="155" />
-                          <line x1="120" y1="140" x2="180" y2="200" />
-                          <line x1="160" y1="130" x2="220" y2="180" />
+                      {/* Montserrado County (includes Monrovia) */}
+                      <path
+                        d="M68 185 L85 180 L100 178 L115 180 L125 185 L130 195 L125 205 L115 210 L100 212 L85 210 L75 205 L70 195 Z"
+                        fill="rgba(59, 130, 246, 0.1)"
+                        stroke="rgba(59, 130, 246, 0.4)"
+                        strokeWidth="1"
+                        className="county-montserrado cursor-pointer hover:fill-blue-200"
+                      />
+                      
+                      {/* Grand Bassa County */}
+                      <path
+                        d="M130 195 L145 190 L160 192 L170 198 L175 208 L170 218 L160 223 L145 225 L130 223 L125 213 L125 205 Z"
+                        fill="rgba(16, 185, 129, 0.1)"
+                        stroke="rgba(16, 185, 129, 0.4)"
+                        strokeWidth="1"
+                        className="county-grand-bassa cursor-pointer hover:fill-emerald-200"
+                      />
+                      
+                      {/* Nimba County */}
+                      <path
+                        d="M200 125 L220 120 L235 125 L245 135 L248 150 L245 165 L235 175 L220 180 L200 178 L185 175 L180 165 L178 150 L180 135 L185 125 Z"
+                        fill="rgba(245, 158, 11, 0.1)"
+                        stroke="rgba(245, 158, 11, 0.4)"
+                        strokeWidth="1"
+                        className="county-nimba cursor-pointer hover:fill-yellow-200"
+                      />
+                      
+                      {/* Lofa County */}
+                      <path
+                        d="M160 112 L180 108 L200 110 L215 115 L225 125 L220 135 L210 140 L195 142 L180 140 L165 138 L155 133 L152 123 L155 113 Z"
+                        fill="rgba(139, 92, 246, 0.1)"
+                        stroke="rgba(139, 92, 246, 0.4)"
+                        strokeWidth="1"
+                        className="county-lofa cursor-pointer hover:fill-purple-200"
+                      />
+                      
+                      {/* Bong County */}
+                      <path
+                        d="M145 150 L165 148 L180 150 L190 158 L188 168 L180 175 L165 178 L150 180 L140 175 L135 165 L135 155 L140 150 Z"
+                        fill="rgba(236, 72, 153, 0.1)"
+                        stroke="rgba(236, 72, 153, 0.4)"
+                        strokeWidth="1"
+                        className="county-bong cursor-pointer hover:fill-pink-200"
+                      />
+                      
+                      {/* Additional counties simplified for space */}
+                      <path
+                        d="M175 208 L190 205 L205 208 L215 215 L218 225 L210 235 L195 240 L180 238 L170 233 L168 223 L170 213 Z"
+                        fill="rgba(220, 38, 127, 0.1)"
+                        stroke="rgba(220, 38, 127, 0.4)"
+                        strokeWidth="1"
+                        className="county-river-cess cursor-pointer hover:fill-rose-200"
+                      />
+                      
+                      <path
+                        d="M218 225 L230 220 L240 225 L245 235 L240 245 L230 250 L218 248 L210 243 L208 233 L210 225 Z"
+                        fill="rgba(34, 197, 94, 0.1)"
+                        stroke="rgba(34, 197, 94, 0.4)"
+                        strokeWidth="1"
+                        className="county-sinoe cursor-pointer hover:fill-green-200"
+                      />
+                      
+                      {/* Grand Gedeh and Maryland Counties */}
+                      <path
+                        d="M240 225 L255 220 L265 228 L268 238 L263 248 L250 255 L240 253 L235 243 L235 233 Z"
+                        fill="rgba(147, 51, 234, 0.1)"
+                        stroke="rgba(147, 51, 234, 0.4)"
+                        strokeWidth="1"
+                        className="county-grand-gedeh cursor-pointer hover:fill-violet-200"
+                      />
+                      
+                      <path
+                        d="M263 248 L275 245 L285 250 L288 260 L283 270 L270 275 L258 273 L250 268 L248 258 L250 248 Z"
+                        fill="rgba(239, 68, 68, 0.1)"
+                        stroke="rgba(239, 68, 68, 0.4)"
+                        strokeWidth="1"
+                        className="county-maryland cursor-pointer hover:fill-red-200"
+                      />
+                      
+                      {/* Major cities and ports */}
+                      <g className="cities">
+                        {/* Monrovia (Capital) */}
+                        <circle cx="85" cy="195" r="3" fill="#dc2626" stroke="#fff" strokeWidth="1" />
+                        <text x="90" y="198" className="text-xs font-medium fill-gray-800">Monrovia</text>
+                        
+                        {/* Gbarnga */}
+                        <circle cx="155" cy="160" r="2" fill="#059669" stroke="#fff" strokeWidth="1" />
+                        <text x="160" y="163" className="text-xs font-medium fill-gray-700">Gbarnga</text>
+                        
+                        {/* Ganta */}
+                        <circle cx="190" cy="135" r="2" fill="#059669" stroke="#fff" strokeWidth="1" />
+                        <text x="195" y="138" className="text-xs font-medium fill-gray-700">Ganta</text>
+                        
+                        {/* Buchanan (Port) */}
+                        <circle cx="140" cy="215" r="2" fill="#2563eb" stroke="#fff" strokeWidth="1" />
+                        <text x="145" y="218" className="text-xs font-medium fill-gray-700">Buchanan</text>
+                        
+                        {/* Harper */}
+                        <circle cx="275" cy="265" r="2" fill="#059669" stroke="#fff" strokeWidth="1" />
+                        <text x="280" y="268" className="text-xs font-medium fill-gray-700">Harper</text>
+                      </g>
+                      
+                      {/* Major highways */}
+                      {layers.find(l => l.id === 'transportation')?.active && (
+                        <g stroke="#6b7280" strokeWidth="1.5" fill="none" strokeDasharray="3,2">
+                          {/* Monrovia-Gbarnga-Ganta Highway */}
+                          <path d="M85 195 Q120 175 155 160 L190 135" />
+                          {/* Coastal Highway */}
+                          <path d="M85 195 Q112 205 140 215 Q180 225 220 235 Q250 245 275 265" />
+                          {/* Interior connections */}
+                          <path d="M155 160 Q175 180 195 200 Q215 220 235 240" />
                         </g>
                       )}
                       
                       {/* Farm markers */}
                       {layers.find(l => l.id === 'farms')?.active && filteredFarms.map(farm => {
-                        // Convert lat/lng to SVG coordinates (simplified projection)
-                        const x = ((farm.lng + 11.5) / 4.5) * 400;
-                        const y = ((8.5 - farm.lat) / 3) * 300;
-                        
                         return (
                           <g key={farm.id}>
                             <circle
-                              cx={x}
-                              cy={y}
+                              cx={farm.x}
+                              cy={farm.y}
                               r={selectedFarm?.id === farm.id ? "8" : "5"}
                               fill={farm.compliance === 'compliant' ? '#10b981' : 
                                    farm.compliance === 'pending' ? '#f59e0b' : '#ef4444'}
@@ -424,8 +532,8 @@ export default function EnhancedGISMapping() {
                             />
                             {selectedFarm?.id === farm.id && (
                               <text
-                                x={x}
-                                y={y - 15}
+                                x={farm.x}
+                                y={farm.y - 15}
                                 textAnchor="middle"
                                 className="text-xs font-medium fill-gray-800"
                               >
@@ -446,14 +554,11 @@ export default function EnhancedGISMapping() {
 
                       {/* Vehicle tracking markers */}
                       {layers.find(l => l.id === 'vehicle_tracking')?.active && VEHICLE_DATA.map(vehicle => {
-                        const x = ((vehicle.lng + 11.5) / 4.5) * 400;
-                        const y = ((8.5 - vehicle.lat) / 3) * 300;
-                        
                         return (
                           <g key={vehicle.id}>
                             <rect
-                              x={x - 6}
-                              y={y - 6}
+                              x={vehicle.x - 6}
+                              y={vehicle.y - 6}
                               width="12"
                               height="12"
                               fill={vehicle.status === 'moving' ? '#f97316' : vehicle.status === 'stopped' ? '#dc2626' : '#eab308'}
@@ -463,7 +568,7 @@ export default function EnhancedGISMapping() {
                               onClick={() => setSelectedVehicle(vehicle)}
                             />
                             {vehicle.status === 'moving' && (
-                              <circle cx={x} cy={y} r="15" fill="none" stroke="#f97316" strokeWidth="1" opacity="0.5">
+                              <circle cx={vehicle.x} cy={vehicle.y} r="15" fill="none" stroke="#f97316" strokeWidth="1" opacity="0.5">
                                 <animate attributeName="r" from="5" to="15" dur="2s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" from="0.8" to="0" dur="2s" repeatCount="indefinite" />
                               </circle>
@@ -474,13 +579,10 @@ export default function EnhancedGISMapping() {
 
                       {/* Deforestation alerts */}
                       {layers.find(l => l.id === 'deforestation')?.active && DEFORESTATION_ALERTS.map(alert => {
-                        const x = ((alert.lng + 11.5) / 4.5) * 400;
-                        const y = ((8.5 - alert.lat) / 3) * 300;
-                        
                         return (
                           <g key={alert.id}>
                             <polygon
-                              points={`${x},${y-8} ${x+8},${y+8} ${x-8},${y+8}`}
+                              points={`${alert.x},${alert.y-8} ${alert.x+8},${alert.y+8} ${alert.x-8},${alert.y+8}`}
                               fill={alert.severity === 'high' ? '#dc2626' : alert.severity === 'medium' ? '#f97316' : '#eab308'}
                               stroke="#fff"
                               strokeWidth="2"
@@ -488,7 +590,7 @@ export default function EnhancedGISMapping() {
                               onClick={() => setSelectedAlert(alert)}
                             />
                             {alert.severity === 'high' && (
-                              <circle cx={x} cy={y} r="20" fill="none" stroke="#dc2626" strokeWidth="2" opacity="0.3">
+                              <circle cx={alert.x} cy={alert.y} r="20" fill="none" stroke="#dc2626" strokeWidth="2" opacity="0.3">
                                 <animate attributeName="r" from="8" to="20" dur="3s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
                               </circle>
@@ -499,14 +601,11 @@ export default function EnhancedGISMapping() {
 
                       {/* Field agents */}
                       {layers.find(l => l.id === 'field_agents')?.active && FIELD_AGENTS.map(agent => {
-                        const x = ((agent.lng + 11.5) / 4.5) * 400;
-                        const y = ((8.5 - agent.lat) / 3) * 300;
-                        
                         return (
                           <g key={agent.id}>
                             <circle
-                              cx={x}
-                              cy={y}
+                              cx={agent.x}
+                              cy={agent.y}
                               r="6"
                               fill={agent.status === 'active' ? '#6366f1' : '#94a3b8'}
                               stroke="#fff"
@@ -514,7 +613,7 @@ export default function EnhancedGISMapping() {
                               className="cursor-pointer"
                             />
                             {agent.status === 'active' && (
-                              <circle cx={x} cy={y} r="12" fill="none" stroke="#6366f1" strokeWidth="1" opacity="0.4">
+                              <circle cx={agent.x} cy={agent.y} r="12" fill="none" stroke="#6366f1" strokeWidth="1" opacity="0.4">
                                 <animate attributeName="r" from="6" to="12" dur="2s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite" />
                               </circle>

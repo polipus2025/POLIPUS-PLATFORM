@@ -69,6 +69,16 @@ export default function Commodities() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Real-time simulation state
+  const [simulationActive, setSimulationActive] = useState(false);
+  const [simulationData, setSimulationData] = useState({
+    totalCommodities: 1250,
+    complianceRate: 92.4,
+    pendingInspections: 23,
+    recentUpdates: 0,
+    lastUpdate: new Date()
+  });
+
   // Real-time data simulation
   useEffect(() => {
     const interval = setInterval(() => {
@@ -79,28 +89,88 @@ export default function Commodities() {
     return () => clearInterval(interval);
   }, [queryClient]);
 
+  // Real-time simulation engine
+  useEffect(() => {
+    if (!simulationActive) return;
+
+    const simulationInterval = setInterval(() => {
+      setSimulationData(prev => {
+        const now = new Date();
+        const timeDiff = (now.getTime() - prev.lastUpdate.getTime()) / 1000;
+        
+        // Simulate various changes
+        const changes = {
+          totalCommodities: prev.totalCommodities + (Math.random() > 0.7 ? Math.floor(Math.random() * 3) : 0),
+          complianceRate: Math.max(85, Math.min(98, prev.complianceRate + (Math.random() - 0.5) * 0.5)),
+          pendingInspections: Math.max(0, prev.pendingInspections + (Math.random() > 0.6 ? (Math.random() > 0.5 ? 1 : -1) : 0)),
+          recentUpdates: prev.recentUpdates + (Math.random() > 0.4 ? 1 : 0),
+          lastUpdate: now
+        };
+        
+        return changes;
+      });
+    }, 2000); // Update every 2 seconds
+
+    return () => clearInterval(simulationInterval);
+  }, [simulationActive]);
+
+  // Auto-scroll new activities
+  useEffect(() => {
+    if (simulationActive && simulationData.recentUpdates > 0) {
+      // Trigger visual updates in commodities list
+      const randomIndex = Math.floor(Math.random() * enhancedCommodities.length);
+      if (enhancedCommodities[randomIndex]) {
+        // Simulate status change animation
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/commodities"] });
+        }, 500);
+      }
+    }
+  }, [simulationData.recentUpdates, simulationActive, enhancedCommodities.length, queryClient]);
+
   const { data: commodities = [], isLoading } = useQuery<DetailedCommodity[]>({
     queryKey: ["/api/commodities"],
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
   });
 
   // Generate enhanced commodity data with compliance details
-  const enhancedCommodities = commodities.map(commodity => ({
-    ...commodity,
-    complianceDetails: generateComplianceDetails(commodity),
-    lastInspection: generateLastInspectionDate(),
-    nextInspectionDue: generateNextInspectionDate(),
-    certificationCount: Math.floor(Math.random() * 5) + 1,
-    gpsVerified: Math.random() > 0.3,
-  }));
+  const enhancedCommodities = commodities.map((commodity, index) => {
+    const baseData = {
+      ...commodity,
+      complianceDetails: generateComplianceDetails(commodity, simulationActive, simulationData.lastUpdate),
+      lastInspection: generateLastInspectionDate(),
+      nextInspectionDue: generateNextInspectionDate(),
+      certificationCount: Math.floor(Math.random() * 5) + 1,
+      gpsVerified: Math.random() > 0.3,
+    };
+
+    // Add simulation effects
+    if (simulationActive && index < 3) {
+      const timeBasedVariation = Math.sin(Date.now() / 10000 + index) * 5;
+      if (baseData.complianceDetails) {
+        baseData.complianceDetails.overallScore = Math.max(60, Math.min(100, 
+          baseData.complianceDetails.overallScore + timeBasedVariation
+        ));
+      }
+    }
+
+    return baseData;
+  });
 
   // Generate real-time compliance details
-  function generateComplianceDetails(commodity: Commodity): ComplianceDetails {
+  function generateComplianceDetails(commodity: Commodity, isSimulation: boolean = false, lastUpdate: Date = new Date()): ComplianceDetails {
     const baseScore = commodity.status === 'compliant' ? 85 : 
                      commodity.status === 'review_required' ? 65 : 
                      commodity.status === 'non_compliant' ? 40 : 55;
     
-    const variance = Math.random() * 20 - 10; // +/- 10 points variance
+    let variance = Math.random() * 20 - 10; // +/- 10 points variance
+    
+    // Add real-time variation during simulation
+    if (isSimulation) {
+      const timeVariation = Math.sin(lastUpdate.getTime() / 30000) * 8;
+      variance += timeVariation;
+    }
+    
     const overallScore = Math.max(0, Math.min(100, baseScore + variance));
     
     const issues = [];
@@ -375,25 +445,95 @@ export default function Commodities() {
               <h2 className="text-2xl font-bold text-neutral mb-2">Agricultural Commodities</h2>
               <p className="text-gray-600">Track and manage agricultural commodities across Liberian counties</p>
             </div>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-lacra-green hover:bg-green-700 w-full lg:w-auto">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Commodity
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Add New Commodity</DialogTitle>
-                  <DialogDescription>
-                    Register a new agricultural commodity for tracking and compliance monitoring.
-                  </DialogDescription>
-                </DialogHeader>
-                <CommodityForm onSuccess={() => setIsAddDialogOpen(false)} />
-              </DialogContent>
-            </Dialog>
+            <div className="flex gap-2">
+              <Button 
+                variant={simulationActive ? "destructive" : "outline"}
+                size="sm"
+                onClick={() => setSimulationActive(!simulationActive)}
+                className="w-full lg:w-auto"
+              >
+                {simulationActive ? (
+                  <>
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Stop Simulation
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Start Real-time Test
+                  </>
+                )}
+              </Button>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-lacra-green hover:bg-green-700 w-full lg:w-auto">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Commodity
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Add New Commodity</DialogTitle>
+                    <DialogDescription>
+                      Register a new agricultural commodity for tracking and compliance monitoring.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <CommodityForm onSuccess={() => setIsAddDialogOpen(false)} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
+
+        {/* Real-time Simulation Dashboard */}
+        {simulationActive && (
+          <Card className="mb-6 border-green-200 bg-green-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                Real-time Simulation Active
+                <Badge variant="outline" className="ml-auto">
+                  Live Testing Mode
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 transition-all duration-500">
+                    {simulationData.totalCommodities.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Commodities</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 transition-all duration-500">
+                    {simulationData.complianceRate.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Compliance Rate</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600 transition-all duration-500">
+                    {simulationData.pendingInspections}
+                  </div>
+                  <div className="text-sm text-gray-600">Pending Inspections</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600 transition-all duration-500">
+                    {simulationData.recentUpdates}
+                  </div>
+                  <div className="text-sm text-gray-600">Recent Updates</div>
+                </div>
+              </div>
+              <div className="mt-4 text-center text-xs text-gray-500">
+                Last update: {simulationData.lastUpdate.toLocaleTimeString()} 
+                <span className="ml-2 inline-flex items-center gap-1">
+                  <div className="w-1 h-1 bg-green-500 rounded-full animate-ping"></div>
+                  Live data simulation running
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       {/* Filters */}
       <Card className="mb-6">

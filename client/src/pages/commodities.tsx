@@ -416,9 +416,9 @@ export default function Commodities() {
               <label className="text-sm font-medium text-gray-700 mb-2 block">County</label>
               <Select value={selectedCounty} onValueChange={setSelectedCounty}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select county" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] overflow-y-auto">
                   <SelectItem value="all">All Counties</SelectItem>
                   {COUNTIES.map((county) => (
                     <SelectItem key={county} value={county}>{county}</SelectItem>
@@ -430,9 +430,9 @@ export default function Commodities() {
               <label className="text-sm font-medium text-gray-700 mb-2 block">Commodity Type</label>
               <Select value={selectedType} onValueChange={setSelectedType}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select commodity type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] overflow-y-auto">
                   <SelectItem value="all">All Types</SelectItem>
                   {COMMODITY_TYPES.map((type) => (
                     <SelectItem key={type} value={type}>

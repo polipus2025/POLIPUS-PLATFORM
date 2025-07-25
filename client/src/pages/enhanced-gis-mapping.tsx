@@ -238,6 +238,54 @@ export default function EnhancedGISMapping() {
     URL.revokeObjectURL(url);
   };
 
+  // Quick action handlers
+  const handleTrackVehicle = () => {
+    const activeVehicle = VEHICLE_DATA.find(v => v.status === 'moving');
+    if (activeVehicle) {
+      setSelectedVehicle(activeVehicle);
+      setMapCenter({ lat: activeVehicle.lat, lng: activeVehicle.lng });
+      setZoomLevel(10);
+      // Enable vehicle tracking layer
+      setLayers(prev => prev.map(layer => 
+        layer.id === 'vehicle_tracking' ? { ...layer, active: true } : layer
+      ));
+    }
+  };
+
+  const handleViewAlerts = () => {
+    const highPriorityAlert = DEFORESTATION_ALERTS.find(a => a.severity === 'high');
+    if (highPriorityAlert) {
+      setSelectedAlert(highPriorityAlert);
+      setMapCenter({ lat: highPriorityAlert.lat, lng: highPriorityAlert.lng });
+      setZoomLevel(10);
+      // Enable deforestation layer
+      setLayers(prev => prev.map(layer => 
+        layer.id === 'deforestation' ? { ...layer, active: true } : layer
+      ));
+    }
+  };
+
+  const handleForestMonitor = () => {
+    // Show all deforestation alerts
+    setLayers(prev => prev.map(layer => 
+      layer.id === 'deforestation' ? { ...layer, active: true } : layer
+    ));
+    setMapCenter({ lat: 7.1800, lng: -8.9500 });
+    setZoomLevel(8);
+  };
+
+  const handleFieldAgents = () => {
+    const activeAgent = FIELD_AGENTS.find(a => a.status === 'active');
+    if (activeAgent) {
+      setMapCenter({ lat: activeAgent.lat, lng: activeAgent.lng });
+      setZoomLevel(9);
+      // Enable field agents layer
+      setLayers(prev => prev.map(layer => 
+        layer.id === 'field_agents' ? { ...layer, active: true } : layer
+      ));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Helmet>
@@ -294,19 +342,19 @@ export default function EnhancedGISMapping() {
               Quick Actions
             </h3>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs">
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleTrackVehicle}>
                 <Truck className="h-3 w-3 mr-1" />
                 Track Vehicle
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs">
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleViewAlerts}>
                 <AlertTriangle className="h-3 w-3 mr-1" />
                 View Alerts
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs">
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleForestMonitor}>
                 <TreePine className="h-3 w-3 mr-1" />
                 Forest Monitor
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs">
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleFieldAgents}>
                 <Users className="h-3 w-3 mr-1" />
                 Field Agents
               </Button>

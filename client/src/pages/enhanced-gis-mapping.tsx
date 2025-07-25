@@ -45,7 +45,7 @@ import {
   Wifi
 } from 'lucide-react';
 
-// Liberian Counties
+// Authentic Liberian Counties (ISO LR administrative divisions)
 const LIBERIAN_COUNTIES = [
   'All Counties',
   'Bomi County', 'Bong County', 'Gbarpolu County', 'Grand Bassa County',
@@ -642,9 +642,11 @@ export default function EnhancedGISMapping() {
                     {/* Map Overlay Info */}
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
                       <div className="text-xs text-gray-600 space-y-1">
+                        <div><strong>Country:</strong> Liberia (LR)</div>
                         <div><strong>Center:</strong> {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}</div>
                         <div><strong>Zoom:</strong> {zoomLevel}</div>
                         <div><strong>Visible Farms:</strong> {filteredFarms.length}</div>
+                        <div><strong>Active Counties:</strong> {selectedCounty === 'All Counties' ? '15' : '1'}</div>
                       </div>
                     </div>
 

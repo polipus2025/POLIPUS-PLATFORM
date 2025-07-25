@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { useState, useEffect } from "react";
 
 export default function Landing() {
@@ -65,7 +66,14 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-lg overflow-hidden">
+                  <img 
+                    src={lacraLogo} 
+                    alt="LACRA Official Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div className="w-12 h-12 rounded-lg overflow-hidden">
                   <img 
                     src={agriTraceLogo} 

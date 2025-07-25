@@ -1,5 +1,6 @@
 import { Bell, Sprout, LogOut, User, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -162,7 +163,14 @@ export default function Header() {
       <div className="px-6 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-lg overflow-hidden">
+                <img 
+                  src={lacraLogo} 
+                  alt="LACRA Official Logo" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="w-12 h-12 rounded-lg overflow-hidden">
                 <img 
                   src={agriTraceLogo} 
@@ -172,6 +180,7 @@ export default function Header() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-neutral">AgriTrace360™</h1>
+                <p className="text-xs text-gray-600">LACRA - Liberia Agriculture Commodity Regulatory Authority</p>
                 <p className="text-sm text-gray-500">LACRA Regulatory Dashboard</p>
               </div>
             </div>

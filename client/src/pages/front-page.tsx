@@ -91,7 +91,7 @@ export default function FrontPage() {
         <img 
           src={poliposLogo} 
           alt="Polipos - Brightening the Future" 
-          className="h-32 w-auto object-contain"
+          className="h-48 w-auto object-contain"
         />
       </div>
 

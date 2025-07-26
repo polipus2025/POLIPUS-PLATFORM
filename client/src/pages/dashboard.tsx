@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Dashboard() {
   const [isEudrDialogOpen, setIsEudrDialogOpen] = useState(false);
   const [selectedExporter, setSelectedExporter] = useState<string>("all");
+  const [selectedCounty, setSelectedCounty] = useState<string>("all");
   const [isExportReportOpen, setIsExportReportOpen] = useState(false);
   const [isMessagesDialogOpen, setIsMessagesDialogOpen] = useState(false);
   
@@ -377,27 +378,27 @@ export default function Dashboard() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Select defaultValue="all">
+            <Select value={selectedCounty} onValueChange={setSelectedCounty}>
               <SelectTrigger className="w-48">
-                <SelectValue />
+                <SelectValue placeholder="Select County" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Counties</SelectItem>
-                <SelectItem value="bomi">Bomi County</SelectItem>
-                <SelectItem value="bong">Bong County</SelectItem>
-                <SelectItem value="gbarpolu">Gbarpolu County</SelectItem>
-                <SelectItem value="grand_bassa">Grand Bassa County</SelectItem>
-                <SelectItem value="grand_cape_mount">Grand Cape Mount County</SelectItem>
-                <SelectItem value="grand_gedeh">Grand Gedeh County</SelectItem>
-                <SelectItem value="grand_kru">Grand Kru County</SelectItem>
-                <SelectItem value="lofa">Lofa County</SelectItem>
-                <SelectItem value="margibi">Margibi County</SelectItem>
-                <SelectItem value="maryland">Maryland County</SelectItem>
-                <SelectItem value="montserrado">Montserrado County</SelectItem>
-                <SelectItem value="nimba">Nimba County</SelectItem>
-                <SelectItem value="rivercess">River Cess County</SelectItem>
-                <SelectItem value="river_gee">River Gee County</SelectItem>
-                <SelectItem value="sinoe">Sinoe County</SelectItem>
+                <SelectItem value="Bomi County">Bomi County</SelectItem>
+                <SelectItem value="Bong County">Bong County</SelectItem>
+                <SelectItem value="Gbarpolu County">Gbarpolu County</SelectItem>
+                <SelectItem value="Grand Bassa County">Grand Bassa County</SelectItem>
+                <SelectItem value="Grand Cape Mount County">Grand Cape Mount County</SelectItem>
+                <SelectItem value="Grand Gedeh County">Grand Gedeh County</SelectItem>
+                <SelectItem value="Grand Kru County">Grand Kru County</SelectItem>
+                <SelectItem value="Lofa County">Lofa County</SelectItem>
+                <SelectItem value="Margibi County">Margibi County</SelectItem>
+                <SelectItem value="Maryland County">Maryland County</SelectItem>
+                <SelectItem value="Montserrado County">Montserrado County</SelectItem>
+                <SelectItem value="Nimba County">Nimba County</SelectItem>
+                <SelectItem value="River Cess County">River Cess County</SelectItem>
+                <SelectItem value="River Gee County">River Gee County</SelectItem>
+                <SelectItem value="Sinoe County">Sinoe County</SelectItem>
               </SelectContent>
             </Select>
             
@@ -788,7 +789,7 @@ export default function Dashboard() {
 
       {/* Key Metrics Cards */}
       <div className="mb-6">
-        <MetricsCards />
+        <MetricsCards selectedCounty={selectedCounty} />
       </div>
 
       {/* Exporter Compliance Tracking */}
@@ -937,8 +938,8 @@ export default function Dashboard() {
 
       {/* Charts and Regional Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <ComplianceChart />
-        <RegionalMap />
+        <ComplianceChart selectedCounty={selectedCounty} />
+        <RegionalMap selectedCounty={selectedCounty} />
       </div>
 
       {/* Commodity Details Table */}

@@ -12,10 +12,19 @@ const COLORS = {
   pending: '#9E9E9E'
 };
 
-export default function ComplianceChart() {
+interface ComplianceChartProps {
+  selectedCounty?: string;
+}
+
+export default function ComplianceChart({ selectedCounty = "all" }: ComplianceChartProps) {
   const { data: commodities = [], isLoading } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
   });
+
+  // Filter commodities by selected county
+  const filteredCommodities = selectedCounty === "all" 
+    ? commodities 
+    : commodities.filter(commodity => commodity.county === selectedCounty);
 
   if (isLoading) {
     return (
@@ -30,7 +39,7 @@ export default function ComplianceChart() {
     );
   }
 
-  const statusCounts = commodities.reduce((acc, commodity) => {
+  const statusCounts = filteredCommodities.reduce((acc, commodity) => {
     acc[commodity.status] = (acc[commodity.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -45,7 +54,14 @@ export default function ComplianceChart() {
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-semibold text-neutral">Commodity Compliance Status</CardTitle>
+          <CardTitle className="text-lg font-semibold text-neutral">
+            Commodity Compliance Status
+            {selectedCounty !== "all" && (
+              <span className="text-sm font-normal text-blue-600 ml-2">
+                • {selectedCounty}
+              </span>
+            )}
+          </CardTitle>
           <Select defaultValue="7days">
             <SelectTrigger className="w-32">
               <SelectValue />

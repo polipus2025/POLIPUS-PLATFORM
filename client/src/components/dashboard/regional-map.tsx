@@ -3,10 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ComplianceByCounty } from "@/lib/types";
 
-export default function RegionalMap() {
+interface RegionalMapProps {
+  selectedCounty?: string;
+}
+
+export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps) {
   const { data: countyData = [], isLoading } = useQuery<ComplianceByCounty[]>({
     queryKey: ["/api/dashboard/compliance-by-county"],
   });
+
+  // Filter county data based on selection
+  const filteredCountyData = selectedCounty === "all" 
+    ? countyData 
+    : countyData.filter(county => county.county === selectedCounty);
 
   if (isLoading) {
     return (
@@ -31,7 +40,14 @@ export default function RegionalMap() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-neutral">Regional Compliance Overview</CardTitle>
+        <CardTitle className="text-lg font-semibold text-neutral">
+          Regional Compliance Overview
+          {selectedCounty !== "all" && (
+            <span className="text-sm font-normal text-blue-600 ml-2">
+              • {selectedCounty}
+            </span>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div 
@@ -45,7 +61,7 @@ export default function RegionalMap() {
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
           <div className="relative h-full flex items-center justify-center">
             <div className="grid grid-cols-2 gap-4 text-white">
-              {countyData.map((county) => (
+              {filteredCountyData.map((county) => (
                 <div key={county.county} className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <div className={`w-3 h-3 ${getStatusColor(county.complianceRate || 0)} rounded-full`}></div>

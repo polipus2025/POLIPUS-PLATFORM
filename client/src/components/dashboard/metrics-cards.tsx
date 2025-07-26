@@ -4,10 +4,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Package, CheckCircle, Clock, Award } from "lucide-react";
 import type { DashboardMetrics } from "@/lib/types";
 
-export default function MetricsCards() {
+interface MetricsCardsProps {
+  selectedCounty?: string;
+}
+
+export default function MetricsCards({ selectedCounty = "all" }: MetricsCardsProps) {
   const { data: metrics, isLoading } = useQuery<DashboardMetrics>({
     queryKey: ["/api/dashboard/metrics"],
   });
+
+  // Add county filter indicator (metrics are aggregated so we show the filter context)
+  const getFilteredLabel = (label: string) => {
+    if (selectedCounty === "all") return label;
+    return `${label} (${selectedCounty})`;
+  };
 
   if (isLoading) {
     return (

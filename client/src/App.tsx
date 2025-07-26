@@ -69,16 +69,21 @@ function Router() {
       <Route path="/exporter-login" component={ExporterLogin} />
       <Route path="/login-test" component={LoginTest} />
       
-      {/* Protected Routes - Force authentication bypass since header shows user is logged in */}
-      {/* DEBUGGING: Force show protected routes regardless of token status */}
-      {true ? (
+      {/* Protected Routes */}
+      {authToken ? (
         <>
-          {/* Dashboard - Testing with simple test component */}
+          {/* Dashboard - Fixed to show correct component based on user type */}
           <Route path="/dashboard">
-            <TestDashboard />
+            {userType === 'farmer' ? <FarmerDashboard /> : 
+             userType === 'field_agent' ? <FieldAgentDashboard /> : 
+             userType === 'exporter' ? <ExporterDashboard /> :
+             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
           </Route>
           <Route path="/">
-            <TestDashboard />
+            {userType === 'farmer' ? <FarmerDashboard /> : 
+             userType === 'field_agent' ? <FieldAgentDashboard /> : 
+             userType === 'exporter' ? <ExporterDashboard /> :
+             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
           </Route>
           
           {/* Exporter Portal Routes */}

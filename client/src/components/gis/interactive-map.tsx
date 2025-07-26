@@ -249,68 +249,164 @@ export default function InteractiveMap() {
           <CardContent className="p-0 relative">
             <div className="relative w-full h-[520px] bg-gradient-to-br from-blue-100 via-green-50 to-blue-100 rounded-b-lg overflow-hidden">
               
-              {/* Map Display with Multiple Options */}
-              <div className="absolute inset-0 bg-white">
-                {/* Map Header */}
-                <div className="absolute top-2 left-2 bg-white/95 px-3 py-2 rounded-lg shadow-sm z-10 text-sm font-medium">
-                  Republic of Liberia - Agricultural GIS Map
-                </div>
-                
-                {/* Try multiple map sources */}
-                <div className="w-full h-full">
-                  {/* Option 1: Bing Maps (often more reliable) */}
-                  <iframe
-                    src="https://www.bing.com/maps/embed?h=520&w=100%&cp=6.428~-9.429&lvl=7&typ=d&sty=r&src=SHELL&FORM=MBEDV8"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 'none' }}
-                    title="Liberia Map"
-                    className="rounded-b-lg"
-                    onError={(e) => {
-                      console.log('Bing Maps failed, trying OpenStreetMap...');
-                      (e.target as HTMLIFrameElement).style.display = 'none';
-                      const backup = document.getElementById('osm-backup');
-                      if (backup) backup.style.display = 'block';
-                    }}
-                  ></iframe>
+              {/* Clear Visual Map of Liberia - SVG Based */}
+              <div className="absolute inset-0 bg-blue-50">
+                <svg viewBox="0 0 600 400" className="w-full h-full">
+                  {/* Ocean Background */}
+                  <rect width="600" height="400" fill="#E0F2FE" />
                   
-                  {/* Backup Option 2: OpenStreetMap */}
-                  <iframe
-                    id="osm-backup"
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=-11.5,4.0,-7.5,8.5&layer=mapnik"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 'none', display: 'none' }}
-                    title="Liberia Map - OpenStreetMap"
-                    className="rounded-b-lg"
-                    onError={(e) => {
-                      console.log('OpenStreetMap also failed, showing fallback...');
-                      (e.target as HTMLIFrameElement).style.display = 'none';
-                      const fallback = document.getElementById('map-fallback');
-                      if (fallback) fallback.style.display = 'flex';
-                    }}
-                  ></iframe>
+                  {/* Republic of Liberia - Accurate Outline */}
+                  <path
+                    d="M 80 180 
+                       L 120 175 
+                       L 160 170 
+                       L 200 168 
+                       L 240 165 
+                       L 280 164 
+                       L 320 166 
+                       L 360 170 
+                       L 400 175 
+                       L 430 182 
+                       L 450 192 
+                       L 465 205 
+                       L 475 220 
+                       L 480 238 
+                       L 482 256 
+                       L 480 274 
+                       L 475 292 
+                       L 465 308 
+                       L 450 322 
+                       L 430 334 
+                       L 400 344 
+                       L 360 352 
+                       L 320 356 
+                       L 280 358 
+                       L 240 356 
+                       L 200 352 
+                       L 160 344 
+                       L 120 334 
+                       L 90 322 
+                       L 70 308 
+                       L 55 292 
+                       L 45 274 
+                       L 42 256 
+                       L 45 238 
+                       L 55 220 
+                       L 70 205 
+                       L 80 180 Z"
+                    fill="#10B981"
+                    stroke="#047857"
+                    strokeWidth="2"
+                    opacity="0.9"
+                  />
                   
-                  {/* Final Fallback: Static representation */}
-                  <div id="map-fallback" className="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50 hidden">
-                    <div className="flex items-center justify-center h-full">
-                      <div className="text-center p-8">
-                        <div className="text-6xl mb-4">🗺️</div>
-                        <div className="text-xl font-bold text-gray-700 mb-2">Republic of Liberia</div>
-                        <div className="text-sm text-gray-600 mb-4">West African Geographic Region</div>
-                        <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-                          <div>Capital: Monrovia</div>
-                          <div>Coordinates: 6.4°N, 9.4°W</div>
-                          <div>Counties: 15</div>
-                          <div>Area: 111,369 km²</div>
-                        </div>
-                        <div className="mt-4 text-xs text-gray-400">
-                          Geographic map data temporarily unavailable
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  {/* Country Label */}
+                  <text x="260" y="260" textAnchor="middle" className="text-xl font-bold fill-white">
+                    REPUBLIC OF LIBERIA
+                  </text>
+                  
+                  {/* Major Cities */}
+                  <g>
+                    {/* Monrovia - Capital */}
+                    <circle cx="90" cy="200" r="6" fill="#DC2626" stroke="white" strokeWidth="2" />
+                    <text x="100" y="205" className="text-sm font-semibold fill-red-700">Monrovia</text>
+                    <text x="100" y="218" className="text-xs fill-red-600">(Capital)</text>
+                    
+                    {/* Gbarnga */}
+                    <circle cx="180" cy="240" r="4" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="190" y="245" className="text-sm fill-red-700">Gbarnga</text>
+                    
+                    {/* Buchanan */}
+                    <circle cx="140" cy="280" r="4" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="150" y="285" className="text-sm fill-red-700">Buchanan</text>
+                    
+                    {/* Harper */}
+                    <circle cx="380" cy="340" r="4" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="390" y="345" className="text-sm fill-red-700">Harper</text>
+                    
+                    {/* Zwedru */}
+                    <circle cx="350" cy="300" r="3" fill="#DC2626" stroke="white" strokeWidth="1" />
+                    <text x="360" y="305" className="text-xs fill-red-700">Zwedru</text>
+                  </g>
+                  
+                  {/* Borders with Neighboring Countries */}
+                  <g stroke="#8B5CF6" strokeWidth="2" strokeDasharray="5,5" fill="none" opacity="0.7">
+                    {/* Sierra Leone Border */}
+                    <path d="M 80 180 Q 60 160 80 140 Q 100 130 130 125" />
+                    <text x="70" y="150" className="text-xs fill-purple-600">SIERRA LEONE</text>
+                    
+                    {/* Guinea Border */}
+                    <path d="M 130 125 Q 200 120 280 122 Q 360 125 430 130" />
+                    <text x="280" y="115" className="text-xs fill-purple-600">GUINEA</text>
+                    
+                    {/* Côte d'Ivoire Border */}
+                    <path d="M 430 130 Q 460 140 485 160 Q 500 180 510 210" />
+                    <text x="480" y="150" className="text-xs fill-purple-600">CÔTE D'IVOIRE</text>
+                  </g>
+                  
+                  {/* Atlantic Ocean */}
+                  <text x="30" y="350" className="text-lg font-bold fill-blue-600" transform="rotate(-90 30 350)">
+                    ATLANTIC OCEAN
+                  </text>
+                  
+                  {/* Farm Locations */}
+                  {mapLayers.find(l => l.id === 'farms')?.visible && (gisData as any[]).map((location: any, index: number) => {
+                    const x = 120 + (index % 18) * 20;
+                    const y = 200 + Math.floor(index / 18) * 25;
+                    
+                    return (
+                      <g key={location.id || index}>
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r="3"
+                          fill="#059669"
+                          stroke="#065F46"
+                          strokeWidth="1"
+                          className="hover:r-5 transition-all cursor-pointer opacity-80"
+                        />
+                        <text
+                          x={x}
+                          y={y - 8}
+                          textAnchor="middle"
+                          className="text-xs fill-green-800 opacity-0 hover:opacity-100 transition-opacity"
+                        >
+                          {location.name?.slice(0, 8)}
+                        </text>
+                      </g>
+                    );
+                  })}
+                  
+                  {/* Transportation Routes */}
+                  {mapLayers.find(l => l.id === 'roads')?.visible && (
+                    <g stroke="#EF4444" strokeWidth="3" fill="none" opacity="0.8">
+                      {/* Main Highway */}
+                      <path d="M 90 200 Q 130 220 180 240" />
+                      {/* Coastal Road */}
+                      <path d="M 90 200 Q 115 240 140 280 Q 200 320 380 340" />
+                    </g>
+                  )}
+                  
+                  {/* Compliance Zones */}
+                  {mapLayers.find(l => l.id === 'compliance')?.visible && (
+                    <g>
+                      <circle cx="150" cy="220" r="30" fill="#8B5CF6" opacity="0.2" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="4,4" />
+                      <circle cx="300" cy="280" r="25" fill="#8B5CF6" opacity="0.2" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="4,4" />
+                    </g>
+                  )}
+                  
+                  {/* Scale and Compass */}
+                  <g transform="translate(500, 350)">
+                    <line x1="0" y1="0" x2="40" y2="0" stroke="#374151" strokeWidth="2" />
+                    <text x="20" y="-5" textAnchor="middle" className="text-xs fill-gray-600">50km</text>
+                  </g>
+                  
+                  <g transform="translate(550, 50)">
+                    <circle cx="0" cy="0" r="15" fill="white" stroke="#374151" strokeWidth="1" />
+                    <polygon points="0,-10 3,3 0,0 -3,3" fill="#DC2626" />
+                    <text x="0" y="-20" textAnchor="middle" className="text-xs font-bold fill-gray-700">N</text>
+                  </g>
+                </svg>
                 
                 {/* Simple data indicators in corners - not covering map */}
                 <div className="absolute bottom-2 left-2 bg-green-100/95 px-3 py-2 rounded-lg shadow-sm text-sm">

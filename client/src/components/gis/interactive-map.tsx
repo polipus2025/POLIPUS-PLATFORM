@@ -249,15 +249,24 @@ export default function InteractiveMap() {
           <CardContent className="p-0 relative">
             <div className="relative w-full h-[520px] bg-gradient-to-br from-blue-100 via-green-50 to-blue-100 rounded-b-lg overflow-hidden">
               
-              {/* Real Map Container using OpenStreetMap */}
+              {/* Real Map Container using multiple map sources */}
               <div className="absolute inset-0">
+                {/* Primary: Google Maps for Liberia */}
                 <iframe
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=-11.7,4.0,-7.0,8.8&layer=mapnik&marker=6.4281,-9.4295`}
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2027736.4851769547!2d-11.202491656250002!3d6.428055699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xf0106183aabf343%3A0x5369e9cdc72cf719!2sLiberia!5e0!3m2!1sen!2s!4v1643723456789!5m2!1sen!2s"
                   width="100%"
                   height="100%"
                   style={{ border: 'none' }}
-                  title="Liberia Map - OpenStreetMap"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Liberia Map - Real Geographic Data"
                   className="rounded-b-lg"
+                  onError={(e) => {
+                    // Fallback to alternative map service if Google Maps fails
+                    console.log('Primary map failed, loading alternative...');
+                    (e.target as HTMLIFrameElement).src = 'https://maps.openrouteservice.org/embed?bbox=-11.7,4.0,-7.0,8.8&layer=osm&marker=6.4281,-9.4295';
+                  }}
                 ></iframe>
                 
                 {/* Map overlay with agricultural data points */}

@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ComplianceByCounty } from "@/lib/types";
 
 interface RegionalMapProps {
@@ -10,12 +13,40 @@ interface RegionalMapProps {
 export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps) {
   const { data: countyData = [], isLoading } = useQuery<ComplianceByCounty[]>({
     queryKey: ["/api/dashboard/compliance-by-county"],
+    refetchInterval: 3000, // Refresh every 3 seconds for real-time updates
   });
+
+  // Auto-scroll state
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const [displayData, setDisplayData] = useState<ComplianceByCounty[]>([]);
 
   // Filter county data based on selection
   const filteredCountyData = selectedCounty === "all" 
     ? countyData 
     : countyData.filter(county => county.county === selectedCounty);
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (!isAutoScrolling || filteredCountyData.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => 
+        (prevIndex + 1) % Math.max(1, Math.ceil(filteredCountyData.length / 4))
+      );
+    }, 4000); // Change every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoScrolling, filteredCountyData.length]);
+
+  // Update display data when data changes or index changes
+  useEffect(() => {
+    if (filteredCountyData.length === 0) return;
+    
+    const startIndex = currentIndex * 4;
+    const endIndex = startIndex + 4;
+    setDisplayData(filteredCountyData.slice(startIndex, endIndex));
+  }, [filteredCountyData, currentIndex]);
 
   if (isLoading) {
     return (
@@ -40,14 +71,56 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-neutral">
-          Regional Compliance Overview
-          {selectedCounty !== "all" && (
-            <span className="text-sm font-normal text-blue-600 ml-2">
-              • {selectedCounty}
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-semibold text-neutral">
+            Regional Compliance Overview
+            {selectedCounty !== "all" && (
+              <span className="text-sm font-normal text-blue-600 ml-2">
+                • {selectedCounty}
+              </span>
+            )}
+          </CardTitle>
+          
+          {/* Auto-scroll Controls */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAutoScrolling(!isAutoScrolling)}
+              className="h-8"
+            >
+              {isAutoScrolling ? (
+                <Pause className="h-3 w-3" />
+              ) : (
+                <Play className="h-3 w-3" />
+              )}
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              disabled={currentIndex === 0}
+              className="h-8"
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </Button>
+            
+            <span className="text-xs text-gray-500 min-w-[60px] text-center">
+              {currentIndex + 1} / {Math.max(1, Math.ceil(filteredCountyData.length / 4))}
             </span>
-          )}
-        </CardTitle>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentIndex(Math.min(Math.ceil(filteredCountyData.length / 4) - 1, currentIndex + 1))}
+              disabled={currentIndex >= Math.ceil(filteredCountyData.length / 4) - 1}
+              className="h-8"
+            >
+              <ChevronRight className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div 
@@ -60,17 +133,56 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
         >
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
           <div className="relative h-full flex items-center justify-center">
-            <div className="grid grid-cols-2 gap-4 text-white">
-              {filteredCountyData.map((county) => (
-                <div key={county.county} className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3">
+            {/* Auto-scrolling Indicator */}
+            {isAutoScrolling && (
+              <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                Live
+              </div>
+            )}
+            
+            {/* County Data Grid with Smooth Transitions */}
+            <div className="grid grid-cols-2 gap-4 text-white transition-all duration-500 ease-in-out">
+              {displayData.map((county, index) => (
+                <div 
+                  key={`${county.county}-${currentIndex}`} 
+                  className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3 transform transition-all duration-500 hover:bg-opacity-30"
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                    animation: isAutoScrolling ? 'fadeInUp 0.6s ease-out forwards' : 'none'
+                  }}
+                >
                   <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 ${getStatusColor(county.complianceRate || 0)} rounded-full`}></div>
-                    <span className="text-sm font-medium">{county.county}</span>
+                    <div className={`w-3 h-3 ${getStatusColor(county.complianceRate || 0)} rounded-full animate-pulse`}></div>
+                    <span className="text-sm font-medium truncate">{county.county}</span>
                   </div>
-                  <p className="text-xs mt-1 opacity-90">{(county.complianceRate || 0).toFixed(1)}% Compliant</p>
+                  <div className="mt-2 space-y-1">
+                    <div className="text-xs text-gray-200">
+                      Compliance: <span className="font-semibold text-white">{county.complianceRate || 0}%</span>
+                    </div>
+                    <div className="text-xs text-gray-200">
+                      Commodities: <span className="font-semibold text-white">{county.totalCommodities || 0}</span>
+                    </div>
+                    <div className="w-full bg-gray-600 rounded-full h-1 mt-1">
+                      <div 
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                          (county.complianceRate || 0) >= 85 ? 'bg-green-400' :
+                          (county.complianceRate || 0) >= 70 ? 'bg-yellow-400' : 'bg-red-400'
+                        }`}
+                        style={{ width: `${county.complianceRate || 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
+            
+            {/* Empty State for No Data */}
+            {displayData.length === 0 && (
+              <div className="text-white text-center">
+                <div className="text-sm opacity-75">No county data available</div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

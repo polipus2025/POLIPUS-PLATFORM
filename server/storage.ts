@@ -36,6 +36,10 @@ import {
   internalMessages,
   messageRecipients,
   messageTemplates,
+  certificateVerifications,
+  userVerifications,
+  trackingEvents,
+  verificationLogs,
   type Commodity,
   type Inspection,
   type Certification,
@@ -109,7 +113,15 @@ import {
   type MessageTemplate,
   type InsertInternalMessage,
   type InsertMessageRecipient,
-  type InsertMessageTemplate
+  type InsertMessageTemplate,
+  type CertificateVerification,
+  type UserVerification,
+  type TrackingEvent,
+  type VerificationLog,
+  type InsertCertificateVerification,
+  type InsertUserVerification,
+  type InsertTrackingEvent,
+  type InsertVerificationLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -221,6 +233,29 @@ export interface IStorage {
   createTrackingAlert(alert: InsertTrackingAlert): Promise<TrackingAlert>;
   getTrackingReports(): Promise<TrackingReport[]>;
   createTrackingReport(report: InsertTrackingReport): Promise<TrackingReport>;
+
+  // Real-time verification methods
+  getCertificateVerifications(): Promise<CertificateVerification[]>;
+  getCertificateVerification(id: number): Promise<CertificateVerification | undefined>;
+  getCertificateVerificationByCode(code: string): Promise<CertificateVerification | undefined>;
+  createCertificateVerification(verification: InsertCertificateVerification): Promise<CertificateVerification>;
+  updateCertificateVerification(id: number, verification: Partial<CertificateVerification>): Promise<CertificateVerification>;
+  
+  getUserVerifications(): Promise<UserVerification[]>;
+  getUserVerification(id: number): Promise<UserVerification | undefined>;
+  getUserVerificationsByUser(userId: number): Promise<UserVerification[]>;
+  createUserVerification(verification: InsertUserVerification): Promise<UserVerification>;
+  updateUserVerification(id: number, verification: Partial<UserVerification>): Promise<UserVerification>;
+  
+  getTrackingEvents(): Promise<TrackingEvent[]>;
+  getTrackingEvent(id: number): Promise<TrackingEvent | undefined>;
+  getTrackingEventsByTrackingId(trackingId: string): Promise<TrackingEvent[]>;
+  createTrackingEvent(event: InsertTrackingEvent): Promise<TrackingEvent>;
+  updateTrackingEvent(id: number, event: Partial<TrackingEvent>): Promise<TrackingEvent>;
+  
+  getVerificationLogs(): Promise<VerificationLog[]>;
+  getVerificationLogsByType(type: string): Promise<VerificationLog[]>;
+  createVerificationLog(log: InsertVerificationLog): Promise<VerificationLog>;
 
   // Exporter methods
   getExporters(): Promise<any[]>;
@@ -1377,6 +1412,167 @@ export class DatabaseStorage implements IStorage {
     const replyMessage = { ...reply, parentMessageId };
     const [newReply] = await db.insert(internalMessages).values(replyMessage).returning();
     return newReply;
+  }
+
+  // Real-time verification methods implementation
+  async getCertificateVerifications(): Promise<CertificateVerification[]> {
+    return await db.select().from(certificateVerifications).orderBy(desc(certificateVerifications.createdAt));
+  }
+
+  async getCertificateVerification(id: number): Promise<CertificateVerification | undefined> {
+    const [verification] = await db.select().from(certificateVerifications).where(eq(certificateVerifications.id, id));
+    return verification || undefined;
+  }
+
+  async getCertificateVerificationByCode(code: string): Promise<CertificateVerification | undefined> {
+    const [verification] = await db.select().from(certificateVerifications).where(eq(certificateVerifications.verificationCode, code));
+    return verification || undefined;
+  }
+
+  async createCertificateVerification(verification: InsertCertificateVerification): Promise<CertificateVerification> {
+    const [newVerification] = await db.insert(certificateVerifications).values(verification).returning();
+    
+    // Create verification log
+    await this.createVerificationLog({
+      verificationId: newVerification.id,
+      verificationType: 'certificate',
+      action: 'created',
+      performedBy: verification.verifiedBy,
+      details: `Certificate verification created with code: ${verification.verificationCode}`,
+      newState: verification.verificationStatus || 'pending'
+    });
+    
+    return newVerification;
+  }
+
+  async updateCertificateVerification(id: number, verification: Partial<CertificateVerification>): Promise<CertificateVerification> {
+    const [updated] = await db.update(certificateVerifications)
+      .set({ ...verification, updatedAt: new Date() })
+      .where(eq(certificateVerifications.id, id))
+      .returning();
+    
+    // Create verification log
+    await this.createVerificationLog({
+      verificationId: id,
+      verificationType: 'certificate',
+      action: 'updated',
+      performedBy: verification.verifiedBy,
+      details: `Certificate verification updated`,
+      newState: verification.verificationStatus || 'updated'
+    });
+    
+    return updated;
+  }
+
+  async getUserVerifications(): Promise<UserVerification[]> {
+    return await db.select().from(userVerifications).orderBy(desc(userVerifications.createdAt));
+  }
+
+  async getUserVerification(id: number): Promise<UserVerification | undefined> {
+    const [verification] = await db.select().from(userVerifications).where(eq(userVerifications.id, id));
+    return verification || undefined;
+  }
+
+  async getUserVerificationsByUser(userId: number): Promise<UserVerification[]> {
+    return await db.select().from(userVerifications).where(eq(userVerifications.userId, userId));
+  }
+
+  async createUserVerification(verification: InsertUserVerification): Promise<UserVerification> {
+    const [newVerification] = await db.insert(userVerifications).values(verification).returning();
+    
+    // Create verification log
+    await this.createVerificationLog({
+      verificationId: newVerification.id,
+      verificationType: 'user',
+      action: 'created',
+      performedBy: verification.verifiedBy,
+      details: `User verification created for type: ${verification.verificationType}`,
+      newState: verification.verificationStatus
+    });
+    
+    return newVerification;
+  }
+
+  async updateUserVerification(id: number, verification: Partial<UserVerification>): Promise<UserVerification> {
+    const [updated] = await db.update(userVerifications)
+      .set({ ...verification, updatedAt: new Date() })
+      .where(eq(userVerifications.id, id))
+      .returning();
+    
+    // Create verification log
+    await this.createVerificationLog({
+      verificationId: id,
+      verificationType: 'user',
+      action: 'updated',
+      performedBy: verification.verifiedBy,
+      details: `User verification updated`,
+      newState: verification.verificationStatus || 'updated'
+    });
+    
+    return updated;
+  }
+
+  async getTrackingEvents(): Promise<TrackingEvent[]> {
+    return await db.select().from(trackingEvents).orderBy(desc(trackingEvents.timestamp));
+  }
+
+  async getTrackingEvent(id: number): Promise<TrackingEvent | undefined> {
+    const [event] = await db.select().from(trackingEvents).where(eq(trackingEvents.id, id));
+    return event || undefined;
+  }
+
+  async getTrackingEventsByTrackingId(trackingId: string): Promise<TrackingEvent[]> {
+    return await db.select().from(trackingEvents).where(eq(trackingEvents.trackingId, trackingId));
+  }
+
+  async createTrackingEvent(event: InsertTrackingEvent): Promise<TrackingEvent> {
+    const [newEvent] = await db.insert(trackingEvents).values(event).returning();
+    
+    // Create verification log
+    await this.createVerificationLog({
+      verificationId: newEvent.id,
+      verificationType: 'tracking',
+      action: 'created',
+      performedBy: event.userId,
+      details: `Tracking event created: ${event.eventType} - ${event.eventStatus}`,
+      newState: event.eventStatus
+    });
+    
+    return newEvent;
+  }
+
+  async updateTrackingEvent(id: number, event: Partial<TrackingEvent>): Promise<TrackingEvent> {
+    const [updated] = await db.update(trackingEvents)
+      .set(event)
+      .where(eq(trackingEvents.id, id))
+      .returning();
+    
+    // Create verification log
+    await this.createVerificationLog({
+      verificationId: id,
+      verificationType: 'tracking',
+      action: 'updated',
+      performedBy: event.userId,
+      details: `Tracking event updated`,
+      newState: event.eventStatus || 'updated'
+    });
+    
+    return updated;
+  }
+
+  async getVerificationLogs(): Promise<VerificationLog[]> {
+    return await db.select().from(verificationLogs).orderBy(desc(verificationLogs.timestamp));
+  }
+
+  async getVerificationLogsByType(type: string): Promise<VerificationLog[]> {
+    return await db.select().from(verificationLogs)
+      .where(eq(verificationLogs.verificationType, type))
+      .orderBy(desc(verificationLogs.timestamp));
+  }
+
+  async createVerificationLog(log: InsertVerificationLog): Promise<VerificationLog> {
+    const [newLog] = await db.insert(verificationLogs).values(log).returning();
+    return newLog;
   }
 }
 

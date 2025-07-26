@@ -297,6 +297,78 @@ export const userPermissions = pgTable("user_permissions", {
   grantedAt: timestamp("granted_at").defaultNow(),
 });
 
+// Certificate verification system
+export const certificateVerifications = pgTable("certificate_verifications", {
+  id: serial("id").primaryKey(),
+  certificateId: integer("certificate_id").references(() => certifications.id),
+  verificationCode: text("verification_code").notNull().unique(),
+  verifiedBy: integer("verified_by").references(() => authUsers.id),
+  verificationStatus: text("verification_status").notNull(), // pending, verified, rejected, expired
+  verificationDate: timestamp("verification_date").defaultNow(),
+  verificationNotes: text("verification_notes"),
+  digitalSignature: text("digital_signature"),
+  blockchainHash: text("blockchain_hash"),
+  qrCodeData: text("qr_code_data"),
+  expiryDate: timestamp("expiry_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User verification system for operators, officers, and registered users
+export const userVerifications = pgTable("user_verifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => authUsers.id),
+  verificationType: text("verification_type").notNull(), // identity, certification, license, background_check
+  verificationStatus: text("verification_status").notNull(), // pending, verified, rejected, expired
+  verifiedBy: integer("verified_by").references(() => authUsers.id),
+  verificationDate: timestamp("verification_date").defaultNow(),
+  documentType: text("document_type"), // passport, id_card, license, certificate
+  documentNumber: text("document_number"),
+  issuingAuthority: text("issuing_authority"),
+  expiryDate: timestamp("expiry_date"),
+  verificationNotes: text("verification_notes"),
+  digitalSignature: text("digital_signature"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tracking system for real-time monitoring
+export const trackingEvents = pgTable("tracking_events", {
+  id: serial("id").primaryKey(),
+  trackingId: text("tracking_id").notNull(),
+  eventType: text("event_type").notNull(), // pickup, transit, delivery, inspection, verification
+  eventStatus: text("event_status").notNull(), // pending, in_progress, completed, failed
+  location: text("location"),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  timestamp: timestamp("timestamp").defaultNow(),
+  userId: integer("user_id").references(() => authUsers.id),
+  commodityId: integer("commodity_id").references(() => commodities.id),
+  vehicleId: text("vehicle_id"),
+  notes: text("notes"),
+  temperature: decimal("temperature", { precision: 5, scale: 2 }),
+  humidity: decimal("humidity", { precision: 5, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Real-time verification logs
+export const verificationLogs = pgTable("verification_logs", {
+  id: serial("id").primaryKey(),
+  verificationId: integer("verification_id"),
+  verificationType: text("verification_type").notNull(), // certificate, user, tracking
+  action: text("action").notNull(), // created, updated, verified, rejected
+  performedBy: integer("performed_by").references(() => authUsers.id),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  timestamp: timestamp("timestamp").defaultNow(),
+  details: text("details"),
+  previousState: text("previous_state"),
+  newState: text("new_state"),
+});
+
 // User schema (keeping existing for backward compatibility)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -423,6 +495,39 @@ export const insertUserPermissionSchema = createInsertSchema(userPermissions).om
 export type AuthUser = typeof authUsers.$inferSelect;
 export type UserSession = typeof userSessions.$inferSelect;
 export type UserPermission = typeof userPermissions.$inferSelect;
+
+// Verification system insert schemas
+export const insertCertificateVerificationSchema = createInsertSchema(certificateVerifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserVerificationSchema = createInsertSchema(userVerifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTrackingEventSchema = createInsertSchema(trackingEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertVerificationLogSchema = createInsertSchema(verificationLogs).omit({
+  id: true,
+});
+
+// Verification system types
+export type CertificateVerification = typeof certificateVerifications.$inferSelect;
+export type UserVerification = typeof userVerifications.$inferSelect;
+export type TrackingEvent = typeof trackingEvents.$inferSelect;
+export type VerificationLog = typeof verificationLogs.$inferSelect;
+
+export type InsertCertificateVerification = z.infer<typeof insertCertificateVerificationSchema>;
+export type InsertUserVerification = z.infer<typeof insertUserVerificationSchema>;
+export type InsertTrackingEvent = z.infer<typeof insertTrackingEventSchema>;
+export type InsertVerificationLog = z.infer<typeof insertVerificationLogSchema>;
 
 export type InsertAuthUser = z.infer<typeof insertAuthUserSchema>;
 export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;

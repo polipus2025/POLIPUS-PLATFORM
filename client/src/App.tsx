@@ -41,6 +41,7 @@ import FarmerDashboard from "@/pages/farmer-dashboard";
 import Messaging from "@/pages/messaging";
 import LoginTest from "@/pages/login-test";
 import ExportPermitSubmission from "@/pages/export-permit-submission";
+import RealTimeVerificationDashboard from "@/pages/verification-dashboard";
 
 import NotFound from "@/pages/not-found";
 
@@ -208,6 +209,12 @@ function Router() {
           
           {/* Document Verification - Available to all */}
           <Route path="/verification" component={Verification} />
+          <Route path="/verification-dashboard">
+            <ProtectedRoute 
+              component={RealTimeVerificationDashboard} 
+              allowedUserTypes={['regulatory', 'field_agent']} 
+            />
+          </Route>
           
           {/* Offline Sync - Available to all authenticated users */}
           <Route path="/offline-sync" component={OfflineSync} />

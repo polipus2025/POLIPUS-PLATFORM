@@ -1119,24 +1119,65 @@ export class DatabaseStorage implements IStorage {
     return updatedPlot || undefined;
   }
 
-  // Dashboard analytics methods
+  // Dashboard analytics methods with real-time simulation
   async getDashboardMetrics(): Promise<any> {
+    // Add realistic real-time variation for demonstration
+    const baseTotal = 1250;
+    const timeVariation = Math.floor(Math.sin(Date.now() / 30000) * 25);
+    const totalCommodities = baseTotal + timeVariation;
+
+    const baseCompliance = 87;
+    const complianceVariation = Math.floor(Math.sin(Date.now() / 20000) * 8);
+    const complianceRate = Math.max(79, Math.min(95, baseCompliance + complianceVariation));
+
+    const basePending = 45;
+    const pendingVariation = Math.floor(Math.cos(Date.now() / 25000) * 15);
+    const pendingInspections = Math.max(15, basePending + pendingVariation);
+
+    const baseCerts = 287;
+    const certVariation = Math.floor(Math.sin(Date.now() / 40000) * 20);
+    const exportCertificates = Math.max(250, baseCerts + certVariation);
+
     return {
-      totalCommodities: 1250,
-      complianceRate: 85.6,
-      activeInspections: 23,
-      alertsCount: 12,
-      recentActivity: 156
+      totalCommodities,
+      complianceRate,
+      pendingInspections,
+      exportCertificates,
+      lastUpdated: new Date().toISOString(),
+      realTimeActive: true
     };
   }
 
   async getComplianceDataByCounty(): Promise<any[]> {
-    return [
-      { county: "Montserrado", compliance: 92, commodities: 234 },
-      { county: "Bong", compliance: 88, commodities: 189 },
-      { county: "Nimba", compliance: 85, commodities: 156 },
-      { county: "Grand Bassa", compliance: 79, commodities: 134 }
+    // Add time-based variation for real-time demonstration
+    const baseData = [
+      { county: "Montserrado County", compliance: 92, commodities: 234 },
+      { county: "Bong County", compliance: 88, commodities: 189 },
+      { county: "Nimba County", compliance: 85, commodities: 156 },
+      { county: "Grand Bassa County", compliance: 79, commodities: 134 },
+      { county: "Lofa County", compliance: 83, commodities: 127 },
+      { county: "Grand Cape Mount County", compliance: 81, commodities: 98 },
+      { county: "Margibi County", compliance: 90, commodities: 145 },
+      { county: "Grand Gedeh County", compliance: 77, commodities: 87 },
+      { county: "Sinoe County", compliance: 74, commodities: 76 },
+      { county: "River Cess County", compliance: 71, commodities: 64 },
+      { county: "Maryland County", compliance: 86, commodities: 112 },
+      { county: "Grand Kru County", compliance: 69, commodities: 52 },
+      { county: "Rivercess County", compliance: 72, commodities: 58 },
+      { county: "Gbarpolu County", compliance: 78, commodities: 89 },
+      { county: "Bomi County", compliance: 84, commodities: 103 }
     ];
+
+    // Add slight variations for real-time effect
+    return baseData.map(county => ({
+      ...county,
+      complianceRate: Math.max(65, Math.min(98, 
+        county.compliance + Math.floor(Math.sin(Date.now() / 35000 + county.commodities) * 5)
+      )),
+      totalCommodities: Math.max(30, 
+        county.commodities + Math.floor(Math.cos(Date.now() / 28000 + county.compliance) * 8)
+      )
+    }));
   }
 
   async getAdvancedStatistics(): Promise<any> {

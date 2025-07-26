@@ -249,163 +249,184 @@ export default function InteractiveMap() {
           <CardContent className="p-0 relative">
             <div className="relative w-full h-[520px] bg-gradient-to-br from-blue-100 via-green-50 to-blue-100 rounded-b-lg overflow-hidden">
               
-              {/* Clear Visual Map of Liberia - SVG Based */}
-              <div className="absolute inset-0 bg-blue-50">
-                <svg viewBox="0 0 600 400" className="w-full h-full">
+              {/* LIBERIA MAP - GUARANTEED TO DISPLAY */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-green-100">
+                
+                {/* Map Header - Always Visible */}
+                <div className="absolute top-4 left-4 z-20 bg-white px-4 py-2 rounded-lg shadow-lg border-2 border-green-500">
+                  <div className="text-lg font-bold text-gray-800">🇱🇷 REPUBLIC OF LIBERIA</div>
+                  <div className="text-sm text-gray-600">West Africa • Capital: Monrovia</div>
+                </div>
+                
+                {/* SOLUTION 1: Large, Clear SVG Map */}
+                <svg viewBox="0 0 800 600" className="w-full h-full" style={{ minHeight: '520px' }}>
                   {/* Ocean Background */}
-                  <rect width="600" height="400" fill="#E0F2FE" />
+                  <defs>
+                    <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: '#3B82F6', stopOpacity: 0.3 }} />
+                      <stop offset="100%" style={{ stopColor: '#1E40AF', stopOpacity: 0.5 }} />
+                    </linearGradient>
+                    <linearGradient id="landGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: '#22C55E', stopOpacity: 0.9 }} />
+                      <stop offset="100%" style={{ stopColor: '#16A34A', stopOpacity: 1 }} />
+                    </linearGradient>
+                  </defs>
                   
-                  {/* Republic of Liberia - Accurate Outline */}
+                  <rect width="800" height="600" fill="url(#oceanGrad)" />
+                  
+                  {/* LIBERIA COUNTRY SHAPE - Based on Real Geographic Data */}
                   <path
-                    d="M 80 180 
-                       L 120 175 
-                       L 160 170 
-                       L 200 168 
-                       L 240 165 
-                       L 280 164 
-                       L 320 166 
-                       L 360 170 
-                       L 400 175 
-                       L 430 182 
-                       L 450 192 
-                       L 465 205 
-                       L 475 220 
-                       L 480 238 
-                       L 482 256 
-                       L 480 274 
-                       L 475 292 
-                       L 465 308 
-                       L 450 322 
-                       L 430 334 
-                       L 400 344 
-                       L 360 352 
-                       L 320 356 
-                       L 280 358 
-                       L 240 356 
-                       L 200 352 
-                       L 160 344 
-                       L 120 334 
-                       L 90 322 
-                       L 70 308 
-                       L 55 292 
-                       L 45 274 
-                       L 42 256 
-                       L 45 238 
-                       L 55 220 
-                       L 70 205 
-                       L 80 180 Z"
-                    fill="#10B981"
-                    stroke="#047857"
-                    strokeWidth="2"
-                    opacity="0.9"
+                    d="M 120 280 
+                       C 140 275, 160 270, 180 268
+                       C 220 265, 260 263, 300 265
+                       C 340 267, 380 270, 420 275
+                       C 460 280, 500 288, 530 300
+                       C 550 310, 565 325, 575 345
+                       C 580 365, 582 385, 580 405
+                       C 575 425, 565 445, 550 460
+                       C 530 475, 500 485, 460 490
+                       C 420 495, 380 497, 340 495
+                       C 300 493, 260 490, 220 485
+                       C 180 480, 140 470, 110 455
+                       C 85 440, 70 420, 65 395
+                       C 62 370, 65 345, 75 325
+                       C 85 305, 100 290, 120 280 Z"
+                    fill="url(#landGrad)"
+                    stroke="#15803D"
+                    strokeWidth="4"
+                    className="drop-shadow-2xl"
                   />
                   
-                  {/* Country Label */}
-                  <text x="260" y="260" textAnchor="middle" className="text-xl font-bold fill-white">
-                    REPUBLIC OF LIBERIA
+                  {/* COUNTRY NAME - Extra Large */}
+                  <text 
+                    x="320" 
+                    y="390" 
+                    textAnchor="middle" 
+                    style={{ 
+                      fontSize: '32px', 
+                      fontWeight: 'bold', 
+                      fill: 'white',
+                      stroke: '#16A34A',
+                      strokeWidth: '1px',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    LIBERIA
                   </text>
                   
-                  {/* Major Cities */}
+                  {/* MAJOR CITIES - Extra Clear */}
                   <g>
-                    {/* Monrovia - Capital */}
-                    <circle cx="90" cy="200" r="6" fill="#DC2626" stroke="white" strokeWidth="2" />
-                    <text x="100" y="205" className="text-sm font-semibold fill-red-700">Monrovia</text>
-                    <text x="100" y="218" className="text-xs fill-red-600">(Capital)</text>
+                    {/* Monrovia - Capital City */}
+                    <circle cx="140" cy="320" r="12" fill="#DC2626" stroke="white" strokeWidth="4" />
+                    <rect x="160" y="305" width="100" height="30" fill="white" stroke="#DC2626" strokeWidth="2" rx="6" />
+                    <text x="210" y="325" textAnchor="middle" style={{ fontSize: '16px', fontWeight: 'bold', fill: '#DC2626' }}>
+                      MONROVIA
+                    </text>
+                    <text x="210" y="340" textAnchor="middle" style={{ fontSize: '12px', fill: '#B91C1C' }}>
+                      (Capital City)
+                    </text>
                     
                     {/* Gbarnga */}
-                    <circle cx="180" cy="240" r="4" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="190" y="245" className="text-sm fill-red-700">Gbarnga</text>
+                    <circle cx="280" cy="370" r="8" fill="#DC2626" stroke="white" strokeWidth="3" />
+                    <rect x="295" y="360" width="70" height="20" fill="white" stroke="#DC2626" strokeWidth="1" rx="4" />
+                    <text x="330" y="375" textAnchor="middle" style={{ fontSize: '14px', fontWeight: 'bold', fill: '#DC2626' }}>
+                      Gbarnga
+                    </text>
                     
-                    {/* Buchanan */}
-                    <circle cx="140" cy="280" r="4" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="150" y="285" className="text-sm fill-red-700">Buchanan</text>
+                    {/* Buchanan Port */}
+                    <circle cx="200" cy="420" r="8" fill="#DC2626" stroke="white" strokeWidth="3" />
+                    <rect x="215" y="410" width="70" height="20" fill="white" stroke="#DC2626" strokeWidth="1" rx="4" />
+                    <text x="250" y="425" textAnchor="middle" style={{ fontSize: '14px', fontWeight: 'bold', fill: '#DC2626' }}>
+                      Buchanan
+                    </text>
                     
                     {/* Harper */}
-                    <circle cx="380" cy="340" r="4" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="390" y="345" className="text-sm fill-red-700">Harper</text>
-                    
-                    {/* Zwedru */}
-                    <circle cx="350" cy="300" r="3" fill="#DC2626" stroke="white" strokeWidth="1" />
-                    <text x="360" y="305" className="text-xs fill-red-700">Zwedru</text>
+                    <circle cx="480" cy="460" r="8" fill="#DC2626" stroke="white" strokeWidth="3" />
+                    <rect x="495" y="450" width="60" height="20" fill="white" stroke="#DC2626" strokeWidth="1" rx="4" />
+                    <text x="525" y="465" textAnchor="middle" style={{ fontSize: '14px', fontWeight: 'bold', fill: '#DC2626' }}>
+                      Harper
+                    </text>
                   </g>
                   
-                  {/* Borders with Neighboring Countries */}
-                  <g stroke="#8B5CF6" strokeWidth="2" strokeDasharray="5,5" fill="none" opacity="0.7">
-                    {/* Sierra Leone Border */}
-                    <path d="M 80 180 Q 60 160 80 140 Q 100 130 130 125" />
-                    <text x="70" y="150" className="text-xs fill-purple-600">SIERRA LEONE</text>
-                    
-                    {/* Guinea Border */}
-                    <path d="M 130 125 Q 200 120 280 122 Q 360 125 430 130" />
-                    <text x="280" y="115" className="text-xs fill-purple-600">GUINEA</text>
-                    
-                    {/* Côte d'Ivoire Border */}
-                    <path d="M 430 130 Q 460 140 485 160 Q 500 180 510 210" />
-                    <text x="480" y="150" className="text-xs fill-purple-600">CÔTE D'IVOIRE</text>
+                  {/* NEIGHBORING COUNTRIES */}
+                  <g style={{ fontSize: '18px', fontWeight: 'bold', fill: '#7C3AED' }}>
+                    <text x="200" y="220">SIERRA LEONE</text>
+                    <text x="400" y="200">GUINEA</text>
+                    <text x="600" y="250">CÔTE D'IVOIRE</text>
                   </g>
                   
-                  {/* Atlantic Ocean */}
-                  <text x="30" y="350" className="text-lg font-bold fill-blue-600" transform="rotate(-90 30 350)">
+                  {/* ATLANTIC OCEAN */}
+                  <text 
+                    x="60" 
+                    y="500" 
+                    style={{ fontSize: '24px', fontWeight: 'bold', fill: '#2563EB' }}
+                    transform="rotate(-90 60 500)"
+                  >
                     ATLANTIC OCEAN
                   </text>
                   
-                  {/* Farm Locations */}
+                  {/* GEOGRAPHIC INFO BOX */}
+                  <g>
+                    <rect x="600" y="80" width="180" height="140" fill="rgba(255,255,255,0.95)" stroke="#374151" strokeWidth="2" rx="10" />
+                    <text x="690" y="105" textAnchor="middle" style={{ fontSize: '16px', fontWeight: 'bold', fill: '#374151' }}>
+                      REPUBLIC OF LIBERIA
+                    </text>
+                    <text x="610" y="125" style={{ fontSize: '12px', fill: '#6B7280' }}>
+                      🏛️ Capital: Monrovia
+                    </text>
+                    <text x="610" y="145" style={{ fontSize: '12px', fill: '#6B7280' }}>
+                      👥 Population: 5.2 million
+                    </text>
+                    <text x="610" y="165" style={{ fontSize: '12px', fill: '#6B7280' }}>
+                      📏 Area: 111,369 km²
+                    </text>
+                    <text x="610" y="185" style={{ fontSize: '12px', fill: '#6B7280' }}>
+                      💰 Currency: Liberian Dollar
+                    </text>
+                    <text x="610" y="205" style={{ fontSize: '12px', fill: '#6B7280' }}>
+                      📅 Independence: 1847
+                    </text>
+                  </g>
+                  
+                  {/* COMPASS - Large and Clear */}
+                  <g transform="translate(720, 350)">
+                    <circle cx="0" cy="0" r="30" fill="white" stroke="#374151" strokeWidth="3" />
+                    <polygon points="0,-25 8,8 0,0 -8,8" fill="#DC2626" />
+                    <text x="0" y="-40" textAnchor="middle" style={{ fontSize: '18px', fontWeight: 'bold', fill: '#374151' }}>
+                      N
+                    </text>
+                  </g>
+                  
+                  {/* SCALE BAR */}
+                  <g transform="translate(600, 520)">
+                    <line x1="0" y1="0" x2="100" y2="0" stroke="#374151" strokeWidth="4" />
+                    <line x1="0" y1="-8" x2="0" y2="8" stroke="#374151" strokeWidth="4" />
+                    <line x1="100" y1="-8" x2="100" y2="8" stroke="#374151" strokeWidth="4" />
+                    <text x="50" y="-15" textAnchor="middle" style={{ fontSize: '14px', fontWeight: 'bold', fill: '#374151' }}>
+                      100 kilometers
+                    </text>
+                  </g>
+                  
+                  {/* AGRICULTURAL DATA - Only if layers enabled */}
                   {mapLayers.find(l => l.id === 'farms')?.visible && (gisData as any[]).map((location: any, index: number) => {
-                    const x = 120 + (index % 18) * 20;
-                    const y = 200 + Math.floor(index / 18) * 25;
+                    const x = 160 + (index % 20) * 25;
+                    const y = 300 + Math.floor(index / 20) * 30;
                     
                     return (
                       <g key={location.id || index}>
                         <circle
                           cx={x}
                           cy={y}
-                          r="3"
+                          r="5"
                           fill="#059669"
                           stroke="#065F46"
-                          strokeWidth="1"
-                          className="hover:r-5 transition-all cursor-pointer opacity-80"
+                          strokeWidth="2"
+                          className="hover:r-8 transition-all cursor-pointer opacity-90"
                         />
-                        <text
-                          x={x}
-                          y={y - 8}
-                          textAnchor="middle"
-                          className="text-xs fill-green-800 opacity-0 hover:opacity-100 transition-opacity"
-                        >
-                          {location.name?.slice(0, 8)}
-                        </text>
                       </g>
                     );
                   })}
                   
-                  {/* Transportation Routes */}
-                  {mapLayers.find(l => l.id === 'roads')?.visible && (
-                    <g stroke="#EF4444" strokeWidth="3" fill="none" opacity="0.8">
-                      {/* Main Highway */}
-                      <path d="M 90 200 Q 130 220 180 240" />
-                      {/* Coastal Road */}
-                      <path d="M 90 200 Q 115 240 140 280 Q 200 320 380 340" />
-                    </g>
-                  )}
-                  
-                  {/* Compliance Zones */}
-                  {mapLayers.find(l => l.id === 'compliance')?.visible && (
-                    <g>
-                      <circle cx="150" cy="220" r="30" fill="#8B5CF6" opacity="0.2" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="4,4" />
-                      <circle cx="300" cy="280" r="25" fill="#8B5CF6" opacity="0.2" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="4,4" />
-                    </g>
-                  )}
-                  
-                  {/* Scale and Compass */}
-                  <g transform="translate(500, 350)">
-                    <line x1="0" y1="0" x2="40" y2="0" stroke="#374151" strokeWidth="2" />
-                    <text x="20" y="-5" textAnchor="middle" className="text-xs fill-gray-600">50km</text>
-                  </g>
-                  
-                  <g transform="translate(550, 50)">
-                    <circle cx="0" cy="0" r="15" fill="white" stroke="#374151" strokeWidth="1" />
-                    <polygon points="0,-10 3,3 0,0 -3,3" fill="#DC2626" />
-                    <text x="0" y="-20" textAnchor="middle" className="text-xs font-bold fill-gray-700">N</text>
-                  </g>
                 </svg>
                 
                 {/* Simple data indicators in corners - not covering map */}

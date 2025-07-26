@@ -15,7 +15,9 @@ export default function SystemAlerts() {
 
   const markAsReadMutation = useMutation({
     mutationFn: (alertId: number) =>
-      apiRequest("PUT", `/api/alerts/${alertId}/read`),
+      apiRequest(`/api/alerts/${alertId}/read`, {
+        method: "PUT"
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/alerts"] });
     },

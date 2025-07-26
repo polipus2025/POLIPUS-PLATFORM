@@ -1468,6 +1468,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate sample alert data for real-time simulation
+  app.post("/api/alerts/generate-sample", async (req, res) => {
+    try {
+      const sampleAlerts = [
+        {
+          type: "warning",
+          title: "EUDR Compliance Deadline Approaching",
+          message: "5 export shipments require EUDR documentation within 72 hours. Action needed for Coffee exports to EU.",
+          priority: "high",
+          source: "eudr_monitor",
+          isRead: false
+        },
+        {
+          type: "error", 
+          title: "Quality Inspection Failed",
+          message: "Batch COF-2025-0158 from Lofa County failed Grade A quality standards. Mycotoxin levels exceed EU limits.",
+          priority: "critical",
+          source: "quality_control",
+          isRead: false
+        },
+        {
+          type: "success",
+          title: "Export Certificate Issued",
+          message: "Certificate EXP-2025-0089 successfully issued for Organic Cocoa shipment to Netherlands (15.2 MT).",
+          priority: "normal",
+          source: "certification",
+          isRead: false
+        },
+        {
+          type: "warning",
+          title: "GPS Tracking Signal Lost",
+          message: "Vehicle LR-TRK-045 transporting coffee from Nimba County has lost GPS signal. Last location: Ganta-Monrovia Highway.",
+          priority: "high", 
+          source: "gps_tracking",
+          isRead: false
+        },
+        {
+          type: "error",
+          title: "Deforestation Alert",
+          message: "Satellite monitoring detected potential deforestation in protected area near Grand Gedeh County farm plots.",
+          priority: "critical",
+          source: "satellite_monitor",
+          isRead: false
+        },
+        {
+          type: "warning",
+          title: "Field Agent Request Pending",
+          message: "Sarah Konneh (Lofa County) submitted urgent farmer registration request requiring director approval.",
+          priority: "high",
+          source: "mobile_app",
+          isRead: false
+        }
+      ];
+
+      const createdAlerts = [];
+      for (const alertData of sampleAlerts) {
+        const alert = await storage.createAlert(alertData);
+        createdAlerts.push(alert);
+      }
+
+      res.status(201).json({
+        message: `Generated ${createdAlerts.length} sample alerts for real-time dashboard simulation`,
+        alerts: createdAlerts
+      });
+    } catch (error) {
+      console.error('Error generating sample alerts:', error);
+      res.status(500).json({ message: "Failed to generate sample alerts" });
+    }
+  });
+
   // Report routes
   app.get("/api/reports", async (req, res) => {
     try {

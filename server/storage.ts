@@ -535,7 +535,7 @@ export class DatabaseStorage implements IStorage {
 
   // Crop planning methods
   async getCropPlansByFarmer(farmerId: string): Promise<CropPlan[]> {
-    return await db.select().from(cropPlanning).where(eq(cropPlanning.farmerId, farmerId));
+    return await db.select().from(cropPlanning).where(eq(cropPlanning.farmerId, parseInt(farmerId)));
   }
 
   async getCropPlansBySeason(season: string): Promise<CropPlan[]> {
@@ -553,15 +553,15 @@ export class DatabaseStorage implements IStorage {
 
   // Government integration methods
   async getLraIntegrationsByStatus(status: string): Promise<LraIntegration[]> {
-    return await db.select().from(lraIntegration).where(eq(lraIntegration.status, status));
+    return await db.select().from(lraIntegration).where(eq(lraIntegration.syncStatus, status));
   }
 
   async getMoaIntegrationsByStatus(status: string): Promise<MoaIntegration[]> {
-    return await db.select().from(moaIntegration).where(eq(moaIntegration.status, status));
+    return await db.select().from(moaIntegration).where(eq(moaIntegration.syncStatus, status));
   }
 
   async getCustomsIntegrationsByStatus(status: string): Promise<CustomsIntegration[]> {
-    return await db.select().from(customsIntegration).where(eq(customsIntegration.status, status));
+    return await db.select().from(customsIntegration).where(eq(customsIntegration.syncStatus, status));
   }
 
   async createLraIntegration(integration: InsertLraIntegration): Promise<LraIntegration> {
@@ -581,7 +581,7 @@ export class DatabaseStorage implements IStorage {
 
   // Sync operations
   async getGovernmentSyncLogsByEntity(entity: string): Promise<GovernmentSyncLog[]> {
-    return await db.select().from(governmentSyncLog).where(eq(governmentSyncLog.entity, entity));
+    return await db.select().from(governmentSyncLog).where(eq(governmentSyncLog.entityId, entity));
   }
 
   async getGovernmentSyncLogsByType(type: string): Promise<GovernmentSyncLog[]> {
@@ -613,7 +613,7 @@ export class DatabaseStorage implements IStorage {
 
   // Analytics methods
   async getAnalyticsData(): Promise<AnalyticsData[]> {
-    return await db.select().from(analyticsData).orderBy(desc(analyticsData.createdAt));
+    return await db.select().from(analyticsData).orderBy(desc(analyticsData.generatedAt));
   }
 
   async createAnalyticsData(data: InsertAnalyticsData): Promise<AnalyticsData> {
@@ -661,7 +661,7 @@ export class DatabaseStorage implements IStorage {
 
   // Audit methods
   async getAuditLogs(): Promise<AuditLog[]> {
-    return await db.select().from(auditLogs).orderBy(desc(auditLogs.timestamp));
+    return await db.select().from(auditLogs).orderBy(desc(auditLogs.auditTimestamp));
   }
 
   async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
@@ -689,7 +689,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAuditReports(): Promise<AuditReport[]> {
-    return await db.select().from(auditReports).orderBy(desc(auditReports.createdAt));
+    return await db.select().from(auditReports).orderBy(desc(auditReports.generatedAt));
   }
 
   async getAuditReport(id: number): Promise<AuditReport | undefined> {
@@ -775,7 +775,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getInternationalStandardsByOrganization(organization: string): Promise<InternationalStandard[]> {
-    return await db.select().from(internationalStandards).where(eq(internationalStandards.organization, organization));
+    return await db.select().from(internationalStandards).where(eq(internationalStandards.organizationName, organization));
   }
 
   async getInternationalStandard(id: number): Promise<InternationalStandard | undefined> {
@@ -817,7 +817,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getStandardsSyncLogsByIntegration(integrationId: number): Promise<StandardsSyncLog[]> {
-    return await db.select().from(standardsSyncLog).where(eq(standardsSyncLog.integrationId, integrationId));
+    return await db.select().from(standardsSyncLog).where(eq(standardsSyncLog.apiIntegrationId, integrationId));
   }
 
   async createStandardsSyncLog(log: InsertStandardsSyncLog): Promise<StandardsSyncLog> {
@@ -831,7 +831,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTrackingRecordsByFarmer(farmerId: string): Promise<TrackingRecord[]> {
-    return await db.select().from(trackingRecords).where(eq(trackingRecords.farmerId, farmerId));
+    return await db.select().from(trackingRecords).where(eq(trackingRecords.farmerId, parseInt(farmerId)));
   }
 
   async getTrackingRecord(id: number): Promise<TrackingRecord | undefined> {
@@ -846,7 +846,7 @@ export class DatabaseStorage implements IStorage {
 
   async verifyTrackingRecord(id: number): Promise<TrackingRecord> {
     const [verifiedRecord] = await db.update(trackingRecords)
-      .set({ isVerified: true, verifiedAt: new Date() })
+      .set({ verificationStatus: 'verified', verifiedAt: new Date() })
       .where(eq(trackingRecords.id, id))
       .returning();
     return verifiedRecord;
@@ -1005,7 +1005,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCommodity(id: number): Promise<boolean> {
     const result = await db.delete(commodities).where(eq(commodities.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Inspection methods
@@ -1082,7 +1082,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAlert(id: number): Promise<boolean> {
     const result = await db.delete(alerts).where(eq(alerts.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Report methods
@@ -1405,7 +1405,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMessage(messageId: string): Promise<boolean> {
     const result = await db.delete(internalMessages).where(eq(internalMessages.messageId, messageId));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async replyToMessage(parentMessageId: string, reply: InsertInternalMessage): Promise<InternalMessage> {

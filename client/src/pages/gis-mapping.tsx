@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import InteractiveMap from '@/components/gis/interactive-map';
 import SimpleLiberiaMap from '@/components/gis/simple-liberia-map';
+import LiberiaGeographicMap from '@/components/gis/liberia-geographic-map';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
 import { 
@@ -769,13 +770,17 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Primary Map Display - Guaranteed to Work */}
+          <LiberiaGeographicMap />
+          
+          {/* Alternative Views */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <InteractiveMap />
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
-                  Alternative Liberia Map
+                  SVG Technical Map
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
@@ -783,48 +788,6 @@ export default function GISMapping() {
               </CardContent>
             </Card>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Real Map Integration
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">OpenStreetMap</h4>
-                  <iframe
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=-11.31,4.21,-7.27,8.34&layer=mapnik"
-                    width="100%"
-                    height="200"
-                    style={{ border: 'none' }}
-                    title="Liberia - OpenStreetMap"
-                  ></iframe>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">Bing Maps</h4>
-                  <iframe
-                    src="https://www.bing.com/maps/embed?h=200&w=100%&cp=6.428~-9.430&lvl=7&typ=d&sty=r&src=SHELL&FORM=MBEDV8"
-                    width="100%"
-                    height="200"
-                    style={{ border: 'none' }}
-                    title="Liberia - Bing Maps"
-                  ></iframe>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">Geographic Info</h4>
-                  <div className="text-sm space-y-2">
-                    <div><strong>Coordinates:</strong> 6.428°N, 9.430°W</div>
-                    <div><strong>Area:</strong> 111,369 km²</div>
-                    <div><strong>Capital:</strong> Monrovia</div>
-                    <div><strong>Neighbors:</strong> Sierra Leone, Guinea, Côte d'Ivoire</div>
-                    <div><strong>Coastline:</strong> 680 km Atlantic Ocean</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="farm-plots" className="space-y-0">

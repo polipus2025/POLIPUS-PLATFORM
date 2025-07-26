@@ -249,87 +249,81 @@ export default function InteractiveMap() {
           <CardContent className="p-0 relative">
             <div className="relative w-full h-[520px] bg-gradient-to-br from-blue-100 via-green-50 to-blue-100 rounded-b-lg overflow-hidden">
               
-              {/* Real Map Container using multiple map sources */}
-              <div className="absolute inset-0">
-                {/* Primary: Google Maps for Liberia */}
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2027736.4851769547!2d-11.202491656250002!3d6.428055699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xf0106183aabf343%3A0x5369e9cdc72cf719!2sLiberia!5e0!3m2!1sen!2s!4v1643723456789!5m2!1sen!2s"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none' }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Liberia Map - Real Geographic Data"
-                  className="rounded-b-lg"
-                  onError={(e) => {
-                    // Fallback to alternative map service if Google Maps fails
-                    console.log('Primary map failed, loading alternative...');
-                    (e.target as HTMLIFrameElement).src = 'https://maps.openrouteservice.org/embed?bbox=-11.7,4.0,-7.0,8.8&layer=osm&marker=6.4281,-9.4295';
-                  }}
-                ></iframe>
+              {/* Map Display with Multiple Options */}
+              <div className="absolute inset-0 bg-white">
+                {/* Map Header */}
+                <div className="absolute top-2 left-2 bg-white/95 px-3 py-2 rounded-lg shadow-sm z-10 text-sm font-medium">
+                  Republic of Liberia - Agricultural GIS Map
+                </div>
                 
-                {/* Map overlay with agricultural data points */}
-                <div className="absolute inset-0 pointer-events-none">
-                  <svg viewBox="0 0 100 100" className="w-full h-full">
-                    {/* Agricultural zones overlay on real map */}
-                    {mapLayers.find(l => l.id === 'farms')?.visible && (gisData as any[]).map((location: any, index: number) => {
-                      // Convert to percentage positions for overlay on real map
-                      const x = 15 + (index % 15) * 5; // Spread across Liberia's width
-                      const y = 25 + Math.floor(index / 15) * 8; // Spread across Liberia's height
-                      
-                      return (
-                        <g key={location.id || index} className="pointer-events-auto">
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r="1.5"
-                            fill="#10B981"
-                            stroke="#065F46"
-                            strokeWidth="0.3"
-                            className="hover:r-2 transition-all cursor-pointer opacity-80"
-                          />
-                          <text
-                            x={x}
-                            y={y - 2}
-                            fill="#065F46"
-                            fontSize="2"
-                            textAnchor="middle"
-                            className="opacity-0 hover:opacity-100 transition-opacity"
-                          >
-                            {location.name?.slice(0, 8)}
-                          </text>
-                        </g>
-                      );
-                    })}
-                    
-                    {/* Compliance zones overlay */}
-                    {mapLayers.find(l => l.id === 'compliance')?.visible && (
-                      <g className="pointer-events-none">
-                        {/* Monrovia region */}
-                        <circle cx="20" cy="45" r="8" fill="#8B5CF6" opacity="0.2" 
-                                stroke="#8B5CF6" strokeWidth="0.5" strokeDasharray="1,1" />
-                        {/* Gbarnga region */}
-                        <circle cx="35" cy="55" r="7" fill="#8B5CF6" opacity="0.2" 
-                                stroke="#8B5CF6" strokeWidth="0.5" strokeDasharray="1,1" />
-                        {/* Zwedru region */}
-                        <circle cx="65" cy="60" r="6" fill="#8B5CF6" opacity="0.2" 
-                                stroke="#8B5CF6" strokeWidth="0.5" strokeDasharray="1,1" />
-                      </g>
-                    )}
-                    
-                    {/* Transportation routes overlay */}
-                    {mapLayers.find(l => l.id === 'roads')?.visible && (
-                      <g className="pointer-events-none">
-                        {/* Main highway Monrovia-Gbarnga */}
-                        <path d="M20 45 Q27 50, 35 55" 
-                              stroke="#EF4444" strokeWidth="1" fill="none" opacity="0.8" />
-                        {/* Coastal route */}
-                        <path d="M20 45 Q30 65, 50 75 Q70 80, 85 78" 
-                              stroke="#EF4444" strokeWidth="0.8" fill="none" opacity="0.7" strokeDasharray="2,1" />
-                      </g>
-                    )}
-                  </svg>
+                {/* Try multiple map sources */}
+                <div className="w-full h-full">
+                  {/* Option 1: Bing Maps (often more reliable) */}
+                  <iframe
+                    src="https://www.bing.com/maps/embed?h=520&w=100%&cp=6.428~-9.429&lvl=7&typ=d&sty=r&src=SHELL&FORM=MBEDV8"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 'none' }}
+                    title="Liberia Map"
+                    className="rounded-b-lg"
+                    onError={(e) => {
+                      console.log('Bing Maps failed, trying OpenStreetMap...');
+                      (e.target as HTMLIFrameElement).style.display = 'none';
+                      const backup = document.getElementById('osm-backup');
+                      if (backup) backup.style.display = 'block';
+                    }}
+                  ></iframe>
+                  
+                  {/* Backup Option 2: OpenStreetMap */}
+                  <iframe
+                    id="osm-backup"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=-11.5,4.0,-7.5,8.5&layer=mapnik"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 'none', display: 'none' }}
+                    title="Liberia Map - OpenStreetMap"
+                    className="rounded-b-lg"
+                    onError={(e) => {
+                      console.log('OpenStreetMap also failed, showing fallback...');
+                      (e.target as HTMLIFrameElement).style.display = 'none';
+                      const fallback = document.getElementById('map-fallback');
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  ></iframe>
+                  
+                  {/* Final Fallback: Static representation */}
+                  <div id="map-fallback" className="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50 hidden">
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center p-8">
+                        <div className="text-6xl mb-4">🗺️</div>
+                        <div className="text-xl font-bold text-gray-700 mb-2">Republic of Liberia</div>
+                        <div className="text-sm text-gray-600 mb-4">West African Geographic Region</div>
+                        <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
+                          <div>Capital: Monrovia</div>
+                          <div>Coordinates: 6.4°N, 9.4°W</div>
+                          <div>Counties: 15</div>
+                          <div>Area: 111,369 km²</div>
+                        </div>
+                        <div className="mt-4 text-xs text-gray-400">
+                          Geographic map data temporarily unavailable
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Simple data indicators in corners - not covering map */}
+                <div className="absolute bottom-2 left-2 bg-green-100/95 px-3 py-2 rounded-lg shadow-sm text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span>{(gisData as any[]).length} Farm Locations</span>
+                  </div>
+                </div>
+                
+                <div className="absolute bottom-2 right-2 bg-blue-100/95 px-3 py-2 rounded-lg shadow-sm text-sm">
+                  <div className="text-gray-600">
+                    Center: Monrovia, Liberia
+                  </div>
                 </div>
               </div>
 

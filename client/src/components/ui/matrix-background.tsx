@@ -27,7 +27,7 @@ export default function MatrixBackground({ children }: MatrixBackgroundProps) {
     const chars = '0123456789010101001100110101010011001101010100110011010101001100110101';
     const charArray = chars.split('');
 
-    const fontSize = 14;
+    const fontSize = 16;
     const columns = Math.floor(canvas.width / fontSize);
     
     // Array to track the y position of each column
@@ -38,14 +38,19 @@ export default function MatrixBackground({ children }: MatrixBackgroundProps) {
       drops[x] = Math.random() * canvas.height;
     }
 
+    // Start animation immediately
+    draw();
+
     const draw = () => {
       // Create trailing effect by drawing a semi-transparent black rectangle
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Set text properties
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; // White color with slight transparency
-      ctx.font = `${fontSize}px 'Courier New', monospace`;
+      // Set text properties - make characters more visible
+      ctx.fillStyle = '#00ff41'; // Bright Matrix green
+      ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+      ctx.shadowColor = '#00ff41';
+      ctx.shadowBlur = 2;
 
       // Draw characters
       for (let i = 0; i < drops.length; i++) {
@@ -56,7 +61,7 @@ export default function MatrixBackground({ children }: MatrixBackgroundProps) {
         ctx.fillText(text, i * fontSize, drops[i]);
 
         // Move the drop down
-        if (drops[i] > canvas.height && Math.random() > 0.975) {
+        if (drops[i] > canvas.height && Math.random() > 0.98) {
           drops[i] = 0;
         }
         drops[i] += fontSize;
@@ -64,7 +69,7 @@ export default function MatrixBackground({ children }: MatrixBackgroundProps) {
     };
 
     // Animation loop
-    const interval = setInterval(draw, 50);
+    const interval = setInterval(draw, 80);
 
     return () => {
       clearInterval(interval);
@@ -78,7 +83,7 @@ export default function MatrixBackground({ children }: MatrixBackgroundProps) {
       <canvas
         ref={canvasRef}
         className="fixed inset-0 z-0 pointer-events-none"
-        style={{ background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)' }}
+        style={{ background: '#000000' }}
       />
       
       {/* Content overlay */}

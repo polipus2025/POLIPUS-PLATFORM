@@ -848,32 +848,122 @@ export default function GISMapping() {
                         <div className="font-bold">Nimba</div>
                         <div className="text-sm">298 farms</div>
                       </div>
-                      <div className="bg-green-200 p-4 rounded cursor-pointer hover:bg-green-300 text-center">
+                      <div 
+                        className="bg-green-200 p-4 rounded cursor-pointer hover:bg-green-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Bong',
+                            farms: 234,
+                            population: '333,000',
+                            area: '8,772 km²',
+                            capital: 'Gbarnga',
+                            commodities: ['Rubber', 'Rice', 'Cassava', 'Sweet potato'],
+                            compliance: 89,
+                            exports: '$1.6M/year',
+                            details: 'Central county with significant rubber plantations and educational institutions including Cuttington University.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Bong</div>
                         <div className="text-sm">234 farms</div>
                       </div>
-                      <div className="bg-purple-200 p-4 rounded cursor-pointer hover:bg-purple-300 text-center">
+                      <div 
+                        className="bg-purple-200 p-4 rounded cursor-pointer hover:bg-purple-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Grand Gedeh',
+                            farms: 156,
+                            population: '125,000',
+                            area: '10,484 km²',
+                            capital: 'Zwedru',
+                            commodities: ['Cocoa', 'Coffee', 'Cassava', 'Timber'],
+                            compliance: 88,
+                            exports: '$1.1M/year',
+                            details: 'Eastern border county known for coffee production and forest resources. Strategic location for cross-border trade.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Grand Gedeh</div>
                         <div className="text-sm">156 farms</div>
                       </div>
-                      <div className="bg-pink-200 p-4 rounded cursor-pointer hover:bg-pink-300 text-center">
+                      <div 
+                        className="bg-pink-200 p-4 rounded cursor-pointer hover:bg-pink-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Grand Bassa',
+                            farms: 198,
+                            population: '224,000',
+                            area: '7,937 km²',
+                            capital: 'Buchanan',
+                            commodities: ['Palm oil', 'Rubber', 'Cocoa', 'Rice'],
+                            compliance: 92,
+                            exports: '$2.1M/year',
+                            details: 'Coastal county with major port facilities and palm oil production. Important export hub for agricultural products.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Grand Bassa</div>
                         <div className="text-sm">198 farms</div>
                       </div>
-                      <div className="bg-indigo-200 p-4 rounded cursor-pointer hover:bg-indigo-300 text-center">
+                      <div 
+                        className="bg-indigo-200 p-4 rounded cursor-pointer hover:bg-indigo-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Sinoe',
+                            farms: 167,
+                            population: '104,000',
+                            area: '10,137 km²',
+                            capital: 'Greenville',
+                            commodities: ['Palm oil', 'Rubber', 'Cocoa', 'Timber'],
+                            compliance: 85,
+                            exports: '$1.2M/year',
+                            details: 'Southeastern coastal county known for palm oil production and timber. Rich biodiversity and forest resources.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Sinoe</div>
                         <div className="text-sm">167 farms</div>
                       </div>
-                      <div className="bg-orange-200 p-4 rounded cursor-pointer hover:bg-orange-300 text-center">
+                      <div 
+                        className="bg-orange-200 p-4 rounded cursor-pointer hover:bg-orange-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Maryland',
+                            farms: 145,
+                            population: '136,000',
+                            area: '2,297 km²',
+                            capital: 'Harper',
+                            commodities: ['Palm oil', 'Cocoa', 'Rubber', 'Rice'],
+                            compliance: 93,
+                            exports: '$1.4M/year',
+                            details: 'Southeastern coastal county with strong palm oil industry and historical significance as early settlement area.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Maryland</div>
                         <div className="text-sm">145 farms</div>
                       </div>
-                      <div className="bg-teal-200 p-4 rounded cursor-pointer hover:bg-teal-300 text-center">
+                      <div 
+                        className="bg-teal-200 p-4 rounded cursor-pointer hover:bg-teal-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Grand Kru',
+                            farms: 134,
+                            population: '57,000',
+                            area: '3,895 km²',
+                            capital: 'Barclayville',
+                            commodities: ['Palm oil', 'Cassava', 'Rice', 'Fishing'],
+                            compliance: 86,
+                            exports: '$0.8M/year',
+                            details: 'Coastal county with fishing industry and palm oil production. Smaller population but important coastal resources.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Grand Kru</div>
                         <div className="text-sm">134 farms</div>

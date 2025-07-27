@@ -305,10 +305,11 @@ export default function FarmPlotMapper({ farmerId, readOnly = false }: FarmPlotM
                         {/* Plot center marker */}
                         {plot.coordinates.length > 0 && (
                           <g>
-                            <circle
-                              cx={(plot.coordinates[0][1] + 9.5) * 50}
-                              cy={(6.5 - plot.coordinates[0][0]) * 60}
-                              r="4"
+                            <rect
+                              x={(plot.coordinates[0][1] + 9.5) * 50 - 2}
+                              y={(6.5 - plot.coordinates[0][0]) * 60 - 2}
+                              width="4"
+                              height="4"
                               fill="#DC2626"
                             />
                             <text
@@ -327,11 +328,12 @@ export default function FarmPlotMapper({ farmerId, readOnly = false }: FarmPlotM
                     
                     {/* Current drawing coordinates */}
                     {coordinates.map((coord, index) => (
-                      <circle
+                      <rect
                         key={index}
-                        cx={(coord[1] + 9.5) * 50}
-                        cy={(6.5 - coord[0]) * 60}
-                        r="3"
+                        x={(coord[1] + 9.5) * 50 - 1.5}
+                        y={(6.5 - coord[0]) * 60 - 1.5}
+                        width="3"
+                        height="3"
                         fill="#EF4444"
                       />
                     ))}

@@ -303,16 +303,16 @@ export default function TransportationTracker() {
                     
                     {/* Major Cities */}
                     <g>
-                      <circle cx="120" cy="240" r="3" fill="#DC2626" />
+                      <rect x="117" y="237" width="6" height="6" fill="#DC2626" />
                       <text x="125" y="235" fontSize="10" fill="#374151" fontWeight="bold">Monrovia</text>
                       
-                      <circle cx="200" cy="200" r="2" fill="#DC2626" />
+                      <rect x="198" y="198" width="4" height="4" fill="#DC2626" />
                       <text x="205" y="195" fontSize="8" fill="#374151">Lofa</text>
                       
-                      <circle cx="350" cy="190" r="2" fill="#DC2626" />
+                      <rect x="348" y="188" width="4" height="4" fill="#DC2626" />
                       <text x="355" y="185" fontSize="8" fill="#374151">Nimba</text>
                       
-                      <circle cx="480" cy="220" r="2" fill="#DC2626" />
+                      <rect x="478" y="218" width="4" height="4" fill="#DC2626" />
                       <text x="485" y="215" fontSize="8" fill="#374151">Gedeh</text>
                     </g>
                   </svg>

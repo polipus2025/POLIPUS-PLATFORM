@@ -22,6 +22,9 @@ import EmergencyLiberiaDisplay from '@/components/gis/emergency-liberia-display'
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
 import FunctionalLiberiaMap from '@/components/gis/functional-liberia-map';
+import AdvancedBoundaryMapper from '@/components/gps/advanced-boundary-mapper';
+import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
+import GPSMapViewer from '@/components/gps/gps-map-viewer';
 import { 
   Map, 
   Navigation, 
@@ -40,7 +43,8 @@ import {
   Globe,
   Zap,
   Eye,
-  FileText
+  FileText,
+  Target
 } from 'lucide-react';
 import { SatelliteImageryService, CropMonitoringService, NASASatelliteService, SATELLITE_PROVIDERS, GPS_SERVICES, NASA_SATELLITES } from "@/lib/satellite-services";
 import GISErrorBoundary from '@/components/gis/error-boundary';
@@ -779,12 +783,101 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* FUNCTIONAL LIBERIA MAP: Real Geographic Data */}
-          <FunctionalLiberiaMap />
+          {/* INTEGRATED MOBILE MAP SYSTEM: Using existing GPS components */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Map className="h-5 w-5" />
+                    Interactive Liberia Map
+                    <Badge variant="outline" className="ml-2">Mobile GPS System</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FunctionalLiberiaMap />
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Satellite className="h-5 w-5" />
+                    Mobile GPS Boundary Mapper
+                    <Badge variant="default" className="ml-2 bg-green-600">Live System</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <AdvancedBoundaryMapper
+                    onBoundaryComplete={(boundary) => {
+                      console.log('Boundary completed:', boundary);
+                      toast({
+                        title: "Farm Boundary Mapped",
+                        description: `Successfully mapped ${boundary.name} with ${boundary.points.length} GPS points`,
+                      });
+                    }}
+                    onPointAdded={(point) => {
+                      console.log('GPS point added:', point);
+                    }}
+                    maxPoints={100}
+                    minAccuracy={10}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value="farm-plots" className="space-y-0">
-          <FarmPlotMapper />
+        <TabsContent value="farm-plots" className="space-y-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Precision Boundary Mapper
+                    <Badge variant="default" className="ml-2 bg-blue-600">Mobile System</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PrecisionBoundaryMapper
+                    onBoundaryComplete={(boundary) => {
+                      console.log('Precision boundary completed:', boundary);
+                      toast({
+                        title: "Precision Mapping Complete",
+                        description: `Mapped ${boundary.name} with ${boundary.area.toFixed(2)} hectares`,
+                      });
+                    }}
+                    onBoundaryUpdate={(boundary) => {
+                      console.log('Boundary updated:', boundary);
+                    }}
+                    requiredAccuracy={5}
+                    minPoints={4}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Map className="h-5 w-5" />
+                    GPS Map Viewer
+                    <Badge variant="outline" className="ml-2">Interactive</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <GPSMapViewer />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          
+          {/* Keep existing farm plot mapper below */}
+          <div className="mt-6">
+            <FarmPlotMapper />
+          </div>
         </TabsContent>
 
         <TabsContent value="transportation" className="space-y-0">

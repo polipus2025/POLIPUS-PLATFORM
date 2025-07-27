@@ -87,6 +87,15 @@ export default function Messaging() {
     }
   });
 
+  // Separate form for replies
+  const replyForm = useForm({
+    defaultValues: {
+      priority: "normal",
+      messageType: "general",
+      content: ""
+    }
+  });
+
   // Reply to message mutation
   const replyMessageMutation = useMutation({
     mutationFn: ({ parentMessageId, replyData }: { parentMessageId: string; replyData: any }) => 
@@ -97,7 +106,7 @@ export default function Messaging() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
       setIsReplying(false);
-      form.reset();
+      replyForm.reset();
       toast({
         title: "Reply Sent",
         description: "Your reply has been sent successfully.",
@@ -227,7 +236,7 @@ export default function Messaging() {
     sendMessageMutation.mutate(messageData);
   };
 
-  const onReply = (data: MessageFormData) => {
+  const onReply = (data: any) => {
     console.log("onReply function called with data:", data);
     if (!selectedMessage) {
       console.log("No selected message found");
@@ -566,14 +575,10 @@ export default function Messaging() {
                           size="sm"
                           onClick={() => {
                             console.log("Reply button clicked for message:", selectedMessage?.messageId);
-                            form.reset({
+                            replyForm.reset({
                               priority: "normal",
                               messageType: "general",
-                              content: "",
-                              recipientType: "",
-                              subject: "",
-                              recipientId: "",
-                              recipientName: ""
+                              content: ""
                             });
                           }}
                         >
@@ -588,11 +593,11 @@ export default function Messaging() {
                             Replying to: {selectedMessage.subject}
                           </DialogDescription>
                         </DialogHeader>
-                        <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onReply)} className="space-y-4">
+                        <Form {...replyForm}>
+                          <form onSubmit={replyForm.handleSubmit(onReply)} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                               <FormField
-                                control={form.control}
+                                control={replyForm.control}
                                 name="priority"
                                 render={({ field }) => (
                                   <FormItem>
@@ -615,7 +620,7 @@ export default function Messaging() {
                                 )}
                               />
                               <FormField
-                                control={form.control}
+                                control={replyForm.control}
                                 name="messageType"
                                 render={({ field }) => (
                                   <FormItem>
@@ -640,7 +645,7 @@ export default function Messaging() {
                               />
                             </div>
                             <FormField
-                              control={form.control}
+                              control={replyForm.control}
                               name="content"
                               render={({ field }) => (
                                 <FormItem>

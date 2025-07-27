@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom blinking notification animation */
+@keyframes blink-red {
+  0%, 50% { 
+    background-color: #ef4444; 
+    box-shadow: 0 0 10px #ef4444; 
+    opacity: 1; 
+  }
+  51%, 100% { 
+    background-color: #dc2626; 
+    box-shadow: 0 0 20px #dc2626; 
+    opacity: 0.6; 
+  }
+}
+
+.blink-red {
+  animation: blink-red 1s infinite;
+}
+
 /* Modern CSS Variables for Advanced Styling */
 :root {
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

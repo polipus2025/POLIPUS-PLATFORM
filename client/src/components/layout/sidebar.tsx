@@ -20,6 +20,9 @@ import {
   MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useState } from "react";
 
 // Helper function to check user role and type
 const getUserInfo = () => {
@@ -106,6 +109,24 @@ const getNavigationItems = (userType: string | null, role: string | null) => {
 export default function Sidebar() {
   const [location] = useLocation();
   const { role, userType } = getUserInfo();
+  
+  // Get current user ID for messaging notifications
+  const [currentUserId] = useState(() => 
+    localStorage.getItem("username") || 
+    localStorage.getItem("agentId") || 
+    localStorage.getItem("farmerId") || 
+    localStorage.getItem("exporterId") || 
+    "admin001"
+  );
+
+  // Fetch unread message count
+  const { data: unreadData } = useQuery({
+    queryKey: ["/api/messages", currentUserId, "unread-count"],
+    queryFn: () => apiRequest(`/api/messages/${currentUserId}/unread-count`),
+    refetchInterval: 5000, // Check every 5 seconds
+  });
+
+  const unreadCount = unreadData?.count || 0;
 
   // Get the appropriate navigation items based on user type
   const navigationItems = getNavigationItems(userType, role);
@@ -127,7 +148,7 @@ export default function Sidebar() {
               return (
                 <li key={item.name}>
                   <Link href={item.href} className={cn(
-                    "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors",
+                    "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors relative",
                     isActive
                       ? userType === 'farmer' 
                         ? "text-green-700 bg-green-50"
@@ -140,6 +161,15 @@ export default function Sidebar() {
                   )}>
                     <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
+                    {/* Show blinking red notification for Internal Messaging */}
+                    {item.name === "Internal Messaging" && unreadCount > 0 && (
+                      <div className="ml-auto flex items-center space-x-1">
+                        <div className="w-3 h-3 rounded-full blink-red"></div>
+                        <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded-full animate-pulse">
+                          {unreadCount}
+                        </span>
+                      </div>
+                    )}
                   </Link>
                 </li>
               );

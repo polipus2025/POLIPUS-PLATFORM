@@ -53,9 +53,12 @@ export default function ModernHeader({
               <MessageSquare className="h-4 w-4 mr-2" />
               Messages
               {notifications > 0 && (
-                <Badge className="ml-2 bg-red-500 text-white animate-pulse">
-                  {notifications}
-                </Badge>
+                <div className="ml-2 flex items-center space-x-1">
+                  <div className="w-3 h-3 rounded-full blink-red"></div>
+                  <Badge className="bg-red-500 text-white animate-pulse">
+                    {notifications}
+                  </Badge>
+                </div>
               )}
             </Button>
             

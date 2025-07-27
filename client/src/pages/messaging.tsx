@@ -56,19 +56,32 @@ interface Message {
 export default function Messaging() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isComposing, setIsComposing] = useState(false);
-  const [currentUserId] = useState("global-test-user"); // Global testing user - no geographic restrictions
-  const [currentUserType] = useState("global_tester");
-  const [currentUserName] = useState("Global Test User");
+  // Get current user from localStorage
+  const [currentUserId] = useState(() => 
+    localStorage.getItem("username") || 
+    localStorage.getItem("agentId") || 
+    localStorage.getItem("farmerId") || 
+    localStorage.getItem("exporterId") || 
+    "admin001"
+  );
+  const [currentUserType] = useState(() => 
+    localStorage.getItem("userType") || "regulatory"
+  );
+  const [currentUserName] = useState(() => 
+    `${localStorage.getItem("firstName") || "System"} ${localStorage.getItem("lastName") || "User"}`
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const form = useForm<MessageFormData>({
     resolver: zodResolver(messageFormSchema),
     defaultValues: {
+      recipientType: "",
       priority: "normal",
       messageType: "general",
-      recipientType: "",
-    },
+      subject: "",
+      content: ""
+    }
   });
 
   // Fetch messages

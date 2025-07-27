@@ -3329,6 +3329,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get unread message count for a user
+  app.get("/api/messages/:recipientId/unread-count", async (req, res) => {
+    try {
+      const { recipientId } = req.params;
+      const messages = await storage.getMessages(recipientId);
+      const unreadCount = messages.filter(msg => !msg.isRead).length;
+      res.json({ count: unreadCount });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
   // Get specific message
   app.get("/api/messages/single/:messageId", async (req, res) => {
     try {
@@ -3394,17 +3407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get unread messages count
-  app.get("/api/messages/:recipientId/unread-count", async (req, res) => {
-    try {
-      const { recipientId } = req.params;
-      const count = await storage.getUnreadMessagesCount(recipientId);
-      res.json({ count });
-    } catch (error) {
-      console.error("Error fetching unread count:", error);
-      res.status(500).json({ message: "Failed to fetch unread count" });
-    }
-  });
+
 
   // Delete message
   app.delete("/api/messages/:messageId", async (req, res) => {

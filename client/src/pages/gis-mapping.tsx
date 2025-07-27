@@ -21,7 +21,7 @@ import SimpleWorkingMap from '@/components/gis/simple-working-map';
 // Removed EmergencyLiberiaDisplay - uses SVG circles
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
-import FunctionalLiberiaMap from '@/components/gis/functional-liberia-map';
+import CleanLiberiaMap from '@/components/gis/clean-liberia-map';
 import AdvancedBoundaryMapper from '@/components/gps/advanced-boundary-mapper';
 import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
 import GPSMapViewer from '@/components/gps/gps-map-viewer';
@@ -795,7 +795,7 @@ export default function GISMapping() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <FunctionalLiberiaMap />
+                  <CleanLiberiaMap />
                 </CardContent>
               </Card>
             </div>

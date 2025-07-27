@@ -17,6 +17,7 @@ import DirectLiberiaMap from '@/components/gis/direct-liberia-map';
 import AlternativeMapDisplay from '@/components/gis/alternative-map-display';
 import LiberiaMapFallback from '@/components/gis/liberia-map-fallback';
 import GuaranteedLiberiaDisplay from '@/components/gis/guaranteed-liberia-display';
+import SimpleWorkingMap from '@/components/gis/simple-working-map';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
 import { 
@@ -776,8 +777,8 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* GUARANTEED SOLUTION: Always Works */}
-          <GuaranteedLiberiaDisplay />
+          {/* SIMPLE TEST: Basic HTML/CSS Only */}
+          <SimpleWorkingMap />
         </TabsContent>
 
         <TabsContent value="farm-plots" className="space-y-0">

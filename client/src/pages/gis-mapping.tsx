@@ -21,6 +21,7 @@ import SimpleWorkingMap from '@/components/gis/simple-working-map';
 import EmergencyLiberiaDisplay from '@/components/gis/emergency-liberia-display';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
+import FunctionalLiberiaMap from '@/components/gis/functional-liberia-map';
 import { 
   Map, 
   Navigation, 
@@ -778,8 +779,8 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* EMERGENCY DISPLAY: Guaranteed to work */}
-          <EmergencyLiberiaDisplay />
+          {/* FUNCTIONAL LIBERIA MAP: Real Geographic Data */}
+          <FunctionalLiberiaMap />
         </TabsContent>
 
         <TabsContent value="farm-plots" className="space-y-0">

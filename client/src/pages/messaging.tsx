@@ -127,15 +127,8 @@ export default function Messaging() {
   // Fetch messages
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["/api/messages", currentUserId],
-    queryFn: async () => {
-      const result = await apiRequest(`/api/messages/${currentUserId}`);
-      console.log(`Messages for ${currentUserId}:`, result.length, 'messages');
-      console.log('Messages content:', result.map(m => ({ id: m.id, subject: m.subject, content: m.content })));
-      return result;
-    },
-    refetchInterval: 3000, // Refresh every 3 seconds
-    staleTime: 0, // Always consider data stale
-    gcTime: 0, // Don't cache data
+    queryFn: () => apiRequest(`/api/messages/${currentUserId}`),
+    refetchInterval: 5000, // Refresh every 5 seconds
   });
 
   // Fetch unread count

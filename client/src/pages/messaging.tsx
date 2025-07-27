@@ -104,7 +104,10 @@ export default function Messaging() {
         body: JSON.stringify(replyData)
       }),
     onSuccess: () => {
+      // Invalidate all message-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      // Also invalidate unread count queries
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", currentUserId, "unread-count"] });
       setIsReplying(false);
       replyForm.reset();
       toast({
@@ -125,6 +128,7 @@ export default function Messaging() {
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["/api/messages", currentUserId],
     queryFn: () => apiRequest(`/api/messages/${currentUserId}`),
+    refetchInterval: 5000, // Refresh every 5 seconds
   });
 
   // Fetch unread count
@@ -140,7 +144,10 @@ export default function Messaging() {
       body: JSON.stringify(messageData)
     }),
     onSuccess: () => {
+      // Invalidate all message-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      // Also invalidate unread count queries
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", currentUserId, "unread-count"] });
       setIsComposing(false);
       form.reset();
       toast({
@@ -165,7 +172,10 @@ export default function Messaging() {
         body: JSON.stringify({ recipientId: currentUserId })
       }),
     onSuccess: () => {
+      // Invalidate all message-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      // Also invalidate unread count queries
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", currentUserId, "unread-count"] });
     },
   });
 

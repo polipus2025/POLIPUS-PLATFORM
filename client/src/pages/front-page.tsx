@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { Helmet } from 'react-helmet';
+import ModernBackground from '@/components/ui/modern-background';
+import ModernCard from '@/components/ui/modern-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -85,7 +87,8 @@ export default function FrontPage() {
 
 
   return (
-    <div className="min-h-screen bg-white">
+    <ModernBackground variant="animated">
+      <div className="min-h-screen">
       {/* Polipos Logo */}
       <div className="flex justify-center pt-12 pb-12">
         <img 
@@ -150,5 +153,6 @@ export default function FrontPage() {
         </div>
       </div>
     </div>
+    </ModernBackground>
   );
 }

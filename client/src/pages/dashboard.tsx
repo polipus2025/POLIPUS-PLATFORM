@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet";
 import { useState } from "react";
+import ModernBackground from "@/components/ui/modern-background";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import ComplianceChart from "@/components/dashboard/compliance-chart";
 import RegionalMap from "@/components/dashboard/regional-map";
@@ -303,7 +304,8 @@ export default function Dashboard() {
   // The header component handles auth verification, so dashboard should display content.
 
   return (
-    <div className="mobile-container">
+    <ModernBackground variant="gradient">
+      <div className="mobile-container">
       <div className="mobile-header-safe">
         <Helmet>
           <title>Dashboard - AgriTrace360™ LACRA</title>
@@ -1104,5 +1106,6 @@ export default function Dashboard() {
       </Dialog>
       </div>
     </div>
+    </ModernBackground>
   );
 }

@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet";
+import ModernBackground from "@/components/ui/modern-background";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
@@ -55,7 +56,8 @@ export default function Landing() {
   const WeatherIcon = getWeatherIcon();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50">
+    <ModernBackground variant="gradient">
+      <div className="min-h-screen">
       <Helmet>
         <title>AgriTrace360™ - Agricultural Traceability & Compliance Platform | LACRA</title>
         <meta name="description" content="Comprehensive agricultural commodity compliance management system for the Liberia Agriculture Commodity Regulatory Authority" />
@@ -429,5 +431,6 @@ export default function Landing() {
         </div>
       </footer>
     </div>
+    </ModernBackground>
   );
 }

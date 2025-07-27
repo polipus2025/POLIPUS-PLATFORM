@@ -80,7 +80,9 @@ export default function Messaging() {
       priority: "normal",
       messageType: "general",
       subject: "",
-      content: ""
+      content: "",
+      recipientId: "",
+      recipientName: ""
     }
   });
 
@@ -140,17 +142,54 @@ export default function Messaging() {
   });
 
   const onSubmit = (data: MessageFormData) => {
+    // Generate recipient ID based on type
+    let recipientId = "all_users";
+    let recipientName = "All Users";
+    let recipientPortal = "all_portals";
+    
+    if (data.recipientType !== "all_users") {
+      // Set specific recipient based on type
+      switch (data.recipientType) {
+        case "farmer":
+          recipientId = "FRM-2024-001";
+          recipientName = "Moses Tuah";
+          recipientPortal = "farmer_portal";
+          break;
+        case "field_agent":
+          recipientId = "AGT-2024-001";
+          recipientName = "Sarah Konneh";
+          recipientPortal = "field_agent_portal";
+          break;
+        case "exporter":
+          recipientId = "EXP-2024-001";
+          recipientName = "Marcus Bawah";
+          recipientPortal = "exporter_portal";
+          break;
+        case "regulatory_admin":
+          recipientId = "admin001";
+          recipientName = "System Admin";
+          recipientPortal = "regulatory_portal";
+          break;
+        default:
+          recipientId = "all_users";
+          recipientName = "All Users";
+          recipientPortal = "all_portals";
+      }
+    }
+
     const messageData = {
       ...data,
       senderId: currentUserId,
       senderName: currentUserName,
       senderType: currentUserType,
-      senderPortal: "regulatory_portal",
-      recipientId: data.recipientId || "all_users",
-      recipientName: data.recipientName || "All Users",
-      recipientPortal: data.recipientType === "all_users" ? "all_portals" : `${data.recipientType}_portal`,
+      senderPortal: `${currentUserType}_portal`,
+      recipientId,
+      recipientName,
+      recipientType: data.recipientType,
+      recipientPortal,
     };
 
+    console.log("Sending message:", messageData);
     sendMessageMutation.mutate(messageData);
   };
 

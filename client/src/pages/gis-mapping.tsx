@@ -11,6 +11,8 @@ import { useQuery } from '@tanstack/react-query';
 import InteractiveMap from '@/components/gis/interactive-map';
 import SimpleLiberiaMap from '@/components/gis/simple-liberia-map';
 import LiberiaGeographicMap from '@/components/gis/liberia-geographic-map';
+import RealLiberiaMap from '@/components/gis/real-liberia-map';
+import AuthenticLiberiaMap from '@/components/gis/authentic-liberia-map';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
 import { 
@@ -770,23 +772,16 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Primary Map Display - Guaranteed to Work */}
-          <LiberiaGeographicMap />
+          {/* REAL LIBERIA MAP - Interactive Leaflet Map */}
+          <RealLiberiaMap />
           
-          {/* Alternative Views */}
+          {/* AUTHENTIC LIBERIA DATA - Official Geographic Information */}
+          <AuthenticLiberiaMap />
+          
+          {/* Additional Map Views */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <InteractiveMap />
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  SVG Technical Map
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <SimpleLiberiaMap />
-              </CardContent>
-            </Card>
+            <LiberiaGeographicMap />
           </div>
         </TabsContent>
 

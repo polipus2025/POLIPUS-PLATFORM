@@ -1370,15 +1370,24 @@ export class DatabaseStorage implements IStorage {
   async getMessages(recipientId: string): Promise<InternalMessage[]> {
     // Get user type from the recipient ID
     let userType = 'regulatory_admin'; // default
-    if (recipientId.startsWith('FRM-')) userType = 'farmer';
-    else if (recipientId.startsWith('AGT-')) userType = 'field_agent';
-    else if (recipientId.startsWith('EXP-')) userType = 'exporter';
+    let altUserType = 'regulatory'; // alternative form
+    if (recipientId.startsWith('FRM-')) {
+      userType = 'farmer';
+      altUserType = 'farmer';
+    } else if (recipientId.startsWith('AGT-')) {
+      userType = 'field_agent';
+      altUserType = 'field_agent';
+    } else if (recipientId.startsWith('EXP-')) {
+      userType = 'exporter';
+      altUserType = 'exporter';
+    }
 
     return await db.select().from(internalMessages).where(
       or(
         eq(internalMessages.recipientId, recipientId), // Messages sent directly to user
         eq(internalMessages.recipientId, 'all_users'), // Messages sent to all users
-        eq(internalMessages.recipientType, userType),  // Messages sent to user's type
+        eq(internalMessages.recipientType, userType),  // Messages sent to user's type (old format)
+        eq(internalMessages.recipientType, altUserType),  // Messages sent to user's type (new format)
         eq(internalMessages.recipientType, 'all_users') // Messages sent to all user types
       )
     );
@@ -1403,9 +1412,17 @@ export class DatabaseStorage implements IStorage {
   async getUnreadMessagesCount(recipientId: string): Promise<number> {
     // Get user type from the recipient ID
     let userType = 'regulatory_admin'; // default
-    if (recipientId.startsWith('FRM-')) userType = 'farmer';
-    else if (recipientId.startsWith('AGT-')) userType = 'field_agent';
-    else if (recipientId.startsWith('EXP-')) userType = 'exporter';
+    let altUserType = 'regulatory'; // alternative form
+    if (recipientId.startsWith('FRM-')) {
+      userType = 'farmer';
+      altUserType = 'farmer';
+    } else if (recipientId.startsWith('AGT-')) {
+      userType = 'field_agent';
+      altUserType = 'field_agent';
+    } else if (recipientId.startsWith('EXP-')) {
+      userType = 'exporter';
+      altUserType = 'exporter';
+    }
 
     const result = await db.select({ count: sql`count(*)` })
       .from(internalMessages)
@@ -1413,7 +1430,8 @@ export class DatabaseStorage implements IStorage {
         or(
           eq(internalMessages.recipientId, recipientId), // Messages sent directly to user
           eq(internalMessages.recipientId, 'all_users'), // Messages sent to all users
-          eq(internalMessages.recipientType, userType),  // Messages sent to user's type
+          eq(internalMessages.recipientType, userType),  // Messages sent to user's type (old format)
+          eq(internalMessages.recipientType, altUserType),  // Messages sent to user's type (new format)
           eq(internalMessages.recipientType, 'all_users') // Messages sent to all user types
         ),
         eq(internalMessages.isRead, false)

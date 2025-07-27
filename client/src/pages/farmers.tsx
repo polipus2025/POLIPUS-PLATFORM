@@ -52,11 +52,14 @@ const farmerFormSchema = z.object({
 
 type FarmerFormData = z.infer<typeof farmerFormSchema>;
 
-const liberianCounties = [
-  "Bomi County", "Bong County", "Gbarpolu County", "Grand Bassa County",
-  "Grand Cape Mount County", "Grand Gedeh County", "Grand Kru County", 
-  "Lofa County", "Margibi County", "Maryland County", "Montserrado County",
-  "Nimba County", "River Cess County", "River Gee County", "Sinoe County"
+const globalTestingRegions = [
+  "Global Testing Zone", "Demo Area", "Any Location", "Testing County", 
+  "Liberia - Bomi County", "Liberia - Bong County", "Liberia - Gbarpolu County", 
+  "Liberia - Grand Bassa County", "Liberia - Grand Cape Mount County", 
+  "Liberia - Grand Gedeh County", "Liberia - Grand Kru County", "Liberia - Lofa County", 
+  "Liberia - Margibi County", "Liberia - Maryland County", "Liberia - Montserrado County",
+  "Liberia - Nimba County", "Liberia - River Cess County", "Liberia - River Gee County", 
+  "Liberia - Sinoe County", "International Testing", "Global Demo"
 ];
 
 export default function FarmersPage() {
@@ -405,9 +408,9 @@ export default function FarmersPage() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {liberianCounties.map((county) => (
-                                    <SelectItem key={county} value={county}>
-                                      {county}
+                                  {globalTestingRegions.map((region) => (
+                                    <SelectItem key={region} value={region}>
+                                      {region}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>

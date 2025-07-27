@@ -65,11 +65,11 @@ export default function AdvancedBoundaryMapper({
   const watchIdRef = React.useRef<number | null>(null);
   const autoIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  // GPS tracking options
+  // GPS tracking options - Relaxed for global testing
   const gpsOptions = {
-    enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 1000
+    enableHighAccuracy: false, // Allow lower accuracy for broader compatibility
+    timeout: 30000,            // Longer timeout for testing
+    maximumAge: 60000          // Accept older positions for demo purposes
   };
 
   useEffect(() => {

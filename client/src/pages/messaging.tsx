@@ -56,9 +56,9 @@ interface Message {
 export default function Messaging() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isComposing, setIsComposing] = useState(false);
-  const [currentUserId] = useState("admin001"); // This would come from auth context
-  const [currentUserType] = useState("regulatory_admin");
-  const [currentUserName] = useState("Admin User");
+  const [currentUserId] = useState("global-test-user"); // Global testing user - no geographic restrictions
+  const [currentUserType] = useState("global_tester");
+  const [currentUserName] = useState("Global Test User");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

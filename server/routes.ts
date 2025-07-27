@@ -228,6 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/farmer-login", async (req, res) => {
     try {
       const { farmerId, password, county, phoneNumber, userType } = req.body;
+      // Note: County restrictions removed for global testing purposes
       
       // Validate input
       if (!farmerId || !password) {
@@ -502,6 +503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/dashboard/compliance-by-county", async (req, res) => {
     try {
+      // Global testing data - removed county restrictions
       const data = await storage.getComplianceDataByCounty();
       res.json(data);
     } catch (error) {
@@ -725,6 +727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/gis/locations', async (req, res) => {
     try {
       const county = req.query.county as string;
+      // Global testing locations - removed geographic restrictions
       const locations = [
         {
           id: "farm-001",
@@ -749,9 +752,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       
-      const filteredLocations = county ? 
-        locations.filter(loc => loc.properties.county === county) : 
-        locations;
+      // For testing purposes, return all locations regardless of county filter
+      const filteredLocations = locations; // Removed geographic filtering for global testing
       
       res.json(filteredLocations);
     } catch (error) {

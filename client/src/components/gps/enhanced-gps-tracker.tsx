@@ -69,11 +69,11 @@ export default function EnhancedGPSTracker({
   const watchIdRef = useRef<number | null>(null);
   const positionHistoryRef = useRef<GPSPosition[]>([]);
 
-  // GPS tracking options
+  // GPS tracking options - Relaxed for global testing
   const gpsOptions = {
-    enableHighAccuracy: true,
-    timeout: 5000,
-    maximumAge: 1000
+    enableHighAccuracy: false, // Allow lower accuracy for global compatibility
+    timeout: 30000,            // Extended timeout for broader testing
+    maximumAge: 60000      // Accept older positions for testing purposes
   };
 
   // Start GPS tracking

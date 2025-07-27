@@ -45,15 +45,19 @@ const gpsFormSchema = z.object({
 type GpsFormData = z.infer<typeof gpsFormSchema>;
 
 const mockFarmers = [
-  { id: 1, name: 'John Doe', county: 'Montserrado County' },
-  { id: 2, name: 'Mary Johnson', county: 'Bong County' },
-  { id: 3, name: 'Samuel Williams', county: 'Nimba County' },
+  { id: 1, name: 'John Doe', county: 'Any Location', region: 'Global' },
+  { id: 2, name: 'Mary Johnson', county: 'Any Location', region: 'Global' },
+  { id: 3, name: 'Samuel Williams', county: 'Any Location', region: 'Global' },
+  { id: 4, name: 'Test User Alpha', county: 'Testing Zone', region: 'Global' },
+  { id: 5, name: 'Test User Beta', county: 'Testing Zone', region: 'Global' },
 ];
 
 const mockFarmPlots = [
-  { id: 1, plotName: 'Coffee Plot A', farmerId: 1, cropType: 'Coffee' },
-  { id: 2, plotName: 'Cocoa Plot B', farmerId: 2, cropType: 'Cocoa' },
-  { id: 3, plotName: 'Palm Plot C', farmerId: 3, cropType: 'Oil Palm' },
+  { id: 1, plotName: 'Test Plot A', farmerId: 1, cropType: 'Coffee', location: 'Global Testing' },
+  { id: 2, plotName: 'Test Plot B', farmerId: 2, cropType: 'Cocoa', location: 'Global Testing' },
+  { id: 3, plotName: 'Test Plot C', farmerId: 3, cropType: 'Oil Palm', location: 'Global Testing' },
+  { id: 4, plotName: 'Demo Plot Alpha', farmerId: 4, cropType: 'Rice', location: 'Demo Area' },
+  { id: 5, plotName: 'Demo Plot Beta', farmerId: 5, cropType: 'Wheat', location: 'Demo Area' },
 ];
 
 export default function GpsMapping() {

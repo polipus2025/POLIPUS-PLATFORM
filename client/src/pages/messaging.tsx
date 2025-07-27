@@ -228,7 +228,11 @@ export default function Messaging() {
   };
 
   const onReply = (data: MessageFormData) => {
-    if (!selectedMessage) return;
+    console.log("onReply function called with data:", data);
+    if (!selectedMessage) {
+      console.log("No selected message found");
+      return;
+    }
 
     const replyData = {
       subject: `Re: ${selectedMessage.subject}`,

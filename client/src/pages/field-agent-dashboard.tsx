@@ -41,6 +41,25 @@ export default function FieldAgentDashboard() {
   const jurisdiction = localStorage.getItem("jurisdiction");
   const token = localStorage.getItem("authToken");
 
+  // Fetch field agent specific data with territorial filtering
+  const farmersQuery = useQuery({
+    queryKey: ['/api/farmers', jurisdiction],
+    queryFn: () => apiRequest(`/api/farmers?jurisdiction=${jurisdiction}`),
+    enabled: !!jurisdiction && !!token,
+  });
+
+  const inspectionsQuery = useQuery({
+    queryKey: ['/api/inspections', jurisdiction],
+    queryFn: () => apiRequest(`/api/inspections?jurisdiction=${jurisdiction}`),
+    enabled: !!jurisdiction && !!token,
+  });
+
+  const commoditiesQuery = useQuery({
+    queryKey: ['/api/commodities', jurisdiction],
+    queryFn: () => apiRequest(`/api/commodities?county=${jurisdiction}`),
+    enabled: !!jurisdiction && !!token,
+  });
+
   if (!token) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -54,24 +73,10 @@ export default function FieldAgentDashboard() {
     );
   }
 
-  // Fetch field agent specific data with territorial filtering
-  const { data: farmers = [] } = useQuery({
-    queryKey: ['/api/farmers', jurisdiction],
-    queryFn: () => apiRequest(`/api/farmers?jurisdiction=${jurisdiction}`),
-    enabled: !!jurisdiction,
-  });
-
-  const { data: inspections = [] } = useQuery({
-    queryKey: ['/api/inspections', jurisdiction],
-    queryFn: () => apiRequest(`/api/inspections?jurisdiction=${jurisdiction}`),
-    enabled: !!jurisdiction,
-  });
-
-  const { data: commodities = [] } = useQuery({
-    queryKey: ['/api/commodities', jurisdiction],
-    queryFn: () => apiRequest(`/api/commodities?county=${jurisdiction}`),
-    enabled: !!jurisdiction,
-  });
+  // Extract data from queries
+  const farmers = farmersQuery.data || [];
+  const inspections = inspectionsQuery.data || [];
+  const commodities = commoditiesQuery.data || [];
 
   // Calculate agent-specific metrics
   const totalFarmers = farmers.filter((f: any) => f.county === jurisdiction).length;

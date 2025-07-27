@@ -56,6 +56,7 @@ interface Message {
 export default function Messaging() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isComposing, setIsComposing] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   // Get current user from localStorage
   const [currentUserId] = useState(() => 
     localStorage.getItem("username") || 
@@ -84,6 +85,31 @@ export default function Messaging() {
       recipientId: "",
       recipientName: ""
     }
+  });
+
+  // Reply to message mutation
+  const replyMessageMutation = useMutation({
+    mutationFn: ({ parentMessageId, replyData }: { parentMessageId: string; replyData: any }) => 
+      apiRequest(`/api/messages/${parentMessageId}/reply`, {
+        method: "POST",
+        body: JSON.stringify(replyData)
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      setIsReplying(false);
+      form.reset();
+      toast({
+        title: "Reply Sent",
+        description: "Your reply has been sent successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to send reply. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Fetch messages
@@ -199,6 +225,31 @@ export default function Messaging() {
 
     console.log("Sending message:", messageData);
     sendMessageMutation.mutate(messageData);
+  };
+
+  const onReply = (data: MessageFormData) => {
+    if (!selectedMessage) return;
+
+    const replyData = {
+      subject: `Re: ${selectedMessage.subject}`,
+      content: data.content,
+      priority: data.priority,
+      messageType: data.messageType,
+      senderId: currentUserId,
+      senderName: currentUserName,
+      senderType: currentUserType,
+      senderPortal: `${currentUserType}_portal`,
+      recipientId: selectedMessage.senderId,
+      recipientName: selectedMessage.senderName,
+      recipientType: selectedMessage.senderType,
+      recipientPortal: selectedMessage.senderPortal,
+      threadId: selectedMessage.threadId,
+    };
+
+    replyMessageMutation.mutate({ 
+      parentMessageId: selectedMessage.messageId, 
+      replyData 
+    });
   };
 
   const handleMessageClick = (message: Message) => {
@@ -501,10 +552,107 @@ export default function Messaging() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                      <Reply className="h-4 w-4 mr-2" />
-                      Reply
-                    </Button>
+                    <Dialog open={isReplying} onOpenChange={setIsReplying}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Reply className="h-4 w-4 mr-2" />
+                          Reply
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Reply to Message</DialogTitle>
+                          <DialogDescription>
+                            Replying to: {selectedMessage.subject}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Form {...form}>
+                          <form onSubmit={form.handleSubmit(onReply)} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <FormField
+                                control={form.control}
+                                name="priority"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Priority</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select priority" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="low">Low</SelectItem>
+                                        <SelectItem value="normal">Normal</SelectItem>
+                                        <SelectItem value="high">High</SelectItem>
+                                        <SelectItem value="urgent">Urgent</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="messageType"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Message Type</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select message type" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="general">General</SelectItem>
+                                        <SelectItem value="announcement">Announcement</SelectItem>
+                                        <SelectItem value="alert">Alert</SelectItem>
+                                        <SelectItem value="request">Request</SelectItem>
+                                        <SelectItem value="support">Support</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <FormField
+                              control={form.control}
+                              name="content"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Reply Message</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder="Type your reply here..."
+                                      className="min-h-[120px]"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsReplying(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="submit"
+                                disabled={replyMessageMutation.isPending}
+                              >
+                                {replyMessageMutation.isPending ? "Sending..." : "Send Reply"}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
                     <Button 
                       variant="outline" 
                       size="sm"

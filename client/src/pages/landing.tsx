@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import MatrixBackground from "@/components/ui/matrix-background";
+import ModernBackground from "@/components/ui/modern-background";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
@@ -56,7 +56,7 @@ export default function Landing() {
   const WeatherIcon = getWeatherIcon();
 
   return (
-    <MatrixBackground>
+    <ModernBackground variant="gradient">
       <div className="min-h-screen">
       <Helmet>
         <title>AgriTrace360™ - Agricultural Traceability & Compliance Platform | LACRA</title>
@@ -431,6 +431,6 @@ export default function Landing() {
         </div>
       </footer>
     </div>
-    </MatrixBackground>
+    </ModernBackground>
   );
 }

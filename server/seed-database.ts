@@ -25,7 +25,7 @@ export async function seedDatabase() {
 
     await storage.createAuthUser({
       username: "AGT-2024-001",
-      passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
+      passwordHash: "$2b$10$E7X5pxmRqrL9HUj6xfZq1uVARFgN8hIm2ahWDqi5kEE1PjRDjn5V6",
       role: "field_agent",
       userType: "field_agent",
       firstName: "Sarah",

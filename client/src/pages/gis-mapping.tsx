@@ -49,9 +49,9 @@ export default function GISMapping() {
   const [activeAnalysisType, setActiveAnalysisType] = useState<string | null>(null);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [isAnalysisDialogOpen, setIsAnalysisDialogOpen] = useState(false);
+  const [selectedCounty, setSelectedCounty] = useState<any>(null);
   const [locationData, setLocationData] = useState<any>(null);
   const [farmPlots, setFarmPlots] = useState<any[]>([]);
-  const [selectedCounty, setSelectedCounty] = useState<string>('');
 
   // Connect to real satellites on component mount
   useEffect(() => {
@@ -788,17 +788,62 @@ export default function GISMapping() {
 
                     {/* LIBERIA MAP - NO SVG CIRCLES */}
                     <div className="grid grid-cols-3 gap-4 bg-green-50 p-6 rounded-lg">
-                      <div className="bg-red-200 p-4 rounded cursor-pointer hover:bg-red-300 text-center">
+                      <div 
+                        className="bg-red-200 p-4 rounded cursor-pointer hover:bg-red-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Montserrado',
+                            farms: 342,
+                            population: '1.4M',
+                            area: '1,912 km²',
+                            capital: 'Monrovia',
+                            commodities: ['Cocoa', 'Coffee', 'Rice', 'Cassava'],
+                            compliance: 94,
+                            exports: '$2.3M/year',
+                            details: 'Liberia\'s most populous county and home to the capital city of Monrovia. Major agricultural hub with strong infrastructure.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Montserrado</div>
                         <div className="text-sm">342 farms</div>
                       </div>
-                      <div className="bg-blue-200 p-4 rounded cursor-pointer hover:bg-blue-300 text-center">
+                      <div 
+                        className="bg-blue-200 p-4 rounded cursor-pointer hover:bg-blue-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Lofa',
+                            farms: 287,
+                            population: '312,000',
+                            area: '9,982 km²',
+                            capital: 'Voinjama',
+                            commodities: ['Rice', 'Coffee', 'Palm oil', 'Rubber'],
+                            compliance: 87,
+                            exports: '$1.8M/year',
+                            details: 'Northwestern county known for rice production and coffee cultivation. Significant agricultural potential.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Lofa</div>
                         <div className="text-sm">287 farms</div>
                       </div>
-                      <div className="bg-yellow-200 p-4 rounded cursor-pointer hover:bg-yellow-300 text-center">
+                      <div 
+                        className="bg-yellow-200 p-4 rounded cursor-pointer hover:bg-yellow-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Nimba',
+                            farms: 298,
+                            population: '462,000',
+                            area: '11,551 km²',
+                            capital: 'Sanniquellie',
+                            commodities: ['Rubber', 'Cocoa', 'Coffee', 'Iron ore'],
+                            compliance: 91,
+                            exports: '$3.1M/year',
+                            details: 'Largest county by area with significant mining and agricultural activities. Rich in natural resources.'
+                          });
+                        }}
+                      >
                         <div className="text-2xl">🏛️</div>
                         <div className="font-bold">Nimba</div>
                         <div className="text-sm">298 farms</div>
@@ -2249,6 +2294,87 @@ export default function GISMapping() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* County Details Dialog */}
+        {selectedCounty && (
+          <Dialog open={!!selectedCounty} onOpenChange={() => setSelectedCounty(null)}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                  {selectedCounty.name} County Details
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                {/* County Overview */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-600 font-medium">Total Farms</p>
+                    <p className="text-3xl font-bold text-blue-700">{selectedCounty.farms}</p>
+                  </div>
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-600 font-medium">Compliance Rate</p>
+                    <p className="text-3xl font-bold text-green-700">{selectedCounty.compliance}%</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <p className="text-sm text-purple-600 font-medium">Population</p>
+                    <p className="text-2xl font-bold text-purple-700">{selectedCounty.population}</p>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <p className="text-sm text-orange-600 font-medium">Annual Exports</p>
+                    <p className="text-2xl font-bold text-orange-700">{selectedCounty.exports}</p>
+                  </div>
+                </div>
+
+                {/* County Information */}
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-sm mb-2">County Information</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Capital:</span> {selectedCounty.capital}
+                      </div>
+                      <div>
+                        <span className="font-medium">Area:</span> {selectedCounty.area}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-sm mb-2">Major Commodities</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCounty.commodities?.map((commodity: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {commodity}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-sm mb-2">Description</h4>
+                    <p className="text-sm text-gray-600">{selectedCounty.details}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button className="flex-1" onClick={() => toast({ title: "County Report", description: `Generating detailed report for ${selectedCounty.name} County...` })}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Generate Report
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => toast({ title: "Opening Map", description: `Loading ${selectedCounty.name} County on interactive map...` })}>
+                    <MapPin className="h-4 w-4 mr-2" />
+                    View on Map
+                  </Button>
+                  <Button variant="outline" onClick={() => setSelectedCounty(null)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
   );
 }

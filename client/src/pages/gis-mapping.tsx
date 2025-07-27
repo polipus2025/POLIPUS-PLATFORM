@@ -13,6 +13,9 @@ import SimpleLiberiaMap from '@/components/gis/simple-liberia-map';
 import LiberiaGeographicMap from '@/components/gis/liberia-geographic-map';
 import RealLiberiaMap from '@/components/gis/real-liberia-map';
 import AuthenticLiberiaMap from '@/components/gis/authentic-liberia-map';
+import DirectLiberiaMap from '@/components/gis/direct-liberia-map';
+import AlternativeMapDisplay from '@/components/gis/alternative-map-display';
+import LiberiaMapFallback from '@/components/gis/liberia-map-fallback';
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
 import { 
@@ -772,17 +775,14 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* REAL LIBERIA MAP - Interactive Leaflet Map */}
-          <RealLiberiaMap />
+          {/* ALWAYS VISIBLE: Complete Liberia Information */}
+          <LiberiaMapFallback />
           
-          {/* AUTHENTIC LIBERIA DATA - Official Geographic Information */}
-          <AuthenticLiberiaMap />
+          {/* PRIMARY: Direct Google Maps Embed */}
+          <DirectLiberiaMap />
           
-          {/* Additional Map Views */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <InteractiveMap />
-            <LiberiaGeographicMap />
-          </div>
+          {/* SECONDARY: Multiple Map Sources */}
+          <AlternativeMapDisplay />
         </TabsContent>
 
         <TabsContent value="farm-plots" className="space-y-0">

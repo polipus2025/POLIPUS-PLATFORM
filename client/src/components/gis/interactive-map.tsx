@@ -407,21 +407,22 @@ export default function InteractiveMap() {
                     </text>
                   </g>
                   
-                  {/* AGRICULTURAL DATA - Only if layers enabled */}
+                  {/* AGRICULTURAL DATA - Clean square markers */}
                   {mapLayers.find(l => l.id === 'farms')?.visible && (gisData as any[]).map((location: any, index: number) => {
                     const x = 160 + (index % 20) * 25;
                     const y = 300 + Math.floor(index / 20) * 30;
                     
                     return (
                       <g key={location.id || index}>
-                        <circle
-                          cx={x}
-                          cy={y}
-                          r="5"
+                        <rect
+                          x={x-3}
+                          y={y-3}
+                          width="6"
+                          height="6"
                           fill="#059669"
                           stroke="#065F46"
-                          strokeWidth="2"
-                          className="hover:r-8 transition-all cursor-pointer opacity-90"
+                          strokeWidth="1"
+                          className="hover:width-8 hover:height-8 transition-all cursor-pointer opacity-90"
                         />
                       </g>
                     );

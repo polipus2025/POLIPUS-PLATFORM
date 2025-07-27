@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-import InteractiveMap from '@/components/gis/interactive-map';
+// Removed InteractiveMap - uses SVG circles
 import SimpleLiberiaMap from '@/components/gis/simple-liberia-map';
 import LiberiaGeographicMap from '@/components/gis/liberia-geographic-map';
 import RealLiberiaMap from '@/components/gis/real-liberia-map';
@@ -18,7 +18,7 @@ import AlternativeMapDisplay from '@/components/gis/alternative-map-display';
 import LiberiaMapFallback from '@/components/gis/liberia-map-fallback';
 import GuaranteedLiberiaDisplay from '@/components/gis/guaranteed-liberia-display';
 import SimpleWorkingMap from '@/components/gis/simple-working-map';
-import EmergencyLiberiaDisplay from '@/components/gis/emergency-liberia-display';
+// Removed EmergencyLiberiaDisplay - uses SVG circles
 import FarmPlotMapper from '@/components/gis/farm-plot-mapper';
 import TransportationTracker from '@/components/gis/transportation-tracker';
 import FunctionalLiberiaMap from '@/components/gis/functional-liberia-map';

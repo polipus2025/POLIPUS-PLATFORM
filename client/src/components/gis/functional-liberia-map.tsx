@@ -124,111 +124,93 @@ export default function FunctionalLiberiaMap() {
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234f8ef7' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                 }}
               >
-                {/* Ocean Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-blue-50 to-green-50">
+                {/* CLEAN MAP INTERFACE - NO MORE CIRCLES */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50">
                   
-                  {/* Liberia Country Outline - Authentic Shape */}
-                  <svg 
-                    viewBox="0 0 400 300" 
-                    className="absolute inset-0 w-full h-full"
-                    style={{ filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))' }}
-                  >
-                    {/* Country Border - Authentic Liberia Shape */}
-                    <path
-                      d="M50,150 Q60,120 90,110 Q120,105 150,100 Q180,95 210,90 Q240,85 270,80 Q300,85 320,100 Q340,120 350,150 Q345,180 330,200 Q310,220 280,230 Q250,235 220,240 Q190,245 160,240 Q130,235 100,220 Q70,200 50,180 Z"
-                      fill="rgba(34, 197, 94, 0.2)"
-                      stroke="#16a34a"
-                      strokeWidth="2"
-                      className="hover:fill-green-200 transition-all duration-300 cursor-pointer"
-                      onClick={() => setSelectedCounty('Liberia')}
-                    />
+                  {/* Interactive County Grid Layout */}
+                  <div className="grid grid-cols-4 gap-3 p-4 h-full">
                     
-                    {/* County Boundaries */}
-                    {LIBERIA_COUNTIES.map((county, index) => {
-                      const x = 50 + ((county.lng + 11.439) / (-7.367 + 11.439)) * 300;
-                      const y = 250 - ((county.lat - 4.269) / (8.551 - 4.269)) * 200;
+                    {/* Main Counties Grid */}
+                    <div className="col-span-3 grid grid-cols-3 gap-2">
+                      {LIBERIA_COUNTIES.slice(0, 9).map((county, index) => (
+                        <div
+                          key={county.name}
+                          className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
+                            selectedCounty === county.name 
+                              ? 'bg-blue-100 border-blue-500 shadow-md' 
+                              : 'bg-white border-green-300 hover:bg-green-50'
+                          }`}
+                          onClick={() => handleCountyClick(county)}
+                        >
+                          <div className="text-center">
+                            <div className="text-xs font-semibold text-gray-800 mb-1">
+                              {county.name.length > 12 ? county.name.split(' ')[0] : county.name}
+                            </div>
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-gray-600">🏠 {county.farms}</span>
+                              <span className="text-blue-600 font-mono">{county.lat.toFixed(1)}°N</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Side Panel */}
+                    <div className="space-y-3">
+                      {/* Remaining Counties */}
+                      <div className="bg-white p-3 rounded-lg border">
+                        <h4 className="text-xs font-semibold mb-2 text-gray-800">Other Counties</h4>
+                        <div className="grid grid-cols-2 gap-1">
+                          {LIBERIA_COUNTIES.slice(9).map((county) => (
+                            <div
+                              key={county.name}
+                              className={`p-2 rounded border cursor-pointer transition-all ${
+                                selectedCounty === county.name 
+                                  ? 'bg-blue-100 border-blue-500' 
+                                  : 'bg-gray-50 border-gray-200 hover:bg-green-50'
+                              }`}
+                              onClick={() => handleCountyClick(county)}
+                            >
+                              <div className="text-center">
+                                <div className="text-[10px] font-medium text-gray-700">
+                                  {county.name.split(' ')[0]}
+                                </div>
+                                <div className="text-[8px] text-gray-500">
+                                  {county.farms}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                       
-                      return (
-                        <g key={county.name}>
-                          {/* County Area */}
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r="25"
-                            fill={selectedCounty === county.name ? "rgba(59, 130, 246, 0.4)" : "rgba(34, 197, 94, 0.15)"}
-                            stroke={selectedCounty === county.name ? "#3b82f6" : "#16a34a"}
-                            strokeWidth="1"
-                            className="hover:fill-blue-200 transition-all duration-300 cursor-pointer"
-                            onClick={() => handleCountyClick(county)}
-                          />
-                          
-                          {/* County Label */}
-                          <text
-                            x={x}
-                            y={y + 5}
-                            textAnchor="middle"
-                            className="text-[8px] font-medium fill-gray-700 pointer-events-none select-none"
-                          >
-                            {county.name.split(' ')[0]}
-                          </text>
-                          
-                          {/* Farm Count Badge */}
-                          <circle
-                            cx={x + 20}
-                            cy={y - 20}
-                            r="8"
-                            fill="#ef4444"
-                            className="opacity-80"
-                          />
-                          <text
-                            x={x + 20}
-                            y={y - 17}
-                            textAnchor="middle"
-                            className="text-[6px] font-bold fill-white pointer-events-none select-none"
-                          >
-                            {county.farms}
-                          </text>
-                        </g>
-                      );
-                    })}
+                      {/* Major Cities */}
+                      <div className="bg-white p-3 rounded-lg border">
+                        <h4 className="text-xs font-semibold mb-2 text-gray-800">Major Cities</h4>
+                        <div className="space-y-1">
+                          {MAJOR_CITIES.slice(0, 4).map((city) => (
+                            <div
+                              key={city.name}
+                              className="flex items-center justify-between text-xs cursor-pointer hover:bg-gray-50 p-1 rounded"
+                              onClick={() => handleCityClick(city)}
+                            >
+                              <span className="flex items-center gap-1">
+                                <div className={`w-2 h-2 rounded-full ${
+                                  city.type === 'capital' ? 'bg-red-500' : 
+                                  city.type === 'port' ? 'bg-blue-500' : 'bg-green-500'
+                                }`} />
+                                {city.name}
+                              </span>
+                              <span className="text-[10px] text-gray-500 font-mono">
+                                {city.lat.toFixed(1)}°N
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                     
-                    {/* Major Cities */}
-                    {MAJOR_CITIES.map((city, index) => {
-                      const x = 50 + ((city.lng + 11.439) / (-7.367 + 11.439)) * 300;
-                      const y = 250 - ((city.lat - 4.269) / (8.551 - 4.269)) * 200;
-                      
-                      return (
-                        <g key={city.name}>
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r={city.type === 'capital' ? "6" : "4"}
-                            fill={city.type === 'capital' ? "#dc2626" : "#059669"}
-                            stroke="white"
-                            strokeWidth="1"
-                            className="hover:scale-125 transition-transform duration-200 cursor-pointer"
-                            onClick={() => handleCityClick(city)}
-                          />
-                          <text
-                            x={x}
-                            y={y - 10}
-                            textAnchor="middle"
-                            className="text-[7px] font-medium fill-gray-800 pointer-events-none select-none"
-                          >
-                            {city.name}
-                          </text>
-                        </g>
-                      );
-                    })}
-                    
-                    {/* Coordinates Grid */}
-                    <defs>
-                      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.3"/>
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                  </svg>
+                  </div>
                   
                   {/* Geographic Coordinates Display */}
                   <div className="absolute top-4 left-4 bg-white/90 p-2 rounded-lg shadow-sm">

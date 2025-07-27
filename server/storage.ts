@@ -124,7 +124,7 @@ import {
   type InsertVerificationLog
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, or, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods (legacy)
@@ -1368,7 +1368,20 @@ export class DatabaseStorage implements IStorage {
 
   // Internal messaging methods
   async getMessages(recipientId: string): Promise<InternalMessage[]> {
-    return await db.select().from(internalMessages).where(eq(internalMessages.recipientId, recipientId));
+    // Get user type from the recipient ID
+    let userType = 'regulatory_admin'; // default
+    if (recipientId.startsWith('FRM-')) userType = 'farmer';
+    else if (recipientId.startsWith('AGT-')) userType = 'field_agent';
+    else if (recipientId.startsWith('EXP-')) userType = 'exporter';
+
+    return await db.select().from(internalMessages).where(
+      or(
+        eq(internalMessages.recipientId, recipientId), // Messages sent directly to user
+        eq(internalMessages.recipientId, 'all_users'), // Messages sent to all users
+        eq(internalMessages.recipientType, userType),  // Messages sent to user's type
+        eq(internalMessages.recipientType, 'all_users') // Messages sent to all user types
+      )
+    );
   }
 
   async getMessage(messageId: string): Promise<InternalMessage | undefined> {
@@ -1388,9 +1401,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUnreadMessagesCount(recipientId: string): Promise<number> {
+    // Get user type from the recipient ID
+    let userType = 'regulatory_admin'; // default
+    if (recipientId.startsWith('FRM-')) userType = 'farmer';
+    else if (recipientId.startsWith('AGT-')) userType = 'field_agent';
+    else if (recipientId.startsWith('EXP-')) userType = 'exporter';
+
     const result = await db.select({ count: sql`count(*)` })
       .from(internalMessages)
-      .where(and(eq(internalMessages.recipientId, recipientId), eq(internalMessages.isRead, false)));
+      .where(and(
+        or(
+          eq(internalMessages.recipientId, recipientId), // Messages sent directly to user
+          eq(internalMessages.recipientId, 'all_users'), // Messages sent to all users
+          eq(internalMessages.recipientType, userType),  // Messages sent to user's type
+          eq(internalMessages.recipientType, 'all_users') // Messages sent to all user types
+        ),
+        eq(internalMessages.isRead, false)
+      ));
     return Number(result[0]?.count || 0);
   }
 

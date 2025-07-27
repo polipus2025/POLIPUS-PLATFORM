@@ -100,7 +100,10 @@ export default function Messaging() {
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: (messageData: any) => apiRequest("/api/messages", "POST", messageData),
+    mutationFn: (messageData: any) => apiRequest("/api/messages", {
+      method: "POST",
+      body: JSON.stringify(messageData)
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
       setIsComposing(false);
@@ -122,7 +125,10 @@ export default function Messaging() {
   // Mark as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: ({ messageId }: { messageId: string }) => 
-      apiRequest(`/api/messages/${messageId}/read`, "PATCH", { recipientId: currentUserId }),
+      apiRequest(`/api/messages/${messageId}/read`, {
+        method: "PATCH",
+        body: JSON.stringify({ recipientId: currentUserId })
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
     },
@@ -130,7 +136,9 @@ export default function Messaging() {
 
   // Delete message mutation
   const deleteMessageMutation = useMutation({
-    mutationFn: (messageId: string) => apiRequest(`/api/messages/${messageId}`, "DELETE"),
+    mutationFn: (messageId: string) => apiRequest(`/api/messages/${messageId}`, {
+      method: "DELETE"
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
       setSelectedMessage(null);

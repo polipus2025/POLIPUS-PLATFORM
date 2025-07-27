@@ -246,6 +246,9 @@ export default function Messaging() {
       threadId: selectedMessage.threadId,
     };
 
+    console.log("Sending reply:", replyData);
+    console.log("To parent message:", selectedMessage.messageId);
+    
     replyMessageMutation.mutate({ 
       parentMessageId: selectedMessage.messageId, 
       replyData 
@@ -554,7 +557,22 @@ export default function Messaging() {
                   <div className="flex items-center gap-2">
                     <Dialog open={isReplying} onOpenChange={setIsReplying}>
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            console.log("Reply button clicked for message:", selectedMessage?.messageId);
+                            form.reset({
+                              priority: "normal",
+                              messageType: "general",
+                              content: "",
+                              recipientType: "",
+                              subject: "",
+                              recipientId: "",
+                              recipientName: ""
+                            });
+                          }}
+                        >
                           <Reply className="h-4 w-4 mr-2" />
                           Reply
                         </Button>

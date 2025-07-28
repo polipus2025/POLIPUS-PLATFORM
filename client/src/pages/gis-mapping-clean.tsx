@@ -86,8 +86,11 @@ export default function GISMappingClean() {
                         setSelectedCounty({
                           name: county.name,
                           farms: county.farms,
+                          compliance: county.compliance,
+                          deforestationAlerts: county.deforestationAlerts,
+                          carbonCredits: county.carbonCredits,
+                          sustainabilityScore: county.sustainabilityScore,
                           population: `${Math.floor(Math.random() * 500 + 100)}K`,
-                          compliance: Math.floor(Math.random() * 15 + 85),
                         });
                       }}
                     >

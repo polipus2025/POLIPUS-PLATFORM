@@ -807,44 +807,37 @@ export default function GISMapping() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* INTEGRATED MOBILE MAP SYSTEM: Using existing GPS components */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Map className="h-5 w-5" />
-                    Interactive Liberia Map
-                    <Badge variant="outline" className="ml-2">Mobile GPS System</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* DIRECT INLINE SOLUTION - NO EXTERNAL COMPONENTS */}
-                  <div className="p-6 space-y-6">
-
-
-                    {/* LIBERIA MAP - NO SVG CIRCLES */}
-                    <div className="grid grid-cols-5 gap-2 bg-green-50 p-4 rounded-lg">
-                      <div 
-                        className="bg-red-200 p-3 rounded cursor-pointer hover:bg-red-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Montserrado',
-                            farms: 342,
-                            population: '1.4M',
-                            area: '1,912 km²',
-                            capital: 'Monrovia',
-                            commodities: ['Cocoa', 'Coffee', 'Rice', 'Cassava'],
-                            compliance: 94,
-                            exports: '$2.3M/year',
-                            details: 'Liberia\'s most populous county and home to the capital city of Monrovia. Major agricultural hub with strong infrastructure.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Montserrado</div>
-                        <div className="text-xs">342 farms</div>
-                      </div>
+          <div className="grid grid-cols-1 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Map className="h-5 w-5" />
+                  Liberia Counties Map
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Clean Counties Grid */}
+                  <div className="grid grid-cols-5 gap-3 p-6 bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border">
+                    <div 
+                      className="bg-red-100 p-2 rounded-lg cursor-pointer hover:bg-red-200 text-center transition-colors" 
+                      onClick={() => {
+                        setSelectedCounty({
+                          name: 'Montserrado',
+                          farms: 342,
+                          population: '1.4M',
+                          area: '1,912 km²',
+                          capital: 'Monrovia',
+                          commodities: ['Cocoa', 'Coffee', 'Rice', 'Cassava'],
+                          compliance: 94,
+                          exports: '$2.3M/year',
+                          details: 'Liberia\'s most populous county and home to the capital city of Monrovia. Major agricultural hub with strong infrastructure.'
+                        });
+                      }}
+                    >
+                      <div className="font-semibold text-sm">Montserrado</div>
+                      <div className="text-xs text-gray-600">342 farms</div>
+                    </div>
                       <div 
                         className="bg-blue-200 p-3 rounded cursor-pointer hover:bg-blue-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
@@ -1134,43 +1127,22 @@ export default function GISMapping() {
                       </div>
                     </div>
 
-                    <div className="bg-green-100 p-4 rounded-lg text-center">
-                      <h2 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA - ALL 15 INTERACTIVE COUNTIES</h2>
-                      <p className="text-green-700">✅ Montserrado, Lofa, Nimba, Bong, Grand Gedeh, Grand Bassa, Sinoe, Maryland, Grand Kru</p>
-                      <p className="text-green-700">✅ River Cess, Gbarpolu, Bomi, Grand Cape Mount, Margibi, River Gee</p>
-                      <p className="text-sm text-green-600 mt-2">Click on any block to view detailed information</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-green-100 to-blue-100 p-4 rounded-lg text-center border">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">🇱🇷 Liberia Counties Overview</h3>
+                    <p className="text-sm text-gray-600">15 interactive counties with agricultural data</p>
+                    <div className="flex justify-center space-x-4 mt-3 text-xs text-gray-500">
+                      <span>Total Farms: 3,247</span>
+                      <span>•</span>
+                      <span>Avg Compliance: 88%</span>
+                      <span>•</span>
+                      <span>Active Counties: 15</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Satellite className="h-5 w-5" />
-                    Mobile GPS Boundary Mapper
-                    <Badge variant="default" className="ml-2 bg-green-600">Live System</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <AdvancedBoundaryMapper
-                    onBoundaryComplete={(boundary) => {
-                      console.log('Boundary completed:', boundary);
-                      toast({
-                        title: "Farm Boundary Mapped",
-                        description: `Successfully mapped ${boundary.name} with ${boundary.points.length} GPS points`,
-                      });
-                    }}
-                    onPointAdded={(point) => {
-                      console.log('GPS point added:', point);
-                    }}
-                    maxPoints={100}
-                    minAccuracy={10}
-                  />
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 

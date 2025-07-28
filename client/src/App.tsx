@@ -27,7 +27,7 @@ import FarmPlots from "@/pages/farm-plots";
 import CropPlanning from "@/pages/crop-planning";
 
 import GovernmentIntegration from "@/pages/government-integration";
-import GISMapping from "@/pages/gis-mapping";
+import GISMapping from "@/pages/gis-mapping-clean";
 import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";

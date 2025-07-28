@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Map, Globe, Satellite, Truck, Activity, BarChart3, MapPin, Target, Navigation, AlertTriangle, Leaf, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import CountyReportGenerator from "@/components/CountyReportGenerator";
 
 // Clean GIS Mapping Component
 export default function GISMappingClean() {
@@ -485,51 +484,265 @@ export default function GISMappingClean() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
+          {/* Platform Overview Dashboard */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                County PDF Reports
+                Platform Analytics Dashboard
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* Summary Statistics */}
+                {/* Real-time Key Metrics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg border">
-                    <div className="text-2xl font-bold text-green-600">15</div>
-                    <div className="text-sm text-gray-600">Counties Available</div>
+                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                    <div className="text-3xl font-bold text-blue-600 mb-1">{counties.reduce((sum, c) => sum + c.farms, 0).toLocaleString()}</div>
+                    <div className="text-sm text-blue-700 font-medium">Total Farms Registered</div>
+                    <div className="text-xs text-blue-600 mt-1">↗ +2.3% this month</div>
                   </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg border">
-                    <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+                    <div className="text-3xl font-bold text-green-600 mb-1">
                       {Math.round(counties.reduce((sum, c) => sum + c.compliance, 0) / counties.length)}%
                     </div>
-                    <div className="text-sm text-gray-600">Avg Compliance</div>
+                    <div className="text-sm text-green-700 font-medium">Average Compliance</div>
+                    <div className="text-xs text-green-600 mt-1">↗ +1.8% this week</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg border">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {counties.reduce((sum, c) => sum + c.farms, 0)}
+                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                    <div className="text-3xl font-bold text-purple-600 mb-1">
+                      {(counties.reduce((sum, c) => sum + c.carbonCredits, 0) / 1000).toLocaleString()}K
                     </div>
-                    <div className="text-sm text-gray-600">Total Farms</div>
+                    <div className="text-sm text-purple-700 font-medium">Carbon Credits</div>
+                    <div className="text-xs text-purple-600 mt-1">↗ +5.2% this month</div>
                   </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg border">
-                    <div className="text-2xl font-bold text-orange-600">
+                  <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                    <div className="text-3xl font-bold text-orange-600 mb-1">
                       {counties.reduce((sum, c) => sum + c.deforestationAlerts, 0)}
                     </div>
-                    <div className="text-sm text-gray-600">Active Alerts</div>
+                    <div className="text-sm text-orange-700 font-medium">Active Alerts</div>
+                    <div className="text-xs text-orange-600 mt-1">↘ -12% this week</div>
                   </div>
                 </div>
 
-                {/* Report Features */}
-                <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border">
-                  <h3 className="font-semibold text-gray-800 mb-2">Comprehensive Agricultural Reports</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Generate detailed A4 PDF reports with satellite data, weather conditions, compliance metrics, and sustainability analysis.
-                  </p>
+                {/* Real-time Activity Feed */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-green-500" />
+                        Live Platform Activity
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {[
+                          { action: "New farm registration", user: "Marcus Bawah", location: "Lofa County", time: "2 minutes ago", type: "farm" },
+                          { action: "Compliance inspection completed", user: "Sarah Konneh", location: "Nimba County", time: "5 minutes ago", type: "inspection" },
+                          { action: "Export permit submitted", user: "Liberia Agri Export", location: "Monrovia", time: "8 minutes ago", type: "export" },
+                          { action: "GPS boundary mapped", user: "Moses Tuah", location: "Bong County", time: "12 minutes ago", type: "gps" },
+                          { action: "Deforestation alert cleared", user: "LACRA Officer", location: "Sinoe County", time: "15 minutes ago", type: "alert" }
+                        ].map((activity, index) => (
+                          <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <div className={`w-2 h-2 rounded-full ${
+                              activity.type === 'farm' ? 'bg-green-500' :
+                              activity.type === 'inspection' ? 'bg-blue-500' :
+                              activity.type === 'export' ? 'bg-purple-500' :
+                              activity.type === 'gps' ? 'bg-orange-500' : 'bg-red-500'
+                            }`} />
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{activity.action}</div>
+                              <div className="text-xs text-gray-600">{activity.user} • {activity.location}</div>
+                            </div>
+                            <div className="text-xs text-gray-500">{activity.time}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Globe className="h-5 w-5 text-blue-500" />
+                        Geographic Distribution
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {[
+                          { county: "Montserrado", farms: 245, compliance: 94, color: "bg-green-500" },
+                          { county: "Lofa", farms: 189, compliance: 91, color: "bg-blue-500" },
+                          { county: "Nimba", farms: 167, compliance: 88, color: "bg-purple-500" },
+                          { county: "Bong", farms: 143, compliance: 85, color: "bg-orange-500" },
+                          { county: "Grand Bassa", farms: 124, compliance: 87, color: "bg-pink-500" }
+                        ].map((county, index) => (
+                          <div key={index} className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium">{county.county}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-600">{county.farms} farms</span>
+                                <span className="text-xs font-medium text-green-600">{county.compliance}%</span>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`${county.color} h-2 rounded-full transition-all duration-500`}
+                                style={{ width: `${county.compliance}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                {/* County Grid */}
-                <CountyReportGenerator />
+                {/* System Performance Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Satellite className="h-5 w-5 text-indigo-500" />
+                        Satellite Connectivity
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-indigo-600">118</div>
+                          <div className="text-sm text-gray-600">Satellites Connected</div>
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { name: "GPS", count: 31, color: "bg-blue-500" },
+                            { name: "GLONASS", count: 29, color: "bg-red-500" },
+                            { name: "Galileo", count: 31, color: "bg-green-500" },
+                            { name: "BeiDou", count: 27, color: "bg-yellow-500" }
+                          ].map((sat, index) => (
+                            <div key={index} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-3 h-3 rounded-full ${sat.color}`} />
+                                <span className="text-sm">{sat.name}</span>
+                              </div>
+                              <span className="text-sm font-medium">{sat.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                        Alert Summary
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                          <div>
+                            <div className="text-2xl font-bold text-red-600">23</div>
+                            <div className="text-xs text-gray-600">Critical</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-yellow-600">47</div>
+                            <div className="text-xs text-gray-600">Warning</div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { type: "Deforestation", count: 15, color: "text-red-600" },
+                            { type: "Compliance", count: 18, color: "text-orange-600" },
+                            { type: "Quality", count: 12, color: "text-yellow-600" },
+                            { type: "Documentation", count: 8, color: "text-purple-600" }
+                          ].map((alert, index) => (
+                            <div key={index} className="flex justify-between items-center">
+                              <span className="text-sm">{alert.type}</span>
+                              <span className={`text-sm font-medium ${alert.color}`}>{alert.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Truck className="h-5 w-5 text-green-500" />
+                        Transportation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                          <div>
+                            <div className="text-2xl font-bold text-green-600">87</div>
+                            <div className="text-xs text-gray-600">Active Routes</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-blue-600">1,245</div>
+                            <div className="text-xs text-gray-600">QR Scans Today</div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">In Transit</span>
+                            <span className="text-sm font-medium text-blue-600">34 vehicles</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Delivered</span>
+                            <span className="text-sm font-medium text-green-600">156 loads</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">GPS Verified</span>
+                            <span className="text-sm font-medium text-purple-600">98.7%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Platform Usage Statistics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Target className="h-5 w-5 text-indigo-500" />
+                      Platform Usage Analytics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                      <div className="text-center p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg">
+                        <div className="text-xl font-bold text-indigo-600">2,847</div>
+                        <div className="text-xs text-indigo-700">Total Users</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg">
+                        <div className="text-xl font-bold text-cyan-600">456</div>
+                        <div className="text-xs text-cyan-700">Active Today</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg">
+                        <div className="text-xl font-bold text-teal-600">12.4K</div>
+                        <div className="text-xs text-teal-700">Data Entries</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg">
+                        <div className="text-xl font-bold text-emerald-600">3,921</div>
+                        <div className="text-xs text-emerald-700">GPS Points</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-lime-50 to-lime-100 rounded-lg">
+                        <div className="text-xl font-bold text-lime-600">847</div>
+                        <div className="text-xs text-lime-700">Reports Generated</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg">
+                        <div className="text-xl font-bold text-yellow-600">99.2%</div>
+                        <div className="text-xs text-yellow-700">System Uptime</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>

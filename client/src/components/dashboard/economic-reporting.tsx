@@ -208,13 +208,26 @@ export default function EconomicReporting() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header and Controls */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Economic Activity Reporting</h2>
-          <p className="text-gray-600 mt-1">Comprehensive economic data across all Liberian counties</p>
+    <div className="space-y-8">
+      {/* Modern ISMS Header */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-4 mb-6">
+          <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+            <BarChart3 className="h-10 w-10 text-white" />
+          </div>
+          <div className="text-left">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              Economic Activity Reporting
+            </h1>
+            <p className="text-slate-600 text-lg mt-1">
+              Comprehensive economic data across all Liberian counties
+            </p>
+          </div>
         </div>
+      </div>
+
+      {/* Controls */}
+      <div className="flex justify-between items-center mb-8">
         <div className="flex gap-3">
           <Select value={selectedCounty} onValueChange={setSelectedCounty}>
             <SelectTrigger className="w-48">
@@ -245,111 +258,117 @@ export default function EconomicReporting() {
         </div>
       </div>
 
-      {/* Economic Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">GDP Contribution</p>
-                <p className="text-2xl font-bold text-green-900">
-                  {formatCurrency(economicOverview.totalGdpContribution)}
-                </p>
-                <div className="flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                  <span className="text-xs text-green-600">+{economicOverview.monthlyGrowthRate}%</span>
+      {/* Economic Overview Cards - ISMS Style */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+        <div className="isms-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">GDP Contribution</p>
+              <p className="isms-metric-number text-3xl">
+                {formatCurrency(economicOverview.totalGdpContribution)}
+              </p>
+              <div className="flex items-center mt-3">
+                <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center mr-2">
+                  <TrendingUp className="h-4 w-4" />
                 </div>
+                <span className="text-sm font-medium text-green-600">+{economicOverview.monthlyGrowthRate}%</span>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-green flex items-center justify-center">
+              <DollarSign className="h-8 w-8" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600">Employment</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {economicOverview.totalEmployment.toLocaleString()}
-                </p>
-                <p className="text-xs text-blue-600 mt-1">Total jobs</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-600" />
+        <div className="isms-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">Employment</p>
+              <p className="isms-metric-number text-3xl">
+                {economicOverview.totalEmployment.toLocaleString()}
+              </p>
+              <p className="text-sm text-slate-500 mt-3">Total jobs</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+              <Users className="h-8 w-8" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Active Businesses</p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {economicOverview.activeBusinesses.toLocaleString()}
-                </p>
-                <p className="text-xs text-purple-600 mt-1">Registered</p>
-              </div>
-              <Building2 className="h-8 w-8 text-purple-600" />
+        <div className="isms-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">Active Businesses</p>
+              <p className="isms-metric-number text-3xl">
+                {economicOverview.activeBusinesses.toLocaleString()}
+              </p>
+              <p className="text-sm text-slate-500 mt-3">Registered</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+              <Building2 className="h-8 w-8" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">Tax Revenue</p>
-                <p className="text-2xl font-bold text-orange-900">
-                  {formatCurrency(economicOverview.totalTaxRevenue)}
-                </p>
-                <p className="text-xs text-orange-600 mt-1">Monthly</p>
-              </div>
-              <FileText className="h-8 w-8 text-orange-600" />
+        <div className="isms-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">Tax Revenue</p>
+              <p className="isms-metric-number text-3xl">
+                {formatCurrency(economicOverview.totalTaxRevenue)}
+              </p>
+              <p className="text-sm text-slate-500 mt-3">Monthly</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+              <FileText className="h-8 w-8" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-indigo-600">Export Value</p>
-                <p className="text-2xl font-bold text-indigo-900">
-                  {formatCurrency(economicOverview.exportValue)}
-                </p>
-                <p className="text-xs text-indigo-600 mt-1">Monthly</p>
-              </div>
-              <Globe className="h-8 w-8 text-indigo-600" />
+        <div className="isms-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">Export Value</p>
+              <p className="isms-metric-number text-3xl">
+                {formatCurrency(economicOverview.exportValue)}
+              </p>
+              <p className="text-sm text-slate-500 mt-3">Monthly</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+              <Globe className="h-8 w-8" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="bg-gradient-to-r from-teal-50 to-green-50 border-teal-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-teal-600">Top Commodities</p>
-                <p className="text-xs font-bold text-teal-900 leading-tight">
-                  {economicOverview.topCommodities.slice(0, 3).join(", ")}
-                </p>
-                <p className="text-xs text-teal-600 mt-1">Leading exports</p>
-              </div>
-              <Package className="h-8 w-8 text-teal-600" />
+        <div className="isms-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">Top Commodities</p>
+              <p className="text-lg font-bold text-slate-900 leading-tight">
+                {economicOverview.topCommodities.slice(0, 3).join(", ")}
+              </p>
+              <p className="text-sm text-slate-500 mt-3">Leading exports</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-green flex items-center justify-center">
+              <Package className="h-8 w-8" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* County Economic Performance */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            County Economic Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* County Economic Performance - ISMS Style */}
+      <div className="isms-card">
+        <div className="mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+              <MapPin className="h-6 w-6" />
+            </div>
+            <h2 className="text-2xl font-bold isms-gradient-text">
+              County Economic Performance
+            </h2>
+          </div>
+        </div>
+        <div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -391,21 +410,25 @@ export default function EconomicReporting() {
               </tbody>
             </table>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Recent Economic Activities */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Recent Economic Activities
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Recent Economic Activities - ISMS Style */}
+      <div className="isms-card">
+        <div className="mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+              <Activity className="h-6 w-6" />
+            </div>
+            <h2 className="text-2xl font-bold isms-gradient-text">
+              Recent Economic Activities
+            </h2>
+          </div>
+        </div>
+        <div>
           <div className="space-y-4">
             {economicActivities.map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+              <div key={activity.id} className="flex items-center justify-between p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all duration-300">
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     {activity.type === "Production" && <Factory className="h-5 w-5 text-blue-600" />}
@@ -429,38 +452,46 @@ export default function EconomicReporting() {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Economic Indicators */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Key Economic Indicators
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Economic Indicators - ISMS Style */}
+      <div className="isms-card">
+        <div className="mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+              <BarChart3 className="h-6 w-6" />
+            </div>
+            <h2 className="text-2xl font-bold isms-gradient-text">
+              Key Economic Indicators
+            </h2>
+          </div>
+        </div>
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {economicIndicators.map((indicator, index) => (
-              <div key={index} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-sm">{indicator.name}</h4>
-                  {indicator.trend === "up" ? (
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-red-600" />
-                  )}
+              <div key={index} className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-medium text-slate-600">{indicator.name}</h4>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    indicator.trend === "up" ? "isms-icon-bg-green" : "isms-icon-bg-orange"
+                  }`}>
+                    {indicator.trend === "up" ? (
+                      <TrendingUp className="h-4 w-4" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4" />
+                    )}
+                  </div>
                 </div>
-                <p className="text-2xl font-bold">{indicator.value}</p>
-                <p className={`text-sm ${indicator.trend === "up" ? "text-green-600" : "text-red-600"}`}>
+                <p className="text-2xl font-bold text-slate-900 mb-2">{indicator.value}</p>
+                <p className={`text-sm font-medium ${indicator.trend === "up" ? "text-green-600" : "text-orange-600"}`}>
                   {indicator.change} from last period
                 </p>
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -36,6 +36,11 @@ export default function Dashboard() {
   const [testResults, setTestResults] = useState<any[]>([]);
   const [testProgress, setTestProgress] = useState(0);
   
+  // Certificate viewing and downloading states
+  const [selectedExporterDetails, setSelectedExporterDetails] = useState<any>(null);
+  const [isExporterDetailsOpen, setIsExporterDetailsOpen] = useState(false);
+  const [isDownloadingCertificate, setIsDownloadingCertificate] = useState<string | null>(null);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -80,6 +85,66 @@ export default function Dashboard() {
       });
     },
   });
+
+  // Certificate handling functions
+  const handleViewExporterDetails = (exporter: any) => {
+    setSelectedExporterDetails(exporter);
+    setIsExporterDetailsOpen(true);
+  };
+
+  const handleDownloadCertificate = async (exporter: any) => {
+    setIsDownloadingCertificate(exporter.id);
+    
+    try {
+      // Generate certificate data
+      const certificateData = {
+        exporterName: exporter.name,
+        exporterId: exporter.id,
+        certificateNumber: `LACRA-CERT-${exporter.id}-${new Date().getFullYear()}`,
+        issuedDate: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        complianceStatus: exporter.complianceStatus,
+        complianceScore: Math.floor(Math.random() * 30) + 70, // 70-100%
+        certifications: [
+          'EUDR Compliance Certificate',
+          'Phytosanitary Certificate', 
+          'Certificate of Origin',
+          'Quality Control Certificate'
+        ],
+        issuingAuthority: 'Liberia Agriculture Commodity Regulatory Authority (LACRA)',
+        digitalSignature: `LACRA-${Date.now()}`,
+        qrCode: `https://verify.lacra.gov.lr/cert/${exporter.id}`,
+        commodities: ['Cocoa', 'Coffee', 'Palm Oil', 'Rubber'].filter(() => Math.random() > 0.3)
+      };
+
+      // Create downloadable JSON file
+      const dataStr = JSON.stringify(certificateData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `LACRA_Certificate_${exporter.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Certificate Downloaded",
+        description: `Certificate for ${exporter.name} has been downloaded successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download certificate. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloadingCertificate(null);
+    }
+  };
 
   // Enhanced real-time testing and data simulation
   const startRealTimeTest = async () => {
@@ -1059,7 +1124,12 @@ export default function Dashboard() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 mt-4">
-                  <Button size="sm" variant="outline" className="text-lacra-blue border-lacra-blue hover:bg-blue-50">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="text-lacra-blue border-lacra-blue hover:bg-blue-50"
+                    onClick={() => handleViewExporterDetails(exporter)}
+                  >
                     <FileCheck className="h-4 w-4 mr-1" />
                     View Details
                   </Button>
@@ -1075,9 +1145,15 @@ export default function Dashboard() {
                       Review Pending
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" className="text-lacra-green border-lacra-green hover:bg-green-50">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="text-lacra-green border-lacra-green hover:bg-green-50"
+                    onClick={() => handleDownloadCertificate(exporter)}
+                    disabled={isDownloadingCertificate === exporter.id}
+                  >
                     <Download className="h-4 w-4 mr-1" />
-                    Download Certificate
+                    {isDownloadingCertificate === exporter.id ? 'Downloading...' : 'Download Certificate'}
                   </Button>
                 </div>
               </div>
@@ -1447,6 +1523,169 @@ export default function Dashboard() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exporter Details Dialog */}
+      <Dialog open={isExporterDetailsOpen} onOpenChange={setIsExporterDetailsOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-lacra-blue" />
+              Exporter Compliance Details
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedExporterDetails && (
+            <div className="space-y-6">
+              {/* Exporter Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Company Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Company Name</label>
+                      <p className="text-lg font-semibold">{selectedExporterDetails.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Exporter ID</label>
+                      <p className="text-lg font-semibold">{selectedExporterDetails.id}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Company Type</label>
+                      <p className="text-lg">{selectedExporterDetails.type} Exporter</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Registration Date</label>
+                      <p className="text-lg">January 15, 2024</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Compliance Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Compliance Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex items-center gap-3">
+                      {getComplianceStatusBadge(selectedExporterDetails.complianceStatus)}
+                      <div>
+                        <p className="font-medium">Overall Status</p>
+                        <p className="text-sm text-gray-600">Current compliance level</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {getRiskLevelBadge(selectedExporterDetails.riskLevel)}
+                      <div>
+                        <p className="font-medium">Risk Assessment</p>
+                        <p className="text-sm text-gray-600">Based on recent activities</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {selectedExporterDetails.licensesValid ? (
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                      ) : (
+                        <XCircle className="h-6 w-6 text-red-600" />
+                      )}
+                      <div>
+                        <p className="font-medium">Licenses</p>
+                        <p className="text-sm text-gray-600">
+                          {selectedExporterDetails.licensesValid ? 'All Valid' : 'Issues Found'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Certificates */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Available Certificates</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'EUDR Compliance Certificate', status: 'Valid', expiry: '2025-12-31', id: 'EUDR-001' },
+                      { name: 'Phytosanitary Certificate', status: 'Valid', expiry: '2025-06-30', id: 'PHYTO-001' },
+                      { name: 'Certificate of Origin', status: 'Valid', expiry: '2025-09-15', id: 'ORIGIN-001' },
+                      { name: 'Quality Control Certificate', status: 'Pending', expiry: '2025-03-20', id: 'QC-001' }
+                    ].map((cert, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <FileCheck className="h-5 w-5 text-blue-600" />
+                          <div>
+                            <p className="font-medium">{cert.name}</p>
+                            <p className="text-sm text-gray-600">ID: {cert.id} • Expires: {new Date(cert.expiry).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={cert.status === 'Valid' ? 'default' : 'secondary'}>
+                            {cert.status}
+                          </Badge>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="font-medium">Certificate Renewal Completed</p>
+                        <p className="text-sm text-gray-600">EUDR compliance certificate renewed • 2 days ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-blue-50 rounded-lg">
+                      <FileCheck className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium">Inspection Scheduled</p>
+                        <p className="text-sm text-gray-600">Annual compliance inspection • 1 week ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-yellow-50 rounded-lg">
+                      <Clock className="h-5 w-5 text-yellow-600" />
+                      <div>
+                        <p className="font-medium">Document Update Required</p>
+                        <p className="text-sm text-gray-600">Updated export documentation needed • 3 days ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsExporterDetailsOpen(false)}>
+                  Close
+                </Button>
+                <Button 
+                  onClick={() => handleDownloadCertificate(selectedExporterDetails)}
+                  disabled={isDownloadingCertificate === selectedExporterDetails.id}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {isDownloadingCertificate === selectedExporterDetails.id ? 'Downloading...' : 'Download All Certificates'}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
       </div>

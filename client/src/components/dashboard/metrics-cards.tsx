@@ -69,32 +69,52 @@ export default function MetricsCards({ selectedCounty = "all" }: MetricsCardsPro
   ];
 
   return (
-    <div className="mobile-container">
-      <div className="mobile-safe-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card, index) => (
-          <Card key={card.title} className="border border-gray-100 w-full max-w-full">
-            <CardContent className="mobile-card">
-              <div className="flex items-center justify-between mobile-hide-overflow">
-                <div className="min-w-0 flex-1 mobile-text-safe">
-                  <p className="text-xs md:text-sm font-medium text-gray-500 mobile-text-safe">{card.title}</p>
-                  <p className="text-base md:text-2xl font-bold text-neutral mt-1 mobile-text-safe">{card.value}</p>
-                </div>
-                <div className={`w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 ${card.color} bg-opacity-10 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                  <card.icon className={`text-xs sm:text-sm md:text-xl ${card.color.replace('bg-', 'text-')}`} />
-                </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {cards.map((card, index) => (
+        <div key={card.title} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300">
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`p-3 rounded-xl ${
+              index === 0 ? 'bg-blue-50' :
+              index === 1 ? 'bg-green-50' :
+              index === 2 ? 'bg-orange-50' : 'bg-purple-50'
+            }`}>
+              <card.icon className={`h-6 w-6 ${
+                index === 0 ? 'text-blue-600' :
+                index === 1 ? 'text-green-600' :
+                index === 2 ? 'text-orange-600' : 'text-purple-600'
+              }`} />
+            </div>
+            <h3 className="font-semibold text-slate-700">{card.title}</h3>
+          </div>
+          <div className="space-y-2">
+            <div className="text-3xl font-bold text-slate-900">{card.value}</div>
+            <div className="flex items-center gap-2 text-sm">
+              <div className={`h-2 w-2 rounded-full ${
+                index === 2 ? 'bg-orange-500 animate-pulse' : 'bg-green-500'
+              }`}></div>
+              <span className={`font-medium ${
+                index === 2 ? 'text-orange-600' : 'text-green-600'
+              }`}>
+                {card.change}
+              </span>
+              <span className="text-slate-500">{card.changeText}</span>
+            </div>
+            {index === 1 && (
+              <div className="w-full bg-slate-100 rounded-full h-2 mt-3">
+                <div 
+                  className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${metrics?.complianceRate || 0}%` }}
+                ></div>
               </div>
-              <div className="mt-2 md:mt-4 w-full">
-                <div className="flex items-center text-xs md:text-sm text-gray-600">
-                  <span className={`font-medium truncate ${index === 2 ? 'text-error' : 'text-success'}`}>
-                    {card.change}
-                  </span>
-                  <span className="ml-1 truncate">{card.changeText}</span>
-                </div>
+            )}
+            {index === 2 && (
+              <div className="text-xs text-slate-500 mt-2">
+                {(metrics?.pendingInspections || 0) > 10 ? "High priority queue" : "Normal processing"}
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

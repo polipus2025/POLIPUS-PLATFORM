@@ -41,12 +41,16 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
 
   // Update display data when data changes or index changes
   useEffect(() => {
-    if (filteredCountyData.length === 0) return;
+    if (filteredCountyData.length === 0) {
+      setDisplayData([]);
+      return;
+    }
     
     const startIndex = currentIndex * 4;
     const endIndex = startIndex + 4;
-    setDisplayData(filteredCountyData.slice(startIndex, endIndex));
-  }, [filteredCountyData, currentIndex]);
+    const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
+    setDisplayData(newDisplayData);
+  }, [currentIndex, countyData, selectedCounty]);
 
   if (isLoading) {
     return (

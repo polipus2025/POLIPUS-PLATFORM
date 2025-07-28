@@ -56,13 +56,13 @@ export default function SystemAlerts() {
   const getAlertColors = (type: string) => {
     switch (type) {
       case 'error':
-        return 'bg-red-900 bg-opacity-20 border-red-500 border-opacity-30';
+        return 'bg-error bg-opacity-5 border-error border-opacity-20 text-error';
       case 'warning':
-        return 'bg-yellow-900 bg-opacity-20 border-yellow-500 border-opacity-30';
+        return 'bg-warning bg-opacity-5 border-warning border-opacity-20 text-warning';
       case 'success':
-        return 'bg-green-900 bg-opacity-20 border-green-500 border-opacity-30';
+        return 'bg-success bg-opacity-5 border-success border-opacity-20 text-success';
       default:
-        return 'bg-gray-800 bg-opacity-20 border-gray-500 border-opacity-30';
+        return 'bg-gray-100 border-gray-300 text-gray-600';
     }
   };
 

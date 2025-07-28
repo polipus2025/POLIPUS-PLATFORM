@@ -787,9 +787,9 @@ export default function GISMapping() {
                     </div>
 
                     {/* LIBERIA MAP - NO SVG CIRCLES */}
-                    <div className="grid grid-cols-5 gap-3 bg-green-50 p-6 rounded-lg">
+                    <div className="grid grid-cols-5 gap-2 bg-green-50 p-4 rounded-lg">
                       <div 
-                        className="bg-red-200 p-4 rounded cursor-pointer hover:bg-red-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-red-200 p-3 rounded cursor-pointer hover:bg-red-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Montserrado',
@@ -804,12 +804,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Montserrado</div>
-                        <div className="text-sm">342 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Montserrado</div>
+                        <div className="text-xs">342 farms</div>
                       </div>
                       <div 
-                        className="bg-blue-200 p-4 rounded cursor-pointer hover:bg-blue-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-blue-200 p-3 rounded cursor-pointer hover:bg-blue-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Lofa',
@@ -824,12 +824,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Lofa</div>
-                        <div className="text-sm">287 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Lofa</div>
+                        <div className="text-xs">287 farms</div>
                       </div>
                       <div 
-                        className="bg-yellow-200 p-4 rounded cursor-pointer hover:bg-yellow-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-yellow-200 p-3 rounded cursor-pointer hover:bg-yellow-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Nimba',
@@ -844,12 +844,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Nimba</div>
-                        <div className="text-sm">298 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Nimba</div>
+                        <div className="text-xs">298 farms</div>
                       </div>
                       <div 
-                        className="bg-green-200 p-4 rounded cursor-pointer hover:bg-green-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-green-200 p-3 rounded cursor-pointer hover:bg-green-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Bong',
@@ -864,12 +864,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Bong</div>
-                        <div className="text-sm">234 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Bong</div>
+                        <div className="text-xs">234 farms</div>
                       </div>
                       <div 
-                        className="bg-purple-200 p-4 rounded cursor-pointer hover:bg-purple-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-purple-200 p-3 rounded cursor-pointer hover:bg-purple-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Grand Gedeh',
@@ -884,12 +884,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Grand Gedeh</div>
-                        <div className="text-sm">156 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Grand Gedeh</div>
+                        <div className="text-xs">156 farms</div>
                       </div>
                       <div 
-                        className="bg-pink-200 p-4 rounded cursor-pointer hover:bg-pink-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-pink-200 p-3 rounded cursor-pointer hover:bg-pink-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Grand Bassa',
@@ -904,12 +904,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Grand Bassa</div>
-                        <div className="text-sm">198 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Grand Bassa</div>
+                        <div className="text-xs">198 farms</div>
                       </div>
                       <div 
-                        className="bg-indigo-200 p-4 rounded cursor-pointer hover:bg-indigo-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-indigo-200 p-3 rounded cursor-pointer hover:bg-indigo-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Sinoe',
@@ -924,12 +924,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Sinoe</div>
-                        <div className="text-sm">167 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Sinoe</div>
+                        <div className="text-xs">167 farms</div>
                       </div>
                       <div 
-                        className="bg-orange-200 p-4 rounded cursor-pointer hover:bg-orange-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-orange-200 p-3 rounded cursor-pointer hover:bg-orange-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Maryland',
@@ -944,12 +944,12 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Maryland</div>
-                        <div className="text-sm">145 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Maryland</div>
+                        <div className="text-xs">145 farms</div>
                       </div>
                       <div 
-                        className="bg-teal-200 p-4 rounded cursor-pointer hover:bg-teal-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-teal-200 p-3 rounded cursor-pointer hover:bg-teal-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Grand Kru',
@@ -964,14 +964,14 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Grand Kru</div>
-                        <div className="text-sm">134 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Grand Kru</div>
+                        <div className="text-xs">134 farms</div>
                       </div>
 
                       {/* SECONDA RIGA - 6 CONTEE AGGIUNTIVE */}
                       <div 
-                        className="bg-cyan-200 p-4 rounded cursor-pointer hover:bg-cyan-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-cyan-200 p-3 rounded cursor-pointer hover:bg-cyan-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'River Cess',
@@ -986,13 +986,13 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">River Cess</div>
-                        <div className="text-sm">112 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">River Cess</div>
+                        <div className="text-xs">112 farms</div>
                       </div>
 
                       <div 
-                        className="bg-lime-200 p-4 rounded cursor-pointer hover:bg-lime-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-lime-200 p-3 rounded cursor-pointer hover:bg-lime-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Gbarpolu',
@@ -1007,13 +1007,13 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Gbarpolu</div>
-                        <div className="text-sm">98 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Gbarpolu</div>
+                        <div className="text-xs">98 farms</div>
                       </div>
 
                       <div 
-                        className="bg-rose-200 p-4 rounded cursor-pointer hover:bg-rose-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-rose-200 p-3 rounded cursor-pointer hover:bg-rose-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Bomi',
@@ -1028,13 +1028,13 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Bomi</div>
-                        <div className="text-sm">156 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Bomi</div>
+                        <div className="text-xs">156 farms</div>
                       </div>
 
                       <div 
-                        className="bg-amber-200 p-4 rounded cursor-pointer hover:bg-amber-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-amber-200 p-3 rounded cursor-pointer hover:bg-amber-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Grand Cape Mount',
@@ -1049,13 +1049,13 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Grand Cape Mount</div>
-                        <div className="text-sm">178 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">G. Cape Mount</div>
+                        <div className="text-xs">178 farms</div>
                       </div>
 
                       <div 
-                        className="bg-emerald-200 p-4 rounded cursor-pointer hover:bg-emerald-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-emerald-200 p-3 rounded cursor-pointer hover:bg-emerald-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'Margibi',
@@ -1070,13 +1070,13 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">Margibi</div>
-                        <div className="text-sm">203 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">Margibi</div>
+                        <div className="text-xs">203 farms</div>
                       </div>
 
                       <div 
-                        className="bg-violet-200 p-4 rounded cursor-pointer hover:bg-violet-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        className="bg-violet-200 p-3 rounded cursor-pointer hover:bg-violet-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
                           setSelectedCounty({
                             name: 'River Gee',
@@ -1091,9 +1091,9 @@ export default function GISMapping() {
                           });
                         }}
                       >
-                        <div className="text-2xl">🏛️</div>
-                        <div className="font-bold">River Gee</div>
-                        <div className="text-sm">89 farms</div>
+                        <div className="text-xl">🏛️</div>
+                        <div className="font-bold text-xs">River Gee</div>
+                        <div className="text-xs">89 farms</div>
                       </div>
                     </div>
 

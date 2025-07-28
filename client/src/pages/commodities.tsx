@@ -433,20 +433,34 @@ export default function Commodities() {
   };
 
   return (
-    <div className="w-full bg-gray-50 min-h-screen">
-      <Helmet>
-        <title>Commodities - AgriTrace360™ LACRA</title>
-        <meta name="description" content="Agricultural commodity tracking and management system for LACRA regulatory compliance" />
-      </Helmet>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Helmet>
+          <title>Commodities - AgriTrace360™ LACRA</title>
+          <meta name="description" content="Agricultural commodity tracking and management system for LACRA regulatory compliance" />
+        </Helmet>
 
-      <div className="p-4 lg:p-6 w-full max-w-full">
-        {/* Page Header */}
-        <div className="mb-6">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-neutral mb-2">Agricultural Commodities</h2>
-              <p className="text-gray-600">Track and manage agricultural commodities across Liberian counties</p>
+        {/* Modern ISMS Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-4 mb-6">
+            <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+              <Building2 className="h-10 w-10 text-white" />
             </div>
+            <div className="text-left">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                Agricultural Commodities
+              </h1>
+              <p className="text-slate-600 text-lg mt-1">
+                Track and manage agricultural commodities across Liberian counties
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+            <div></div>
             <div className="flex gap-2">
               <Button 
                 variant={simulationActive ? "destructive" : "outline"}
@@ -625,59 +639,75 @@ export default function Commodities() {
           </div>
         </div>
 
-        {/* Real-time Simulation Dashboard */}
+        {/* Real-time Simulation Dashboard - ISMS Style */}
         {simulationActive && (
-          <Card className="mb-6 border-green-200 bg-green-50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                Real-time Simulation Active
-                <Badge variant="outline" className="ml-auto">
-                  Live Testing Mode
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 transition-all duration-500">
-                    {simulationData.totalCommodities.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600">Total Commodities</div>
+          <div className="isms-card mb-8">
+            <div className="mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 transition-all duration-500">
-                    {simulationData.complianceRate.toFixed(1)}%
-                  </div>
-                  <div className="text-sm text-gray-600">Compliance Rate</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600 transition-all duration-500">
-                    {simulationData.pendingInspections}
-                  </div>
-                  <div className="text-sm text-gray-600">Pending Inspections</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600 transition-all duration-500">
-                    {simulationData.recentUpdates}
-                  </div>
-                  <div className="text-sm text-gray-600">Recent Updates</div>
+                <div>
+                  <h2 className="text-2xl font-bold isms-gradient-text">
+                    Real-time Simulation Active
+                  </h2>
+                  <Badge variant="outline" className="mt-1">
+                    Live Testing Mode
+                  </Badge>
                 </div>
               </div>
-              <div className="mt-4 text-center text-xs text-gray-500">
+            </div>
+            <div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 text-center">
+                  <div className="text-3xl font-bold text-green-600 transition-all duration-500 mb-2">
+                    {simulationData.totalCommodities.toLocaleString()}
+                  </div>
+                  <div className="text-sm font-medium text-slate-600">Total Commodities</div>
+                </div>
+                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 text-center">
+                  <div className="text-3xl font-bold text-blue-600 transition-all duration-500 mb-2">
+                    {simulationData.complianceRate.toFixed(1)}%
+                  </div>
+                  <div className="text-sm font-medium text-slate-600">Compliance Rate</div>
+                </div>
+                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 text-center">
+                  <div className="text-3xl font-bold text-orange-600 transition-all duration-500 mb-2">
+                    {simulationData.pendingInspections}
+                  </div>
+                  <div className="text-sm font-medium text-slate-600">Pending Inspections</div>
+                </div>
+                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 text-center">
+                  <div className="text-3xl font-bold text-purple-600 transition-all duration-500 mb-2">
+                    {simulationData.recentUpdates}
+                  </div>
+                  <div className="text-sm font-medium text-slate-600">Recent Updates</div>
+                </div>
+              </div>
+              <div className="mt-6 text-center text-xs text-slate-500">
                 Last update: {simulationData.lastUpdate.toLocaleTimeString()} 
                 <span className="ml-2 inline-flex items-center gap-1">
                   <div className="w-1 h-1 bg-green-500 rounded-full animate-ping"></div>
                   Live data simulation running
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
+        {/* Filters - ISMS Style */}
+        <div className="isms-card mb-8">
+          <div className="mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Filter className="h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold isms-gradient-text">
+                Search & Filter Commodities
+              </h2>
+            </div>
+          </div>
+          <div>
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-64">
               <label className="text-sm font-medium text-gray-700 mb-2 block">Search</label>
@@ -722,22 +752,32 @@ export default function Commodities() {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" className="rounded-xl">
               <Filter className="h-4 w-4 mr-2" />
               More Filters
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Commodities Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-neutral">
-            Commodities ({filteredCommodities.length} of {commodities.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      {/* Commodities Table - ISMS Style */}
+      <div className="isms-card">
+        <div className="mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+              <Building2 className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold isms-gradient-text">
+                Agricultural Commodities 
+              </h2>
+              <p className="text-slate-600 text-sm">
+                {filteredCommodities.length} of {commodities.length} commodities
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="overflow-hidden">
           <div className="w-full overflow-x-auto max-w-full">
             <Table className="w-full min-w-[800px]">
               <TableHeader>
@@ -903,8 +943,8 @@ export default function Commodities() {
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
       {/* Compliance Details Dialog */}
       <Dialog open={isComplianceDialogOpen} onOpenChange={setIsComplianceDialogOpen}>

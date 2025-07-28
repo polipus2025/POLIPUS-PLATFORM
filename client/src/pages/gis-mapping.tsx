@@ -821,11 +821,7 @@ export default function GISMapping() {
                 <CardContent>
                   {/* DIRECT INLINE SOLUTION - NO EXTERNAL COMPONENTS */}
                   <div className="p-6 space-y-6">
-                    {/* IMMEDIATE VISUAL CONFIRMATION */}
-                    <div className="bg-red-500 text-white p-4 rounded-lg text-center">
-                      <h1 className="text-2xl font-bold">✅ SISTEMA FUNZIONA - CERCHI ELIMINATI</h1>
-                      <p className="text-lg">Se vedi questo banner rosso, la mappa è stata riparata!</p>
-                    </div>
+
 
                     {/* LIBERIA MAP - NO SVG CIRCLES */}
                     <div className="grid grid-cols-5 gap-2 bg-green-50 p-4 rounded-lg">
@@ -2453,10 +2449,7 @@ export default function GISMapping() {
                       </div>
                     )}
 
-                    <div className="bg-blue-100 p-4 rounded-lg text-center">
-                      <h2 className="text-xl font-bold text-blue-800">🗺️ MAPPA GIS INTERATTIVA LIBERIA</h2>
-                      <p className="text-blue-700">Sistema di mappatura geografica con dati in tempo reale</p>
-                    </div>
+
                   </div>
                 </CardContent>
               </Card>

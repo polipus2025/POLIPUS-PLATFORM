@@ -2363,11 +2363,11 @@ export default function GISMapping() {
                         <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg">
                           <div className="text-center">
                             <Globe className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                            <h3 className="text-lg font-semibold text-gray-700">Mappa GIS Interattiva</h3>
-                            <p className="text-gray-500 mb-4">Clicca "Start Live" per attivare la mappa in tempo reale</p>
+                            <h3 className="text-lg font-semibold text-gray-700">Interactive GIS Map</h3>
+                            <p className="text-gray-500 mb-4">Click "Start Live" to activate real-time mapping</p>
                             <Button onClick={() => {setIsRealTimeActive(true); initializeRealTimeMap();}}>
                               <Play className="h-4 w-4 mr-2" />
-                              Attiva Mappa Interattiva
+                              Activate Interactive Map
                             </Button>
                           </div>
                         </div>
@@ -2405,12 +2405,12 @@ export default function GISMapping() {
                                 <div className="animate-pulse">
                                   <Globe className="h-16 w-16 mx-auto text-green-600 mb-4" />
                                 </div>
-                                <h3 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA GIS MAP ATTIVA</h3>
-                                <p className="text-green-700 mb-2">Sistema di mappatura in tempo reale attivo</p>
+                                <h3 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA GIS MAP ACTIVE</h3>
+                                <p className="text-green-700 mb-2">Real-time mapping system active</p>
                                 <div className="flex justify-center space-x-4 text-sm">
-                                  <span className="bg-green-100 px-2 py-1 rounded">📡 GPS: Attivo</span>
-                                  <span className="bg-blue-100 px-2 py-1 rounded">🛰️ Satelliti: 12 connessi</span>
-                                  <span className="bg-yellow-100 px-2 py-1 rounded">📍 Posizione: Live</span>
+                                  <span className="bg-green-100 px-2 py-1 rounded">📡 GPS: Active</span>
+                                  <span className="bg-blue-100 px-2 py-1 rounded">🛰️ Satellites: 12 connected</span>
+                                  <span className="bg-yellow-100 px-2 py-1 rounded">📍 Position: Live</span>
                                 </div>
                               </div>
                             </div>
@@ -2425,7 +2425,7 @@ export default function GISMapping() {
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="font-semibold text-green-800 flex items-center gap-2">
                             <Activity className="h-4 w-4" />
-                            Dati in Tempo Reale
+                            Real-Time Data
                           </h4>
                           <Badge variant="secondary" className="bg-green-100 text-green-800">
                             <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
@@ -2435,7 +2435,7 @@ export default function GISMapping() {
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-green-600">{realTimeMapData?.activeFarms || 2847}</div>
-                            <div className="text-gray-600">Farms Attive</div>
+                            <div className="text-gray-600">Active Farms</div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-blue-600">{realTimeMapData?.compliance || 91}%</div>
@@ -2461,7 +2461,7 @@ export default function GISMapping() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Layers className="h-5 w-5" />
-                    Controlli GIS Live
+                    Live GIS Controls
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -2544,10 +2544,10 @@ export default function GISMapping() {
                       <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Zap className="h-4 w-4 text-yellow-600" />
-                          <span className="font-semibold text-sm text-yellow-800">Sistema Attivo</span>
+                          <span className="font-semibold text-sm text-yellow-800">System Active</span>
                         </div>
                         <p className="text-xs text-yellow-700">
-                          La mappa GIS è attualmente in modalità real-time. I dati vengono aggiornati automaticamente ogni 3 secondi.
+                          The GIS map is currently in real-time mode. Data is automatically updated every 3 seconds.
                         </p>
                       </div>
                     )}

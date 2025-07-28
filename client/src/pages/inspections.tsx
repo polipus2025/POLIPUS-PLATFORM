@@ -98,20 +98,35 @@ export default function Inspections() {
   };
 
   return (
-    <div className="p-6">
-      <Helmet>
-        <title>Inspections - AgriTrace360™ LACRA</title>
-        <meta name="description" content="Quality control inspection management system for agricultural commodity compliance" />
-      </Helmet>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Helmet>
+          <title>Inspections - AgriTrace360™ LACRA</title>
+          <meta name="description" content="Quality control inspection management system for agricultural commodity compliance" />
+        </Helmet>
 
-      {/* Page Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-neutral mb-2">Quality Inspections</h2>
-            <p className="text-gray-600">Manage quality control inspections and compliance monitoring</p>
+        {/* Modern ISMS Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-4 mb-6">
+            <div className="p-4 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl shadow-lg">
+              <FileText className="h-10 w-10 text-white" />
+            </div>
+            <div className="text-left">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                Quality Inspections
+              </h1>
+              <p className="text-slate-600 text-lg mt-1">
+                Manage quality control inspections and compliance monitoring
+              </p>
+            </div>
           </div>
-          <div className="flex space-x-3">
+        </div>
+
+        {/* Controls */}
+        <div className="mb-8">
+          <div className="flex justify-between items-start">
+            <div></div>
+            <div className="flex space-x-3">
             <Button 
               variant="outline"
               onClick={() => setIsScheduleDialogOpen(true)}
@@ -130,61 +145,78 @@ export default function Inspections() {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-neutral">{inspections.length}</div>
-            <p className="text-sm text-gray-500">Total Inspections</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-success">
+        {/* Summary Cards - ISMS Style */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-slate-900 mb-2">{inspections.length}</div>
+            <p className="text-slate-600 font-medium">Total Inspections</p>
+          </div>
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-green-600 mb-2">
               {inspections.filter(i => i.complianceStatus === 'compliant').length}
             </div>
-            <p className="text-sm text-gray-500">Compliant</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-warning">
+            <p className="text-slate-600 font-medium">Compliant</p>
+          </div>
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-orange-600 mb-2">
               {inspections.filter(i => i.complianceStatus === 'review_required').length}
             </div>
-            <p className="text-sm text-gray-500">Review Required</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-error">
+            <p className="text-slate-600 font-medium">Review Required</p>
+          </div>
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-red flex items-center justify-center">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-red-600 mb-2">
               {inspections.filter(i => i.complianceStatus === 'non_compliant').length}
             </div>
-            <p className="text-sm text-gray-500">Non-Compliant</p>
-          </CardContent>
-        </Card>
-      </div>
+            <p className="text-slate-600 font-medium">Non-Compliant</p>
+          </div>
+        </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
+        {/* Filters Section - ISMS Style */}
+        <div className="isms-card mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Search className="h-5 w-5 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900">Search & Filter</h3>
+          </div>
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-64">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Search</label>
+              <label className="text-sm font-medium text-slate-700 mb-2 block">Search Inspections</label>
               <div className="relative">
                 <Input
                   type="text"
                   placeholder="Search by inspector, commodity, or batch number..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
                 />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
               </div>
             </div>
             <div className="min-w-48">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
+              <label className="text-sm font-medium text-slate-700 mb-2 block">Status Filter</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="border-slate-200 focus:border-blue-500 focus:ring-blue-500">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -196,17 +228,21 @@ export default function Inspections() {
               </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Inspections Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-neutral">
-            Inspections ({filteredInspections.length} of {inspections.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Inspections Table - ISMS Style */}
+        <div className="isms-card">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+              <FileText className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-slate-900">Quality Inspections</h3>
+              <p className="text-slate-600 text-sm">
+                Showing {filteredInspections.length} of {inspections.length} inspections
+              </p>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -295,8 +331,7 @@ export default function Inspections() {
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
       {/* View Inspection Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
@@ -620,6 +655,8 @@ export default function Inspections() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      </div>
     </div>
   );
 }

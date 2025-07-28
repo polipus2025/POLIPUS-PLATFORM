@@ -489,27 +489,46 @@ export default function GISMappingClean() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                County PDF Reports - Comprehensive Agricultural Analysis
+                County PDF Reports
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-800 mb-2">Generate Detailed County Reports</h3>
-                  <p className="text-sm text-blue-700 mb-3">
-                    Create comprehensive A4 PDF reports for each of Liberia's 15 counties including:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-700">
-                    <div>• County maps with GPS coordinates</div>
-                    <div>• Multi-constellation satellite data</div>
-                    <div>• Real-time weather conditions</div>
-                    <div>• Deforestation alerts & monitoring</div>
-                    <div>• EUDR compliance metrics</div>
-                    <div>• Tracking & tracing statistics</div>
-                    <div>• Carbon credit impact analysis</div>
-                    <div>• Sustainability scoring</div>
+              <div className="space-y-6">
+                {/* Summary Statistics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-green-50 rounded-lg border">
+                    <div className="text-2xl font-bold text-green-600">15</div>
+                    <div className="text-sm text-gray-600">Counties Available</div>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg border">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {Math.round(counties.reduce((sum, c) => sum + c.compliance, 0) / counties.length)}%
+                    </div>
+                    <div className="text-sm text-gray-600">Avg Compliance</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg border">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {counties.reduce((sum, c) => sum + c.farms, 0)}
+                    </div>
+                    <div className="text-sm text-gray-600">Total Farms</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg border">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {counties.reduce((sum, c) => sum + c.deforestationAlerts, 0)}
+                    </div>
+                    <div className="text-sm text-gray-600">Active Alerts</div>
                   </div>
                 </div>
+
+                {/* Report Features */}
+                <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border">
+                  <h3 className="font-semibold text-gray-800 mb-2">Comprehensive Agricultural Reports</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Generate detailed A4 PDF reports with satellite data, weather conditions, compliance metrics, and sustainability analysis.
+                  </p>
+                </div>
+
+                {/* County Grid */}
                 <CountyReportGenerator />
               </div>
             </CardContent>

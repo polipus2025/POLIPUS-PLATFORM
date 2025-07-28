@@ -374,127 +374,80 @@ export default function CountyReportGenerator() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            County Report Generator
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {countyDatabase.map((county) => (
-              <Card key={county.name} className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="text-center space-y-2">
-                    <h3 className="font-semibold text-sm">{county.name}</h3>
-                    <div className="text-xs text-gray-600">
-                      <div>{county.farms} farms</div>
-                      <div>{county.compliance}% compliance</div>
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {countyDatabase.map((county) => (
+        <Card key={county.name} className="hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="text-center space-y-3">
+              <h3 className="font-semibold text-sm">{county.name}</h3>
+              <div className="text-xs text-gray-600 space-y-1">
+                <div>{county.farms} farms</div>
+                <div>{county.compliance}% compliance</div>
+                <div className="flex justify-center gap-2">
+                  <span className="text-orange-600">{county.deforestationAlerts} alerts</span>
+                  <span className="text-green-600">{county.sustainabilityScore}%</span>
+                </div>
+              </div>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => setSelectedCounty(county)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    PDF Report
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      {county.name} County Report
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="text-center p-3 bg-gray-50 rounded">
+                        <div className="font-bold text-lg text-green-600">{county.farms}</div>
+                        <div className="text-gray-600">Farms</div>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 rounded">
+                        <div className="font-bold text-lg text-blue-600">{county.compliance}%</div>
+                        <div className="text-gray-600">Compliance</div>
+                      </div>
                     </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          size="sm" 
-                          className="w-full"
-                          onClick={() => setSelectedCounty(county)}
-                        >
-                          <Download className="h-4 w-4 mr-1" />
-                          Generate PDF
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>{county.name} County Report</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <div className="font-medium">Population</div>
-                              <div className="text-gray-600">{county.population}</div>
-                            </div>
-                            <div>
-                              <div className="font-medium">Capital</div>
-                              <div className="text-gray-600">{county.capital}</div>
-                            </div>
-                            <div>
-                              <div className="font-medium">Farms</div>
-                              <div className="text-gray-600">{county.farms}</div>
-                            </div>
-                            <div>
-                              <div className="font-medium">Compliance</div>
-                              <div className="text-gray-600">{county.compliance}%</div>
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <div className="font-medium text-sm mb-2">Major Commodities</div>
-                            <div className="flex flex-wrap gap-1">
-                              {county.commodities.map((commodity) => (
-                                <Badge key={commodity} variant="secondary" className="text-xs">
-                                  {commodity}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
 
-                          <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div className="text-center">
-                              <div className="font-medium flex items-center justify-center gap-1">
-                                <AlertTriangle className="h-4 w-4 text-orange-500" />
-                                Alerts
-                              </div>
-                              <div className="text-orange-600">{county.deforestationAlerts}</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="font-medium flex items-center justify-center gap-1">
-                                <Leaf className="h-4 w-4 text-green-500" />
-                                Credits
-                              </div>
-                              <div className="text-green-600">{county.carbonCredits}</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="font-medium flex items-center justify-center gap-1">
-                                <BarChart3 className="h-4 w-4 text-blue-500" />
-                                Score
-                              </div>
-                              <div className="text-blue-600">{county.sustainabilityScore}%</div>
-                            </div>
-                          </div>
-
-                          {isGenerating && (
-                            <div className="space-y-2">
-                              <div className="text-sm font-medium">Generating PDF Report...</div>
-                              <Progress value={progress} className="w-full" />
-                              <div className="text-xs text-gray-500">
-                                {progress < 20 && "Creating county overview..."}
-                                {progress >= 20 && progress < 40 && "Processing satellite data..."}
-                                {progress >= 40 && progress < 60 && "Analyzing weather conditions..."}
-                                {progress >= 60 && progress < 80 && "Checking deforestation alerts..."}
-                                {progress >= 80 && "Calculating sustainability metrics..."}
-                              </div>
-                            </div>
-                          )}
-
-                          <Button 
-                            onClick={() => generateCountyPDF(county)}
-                            disabled={isGenerating}
-                            className="w-full"
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            {isGenerating ? 'Generating...' : 'Download Full Report (PDF)'}
-                          </Button>
+                    {isGenerating && (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">Generating PDF Report...</div>
+                        <Progress value={progress} className="w-full" />
+                        <div className="text-xs text-gray-500">
+                          {progress < 20 && "Creating county overview..."}
+                          {progress >= 20 && progress < 40 && "Processing satellite data..."}
+                          {progress >= 40 && progress < 60 && "Analyzing weather conditions..."}
+                          {progress >= 60 && progress < 80 && "Checking deforestation alerts..."}
+                          {progress >= 80 && "Calculating sustainability metrics..."}
                         </div>
-                      </DialogContent>
-                    </Dialog>
+                      </div>
+                    )}
+
+                    <Button 
+                      onClick={() => generateCountyPDF(county)}
+                      disabled={isGenerating}
+                      className="w-full"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      {isGenerating ? 'Generating...' : 'Download PDF'}
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

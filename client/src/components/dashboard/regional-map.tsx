@@ -21,14 +21,37 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const [displayData, setDisplayData] = useState<ComplianceByCounty[]>([]);
 
-  // Filter county data based on selection
+  // Filter county data based on selection with improved matching and debugging
   const filteredCountyData = selectedCounty === "all" 
     ? countyData 
-    : countyData.filter(county => county.county === selectedCounty);
+    : countyData.filter(county => {
+        // Exact match for county names
+        const countyName = county.county.toLowerCase().trim();
+        const selectedName = selectedCounty.toLowerCase().trim();
+        
+        // Debug logging (remove in production)
+        if (selectedCounty !== "all") {
+          console.log('Filtering counties:', {
+            selectedCounty,
+            countyName,
+            selectedName,
+            exact: countyName === selectedName,
+            available: countyData.map(c => c.county)
+          });
+        }
+        
+        return countyName === selectedName;
+      });
+
+  // Reset current index when county selection changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setIsAutoScrolling(filteredCountyData.length > 4); // Only auto-scroll if more than 4 items
+  }, [selectedCounty, filteredCountyData.length]);
 
   // Auto-scroll effect
   useEffect(() => {
-    if (!isAutoScrolling || filteredCountyData.length === 0) return;
+    if (!isAutoScrolling || filteredCountyData.length <= 4) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => 
@@ -46,11 +69,17 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
       return;
     }
     
+    // For single county or small datasets, show all data
+    if (filteredCountyData.length <= 4) {
+      setDisplayData(filteredCountyData);
+      return;
+    }
+    
     const startIndex = currentIndex * 4;
     const endIndex = startIndex + 4;
     const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
     setDisplayData(newDisplayData);
-  }, [currentIndex, countyData, selectedCounty]);
+  }, [currentIndex, filteredCountyData]);
 
   if (isLoading) {
     return (
@@ -77,10 +106,10 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg font-semibold text-neutral">
-            Regional Compliance Overview
+            {selectedCounty === "all" ? "Regional Compliance Overview" : `${selectedCounty} County Overview`}
             {selectedCounty !== "all" && (
-              <span className="text-sm font-normal text-blue-600 ml-2">
-                • {selectedCounty}
+              <span className="text-sm font-normal text-green-600 ml-2">
+                • Filtered View ({filteredCountyData.length} record{filteredCountyData.length !== 1 ? 's' : ''})
               </span>
             )}
           </CardTitle>
@@ -183,8 +212,16 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
             
             {/* Empty State for No Data */}
             {displayData.length === 0 && (
-              <div className="text-white text-center">
-                <div className="text-sm opacity-75">No county data available</div>
+              <div className="text-white text-center p-8">
+                <div className="text-lg font-medium mb-2">
+                  {selectedCounty === "all" ? "No county data available" : `No data found for ${selectedCounty}`}
+                </div>
+                <div className="text-sm opacity-75">
+                  {selectedCounty === "all" 
+                    ? "Please check your connection or try refreshing the page" 
+                    : "This county may not have compliance data available yet"
+                  }
+                </div>
               </div>
             )}
           </div>

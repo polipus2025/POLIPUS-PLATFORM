@@ -93,27 +93,39 @@ export default function QuickActions() {
   const actions = [
     {
       title: "New Inspection",
+      subtitle: "Record quality control",
       icon: ClipboardCheck,
       action: "dialog",
-      color: "hover:border-lacra-blue hover:bg-blue-50"
+      bgGradient: "from-blue-500 to-blue-600",
+      iconColor: "text-white",
+      hoverColor: "hover:from-blue-600 hover:to-blue-700"
     },
     {
       title: "Generate Report",
+      subtitle: "Export compliance data",
       icon: FileText,
       href: "/reports",
-      color: "hover:border-lacra-green hover:bg-green-50"
+      bgGradient: "from-green-500 to-green-600",
+      iconColor: "text-white",
+      hoverColor: "hover:from-green-600 hover:to-green-700"
     },
     {
       title: "Issue Tag",
+      subtitle: "Create certificates",
       icon: Tag,
       href: "/data-entry?type=certification",
-      color: "hover:border-warning hover:bg-orange-50"
+      bgGradient: "from-orange-500 to-orange-600",
+      iconColor: "text-white",
+      hoverColor: "hover:from-orange-600 hover:to-orange-700"
     },
     {
       title: "Schedule Inspection",
+      subtitle: "Plan future reviews",
       icon: CalendarPlus,
       href: "/inspections",
-      color: "hover:border-purple-500 hover:bg-purple-50"
+      bgGradient: "from-purple-500 to-purple-600",
+      iconColor: "text-white",
+      hoverColor: "hover:from-purple-600 hover:to-purple-700"
     }
   ];
 
@@ -129,13 +141,18 @@ export default function QuickActions() {
               return (
                 <Dialog key={action.title} open={isNewInspectionOpen} onOpenChange={setIsNewInspectionOpen}>
                   <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="flex flex-col items-center p-6 h-auto bg-white border-2 border-gray-200 hover:border-lacra-blue hover:bg-gray-50 transition-colors w-full rounded-lg shadow-sm"
-                    >
-                      <action.icon className="h-6 w-6 mb-3 text-lacra-blue" />
-                      <span className="text-sm font-medium text-gray-700">{action.title}</span>
-                    </Button>
+                    <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-lg`}>
+                      <div className="absolute inset-0 bg-black bg-opacity-10"></div>
+                      <div className="relative p-6 flex flex-col items-center text-center">
+                        <div className="mb-4 p-3 bg-white bg-opacity-20 rounded-full">
+                          <action.icon className={`h-8 w-8 ${action.iconColor}`} />
+                        </div>
+                        <h3 className="text-white font-semibold text-sm mb-1">{action.title}</h3>
+                        <p className="text-white text-xs opacity-90">{action.subtitle}</p>
+                        <div className="absolute top-2 right-2 w-2 h-2 bg-white bg-opacity-30 rounded-full"></div>
+                        <div className="absolute bottom-2 left-2 w-1 h-1 bg-white bg-opacity-40 rounded-full"></div>
+                      </div>
+                    </div>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
@@ -243,13 +260,18 @@ export default function QuickActions() {
             
             return (
               <Link key={action.title} href={action.href || "#"}>
-                <Button
-                  variant="outline"
-                  className="flex flex-col items-center p-6 h-auto bg-white border-2 border-gray-200 hover:border-lacra-blue hover:bg-gray-50 transition-colors w-full rounded-lg shadow-sm"
-                >
-                  <action.icon className="h-6 w-6 mb-3 text-lacra-blue" />
-                  <span className="text-sm font-medium text-gray-700">{action.title}</span>
-                </Button>
+                <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-lg`}>
+                  <div className="absolute inset-0 bg-black bg-opacity-10"></div>
+                  <div className="relative p-6 flex flex-col items-center text-center">
+                    <div className="mb-4 p-3 bg-white bg-opacity-20 rounded-full">
+                      <action.icon className={`h-8 w-8 ${action.iconColor}`} />
+                    </div>
+                    <h3 className="text-white font-semibold text-sm mb-1">{action.title}</h3>
+                    <p className="text-white text-xs opacity-90">{action.subtitle}</p>
+                    <div className="absolute top-2 right-2 w-2 h-2 bg-white bg-opacity-30 rounded-full"></div>
+                    <div className="absolute bottom-2 left-2 w-1 h-1 bg-white bg-opacity-40 rounded-full"></div>
+                  </div>
+                </div>
               </Link>
             );
           })}

@@ -40,6 +40,7 @@ import Messaging from "@/pages/messaging";
 import LoginTest from "@/pages/login-test";
 import ExportPermitSubmission from "@/pages/export-permit-submission";
 import RealTimeVerificationDashboard from "@/pages/verification-dashboard";
+import EconomicReportingPage from "@/pages/economic-reporting";
 
 import NotFound from "@/pages/not-found";
 
@@ -183,6 +184,12 @@ function Router() {
           <Route path="/gis-mapping">
             <ProtectedRoute 
               component={GISMapping} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          <Route path="/economic-reporting">
+            <ProtectedRoute 
+              component={EconomicReportingPage} 
               allowedUserTypes={['regulatory']} 
             />
           </Route>

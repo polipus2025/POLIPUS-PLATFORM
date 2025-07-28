@@ -184,8 +184,76 @@ export const harvestRecords = pgTable("harvest_records", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Economic Activity Reporting System
+export const economicActivities = pgTable("economic_activities", {
+  id: serial("id").primaryKey(),
+  activityType: text("activity_type").notNull(), // production, processing, trading, export, import, market_sale
+  commodityType: text("commodity_type").notNull(),
+  county: text("county").notNull(),
+  district: text("district"),
+  actorType: text("actor_type").notNull(), // farmer, processor, trader, exporter, cooperative
+  actorId: text("actor_id").notNull(),
+  actorName: text("actor_name").notNull(),
+  quantity: decimal("quantity", { precision: 12, scale: 2 }).notNull(),
+  unit: text("unit").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }),
+  totalValue: decimal("total_value", { precision: 15, scale: 2 }).notNull(),
+  currency: text("currency").default("USD"),
+  transactionDate: timestamp("transaction_date").notNull(),
+  destination: text("destination"), // for exports/trades
+  marketLocation: text("market_location"),
+  paymentMethod: text("payment_method"), // cash, mobile_money, bank_transfer, credit
+  taxesPaid: decimal("taxes_paid", { precision: 10, scale: 2 }),
+  licenseNumber: text("license_number"),
+  complianceStatus: text("compliance_status").default("pending"), // compliant, non_compliant, under_review
+  gpsCoordinates: text("gps_coordinates"),
+  verificationStatus: text("verification_status").default("unverified"), // verified, unverified, disputed
+  verifiedBy: text("verified_by"),
+  verificationDate: timestamp("verification_date"),
+  notes: text("notes"),
+  attachments: text("attachments").array(), // Document URLs/paths
+  seasonYear: text("season_year").notNull(), // "2024/2025"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
+// County Economic Summary (aggregated data)
+export const countyEconomicSummary = pgTable("county_economic_summary", {
+  id: serial("id").primaryKey(),
+  county: text("county").notNull(),
+  reportPeriod: text("report_period").notNull(), // "2025-01", "2025-Q1", "2025"
+  totalProduction: decimal("total_production", { precision: 15, scale: 2 }).default("0"),
+  totalTrading: decimal("total_trading", { precision: 15, scale: 2 }).default("0"),
+  totalExports: decimal("total_exports", { precision: 15, scale: 2 }).default("0"),
+  totalTaxRevenue: decimal("total_tax_revenue", { precision: 12, scale: 2 }).default("0"),
+  activeBusinesses: integer("active_businesses").default(0),
+  registeredFarmers: integer("registered_farmers").default(0),
+  employmentCreated: integer("employment_created").default(0),
+  averageProductionPrice: decimal("average_production_price", { precision: 10, scale: 2 }),
+  topCommodities: text("top_commodities").array(), // ["cocoa", "coffee", "rice"]
+  complianceRate: decimal("compliance_rate", { precision: 5, scale: 2 }).default("0"), // percentage
+  growthRate: decimal("growth_rate", { precision: 5, scale: 2 }), // month-over-month percentage
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
+// Economic Indicators Dashboard
+export const economicIndicators = pgTable("economic_indicators", {
+  id: serial("id").primaryKey(),
+  indicatorType: text("indicator_type").notNull(), // gdp_contribution, export_value, employment, price_index
+  value: decimal("value", { precision: 15, scale: 2 }).notNull(),
+  unit: text("unit").notNull(), // USD, percentage, jobs, index
+  period: text("period").notNull(), // "2025-01", "2025-Q1"
+  county: text("county"), // null for national indicators
+  commodityType: text("commodity_type"), // null for general indicators
+  previousValue: decimal("previous_value", { precision: 15, scale: 2 }),
+  changePercentage: decimal("change_percentage", { precision: 5, scale: 2 }),
+  trendDirection: text("trend_direction"), // up, down, stable
+  dataSource: text("data_source").notNull(),
+  calculationMethod: text("calculation_method"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 // Insert schemas
 export const insertFarmerSchema = createInsertSchema(farmers).omit({
@@ -241,6 +309,23 @@ export const insertReportSchema = createInsertSchema(reports).omit({
   generatedAt: true,
 });
 
+export const insertEconomicActivitySchema = createInsertSchema(economicActivities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCountyEconomicSummarySchema = createInsertSchema(countyEconomicSummary).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
+export const insertEconomicIndicatorSchema = createInsertSchema(economicIndicators).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Commodity = typeof commodities.$inferSelect;
 export type InsertCommodity = z.infer<typeof insertCommoditySchema>;
@@ -259,6 +344,15 @@ export type InsertMobileAlertRequest = z.infer<typeof insertMobileAlertRequestSc
 
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = z.infer<typeof insertReportSchema>;
+
+export type EconomicActivity = typeof economicActivities.$inferSelect;
+export type InsertEconomicActivity = z.infer<typeof insertEconomicActivitySchema>;
+
+export type CountyEconomicSummary = typeof countyEconomicSummary.$inferSelect;
+export type InsertCountyEconomicSummary = z.infer<typeof insertCountyEconomicSummarySchema>;
+
+export type EconomicIndicator = typeof economicIndicators.$inferSelect;
+export type InsertEconomicIndicator = z.infer<typeof insertEconomicIndicatorSchema>;
 
 // Authentication and User Management System
 export const authUsers = pgTable("auth_users", {

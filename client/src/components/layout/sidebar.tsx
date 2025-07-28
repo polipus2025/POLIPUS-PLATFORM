@@ -17,7 +17,8 @@ import {
   Map,
   RefreshCw,
   Award,
-  MessageSquare
+  MessageSquare,
+  TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -42,6 +43,7 @@ const getUserInfo = () => {
 // LACRA Officer/Regulatory Staff Navigation
 const regulatoryNavigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
+  { name: "Economic Reporting", href: "/economic-reporting", icon: TrendingUp },
   { name: "Commodities", href: "/commodities", icon: Leaf },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Export Certifications", href: "/certifications", icon: Tag },

@@ -40,6 +40,9 @@ import {
   userVerifications,
   trackingEvents,
   verificationLogs,
+  economicActivities,
+  countyEconomicSummary,
+  economicIndicators,
   type Commodity,
   type Inspection,
   type Certification,
@@ -121,7 +124,13 @@ import {
   type InsertCertificateVerification,
   type InsertUserVerification,
   type InsertTrackingEvent,
-  type InsertVerificationLog
+  type InsertVerificationLog,
+  type EconomicActivity,
+  type CountyEconomicSummary,
+  type EconomicIndicator,
+  type InsertEconomicActivity,
+  type InsertCountyEconomicSummary,
+  type InsertEconomicIndicator
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";

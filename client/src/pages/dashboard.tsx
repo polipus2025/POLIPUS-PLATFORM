@@ -472,21 +472,32 @@ export default function Dashboard() {
   // The header component handles auth verification, so dashboard should display content.
 
   return (
-    <ModernBackground variant="gradient">
-      <div className="mobile-container">
-      <div className="mobile-header-safe">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Helmet>
           <title>Dashboard - AgriTrace360™ LACRA</title>
           <meta name="description" content="Real-time agricultural commodity compliance monitoring dashboard for Liberia Agriculture Commodity Regulatory Authority" />
         </Helmet>
 
-      {/* Dashboard Header - Mobile Optimized */}
-      <div className="mb-4 md:mb-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-          <div className="text-center md:text-left">
-            <h2 className="text-xl md:text-2xl font-bold text-neutral mb-2">Compliance Overview</h2>
-            <p className="text-sm md:text-base text-gray-600">Real-time agricultural commodity compliance monitoring</p>
+      {/* Dashboard Header - Modern ISMS Style */}
+      <div className="mb-12 text-center">
+        <div className="inline-flex items-center gap-4 mb-6">
+          <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+            <Activity className="h-10 w-10 text-white" />
           </div>
+          <div className="text-left">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              Compliance Dashboard
+            </h1>
+            <p className="text-slate-600 text-lg mt-1">
+              Real-time agricultural commodity compliance monitoring
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full md:w-auto">
             {/* Messages Button - Mobile Responsive */}
             <Dialog open={isMessagesDialogOpen} onOpenChange={setIsMessagesDialogOpen}>
@@ -1690,6 +1701,5 @@ export default function Dashboard() {
       </Dialog>
       </div>
     </div>
-    </ModernBackground>
   );
 }

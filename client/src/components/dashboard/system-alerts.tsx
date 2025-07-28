@@ -25,18 +25,17 @@ export default function SystemAlerts() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div className="mb-6">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -78,12 +77,12 @@ export default function SystemAlerts() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-neutral">System Alerts</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300">
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-slate-900 mb-2">System Alerts</h3>
+        <p className="text-slate-600">Real-time notifications and compliance monitoring</p>
+      </div>
+      <div className="space-y-4">
           {alerts.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <CheckCircle className="h-8 w-8 mx-auto mb-2 text-success" />
@@ -97,15 +96,17 @@ export default function SystemAlerts() {
               return (
                 <div
                   key={alert.id}
-                  className={`flex items-start space-x-3 p-3 border rounded-lg ${colors} ${
+                  className={`flex items-start space-x-3 p-4 border rounded-xl transition-all duration-300 hover:shadow-sm ${colors} ${
                     alert.isRead ? 'opacity-60' : ''
                   }`}
                 >
-                  <IconComponent className="h-5 w-5 mt-1 flex-shrink-0" />
+                  <div className="p-2 rounded-lg bg-white bg-opacity-50">
+                    <IconComponent className="h-5 w-5 flex-shrink-0" />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-neutral">{alert.title}</p>
-                    <p className="text-xs text-white mt-1">{alert.message}</p>
-                    <p className="text-xs text-white opacity-80 mt-1">{formatTimeAgo(alert.createdAt!)}</p>
+                    <p className="text-sm font-semibold text-slate-900">{alert.title}</p>
+                    <p className="text-xs text-slate-700 mt-1 opacity-90">{alert.message}</p>
+                    <p className="text-xs text-slate-600 opacity-70 mt-2">{formatTimeAgo(alert.createdAt!)}</p>
                   </div>
                   {!alert.isRead && (
                     <Button
@@ -122,8 +123,7 @@ export default function SystemAlerts() {
               );
             })
           )}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

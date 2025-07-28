@@ -130,18 +130,18 @@ export default function QuickActions() {
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-neutral">Quick Actions</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          {actions.map((action) => {
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300">
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-slate-900 mb-2">Quick Actions</h3>
+        <p className="text-slate-600">Streamline your workflow with instant access to key features</p>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        {actions.map((action) => {
             if (action.action === "dialog" && action.title === "New Inspection") {
               return (
                 <Dialog key={action.title} open={isNewInspectionOpen} onOpenChange={setIsNewInspectionOpen}>
                   <DialogTrigger asChild>
-                    <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-lg`}>
+                    <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl`}>
                       <div className="absolute inset-0 bg-black bg-opacity-10"></div>
                       <div className="relative p-6 flex flex-col items-center text-center">
                         <div className="mb-4 p-3 bg-white bg-opacity-20 rounded-full">
@@ -260,7 +260,7 @@ export default function QuickActions() {
             
             return (
               <Link key={action.title} href={action.href || "#"}>
-                <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-lg`}>
+                <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl`}>
                   <div className="absolute inset-0 bg-black bg-opacity-10"></div>
                   <div className="relative p-6 flex flex-col items-center text-center">
                     <div className="mb-4 p-3 bg-white bg-opacity-20 rounded-full">
@@ -276,7 +276,6 @@ export default function QuickActions() {
             );
           })}
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

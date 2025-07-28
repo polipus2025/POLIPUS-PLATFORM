@@ -56,13 +56,13 @@ export default function SystemAlerts() {
   const getAlertColors = (type: string) => {
     switch (type) {
       case 'error':
-        return 'bg-error bg-opacity-5 border-error border-opacity-20 text-error';
+        return 'bg-red-900 bg-opacity-20 border-red-500 border-opacity-30';
       case 'warning':
-        return 'bg-warning bg-opacity-5 border-warning border-opacity-20 text-warning';
+        return 'bg-yellow-900 bg-opacity-20 border-yellow-500 border-opacity-30';
       case 'success':
-        return 'bg-success bg-opacity-5 border-success border-opacity-20 text-success';
+        return 'bg-green-900 bg-opacity-20 border-green-500 border-opacity-30';
       default:
-        return 'bg-gray-100 border-gray-300 text-gray-600';
+        return 'bg-gray-800 bg-opacity-20 border-gray-500 border-opacity-30';
     }
   };
 
@@ -104,8 +104,8 @@ export default function SystemAlerts() {
                   <IconComponent className="h-5 w-5 mt-1 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-neutral">{alert.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">{alert.message}</p>
-                    <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(alert.createdAt!)}</p>
+                    <p className="text-xs text-white mt-1">{alert.message}</p>
+                    <p className="text-xs text-white opacity-80 mt-1">{formatTimeAgo(alert.createdAt!)}</p>
                   </div>
                   {!alert.isRead && (
                     <Button

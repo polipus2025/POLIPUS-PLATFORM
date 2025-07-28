@@ -131,10 +131,10 @@ export default function QuickActions() {
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`flex flex-col items-center p-4 h-auto border-2 border-dashed ${action.color} transition-colors w-full`}
+                      className="flex flex-col items-center p-6 h-auto bg-white border-2 border-gray-200 hover:border-lacra-blue hover:bg-gray-50 transition-colors w-full rounded-lg shadow-sm"
                     >
-                      <action.icon className="h-8 w-8 mb-2" />
-                      <span className="text-sm font-medium">{action.title}</span>
+                      <action.icon className="h-6 w-6 mb-3 text-lacra-blue" />
+                      <span className="text-sm font-medium text-gray-700">{action.title}</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -245,10 +245,10 @@ export default function QuickActions() {
               <Link key={action.title} href={action.href || "#"}>
                 <Button
                   variant="outline"
-                  className={`flex flex-col items-center p-4 h-auto border-2 border-dashed ${action.color} transition-colors w-full`}
+                  className="flex flex-col items-center p-6 h-auto bg-white border-2 border-gray-200 hover:border-lacra-blue hover:bg-gray-50 transition-colors w-full rounded-lg shadow-sm"
                 >
-                  <action.icon className="h-8 w-8 mb-2" />
-                  <span className="text-sm font-medium">{action.title}</span>
+                  <action.icon className="h-6 w-6 mb-3 text-lacra-blue" />
+                  <span className="text-sm font-medium text-gray-700">{action.title}</span>
                 </Button>
               </Link>
             );

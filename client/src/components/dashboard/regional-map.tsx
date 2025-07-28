@@ -27,15 +27,7 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
     : countyData.filter(county => {
         const match = county.county.toLowerCase().trim() === selectedCounty.toLowerCase().trim();
         
-        // Debug logging to see what's happening
-        if (selectedCounty !== "all") {
-          console.log('County Filter Debug:', {
-            selectedCounty,
-            countyName: county.county,
-            match,
-            allCounties: countyData.map(c => c.county)
-          });
-        }
+
         
         return match;
       });
@@ -61,26 +53,22 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
 
   // Update display data when data changes or index changes
   useEffect(() => {
-    const updateDisplayData = () => {
-      if (filteredCountyData.length === 0) {
-        setDisplayData([]);
-        return;
-      }
-      
-      // For single county or small datasets, show all data
-      if (filteredCountyData.length <= 4) {
-        setDisplayData([...filteredCountyData]);
-        return;
-      }
-      
-      const startIndex = currentIndex * 4;
-      const endIndex = startIndex + 4;
-      const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
-      setDisplayData([...newDisplayData]);
-    };
-
-    updateDisplayData();
-  }, [currentIndex, selectedCounty, countyData]);
+    if (filteredCountyData.length === 0) {
+      setDisplayData([]);
+      return;
+    }
+    
+    // For single county or small datasets, show all data
+    if (filteredCountyData.length <= 4) {
+      setDisplayData(filteredCountyData);
+      return;
+    }
+    
+    const startIndex = currentIndex * 4;
+    const endIndex = startIndex + 4;
+    const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
+    setDisplayData(newDisplayData);
+  }, [currentIndex, filteredCountyData]);
 
   if (isLoading) {
     return (

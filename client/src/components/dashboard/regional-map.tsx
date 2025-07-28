@@ -21,26 +21,23 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const [displayData, setDisplayData] = useState<ComplianceByCounty[]>([]);
 
-  // Filter county data based on selection with improved matching and debugging
+  // Filter county data based on selection
   const filteredCountyData = selectedCounty === "all" 
     ? countyData 
     : countyData.filter(county => {
-        // Exact match for county names
-        const countyName = county.county.toLowerCase().trim();
-        const selectedName = selectedCounty.toLowerCase().trim();
+        const match = county.county.toLowerCase().trim() === selectedCounty.toLowerCase().trim();
         
-        // Debug logging (remove in production)
+        // Debug logging to see what's happening
         if (selectedCounty !== "all") {
-          console.log('Filtering counties:', {
+          console.log('County Filter Debug:', {
             selectedCounty,
-            countyName,
-            selectedName,
-            exact: countyName === selectedName,
-            available: countyData.map(c => c.county)
+            countyName: county.county,
+            match,
+            allCounties: countyData.map(c => c.county)
           });
         }
         
-        return countyName === selectedName;
+        return match;
       });
 
   // Reset current index when county selection changes
@@ -64,22 +61,26 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
 
   // Update display data when data changes or index changes
   useEffect(() => {
-    if (filteredCountyData.length === 0) {
-      setDisplayData([]);
-      return;
-    }
-    
-    // For single county or small datasets, show all data
-    if (filteredCountyData.length <= 4) {
-      setDisplayData(filteredCountyData);
-      return;
-    }
-    
-    const startIndex = currentIndex * 4;
-    const endIndex = startIndex + 4;
-    const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
-    setDisplayData(newDisplayData);
-  }, [currentIndex, filteredCountyData]);
+    const updateDisplayData = () => {
+      if (filteredCountyData.length === 0) {
+        setDisplayData([]);
+        return;
+      }
+      
+      // For single county or small datasets, show all data
+      if (filteredCountyData.length <= 4) {
+        setDisplayData([...filteredCountyData]);
+        return;
+      }
+      
+      const startIndex = currentIndex * 4;
+      const endIndex = startIndex + 4;
+      const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
+      setDisplayData([...newDisplayData]);
+    };
+
+    updateDisplayData();
+  }, [currentIndex, selectedCounty, countyData]);
 
   if (isLoading) {
     return (

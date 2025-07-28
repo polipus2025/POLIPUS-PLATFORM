@@ -297,71 +297,98 @@ export default function Certifications() {
   };
 
   return (
-    <div className="p-6">
-      <Helmet>
-        <title>Export Certifications - AgriTrace360™ LACRA</title>
-        <meta name="description" content="Export certification tracking and management system for agricultural commodity compliance" />
-      </Helmet>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Helmet>
+          <title>Export Certifications - AgriTrace360™ LACRA</title>
+          <meta name="description" content="Export certification tracking and management system for agricultural commodity compliance" />
+        </Helmet>
 
-      {/* Page Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-neutral mb-2">Export Certifications</h2>
-            <p className="text-gray-600">Manage export certificates and track compliance documentation</p>
-          </div>
-          <Button className="bg-lacra-green hover:bg-green-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Issue Certificate
-          </Button>
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold text-neutral">{certifications.length}</div>
-                <p className="text-sm text-gray-500">Total Certificates</p>
-              </div>
-              <Award className="h-8 w-8 text-lacra-blue" />
+        {/* Modern ISMS Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-4 mb-6">
+            <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+              <Award className="h-10 w-10 text-white" />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-success">
+            <div className="text-left">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                Export Certifications
+              </h1>
+              <p className="text-slate-600 text-lg mt-1">
+                Manage export certificates and track compliance documentation
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="mb-8">
+          <div className="flex justify-between items-start">
+            <div></div>
+            <Button className="bg-lacra-green hover:bg-green-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Issue Certificate
+            </Button>
+          </div>
+        </div>
+
+        {/* Summary Cards - ISMS Style */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Award className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-slate-900 mb-2">{certifications.length}</div>
+            <p className="text-slate-600 font-medium">Total Certificates</p>
+          </div>
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <Award className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-green-600 mb-2">
               {certifications.filter(c => c.status === 'active').length}
             </div>
-            <p className="text-sm text-gray-500">Active</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-warning">
+            <p className="text-slate-600 font-medium">Active</p>
+          </div>
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                <Award className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-orange-600 mb-2">
               {certifications.filter(c => isExpiringSoon(c.expiryDate)).length}
             </div>
-            <p className="text-sm text-gray-500">Expiring Soon</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-error">
+            <p className="text-slate-600 font-medium">Expiring Soon</p>
+          </div>
+          <div className="isms-card text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-red flex items-center justify-center">
+                <Award className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-red-600 mb-2">
               {certifications.filter(c => c.status === 'expired' || c.status === 'revoked').length}
             </div>
-            <p className="text-sm text-gray-500">Expired/Revoked</p>
-          </CardContent>
-        </Card>
-      </div>
+            <p className="text-slate-600 font-medium">Expired/Revoked</p>
+          </div>
+        </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
+        {/* Filters Section - ISMS Style */}
+        <div className="isms-card mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Search className="h-5 w-5 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900">Search & Filter</h3>
+          </div>
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-64">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Search</label>
+              <label className="text-sm font-medium text-slate-700 mb-2 block">Search Certificates</label>
               <div className="relative">
                 <Input
                   type="text"
@@ -402,17 +429,21 @@ export default function Certifications() {
               </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Certifications Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-neutral">
-            Certificates ({filteredCertifications.length} of {certifications.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Certifications Table - ISMS Style */}
+        <div className="isms-card">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+              <Award className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-slate-900">Export Certificates</h3>
+              <p className="text-slate-600 text-sm">
+                Showing {filteredCertifications.length} of {certifications.length} certificates
+              </p>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -517,8 +548,7 @@ export default function Certifications() {
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
       {/* Certificate Preview Dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
@@ -560,40 +590,35 @@ export default function Certifications() {
                   </div>
                   
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Exporter License</label>
-                    <div className="mt-1 text-gray-900">{selectedCertificate.exporterLicense}</div>
+                    <label className="text-sm font-semibold text-gray-700">Issued By</label>
+                    <div className="mt-1 text-gray-900">{selectedCertificate.issuedBy}</div>
                   </div>
                   
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Commodity</label>
-                    <div className="mt-1 text-gray-900">{selectedCertificate.commodity?.name || 'N/A'}</div>
+                    <label className="text-sm font-semibold text-gray-700">Certificate Type</label>
+                    <div className="mt-1 text-gray-900">{selectedCertificate.certificateType}</div>
                   </div>
                   
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Commodity Type</label>
-                    <div className="mt-1 text-gray-900">{selectedCertificate.commodity?.type || 'N/A'}</div>
+                    <label className="text-sm font-semibold text-gray-700">Export Destination</label>
+                    <div className="mt-1 text-gray-900">{selectedCertificate.exportDestination || 'N/A'}</div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Quantity</label>
-                    <div className="mt-1 text-gray-900">{selectedCertificate.quantity} {selectedCertificate.unit}</div>
+                    <label className="text-sm font-semibold text-gray-700">Status</label>
+                    <div className="mt-1 text-gray-900">{selectedCertificate.status}</div>
                   </div>
                   
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Quality Grade</label>
-                    <div className="mt-1 text-gray-900">{selectedCertificate.commodity?.qualityGrade || 'N/A'}</div>
+                    <label className="text-sm font-semibold text-gray-700">Exporter</label>
+                    <div className="mt-1 text-gray-900">{selectedCertificate.exporterName || 'N/A'}</div>
                   </div>
                   
                   <div>
-                    <label className="text-sm font-semibold text-gray-700">Destination Country</label>
-                    <div className="mt-1 text-gray-900">{selectedCertificate.destinationCountry}</div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700">Destination Port</label>
-                    <div className="mt-1 text-gray-900">{selectedCertificate.destinationPort}</div>
+                    <label className="text-sm font-semibold text-gray-700">Created Date</label>
+                    <div className="mt-1 text-gray-900">{selectedCertificate.createdAt ? new Date(selectedCertificate.createdAt).toLocaleDateString() : 'N/A'}</div>
                   </div>
                   
                   <div>
@@ -611,21 +636,9 @@ export default function Certifications() {
               {/* Additional Information */}
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">Inspection Date</label>
-                  <div className="mt-1 text-gray-900">{new Date(selectedCertificate.inspectionDate).toLocaleDateString()}</div>
+                  <label className="text-sm font-semibold text-gray-700">Certificate Number</label>
+                  <div className="mt-1 text-gray-900">{selectedCertificate.certificateNumber}</div>
                 </div>
-                
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Certification Body</label>
-                  <div className="mt-1 text-gray-900">{selectedCertificate.certificationBody}</div>
-                </div>
-                
-                {selectedCertificate.notes && (
-                  <div>
-                    <label className="text-sm font-semibold text-gray-700">Additional Notes</label>
-                    <div className="mt-1 p-3 bg-gray-50 rounded-lg text-gray-900">{selectedCertificate.notes}</div>
-                  </div>
-                )}
               </div>
 
               {/* Export Buttons */}
@@ -656,6 +669,8 @@ export default function Certifications() {
           )}
         </DialogContent>
       </Dialog>
+      
+      </div>
     </div>
   );
 }

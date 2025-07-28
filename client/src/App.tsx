@@ -226,38 +226,22 @@ function Router() {
 }
 
 function App() {
-  const authToken = localStorage.getItem("authToken");
-  const userType = localStorage.getItem("userType");
-  
-  // Check if user is on authentication pages, landing page, or front page
-  const isAuthPage = window.location.pathname.includes("-login");
-  const isLandingPage = window.location.pathname === "/landing" && !authToken;
-  const isFrontPage = window.location.pathname === "/" && !authToken;
-  const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
-  
+  // SITO COMPLETAMENTE BLOCCATO - NON NAVIGABILE
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage) ? (
-          // Render auth/landing pages without layout
-          <div className="min-h-screen">
-            <Router />
-          </div>
-        ) : (
-          // Render authenticated pages with full layout
-          <div className="min-h-screen bg-gray-50">
-            <Header />
-            <div className="flex">
-              <Sidebar />
-              <main className="flex-1 min-w-0 overflow-hidden">
-                <Router />
-              </main>
-            </div>
-          </div>
-        )}
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <div className="min-h-screen bg-red-900 flex items-center justify-center">
+      <div className="bg-white p-12 rounded-xl shadow-2xl text-center max-w-lg">
+        <div className="text-8xl mb-6">🚫</div>
+        <h1 className="text-4xl font-bold text-red-600 mb-6">ACCESSO NEGATO</h1>
+        <div className="text-gray-700 space-y-4">
+          <p className="text-xl">Il sistema AgriTrace360™ è temporaneamente non disponibile.</p>
+          <p className="text-lg">Tutte le funzionalità sono state disabilitate.</p>
+          <p className="text-base text-gray-500">Contattare l'amministratore di sistema per ulteriori informazioni.</p>
+        </div>
+        <div className="mt-8 p-4 bg-red-50 rounded-lg">
+          <p className="text-red-600 font-semibold">🔒 SITO BLOCCATO PER MANUTENZIONE</p>
+        </div>
+      </div>
+    </div>
   );
 }
 

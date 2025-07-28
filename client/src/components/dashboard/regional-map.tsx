@@ -195,7 +195,7 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
                       Compliance: <span className="font-semibold text-white">{county.complianceRate || 0}%</span>
                     </div>
                     <div className="text-xs text-gray-200">
-                      Commodities: <span className="font-semibold text-white">{county.totalCommodities || 0}</span>
+                      Commodities: <span className="font-semibold text-white">{county.total || 0}</span>
                     </div>
                     <div className="w-full bg-gray-600 rounded-full h-1 mt-1">
                       <div 

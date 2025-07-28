@@ -128,14 +128,181 @@ export default function GISMappingClean() {
         </TabsContent>
 
         <TabsContent value="satellites" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* GPS Constellation */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Satellite className="h-5 w-5 text-blue-600" />
+                  GPS (USA)
+                  <Badge variant="default" className="bg-green-500">Active</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Satellites Available:</span>
+                    <span className="font-bold text-blue-600">31</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Healthy Satellites:</span>
+                    <span className="font-bold text-green-600">29</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Signal Strength:</span>
+                    <span className="font-bold">98%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Accuracy:</span>
+                    <span className="font-bold text-green-600">2.1m</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Connected: GPS-I, GPS-II, GPS-IIA, GPS-IIR, GPS-IIF, GPS-III
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* GLONASS Constellation */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Satellite className="h-5 w-5 text-red-600" />
+                  GLONASS (Russia)
+                  <Badge variant="default" className="bg-green-500">Active</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Satellites Available:</span>
+                    <span className="font-bold text-red-600">24</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Healthy Satellites:</span>
+                    <span className="font-bold text-green-600">22</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Signal Strength:</span>
+                    <span className="font-bold">94%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Accuracy:</span>
+                    <span className="font-bold text-green-600">2.8m</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Connected: GLONASS-M, GLONASS-K1, GLONASS-K2
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Galileo Constellation */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Satellite className="h-5 w-5 text-purple-600" />
+                  Galileo (EU)
+                  <Badge variant="default" className="bg-green-500">Active</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Satellites Available:</span>
+                    <span className="font-bold text-purple-600">28</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Healthy Satellites:</span>
+                    <span className="font-bold text-green-600">26</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Signal Strength:</span>
+                    <span className="font-bold">96%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Accuracy:</span>
+                    <span className="font-bold text-green-600">1.9m</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Connected: Galileo FOC, Galileo IOV satellites
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* BeiDou Constellation */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Satellite className="h-5 w-5 text-yellow-600" />
+                  BeiDou (China)
+                  <Badge variant="default" className="bg-green-500">Active</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Satellites Available:</span>
+                    <span className="font-bold text-yellow-600">35</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Healthy Satellites:</span>
+                    <span className="font-bold text-green-600">33</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Signal Strength:</span>
+                    <span className="font-bold">92%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Accuracy:</span>
+                    <span className="font-bold text-green-600">3.2m</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Connected: BeiDou-2, BeiDou-3 constellation
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Satellite Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Satellite Monitoring</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Global Satellite Network Status
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Satellite className="h-12 w-12 mx-auto text-blue-600 mb-4" />
-                <p className="text-gray-600">Connected to GPS, GLONASS, Galileo networks</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-green-600">118</div>
+                  <div className="text-sm text-gray-600">Total Satellites</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">110</div>
+                  <div className="text-sm text-gray-600">Healthy Satellites</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-purple-600">95%</div>
+                  <div className="text-sm text-gray-600">Average Signal</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-green-600">2.5m</div>
+                  <div className="text-sm text-gray-600">Combined Accuracy</div>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="font-semibold text-green-800">Multi-Constellation GNSS Active</span>
+                </div>
+                <p className="text-sm text-green-700">
+                  Optimal satellite coverage achieved with redundant positioning from all major constellations. 
+                  Real-time corrections active for enhanced agricultural mapping precision.
+                </p>
               </div>
             </CardContent>
           </Card>

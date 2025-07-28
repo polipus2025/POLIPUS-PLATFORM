@@ -12,6 +12,30 @@ export default function GISMappingClean() {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedCounty, setSelectedCounty] = useState<any>(null);
   const { toast } = useToast();
+  
+  // Map layer visibility states
+  const [mapLayers, setMapLayers] = useState({
+    showFarms: true,
+    showTransportRoutes: true,
+    showDeforestationAlerts: true,
+    showGPSTracking: true,
+    showForestCover: true
+  });
+
+  // Toggle map layer visibility
+  const toggleLayer = (layerName: keyof typeof mapLayers) => {
+    setMapLayers(prev => ({
+      ...prev,
+      [layerName]: !prev[layerName]
+    }));
+    
+    const layerDisplayName = layerName.replace(/([A-Z])/g, ' $1').toLowerCase().replace('show ', '');
+    toast({
+      title: `${layerDisplayName} ${mapLayers[layerName] ? 'hidden' : 'shown'}`,
+      description: `Map layer ${mapLayers[layerName] ? 'disabled' : 'enabled'} successfully`,
+      duration: 2000,
+    });
+  };
 
   const counties = [
     { name: 'Montserrado', farms: 342, color: 'bg-red-100 hover:bg-red-200', compliance: 94, deforestationAlerts: 12, carbonCredits: 2340, sustainabilityScore: 87 },
@@ -124,25 +148,50 @@ export default function GISMappingClean() {
                     <div className="space-y-4">
                       {/* Map Controls */}
                       <div className="flex flex-wrap gap-2 mb-4">
-                        <Button size="sm" className="text-xs">
+                        <Button 
+                          size="sm" 
+                          variant={mapLayers.showFarms ? "default" : "outline"}
+                          className="text-xs"
+                          onClick={() => toggleLayer('showFarms')}
+                        >
                           <MapPin className="h-3 w-3 mr-1" />
-                          Show Farms
+                          {mapLayers.showFarms ? 'Hide' : 'Show'} Farms
                         </Button>
-                        <Button size="sm" variant="outline" className="text-xs">
+                        <Button 
+                          size="sm" 
+                          variant={mapLayers.showTransportRoutes ? "default" : "outline"}
+                          className="text-xs"
+                          onClick={() => toggleLayer('showTransportRoutes')}
+                        >
                           <Truck className="h-3 w-3 mr-1" />
-                          Transport Routes
+                          {mapLayers.showTransportRoutes ? 'Hide' : 'Show'} Transport Routes
                         </Button>
-                        <Button size="sm" variant="outline" className="text-xs">
+                        <Button 
+                          size="sm" 
+                          variant={mapLayers.showDeforestationAlerts ? "default" : "outline"}
+                          className="text-xs"
+                          onClick={() => toggleLayer('showDeforestationAlerts')}
+                        >
                           <AlertTriangle className="h-3 w-3 mr-1" />
-                          Deforestation Alerts
+                          {mapLayers.showDeforestationAlerts ? 'Hide' : 'Show'} Deforestation Alerts
                         </Button>
-                        <Button size="sm" variant="outline" className="text-xs">
+                        <Button 
+                          size="sm" 
+                          variant={mapLayers.showGPSTracking ? "default" : "outline"}
+                          className="text-xs"
+                          onClick={() => toggleLayer('showGPSTracking')}
+                        >
                           <Satellite className="h-3 w-3 mr-1" />
-                          GPS Tracking
+                          {mapLayers.showGPSTracking ? 'Hide' : 'Show'} GPS Tracking
                         </Button>
-                        <Button size="sm" variant="outline" className="text-xs">
+                        <Button 
+                          size="sm" 
+                          variant={mapLayers.showForestCover ? "default" : "outline"}
+                          className="text-xs"
+                          onClick={() => toggleLayer('showForestCover')}
+                        >
                           <Leaf className="h-3 w-3 mr-1" />
-                          Forest Cover
+                          {mapLayers.showForestCover ? 'Hide' : 'Show'} Forest Cover
                         </Button>
                       </div>
 
@@ -231,7 +280,7 @@ export default function GISMappingClean() {
                           ))}
 
                           {/* Farm Locations - GPS Tracked */}
-                          {Array.from({ length: 25 }, (_, i) => ({
+                          {mapLayers.showFarms && Array.from({ length: 25 }, (_, i) => ({
                             x: 200 + Math.random() * 300,
                             y: 280 + Math.random() * 180,
                             id: `farm-${i}`,
@@ -255,27 +304,29 @@ export default function GISMappingClean() {
                           ))}
 
                           {/* Transportation Routes */}
-                          <g className="opacity-70">
-                            <path
-                              d="M180 280 Q260 300 420 340"
-                              stroke="#8b5cf6"
-                              strokeWidth="3"
-                              fill="none"
-                              strokeDasharray="5,5"
-                              className="animate-pulse"
-                            />
-                            <path
-                              d="M200 360 Q300 380 480 440"
-                              stroke="#8b5cf6"
-                              strokeWidth="3"
-                              fill="none"
-                              strokeDasharray="5,5"
-                              className="animate-pulse"
-                            />
-                          </g>
+                          {mapLayers.showTransportRoutes && (
+                            <g className="opacity-70">
+                              <path
+                                d="M180 280 Q260 300 420 340"
+                                stroke="#8b5cf6"
+                                strokeWidth="3"
+                                fill="none"
+                                strokeDasharray="5,5"
+                                className="animate-pulse"
+                              />
+                              <path
+                                d="M200 360 Q300 380 480 440"
+                                stroke="#8b5cf6"
+                                strokeWidth="3"
+                                fill="none"
+                                strokeDasharray="5,5"
+                                className="animate-pulse"
+                              />
+                            </g>
+                          )}
 
                           {/* Active Vehicles */}
-                          {Array.from({ length: 8 }, (_, i) => ({
+                          {mapLayers.showGPSTracking && Array.from({ length: 8 }, (_, i) => ({
                             x: 180 + Math.random() * 320,
                             y: 280 + Math.random() * 160,
                             direction: Math.random() * 360
@@ -297,7 +348,7 @@ export default function GISMappingClean() {
                           ))}
 
                           {/* Deforestation Alert Zones */}
-                          {Array.from({ length: 12 }, (_, i) => ({
+                          {mapLayers.showDeforestationAlerts && Array.from({ length: 12 }, (_, i) => ({
                             x: 220 + Math.random() * 280,
                             y: 300 + Math.random() * 140,
                             severity: Math.random() > 0.7 ? 'high' : 'medium'
@@ -317,6 +368,30 @@ export default function GISMappingClean() {
                               }}
                             />
                           ))}
+
+                          {/* Forest Cover Layer */}
+                          {mapLayers.showForestCover && (
+                            <g className="opacity-40">
+                              {/* Forest Cover Areas */}
+                              {Array.from({ length: 15 }, (_, i) => ({
+                                x: 200 + Math.random() * 280,
+                                y: 280 + Math.random() * 140,
+                                size: 20 + Math.random() * 30
+                              })).map((forest, index) => (
+                                <circle
+                                  key={`forest-${index}`}
+                                  cx={forest.x}
+                                  cy={forest.y}
+                                  r={forest.size}
+                                  fill="#16a34a"
+                                  fillOpacity="0.2"
+                                  stroke="#166534"
+                                  strokeWidth="1"
+                                  strokeOpacity="0.4"
+                                />
+                              ))}
+                            </g>
+                          )}
 
                           {/* Coordinate Grid */}
                           <g className="opacity-30">
@@ -357,26 +432,52 @@ export default function GISMappingClean() {
                         <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg border">
                           <h4 className="font-semibold text-sm mb-2">Map Legend</h4>
                           <div className="space-y-1 text-xs">
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                              <span>Compliant Farms</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                              <span>Pending Review</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                              <span>Alert Status</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-1 bg-purple-500"></div>
-                              <span>Transport Routes</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-2 bg-orange-500"></div>
-                              <span>Active Vehicles</span>
-                            </div>
+                            {mapLayers.showFarms && (
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                  <span>Compliant Farms</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                  <span>Pending Review</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                  <span>Alert Status</span>
+                                </div>
+                              </>
+                            )}
+                            {mapLayers.showTransportRoutes && (
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-1 bg-purple-500"></div>
+                                <span>Transport Routes</span>
+                              </div>
+                            )}
+                            {mapLayers.showGPSTracking && (
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-2 bg-orange-500"></div>
+                                <span>Active Vehicles</span>
+                              </div>
+                            )}
+                            {mapLayers.showDeforestationAlerts && (
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 border-2 border-red-500 rounded-full"></div>
+                                  <span>High Risk Alerts</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 border-2 border-yellow-500 rounded-full"></div>
+                                  <span>Medium Risk Alerts</span>
+                                </div>
+                              </>
+                            )}
+                            {mapLayers.showForestCover && (
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-green-600 rounded-full opacity-40"></div>
+                                <span>Forest Cover</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 

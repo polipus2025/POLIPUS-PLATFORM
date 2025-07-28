@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Map, Globe, Satellite, Truck, Activity, BarChart3, MapPin, Target, Navigation } from "lucide-react";
+import { Map, Globe, Satellite, Truck, Activity, BarChart3, MapPin, Target, Navigation, AlertTriangle, Leaf } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import CountyReportGenerator from "@/components/CountyReportGenerator";
 
 // Clean GIS Mapping Component
 export default function GISMappingClean() {
@@ -14,21 +15,21 @@ export default function GISMappingClean() {
   const { toast } = useToast();
 
   const counties = [
-    { name: 'Montserrado', farms: 342, color: 'bg-red-100 hover:bg-red-200' },
-    { name: 'Lofa', farms: 287, color: 'bg-blue-100 hover:bg-blue-200' },
-    { name: 'Nimba', farms: 298, color: 'bg-yellow-100 hover:bg-yellow-200' },
-    { name: 'Bong', farms: 234, color: 'bg-green-100 hover:bg-green-200' },
-    { name: 'Grand Bassa', farms: 189, color: 'bg-purple-100 hover:bg-purple-200' },
-    { name: 'Grand Gedeh', farms: 156, color: 'bg-pink-100 hover:bg-pink-200' },
-    { name: 'Sinoe', farms: 123, color: 'bg-indigo-100 hover:bg-indigo-200' },
-    { name: 'Maryland', farms: 134, color: 'bg-orange-100 hover:bg-orange-200' },
-    { name: 'Grand Kru', farms: 98, color: 'bg-teal-100 hover:bg-teal-200' },
-    { name: 'River Cess', farms: 87, color: 'bg-cyan-100 hover:bg-cyan-200' },
-    { name: 'Gbarpolu', farms: 112, color: 'bg-lime-100 hover:bg-lime-200' },
-    { name: 'Bomi', farms: 145, color: 'bg-emerald-100 hover:bg-emerald-200' },
-    { name: 'Grand Cape Mount', farms: 203, color: 'bg-violet-100 hover:bg-violet-200' },
-    { name: 'Margibi', farms: 167, color: 'bg-rose-100 hover:bg-rose-200' },
-    { name: 'River Gee', farms: 89, color: 'bg-slate-100 hover:bg-slate-200' }
+    { name: 'Montserrado', farms: 342, color: 'bg-red-100 hover:bg-red-200', compliance: 94, deforestationAlerts: 12, carbonCredits: 2340, sustainabilityScore: 87 },
+    { name: 'Lofa', farms: 287, color: 'bg-blue-100 hover:bg-blue-200', compliance: 91, deforestationAlerts: 45, carbonCredits: 4560, sustainabilityScore: 82 },
+    { name: 'Nimba', farms: 298, color: 'bg-yellow-100 hover:bg-yellow-200', compliance: 89, deforestationAlerts: 67, carbonCredits: 3890, sustainabilityScore: 79 },
+    { name: 'Bong', farms: 234, color: 'bg-green-100 hover:bg-green-200', compliance: 93, deforestationAlerts: 23, carbonCredits: 3120, sustainabilityScore: 85 },
+    { name: 'Grand Bassa', farms: 189, color: 'bg-purple-100 hover:bg-purple-200', compliance: 88, deforestationAlerts: 34, carbonCredits: 2780, sustainabilityScore: 81 },
+    { name: 'Grand Gedeh', farms: 156, color: 'bg-pink-100 hover:bg-pink-200', compliance: 86, deforestationAlerts: 56, carbonCredits: 4230, sustainabilityScore: 78 },
+    { name: 'Sinoe', farms: 123, color: 'bg-indigo-100 hover:bg-indigo-200', compliance: 84, deforestationAlerts: 41, carbonCredits: 3450, sustainabilityScore: 76 },
+    { name: 'Maryland', farms: 134, color: 'bg-orange-100 hover:bg-orange-200', compliance: 90, deforestationAlerts: 18, carbonCredits: 2890, sustainabilityScore: 83 },
+    { name: 'Grand Kru', farms: 98, color: 'bg-teal-100 hover:bg-teal-200', compliance: 87, deforestationAlerts: 29, carbonCredits: 2340, sustainabilityScore: 80 },
+    { name: 'River Cess', farms: 87, color: 'bg-cyan-100 hover:bg-cyan-200', compliance: 85, deforestationAlerts: 33, carbonCredits: 2670, sustainabilityScore: 77 },
+    { name: 'Gbarpolu', farms: 112, color: 'bg-lime-100 hover:bg-lime-200', compliance: 82, deforestationAlerts: 52, carbonCredits: 3890, sustainabilityScore: 75 },
+    { name: 'Bomi', farms: 145, color: 'bg-emerald-100 hover:bg-emerald-200', compliance: 92, deforestationAlerts: 15, carbonCredits: 2450, sustainabilityScore: 86 },
+    { name: 'Grand Cape Mount', farms: 203, color: 'bg-violet-100 hover:bg-violet-200', compliance: 89, deforestationAlerts: 27, carbonCredits: 3120, sustainabilityScore: 84 },
+    { name: 'Margibi', farms: 167, color: 'bg-rose-100 hover:bg-rose-200', compliance: 95, deforestationAlerts: 8, carbonCredits: 2780, sustainabilityScore: 88 },
+    { name: 'River Gee', farms: 89, color: 'bg-slate-100 hover:bg-slate-200', compliance: 83, deforestationAlerts: 39, carbonCredits: 3240, sustainabilityScore: 74 }
   ];
 
   return (
@@ -114,14 +115,186 @@ export default function GISMappingClean() {
         </TabsContent>
 
         <TabsContent value="realtime" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Live Agricultural Monitoring */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-green-600" />
+                  Live Agricultural Monitoring
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Active Farm Plots:</span>
+                    <span className="font-bold text-green-600">{counties.reduce((sum, c) => sum + c.farms, 0)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>NDVI Health Index:</span>
+                    <span className="font-bold text-green-600">0.75 (Healthy)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Soil Moisture:</span>
+                    <span className="font-bold text-blue-600">42% (Optimal)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Temperature (Avg):</span>
+                    <span className="font-bold text-orange-600">27°C</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Active Sensors:</span>
+                    <span className="font-bold text-purple-600">2,847</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Weather Monitoring */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  Weather Conditions
+                  <Badge variant="default" className="bg-blue-500">Live</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Current Conditions:</span>
+                    <span className="font-bold text-blue-600">Partly Cloudy</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Temperature:</span>
+                    <span className="font-bold">26°C</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Humidity:</span>
+                    <span className="font-bold">78%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Wind Speed:</span>
+                    <span className="font-bold">12 km/h</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Precipitation:</span>
+                    <span className="font-bold text-blue-600">2.3mm (Today)</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Deforestation Alerts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  Deforestation Alerts
+                  <Badge variant="outline" className="border-orange-500 text-orange-600">
+                    {counties.reduce((sum, c) => sum + c.deforestationAlerts, 0)} Active
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>GLAD Alerts (Weekly):</span>
+                    <span className="font-bold text-orange-600">23</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>RADD Alerts (Daily):</span>
+                    <span className="font-bold text-red-600">7</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>High Confidence:</span>
+                    <span className="font-bold text-red-600">12</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Under Investigation:</span>
+                    <span className="font-bold text-yellow-600">18</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Forest Loss (Ha):</span>
+                    <span className="font-bold text-red-600">145.7 Ha</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Carbon & Sustainability */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Leaf className="h-5 w-5 text-green-600" />
+                  Carbon & Sustainability
+                  <Badge variant="default" className="bg-green-500">Tracking</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Total Carbon Credits:</span>
+                    <span className="font-bold text-green-600">
+                      {counties.reduce((sum, c) => sum + c.carbonCredits, 0).toLocaleString()} tCO2e
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Avg Sustainability:</span>
+                    <span className="font-bold text-green-600">
+                      {Math.round(counties.reduce((sum, c) => sum + c.sustainabilityScore, 0) / counties.length)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Forest Protected:</span>
+                    <span className="font-bold text-green-600">12,340 Ha</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Emission Reduction:</span>
+                    <span className="font-bold text-blue-600">28,450 tCO2e/year</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Projects Active:</span>
+                    <span className="font-bold text-purple-600">47</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Real-time Status Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Real-Time Agricultural Data</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                System Status Overview
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Globe className="h-12 w-12 mx-auto text-green-600 mb-4" />
-                <p className="text-gray-600">Live data streaming from field sensors</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {Math.round(counties.reduce((sum, c) => sum + c.compliance, 0) / counties.length)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Average Compliance</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">118</div>
+                  <div className="text-sm text-gray-600">Satellites Connected</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {counties.reduce((sum, c) => sum + c.farms, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Active Farms</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-orange-600">
+                    {counties.reduce((sum, c) => sum + c.deforestationAlerts, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Active Alerts</div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -311,12 +484,30 @@ export default function GISMappingClean() {
         <TabsContent value="analytics" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Agricultural Analytics</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                County PDF Reports - Comprehensive Agricultural Analysis
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <BarChart3 className="h-12 w-12 mx-auto text-purple-600 mb-4" />
-                <p className="text-gray-600">Compliance trends and production analytics</p>
+              <div className="space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="font-semibold text-blue-800 mb-2">Generate Detailed County Reports</h3>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Create comprehensive A4 PDF reports for each of Liberia's 15 counties including:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-700">
+                    <div>• County maps with GPS coordinates</div>
+                    <div>• Multi-constellation satellite data</div>
+                    <div>• Real-time weather conditions</div>
+                    <div>• Deforestation alerts & monitoring</div>
+                    <div>• EUDR compliance metrics</div>
+                    <div>• Tracking & tracing statistics</div>
+                    <div>• Carbon credit impact analysis</div>
+                    <div>• Sustainability scoring</div>
+                  </div>
+                </div>
+                <CountyReportGenerator />
               </div>
             </CardContent>
           </Card>

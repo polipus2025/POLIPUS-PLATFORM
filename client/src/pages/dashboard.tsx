@@ -25,6 +25,12 @@ export default function Dashboard() {
   const [isExportReportOpen, setIsExportReportOpen] = useState(false);
   const [isMessagesDialogOpen, setIsMessagesDialogOpen] = useState(false);
   
+  // EUDR Compliance Action states
+  const [isEudrReportGenerating, setIsEudrReportGenerating] = useState(false);
+  const [isExportingCertificates, setIsExportingCertificates] = useState(false);
+  const [isSatelliteDataOpen, setIsSatelliteDataOpen] = useState(false);
+  const [isRiskAssessmentOpen, setIsRiskAssessmentOpen] = useState(false);
+  
   // Real-time testing state
   const [isTestingActive, setIsTestingActive] = useState(false);
   const [testResults, setTestResults] = useState<any[]>([]);
@@ -197,6 +203,103 @@ export default function Dashboard() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsEudrDialogOpen(false);
     return { eudr_dialog: "working", compliance: "active" };
+  };
+
+  // EUDR Compliance Action Handlers
+  const handleGenerateEudrReport = async () => {
+    setIsEudrReportGenerating(true);
+    toast({
+      title: "Generating EUDR Compliance Report",
+      description: "Creating comprehensive deforestation compliance report...",
+    });
+    
+    try {
+      // Simulate report generation
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Create downloadable PDF
+      const reportData = {
+        totalCommodities: 1247,
+        compliantCommodities: 1089,
+        riskAssessments: 892,
+        deforestationFree: 1156,
+        complianceRate: 87.3,
+        generatedDate: new Date().toISOString(),
+        reportId: `EUDR-${Date.now()}`
+      };
+      
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `EUDR_Compliance_Report_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Report Generated Successfully",
+        description: "EUDR compliance report has been downloaded to your device.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error Generating Report",
+        description: "Failed to generate EUDR compliance report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEudrReportGenerating(false);
+    }
+  };
+
+  const handleExportCertificates = async () => {
+    setIsExportingCertificates(true);
+    toast({
+      title: "Exporting Deforestation Certificates",
+      description: "Preparing deforestation-free certificates for download...",
+    });
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      
+      const certificates = [
+        { id: 'DFC-2024-001', commodity: 'Cocoa', county: 'Nimba', status: 'Valid' },
+        { id: 'DFC-2024-002', commodity: 'Coffee', county: 'Lofa', status: 'Valid' },
+        { id: 'DFC-2024-003', commodity: 'Palm Oil', county: 'Grand Bassa', status: 'Pending' }
+      ];
+      
+      const blob = new Blob([JSON.stringify(certificates, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Deforestation_Certificates_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Certificates Exported",
+        description: "Deforestation-free certificates have been downloaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export certificates. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingCertificates(false);
+    }
+  };
+
+  const handleViewSatelliteData = () => {
+    setIsSatelliteDataOpen(true);
+  };
+
+  const handleScheduleRiskAssessment = () => {
+    setIsRiskAssessmentOpen(true);
   };
 
   // Sample EUDR compliance data
@@ -654,19 +757,37 @@ export default function Dashboard() {
                         <div>
                           <h4 className="font-semibold mb-3">Compliance Actions</h4>
                           <div className="space-y-2">
-                            <Button variant="outline" className="w-full justify-start">
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start"
+                              onClick={handleGenerateEudrReport}
+                              disabled={isEudrReportGenerating}
+                            >
                               <FileCheck className="h-4 w-4 mr-2" />
-                              Generate EUDR Compliance Report
+                              {isEudrReportGenerating ? "Generating..." : "Generate EUDR Compliance Report"}
                             </Button>
-                            <Button variant="outline" className="w-full justify-start">
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start"
+                              onClick={handleExportCertificates}
+                              disabled={isExportingCertificates}
+                            >
                               <Download className="h-4 w-4 mr-2" />
-                              Export Deforestation Certificates
+                              {isExportingCertificates ? "Exporting..." : "Export Deforestation Certificates"}
                             </Button>
-                            <Button variant="outline" className="w-full justify-start">
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start"
+                              onClick={handleViewSatelliteData}
+                            >
                               <TreePine className="h-4 w-4 mr-2" />
                               View Satellite Monitoring Data
                             </Button>
-                            <Button variant="outline" className="w-full justify-start">
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start"
+                              onClick={handleScheduleRiskAssessment}
+                            >
                               <Shield className="h-4 w-4 mr-2" />
                               Schedule Risk Assessment
                             </Button>
@@ -1101,6 +1222,230 @@ export default function Dashboard() {
               <Download className="h-4 w-4 mr-1" />
               Generate & Download
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Satellite Monitoring Data Dialog */}
+      <Dialog open={isSatelliteDataOpen} onOpenChange={setIsSatelliteDataOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TreePine className="h-5 w-5" />
+              Satellite Monitoring Data
+            </DialogTitle>
+            <DialogDescription>
+              Real-time satellite monitoring data for deforestation tracking and EUDR compliance
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Satellite Status */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Active Satellites</p>
+                      <p className="text-2xl font-bold text-green-600">47</p>
+                    </div>
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Coverage Area</p>
+                      <p className="text-2xl font-bold text-blue-600">98.7%</p>
+                    </div>
+                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Alert Zones</p>
+                      <p className="text-2xl font-bold text-red-600">12</p>
+                    </div>
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Last Update</p>
+                      <p className="text-lg font-bold text-gray-800">2 min ago</p>
+                    </div>
+                    <div className="w-3 h-3 bg-gray-500 rounded-full animate-pulse"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Alerts */}
+            <div>
+              <h4 className="font-semibold mb-4">Recent Deforestation Alerts</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                  <div>
+                    <p className="font-medium text-red-800">High Risk - Nimba County</p>
+                    <p className="text-sm text-red-600">Coordinates: 7.5234°N, 8.6541°W | Area: 2.3 hectares</p>
+                    <p className="text-xs text-gray-500">Detected: 2 hours ago</p>
+                  </div>
+                  <Badge variant="destructive">Critical</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div>
+                    <p className="font-medium text-yellow-800">Medium Risk - Lofa County</p>
+                    <p className="text-sm text-yellow-600">Coordinates: 8.1923°N, 9.7456°W | Area: 0.8 hectares</p>
+                    <p className="text-xs text-gray-500">Detected: 6 hours ago</p>
+                  </div>
+                  <Badge className="bg-yellow-600">Warning</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div>
+                    <p className="font-medium text-green-800">Resolved - Grand Bassa County</p>
+                    <p className="text-sm text-green-600">Coordinates: 6.2314°N, 9.8127°W | False alarm confirmed</p>
+                    <p className="text-xs text-gray-500">Resolved: 1 day ago</p>
+                  </div>
+                  <Badge className="bg-green-600">Resolved</Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsSatelliteDataOpen(false)}>
+                Close
+              </Button>
+              <Button>
+                <Download className="h-4 w-4 mr-2" />
+                Export Satellite Report
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Risk Assessment Scheduling Dialog */}
+      <Dialog open={isRiskAssessmentOpen} onOpenChange={setIsRiskAssessmentOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Schedule Risk Assessment
+            </DialogTitle>
+            <DialogDescription>
+              Schedule a comprehensive EUDR compliance risk assessment for agricultural commodities
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Assessment Type</label>
+                <Select defaultValue="comprehensive">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="comprehensive">Comprehensive Assessment</SelectItem>
+                    <SelectItem value="targeted">Targeted Assessment</SelectItem>
+                    <SelectItem value="followup">Follow-up Assessment</SelectItem>
+                    <SelectItem value="emergency">Emergency Assessment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Priority Level</label>
+                <Select defaultValue="high">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Target County</label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Counties</SelectItem>
+                    <SelectItem value="nimba">Nimba County</SelectItem>
+                    <SelectItem value="lofa">Lofa County</SelectItem>
+                    <SelectItem value="bong">Bong County</SelectItem>
+                    <SelectItem value="margibi">Margibi County</SelectItem>
+                    <SelectItem value="grand-bassa">Grand Bassa County</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Commodity Focus</label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Commodities</SelectItem>
+                    <SelectItem value="cocoa">Cocoa</SelectItem>
+                    <SelectItem value="coffee">Coffee</SelectItem>
+                    <SelectItem value="palm-oil">Palm Oil</SelectItem>
+                    <SelectItem value="rubber">Rubber</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Assessment Notes</label>
+              <textarea 
+                className="w-full p-3 border border-gray-300 rounded-lg resize-none"
+                rows={3}
+                placeholder="Enter specific requirements, focus areas, or additional instructions for the risk assessment..."
+              />
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-900 mb-2">Assessment Preview</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Deforestation risk analysis using satellite data</li>
+                <li>• Supply chain traceability verification</li>
+                <li>• GPS mapping accuracy assessment</li>
+                <li>• Documentation completeness review</li>
+                <li>• EUDR compliance gap analysis</li>
+                <li>• Recommended corrective actions</li>
+              </ul>
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsRiskAssessmentOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                toast({
+                  title: "Risk Assessment Scheduled",
+                  description: "EUDR compliance risk assessment has been scheduled successfully.",
+                });
+                setIsRiskAssessmentOpen(false);
+              }}>
+                <Shield className="h-4 w-4 mr-2" />
+                Schedule Assessment
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -1135,10 +1135,10 @@ export default function GISMapping() {
                     </div>
 
                     <div className="bg-green-100 p-4 rounded-lg text-center">
-                      <h2 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA - TUTTE LE 15 CONTEE INTERATTIVE</h2>
+                      <h2 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA - ALL 15 INTERACTIVE COUNTIES</h2>
                       <p className="text-green-700">✅ Montserrado, Lofa, Nimba, Bong, Grand Gedeh, Grand Bassa, Sinoe, Maryland, Grand Kru</p>
                       <p className="text-green-700">✅ River Cess, Gbarpolu, Bomi, Grand Cape Mount, Margibi, River Gee</p>
-                      <p className="text-sm text-green-600 mt-2">Clicca su qualsiasi blocco per vedere informazioni dettagliate</p>
+                      <p className="text-sm text-green-600 mt-2">Click on any block to view detailed information</p>
                     </div>
                   </div>
                 </CardContent>

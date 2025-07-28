@@ -56,24 +56,21 @@ const regulatoryNavigation = [
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
-// Farmer Navigation - Only farm management features
+// Farmer Navigation - Only farm management features (GIS and Crop Planning restricted to LACRA only)
 const farmerNavigation = [
   { name: "Farm Dashboard", href: "/", icon: BarChart3 },
   { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
-  { name: "GIS Mapping", href: "/gis-mapping", icon: Satellite },
-  { name: "Crop Planning", href: "/crop-planning", icon: Calendar },
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
-// Field Agent Navigation - Territory-limited inspection and verification
+// Field Agent Navigation - Territory-limited inspection and verification (GIS restricted to LACRA only)
 const fieldAgentNavigation = [
   { name: "Field Operations", href: "/", icon: BarChart3 },
   { name: "Territory Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Farmer Registration", href: "/farmers", icon: Users },
-  { name: "GIS Mapping", href: "/gis-mapping", icon: Satellite },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Real-Time Verification", href: "/verification-dashboard", icon: Award },
   { name: "Mobile Data Entry", href: "/data-entry", icon: Plus },

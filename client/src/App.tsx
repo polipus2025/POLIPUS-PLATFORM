@@ -177,13 +177,13 @@ function Router() {
           <Route path="/crop-planning">
             <ProtectedRoute 
               component={CropPlanning} 
-              allowedUserTypes={['farmer']} 
+              allowedUserTypes={['regulatory']} 
             />
           </Route>
           <Route path="/gis-mapping">
             <ProtectedRoute 
               component={GISMapping} 
-              allowedUserTypes={['regulatory', 'farmer', 'field_agent']} 
+              allowedUserTypes={['regulatory']} 
             />
           </Route>
           <Route path="/batch-code-generator">

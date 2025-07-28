@@ -206,7 +206,12 @@ function Router() {
           <Route path="/offline-sync" component={OfflineSync} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
           <Route path="/mobile-alert-demo" component={MobileAlertDemo} />
-          <Route path="/messaging" component={Messaging} />
+          <Route path="/messaging">
+            <ProtectedRoute 
+              component={Messaging} 
+              allowedUserTypes={['regulatory', 'field_agent', 'exporter']} 
+            />
+          </Route>
           
         </>
       ) : (

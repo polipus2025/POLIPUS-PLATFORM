@@ -53,14 +53,8 @@ export default function FarmerDashboard() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/crop-planning">
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Plan New Crop
-            </Button>
-          </Link>
           <Link href="/batch-code-generator">
-            <Button variant="outline">
+            <Button className="bg-green-600 hover:bg-green-700">
               <Package className="h-4 w-4 mr-2" />
               Generate Batch Code
             </Button>

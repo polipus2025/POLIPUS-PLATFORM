@@ -56,13 +56,12 @@ const regulatoryNavigation = [
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
-// Farmer Navigation - Only farm management features (GIS and Crop Planning restricted to LACRA only)
+// Farmer Navigation - Only farm management features (GIS, Crop Planning, and Internal Messaging restricted to LACRA only)
 const farmerNavigation = [
   { name: "Farm Dashboard", href: "/", icon: BarChart3 },
   { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
-  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
   { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 

@@ -71,8 +71,8 @@ export default function GISMapping() {
     });
     
     toast({
-      title: "🗺️ Mappa GIS Attivata",
-      description: "Sistema di mappatura in tempo reale ora attivo per Liberia",
+      title: "GIS Map Activated",
+      description: "Real-time mapping system now active for Liberia",
     });
   };
 
@@ -570,30 +570,32 @@ export default function GISMapping() {
   };
 
   return (
-      <div className="space-y-6">
+    <div className="min-h-screen isms-gradient">
+      <div className="max-w-7xl mx-auto p-8 space-y-8">
         <Helmet>
           <title>GIS Mapping System - AgriTrace360™ LACRA</title>
           <meta name="description" content="Comprehensive geospatial mapping and tracking system for agricultural operations" />
         </Helmet>
 
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">GIS Mapping System</h1>
-          <p className="text-gray-600 mt-2">
-            Comprehensive geospatial mapping and tracking for agricultural operations
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {/* EUDR PDF Report Button */}
-          <Button 
-            onClick={generateEUDRReport}
-            className="bg-green-600 hover:bg-green-700 text-white"
-            size="sm"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Generate EUDR Report
-          </Button>
+        {/* Header Section - ISMS Style */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-16 h-16 rounded-2xl isms-icon-bg-green flex items-center justify-center">
+            <Map className="h-8 w-8 text-white" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold text-slate-900">GIS Mapping System</h1>
+            <p className="text-slate-600 text-lg">Comprehensive geospatial mapping and agricultural tracking</p>
+          </div>
+          <div className="flex gap-2">
+            {/* EUDR PDF Report Button */}
+            <Button 
+              onClick={generateEUDRReport}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              size="sm"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Generate EUDR Report
+            </Button>
           
           <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
             <DialogTrigger asChild>
@@ -697,125 +699,114 @@ export default function GISMapping() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
-      </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Map className="h-5 w-5 text-green-600" />
+        {/* Quick Stats - ISMS Style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="isms-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <Map className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Mapped Plots</p>
-                <p className="text-xl font-bold">{gisStats.totalPlots.toLocaleString()}</p>
+                <p className="text-sm text-slate-600 font-medium">Mapped Plots</p>
+                <p className="isms-metric-number">{gisStats.totalPlots.toLocaleString()}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Satellite className="h-5 w-5 text-blue-600" />
+          <div className="isms-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Satellite className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Area</p>
-                <p className="text-xl font-bold">{gisStats.mappedArea}</p>
+                <p className="text-sm text-slate-600 font-medium">Total Area</p>
+                <p className="isms-metric-number">{gisStats.mappedArea}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Truck className="h-5 w-5 text-orange-600" />
+          <div className="isms-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                <Truck className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Active Vehicles</p>
-                <p className="text-xl font-bold">{gisStats.activeVehicles}</p>
+                <p className="text-sm text-slate-600 font-medium">Active Vehicles</p>
+                <p className="isms-metric-number">{gisStats.activeVehicles}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
+          <div className="isms-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">GPS Accuracy</p>
-                <p className="text-xl font-bold">{gisStats.trackingAccuracy}</p>
+                <p className="text-sm text-slate-600 font-medium">GPS Accuracy</p>
+                <p className="isms-metric-number">{gisStats.trackingAccuracy}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <Activity className="h-5 w-5 text-gray-600" />
+          <div className="isms-card">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+                <Activity className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Last Update</p>
-                <p className="text-sm font-medium">{gisStats.lastUpdate}</p>
-                <Badge variant="secondary" className="text-xs mt-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse" />
-                  Live
-                </Badge>
+                <p className="text-sm text-slate-600 font-medium">Last Update</p>
+                <p className="text-lg font-bold text-slate-900">{gisStats.lastUpdate}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <span className="text-xs text-green-600 font-medium">Live</span>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
 
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Map className="h-4 w-4" />
-            Interactive Map
-          </TabsTrigger>
-          <TabsTrigger value="realtime-gis" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            Real-Time GIS
-          </TabsTrigger>
-          <TabsTrigger value="farm-plots" className="flex items-center gap-2">
-            <Satellite className="h-4 w-4" />
-            Farm Mapping
-          </TabsTrigger>
-          <TabsTrigger value="transportation" className="flex items-center gap-2">
-            <Truck className="h-4 w-4" />
-            Vehicle Tracking
-          </TabsTrigger>
-          <TabsTrigger value="satellites" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Satellites
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm p-2 rounded-xl">
+            <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg">
+              <Map className="h-4 w-4" />
+              Interactive Map
+            </TabsTrigger>
+            <TabsTrigger value="realtime-gis" className="flex items-center gap-2 rounded-lg">
+              <Globe className="h-4 w-4" />
+              Real-Time GIS
+            </TabsTrigger>
+            <TabsTrigger value="farm-plots" className="flex items-center gap-2 rounded-lg">
+              <Satellite className="h-4 w-4" />
+              Farm Mapping
+            </TabsTrigger>
+            <TabsTrigger value="transportation" className="flex items-center gap-2 rounded-lg">
+              <Truck className="h-4 w-4" />
+              Vehicle Tracking
+            </TabsTrigger>
+            <TabsTrigger value="satellites" className="flex items-center gap-2 rounded-lg">
+              <Activity className="h-4 w-4" />
+              Satellites
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2 rounded-lg">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Map className="h-5 w-5" />
-                  Liberia Counties Map
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+          <TabsContent value="overview" className="space-y-8">
+            <div className="grid grid-cols-1 gap-8">
+              <div className="isms-card">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                    <Map className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900">Liberia Counties Map</h3>
+                </div>
                 <div className="space-y-4">
                   {/* Clean Counties Grid */}
                   <div className="grid grid-cols-5 gap-3 p-6 bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border">

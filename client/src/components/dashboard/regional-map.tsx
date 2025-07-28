@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
@@ -21,22 +22,20 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const [displayData, setDisplayData] = useState<ComplianceByCounty[]>([]);
 
-  // Filter county data based on selection
-  const filteredCountyData = selectedCounty === "all" 
-    ? countyData 
-    : countyData.filter(county => {
-        const match = county.county.toLowerCase().trim() === selectedCounty.toLowerCase().trim();
-        
+  // Filter county data based on selection with useMemo to prevent loop
+  const filteredCountyData = React.useMemo(() => {
+    return selectedCounty === "all" 
+      ? countyData 
+      : countyData.filter(county => {
+          return county.county.toLowerCase().trim() === selectedCounty.toLowerCase().trim();
+        });
+  }, [selectedCounty, countyData]);
 
-        
-        return match;
-      });
-
-  // Reset current index when county selection changes
-  useEffect(() => {
+  // Reset when county changes - no effect needed for length changes
+  const resetForNewCounty = (county: string) => {
     setCurrentIndex(0);
-    setIsAutoScrolling(filteredCountyData.length > 4); // Only auto-scroll if more than 4 items
-  }, [selectedCounty, filteredCountyData.length]);
+    setIsAutoScrolling(filteredCountyData.length > 4);
+  };
 
   // Auto-scroll effect
   useEffect(() => {

@@ -787,7 +787,7 @@ export default function GISMapping() {
                     </div>
 
                     {/* LIBERIA MAP - NO SVG CIRCLES */}
-                    <div className="grid grid-cols-3 gap-4 bg-green-50 p-6 rounded-lg">
+                    <div className="grid grid-cols-5 gap-3 bg-green-50 p-6 rounded-lg">
                       <div 
                         className="bg-red-200 p-4 rounded cursor-pointer hover:bg-red-300 text-center transform hover:scale-105 transition-all duration-200" 
                         onClick={() => {
@@ -968,11 +968,140 @@ export default function GISMapping() {
                         <div className="font-bold">Grand Kru</div>
                         <div className="text-sm">134 farms</div>
                       </div>
+
+                      {/* SECONDA RIGA - 6 CONTEE AGGIUNTIVE */}
+                      <div 
+                        className="bg-cyan-200 p-4 rounded cursor-pointer hover:bg-cyan-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'River Cess',
+                            farms: 112,
+                            population: '71,000',
+                            area: '5,594 km²',
+                            capital: 'Cestos',
+                            commodities: ['Palm oil', 'Rubber', 'Rice', 'Cassava'],
+                            compliance: 87,
+                            exports: '$0.9M/year',
+                            details: 'River-rich county with significant palm oil and rubber production. Natural water resources support agriculture.'
+                          });
+                        }}
+                      >
+                        <div className="text-2xl">🏛️</div>
+                        <div className="font-bold">River Cess</div>
+                        <div className="text-sm">112 farms</div>
+                      </div>
+
+                      <div 
+                        className="bg-lime-200 p-4 rounded cursor-pointer hover:bg-lime-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Gbarpolu',
+                            farms: 98,
+                            population: '83,000',
+                            area: '9,689 km²',
+                            capital: 'Bopolu',
+                            commodities: ['Rice', 'Cassava', 'Coffee', 'Cocoa'],
+                            compliance: 84,
+                            exports: '$0.7M/year',
+                            details: 'Northwestern county with mountainous terrain and coffee cultivation. Traditional agricultural practices.'
+                          });
+                        }}
+                      >
+                        <div className="text-2xl">🏛️</div>
+                        <div className="font-bold">Gbarpolu</div>
+                        <div className="text-sm">98 farms</div>
+                      </div>
+
+                      <div 
+                        className="bg-rose-200 p-4 rounded cursor-pointer hover:bg-rose-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Bomi',
+                            farms: 156,
+                            population: '84,000',
+                            area: '1,942 km²',
+                            capital: 'Tubmanburg',
+                            commodities: ['Rubber', 'Rice', 'Cassava', 'Palm oil'],
+                            compliance: 90,
+                            exports: '$1.3M/year',
+                            details: 'Small but productive county with rubber plantations and good agricultural infrastructure near Monrovia.'
+                          });
+                        }}
+                      >
+                        <div className="text-2xl">🏛️</div>
+                        <div className="font-bold">Bomi</div>
+                        <div className="text-sm">156 farms</div>
+                      </div>
+
+                      <div 
+                        className="bg-amber-200 p-4 rounded cursor-pointer hover:bg-amber-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Grand Cape Mount',
+                            farms: 178,
+                            population: '129,000',
+                            area: '5,162 km²',
+                            capital: 'Robertsport',
+                            commodities: ['Rice', 'Cassava', 'Palm oil', 'Fishing'],
+                            compliance: 91,
+                            exports: '$1.5M/year',
+                            details: 'Coastal county with rice farming, fishing industry, and palm oil production. Strategic Atlantic location.'
+                          });
+                        }}
+                      >
+                        <div className="text-2xl">🏛️</div>
+                        <div className="font-bold">Grand Cape Mount</div>
+                        <div className="text-sm">178 farms</div>
+                      </div>
+
+                      <div 
+                        className="bg-emerald-200 p-4 rounded cursor-pointer hover:bg-emerald-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'Margibi',
+                            farms: 203,
+                            population: '209,000',
+                            area: '2,616 km²',
+                            capital: 'Kakata',
+                            commodities: ['Rubber', 'Palm oil', 'Rice', 'Vegetables'],
+                            compliance: 95,
+                            exports: '$2.2M/year',
+                            details: 'Highly productive county with modern agricultural facilities and proximity to Monrovia markets.'
+                          });
+                        }}
+                      >
+                        <div className="text-2xl">🏛️</div>
+                        <div className="font-bold">Margibi</div>
+                        <div className="text-sm">203 farms</div>
+                      </div>
+
+                      <div 
+                        className="bg-violet-200 p-4 rounded cursor-pointer hover:bg-violet-300 text-center transform hover:scale-105 transition-all duration-200" 
+                        onClick={() => {
+                          setSelectedCounty({
+                            name: 'River Gee',
+                            farms: 89,
+                            population: '66,000',
+                            area: '5,113 km²',
+                            capital: 'Fish Town',
+                            commodities: ['Cocoa', 'Palm oil', 'Cassava', 'Fishing'],
+                            compliance: 83,
+                            exports: '$0.6M/year',
+                            details: 'Southeastern county with cocoa farms and coastal fishing. Smaller agricultural output but growing potential.'
+                          });
+                        }}
+                      >
+                        <div className="text-2xl">🏛️</div>
+                        <div className="font-bold">River Gee</div>
+                        <div className="text-sm">89 farms</div>
+                      </div>
                     </div>
 
                     <div className="bg-green-100 p-4 rounded-lg text-center">
-                      <h2 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA - 15 CONTEE COMPLETE</h2>
-                      <p className="text-green-700">Nessun cerchio SVG - Solo blocchi colorati interattivi</p>
+                      <h2 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA - TUTTE LE 15 CONTEE INTERATTIVE</h2>
+                      <p className="text-green-700">✅ Montserrado, Lofa, Nimba, Bong, Grand Gedeh, Grand Bassa, Sinoe, Maryland, Grand Kru</p>
+                      <p className="text-green-700">✅ River Cess, Gbarpolu, Bomi, Grand Cape Mount, Margibi, River Gee</p>
+                      <p className="text-sm text-green-600 mt-2">Clicca su qualsiasi blocco per vedere informazioni dettagliate</p>
                     </div>
                   </div>
                 </CardContent>

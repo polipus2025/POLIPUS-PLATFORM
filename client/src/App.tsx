@@ -244,17 +244,18 @@ function App() {
   const isLandingPage = window.location.pathname === "/landing" && !authToken;
   const isFrontPage = window.location.pathname === "/" && !authToken;
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
+  const isDashboardPage = window.location.pathname === "/dashboard" && authToken;
   
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage) ? (
-          // Render auth/landing pages without layout
+        {(isAuthPage || isLandingPage || isFrontPage || isDashboardPage) ? (
+          // Render auth/landing pages and dashboard without layout
           <div className="min-h-screen">
             <Router />
           </div>
         ) : authToken ? (
-          // Render authenticated pages with full layout
+          // Render authenticated pages with full layout (except dashboard)
           <div className="min-h-screen bg-gray-50">
             <Header />
             <div className="flex">

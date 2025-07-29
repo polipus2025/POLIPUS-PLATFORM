@@ -1,8 +1,10 @@
 import { Helmet } from "react-helmet";
 import { useState, useEffect } from "react";
-import { Activity, TrendingUp, Users, AlertCircle, Package, MapPin, Shield, FileCheck } from "lucide-react";
+import { Activity, TrendingUp, Users, AlertCircle, Package, MapPin, Shield, FileCheck, Clock } from "lucide-react";
 
 export default function WorkingDashboard() {
+  // Real-time clock state
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [dashboardData, setDashboardData] = useState({
     totalCommodities: 1244,
     complianceRate: 89.4,
@@ -15,7 +17,16 @@ export default function WorkingDashboard() {
   useEffect(() => {
     // Simulate loading
     const timer = setTimeout(() => setIsLoaded(true), 300);
-    return () => clearTimeout(timer);
+    
+    // Update clock every second
+    const clockTimer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearInterval(clockTimer);
+    };
   }, []);
 
   if (!isLoaded) {
@@ -35,6 +46,52 @@ export default function WorkingDashboard() {
         <title>Dashboard LACRA - AgriTrace360™</title>
         <meta name="description" content="Dashboard ufficiale LACRA per monitoraggio conformità agricola Liberia" />
       </Helmet>
+
+      {/* Header integrato con orologio */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Shield className="h-8 w-8 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">LACRA Dashboard</h1>
+                <p className="text-sm text-gray-600">Liberia Agriculture Commodity Regulatory Authority</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {/* Orologio integrato */}
+              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <div className="text-right">
+                  <div className="text-sm font-semibold text-gray-900">
+                    {currentTime.toLocaleString('it-IT', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: false 
+                    })}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {currentTime.toLocaleDateString('it-IT', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short'
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-2 bg-green-100 rounded-lg">
+                <div className="text-xs font-medium text-green-800">ADMIN001</div>
+                <div className="text-xs text-green-600">Online</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Success Header */}

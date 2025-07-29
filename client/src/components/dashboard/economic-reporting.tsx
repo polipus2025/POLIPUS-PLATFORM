@@ -260,7 +260,7 @@ export default function EconomicReporting() {
 
       {/* Economic Overview Cards - ISMS Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-        <div className="isms-card h-48 p-6">
+        <div className="isms-card h-56 p-8">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
@@ -282,7 +282,7 @@ export default function EconomicReporting() {
           </div>
         </div>
 
-        <div className="isms-card h-48 p-6">
+        <div className="isms-card h-56 p-8">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
@@ -299,7 +299,7 @@ export default function EconomicReporting() {
           </div>
         </div>
 
-        <div className="isms-card h-48 p-6">
+        <div className="isms-card h-56 p-8">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
@@ -316,7 +316,7 @@ export default function EconomicReporting() {
           </div>
         </div>
 
-        <div className="isms-card h-48 p-6">
+        <div className="isms-card h-56 p-8">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
@@ -333,7 +333,7 @@ export default function EconomicReporting() {
           </div>
         </div>
 
-        <div className="isms-card h-48 p-6">
+        <div className="isms-card h-56 p-8">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
@@ -350,7 +350,7 @@ export default function EconomicReporting() {
           </div>
         </div>
 
-        <div className="isms-card h-48 p-6">
+        <div className="isms-card h-56 p-8">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">

@@ -123,9 +123,27 @@ export default function Verification() {
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrCodeDataURL, setQRCodeDataURL] = useState("");
+  const [realTimeSimulation, setRealTimeSimulation] = useState(false);
+  const [simulationData, setSimulationData] = useState({
+    verificationsProcessed: 0,
+    eudrComplianceRate: 0,
+    activeCertificates: 0,
+    pendingVerifications: 0,
+    failedVerifications: 0,
+    averageProcessingTime: 0,
+    deforestationAlerts: 0,
+    sustainabilityScores: [] as number[]
+  });
+  const [simulationLogs, setSimulationLogs] = useState<Array<{
+    timestamp: string;
+    type: 'success' | 'warning' | 'error' | 'info';
+    message: string;
+    certificateId?: string;
+  }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const qrCodeRef = useRef<HTMLCanvasElement>(null);
+  const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get all tracking records for admin view
   const { data: trackingRecords = [], isLoading: loadingRecords } = useQuery<TrackingRecord[]>({
@@ -213,6 +231,77 @@ export default function Verification() {
   const generateQRCodeData = (trackingNumber: string) => {
     return `https://lacra.gov.lr/verify/${trackingNumber}`;
   };
+
+  // Real-time simulation system
+  const startRealTimeSimulation = () => {
+    setRealTimeSimulation(true);
+    setSimulationLogs([{
+      timestamp: new Date().toLocaleTimeString(),
+      type: 'info',
+      message: 'Real-time verification simulation started'
+    }]);
+    
+    simulationIntervalRef.current = setInterval(() => {
+      setSimulationData(prev => {
+        const newData = {
+          verificationsProcessed: prev.verificationsProcessed + Math.floor(Math.random() * 3) + 1,
+          eudrComplianceRate: Math.round((85 + Math.random() * 13) * 10) / 10,
+          activeCertificates: prev.activeCertificates + Math.floor(Math.random() * 2),
+          pendingVerifications: Math.max(0, prev.pendingVerifications + Math.floor(Math.random() * 3) - 1),
+          failedVerifications: prev.failedVerifications + (Math.random() > 0.85 ? 1 : 0),
+          averageProcessingTime: Math.round((2.1 + Math.random() * 1.8) * 10) / 10,
+          deforestationAlerts: prev.deforestationAlerts + (Math.random() > 0.92 ? 1 : 0),
+          sustainabilityScores: [...prev.sustainabilityScores.slice(-9), Math.round((75 + Math.random() * 20) * 10) / 10]
+        };
+        
+        // Add simulation log entry
+        const logTypes = ['success', 'warning', 'info'] as const;
+        const messages = [
+          'Certificate COF-2025-0' + (Math.floor(Math.random() * 999) + 100) + ' verified successfully',
+          'EUDR compliance check completed for Cocoa shipment',
+          'GPS tracking verification: Origin coordinates confirmed',
+          'Sustainability score calculated: ' + (75 + Math.random() * 20).toFixed(1) + '%',
+          'Deforestation risk assessment: Low risk confirmed',
+          'Supply chain transparency validated',
+          'Quality certification verified for EU export',
+          'Traceability timeline completed: Farm to port tracked'
+        ];
+        
+        const newLog = {
+          timestamp: new Date().toLocaleTimeString(),
+          type: logTypes[Math.floor(Math.random() * logTypes.length)],
+          message: messages[Math.floor(Math.random() * messages.length)],
+          certificateId: 'CERT-' + Math.floor(Math.random() * 10000)
+        };
+        
+        setSimulationLogs(prev => [...prev.slice(-19), newLog]);
+        
+        return newData;
+      });
+    }, 2000);
+  };
+  
+  const stopRealTimeSimulation = () => {
+    setRealTimeSimulation(false);
+    if (simulationIntervalRef.current) {
+      clearInterval(simulationIntervalRef.current);
+      simulationIntervalRef.current = null;
+    }
+    setSimulationLogs(prev => [...prev, {
+      timestamp: new Date().toLocaleTimeString(),
+      type: 'info',
+      message: 'Real-time verification simulation stopped'
+    }]);
+  };
+
+  // Cleanup simulation on unmount
+  useEffect(() => {
+    return () => {
+      if (simulationIntervalRef.current) {
+        clearInterval(simulationIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Generate QR code when showing QR dialog
   useEffect(() => {
@@ -333,7 +422,7 @@ export default function Verification() {
               </TabsTrigger>
               <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <BarChart className="h-4 w-4 mr-2" />
-                Verification Analytics
+                Real-Time Simulation
               </TabsTrigger>
             </TabsList>
 
@@ -843,197 +932,208 @@ export default function Verification() {
                 </div>
               </TabsContent>
 
-            {/* Analytics Tab - ISMS Style */}
+            {/* Real-Time Simulation Tab - ISMS Style */}
             <TabsContent value="analytics" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 border border-blue-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-blue-800 text-sm font-medium">Total Certificates</p>
-                      <p className="text-3xl font-bold text-blue-900">{trackingRecords.length}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-6 border border-green-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                      <CheckCircle className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-green-800 text-sm font-medium">EUDR Compliant</p>
-                      <p className="text-3xl font-bold text-green-900">
-                        {trackingRecords.filter(r => r.eudrCompliant).length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-orange-50 to-amber-100 rounded-xl p-6 border border-orange-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-                      <AlertTriangle className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-orange-800 text-sm font-medium">High Risk</p>
-                      <p className="text-3xl font-bold text-orange-900">
-                        {trackingRecords.filter(r => r.deforestationRisk === "high").length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl p-6 border border-purple-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
-                      <Star className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-purple-800 text-sm font-medium">Avg. Sustainability</p>
-                      <p className="text-3xl font-bold text-purple-900">
-                        {trackingRecords.length > 0 
-                          ? Math.round(trackingRecords.filter(r => r.sustainabilityScore).reduce((acc, r) => acc + (r.sustainabilityScore || 0), 0) / trackingRecords.filter(r => r.sustainabilityScore).length)
-                          : 0}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Status Distribution */}
-                <div className="bg-slate-50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                      <BarChart className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-900">Certificate Status Distribution</h3>
-                      <p className="text-slate-600">Breakdown of certificate statuses</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {["verified", "pending", "in_transit", "rejected"].map(status => {
-                      const count = trackingRecords.filter(r => r.currentStatus === status).length;
-                      const percentage = trackingRecords.length > 0 ? (count / trackingRecords.length) * 100 : 0;
-                      return (
-                        <div key={status} className="bg-white rounded-lg p-4">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium text-slate-900 capitalize">{status.replace('_', ' ')}</span>
-                            <span className="text-slate-600">{count} ({percentage.toFixed(1)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                status === "verified" ? "bg-green-500" :
-                                status === "pending" ? "bg-yellow-500" :
-                                status === "in_transit" ? "bg-blue-500" :
-                                "bg-red-500"
-                              }`}
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Risk Assessment */}
-                <div className="bg-slate-50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-                      <Shield className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-900">Risk Assessment Overview</h3>
-                      <p className="text-slate-600">Deforestation risk breakdown</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {["low", "medium", "high", "unknown"].map(risk => {
-                      const count = trackingRecords.filter(r => (r.deforestationRisk || "unknown") === risk).length;
-                      const percentage = trackingRecords.length > 0 ? (count / trackingRecords.length) * 100 : 0;
-                      return (
-                        <div key={risk} className="bg-white rounded-lg p-4">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium text-slate-900 capitalize">{risk} Risk</span>
-                            <span className="text-slate-600">{count} ({percentage.toFixed(1)}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                risk === "low" ? "bg-green-500" :
-                                risk === "medium" ? "bg-yellow-500" :
-                                risk === "high" ? "bg-red-500" :
-                                "bg-gray-500"
-                              }`}
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
+              {/* Simulation Control Panel */}
               <div className="bg-slate-50 rounded-xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl isms-icon-bg-purple flex items-center justify-center">
-                    <Activity className="h-5 w-5 text-white" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                      <Activity className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">Real-Time Verification Simulation</h3>
+                      <p className="text-slate-600">Monitor live certificate verification processing and system performance</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">Recent Verification Activity</h3>
-                    <p className="text-slate-600">Latest certificate verification activities</p>
+                  <div className="flex gap-3">
+                    {realTimeSimulation ? (
+                      <Button 
+                        onClick={stopRealTimeSimulation}
+                        variant="outline" 
+                        className="border-red-200 text-red-700 hover:bg-red-50"
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Stop Simulation
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={startRealTimeSimulation}
+                        className="isms-button"
+                      >
+                        <Zap className="h-4 w-4 mr-2" />
+                        Start Live Simulation
+                      </Button>
+                    )}
+                    {realTimeSimulation && (
+                      <Badge className="bg-green-100 text-green-800 px-3 py-1">
+                        <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse mr-2"></div>
+                        Live Testing Active
+                      </Badge>
+                    )}
                   </div>
                 </div>
-                <div className="bg-white rounded-lg overflow-hidden">
-                  <div className="divide-y divide-slate-200">
-                    {trackingRecords.slice(0, 5).map((record, index) => (
-                      <div key={record.id} className="p-4 hover:bg-slate-50">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              record.eudrCompliant ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
-                            }`}>
-                              {record.eudrCompliant ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                            </div>
-                            <div>
-                              <p className="font-medium text-slate-900">{record.trackingNumber}</p>
-                              <p className="text-sm text-slate-600">
-                                {record.destinationCountry || "Unknown destination"} • 
-                                <Badge className={`ml-2 ${getStatusColor(record.currentStatus)}`}>
-                                  {record.currentStatus}
+              </div>
+
+              {/* Real-Time Metrics Dashboard */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg isms-icon-bg-blue flex items-center justify-center">
+                      <CheckCircle className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-slate-600 text-sm">Verifications Processed</span>
+                  </div>
+                  <p className="text-3xl font-bold text-blue-900 mb-1">
+                    {simulationData.verificationsProcessed.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-blue-600">Total certificates verified</p>
+                </div>
+
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center">
+                      <Award className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-slate-600 text-sm">EUDR Compliance Rate</span>
+                  </div>
+                  <p className="text-3xl font-bold text-green-900 mb-1">
+                    {simulationData.eudrComplianceRate}%
+                  </p>
+                  <p className="text-xs text-green-600">EU deforestation compliant</p>
+                </div>
+
+                <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg isms-icon-bg-orange flex items-center justify-center">
+                      <Clock className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-slate-600 text-sm">Avg Processing Time</span>
+                  </div>
+                  <p className="text-3xl font-bold text-orange-900 mb-1">
+                    {simulationData.averageProcessingTime}s
+                  </p>
+                  <p className="text-xs text-orange-600">Per certificate verification</p>
+                </div>
+
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg isms-icon-bg-purple flex items-center justify-center">
+                      <AlertTriangle className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-slate-600 text-sm">Deforestation Alerts</span>
+                  </div>
+                  <p className="text-3xl font-bold text-purple-900 mb-1">
+                    {simulationData.deforestationAlerts}
+                  </p>
+                  <p className="text-xs text-purple-600">High-risk detections</p>
+                </div>
+              </div>
+
+              {/* Live Activity Monitor */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Verification Status Overview */}
+                <div className="bg-slate-50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-lg isms-icon-bg-blue flex items-center justify-center">
+                      <BarChart className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className="font-bold text-slate-900">Live Verification Status</h4>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Active Certificates</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="font-medium text-slate-900">{simulationData.activeCertificates}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Pending Verifications</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span className="font-medium text-slate-900">{simulationData.pendingVerifications}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Failed Verifications</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="font-medium text-slate-900">{simulationData.failedVerifications}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Activity Log */}
+                <div className="bg-slate-50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center">
+                      <Activity className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className="font-bold text-slate-900">Live Verification Activity</h4>
+                  </div>
+                  <ScrollArea className="h-64">
+                    <div className="space-y-3">
+                      {simulationLogs.map((log, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg border">
+                          <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                            log.type === 'success' ? 'bg-green-500' :
+                            log.type === 'warning' ? 'bg-yellow-500' :
+                            log.type === 'error' ? 'bg-red-500' :
+                            'bg-blue-500'
+                          }`}></div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs text-slate-500">{log.timestamp}</span>
+                              {log.certificateId && (
+                                <Badge variant="outline" className="text-xs">
+                                  {log.certificateId}
                                 </Badge>
-                              </p>
+                              )}
                             </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-slate-600">{new Date(record.createdAt).toLocaleDateString()}</p>
-                            {record.sustainabilityScore && (
-                              <div className="flex items-center gap-1 mt-1">
-                                <Star className="h-3 w-3 text-yellow-500" />
-                                <span className="text-xs text-slate-600">{record.sustainabilityScore}%</span>
-                              </div>
-                            )}
+                            <p className="text-sm text-slate-700 leading-relaxed">{log.message}</p>
                           </div>
                         </div>
+                      ))}
+                      {simulationLogs.length === 0 && (
+                        <div className="text-center py-8 text-slate-500">
+                          <Activity className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+                          <p>No activity logs yet. Start simulation to see live verification activity.</p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+
+              {/* Sustainability Score Trends */}
+              {simulationData.sustainabilityScores.length > 0 && (
+                <div className="bg-slate-50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-lg isms-icon-bg-purple flex items-center justify-center">
+                      <Star className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className="font-bold text-slate-900">Sustainability Score Trends</h4>
+                  </div>
+                  <div className="grid grid-cols-10 gap-2 h-32">
+                    {simulationData.sustainabilityScores.map((score, index) => (
+                      <div key={index} className="flex flex-col justify-end">
+                        <div 
+                          className={`w-full rounded-t ${
+                            score >= 90 ? 'bg-green-500' :
+                            score >= 75 ? 'bg-blue-500' :
+                            score >= 60 ? 'bg-yellow-500' :
+                            'bg-red-500'
+                          }`}
+                          style={{ height: `${(score / 100) * 100}%` }}
+                        ></div>
+                        <span className="text-xs text-slate-600 text-center mt-1">{score}%</span>
                       </div>
                     ))}
                   </div>
-                  {trackingRecords.length === 0 && (
-                    <div className="text-center py-8">
-                      <Activity className="h-12 w-12 text-slate-400 mx-auto mb-3" />
-                      <p className="text-slate-500">No verification activity recorded</p>
-                    </div>
-                  )}
                 </div>
-              </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

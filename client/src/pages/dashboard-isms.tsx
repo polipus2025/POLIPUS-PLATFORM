@@ -115,15 +115,11 @@ export default function Dashboard() {
         <div className="flex-1 flex flex-col">
           <Header />
           
-          {/* ISMS Main Content */}
-          <main className="flex-1 p-6">
-            <div className="max-w-7xl mx-auto">
-              {/* Debug visibility indicator */}
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <strong>Debug:</strong> Content area is rendering - all your work is preserved!
-              </div>
-        {/* ISMS Header */}
-        <div className="text-center mb-12">
+          {/* ISMS Main Content - Fixed Layout */}
+          <main className="flex-1 p-6 overflow-y-auto">
+            <div className="max-w-7xl mx-auto space-y-8">
+              {/* ISMS Header */}
+              <div className="text-center mb-12">
           <div className="inline-flex items-center gap-4 mb-6">
             <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
               <BarChart3 className="h-10 w-10 text-white" />
@@ -146,88 +142,88 @@ export default function Dashboard() {
                 </Badge>
               </div>
             </div>
-          </div>
-        </div>
+              </div>
+              </div>
 
-        {/* Main Metrics - ISMS Style */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="isms-card h-60 p-10">
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                  <Package className="h-6 w-6" />
+              {/* Main Metrics - ISMS Style */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="isms-card h-60 p-10">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                        <Package className="h-6 w-6" />
+                      </div>
+                      <div className="flex items-center">
+                        <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+                        <span className="text-xs font-medium text-green-600">+12%</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center text-center">
+                      <p className="text-sm font-medium text-slate-600 mb-3">Total Commodities</p>
+                      <p className="text-2xl font-bold text-slate-900">1,247</p>
+                      <p className="text-sm text-slate-500 mt-3">Active batches</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                  <span className="text-xs font-medium text-green-600">+12%</span>
-                </div>
-              </div>
-              <div className="flex-1 flex flex-col justify-center text-center">
-                <p className="text-sm font-medium text-slate-600 mb-3">Total Commodities</p>
-                <p className="text-2xl font-bold text-slate-900">1,247</p>
-                <p className="text-sm text-slate-500 mt-3">Active batches</p>
-              </div>
-            </div>
-          </div>
 
-          <div className="isms-card h-60 p-10">
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                  <CheckCircle className="h-6 w-6" />
+                <div className="isms-card h-60 p-10">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                        <CheckCircle className="h-6 w-6" />
+                      </div>
+                      <div className="flex items-center">
+                        <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+                        <span className="text-xs font-medium text-green-600">+5%</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center text-center">
+                      <p className="text-sm font-medium text-slate-600 mb-3">Compliance Rate</p>
+                      <p className="text-2xl font-bold text-slate-900">87.3%</p>
+                      <p className="text-sm text-slate-500 mt-3">EUDR compliant</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                  <span className="text-xs font-medium text-green-600">+5%</span>
-                </div>
-              </div>
-              <div className="flex-1 flex flex-col justify-center text-center">
-                <p className="text-sm font-medium text-slate-600 mb-3">Compliance Rate</p>
-                <p className="text-2xl font-bold text-slate-900">87.3%</p>
-                <p className="text-sm text-slate-500 mt-3">EUDR compliant</p>
-              </div>
-            </div>
-          </div>
 
-          <div className="isms-card h-60 p-10">
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-                  <Clock className="h-6 w-6" />
+                <div className="isms-card h-60 p-10">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                        <Clock className="h-6 w-6" />
+                      </div>
+                      <div className="flex items-center">
+                        <TrendingUp className="h-4 w-4 text-orange-600 mr-1" />
+                        <span className="text-xs font-medium text-orange-600">+8</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center text-center">
+                      <p className="text-sm font-medium text-slate-600 mb-3">Pending Inspections</p>
+                      <p className="text-2xl font-bold text-slate-900">34</p>
+                      <p className="text-sm text-slate-500 mt-3">Awaiting review</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <TrendingUp className="h-4 w-4 text-orange-600 mr-1" />
-                  <span className="text-xs font-medium text-orange-600">+8</span>
-                </div>
-              </div>
-              <div className="flex-1 flex flex-col justify-center text-center">
-                <p className="text-sm font-medium text-slate-600 mb-3">Pending Inspections</p>
-                <p className="text-2xl font-bold text-slate-900">34</p>
-                <p className="text-sm text-slate-500 mt-3">Awaiting review</p>
-              </div>
-            </div>
-          </div>
 
-          <div className="isms-card h-60 p-10">
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
-                  <AlertTriangle className="h-6 w-6" />
-                </div>
-                <div className="flex items-center">
-                  <span className="text-xs font-medium text-red-600">3 new</span>
+                <div className="isms-card h-60 p-10">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                        <AlertTriangle className="h-6 w-6" />
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-xs font-medium text-red-600">3 new</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center text-center">
+                      <p className="text-sm font-medium text-slate-600 mb-3">Active Alerts</p>
+                      <p className="text-2xl font-bold text-slate-900">12</p>
+                      <p className="text-sm text-slate-500 mt-3">Requires attention</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="flex-1 flex flex-col justify-center text-center">
-                <p className="text-sm font-medium text-slate-600 mb-3">Active Alerts</p>
-                <p className="text-2xl font-bold text-slate-900">12</p>
-                <p className="text-sm text-slate-500 mt-3">Requires attention</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* EUDR Compliance Section - ISMS Style */}
+              {/* EUDR Compliance Section - ISMS Style */}
         <div className="isms-card mb-8">
           <div className="mb-6">
             <div className="flex items-center gap-3">

@@ -103,7 +103,7 @@ export default function FrontPage() {
             <span className="absolute top-16 right-[calc(50%-380px)] text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>
           <div className="flex items-center justify-center relative">
-            <h2 className="text-3xl font-bold text-slate-900">General Environmental Platform</h2>
+            <h2 className="text-3xl font-bold text-slate-900">General Environmental Intelligence Platform</h2>
             <div className="absolute right-0">
               <Link href="/landing">
                 <Button className="isms-button flex items-center gap-2">

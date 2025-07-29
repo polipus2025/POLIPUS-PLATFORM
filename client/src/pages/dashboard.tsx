@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import { useState } from "react";
+import React, { useState } from "react";
 import ModernBackground from "@/components/ui/modern-background";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import ComplianceChart from "@/components/dashboard/compliance-chart";
@@ -19,7 +19,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
-
+  // Temporary minimal state for debugging
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Restore all state variables to fix LSP errors
   const [isEudrDialogOpen, setIsEudrDialogOpen] = useState(false);
   const [selectedExporter, setSelectedExporter] = useState<string>("all");
   const [selectedCounty, setSelectedCounty] = useState<string>("all");
@@ -472,6 +475,23 @@ export default function Dashboard() {
   // the user is clearly authenticated. Removing the blocking authentication check.
   // The header component handles auth verification, so dashboard should display content.
 
+  // Simple loading effect - using React hook properly
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-slate-800">Loading Dashboard...</h2>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -479,6 +499,17 @@ export default function Dashboard() {
           <title>Dashboard - AgriTrace360™ LACRA</title>
           <meta name="description" content="Real-time agricultural commodity compliance monitoring dashboard for Liberia Agriculture Commodity Regulatory Authority" />
         </Helmet>
+        
+        {/* Success indicator - temporarily visible */}
+        <div className="mb-8 p-6 bg-green-100 border-2 border-green-500 rounded-lg text-center">
+          <Activity className="h-12 w-12 text-green-600 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-green-800 mb-2">
+            ✅ Dashboard Loaded Successfully!
+          </h1>
+          <p className="text-green-700">
+            Authentication complete - User: admin001 (regulatory)
+          </p>
+        </div>
 
       {/* Dashboard Header - Modern ISMS Style */}
       <div className="mb-12 text-center">

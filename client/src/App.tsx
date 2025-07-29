@@ -74,12 +74,12 @@ function Router() {
       {authToken ? (
         <>
           {/* Dashboard - Fixed to show correct component based on user type */}
-          <Route path="/dashboard" component={SimpleDashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/farmer-dashboard" component={FarmerDashboard} />
           <Route path="/field-agent-dashboard" component={FieldAgentDashboard} />
           <Route path="/exporter-dashboard" component={ExporterDashboard} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
-          <Route path="/" component={SimpleDashboard} />
+          <Route path="/" component={Dashboard} />
           
           {/* Exporter Portal Routes */}
           <Route path="/exporter-dashboard">

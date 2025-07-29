@@ -42,7 +42,7 @@ export default function CommodityForm({ onSuccess }: CommodityFormProps) {
 
   const createCommodityMutation = useMutation({
     mutationFn: (data: InsertCommodity) =>
-      apiRequest("POST", "/api/commodities", data),
+      apiRequest("/api/commodities", { method: "POST", body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/commodities"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/metrics"] });
@@ -76,9 +76,10 @@ export default function CommodityForm({ onSuccess }: CommodityFormProps) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="bg-slate-50 p-6 rounded-lg">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="name"
@@ -300,23 +301,25 @@ export default function CommodityForm({ onSuccess }: CommodityFormProps) {
           />
         </div>
 
-        <div className="flex justify-end space-x-3">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => form.reset()}
-          >
-            Reset
-          </Button>
-          <Button 
-            type="submit" 
-            className="bg-lacra-green hover:bg-green-700"
-            disabled={createCommodityMutation.isPending}
-          >
-            {createCommodityMutation.isPending ? "Registering..." : "Register Commodity"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex justify-end space-x-4 pt-4 border-t border-slate-200">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => form.reset()}
+              className="px-6"
+            >
+              Reset Form
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createCommodityMutation.isPending}
+              className="isms-button px-8"
+            >
+              {createCommodityMutation.isPending ? "Registering..." : "Register Commodity"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }

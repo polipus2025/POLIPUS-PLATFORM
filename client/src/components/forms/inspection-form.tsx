@@ -41,7 +41,7 @@ export default function InspectionForm() {
 
   const createInspectionMutation = useMutation({
     mutationFn: (data: InsertInspection) =>
-      apiRequest("POST", "/api/inspections", data),
+      apiRequest("/api/inspections", { method: "POST", body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
       queryClient.invalidateQueries({ queryKey: ["/api/commodities"] });
@@ -69,8 +69,9 @@ export default function InspectionForm() {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <div className="bg-slate-50 p-6 rounded-lg">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -336,23 +337,25 @@ export default function InspectionForm() {
           />
         </div>
 
-        <div className="flex justify-end space-x-3">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => form.reset()}
-          >
-            Reset
-          </Button>
-          <Button 
-            type="submit" 
-            className="bg-lacra-green hover:bg-green-700"
-            disabled={createInspectionMutation.isPending}
-          >
-            {createInspectionMutation.isPending ? "Recording..." : "Record Inspection"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex justify-end space-x-4 pt-4 border-t border-slate-200">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => form.reset()}
+              className="px-6"
+            >
+              Reset Form
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createInspectionMutation.isPending}
+              className="isms-button px-8"
+            >
+              {createInspectionMutation.isPending ? "Recording..." : "Record Inspection"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }

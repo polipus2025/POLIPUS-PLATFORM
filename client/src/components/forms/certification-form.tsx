@@ -38,7 +38,7 @@ export default function CertificationForm() {
 
   const createCertificationMutation = useMutation({
     mutationFn: (data: InsertCertification) =>
-      apiRequest("POST", "/api/certifications", data),
+      apiRequest("/api/certifications", { method: "POST", body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/certifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/metrics"] });
@@ -97,8 +97,9 @@ export default function CertificationForm() {
   ];
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <div className="bg-slate-50 p-6 rounded-lg">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -350,32 +351,34 @@ export default function CertificationForm() {
           />
         </div>
 
-        <div className="flex justify-end space-x-3">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => form.reset()}
-          >
-            Reset
-          </Button>
-          <Button 
-            type="submit" 
-            className="bg-lacra-green hover:bg-green-700"
-            disabled={createCertificationMutation.isPending || commodities.length === 0}
-          >
-            {createCertificationMutation.isPending ? "Issuing..." : "Issue Certificate"}
-          </Button>
-        </div>
-        
-        {commodities.length === 0 && (
-          <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-warning text-sm">
-              No compliant commodities available for certification. 
-              Commodities must pass inspection and be marked as compliant before certificates can be issued.
-            </p>
+          <div className="flex justify-end space-x-4 pt-4 border-t border-slate-200">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => form.reset()}
+              className="px-6"
+            >
+              Reset Form
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createCertificationMutation.isPending || commodities.length === 0}
+              className="isms-button px-8"
+            >
+              {createCertificationMutation.isPending ? "Issuing..." : "Issue Certificate"}
+            </Button>
           </div>
-        )}
-      </form>
-    </Form>
+          
+          {commodities.length === 0 && (
+            <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800 text-sm">
+                No compliant commodities available for certification. 
+                Commodities must pass inspection and be marked as compliant before certificates can be issued.
+              </p>
+            </div>
+          )}
+        </form>
+      </Form>
+    </div>
   );
 }

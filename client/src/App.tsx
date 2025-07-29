@@ -13,6 +13,7 @@ import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard";
 import DashboardTest from "@/pages/dashboard-test";
+import SimpleTest from "@/pages/simple-test";
 import SimpleDashboard from "@/pages/dashboard-simple";
 import WorkingDashboard from "@/pages/dashboard-working";
 import SimpleWorkingDashboard from "@/pages/simple-working-dashboard";
@@ -72,6 +73,10 @@ function Router() {
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
       <Route path="/login-test" component={LoginTest} />
+      
+      {/* Test Routes - Always visible for debugging */}
+      <Route path="/test" component={DashboardTest} />
+      <Route path="/simple-test" component={SimpleTest} />
       
       {/* Protected Routes */}
       {authToken ? (
@@ -230,7 +235,8 @@ function Router() {
         </>
       )}
       
-      <Route component={NotFound} />
+      {/* Fallback Route for debugging */}
+      <Route component={SimpleTest} />
     </Switch>
   );
 }

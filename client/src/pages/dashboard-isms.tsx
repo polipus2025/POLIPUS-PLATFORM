@@ -94,7 +94,20 @@ export default function Dashboard() {
         <meta name="description" content="Comprehensive agricultural commodity compliance dashboard for LACRA - Liberia Agriculture Commodity Regulatory Authority. Real-time monitoring, EUDR compliance, and satellite tracking." />
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <ModernBackground>
+        <div />
+      </ModernBackground>
+      
+      {/* Layout with Sidebar */}
+      <div className="flex min-h-screen">
+        <Sidebar />
+        
+        <div className="flex-1 flex flex-col">
+          <Header />
+          
+          {/* ISMS Main Content */}
+          <main className="flex-1 p-6">
+            <div className="max-w-7xl mx-auto">
         {/* ISMS Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-4 mb-6">
@@ -433,6 +446,9 @@ export default function Dashboard() {
               <p className="text-sm text-slate-600">Cargo Value</p>
             </div>
           </div>
+        </div>
+            </div>
+          </main>
         </div>
       </div>
 

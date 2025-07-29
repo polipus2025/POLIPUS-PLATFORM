@@ -261,96 +261,108 @@ export default function EconomicReporting() {
       {/* Economic Overview Cards - ISMS Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         <div className="isms-card">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0 pr-4">
-              <p className="text-sm font-medium text-slate-600 mb-2">GDP Contribution</p>
-              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
-                ${(economicOverview.totalGdpContribution / 1000000).toFixed(1)}M
-              </p>
-              <div className="flex items-center mt-3">
-                <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center mr-2">
-                  <TrendingUp className="h-4 w-4" />
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <DollarSign className="h-6 w-6" />
+              </div>
+              <div className="flex items-center">
+                <div className="w-6 h-6 rounded-lg isms-icon-bg-green flex items-center justify-center mr-2">
+                  <TrendingUp className="h-3 w-3" />
                 </div>
-                <span className="text-sm font-medium text-green-600">+{economicOverview.monthlyGrowthRate}%</span>
+                <span className="text-xs font-medium text-green-600">+{economicOverview.monthlyGrowthRate}%</span>
               </div>
             </div>
-            <div className="w-16 h-16 rounded-xl isms-icon-bg-green flex items-center justify-center">
-              <DollarSign className="h-8 w-8" />
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">GDP Contribution</p>
+              <p className="text-3xl font-bold text-slate-900">
+                ${(economicOverview.totalGdpContribution / 1000000).toFixed(1)}M
+              </p>
             </div>
           </div>
         </div>
 
         <div className="isms-card">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0 pr-4">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Users className="h-6 w-6" />
+              </div>
+            </div>
+            <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Employment</p>
-              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+              <p className="text-3xl font-bold text-slate-900">
                 {(economicOverview.totalEmployment / 1000).toFixed(1)}K
               </p>
-              <p className="text-sm text-slate-500 mt-3">Total jobs</p>
-            </div>
-            <div className="w-16 h-16 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-              <Users className="h-8 w-8" />
+              <p className="text-sm text-slate-500 mt-2">Total jobs</p>
             </div>
           </div>
         </div>
 
         <div className="isms-card">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0 pr-4">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                <Building2 className="h-6 w-6" />
+              </div>
+            </div>
+            <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Active Businesses</p>
-              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+              <p className="text-3xl font-bold text-slate-900">
                 {(economicOverview.activeBusinesses / 1000).toFixed(1)}K
               </p>
-              <p className="text-sm text-slate-500 mt-3">Registered</p>
-            </div>
-            <div className="w-16 h-16 rounded-xl isms-icon-bg-purple flex items-center justify-center">
-              <Building2 className="h-8 w-8" />
+              <p className="text-sm text-slate-500 mt-2">Registered</p>
             </div>
           </div>
         </div>
 
         <div className="isms-card">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0 pr-4">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                <FileText className="h-6 w-6" />
+              </div>
+            </div>
+            <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Tax Revenue</p>
-              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+              <p className="text-3xl font-bold text-slate-900">
                 ${(economicOverview.totalTaxRevenue / 1000000).toFixed(1)}M
               </p>
-              <p className="text-sm text-slate-500 mt-3">Monthly</p>
-            </div>
-            <div className="w-16 h-16 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-              <FileText className="h-8 w-8" />
+              <p className="text-sm text-slate-500 mt-2">Monthly</p>
             </div>
           </div>
         </div>
 
         <div className="isms-card">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0 pr-4">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Globe className="h-6 w-6" />
+              </div>
+            </div>
+            <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Export Value</p>
-              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+              <p className="text-3xl font-bold text-slate-900">
                 ${(economicOverview.exportValue / 1000000).toFixed(1)}M
               </p>
-              <p className="text-sm text-slate-500 mt-3">Monthly</p>
-            </div>
-            <div className="w-16 h-16 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-              <Globe className="h-8 w-8" />
+              <p className="text-sm text-slate-500 mt-2">Monthly</p>
             </div>
           </div>
         </div>
 
         <div className="isms-card">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0 pr-4">
-              <p className="text-sm font-medium text-slate-600 mb-2">Top Commodities</p>
-              <p className="text-lg font-bold text-slate-900 leading-tight truncate">
-                {economicOverview.topCommodities.slice(0, 3).join(", ")}
-              </p>
-              <p className="text-sm text-slate-500 mt-3">Leading exports</p>
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <Package className="h-6 w-6" />
+              </div>
             </div>
-            <div className="w-16 h-16 rounded-xl isms-icon-bg-green flex items-center justify-center">
-              <Package className="h-8 w-8" />
+            <div>
+              <p className="text-sm font-medium text-slate-600 mb-2">Top Commodities</p>
+              <p className="text-xl font-bold text-slate-900 leading-tight">
+                {economicOverview.topCommodities.slice(0, 2).join(", ")}
+              </p>
+              <p className="text-sm text-slate-500 mt-2">Leading exports</p>
             </div>
           </div>
         </div>

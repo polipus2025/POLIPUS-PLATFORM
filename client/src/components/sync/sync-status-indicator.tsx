@@ -55,15 +55,15 @@ export function SyncStatusIndicator() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
+        <button className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 transition-colors">
           {getStatusIcon()}
-          <Badge variant={getStatusColor()} className="text-xs">
+          <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
             {getStatusText()}
-          </Badge>
-        </Button>
+          </div>
+        </button>
       </PopoverTrigger>
       
-      <PopoverContent className="w-80" align="end">
+      <PopoverContent className="w-80 isms-card border-0 shadow-xl" align="end">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold">Sync Status</h4>

@@ -275,7 +275,7 @@ export default function EconomicReporting() {
             </div>
             <div className="flex-1 flex flex-col justify-center text-center">
               <p className="text-sm font-medium text-slate-600 mb-3">GDP Contribution</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900">
                 ${(economicOverview.totalGdpContribution / 1000000).toFixed(1)}M
               </p>
             </div>
@@ -291,7 +291,7 @@ export default function EconomicReporting() {
             </div>
             <div className="flex-1 flex flex-col justify-center text-center">
               <p className="text-sm font-medium text-slate-600 mb-3">Employment</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900">
                 {(economicOverview.totalEmployment / 1000).toFixed(1)}K
               </p>
               <p className="text-sm text-slate-500 mt-3">Total jobs</p>
@@ -308,7 +308,7 @@ export default function EconomicReporting() {
             </div>
             <div className="flex-1 flex flex-col justify-center text-center">
               <p className="text-sm font-medium text-slate-600 mb-3">Active Businesses</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900">
                 {(economicOverview.activeBusinesses / 1000).toFixed(1)}K
               </p>
               <p className="text-sm text-slate-500 mt-3">Registered</p>
@@ -325,7 +325,7 @@ export default function EconomicReporting() {
             </div>
             <div className="flex-1 flex flex-col justify-center text-center">
               <p className="text-sm font-medium text-slate-600 mb-3">Tax Revenue</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900">
                 ${(economicOverview.totalTaxRevenue / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-slate-500 mt-3">Monthly</p>
@@ -342,7 +342,7 @@ export default function EconomicReporting() {
             </div>
             <div className="flex-1 flex flex-col justify-center text-center">
               <p className="text-sm font-medium text-slate-600 mb-3">Export Value</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-2xl font-bold text-slate-900">
                 ${(economicOverview.exportValue / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-slate-500 mt-3">Monthly</p>
@@ -359,7 +359,7 @@ export default function EconomicReporting() {
             </div>
             <div className="flex-1 flex flex-col justify-center text-center">
               <p className="text-sm font-medium text-slate-600 mb-3">Top Commodities</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-xl font-bold text-slate-900">
                 Cocoa, Coffee
               </p>
               <p className="text-sm text-slate-500 mt-3">Leading exports</p>

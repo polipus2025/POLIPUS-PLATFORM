@@ -73,18 +73,12 @@ function Router() {
       {authToken ? (
         <>
           {/* Dashboard - Fixed to show correct component based on user type */}
-          <Route path="/dashboard">
-            {userType === 'farmer' ? <FarmerDashboard /> : 
-             userType === 'field_agent' ? <FieldAgentDashboard /> : 
-             userType === 'exporter' ? <ExporterDashboard /> :
-             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
-          </Route>
-          <Route path="/">
-            {userType === 'farmer' ? <FarmerDashboard /> : 
-             userType === 'field_agent' ? <FieldAgentDashboard /> : 
-             userType === 'exporter' ? <ExporterDashboard /> :
-             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
-          </Route>
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/farmer-dashboard" component={FarmerDashboard} />
+          <Route path="/field-agent-dashboard" component={FieldAgentDashboard} />
+          <Route path="/exporter-dashboard" component={ExporterDashboard} />
+          <Route path="/director-dashboard" component={DirectorDashboard} />
+          <Route path="/" component={Dashboard} />
           
           {/* Exporter Portal Routes */}
           <Route path="/exporter-dashboard">

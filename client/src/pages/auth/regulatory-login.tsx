@@ -64,8 +64,10 @@ export default function RegulatoryLogin() {
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("userType", "regulatory");
         
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
+        // Force reload to ensure proper routing
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 100);
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

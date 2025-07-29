@@ -19,14 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
-  // Early authentication check
-  const authToken = localStorage.getItem("authToken");
-  
-  if (!authToken) {
-    console.log("Dashboard: No auth token, redirecting to login");
-    window.location.href = "/landing";
-    return <div>Redirecting to login...</div>;
-  }
 
   const [isEudrDialogOpen, setIsEudrDialogOpen] = useState(false);
   const [selectedExporter, setSelectedExporter] = useState<string>("all");

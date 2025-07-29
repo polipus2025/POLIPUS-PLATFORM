@@ -323,7 +323,7 @@ export default function GISMapping() {
             <p className="text-slate-600 text-sm">GPS boundary mapped plots</p>
           </div>
 
-          <div className="isms-card py-4">
+          <div className="isms-card">
             <div className="flex flex-col items-center text-center space-y-2">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center">
                 <Activity className="h-6 w-6 text-white" />

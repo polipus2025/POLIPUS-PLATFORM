@@ -66,7 +66,16 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
     const startIndex = currentIndex * 4;
     const endIndex = startIndex + 4;
     const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
-    setDisplayData(newDisplayData);
+    
+    // Only update if display data actually changed to prevent infinite loops
+    setDisplayData(prev => {
+      if (prev.length !== newDisplayData.length) return newDisplayData;
+      const hasChanged = !prev.every((item, idx) => 
+        item.county === newDisplayData[idx]?.county && 
+        item.complianceRate === newDisplayData[idx]?.complianceRate
+      );
+      return hasChanged ? newDisplayData : prev;
+    });
   }, [currentIndex, filteredCountyData]);
 
   if (isLoading) {

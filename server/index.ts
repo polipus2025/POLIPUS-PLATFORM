@@ -9,15 +9,15 @@ const app = express();
 app.use((req, res, next) => {
   // CORS headers for custom domain support
   const allowedOrigins = [
-    'http://localhost:5000',
-    'https://localhost:5000',
+    'http://localhost:80',
+    'https://localhost:80',
     process.env.REPL_SLUG ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : null,
     process.env.CUSTOM_DOMAIN ? `https://${process.env.CUSTOM_DOMAIN}` : null,
     process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null
   ].filter(Boolean);
 
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin) || !origin) {
+  if (allowedOrigins.includes(origin as string) || !origin) {
     res.header('Access-Control-Allow-Origin', origin || '*');
   }
   
@@ -105,7 +105,7 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
+  const port = parseInt(process.env.PORT || '80', 10);
   
   // Production configuration for custom domains
   const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '0.0.0.0';

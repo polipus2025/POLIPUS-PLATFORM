@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import ModernBackground from "@/components/ui/modern-background";
 import { 
   Leaf, 
   MapPin, 
@@ -25,223 +26,233 @@ export default function FarmerDashboard() {
   const farmerName = localStorage.getItem("farmerFirstName") || "Moses";
   
   // Fetch farmer-specific data
-  const { data: farmPlots } = useQuery({ queryKey: ["/api/farm-plots"] });
-  const { data: cropPlans } = useQuery({ queryKey: ["/api/crop-plans"] });
-  const { data: trackingRecords } = useQuery({ queryKey: ["/api/tracking-records"] });
-  const { data: alerts } = useQuery({ queryKey: ["/api/alerts", "unreadOnly=true"] });
+  const { data: farmPlots = [] } = useQuery({ queryKey: ["/api/farm-plots"] });
+  const { data: cropPlans = [] } = useQuery({ queryKey: ["/api/crop-plans"] });
+  const { data: trackingRecords = [] } = useQuery({ queryKey: ["/api/tracking-records"] });
+  const { data: alerts = [] } = useQuery({ queryKey: ["/api/alerts", "unreadOnly=true"] });
 
   // Calculate farmer statistics
-  const totalPlots = farmPlots?.length || 0;
-  const activeCropPlans = cropPlans?.filter((plan: any) => plan.status === 'active')?.length || 0;
-  const totalHarvested = farmPlots?.reduce((sum: number, plot: any) => {
+  const totalPlots = Array.isArray(farmPlots) ? farmPlots.length : 0;
+  const activeCropPlans = Array.isArray(cropPlans) ? cropPlans.filter((plan: any) => plan.status === 'active').length : 0;
+  const totalHarvested = Array.isArray(farmPlots) ? farmPlots.reduce((sum: number, plot: any) => {
     return sum + (parseFloat(plot.harvestedQuantity?.replace(/[^\d.]/g, '') || '0'));
-  }, 0) || 0;
-  const pendingInspections = trackingRecords?.filter((record: any) => 
+  }, 0) : 0;
+  const pendingInspections = Array.isArray(trackingRecords) ? trackingRecords.filter((record: any) => 
     record.status === 'pending_inspection'
-  )?.length || 0;
+  ).length : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {farmerName}!
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Farmer ID: {farmerId} | Your farm management dashboard
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      <ModernBackground>{null}</ModernBackground>
+      <div className="relative space-y-6 p-6">
+        {/* Header - ISMS Style */}
+        <div className="isms-card">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <Leaf className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900">
+                  Welcome back, {farmerName}!
+                </h1>
+                <p className="text-slate-600 mt-1">
+                  Farmer ID: {farmerId} | Your farm management dashboard
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/batch-code-generator">
+                <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
+                  <Package className="h-4 w-4 mr-2" />
+                  Generate Batch Code
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <Link href="/batch-code-generator">
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Package className="h-4 w-4 mr-2" />
-              Generate Batch Code
-            </Button>
-          </Link>
+
+        {/* Statistics Cards - ISMS Style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="isms-card text-center">
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-4">
+              <MapPin className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Total Farm</p>
+            <p className="text-4xl font-bold text-slate-900 mb-2">{totalPlots}</p>
+            <p className="text-slate-600 text-sm">Registered Plots</p>
+          </div>
+
+          <div className="isms-card text-center">
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-4">
+              <Calendar className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Active Crop</p>
+            <p className="text-4xl font-bold text-slate-900 mb-2">{activeCropPlans}</p>
+            <p className="text-slate-600 text-sm">Planning Sessions</p>
+          </div>
+
+          <div className="isms-card text-center">
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-4">
+              <Package className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Total Harvested</p>
+            <p className="text-4xl font-bold text-slate-900 mb-2">{totalHarvested.toFixed(1)}</p>
+            <p className="text-slate-600 text-sm">Metric Tons</p>
+          </div>
+
+          <div className="isms-card text-center">
+            <div className="w-16 h-16 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-4">
+              <Clock className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Pending</p>
+            <p className="text-4xl font-bold text-slate-900 mb-2">{pendingInspections}</p>
+            <p className="text-slate-600 text-sm">Inspections</p>
+          </div>
         </div>
-      </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">Total Farm Plots</p>
-                <p className="text-3xl font-bold text-green-900">{totalPlots}</p>
-                <p className="text-xs text-green-600 mt-1">Registered plots</p>
+        {/* Recent Activities and Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Farm Activities - ISMS Style */}
+          <div className="isms-card">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-white" />
               </div>
-              <MapPin className="h-12 w-12 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Active Crop Plans</p>
-                <p className="text-3xl font-bold text-blue-900">{activeCropPlans}</p>
-                <p className="text-xs text-blue-600 mt-1">Current season</p>
+                <h2 className="text-xl font-bold text-slate-900">Recent Farm Activities</h2>
+                <p className="text-slate-600 text-sm">Latest updates from your farm operations</p>
               </div>
-              <Calendar className="h-12 w-12 text-blue-600" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">Total Harvested</p>
-                <p className="text-3xl font-bold text-orange-900">{totalHarvested.toFixed(1)}</p>
-                <p className="text-xs text-orange-600 mt-1">Metric tons</p>
-              </div>
-              <Package className="h-12 w-12 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Pending Inspections</p>
-                <p className="text-3xl font-bold text-purple-900">{pendingInspections}</p>
-                <p className="text-xs text-purple-600 mt-1">Awaiting review</p>
-              </div>
-              <Clock className="h-12 w-12 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Activities and Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Farm Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              Recent Farm Activities
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
+              <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
                 <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Coffee Harvest Completed</p>
-                  <p className="text-xs text-gray-600">Plot PLT-001 - 2.5 tons harvested</p>
-                  <p className="text-xs text-gray-500">2 days ago</p>
+                  <p className="text-sm font-medium text-slate-900">Coffee Harvest Completed</p>
+                  <p className="text-xs text-slate-600">Plot PLT-001 - 2.5 tons harvested</p>
+                  <p className="text-xs text-slate-500">2 days ago</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
                 <Package className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Batch Code Generated</p>
-                  <p className="text-xs text-gray-600">COF-2024-001 for coffee export</p>
-                  <p className="text-xs text-gray-500">3 days ago</p>
+                  <p className="text-sm font-medium text-slate-900">Batch Code Generated</p>
+                  <p className="text-xs text-slate-600">COF-2024-001 for coffee export</p>
+                  <p className="text-xs text-slate-500">3 days ago</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg">
-                <Calendar className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border border-orange-100">
+                <Calendar className="h-5 w-5 text-orange-600 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Crop Planning Updated</p>
-                  <p className="text-xs text-gray-600">Next season cocoa planning</p>
-                  <p className="text-xs text-gray-500">1 week ago</p>
+                  <p className="text-sm font-medium text-slate-900">Crop Planning Updated</p>
+                  <p className="text-xs text-slate-600">Next season cocoa planning</p>
+                  <p className="text-xs text-slate-500">1 week ago</p>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-green-600" />
-              Farm Management Tools
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
+          {/* Quick Actions - ISMS Style */}
+          <div className="isms-card">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Leaf className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Farm Management Tools</h2>
+                <p className="text-slate-600 text-sm">Access key farming features and tools</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
               <Link href="/farm-plots">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <MapPin className="h-6 w-6 text-green-600" />
-                  <span className="text-sm">View Farm Plots</span>
-                </Button>
+                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-lg hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                  <div className="w-10 h-10 rounded-lg isms-icon-bg-green flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-900">View Farm Plots</p>
+                </div>
               </Link>
 
               <Link href="/gps-mapping">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <MapPin className="h-6 w-6 text-blue-600" />
-                  <span className="text-sm">GPS Mapping</span>
-                </Button>
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 rounded-lg hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                  <div className="w-10 h-10 rounded-lg isms-icon-bg-blue flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-900">GPS Mapping</p>
+                </div>
               </Link>
 
               <Link href="/crop-planning">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <Calendar className="h-6 w-6 text-orange-600" />
-                  <span className="text-sm">Crop Planning</span>
-                </Button>
+                <div className="p-4 bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-100 rounded-lg hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                  <div className="w-10 h-10 rounded-lg isms-icon-bg-orange flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Calendar className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-900">Crop Planning</p>
+                </div>
               </Link>
 
               <Link href="/batch-code-generator">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <Package className="h-6 w-6 text-purple-600" />
-                  <span className="text-sm">Batch Codes</span>
-                </Button>
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-lg hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                  <div className="w-10 h-10 rounded-lg isms-icon-bg-purple flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-900">Batch Codes</p>
+                </div>
               </Link>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
 
-      {/* Farm Plot Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-green-600" />
-            Your Farm Plots Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Farm Plot Overview - ISMS Style */}
+        <div className="isms-card">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+              <MapPin className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Your Farm Plots Overview</h2>
+              <p className="text-slate-600 text-sm">Comprehensive view of all registered farm plots</p>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {farmPlots?.slice(0, 6).map((plot: any) => (
-              <div key={plot.id} className="border rounded-lg p-4 bg-gradient-to-br from-green-50 to-emerald-50">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-green-900">{plot.plotName}</h4>
+            {Array.isArray(farmPlots) && farmPlots.length > 0 ? farmPlots.slice(0, 6).map((plot: any) => (
+              <div key={plot.id} className="border border-slate-200 rounded-lg p-4 bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-all duration-300">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-semibold text-slate-900">{plot.plotName}</h4>
                   <Badge variant={plot.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                     {plot.status}
                   </Badge>
                 </div>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <p><strong>Size:</strong> {plot.plotSize}</p>
-                  <p><strong>Crop:</strong> {plot.cropType}</p>
-                  <p><strong>County:</strong> {plot.county}</p>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <p><strong className="text-slate-900">Size:</strong> {plot.plotSize}</p>
+                  <p><strong className="text-slate-900">Crop:</strong> {plot.cropType}</p>
+                  <p><strong className="text-slate-900">County:</strong> {plot.county}</p>
                   {plot.harvestedQuantity && (
-                    <p><strong>Last Harvest:</strong> {plot.harvestedQuantity}</p>
+                    <p><strong className="text-slate-900">Last Harvest:</strong> {plot.harvestedQuantity}</p>
                   )}
                 </div>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-4 flex gap-2">
                   <Link href="/farm-plots">
-                    <Button size="sm" variant="outline" className="text-xs">
+                    <Button size="sm" variant="outline" className="text-xs hover:bg-green-50">
                       <Eye className="h-3 w-3 mr-1" />
                       View Details
                     </Button>
                   </Link>
                 </div>
               </div>
-            )) || (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No farm plots registered yet</p>
+            )) : (
+              <div className="col-span-full text-center py-12">
+                <div className="w-16 h-16 rounded-xl isms-icon-bg-slate flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="h-8 w-8 text-white" />
+                </div>
+                <p className="text-slate-600 mb-4">No farm plots registered yet</p>
                 <Link href="/farm-plots">
-                  <Button className="mt-3 bg-green-600 hover:bg-green-700">
+                  <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
                     <Plus className="h-4 w-4 mr-2" />
                     Register Your First Plot
                   </Button>
@@ -249,33 +260,35 @@ export default function FarmerDashboard() {
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* System Alerts */}
-      {alerts && alerts.length > 0 && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-800">
-              <AlertTriangle className="h-5 w-5" />
-              Farm Alerts & Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* System Alerts - ISMS Style */}
+        {Array.isArray(alerts) && alerts.length > 0 && (
+          <div className="isms-card border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                <AlertTriangle className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Farm Alerts & Notifications</h2>
+                <p className="text-slate-600 text-sm">Important updates requiring your attention</p>
+              </div>
+            </div>
+            
             <div className="space-y-3">
               {alerts.slice(0, 3).map((alert: any, index: number) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg border">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                <div key={index} className="flex items-start gap-3 p-4 bg-white rounded-lg border border-orange-100 shadow-sm">
+                  <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{alert.title}</p>
-                    <p className="text-xs text-gray-600">{alert.message}</p>
+                    <p className="text-sm font-medium text-slate-900">{alert.title}</p>
+                    <p className="text-xs text-slate-600">{alert.message}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

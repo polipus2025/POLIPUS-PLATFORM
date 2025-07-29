@@ -232,6 +232,10 @@ function Router() {
         </>
       )}
       
+      {/* Always available routes */}
+      <Route path="/front-page" component={FrontPage} />
+      <Route path="/home" component={FrontPage} />
+      
       <Route component={NotFound} />
     </Switch>
   );
@@ -244,7 +248,9 @@ function App() {
   // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");
   const isLandingPage = window.location.pathname === "/landing" && !authToken;
-  const isFrontPage = window.location.pathname === "/" && !authToken;
+  const isFrontPage = (window.location.pathname === "/" && !authToken) || 
+                      window.location.pathname === "/front-page" || 
+                      window.location.pathname === "/home";
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   
   return (

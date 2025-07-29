@@ -118,26 +118,7 @@ export default function FrontPage() {
           
           <div className="isms-card text-center">
             <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
-              <svg className="h-6 w-6" viewBox="0 0 24 18" fill="none">
-                <rect width="24" height="18" fill="#003399"/>
-                <g fill="#FFCC00">
-                  <circle cx="12" cy="9" r="1" />
-                  <circle cx="16.5" cy="6" r="0.8" />
-                  <circle cx="18" cy="9" r="0.8" />
-                  <circle cx="16.5" cy="12" r="0.8" />
-                  <circle cx="12" cy="14" r="0.8" />
-                  <circle cx="7.5" cy="12" r="0.8" />
-                  <circle cx="6" cy="9" r="0.8" />
-                  <circle cx="7.5" cy="6" r="0.8" />
-                  <circle cx="12" cy="4" r="0.8" />
-                  <circle cx="19" cy="6.5" r="0.6" />
-                  <circle cx="19.5" cy="9" r="0.6" />
-                  <circle cx="19" cy="11.5" r="0.6" />
-                  <circle cx="5" cy="11.5" r="0.6" />
-                  <circle cx="4.5" cy="9" r="0.6" />
-                  <circle cx="5" cy="6.5" r="0.6" />
-                </g>
-              </svg>
+              <span className="text-white font-bold text-lg">EU</span>
             </div>
             <p className="text-slate-600 text-sm mb-1">AgriTrace360</p>
             <p className="text-3xl font-bold text-slate-900 mb-2">EUDR 100%</p>

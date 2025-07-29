@@ -477,7 +477,7 @@ export default function Dashboard() {
 
   // Simple loading effect - using React hook properly
   React.useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 100);
+    const timer = setTimeout(() => setIsLoading(false), 50);
     return () => clearTimeout(timer);
   }, []);
 

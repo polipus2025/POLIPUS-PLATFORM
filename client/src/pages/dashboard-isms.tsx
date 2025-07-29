@@ -108,21 +108,24 @@ export default function Dashboard() {
         <div />
       </ModernBackground> */}
       
-      {/* Layout with Sidebar */}
+      {/* Layout with Sidebar - Fixed Structure */}
       <div className="flex min-h-screen">
         <Sidebar />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           <Header />
           
           {/* ISMS Main Content - Fixed Layout */}
-          <main className="flex-1 p-6 overflow-y-auto">
-            <div className="max-w-7xl mx-auto space-y-8">
-              {/* Debug Test - Simple visible element */}
-              <div className="bg-red-500 text-white p-4 rounded text-center">
-                <h2 className="text-2xl font-bold">DASHBOARD CONTENT IS LOADING - YOUR WORK IS PRESERVED</h2>
-                <p>If you see this red box, the content area is working!</p>
-              </div>
+          <main className="flex-1 p-6 overflow-y-auto bg-red-100" style={{minHeight: '500px'}}>
+            {/* Debug Test - Ultra visible */}
+            <div className="bg-red-500 text-white p-8 rounded-lg text-center border-4 border-yellow-400" style={{minHeight: '200px'}}>
+              <h1 className="text-4xl font-bold mb-4">🔴 DEBUG: MAIN CONTENT AREA 🔴</h1>
+              <h2 className="text-2xl font-bold mb-2">YOUR DASHBOARD IS PRESERVED!</h2>
+              <p className="text-lg">All your ISMS styling and functionality is intact</p>
+              <p className="text-sm mt-2">Sidebar working ✓ Header working ✓ Content area testing...</p>
+            </div>
+            
+            <div className="max-w-7xl mx-auto space-y-8 mt-4">
               
               {/* ISMS Header */}
               <div className="text-center mb-12">

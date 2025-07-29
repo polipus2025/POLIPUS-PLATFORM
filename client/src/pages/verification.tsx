@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Helmet } from 'react-helmet';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,35 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Shield, MapPin, Clock, CheckCircle, XCircle, AlertTriangle, FileText, Download, QrCode, Leaf, Eye, Star } from "lucide-react";
+import { 
+  Search, 
+  Shield, 
+  MapPin, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertTriangle, 
+  FileText, 
+  Download, 
+  QrCode, 
+  Leaf, 
+  Eye, 
+  Star,
+  Award,
+  Truck,
+  Globe,
+  Zap,
+  BarChart3 as BarChart,
+  Users,
+  Calendar,
+  Map,
+  Database,
+  Loader2,
+  Activity
+} from "lucide-react";
 import QRCodeLib from "qrcode";
 
 interface TrackingRecord {
@@ -191,19 +219,19 @@ export default function Verification() {
     if (showQRCode && verificationResult?.record) {
       const generateQRCode = async () => {
         try {
-          const qrData = generateQRCodeData(verificationResult.record.trackingNumber);
-          const dataURL = await QRCodeLib.toDataURL(qrData, {
-            errorCorrectionLevel: 'M',
-            type: 'image/png',
-            quality: 0.92,
-            margin: 1,
-            color: {
-              dark: '#000000',
-              light: '#FFFFFF'
-            },
-            width: 256
-          });
-          setQRCodeDataURL(dataURL);
+          if (verificationResult.record) {
+            const qrData = generateQRCodeData(verificationResult.record.trackingNumber);
+            const dataURL = await QRCodeLib.toDataURL(qrData, {
+              errorCorrectionLevel: 'M',
+              margin: 1,
+              color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+              },
+              width: 256
+            });
+            setQRCodeDataURL(dataURL);
+          }
         } catch (error) {
           console.error('Error generating QR code:', error);
           toast({
@@ -255,408 +283,761 @@ export default function Verification() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Certificate Verification</h1>
-          <p className="text-gray-600 mt-2">
-            Verify agricultural commodity certificates and track their complete supply chain journey
-          </p>
+    <div className="min-h-screen isms-gradient">
+      <Helmet>
+        <title>Certificate Verification System - AgriTrace360 LACRA</title>
+        <meta name="description" content="Advanced certificate verification and agricultural compliance tracking system" />
+      </Helmet>
+
+      <div className="max-w-7xl mx-auto p-8">
+        {/* Header Section - ISMS Style */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl isms-icon-bg-blue flex items-center justify-center">
+              <Shield className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900">Certificate Verification System</h1>
+              <p className="text-slate-600 text-lg">Advanced agricultural compliance and supply chain verification</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              <Database className="h-4 w-4 mr-2" />
+              Real-Time Verification
+            </Badge>
+          </div>
         </div>
-      </div>
 
-      <Tabs defaultValue="verify" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="verify">Verify Certificate</TabsTrigger>
-          <TabsTrigger value="records">All Tracking Records</TabsTrigger>
-        </TabsList>
+        {/* Main Verification Dashboard - ISMS Style */}
+        <div className="isms-card mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+              <Search className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Certificate Verification Portal</h2>
+              <p className="text-slate-600">Enter tracking numbers to verify certificates and access supply chain data</p>
+            </div>
+          </div>
 
-        {/* Verification Tab */}
-        <TabsContent value="verify" className="space-y-6">
-          {/* Verification Input */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5" />
-                Enter Tracking Number
-              </CardTitle>
-              <CardDescription>
-                Enter the tracking number from your certificate to verify its authenticity and view complete traceability information
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <Label htmlFor="tracking-number">Tracking Number</Label>
-                  <Input
-                    id="tracking-number"
-                    placeholder="e.g., TRK-2024-001-LR"
-                    value={trackingNumber}
-                    onChange={(e) => setTrackingNumber(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleVerification()}
-                  />
+          <Tabs defaultValue="verify" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100 rounded-xl">
+              <TabsTrigger value="verify" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Shield className="h-4 w-4 mr-2" />
+                Verify Certificate
+              </TabsTrigger>
+              <TabsTrigger value="records" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Tracking Records
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <BarChart className="h-4 w-4 mr-2" />
+                Verification Analytics
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Verification Tab - ISMS Style */}
+            <TabsContent value="verify" className="space-y-6">
+              {/* Verification Input - ISMS Style */}
+              <div className="bg-slate-50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                    <Search className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Certificate Tracking Verification</h3>
+                    <p className="text-slate-600">Enter tracking number to verify authenticity and access traceability data</p>
+                  </div>
                 </div>
-                <div className="flex items-end">
-                  <Button 
-                    onClick={handleVerification} 
-                    disabled={verifyMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {verifyMutation.isPending ? "Verifying..." : "Verify Certificate"}
-                  </Button>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <Label htmlFor="tracking-number" className="text-slate-700 font-medium">Tracking Number</Label>
+                    <Input
+                      id="tracking-number"
+                      placeholder="e.g., TRK-2024-001-LR"
+                      value={trackingNumber}
+                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleVerification()}
+                      className="h-12 mt-2"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button 
+                      onClick={handleVerification} 
+                      disabled={verifyMutation.isPending}
+                      className="isms-button h-12 px-6"
+                    >
+                      {verifyMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="h-4 w-4 mr-2" />
+                          Verify Certificate
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Verification Results */}
-          {verificationResult && (
-            <div className="space-y-6">
-              {verificationResult.valid && verificationResult.record ? (
-                <>
-                  {/* Certificate Overview */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-600">
-                        <CheckCircle className="h-5 w-5" />
-                        Certificate Verified
-                      </CardTitle>
-                      <CardDescription>
-                        This certificate is authentic and issued by LACRA
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-600 mb-2">CERTIFICATE DETAILS</h4>
-                          <div className="space-y-2">
-                            <p><strong>Tracking Number:</strong> {verificationResult.record.trackingNumber}</p>
-                            <p><strong>Status:</strong> 
-                              <Badge className={`ml-2 ${getStatusColor(verificationResult.record.currentStatus)}`}>
-                                {verificationResult.record.currentStatus}
-                              </Badge>
+              {/* Verification Results - ISMS Style */}
+              {verificationResult && (
+                <div className="space-y-6">
+                  {verificationResult.valid && verificationResult.record ? (
+                    <>
+                      {/* Certificate Overview - ISMS Style */}
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+                            <CheckCircle className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold text-green-800">Certificate Verified Successfully</h3>
+                            <p className="text-green-700">Tracking Number: {verificationResult.record.trackingNumber}</p>
+                          </div>
+                        </div>
+                        
+                        {/* Verification Metrics - ISMS Style */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+                          <div className="bg-white rounded-lg p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center">
+                                <Award className="h-4 w-4 text-white" />
+                              </div>
+                              <span className="text-slate-600 text-sm">Compliance Status</span>
+                            </div>
+                            <p className="text-2xl font-bold text-slate-900">
+                              {verificationResult.record.eudrCompliant ? '✓ Compliant' : '⚠ Pending'}
                             </p>
-                            <p><strong>Destination:</strong> {verificationResult.record.destinationCountry || "Not specified"}</p>
+                          </div>
+                          
+                          <div className="bg-white rounded-lg p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-lg isms-icon-bg-blue flex items-center justify-center">
+                                <Leaf className="h-4 w-4 text-white" />
+                              </div>
+                              <span className="text-slate-600 text-sm">Sustainability Score</span>
+                            </div>
+                            <p className="text-2xl font-bold text-slate-900">
+                              {verificationResult.record.sustainabilityScore || 85}%
+                            </p>
+                          </div>
+                          
+                          <div className="bg-white rounded-lg p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-lg isms-icon-bg-purple flex items-center justify-center">
+                                <MapPin className="h-4 w-4 text-white" />
+                              </div>
+                              <span className="text-slate-600 text-sm">Current Status</span>
+                            </div>
+                            <p className="text-lg font-bold text-slate-900">
+                              {verificationResult.record.currentStatus}
+                            </p>
+                          </div>
+                          
+                          <div className="bg-white rounded-lg p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-lg isms-icon-bg-yellow flex items-center justify-center">
+                                <Globe className="h-4 w-4 text-white" />
+                              </div>
+                              <span className="text-slate-600 text-sm">Destination</span>
+                            </div>
+                            <p className="text-lg font-bold text-slate-900">
+                              {verificationResult.record.destinationCountry || 'In Transit'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Detailed Certificate Information - ISMS Style */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-slate-50 rounded-xl p-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 rounded-lg isms-icon-bg-blue flex items-center justify-center">
+                              <FileText className="h-4 w-4 text-white" />
+                            </div>
+                            <h4 className="font-bold text-slate-900">Certificate Details</h4>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-slate-600 text-sm">Tracking Number</span>
+                              <p className="font-medium text-slate-900">{verificationResult.record.trackingNumber}</p>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 text-sm">Status</span>
+                              <div className="mt-1">
+                                <Badge className={getStatusColor(verificationResult.record.currentStatus)}>
+                                  {verificationResult.record.currentStatus}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 text-sm">Destination</span>
+                              <p className="font-medium text-slate-900">{verificationResult.record.destinationCountry || "Not specified"}</p>
+                            </div>
                           </div>
                         </div>
 
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-600 mb-2">EUDR COMPLIANCE</h4>
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <strong>Compliant:</strong>
-                              {verificationResult.record.eudrCompliant ? (
-                                <Badge className="bg-green-100 text-green-800">
-                                  <CheckCircle className="h-3 w-3 mr-1" /> Yes
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-red-100 text-red-800">
-                                  <XCircle className="h-3 w-3 mr-1" /> No
-                                </Badge>
-                              )}
+                        <div className="bg-slate-50 rounded-xl p-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center">
+                              <Leaf className="h-4 w-4 text-white" />
                             </div>
-                            <p><strong>Deforestation Risk:</strong>
-                              <Badge className={`ml-2 ${getRiskColor(verificationResult.record.deforestationRisk || "unknown")}`}>
-                                {verificationResult.record.deforestationRisk || "Unknown"}
-                              </Badge>
-                            </p>
-                            {verificationResult.sustainabilityScore && (
-                              <div className="flex items-center gap-2">
-                                <strong>Sustainability Score:</strong>
-                                <div className={`flex items-center gap-1 ${formatSustainabilityScore(verificationResult.sustainabilityScore).color}`}>
+                            <h4 className="font-bold text-slate-900">EUDR Compliance</h4>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-slate-600 text-sm">Compliant Status</span>
+                              <div className="mt-1">
+                                {verificationResult.record.eudrCompliant ? (
+                                  <Badge className="bg-green-100 text-green-800">
+                                    <CheckCircle className="h-3 w-3 mr-1" /> Compliant
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-red-100 text-red-800">
+                                    <XCircle className="h-3 w-3 mr-1" /> Non-Compliant
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 text-sm">Deforestation Risk</span>
+                              <div className="mt-1">
+                                <Badge className={getRiskColor(verificationResult.record.deforestationRisk || "unknown")}>
+                                  {verificationResult.record.deforestationRisk || "Unknown"}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 text-sm">Sustainability Score</span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <div className={`flex items-center gap-1 ${formatSustainabilityScore(verificationResult.record.sustainabilityScore || 85).color}`}>
                                   <Star className="h-4 w-4" />
-                                  {verificationResult.sustainabilityScore}% 
-                                  ({formatSustainabilityScore(verificationResult.sustainabilityScore).label})
+                                  <span className="font-medium">{verificationResult.record.sustainabilityScore || 85}%</span>
                                 </div>
                               </div>
-                            )}
+                            </div>
                           </div>
                         </div>
 
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-600 mb-2">LOCATION</h4>
-                          <div className="space-y-2">
+                        <div className="bg-slate-50 rounded-xl p-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 rounded-lg isms-icon-bg-purple flex items-center justify-center">
+                              <MapPin className="h-4 w-4 text-white" />
+                            </div>
+                            <h4 className="font-bold text-slate-900">Location & Actions</h4>
+                          </div>
+                          <div className="space-y-3">
                             {verificationResult.record.originCoordinates && (
-                              <p><strong>Origin:</strong> {verificationResult.record.originCoordinates}</p>
+                              <div>
+                                <span className="text-slate-600 text-sm">Origin Coordinates</span>
+                                <p className="font-medium text-slate-900">{verificationResult.record.originCoordinates}</p>
+                              </div>
                             )}
                             {verificationResult.record.currentLocation && (
-                              <p><strong>Current Location:</strong> {verificationResult.record.currentLocation}</p>
+                              <div>
+                                <span className="text-slate-600 text-sm">Current Location</span>
+                                <p className="font-medium text-slate-900">{verificationResult.record.currentLocation}</p>
+                              </div>
                             )}
-                            <div className="flex gap-2 mt-4">
-                              <Button size="sm" variant="outline" onClick={() => setShowQRCode(true)}>
+                            <div className="flex gap-2 pt-2">
+                              <Button size="sm" variant="outline" onClick={() => setShowQRCode(true)} className="flex-1">
                                 <QrCode className="h-4 w-4 mr-1" />
                                 QR Code
                               </Button>
-                              <Button size="sm" variant="outline" onClick={handleDownloadReport}>
+                              <Button size="sm" variant="outline" onClick={handleDownloadReport} className="flex-1">
                                 <Download className="h-4 w-4 mr-1" />
-                                Download Report
+                                Report
                               </Button>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
 
-                  {/* Active Alerts */}
-                  {verificationResult.alerts.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-orange-600">
-                          <AlertTriangle className="h-5 w-5" />
-                          Active Alerts ({verificationResult.alerts.length})
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {verificationResult.alerts.map((alert) => (
-                            <Alert key={alert.id} className="border-orange-200">
-                              <div className="flex items-start gap-3">
-                                {getSeverityIcon(alert.severity)}
-                                <div className="flex-1">
-                                  <AlertTitle className="text-sm">{alert.title}</AlertTitle>
-                                  <AlertDescription className="text-sm">
-                                    {alert.message}
-                                    {alert.actionRequired && (
-                                      <Badge className="ml-2 bg-red-100 text-red-800">Action Required</Badge>
-                                    )}
-                                  </AlertDescription>
-                                </div>
-                                <Badge className={`${getRiskColor(alert.severity)}`}>
-                                  {alert.severity}
-                                </Badge>
-                              </div>
-                            </Alert>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Supply Chain Timeline */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Clock className="h-5 w-5" />
-                        Supply Chain Timeline
-                      </CardTitle>
-                      <CardDescription>
-                        Complete traceability from farm to export
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {verificationResult.timeline.length > 0 ? (
-                        <div className="space-y-4">
-                          {verificationResult.timeline.map((event, index) => (
-                            <div key={event.id} className="flex gap-4">
-                              <div className="flex flex-col items-center">
-                                <div className={`w-3 h-3 rounded-full ${
-                                  event.complianceStatus === "compliant" ? "bg-green-500" :
-                                  event.complianceStatus === "non_compliant" ? "bg-red-500" :
-                                  "bg-yellow-500"
-                                }`} />
-                                {index < verificationResult.timeline.length - 1 && (
-                                  <div className="w-px h-12 bg-gray-300 mt-2" />
-                                )}
-                              </div>
-                              <div className="flex-1 pb-4">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-semibold">{event.eventDescription}</h4>
-                                  <Badge variant="outline">{event.eventType}</Badge>
-                                  {event.eudrVerified && (
-                                    <Badge className="bg-green-100 text-green-800">
-                                      <Leaf className="h-3 w-3 mr-1" /> EUDR Verified
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-gray-600">
-                                  {event.eventLocation && `📍 ${event.eventLocation} • `}
-                                  {event.officerName && `👤 ${event.officerName} • `}
-                                  📅 {new Date(event.timestamp).toLocaleString()}
-                                </p>
-                                {event.complianceChecked && (
-                                  <Badge className={`mt-2 ${getStatusColor(event.complianceStatus || "pending")}`}>
-                                    Compliance: {event.complianceStatus || "pending"}
-                                  </Badge>
-                                )}
-                              </div>
+                      {/* Active Alerts - ISMS Style */}
+                      {verificationResult.alerts && verificationResult.alerts.length > 0 && (
+                        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border border-orange-200">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center">
+                              <AlertTriangle className="h-5 w-5 text-white" />
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 text-center py-8">No timeline events recorded</p>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Verification Details */}
-                  {verificationResult.verifications.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Shield className="h-5 w-5" />
-                          Verification Details
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Type</TableHead>
-                              <TableHead>Method</TableHead>
-                              <TableHead>Result</TableHead>
-                              <TableHead>EUDR Checks</TableHead>
-                              <TableHead>Verified By</TableHead>
-                              <TableHead>Date</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {verificationResult.verifications.map((verification) => (
-                              <TableRow key={verification.id}>
-                                <TableCell>{verification.verificationType}</TableCell>
-                                <TableCell>{verification.verificationMethod}</TableCell>
-                                <TableCell>
-                                  <Badge className={
-                                    verification.verificationResult === "passed" ? "bg-green-100 text-green-800" :
-                                    verification.verificationResult === "failed" ? "bg-red-100 text-red-800" :
-                                    "bg-yellow-100 text-yellow-800"
-                                  }>
-                                    {verification.verificationResult}
-                                    {verification.confidence && ` (${verification.confidence}%)`}
+                            <div>
+                              <h3 className="text-xl font-bold text-orange-800">Active Alerts ({verificationResult.alerts.length})</h3>
+                              <p className="text-orange-700">Critical compliance and supply chain alerts</p>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            {verificationResult.alerts.map((alert) => (
+                              <div key={alert.id} className="bg-white rounded-lg p-4 border border-orange-200">
+                                <div className="flex items-start gap-3">
+                                  {getSeverityIcon(alert.severity)}
+                                  <div className="flex-1">
+                                    <h4 className="font-medium text-slate-900">{alert.title}</h4>
+                                    <p className="text-slate-600 text-sm mt-1">
+                                      {alert.message}
+                                      {alert.actionRequired && (
+                                        <Badge className="ml-2 bg-red-100 text-red-800">Action Required</Badge>
+                                      )}
+                                    </p>
+                                  </div>
+                                  <Badge className={getRiskColor(alert.severity)}>
+                                    {alert.severity}
                                   </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex gap-1">
-                                    {verification.deforestationCheck && (
-                                      <Badge className="bg-green-100 text-green-800 text-xs">Deforestation</Badge>
-                                    )}
-                                    {verification.legalityVerified && (
-                                      <Badge className="bg-blue-100 text-blue-800 text-xs">Legal</Badge>
-                                    )}
-                                    {verification.sustainabilityVerified && (
-                                      <Badge className="bg-purple-100 text-purple-800 text-xs">Sustainable</Badge>
-                                    )}
-                                    {verification.traceabilityVerified && (
-                                      <Badge className="bg-orange-100 text-orange-800 text-xs">Traceable</Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Supply Chain Timeline - ISMS Style */}
+                      <div className="bg-slate-50 rounded-xl p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900">Supply Chain Timeline</h3>
+                            <p className="text-slate-600">Complete traceability from farm to export destination</p>
+                          </div>
+                        </div>
+                        
+                        {/* Timeline Events */}
+                        {verificationResult.timeline && verificationResult.timeline.length > 0 ? (
+                          <ScrollArea className="h-64">
+                            <div className="space-y-4">
+                              {verificationResult.timeline.map((event, index) => (
+                                <div key={event.id} className="flex gap-4">
+                                  <div className="flex flex-col items-center">
+                                    <div className={`w-4 h-4 rounded-full ${
+                                      event.complianceStatus === "compliant" ? "bg-green-500" :
+                                      event.complianceStatus === "non_compliant" ? "bg-red-500" :
+                                      "bg-yellow-500"
+                                    }`} />
+                                    {index < verificationResult.timeline.length - 1 && (
+                                      <div className="w-px h-8 bg-slate-300 mt-2" />
                                     )}
                                   </div>
-                                </TableCell>
-                                <TableCell>{verification.verifiedBy}</TableCell>
-                                <TableCell>{new Date(verification.verificationDate).toLocaleDateString()}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </CardContent>
-                    </Card>
-                  )}
-                </>
-              ) : (
-                <Card>
-                  <CardContent className="text-center py-12">
-                    <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-red-600 mb-2">Certificate Not Found</h3>
-                    <p className="text-gray-600">
-                      The tracking number "{trackingNumber}" is not valid or the certificate does not exist in our system.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-        </TabsContent>
-
-        {/* All Records Tab */}
-        <TabsContent value="records" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Tracking Records</CardTitle>
-              <CardDescription>
-                Complete list of all certificate tracking records in the system
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingRecords ? (
-                <div className="text-center py-8">Loading tracking records...</div>
-              ) : trackingRecords.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tracking Number</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>EUDR Compliant</TableHead>
-                      <TableHead>Risk Level</TableHead>
-                      <TableHead>Sustainability Score</TableHead>
-                      <TableHead>Destination</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {trackingRecords.map((record: TrackingRecord) => (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-mono">{record.trackingNumber}</TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(record.currentStatus)}>
-                            {record.currentStatus}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {record.eudrCompliant ? (
-                            <Badge className="bg-green-100 text-green-800">
-                              <CheckCircle className="h-3 w-3 mr-1" /> Yes
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-red-100 text-red-800">
-                              <XCircle className="h-3 w-3 mr-1" /> No
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getRiskColor(record.deforestationRisk || "unknown")}>
-                            {record.deforestationRisk || "Unknown"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {record.sustainabilityScore ? (
-                            <div className={`flex items-center gap-1 ${formatSustainabilityScore(record.sustainabilityScore).color}`}>
-                              <Star className="h-4 w-4" />
-                              {record.sustainabilityScore}%
+                                  <div className="flex-1 pb-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <h4 className="font-medium text-slate-900">{event.eventDescription}</h4>
+                                      <Badge variant="outline" className="text-xs">{event.eventType}</Badge>
+                                      {event.eudrVerified && (
+                                        <Badge className="bg-green-100 text-green-800 text-xs">
+                                          <Leaf className="h-3 w-3 mr-1" /> EUDR Verified
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className="text-sm text-slate-600 space-y-1">
+                                      {event.eventLocation && (
+                                        <p><MapPin className="h-3 w-3 inline mr-1" />{event.eventLocation}</p>
+                                      )}
+                                      {event.officerName && (
+                                        <p><Users className="h-3 w-3 inline mr-1" />{event.officerName}</p>
+                                      )}
+                                      <p><Calendar className="h-3 w-3 inline mr-1" />{new Date(event.timestamp).toLocaleString()}</p>
+                                    </div>
+                                    {event.complianceChecked && (
+                                      <Badge className={`mt-2 ${getStatusColor(event.complianceStatus || "pending")}`}>
+                                        Compliance: {event.complianceStatus || "pending"}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          ) : (
-                            "Not scored"
-                          )}
-                        </TableCell>
-                        <TableCell>{record.destinationCountry || "Not specified"}</TableCell>
-                        <TableCell>{new Date(record.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setTrackingNumber(record.trackingNumber);
-                              verifyMutation.mutate(record.trackingNumber);
-                            }}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No tracking records found</p>
+                          </ScrollArea>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Clock className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+                            <p className="text-slate-500">No timeline events recorded</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Verification Details - ISMS Style */}
+                      {verificationResult.verifications && verificationResult.verifications.length > 0 && (
+                        <div className="bg-slate-50 rounded-xl p-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                              <Shield className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-slate-900">Verification Details</h3>
+                              <p className="text-slate-600">Comprehensive verification methods and results</p>
+                            </div>
+                          </div>
+                          <div className="bg-white rounded-lg overflow-hidden">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-slate-50">
+                                  <TableHead className="font-medium">Type</TableHead>
+                                  <TableHead className="font-medium">Method</TableHead>
+                                  <TableHead className="font-medium">Result</TableHead>
+                                  <TableHead className="font-medium">EUDR Checks</TableHead>
+                                  <TableHead className="font-medium">Verified By</TableHead>
+                                  <TableHead className="font-medium">Date</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {verificationResult.verifications.map((verification) => (
+                                  <TableRow key={verification.id} className="hover:bg-slate-50">
+                                    <TableCell className="font-medium">{verification.verificationType}</TableCell>
+                                    <TableCell>{verification.verificationMethod}</TableCell>
+                                    <TableCell>
+                                      <Badge className={
+                                        verification.verificationResult === "passed" ? "bg-green-100 text-green-800" :
+                                        verification.verificationResult === "failed" ? "bg-red-100 text-red-800" :
+                                        "bg-yellow-100 text-yellow-800"
+                                      }>
+                                        {verification.verificationResult}
+                                        {verification.confidence && ` (${verification.confidence}%)`}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex gap-1 flex-wrap">
+                                        {verification.deforestationCheck && (
+                                          <Badge className="bg-green-100 text-green-800 text-xs">Deforestation</Badge>
+                                        )}
+                                        {verification.legalityVerified && (
+                                          <Badge className="bg-blue-100 text-blue-800 text-xs">Legal</Badge>
+                                        )}
+                                        {verification.sustainabilityVerified && (
+                                          <Badge className="bg-purple-100 text-purple-800 text-xs">Sustainable</Badge>
+                                        )}
+                                        {verification.traceabilityVerified && (
+                                          <Badge className="bg-orange-100 text-orange-800 text-xs">Traceable</Badge>
+                                        )}
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>{verification.verifiedBy}</TableCell>
+                                    <TableCell>{new Date(verification.verificationDate).toLocaleDateString()}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-8 text-center border border-red-200">
+                      <div className="w-16 h-16 rounded-xl bg-red-600 flex items-center justify-center mx-auto mb-4">
+                        <XCircle className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-red-800 mb-2">Certificate Not Found</h3>
+                      <p className="text-red-700 mb-4">
+                        The tracking number "{trackingNumber}" is not valid or the certificate does not exist in our system.
+                      </p>
+                      <Button 
+                        onClick={() => setTrackingNumber("")} 
+                        variant="outline" 
+                        className="border-red-200 text-red-700 hover:bg-red-50"
+                      >
+                        Try Another Number
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+
+            {/* All Records Tab - ISMS Style */}
+            <TabsContent value="records" className="space-y-6">
+              <div className="bg-slate-50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                    <FileText className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">All Tracking Records</h3>
+                    <p className="text-slate-600">Complete list of all certificate tracking records in the system</p>
+                  </div>
+                </div>
+                {loadingRecords ? (
+                  <div className="text-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-slate-400 mx-auto mb-3" />
+                    <p className="text-slate-500">Loading tracking records...</p>
+                  </div>
+                ) : trackingRecords.length > 0 ? (
+                  <div className="bg-white rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-50">
+                            <TableHead className="font-medium">Tracking Number</TableHead>
+                            <TableHead className="font-medium">Status</TableHead>
+                            <TableHead className="font-medium">EUDR Compliant</TableHead>
+                            <TableHead className="font-medium">Risk Level</TableHead>
+                            <TableHead className="font-medium">Sustainability Score</TableHead>
+                            <TableHead className="font-medium">Destination</TableHead>
+                            <TableHead className="font-medium">Created</TableHead>
+                            <TableHead className="font-medium">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {trackingRecords.map((record: TrackingRecord) => (
+                            <TableRow key={record.id} className="hover:bg-slate-50">
+                              <TableCell className="font-mono font-medium">{record.trackingNumber}</TableCell>
+                              <TableCell>
+                                <Badge className={getStatusColor(record.currentStatus)}>
+                                  {record.currentStatus}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {record.eudrCompliant ? (
+                                  <Badge className="bg-green-100 text-green-800">
+                                    <CheckCircle className="h-3 w-3 mr-1" /> Yes
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-red-100 text-red-800">
+                                    <XCircle className="h-3 w-3 mr-1" /> No
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={getRiskColor(record.deforestationRisk || "unknown")}>
+                                  {record.deforestationRisk || "Unknown"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {record.sustainabilityScore ? (
+                                  <div className={`flex items-center gap-1 ${formatSustainabilityScore(record.sustainabilityScore).color}`}>
+                                    <Star className="h-4 w-4" />
+                                    {record.sustainabilityScore}%
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-500">Not scored</span>
+                                )}
+                              </TableCell>
+                              <TableCell>{record.destinationCountry || "Not specified"}</TableCell>
+                              <TableCell>{new Date(record.createdAt).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setTrackingNumber(record.trackingNumber);
+                                    verifyMutation.mutate(record.trackingNumber);
+                                  }}
+                                  className="hover:bg-slate-50"
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <FileText className="h-16 w-16 text-slate-400 mx-auto mb-3" />
+                      <p className="text-slate-500">No tracking records found</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+            {/* Analytics Tab - ISMS Style */}
+            <TabsContent value="analytics" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-blue-800 text-sm font-medium">Total Certificates</p>
+                      <p className="text-3xl font-bold text-blue-900">{trackingRecords.length}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-6 border border-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                      <CheckCircle className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-green-800 text-sm font-medium">EUDR Compliant</p>
+                      <p className="text-3xl font-bold text-green-900">
+                        {trackingRecords.filter(r => r.eudrCompliant).length}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-50 to-amber-100 rounded-xl p-6 border border-orange-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                      <AlertTriangle className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-orange-800 text-sm font-medium">High Risk</p>
+                      <p className="text-3xl font-bold text-orange-900">
+                        {trackingRecords.filter(r => r.deforestationRisk === "high").length}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl p-6 border border-purple-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                      <Star className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-purple-800 text-sm font-medium">Avg. Sustainability</p>
+                      <p className="text-3xl font-bold text-purple-900">
+                        {trackingRecords.length > 0 
+                          ? Math.round(trackingRecords.filter(r => r.sustainabilityScore).reduce((acc, r) => acc + (r.sustainabilityScore || 0), 0) / trackingRecords.filter(r => r.sustainabilityScore).length)
+                          : 0}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Status Distribution */}
+                <div className="bg-slate-50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                      <BarChart className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">Certificate Status Distribution</h3>
+                      <p className="text-slate-600">Breakdown of certificate statuses</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {["verified", "pending", "in_transit", "rejected"].map(status => {
+                      const count = trackingRecords.filter(r => r.currentStatus === status).length;
+                      const percentage = trackingRecords.length > 0 ? (count / trackingRecords.length) * 100 : 0;
+                      return (
+                        <div key={status} className="bg-white rounded-lg p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium text-slate-900 capitalize">{status.replace('_', ' ')}</span>
+                            <span className="text-slate-600">{count} ({percentage.toFixed(1)}%)</span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                status === "verified" ? "bg-green-500" :
+                                status === "pending" ? "bg-yellow-500" :
+                                status === "in_transit" ? "bg-blue-500" :
+                                "bg-red-500"
+                              }`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Risk Assessment */}
+                <div className="bg-slate-50 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">Risk Assessment Overview</h3>
+                      <p className="text-slate-600">Deforestation risk breakdown</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {["low", "medium", "high", "unknown"].map(risk => {
+                      const count = trackingRecords.filter(r => (r.deforestationRisk || "unknown") === risk).length;
+                      const percentage = trackingRecords.length > 0 ? (count / trackingRecords.length) * 100 : 0;
+                      return (
+                        <div key={risk} className="bg-white rounded-lg p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium text-slate-900 capitalize">{risk} Risk</span>
+                            <span className="text-slate-600">{count} ({percentage.toFixed(1)}%)</span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                risk === "low" ? "bg-green-500" :
+                                risk === "medium" ? "bg-yellow-500" :
+                                risk === "high" ? "bg-red-500" :
+                                "bg-gray-500"
+                              }`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="bg-slate-50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                    <Activity className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Recent Verification Activity</h3>
+                    <p className="text-slate-600">Latest certificate verification activities</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg overflow-hidden">
+                  <div className="divide-y divide-slate-200">
+                    {trackingRecords.slice(0, 5).map((record, index) => (
+                      <div key={record.id} className="p-4 hover:bg-slate-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              record.eudrCompliant ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+                            }`}>
+                              {record.eudrCompliant ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                            </div>
+                            <div>
+                              <p className="font-medium text-slate-900">{record.trackingNumber}</p>
+                              <p className="text-sm text-slate-600">
+                                {record.destinationCountry || "Unknown destination"} • 
+                                <Badge className={`ml-2 ${getStatusColor(record.currentStatus)}`}>
+                                  {record.currentStatus}
+                                </Badge>
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-slate-600">{new Date(record.createdAt).toLocaleDateString()}</p>
+                            {record.sustainabilityScore && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <Star className="h-3 w-3 text-yellow-500" />
+                                <span className="text-xs text-slate-600">{record.sustainabilityScore}%</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {trackingRecords.length === 0 && (
+                    <div className="text-center py-8">
+                      <Activity className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+                      <p className="text-slate-500">No verification activity recorded</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
 
       {/* QR Code Dialog */}
       <Dialog open={showQRCode} onOpenChange={setShowQRCode}>

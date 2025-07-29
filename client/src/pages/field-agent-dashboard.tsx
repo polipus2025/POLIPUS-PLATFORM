@@ -60,6 +60,7 @@ export default function FieldAgentDashboard() {
     enabled: !!jurisdiction && !!token,
   });
 
+  // Early return if not authenticated - after all hooks
   if (!token) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

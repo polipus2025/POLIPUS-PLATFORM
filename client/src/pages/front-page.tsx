@@ -101,7 +101,7 @@ export default function FrontPage() {
                 className="h-64 w-auto object-contain"
               />
               {/* Registered trademark symbol positioned over the "s" */}
-              <span className="absolute top-4 right-12 text-xl font-bold text-slate-700 bg-white/80 rounded-full w-6 h-6 flex items-center justify-center text-xs">
+              <span className="absolute top-8 right-12 text-xl font-bold text-slate-700 bg-white/80 rounded-full w-6 h-6 flex items-center justify-center text-xs">
                 ®
               </span>
             </div>

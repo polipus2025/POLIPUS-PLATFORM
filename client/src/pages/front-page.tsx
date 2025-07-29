@@ -119,7 +119,7 @@ export default function FrontPage() {
               <Wheat className="h-6 w-6 text-white" />
             </div>
             <p className="text-slate-600 text-sm mb-1">AgriTrace360</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">100%</p>
+            <p className="text-3xl font-bold text-slate-900 mb-2">EUDR 100%</p>
             <p className="text-slate-600 text-sm">Complete</p>
           </div>
 

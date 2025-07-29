@@ -260,109 +260,109 @@ export default function EconomicReporting() {
 
       {/* Economic Overview Cards - ISMS Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-        <div className="isms-card">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                <DollarSign className="h-6 w-6" />
+        <div className="isms-card h-36">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <DollarSign className="h-5 w-5" />
               </div>
               <div className="flex items-center">
-                <div className="w-6 h-6 rounded-lg isms-icon-bg-green flex items-center justify-center mr-2">
-                  <TrendingUp className="h-3 w-3" />
+                <div className="w-5 h-5 rounded-lg isms-icon-bg-green flex items-center justify-center mr-1">
+                  <TrendingUp className="h-2.5 w-2.5" />
                 </div>
                 <span className="text-xs font-medium text-green-600">+{economicOverview.monthlyGrowthRate}%</span>
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-2">GDP Contribution</p>
-              <p className="text-3xl font-bold text-slate-900 text-center">
+            <div className="flex-1 flex flex-col justify-center">
+              <p className="text-xs font-medium text-slate-600 mb-1">GDP Contribution</p>
+              <p className="text-2xl font-bold text-slate-900 text-center">
                 ${(economicOverview.totalGdpContribution / 1000000).toFixed(1)}M
               </p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                <Users className="h-6 w-6" />
+        <div className="isms-card h-36">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Users className="h-5 w-5" />
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-2">Employment</p>
-              <p className="text-3xl font-bold text-slate-900 text-center">
+            <div className="flex-1 flex flex-col justify-center">
+              <p className="text-xs font-medium text-slate-600 mb-1">Employment</p>
+              <p className="text-2xl font-bold text-slate-900 text-center">
                 {(economicOverview.totalEmployment / 1000).toFixed(1)}K
               </p>
-              <p className="text-sm text-slate-500 mt-2">Total jobs</p>
+              <p className="text-xs text-slate-500 mt-1">Total jobs</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
-                <Building2 className="h-6 w-6" />
+        <div className="isms-card h-36">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                <Building2 className="h-5 w-5" />
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-2">Active Businesses</p>
-              <p className="text-3xl font-bold text-slate-900 text-center">
+            <div className="flex-1 flex flex-col justify-center">
+              <p className="text-xs font-medium text-slate-600 mb-1">Active Businesses</p>
+              <p className="text-2xl font-bold text-slate-900 text-center">
                 {(economicOverview.activeBusinesses / 1000).toFixed(1)}K
               </p>
-              <p className="text-sm text-slate-500 mt-2">Registered</p>
+              <p className="text-xs text-slate-500 mt-1">Registered</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-                <FileText className="h-6 w-6" />
+        <div className="isms-card h-36">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                <FileText className="h-5 w-5" />
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-2">Tax Revenue</p>
-              <p className="text-3xl font-bold text-slate-900 text-center">
+            <div className="flex-1 flex flex-col justify-center">
+              <p className="text-xs font-medium text-slate-600 mb-1">Tax Revenue</p>
+              <p className="text-2xl font-bold text-slate-900 text-center">
                 ${(economicOverview.totalTaxRevenue / 1000000).toFixed(1)}M
               </p>
-              <p className="text-sm text-slate-500 mt-2">Monthly</p>
+              <p className="text-xs text-slate-500 mt-1">Monthly</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                <Globe className="h-6 w-6" />
+        <div className="isms-card h-36">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Globe className="h-5 w-5" />
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-2">Export Value</p>
-              <p className="text-3xl font-bold text-slate-900 text-center">
+            <div className="flex-1 flex flex-col justify-center">
+              <p className="text-xs font-medium text-slate-600 mb-1">Export Value</p>
+              <p className="text-2xl font-bold text-slate-900 text-center">
                 ${(economicOverview.exportValue / 1000000).toFixed(1)}M
               </p>
-              <p className="text-sm text-slate-500 mt-2">Monthly</p>
+              <p className="text-xs text-slate-500 mt-1">Monthly</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                <Package className="h-6 w-6" />
+        <div className="isms-card h-36">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <Package className="h-5 w-5" />
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-600 mb-2">Top Commodities</p>
-              <p className="text-xl font-bold text-slate-900 leading-tight text-center">
+            <div className="flex-1 flex flex-col justify-center">
+              <p className="text-xs font-medium text-slate-600 mb-1">Top Commodities</p>
+              <p className="text-lg font-bold text-slate-900 leading-tight text-center">
                 {economicOverview.topCommodities.slice(0, 2).join(", ")}
               </p>
-              <p className="text-sm text-slate-500 mt-2">Leading exports</p>
+              <p className="text-xs text-slate-500 mt-1">Leading exports</p>
             </div>
           </div>
         </div>

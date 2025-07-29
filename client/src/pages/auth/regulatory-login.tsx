@@ -94,7 +94,7 @@ export default function RegulatoryLogin() {
               <img 
                 src={lacraLogo} 
                 alt="LACRA Official Logo" 
-                className="h-24 w-24 object-contain"
+                className="h-32 w-32 object-contain"
               />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 mb-2">

@@ -11,7 +11,7 @@ import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
-import Dashboard from "@/pages/dashboard-restored";
+import Dashboard from "@/pages/dashboard-complete";
 
 function App() {
   return (

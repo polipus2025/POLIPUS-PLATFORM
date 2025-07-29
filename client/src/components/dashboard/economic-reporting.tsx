@@ -260,17 +260,17 @@ export default function EconomicReporting() {
 
       {/* Economic Overview Cards - ISMS Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-        <div className="isms-card h-40 p-4">
+        <div className="isms-card h-36">
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                <DollarSign className="h-5 w-5" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <DollarSign className="h-6 w-6" />
               </div>
               <div className="flex items-center">
-                <div className="w-5 h-5 rounded-lg isms-icon-bg-green flex items-center justify-center mr-2">
+                <div className="w-6 h-6 rounded-lg isms-icon-bg-green flex items-center justify-center mr-2">
                   <TrendingUp className="h-3 w-3" />
                 </div>
-                <span className="text-sm font-medium text-green-600">+{economicOverview.monthlyGrowthRate}%</span>
+                <span className="text-xs font-medium text-green-600">+{economicOverview.monthlyGrowthRate}%</span>
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-center">
@@ -282,11 +282,11 @@ export default function EconomicReporting() {
           </div>
         </div>
 
-        <div className="isms-card h-40 p-4">
+        <div className="isms-card h-36">
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                <Users className="h-5 w-5" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Users className="h-6 w-6" />
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-center">
@@ -294,16 +294,15 @@ export default function EconomicReporting() {
               <p className="text-3xl font-bold text-slate-900 text-center">
                 {(economicOverview.totalEmployment / 1000).toFixed(1)}K
               </p>
-              <p className="text-sm text-slate-500 mt-2 text-center">Total jobs</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card h-40 p-4">
+        <div className="isms-card h-36">
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl isms-icon-bg-purple flex items-center justify-center">
-                <Building2 className="h-5 w-5" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                <Building2 className="h-6 w-6" />
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-center">
@@ -311,16 +310,15 @@ export default function EconomicReporting() {
               <p className="text-3xl font-bold text-slate-900 text-center">
                 {(economicOverview.activeBusinesses / 1000).toFixed(1)}K
               </p>
-              <p className="text-sm text-slate-500 mt-2 text-center">Registered</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card h-40 p-4">
+        <div className="isms-card h-36">
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-                <FileText className="h-5 w-5" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                <FileText className="h-6 w-6" />
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-center">
@@ -328,16 +326,15 @@ export default function EconomicReporting() {
               <p className="text-3xl font-bold text-slate-900 text-center">
                 ${(economicOverview.totalTaxRevenue / 1000000).toFixed(1)}M
               </p>
-              <p className="text-sm text-slate-500 mt-2 text-center">Monthly</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card h-40 p-4">
+        <div className="isms-card h-36">
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                <Globe className="h-5 w-5" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <Globe className="h-6 w-6" />
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-center">
@@ -345,24 +342,22 @@ export default function EconomicReporting() {
               <p className="text-3xl font-bold text-slate-900 text-center">
                 ${(economicOverview.exportValue / 1000000).toFixed(1)}M
               </p>
-              <p className="text-sm text-slate-500 mt-2 text-center">Monthly</p>
             </div>
           </div>
         </div>
 
-        <div className="isms-card h-40 p-4">
+        <div className="isms-card h-36">
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                <Package className="h-5 w-5" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <Package className="h-6 w-6" />
               </div>
             </div>
             <div className="flex-1 flex flex-col justify-center">
               <p className="text-sm font-medium text-slate-600 mb-2">Top Commodities</p>
-              <p className="text-xl font-bold text-slate-900 leading-tight text-center">
+              <p className="text-2xl font-bold text-slate-900 text-center">
                 Cocoa, Coffee
               </p>
-              <p className="text-sm text-slate-500 mt-2 text-center">Leading exports</p>
             </div>
           </div>
         </div>

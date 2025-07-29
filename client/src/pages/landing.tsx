@@ -191,7 +191,7 @@ export default function Landing() {
             
             <div className="isms-card text-center">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
-                <span className="text-white font-bold text-lg">EU</span>
+                <span className="text-white font-black text-xl">EU</span>
               </div>
               <p className="text-slate-600 text-sm mb-1">EUDR</p>
               <p className="text-2xl font-bold text-slate-900 mb-2">100%</p>

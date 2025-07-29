@@ -125,7 +125,7 @@ export default function DashboardISMSRestored() {
       <div className="flex">
         <Sidebar />
         
-        <main className="flex-1 p-6 max-w-7xl mx-auto">
+        <main className="flex-1 ml-64 p-6 max-w-7xl mx-auto pt-6">
           <div className="space-y-8">
             
             {/* ISMS Header */}

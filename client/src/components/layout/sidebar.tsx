@@ -129,7 +129,7 @@ export default function Sidebar() {
   const navigationItems = getNavigationItems(userType, role);
 
   return (
-    <aside className="w-64 bg-white shadow-sm border-r border-gray-200">
+    <aside className="w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto shrink-0">
       <nav className="p-6">
         {/* Main Navigation Section */}
         <div className="mb-8">

@@ -27,7 +27,9 @@ import {
   Plus,
   Eye,
   Download,
-  Filter
+  Filter,
+  Zap,
+  Settings
 } from "lucide-react";
 import type { 
   InternationalStandard, 

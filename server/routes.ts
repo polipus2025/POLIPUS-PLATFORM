@@ -2837,8 +2837,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tracking/verify/:trackingNumber', async (req, res) => {
     try {
       const trackingNumber = req.params.trackingNumber;
-      const result = await storage.verifyTrackingRecord(trackingNumber);
-      res.json(result);
+      const record = await storage.verifyTrackingRecord(trackingNumber);
+      
+      if (!record) {
+        return res.status(404).json({ 
+          valid: false, 
+          message: 'Tracking record not found',
+          record: null,
+          timeline: [],
+          verifications: []
+        });
+      }
+
+      // Get additional verification data
+      const timeline = await storage.getTrackingTimeline(record.id);
+      const verifications = await storage.getTrackingVerifications(record.id);
+
+      res.json({
+        valid: true,
+        message: 'Certificate verified successfully',
+        record,
+        timeline,
+        verifications
+      });
     } catch (error) {
       console.error('Error verifying tracking record:', error);
       res.status(500).json({ message: 'Failed to verify tracking record' });

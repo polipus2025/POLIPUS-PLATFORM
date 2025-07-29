@@ -853,12 +853,12 @@ export class DatabaseStorage implements IStorage {
     return updatedRecord;
   }
 
-  async verifyTrackingRecord(id: number): Promise<TrackingRecord> {
-    const [verifiedRecord] = await db.update(trackingRecords)
-      .set({ verificationStatus: 'verified', verifiedAt: new Date() })
-      .where(eq(trackingRecords.id, id))
-      .returning();
-    return verifiedRecord;
+  async verifyTrackingRecord(trackingNumber: string): Promise<TrackingRecord | null> {
+    const [record] = await db.select().from(trackingRecords).where(eq(trackingRecords.trackingNumber, trackingNumber));
+    if (!record) {
+      return null;
+    }
+    return record;
   }
 
   async getTrackingTimeline(recordId: number): Promise<TrackingTimeline[]> {

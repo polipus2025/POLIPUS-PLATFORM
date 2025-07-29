@@ -100,7 +100,7 @@ export default function FrontPage() {
               className="h-64 w-auto object-contain"
             />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
+          <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform®</h2>
         </div>
 
         {/* Platform Statistics - ISMS Style */}

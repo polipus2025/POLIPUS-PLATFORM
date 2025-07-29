@@ -12,6 +12,7 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard-complete";
+import EconomicReportingPage from "@/pages/economic-reporting";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           
           {/* Main Routes */}
           <Route path="/dashboard" component={Dashboard} />
+          <Route path="/economic-reporting" component={EconomicReportingPage} />
           <Route path="/landing" component={Landing} />
           <Route path="/portals" component={Landing} />
           

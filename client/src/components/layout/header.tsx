@@ -159,19 +159,19 @@ export default function Header() {
   const userDisplay = getUserDisplayInfo();
 
   return (
-    <header className="bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 shadow-lg border-b border-slate-200/50 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
-      <div className="px-2 sm:px-4 md:px-6 py-3 md:py-5 w-full max-w-full">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
+      <div className="px-2 sm:px-4 md:px-6 py-2 md:py-4 w-full max-w-full">
         <div className="flex justify-between items-center w-full max-w-full">
           <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-1 min-w-0 max-w-[70%]">
             <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0 max-w-full">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/50">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 rounded overflow-hidden flex-shrink-0">
                 <img 
                   src={lacraLogo} 
                   alt="LACRA" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/50">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 rounded overflow-hidden flex-shrink-0">
                 <img 
                   src={agriTraceLogo} 
                   alt="AgriTrace360" 
@@ -179,20 +179,18 @@ export default function Header() {
                 />
               </div>
               <div className="min-w-0 flex-1 overflow-hidden">
-                <h1 className="text-sm sm:text-lg md:text-2xl font-bold text-white truncate">AgriTrace360™</h1>
-                <p className="text-xs sm:text-sm text-slate-200 truncate">LACRA Dashboard</p>
+                <h1 className="text-xs sm:text-sm md:text-xl font-bold text-neutral truncate">AgriTrace360™</h1>
+                <p className="text-xs text-gray-500 truncate">LACRA Dashboard</p>
               </div>
             </div>
             
-            {/* Time, Date, and Weather Widget - ISMS Style */}
-            <div className="hidden lg:flex items-center space-x-4 isms-card bg-white/95 backdrop-blur-sm px-6 py-3 rounded-xl border border-white/20 shadow-lg">
-              {/* Date */}
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-slate-800">
+            {/* Time, Date, and Weather Widget */}
+            <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-blue-50 to-green-50 px-4 py-2 rounded-lg border border-blue-100">
+              {/* Date and Time */}
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">
                     {currentTime.toLocaleDateString('en-US', { 
                       weekday: 'short',
                       month: 'short', 
@@ -200,18 +198,13 @@ export default function Header() {
                       year: 'numeric'
                     })}
                   </div>
-                  <div className="text-xs text-slate-500">Today</div>
                 </div>
               </div>
               
-              {/* Time */}
-              <div className="w-px h-12 bg-slate-200"></div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-slate-800">
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4 text-green-600" />
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">
                     {currentTime.toLocaleTimeString('en-US', { 
                       hour: '2-digit',
                       minute: '2-digit',
@@ -219,89 +212,75 @@ export default function Header() {
                       hour12: true
                     })}
                   </div>
-                  <div className="text-xs text-slate-500">Local Time</div>
                 </div>
               </div>
               
               {/* Weather */}
-              <div className="w-px h-12 bg-slate-200"></div>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-                  <WeatherIcon className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-slate-800">{weather.temperature}</div>
-                  <div className="text-xs text-slate-500">{weather.location}</div>
+              <div className="flex items-center space-x-2 border-l border-blue-200 pl-4">
+                <WeatherIcon className="h-4 w-4 text-orange-600" />
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">{weather.temperature}</div>
+                  <div className="text-xs text-gray-600">{weather.location}</div>
                 </div>
               </div>
             </div>
             
-            {/* Mobile compact view - ISMS Style */}
-            <div className="lg:hidden flex items-center space-x-2 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/30 shadow-md flex-shrink-0">
-              <div className="w-6 h-6 rounded-lg isms-icon-bg-green flex items-center justify-center">
-                <Clock className="h-3 w-3 text-white" />
-              </div>
-              <span className="text-xs font-semibold text-slate-800">
+            {/* Mobile compact view */}
+            <div className="lg:hidden flex items-center space-x-1 bg-gradient-to-r from-blue-50 to-green-50 px-1 sm:px-2 py-1 rounded border border-blue-100 flex-shrink-0">
+              <Clock className="h-3 w-3 text-green-600" />
+              <span className="text-xs font-medium text-gray-900">
                 {currentTime.toLocaleTimeString('en-US', { 
                   hour: '2-digit',
                   minute: '2-digit',
                   hour12: true
                 })}
               </span>
-              <div className="w-6 h-6 rounded-lg isms-icon-bg-orange flex items-center justify-center">
-                <WeatherIcon className="h-3 w-3 text-white" />
-              </div>
-              <span className="text-xs font-semibold text-slate-800">{weather.temperature}</span>
+              <WeatherIcon className="h-3 w-3 text-orange-600" />
+              <span className="text-xs font-medium text-gray-900">{weather.temperature}</span>
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             {/* Sync Status Indicator */}
             <SyncStatusIndicator />
             
-            {/* Notifications - ISMS Style */}
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/30 transition-all cursor-pointer">
-                <Bell className="h-5 w-5 text-white" />
-              </div>
+            <div className="flex items-center space-x-2">
+              <Bell className="h-5 w-5 text-gray-400" />
               {unreadCount > 0 && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">{unreadCount}</span>
-                </div>
+                <Badge variant="destructive" className="text-xs px-2 py-1">
+                  {unreadCount}
+                </Badge>
               )}
             </div>
             
-            {/* User Profile - ISMS Style */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-3 bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 transition-all px-3 py-2 rounded-xl">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-sm font-semibold text-white">{userDisplay.name}</p>
-                    <p className="text-xs text-slate-200">{userDisplay.role}</p>
+                <Button variant="ghost" className="flex items-center space-x-3 hover:bg-gray-50">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-neutral">{userDisplay.name}</p>
+                    <p className="text-xs text-gray-500">{userDisplay.role}</p>
                   </div>
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${
-                    userType === 'farmer' ? 'isms-icon-bg-green' :
-                    userType === 'field_agent' ? 'isms-icon-bg-orange' :
-                    'isms-icon-bg-blue'
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    userType === 'farmer' ? 'bg-green-600' :
+                    userType === 'field_agent' ? 'bg-orange-600' :
+                    'bg-lacra-blue'
                   }`}>
-                    <span className="text-white text-sm font-bold">{userDisplay.initials}</span>
+                    <span className="text-white text-sm font-medium">{userDisplay.initials}</span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 isms-card border-0 shadow-xl">
-                <DropdownMenuItem disabled className="cursor-default">
-                  <User className="mr-3 h-5 w-5 text-slate-600" />
-                  <span className="font-semibold text-slate-800">{userDisplay.name}</span>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>{userDisplay.name}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled className="cursor-default">
-                  <div className="ml-8">
-                    <span className="text-sm text-slate-600">{userDisplay.role}</span>
-                  </div>
+                <DropdownMenuItem disabled>
+                  <span className="text-xs text-gray-500">{userDisplay.role}</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-slate-200" />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer hover:bg-red-50 focus:bg-red-50">
-                  <LogOut className="mr-3 h-5 w-5" />
-                  <span className="font-medium">Log out</span>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

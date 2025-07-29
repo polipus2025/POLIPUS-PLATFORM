@@ -45,7 +45,7 @@ export default function RegulatoryLogin() {
     setError("");
 
     try {
-      const result = await apiRequest("/api/auth/login", {
+      const result = await apiRequest("/api/auth/regulatory-login", {
         method: "POST",
         body: JSON.stringify({
           ...data,
@@ -64,10 +64,8 @@ export default function RegulatoryLogin() {
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("userType", "regulatory");
         
-        // Navigate to dashboard
-        setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 500);
+        // Redirect to dashboard
+        window.location.href = "/dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

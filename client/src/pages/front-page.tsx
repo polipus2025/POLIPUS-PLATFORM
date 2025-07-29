@@ -102,14 +102,16 @@ export default function FrontPage() {
             {/* Registered trademark symbol positioned over the 's' */}
             <span className="absolute top-16 right-[calc(50%-380px)] text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex items-center justify-center gap-6 relative">
             <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
-            <Link href="/landing">
-              <Button className="isms-button flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Login
-              </Button>
-            </Link>
+            <div className="ml-64">
+              <Link href="/landing">
+                <Button className="isms-button flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Login
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 

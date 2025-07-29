@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Helmet } from "react-helmet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,39 +81,37 @@ export default function RegulatoryLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen isms-gradient flex items-center justify-center p-4">
       <Helmet>
         <title>Regulatory Portal Login - AgriTrace360™ LACRA</title>
         <meta name="description" content="Secure login portal for LACRA regulatory staff and administrators" />
       </Helmet>
 
       <div className="w-full max-w-md">
-        <Card className="shadow-2xl border-0">
-          <CardHeader className="text-center pb-6">
-            <div className="flex justify-center items-center gap-3 mb-4">
-              <div className="w-16 h-16 rounded-lg overflow-hidden">
-                <img 
-                  src={lacraLogo} 
-                  alt="LACRA Official Logo" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-3 bg-gradient-to-r from-green-600 to-blue-600 rounded-full">
+        <div className="isms-card">
+          <div className="text-center pb-6">
+            <div className="flex justify-center items-center gap-4 mb-6">
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                className="h-16 w-16 object-contain"
+              />
+              <div className="w-16 h-16 rounded-2xl isms-icon-bg-blue flex items-center justify-center">
                 <Shield className="h-8 w-8 text-white" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">
               LACRA Regulatory Portal
-            </CardTitle>
-            <p className="text-gray-600 mt-2">
+            </h1>
+            <p className="text-slate-600 text-sm mb-1">
               Liberia Agriculture Commodity Regulatory Authority
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-slate-500 text-xs">
               AgriTrace360™ | Authorized Personnel Only
             </p>
-          </CardHeader>
+          </div>
 
-          <CardContent>
+          <div className="pt-4">
             {error && (
               <Alert className="mb-6 border-red-200 bg-red-50">
                 <AlertCircle className="h-4 w-4 text-red-600" />
@@ -222,7 +219,7 @@ export default function RegulatoryLogin() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium py-3"
+                className="isms-button w-full py-3"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -238,29 +235,29 @@ export default function RegulatoryLogin() {
 
             {/* Footer */}
             <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-500">
                 Liberia Agriculture Commodity Regulatory Authority
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 Secure access portal for authorized personnel
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Access Information */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 mb-2">Need different access?</p>
+          <p className="text-sm text-slate-600 mb-2">Need different access?</p>
           <div className="flex justify-center gap-4">
             <a
               href="/farmer-login"
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
+              className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
             >
               Farmer Portal
             </a>
             <a
               href="/field-agent-login"
-              className="text-sm text-green-600 hover:text-green-800 underline"
+              className="text-sm text-green-600 hover:text-green-800 underline transition-colors"
             >
               Field Agent Portal
             </a>

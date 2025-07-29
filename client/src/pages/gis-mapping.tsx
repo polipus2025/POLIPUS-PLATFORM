@@ -324,18 +324,16 @@ export default function GISMapping() {
           </div>
 
           <div className="isms-card">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex flex-col items-center justify-center text-center space-y-3">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center">
                 <Activity className="h-6 w-6 text-white" />
               </div>
-              <div className="flex-1 text-center">
-                <p className="text-slate-600 text-sm">System Status</p>
-                <p className="text-3xl font-bold text-slate-900">
-                  {isGPSActive ? 'ACTIVE' : 'STANDBY'}
-                </p>
-              </div>
+              <p className="text-slate-600 text-sm">System Status</p>
+              <p className="text-3xl font-bold text-slate-900">
+                {isGPSActive ? 'ACTIVE' : 'STANDBY'}
+              </p>
+              <p className="text-slate-600 text-sm">Real-time tracking status</p>
             </div>
-            <p className="text-slate-600 text-sm text-center">Real-time tracking status</p>
           </div>
         </div>
 

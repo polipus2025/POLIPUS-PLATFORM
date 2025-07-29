@@ -91,24 +91,16 @@ export default function FrontPage() {
       <div className="max-w-7xl mx-auto p-8">
 
 
-        {/* Header with Logos - ISMS Style */}
+        {/* Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-12">
-          <div className="flex items-center justify-center gap-8 py-6">
-            <img 
-              src={agriTraceLogo} 
-              alt="LACRA - Liberia Agriculture Commodity Regulatory Authority" 
-              className="h-16 w-16 object-contain"
-            />
+          <div className="flex justify-center py-6">
             <img 
               src={poliposLogo} 
               alt="Polipos - Brightening the Future" 
               className="h-64 w-auto object-contain"
             />
           </div>
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
-            <p className="text-slate-600 text-sm mt-2">LACRA - Liberia Agriculture Commodity Regulatory Authority</p>
-          </div>
+          <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
         </div>
 
         {/* Platform Statistics - ISMS Style */}

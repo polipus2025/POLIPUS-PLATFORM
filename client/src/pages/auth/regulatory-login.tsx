@@ -97,11 +97,6 @@ export default function RegulatoryLogin() {
                 className="h-24 w-24 object-contain"
               />
             </div>
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 rounded-2xl isms-icon-bg-blue flex items-center justify-center">
-                <Shield className="h-8 w-8 text-white" />
-              </div>
-            </div>
             <h1 className="text-2xl font-bold text-slate-900 mb-2">
               LACRA Regulatory Portal
             </h1>

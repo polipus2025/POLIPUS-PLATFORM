@@ -159,7 +159,7 @@ export default function Header() {
   const userDisplay = getUserDisplayInfo();
 
   return (
-    <header className="isms-gradient shadow-lg border-b border-slate-200/50 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
+    <header className="bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 shadow-lg border-b border-slate-200/50 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
       <div className="px-2 sm:px-4 md:px-6 py-3 md:py-5 w-full max-w-full">
         <div className="flex justify-between items-center w-full max-w-full">
           <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-1 min-w-0 max-w-[70%]">

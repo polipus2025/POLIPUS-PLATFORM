@@ -96,7 +96,7 @@ export default function FrontPage() {
           <div className="flex justify-center py-6">
             <img 
               src={poliposLogo} 
-              alt="Polipos - Brightening the Future" 
+              alt="Polipos® - Brightening the Future" 
               className="h-64 w-auto object-contain"
             />
           </div>

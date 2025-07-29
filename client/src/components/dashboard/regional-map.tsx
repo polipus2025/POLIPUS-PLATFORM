@@ -50,7 +50,7 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
     return () => clearInterval(interval);
   }, [isAutoScrolling, filteredCountyData.length]);
 
-  // Update display data when data changes or index changes
+  // Update display data when data changes or index changes - with stable reference check
   useEffect(() => {
     if (filteredCountyData.length === 0) {
       setDisplayData([]);
@@ -66,17 +66,8 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
     const startIndex = currentIndex * 4;
     const endIndex = startIndex + 4;
     const newDisplayData = filteredCountyData.slice(startIndex, endIndex);
-    
-    // Only update if display data actually changed to prevent infinite loops
-    setDisplayData(prev => {
-      if (prev.length !== newDisplayData.length) return newDisplayData;
-      const hasChanged = !prev.every((item, idx) => 
-        item.county === newDisplayData[idx]?.county && 
-        item.complianceRate === newDisplayData[idx]?.complianceRate
-      );
-      return hasChanged ? newDisplayData : prev;
-    });
-  }, [currentIndex, filteredCountyData]);
+    setDisplayData(newDisplayData);
+  }, [currentIndex, filteredCountyData.length, selectedCounty]);
 
   if (isLoading) {
     return (

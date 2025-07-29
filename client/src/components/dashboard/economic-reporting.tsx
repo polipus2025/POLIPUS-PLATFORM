@@ -262,10 +262,10 @@ export default function EconomicReporting() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         <div className="isms-card">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1 min-w-0 pr-4">
               <p className="text-sm font-medium text-slate-600 mb-2">GDP Contribution</p>
-              <p className="isms-metric-number text-3xl">
-                {formatCurrency(economicOverview.totalGdpContribution)}
+              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+                ${(economicOverview.totalGdpContribution / 1000000).toFixed(1)}M
               </p>
               <div className="flex items-center mt-3">
                 <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center mr-2">
@@ -282,10 +282,10 @@ export default function EconomicReporting() {
 
         <div className="isms-card">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1 min-w-0 pr-4">
               <p className="text-sm font-medium text-slate-600 mb-2">Employment</p>
-              <p className="isms-metric-number text-3xl">
-                {economicOverview.totalEmployment.toLocaleString()}
+              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+                {(economicOverview.totalEmployment / 1000).toFixed(1)}K
               </p>
               <p className="text-sm text-slate-500 mt-3">Total jobs</p>
             </div>
@@ -297,10 +297,10 @@ export default function EconomicReporting() {
 
         <div className="isms-card">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1 min-w-0 pr-4">
               <p className="text-sm font-medium text-slate-600 mb-2">Active Businesses</p>
-              <p className="isms-metric-number text-3xl">
-                {economicOverview.activeBusinesses.toLocaleString()}
+              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+                {(economicOverview.activeBusinesses / 1000).toFixed(1)}K
               </p>
               <p className="text-sm text-slate-500 mt-3">Registered</p>
             </div>
@@ -312,10 +312,10 @@ export default function EconomicReporting() {
 
         <div className="isms-card">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1 min-w-0 pr-4">
               <p className="text-sm font-medium text-slate-600 mb-2">Tax Revenue</p>
-              <p className="isms-metric-number text-3xl">
-                {formatCurrency(economicOverview.totalTaxRevenue)}
+              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+                ${(economicOverview.totalTaxRevenue / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-slate-500 mt-3">Monthly</p>
             </div>
@@ -327,10 +327,10 @@ export default function EconomicReporting() {
 
         <div className="isms-card">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1 min-w-0 pr-4">
               <p className="text-sm font-medium text-slate-600 mb-2">Export Value</p>
-              <p className="isms-metric-number text-3xl">
-                {formatCurrency(economicOverview.exportValue)}
+              <p className="isms-metric-number text-2xl font-bold text-slate-900 truncate">
+                ${(economicOverview.exportValue / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-slate-500 mt-3">Monthly</p>
             </div>
@@ -342,9 +342,9 @@ export default function EconomicReporting() {
 
         <div className="isms-card">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1 min-w-0 pr-4">
               <p className="text-sm font-medium text-slate-600 mb-2">Top Commodities</p>
-              <p className="text-lg font-bold text-slate-900 leading-tight">
+              <p className="text-lg font-bold text-slate-900 leading-tight truncate">
                 {economicOverview.topCommodities.slice(0, 3).join(", ")}
               </p>
               <p className="text-sm text-slate-500 mt-3">Leading exports</p>

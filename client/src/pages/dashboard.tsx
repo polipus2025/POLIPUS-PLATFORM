@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Shield, TreePine, FileCheck, AlertTriangle, Building2, CheckCircle, Clock, XCircle, Plus, Upload, MessageSquare, Bell, Eye, X, Activity, TrendingUp } from "lucide-react";
+import { Download, Shield, TreePine, FileCheck, AlertTriangle, Building2, CheckCircle, Clock, XCircle, Plus, Upload, MessageSquare, Bell, Eye, X, Activity, TrendingUp, Package, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -657,253 +657,305 @@ export default function Dashboard() {
                 </DialogHeader>
                 
                 <div className="space-y-6">
-                  {/* EUDR Overview Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center">
-                          <TreePine className="h-8 w-8 text-green-600" />
-                          <div className="ml-3">
-                            <div className="text-2xl font-bold text-green-600">{eudrMetrics.deforestationFree}</div>
-                            <p className="text-sm text-gray-500">Deforestation-Free</p>
+                  {/* EUDR Overview Cards - ISMS Style */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="isms-card">
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                            <TreePine className="h-6 w-6 text-white" />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <div>
+                          <p className="text-sm font-medium text-slate-600 mb-2">Deforestation-Free</p>
+                          <p className="text-3xl font-bold text-slate-900">{eudrMetrics.deforestationFree}</p>
+                          <p className="text-sm text-slate-500 mt-2">Verified commodities</p>
+                        </div>
+                      </div>
+                    </div>
                     
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center">
-                          <FileCheck className="h-8 w-8 text-blue-600" />
-                          <div className="ml-3">
-                            <div className="text-2xl font-bold text-blue-600">{eudrMetrics.riskAssessments}</div>
-                            <p className="text-sm text-gray-500">Risk Assessments</p>
+                    <div className="isms-card">
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                            <FileCheck className="h-6 w-6 text-white" />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <div>
+                          <p className="text-sm font-medium text-slate-600 mb-2">Risk Assessments</p>
+                          <p className="text-3xl font-bold text-slate-900">{eudrMetrics.riskAssessments}</p>
+                          <p className="text-sm text-slate-500 mt-2">Completed evaluations</p>
+                        </div>
+                      </div>
+                    </div>
                     
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center">
-                          <AlertTriangle className="h-8 w-8 text-orange-600" />
-                          <div className="ml-3">
-                            <div className="text-2xl font-bold text-orange-600">{eudrMetrics.pendingVerifications}</div>
-                            <p className="text-sm text-gray-500">Pending Verifications</p>
+                    <div className="isms-card">
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
+                            <AlertTriangle className="h-6 w-6 text-white" />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <div>
+                          <p className="text-sm font-medium text-slate-600 mb-2">Pending Verifications</p>
+                          <p className="text-3xl font-bold text-slate-900">{eudrMetrics.pendingVerifications}</p>
+                          <p className="text-sm text-slate-500 mt-2">Awaiting review</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* EUDR Compliance Status */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>EUDR Compliance Status</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">Overall Compliance Rate</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-32 bg-gray-200 rounded-full h-2">
+                  {/* EUDR Compliance Status - ISMS Style */}
+                  <div className="isms-card">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                        <Shield className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-slate-900">EUDR Compliance Status</h3>
+                        <p className="text-slate-600">Real-time deforestation regulation monitoring</p>
+                      </div>
+                    </div>
+                    <div className="space-y-6">
+                      <div className="bg-slate-50 rounded-xl p-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-lg font-semibold text-slate-900">Overall Compliance Rate</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-40 bg-slate-200 rounded-full h-3">
                               <div 
-                                className="bg-green-600 h-2 rounded-full" 
+                                className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500" 
                                 style={{ width: `${eudrMetrics.complianceRate}%` }}
                               ></div>
                             </div>
-                            <span className="font-bold text-green-600">{eudrMetrics.complianceRate}%</span>
+                            <span className="text-2xl font-bold text-green-600">{eudrMetrics.complianceRate}%</span>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <h4 className="font-semibold mb-2">Commodity Breakdown</h4>
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
-                              <div className="flex justify-between">
-                                <span>Cocoa</span>
-                                <Badge variant="default">92% Compliant</Badge>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="bg-white rounded-xl p-6">
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center">
+                                <Package className="h-4 w-4 text-white" />
                               </div>
-                              <div className="flex justify-between">
-                                <span>Coffee</span>
-                                <Badge variant="default">89% Compliant</Badge>
+                              <h4 className="text-lg font-bold text-slate-900">Commodity Breakdown</h4>
+                            </div>
+                            <div className="space-y-3 max-h-64 overflow-y-auto">
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Cocoa</span>
+                                <Badge className="bg-green-100 text-green-800">92% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Palm Oil</span>
-                                <Badge variant="secondary">78% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Coffee</span>
+                                <Badge className="bg-green-100 text-green-800">89% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Rubber</span>
-                                <Badge variant="default">95% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Palm Oil</span>
+                                <Badge className="bg-yellow-100 text-yellow-800">78% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Cashew</span>
-                                <Badge variant="default">87% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Rubber</span>
+                                <Badge className="bg-green-100 text-green-800">95% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Rice</span>
-                                <Badge variant="secondary">74% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Cashew</span>
+                                <Badge className="bg-green-100 text-green-800">87% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Cassava</span>
-                                <Badge variant="default">91% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Rice</span>
+                                <Badge className="bg-yellow-100 text-yellow-800">74% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Kola Nut</span>
-                                <Badge variant="default">88% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Cassava</span>
+                                <Badge className="bg-green-100 text-green-800">91% Compliant</Badge>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Kola Nut</span>
+                                <Badge className="bg-green-100 text-green-800">88% Compliant</Badge>
                               </div>
                             </div>
                           </div>
                           
-                          <div>
-                            <h4 className="font-semibold mb-2">Regional Compliance (Top Counties)</h4>
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
-                              <div className="flex justify-between">
-                                <span>Montserrado County</span>
-                                <Badge variant="default">96% Compliant</Badge>
+                          <div className="bg-white rounded-xl p-6">
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="w-8 h-8 rounded-lg isms-icon-bg-blue flex items-center justify-center">
+                                <MapPin className="h-4 w-4 text-white" />
                               </div>
-                              <div className="flex justify-between">
-                                <span>Lofa County</span>
-                                <Badge variant="default">94% Compliant</Badge>
+                              <h4 className="text-lg font-bold text-slate-900">Regional Compliance (Top Counties)</h4>
+                            </div>
+                            <div className="space-y-3 max-h-64 overflow-y-auto">
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Montserrado County</span>
+                                <Badge className="bg-green-100 text-green-800">96% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Bong County</span>
-                                <Badge variant="default">91% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Lofa County</span>
+                                <Badge className="bg-green-100 text-green-800">94% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Margibi County</span>
-                                <Badge variant="default">89% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Bong County</span>
+                                <Badge className="bg-green-100 text-green-800">91% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Grand Gedeh County</span>
-                                <Badge variant="default">88% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Margibi County</span>
+                                <Badge className="bg-green-100 text-green-800">89% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Grand Bassa County</span>
-                                <Badge variant="default">86% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Grand Gedeh County</span>
+                                <Badge className="bg-green-100 text-green-800">88% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Nimba County</span>
-                                <Badge variant="secondary">82% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Grand Bassa County</span>
+                                <Badge className="bg-green-100 text-green-800">86% Compliant</Badge>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Maryland County</span>
-                                <Badge variant="secondary">79% Compliant</Badge>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Nimba County</span>
+                                <Badge className="bg-yellow-100 text-yellow-800">82% Compliant</Badge>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <span className="font-medium text-slate-700">Maryland County</span>
+                                <Badge className="bg-yellow-100 text-yellow-800">79% Compliant</Badge>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
-                  {/* Due Diligence Requirements */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Due Diligence Requirements</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <h4 className="font-semibold mb-3">Required Documentation</h4>
-                          <ul className="space-y-2 text-sm">
-                            <li className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              Geolocation coordinates of production plots
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              Deforestation-free certificates
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              Supply chain traceability records
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                              Risk assessment documentation
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                              Legal compliance verification
-                            </li>
-                          </ul>
+                  {/* Due Diligence Requirements - ISMS Style */}
+                  <div className="isms-card">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                        <FileCheck className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-slate-900">Due Diligence Requirements</h3>
+                        <p className="text-slate-600">EUDR compliance documentation and actions</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="bg-slate-50 rounded-xl p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-8 h-8 rounded-lg isms-icon-bg-green flex items-center justify-center">
+                            <FileCheck className="h-4 w-4 text-white" />
+                          </div>
+                          <h4 className="text-lg font-bold text-slate-900">Required Documentation</h4>
                         </div>
-                        
-                        <div>
-                          <h4 className="font-semibold mb-3">Compliance Actions</h4>
-                          <div className="space-y-2">
-                            <Button 
-                              variant="outline" 
-                              className="w-full justify-start"
-                              onClick={handleGenerateEudrReport}
-                              disabled={isEudrReportGenerating}
-                            >
-                              <FileCheck className="h-4 w-4 mr-2" />
-                              {isEudrReportGenerating ? "Generating..." : "Generate EUDR Compliance Report"}
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              className="w-full justify-start"
-                              onClick={handleExportCertificates}
-                              disabled={isExportingCertificates}
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              {isExportingCertificates ? "Exporting..." : "Export Deforestation Certificates"}
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              className="w-full justify-start"
-                              onClick={handleViewSatelliteData}
-                            >
-                              <TreePine className="h-4 w-4 mr-2" />
-                              View Satellite Monitoring Data
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              className="w-full justify-start"
-                              onClick={handleScheduleRiskAssessment}
-                            >
-                              <Shield className="h-4 w-4 mr-2" />
-                              Schedule Risk Assessment
-                            </Button>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="text-slate-700">Geolocation coordinates of production plots</span>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="text-slate-700">Deforestation-free certificates</span>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="text-slate-700">Supply chain traceability records</span>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <Clock className="h-5 w-5 text-yellow-600" />
+                            <span className="text-slate-700">Risk assessment documentation</span>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <Clock className="h-5 w-5 text-yellow-600" />
+                            <span className="text-slate-700">Legal compliance verification</span>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      <div className="bg-slate-50 rounded-xl p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-8 h-8 rounded-lg isms-icon-bg-blue flex items-center justify-center">
+                            <Activity className="h-4 w-4 text-white" />
+                          </div>
+                          <h4 className="text-lg font-bold text-slate-900">Compliance Actions</h4>
+                        </div>
+                        <div className="space-y-3">
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-start bg-white border-slate-200 hover:bg-slate-50"
+                            onClick={handleGenerateEudrReport}
+                            disabled={isEudrReportGenerating}
+                          >
+                            <FileCheck className="h-4 w-4 mr-2" />
+                            {isEudrReportGenerating ? "Generating..." : "Generate EUDR Compliance Report"}
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-start bg-white border-slate-200 hover:bg-slate-50"
+                            onClick={handleExportCertificates}
+                            disabled={isExportingCertificates}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            {isExportingCertificates ? "Exporting..." : "Export Deforestation Certificates"}
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-start bg-white border-slate-200 hover:bg-slate-50"
+                            onClick={handleViewSatelliteData}
+                          >
+                            <TreePine className="h-4 w-4 mr-2" />
+                            View Satellite Monitoring Data
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-start bg-white border-slate-200 hover:bg-slate-50"
+                            onClick={handleScheduleRiskAssessment}
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Schedule Risk Assessment
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                  {/* Recent EUDR Alerts */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Recent EUDR Alerts</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
-                          <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                  {/* Recent EUDR Alerts - ISMS Style */}
+                  <div className="isms-card">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-red flex items-center justify-center">
+                        <AlertTriangle className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-slate-900">Recent EUDR Alerts</h3>
+                        <p className="text-slate-600">Latest compliance alerts and monitoring updates</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="h-6 w-6 text-red-600 mt-0.5" />
                           <div>
-                            <p className="font-medium text-red-800">High-Risk Area Detected</p>
-                            <p className="text-sm text-red-600">Satellite data shows potential deforestation activity in Nimba County plot NMB-2024-156</p>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg">
-                          <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                          <div>
-                            <p className="font-medium text-yellow-800">Documentation Missing</p>
-                            <p className="text-sm text-yellow-600">15 cocoa batches require updated geolocation certificates for EUDR compliance</p>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
-                          <FileCheck className="h-5 w-5 text-green-600 mt-0.5" />
-                          <div>
-                            <p className="font-medium text-green-800">Compliance Verified</p>
-                            <p className="text-sm text-green-600">Lofa County palm oil operations successfully passed EUDR due diligence audit</p>
+                            <p className="text-lg font-semibold text-red-800">High-Risk Area Detected</p>
+                            <p className="text-slate-700 mt-1">Satellite data shows potential deforestation activity in Nimba County plot NMB-2024-156</p>
+                            <p className="text-sm text-red-600 mt-2">⚠️ Immediate action required</p>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="h-6 w-6 text-yellow-600 mt-0.5" />
+                          <div>
+                            <p className="text-lg font-semibold text-yellow-800">Documentation Missing</p>
+                            <p className="text-slate-700 mt-1">15 cocoa batches require updated geolocation certificates for EUDR compliance</p>
+                            <p className="text-sm text-yellow-600 mt-2">📋 Documentation update needed</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <CheckCircle className="h-6 w-6 text-green-600 mt-0.5" />
+                          <div>
+                            <p className="text-lg font-semibold text-green-800">Compliance Verified</p>
+                            <p className="text-slate-700 mt-1">Lofa County palm oil operations successfully passed EUDR due diligence audit</p>
+                            <p className="text-sm text-green-600 mt-2">✅ Verified compliant</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>

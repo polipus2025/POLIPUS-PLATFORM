@@ -215,7 +215,12 @@ function Router() {
           </Route>
           
           <Route path="/director-dashboard" component={DirectorDashboard} />
-          <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
+          <Route path="/monitoring-dashboard">
+            <ProtectedRoute 
+              component={MonitoringDashboard} 
+              allowedUserTypes={['monitoring']} 
+            />
+          </Route>
 
           <Route path="/messaging">
             <ProtectedRoute 

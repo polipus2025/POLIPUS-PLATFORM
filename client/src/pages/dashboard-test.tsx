@@ -1,34 +1,32 @@
 import { Helmet } from "react-helmet";
+import Header from "@/components/layout/header";
+import Sidebar from "@/components/layout/sidebar";
 
 export default function DashboardTest() {
   return (
-    <div className="min-h-screen bg-red-500 text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Helmet>
         <title>AgriTrace360™ LACRA Dashboard | Test</title>
         <meta name="description" content="Dashboard test page" />
       </Helmet>
 
-      <div className="text-center">
-        <h1 className="text-8xl font-bold mb-8">🔴 CRITICAL TEST 🔴</h1>
-        <p className="text-4xl mb-4">CAN YOU SEE THIS RED PAGE?</p>
-        <p className="text-2xl mb-8">This bypasses all components to test basic rendering</p>
+      <Header />
+      <div className="flex">
+        <Sidebar />
         
-        <div className="bg-yellow-400 text-black p-8 rounded-lg mb-8">
-          <h2 className="text-3xl font-bold">YELLOW BOX TEST</h2>
-          <p className="text-xl">If you can see this, React is working</p>
-        </div>
-        
-        <div className="bg-green-500 text-white p-8 rounded-lg mb-8">
-          <h2 className="text-3xl font-bold">GREEN BOX TEST</h2>
-          <p className="text-xl">If you can see this, CSS is working</p>
-        </div>
-        
-        <div className="bg-blue-500 text-white p-8 rounded-lg">
-          <h2 className="text-3xl font-bold">BLUE BOX TEST</h2>
-          <p className="text-xl">If you can see this, the page is fully loading</p>
-        </div>
-        
-        <p className="text-lg mt-8">Your sophisticated dashboard is preserved and ready to restore!</p>
+        <main className="flex-1 ml-64 p-6 bg-red-500 text-white min-h-screen">
+          <div className="text-center pt-20">
+            <h1 className="text-6xl font-bold mb-4">🔴 LAYOUT TEST SUCCESS! 🔴</h1>
+            <p className="text-2xl mb-2">Main content area is now rendering correctly!</p>
+            <p className="text-lg">Header and sidebar components are working!</p>
+            <div className="mt-8 p-4 bg-white/20 rounded-lg">
+              <p className="text-sm">✅ Header working</p>
+              <p className="text-sm">✅ Sidebar working</p>
+              <p className="text-sm">✅ Main content area working</p>
+              <p className="text-sm">🔧 Ready to restore full dashboard functionality</p>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );

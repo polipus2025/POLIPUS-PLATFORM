@@ -42,10 +42,81 @@ function SimpleApp() {
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex">
+        <div className="flex" style={{ minHeight: 'calc(100vh - 80px)' }}>
           <Sidebar />
-          <main className="flex-1 min-w-0 overflow-hidden">
-            <DashboardTest />
+          <main className="flex-1 p-6 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+            <div className="max-w-7xl mx-auto">
+              {/* Test immediato - senza componente esterno */}
+              <div className="mb-8 p-6 bg-green-100 border-2 border-green-500 rounded-lg text-center">
+                <h1 className="text-3xl font-bold text-green-800 mb-2">
+                  🎉 DASHBOARD CONTENT LOADED! 🎉
+                </h1>
+                <p className="text-green-700 text-lg">
+                  Se vedi questo banner verde, il contenuto principale funziona!
+                </p>
+              </div>
+
+              {/* Metrics Cards Simple */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-lg shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Commodities</p>
+                      <p className="text-3xl font-bold text-blue-600">1,247</p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      📦
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Compliance</p>
+                      <p className="text-3xl font-bold text-green-600">94.7%</p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      ✅
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Alerts</p>
+                      <p className="text-3xl font-bold text-red-600">8</p>
+                    </div>
+                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                      ⚠️
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Exports</p>
+                      <p className="text-3xl font-bold text-purple-600">2.4M</p>
+                    </div>
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                      📈
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Final Success Message */}
+              <div className="p-6 bg-blue-100 border-2 border-blue-500 rounded-lg text-center">
+                <h2 className="text-2xl font-bold text-blue-800 mb-2">
+                  ✅ DASHBOARD COMPLETA CARICATA!
+                </h2>
+                <p className="text-blue-700">
+                  Header + Sidebar + Contenuto principale = Tutto funziona!
+                </p>
+              </div>
+            </div>
           </main>
         </div>
       </div>

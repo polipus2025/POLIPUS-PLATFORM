@@ -171,7 +171,7 @@ export default function Header() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/50">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/50">
                 <img 
                   src={agriTraceLogo} 
                   alt="AgriTrace360" 

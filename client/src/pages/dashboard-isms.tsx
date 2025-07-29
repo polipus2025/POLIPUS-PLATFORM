@@ -111,14 +111,15 @@ export default function Dashboard() {
       {/* Simple Test Layout */}
       <div className="min-h-screen">
         <Header />
-        <div className="flex">
+        <div className="flex min-h-screen">
           <Sidebar />
           
-          {/* Fixed Main Content */}
-          <main className="flex-1 ml-64 p-6 pt-6" style={{minHeight: 'calc(100vh - 73px)'}}>
-            <div className="bg-red-500 text-white p-8 rounded-lg mb-8">
-              <h1 className="text-6xl font-bold text-center">LAYOUT TEST SUCCESS!</h1>
-              <p className="text-2xl text-center mt-4">Header, sidebar, and main content working together!</p>
+          {/* Absolute positioned main content to bypass flex issues */}
+          <main className="fixed left-64 right-0 top-[73px] bottom-0 p-6 bg-red-500 text-white overflow-auto z-10">
+            <div className="text-center p-8">
+              <h1 className="text-8xl font-bold mb-4">🔴 CRITICAL SUCCESS! 🔴</h1>
+              <p className="text-4xl mb-4">MAIN CONTENT IS NOW VISIBLE!</p>
+              <p className="text-2xl">Layout fix applied with absolute positioning!</p>
             </div>
             
             <div className="max-w-7xl mx-auto space-y-8 mt-4">

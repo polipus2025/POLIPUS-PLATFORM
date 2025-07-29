@@ -513,23 +513,109 @@ export default function Dashboard() {
 
         {/* Main Dashboard Content */}
         <div className="space-y-8">
-          {/* Metrics Cards */}
-          <MetricsCards />
-          
-          {/* Compliance Chart */}
-          <ComplianceChart />
-          
-          {/* Regional Map */}
-          <RegionalMap />
-          
+          {/* Test Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Commodities</p>
+                    <p className="text-3xl font-bold text-blue-600">1,247</p>
+                  </div>
+                  <Package className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Compliance Rate</p>
+                    <p className="text-3xl font-bold text-green-600">94.7%</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Alerts</p>
+                    <p className="text-3xl font-bold text-red-600">8</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Export Volume</p>
+                    <p className="text-3xl font-bold text-purple-600">2.4M</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Compliance Overview */}
+          <Card className="bg-white shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-blue-600" />
+                Compliance Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600 mb-2">127</div>
+                  <div className="text-sm text-gray-600">Farms Compliant</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-yellow-600 mb-2">23</div>
+                  <div className="text-sm text-gray-600">Pending Review</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-red-600 mb-2">5</div>
+                  <div className="text-sm text-gray-600">Non-Compliant</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Actions */}
-          <QuickActions />
-          
-          {/* System Alerts */}
-          <SystemAlerts />
-          
-          {/* Inspections Table */}
-          <InspectionsTable />
+          <Card className="bg-white shadow-lg">
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Button className="h-12 bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Commodity
+                </Button>
+                <Button className="h-12 bg-green-600 hover:bg-green-700">
+                  <FileCheck className="h-4 w-4 mr-2" />
+                  New Inspection
+                </Button>
+                <Button className="h-12 bg-purple-600 hover:bg-purple-700">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Generate Certificate
+                </Button>
+                <Button className="h-12 bg-orange-600 hover:bg-orange-700">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Report
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

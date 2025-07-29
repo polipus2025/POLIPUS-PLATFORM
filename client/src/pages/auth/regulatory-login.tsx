@@ -90,12 +90,14 @@ export default function RegulatoryLogin() {
       <div className="w-full max-w-md">
         <div className="isms-card">
           <div className="text-center pb-6">
-            <div className="flex justify-center items-center gap-4 mb-6">
+            <div className="flex justify-center mb-6">
               <img 
                 src={lacraLogo} 
                 alt="LACRA Official Logo" 
-                className="h-16 w-16 object-contain"
+                className="h-24 w-24 object-contain"
               />
+            </div>
+            <div className="flex justify-center mb-6">
               <div className="w-16 h-16 rounded-2xl isms-icon-bg-blue flex items-center justify-center">
                 <Shield className="h-8 w-8 text-white" />
               </div>

@@ -275,7 +275,7 @@ export default function EconomicReporting() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-600 mb-2">GDP Contribution</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-3xl font-bold text-slate-900 text-center">
                 ${(economicOverview.totalGdpContribution / 1000000).toFixed(1)}M
               </p>
             </div>
@@ -291,7 +291,7 @@ export default function EconomicReporting() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Employment</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-3xl font-bold text-slate-900 text-center">
                 {(economicOverview.totalEmployment / 1000).toFixed(1)}K
               </p>
               <p className="text-sm text-slate-500 mt-2">Total jobs</p>
@@ -308,7 +308,7 @@ export default function EconomicReporting() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Active Businesses</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-3xl font-bold text-slate-900 text-center">
                 {(economicOverview.activeBusinesses / 1000).toFixed(1)}K
               </p>
               <p className="text-sm text-slate-500 mt-2">Registered</p>
@@ -325,7 +325,7 @@ export default function EconomicReporting() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Tax Revenue</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-3xl font-bold text-slate-900 text-center">
                 ${(economicOverview.totalTaxRevenue / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-slate-500 mt-2">Monthly</p>
@@ -342,7 +342,7 @@ export default function EconomicReporting() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Export Value</p>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-3xl font-bold text-slate-900 text-center">
                 ${(economicOverview.exportValue / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-slate-500 mt-2">Monthly</p>
@@ -359,7 +359,7 @@ export default function EconomicReporting() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-600 mb-2">Top Commodities</p>
-              <p className="text-xl font-bold text-slate-900 leading-tight">
+              <p className="text-xl font-bold text-slate-900 leading-tight text-center">
                 {economicOverview.topCommodities.slice(0, 2).join(", ")}
               </p>
               <p className="text-sm text-slate-500 mt-2">Leading exports</p>

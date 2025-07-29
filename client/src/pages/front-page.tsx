@@ -102,15 +102,15 @@ export default function FrontPage() {
 
         {/* Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-12">
-          <div className="flex justify-center py-8">
+          <div className="flex justify-center py-12">
             <img 
               src={poliposLogo} 
               alt="Polipos - Brightening the Future" 
-              className="h-40 w-auto object-contain"
+              className="h-64 w-auto object-contain"
             />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Brightening the Future</h2>
-          <p className="text-slate-600">Innovation through technology excellence</p>
+          <h2 className="text-3xl font-bold text-slate-900 mb-3">Brightening the Future</h2>
+          <p className="text-slate-600 text-lg">Innovation through technology excellence</p>
         </div>
 
         {/* Platform Statistics - ISMS Style */}

@@ -31,14 +31,14 @@ export default function FarmerDashboard() {
   const { data: alerts } = useQuery({ queryKey: ["/api/alerts", "unreadOnly=true"] });
 
   // Calculate farmer statistics
-  const totalPlots = farmPlots?.length || 0;
-  const activeCropPlans = cropPlans?.filter((plan: any) => plan.status === 'active')?.length || 0;
-  const totalHarvested = farmPlots?.reduce((sum: number, plot: any) => {
+  const totalPlots = Array.isArray(farmPlots) ? farmPlots.length : 0;
+  const activeCropPlans = Array.isArray(cropPlans) ? cropPlans.filter((plan: any) => plan.status === 'active').length : 0;
+  const totalHarvested = Array.isArray(farmPlots) ? farmPlots.reduce((sum: number, plot: any) => {
     return sum + (parseFloat(plot.harvestedQuantity?.replace(/[^\d.]/g, '') || '0'));
-  }, 0) || 0;
-  const pendingInspections = trackingRecords?.filter((record: any) => 
+  }, 0) : 0;
+  const pendingInspections = Array.isArray(trackingRecords) ? trackingRecords.filter((record: any) => 
     record.status === 'pending_inspection'
-  )?.length || 0;
+  ).length : 0;
 
   return (
     <div className="space-y-6">
@@ -211,7 +211,7 @@ export default function FarmerDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {farmPlots?.slice(0, 6).map((plot: any) => (
+            {Array.isArray(farmPlots) && farmPlots.length > 0 ? farmPlots.slice(0, 6).map((plot: any) => (
               <div key={plot.id} className="border rounded-lg p-4 bg-gradient-to-br from-green-50 to-emerald-50">
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold text-green-900">{plot.plotName}</h4>
@@ -236,7 +236,7 @@ export default function FarmerDashboard() {
                   </Link>
                 </div>
               </div>
-            )) || (
+            )) : (
               <div className="col-span-full text-center py-8 text-gray-500">
                 <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>No farm plots registered yet</p>
@@ -253,7 +253,7 @@ export default function FarmerDashboard() {
       </Card>
 
       {/* System Alerts */}
-      {alerts && alerts.length > 0 && (
+      {Array.isArray(alerts) && alerts.length > 0 && (
         <Card className="border-yellow-200 bg-yellow-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-yellow-800">

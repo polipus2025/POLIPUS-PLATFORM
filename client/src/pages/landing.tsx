@@ -223,177 +223,177 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Regulatory Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col">
-              <div className="text-center pb-4">
-                <div className="w-16 h-16 rounded-2xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <Shield className="h-8 w-8 text-white" />
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Shield className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
                   Regulatory Portal
                 </h3>
-                <p className="text-slate-600 text-sm">
-                  For LACRA administrators and regulatory staff
+                <p className="text-slate-600 text-xs leading-tight">
+                  LACRA administrators
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6 flex-1">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  Compliance monitoring & oversight
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Compliance monitoring</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  System analytics & reporting
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">System analytics</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                  Government agency integration
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Government integration</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-slate-500"></div>
-                  User management & permissions
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-slate-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">User management</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full group-hover:scale-105 transition-transform"
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
                 <a href="/regulatory-login">
                   Access Portal
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
               </Button>
             </div>
 
             {/* Farmer Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col">
-              <div className="text-center pb-4">
-                <div className="w-16 h-16 rounded-2xl isms-icon-bg-green flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <Leaf className="h-8 w-8 text-white" />
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Leaf className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
                   Farmer Portal
                 </h3>
-                <p className="text-slate-600 text-sm">
-                  For registered farmers and agricultural producers
+                <p className="text-slate-600 text-xs leading-tight">
+                  Agricultural producers
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6 flex-1">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  Farm plot mapping & management
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Farm plot mapping</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  Batch code generation & tracking
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Batch code tracking</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  Crop planning & harvest records
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Crop planning</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-600"></div>
-                  Compliance documentation
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-600 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Compliance docs</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full group-hover:scale-105 transition-transform"
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
                 <a href="/farmer-login">
                   Access Portal
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
               </Button>
             </div>
 
             {/* Field Agent Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col">
-              <div className="text-center pb-4">
-                <div className="w-16 h-16 rounded-2xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <Users className="h-8 w-8 text-white" />
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Users className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
                   Field Agent Portal
                 </h3>
-                <p className="text-slate-600 text-sm">
-                  For field agents and extension officers
+                <p className="text-slate-600 text-xs leading-tight">
+                  Extension officers
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6 flex-1">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                  Farmer onboarding & registration
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Farmer onboarding</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  GPS field mapping & inspections
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">GPS field mapping</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  Mobile data collection forms
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Mobile data collection</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  Field report submissions
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Field reports</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full group-hover:scale-105 transition-transform"
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
                 <a href="/field-agent-login">
                   Access Portal
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
               </Button>
             </div>
 
             {/* Exporter Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col">
-              <div className="text-center pb-4">
-                <div className="w-16 h-16 rounded-2xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <Package className="h-8 w-8 text-white" />
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Package className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
                   Exporter Portal
                 </h3>
-                <p className="text-slate-600 text-sm">
-                  For licensed agricultural commodity exporters
+                <p className="text-slate-600 text-xs leading-tight">
+                  Commodity exporters
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6 flex-1">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  Export order management
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Export order management</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                  LACRA compliance integration
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">LACRA compliance</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  Network partnerships
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Network partnerships</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                  Export analytics & reporting
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Export analytics</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full group-hover:scale-105 transition-transform"
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
                 <a href="/exporter-login">
                   Access Portal
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
               </Button>
             </div>

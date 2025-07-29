@@ -51,8 +51,8 @@ export default function MonitoringLogin() {
         localStorage.setItem("userRole", "monitoring_admin");
         localStorage.setItem("userId", data.user.id);
         localStorage.setItem("username", data.user.username);
-        // Redirect directly to monitoring dashboard
-        setLocation("/monitoring-dashboard");
+        // Redirect to root, router will handle monitoring users
+        setLocation("/");
       } else {
         setError(data.message || "Invalid monitoring credentials");
       }

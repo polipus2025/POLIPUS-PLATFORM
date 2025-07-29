@@ -151,7 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Authentication routes
-  app.post("/api/auth/regulatory-login", async (req, res) => {
+  app.post("/api/auth/login", async (req, res) => {
     try {
       const { username, password, role, department, userType } = req.body;
       

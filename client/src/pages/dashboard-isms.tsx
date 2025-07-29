@@ -22,13 +22,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
-  // Authentication check
+  // Authentication check - simplified
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
   if (!authToken) {
-    window.location.href = "/regulatory-login";
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <div className="text-center p-8 bg-white rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold text-slate-700 mb-4">Authentication Required</h2>
+          <p className="text-slate-600 mb-4">Please log in to access the dashboard.</p>
+          <a href="/regulatory-login" className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Go to Login
+          </a>
+        </div>
+      </div>
+    );
   }
 
   // State for all dashboard functionality

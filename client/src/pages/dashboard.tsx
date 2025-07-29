@@ -19,6 +19,72 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
+  // Check authentication first
+  const authToken = localStorage.getItem("authToken");
+  if (!authToken) {
+    window.location.href = "/regulatory-login";
+    return null;
+  }
+
+  // Simplified layout with working dashboard
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <Helmet>
+        <title>AgriTrace360™ LACRA Dashboard | Agricultural Compliance Management</title>
+        <meta name="description" content="Comprehensive agricultural commodity compliance dashboard for LACRA - Liberia Agriculture Commodity Regulatory Authority. Real-time monitoring, EUDR compliance, and satellite tracking." />
+      </Helmet>
+
+      {/* Simplified Header */}
+      <header className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-slate-200/50 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xl">A</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">AgriTrace360™</h1>
+              <p className="text-sm text-slate-600">LACRA - Liberia Agriculture Regulatory Authority</p>
+            </div>
+          </div>
+          
+          {/* Navigation Menu */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <a href="/" className="text-slate-700 hover:text-blue-600 font-medium">Dashboard</a>
+            <a href="/commodities" className="text-slate-700 hover:text-blue-600 font-medium">Commodities</a>
+            <a href="/inspections" className="text-slate-700 hover:text-blue-600 font-medium">Inspections</a>
+            <a href="/certifications" className="text-slate-700 hover:text-blue-600 font-medium">Certifications</a>
+            <a href="/gis-mapping" className="text-slate-700 hover:text-blue-600 font-medium">GIS Mapping</a>
+            <a href="/reports" className="text-slate-700 hover:text-blue-600 font-medium">Reports</a>
+          </nav>
+          
+          <div className="flex items-center space-x-4">
+            <div className="text-right">
+              <p className="text-sm font-medium text-slate-700">admin001</p>
+              <p className="text-xs text-slate-500">Regulatory Admin</p>
+            </div>
+            <button 
+              onClick={() => {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userType");
+                window.location.reload();
+              }}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Dashboard Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <DashboardContent />
+      </main>
+    </div>
+  );
+}
+
+function DashboardContent() {
   // Temporary minimal state for debugging
   const [isLoading, setIsLoading] = useState(true);
   

@@ -118,6 +118,10 @@ export default function Dashboard() {
           {/* ISMS Main Content */}
           <main className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
+              {/* Debug visibility indicator */}
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <strong>Debug:</strong> Content area is rendering - all your work is preserved!
+              </div>
         {/* ISMS Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-4 mb-6">

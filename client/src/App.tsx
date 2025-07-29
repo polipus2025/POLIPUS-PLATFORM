@@ -12,6 +12,7 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard-isms";
+import DashboardTest from "@/pages/dashboard-test";
 import EconomicReportingPage from "@/pages/economic-reporting";
 
 function App() {
@@ -36,7 +37,7 @@ function App() {
             {(() => {
               const authToken = localStorage.getItem("authToken");
               if (authToken) {
-                return <Dashboard />;
+                return <DashboardTest />;
               } else {
                 return <FrontPage />;
               }

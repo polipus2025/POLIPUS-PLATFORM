@@ -108,22 +108,16 @@ export default function Dashboard() {
         <div />
       </ModernBackground> */}
       
-      {/* Layout with Sidebar - Fixed Structure */}
-      <div className="flex min-h-screen">
-        <Sidebar />
-        
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header />
+      {/* Simple Test Layout */}
+      <div className="min-h-screen">
+        <Header />
+        <div className="flex">
+          <Sidebar />
           
-          {/* ISMS Main Content - Fixed Layout */}
-          <main className="flex-1 p-6 overflow-y-auto bg-red-100" style={{minHeight: '500px'}}>
-            {/* Debug Test - Ultra visible */}
-            <div className="bg-red-500 text-white p-8 rounded-lg text-center border-4 border-yellow-400" style={{minHeight: '200px'}}>
-              <h1 className="text-4xl font-bold mb-4">🔴 DEBUG: MAIN CONTENT AREA 🔴</h1>
-              <h2 className="text-2xl font-bold mb-2">YOUR DASHBOARD IS PRESERVED!</h2>
-              <p className="text-lg">All your ISMS styling and functionality is intact</p>
-              <p className="text-sm mt-2">Sidebar working ✓ Header working ✓ Content area testing...</p>
-            </div>
+          {/* Test Main Content */}
+          <main className="flex-1 p-6 bg-red-500 text-white" style={{minHeight: '80vh', width: 'calc(100% - 256px)'}}>
+            <h1 className="text-6xl font-bold text-center">LAYOUT TEST SUCCESS!</h1>
+            <p className="text-2xl text-center mt-4">Your dashboard is preserved and ready to restore!</p>
             
             <div className="max-w-7xl mx-auto space-y-8 mt-4">
               
@@ -465,9 +459,10 @@ export default function Dashboard() {
               <p className="text-sm text-slate-600">Cargo Value</p>
             </div>
           </div>
-                </div>
-              </div>
-            </main>
+        </div>
+      </div>
+      
+      </main>
         </div>
       </div>
 

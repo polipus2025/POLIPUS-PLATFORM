@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
-import ModernBackground from "@/components/ui/modern-background";
+// import ModernBackground from "@/components/ui/modern-background";
 // Temporarily commented to isolate rendering issue - keeping your exact dashboard
 // import MetricsCards from "@/components/dashboard/metrics-cards";
 // import ComplianceChart from "@/components/dashboard/compliance-chart";
@@ -104,9 +104,9 @@ export default function Dashboard() {
         <meta name="description" content="Comprehensive agricultural commodity compliance dashboard for LACRA - Liberia Agriculture Commodity Regulatory Authority. Real-time monitoring, EUDR compliance, and satellite tracking." />
       </Helmet>
 
-      <ModernBackground>
+      {/* <ModernBackground>
         <div />
-      </ModernBackground>
+      </ModernBackground> */}
       
       {/* Layout with Sidebar */}
       <div className="flex min-h-screen">

@@ -78,9 +78,9 @@ export default function MonitoringDashboard() {
 
     const tests = [
       { name: 'Authentication System', endpoint: '/api/auth/monitoring-login', method: 'POST', data: { username: 'monitor001', password: 'monitor123' } },
-      { name: 'Regulatory Portal', endpoint: '/api/auth/regulatory-login', method: 'POST', data: { username: 'admin001', password: 'admin123' } },
-      { name: 'Farmer Portal', endpoint: '/api/auth/farmer-login', method: 'POST', data: { username: 'FRM-2024-001', password: 'farmer123' } },
-      { name: 'Field Agent Portal', endpoint: '/api/auth/field-agent-login', method: 'POST', data: { username: 'AGT-2024-001', password: 'agent123' } },
+      { name: 'Regulatory Portal', endpoint: '/api/auth/regulatory-login', method: 'POST', data: { username: 'admin001', password: 'admin123', role: 'admin' } },
+      { name: 'Farmer Portal', endpoint: '/api/auth/farmer-login', method: 'POST', data: { farmerId: 'FRM-2024-001', password: 'farmer123' } },
+      { name: 'Field Agent Portal', endpoint: '/api/auth/field-agent-login', method: 'POST', data: { agentId: 'AGT-2024-001', password: 'agent123' } },
       { name: 'Exporter Portal', endpoint: '/api/auth/exporter-login', method: 'POST', data: { username: 'EXP-2024-001', password: 'exporter123' } },
       { name: 'Dashboard API', endpoint: '/api/dashboard/metrics', method: 'GET' },
       { name: 'Commodities Data', endpoint: '/api/commodities', method: 'GET' },

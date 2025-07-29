@@ -241,13 +241,7 @@ function App() {
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
-  // Debug logging for authentication state
-  console.log("App Authentication State:", {
-    pathname: window.location.pathname,
-    authToken: !!authToken,
-    userType,
-    tokenLength: authToken?.length
-  });
+
   
   // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");

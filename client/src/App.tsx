@@ -11,6 +11,8 @@ import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
+import MonitoringLogin from "@/pages/auth/monitoring-login";
+import MonitoringDashboard from "@/pages/monitoring-dashboard";
 import Dashboard from "@/pages/dashboard";
 
 import Commodities from "@/pages/commodities";
@@ -67,6 +69,7 @@ function Router() {
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
+      <Route path="/monitoring-login" component={MonitoringLogin} />
 
       
       {/* Protected Routes */}
@@ -77,6 +80,7 @@ function Router() {
             {userType === 'farmer' ? <FarmerDashboard /> : 
              userType === 'field_agent' ? <FieldAgentDashboard /> : 
              userType === 'exporter' ? <ExporterDashboard /> :
+             userType === 'monitoring' ? <MonitoringDashboard /> :
              <Dashboard />}
           </Route>
           <Route path="/">
@@ -212,6 +216,7 @@ function Router() {
           {/* Offline Sync - Available to all authenticated users */}
           <Route path="/offline-sync" component={OfflineSync} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
+          <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
 
           <Route path="/messaging">
             <ProtectedRoute 

@@ -105,7 +105,7 @@ export default function FrontPage() {
           <div className="flex items-center justify-center relative">
             <h2 className="text-3xl font-bold text-slate-900">General Environmental Intelligence Platform</h2>
             <div className="absolute right-0">
-              <Link href="/landing">
+              <Link href="/monitoring-login">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   Login

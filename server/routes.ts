@@ -151,6 +151,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Authentication routes
+  // Monitoring login endpoint
+  app.post('/api/auth/monitoring-login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Monitoring admin credentials
+      if (username === 'monitor001' && password === 'monitor123') {
+        const token = jwt.sign(
+          { 
+            userId: 999,
+            username: username,
+            role: 'monitoring_admin',
+            userType: 'monitoring'
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        res.json({
+          success: true,
+          token,
+          user: {
+            id: 999,
+            username: username,
+            role: 'monitoring_admin',
+            userType: 'monitoring'
+          }
+        });
+      } else {
+        res.status(401).json({
+          success: false,
+          message: 'Invalid monitoring credentials'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Server error during monitoring authentication'
+      });
+    }
+  });
+
   app.post("/api/auth/regulatory-login", async (req, res) => {
     try {
       const { username, password, role, department, userType } = req.body;
@@ -4012,6 +4054,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error generating sample data:', error);
       res.status(500).json({ message: 'Failed to generate sample data' });
     }
+  });
+
+  // Monitoring API endpoints
+  app.get('/api/monitoring/overview', (req, res) => {
+    const overview = {
+      activeUsers: 12 + Math.floor(Math.random() * 5),
+      apiRequests: 1847 + Math.floor(Math.random() * 100),
+      systemHealth: 98.7,
+      responseTime: 68 + Math.floor(Math.random() * 20),
+      timestamp: new Date().toISOString()
+    };
+    res.json(overview);
+  });
+
+  app.get('/api/monitoring/user-activity', (req, res) => {
+    const userActivity = {
+      portals: {
+        regulatory: { active: 5, sessions: 23 },
+        farmer: { active: 3, sessions: 18 },
+        exporter: { active: 2, sessions: 12 },
+        field_agent: { active: 2, sessions: 15 }
+      },
+      recentLogins: [
+        { user: 'admin001', portal: 'Regulatory', action: 'Login', timestamp: '2 minutes ago' },
+        { user: 'FRM-2024-001', portal: 'Farmer', action: 'Active Session', timestamp: '5 minutes ago' },
+        { user: 'EXP-2024-001', portal: 'Exporter', action: 'Dashboard Access', timestamp: '8 minutes ago' }
+      ]
+    };
+    res.json(userActivity);
+  });
+
+  app.get('/api/monitoring/system-metrics', (req, res) => {
+    const systemMetrics = {
+      cpu: { usage: 23 + Math.floor(Math.random() * 10), status: 'Normal' },
+      memory: { usage: 45 + Math.floor(Math.random() * 15), status: 'Good' },
+      database: { load: 12 + Math.floor(Math.random() * 8), status: 'Low' },
+      uptime: '99.8%',
+      errors: Math.floor(Math.random() * 3)
+    };
+    res.json(systemMetrics);
+  });
+
+  app.get('/api/monitoring/audit-logs', (req, res) => {
+    const auditLogs = [
+      { type: 'success', message: 'Successful Login', details: 'admin001 from regulatory portal', timestamp: new Date(Date.now() - 2*60*1000).toLocaleTimeString() },
+      { type: 'info', message: 'API Access', details: 'Dashboard metrics requested', timestamp: new Date(Date.now() - 1*60*1000).toLocaleTimeString() },
+      { type: 'warning', message: 'Rate Limit Warning', details: 'High API request volume detected', timestamp: new Date(Date.now() - 5*60*1000).toLocaleTimeString() }
+    ];
+    res.json(auditLogs);
   });
 
   const httpServer = createServer(app);

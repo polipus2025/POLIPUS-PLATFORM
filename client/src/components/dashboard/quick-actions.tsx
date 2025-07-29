@@ -196,6 +196,19 @@ export default function QuickActions() {
           soilMoisture: 71,
           vegetationIndex: 0.63,
           carbonContent: 2.2
+        },
+        {
+          name: "Bomi County",
+          temperature: 27.4,
+          humidity: 83,
+          soilType: "Iron-rich Laterite",
+          soilPH: 5.9,
+          precipitation: 205,
+          elevation: 95,
+          cropSuitability: ["Rice", "Cassava", "Coffee", "Iron Ore Vegetation"],
+          soilMoisture: 79,
+          vegetationIndex: 0.67,
+          carbonContent: 2.9
         }
       ];
       

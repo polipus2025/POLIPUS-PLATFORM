@@ -94,11 +94,17 @@ export default function FrontPage() {
         {/* Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-12">
           <div className="flex justify-center py-6">
-            <img 
-              src={poliposLogo} 
-              alt="Polipos - Brightening the Future" 
-              className="h-64 w-auto object-contain"
-            />
+            <div className="relative inline-block">
+              <img 
+                src={poliposLogo} 
+                alt="Polipos - Brightening the Future" 
+                className="h-64 w-auto object-contain"
+              />
+              {/* Registered trademark symbol positioned over the "s" */}
+              <span className="absolute top-4 right-12 text-xl font-bold text-slate-700 bg-white/80 rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                ®
+              </span>
+            </div>
           </div>
           <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
         </div>

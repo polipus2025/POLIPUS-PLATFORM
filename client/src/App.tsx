@@ -254,16 +254,17 @@ function App() {
   // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");
   const isLandingPage = window.location.pathname === "/landing" && !authToken;
-  const isFrontPage = (window.location.pathname === "/" && !authToken) || 
+  const isFrontPage = (window.location.pathname === "/" && !authToken && userType !== 'monitoring') || 
                       window.location.pathname === "/front-page" || 
                       window.location.pathname === "/home";
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
+  const isMonitoringDashboard = authToken && userType === 'monitoring';
   
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage) ? (
-          // Render auth/landing pages without layout
+        {(isAuthPage || isLandingPage || isFrontPage || (authToken && userType === 'monitoring') || (authToken && userType === 'exporter')) ? (
+          // Render auth/landing pages or special dashboards without layout
           <div className="min-h-screen">
             <Router />
           </div>

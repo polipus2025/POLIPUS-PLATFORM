@@ -76,12 +76,12 @@ function Router() {
       {authToken ? (
         <>
           {/* Dashboard - Fixed to show correct component based on user type */}
-          <Route path="/dashboard" component={SimpleWorkingDashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/farmer-dashboard" component={FarmerDashboard} />
           <Route path="/field-agent-dashboard" component={FieldAgentDashboard} />
           <Route path="/exporter-dashboard" component={ExporterDashboard} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
-          <Route path="/" component={SimpleWorkingDashboard} />
+          <Route path="/" component={Dashboard} />
           
           {/* Exporter Portal Routes */}
           <Route path="/exporter-dashboard">
@@ -250,13 +250,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage || isDashboardPage) ? (
-          // Render auth/landing pages and dashboard without layout
+        {(isAuthPage || isLandingPage || isFrontPage) ? (
+          // Render auth/landing pages without layout
           <div className="min-h-screen">
             <Router />
           </div>
         ) : authToken ? (
-          // Render authenticated pages with full layout (except dashboard)
+          // Render authenticated pages with full layout
           <div className="min-h-screen bg-gray-50">
             <Header />
             <div className="flex">

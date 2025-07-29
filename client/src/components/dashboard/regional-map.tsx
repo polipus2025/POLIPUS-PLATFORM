@@ -33,11 +33,18 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
         });
   }, [selectedCounty, countyData]);
 
-  // Reset when county changes - no effect needed for length changes
-  const resetForNewCounty = (county: string) => {
-    setCurrentIndex(0);
-    setIsAutoScrolling(filteredCountyData.length > 4);
-  };
+  // Enhanced county data with satellite and agricultural intelligence
+  const enhancedCountyData = React.useMemo(() => {
+    return filteredCountyData.map((county, index) => ({
+      ...county,
+      satellites: Math.floor(Math.random() * 8) + 3, // 3-10 satellites per county
+      activeAgents: Math.floor(Math.random() * 15) + 5, // 5-19 active agents
+      farmCoverage: Math.floor(Math.random() * 30) + 70, // 70-99% farm coverage
+      forestCover: Math.floor(Math.random() * 40) + 45, // 45-84% forest cover
+      carbonCredits: Math.floor(Math.random() * 500) + 200, // 200-699 carbon credits
+      lastSatelliteUpdate: Math.floor(Math.random() * 30) + 5, // 5-34 minutes ago
+    }));
+  }, [filteredCountyData]);
 
   // Auto-scroll effect
   useEffect(() => {
@@ -90,19 +97,6 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
     if (safeRate >= 85) return 'bg-warning';
     return 'bg-error';
   };
-
-  // Enhanced county data with satellite and agricultural intelligence
-  const enhancedCountyData = React.useMemo(() => {
-    return filteredCountyData.map((county, index) => ({
-      ...county,
-      satellites: Math.floor(Math.random() * 8) + 3, // 3-10 satellites per county
-      activeAgents: Math.floor(Math.random() * 15) + 5, // 5-19 active agents
-      farmCoverage: Math.floor(Math.random() * 30) + 70, // 70-99% farm coverage
-      forestCover: Math.floor(Math.random() * 40) + 45, // 45-84% forest cover
-      carbonCredits: Math.floor(Math.random() * 500) + 200, // 200-699 carbon credits
-      lastSatelliteUpdate: Math.floor(Math.random() * 30) + 5, // 5-34 minutes ago
-    }));
-  }, [filteredCountyData]);
 
   return (
     <Card>

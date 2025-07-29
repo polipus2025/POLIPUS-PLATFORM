@@ -105,15 +105,19 @@ export default function Dashboard() {
           
           {/* Main Content */}
           <main className="flex-1 p-6 space-y-6">
-            {/* Welcome Section */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-slate-200/50">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                  <BarChart3 className="h-8 w-8 text-white" />
+            {/* ISMS Welcome Section */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-4 mb-6">
+                <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+                  <BarChart3 className="h-10 w-10 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-slate-800">Agricultural Compliance Dashboard</h1>
-                  <p className="text-slate-600">Real-time monitoring and compliance management system</p>
+                <div className="text-left">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                    Agricultural Compliance Dashboard
+                  </h1>
+                  <p className="text-slate-600 text-lg mt-1">
+                    Real-time monitoring and compliance management system
+                  </p>
                   <div className="flex items-center space-x-4 mt-2">
                     <Badge variant="default" className="bg-green-100 text-green-800">
                       <CheckCircle className="h-3 w-3 mr-1" />
@@ -144,21 +148,20 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* EUDR Compliance Section - Full Width */}
-            <Card className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/50">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
-                    <TreePine className="h-6 w-6 text-white" />
+            {/* EUDR Compliance Section - ISMS Style */}
+            <div className="isms-card">
+              <div className="mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                    <TreePine className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-800">EUDR Compliance Dashboard</h3>
+                    <h2 className="text-2xl font-bold isms-gradient-text">EUDR Compliance Dashboard</h2>
                     <p className="text-slate-600">EU Deforestation Regulation Monitoring & Risk Assessment</p>
                   </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                </div>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Compliance Overview */}
                   <div className="space-y-4">
                     <h4 className="font-semibold text-slate-800">Compliance Overview</h4>

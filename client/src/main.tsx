@@ -2,9 +2,6 @@ import { createRoot } from "react-dom/client";
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
-import Header from "@/components/layout/header";
-import Sidebar from "@/components/layout/sidebar";
-import DashboardTest from "@/pages/dashboard-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FrontPage from "@/pages/front-page";
 import "./index.css";
@@ -38,86 +35,112 @@ function SimpleApp() {
     );
   }
 
+  // Dashboard senza Header e Sidebar - solo contenuto puro
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex" style={{ minHeight: 'calc(100vh - 80px)' }}>
-          <Sidebar />
-          <main className="flex-1 p-6 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-            <div className="max-w-7xl mx-auto">
-              {/* Test immediato - senza componente esterno */}
-              <div className="mb-8 p-6 bg-green-100 border-2 border-green-500 rounded-lg text-center">
-                <h1 className="text-3xl font-bold text-green-800 mb-2">
-                  🎉 DASHBOARD CONTENT LOADED! 🎉
-                </h1>
-                <p className="text-green-700 text-lg">
-                  Se vedi questo banner verde, il contenuto principale funziona!
-                </p>
-              </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-100 to-indigo-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Semplice */}
+          <div className="mb-8 p-6 bg-white rounded-lg shadow-lg text-center">
+            <h1 className="text-4xl font-bold text-slate-800 mb-2">
+              AgriTrace360™ LACRA Dashboard
+            </h1>
+            <p className="text-slate-600 text-lg">
+              Sei loggato come: admin001 (Token presente)
+            </p>
+          </div>
 
-              {/* Metrics Cards Simple */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-lg shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Commodities</p>
-                      <p className="text-3xl font-bold text-blue-600">1,247</p>
-                    </div>
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      📦
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-lg shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Compliance</p>
-                      <p className="text-3xl font-bold text-green-600">94.7%</p>
-                    </div>
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      ✅
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-lg shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Alerts</p>
-                      <p className="text-3xl font-bold text-red-600">8</p>
-                    </div>
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                      ⚠️
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-lg shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Exports</p>
-                      <p className="text-3xl font-bold text-purple-600">2.4M</p>
-                    </div>
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                      📈
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {/* Test Banner */}
+          <div className="mb-8 p-6 bg-green-100 border-2 border-green-500 rounded-lg text-center">
+            <h1 className="text-3xl font-bold text-green-800 mb-2">
+              ✅ DASHBOARD FUNZIONA SENZA HEADER/SIDEBAR!
+            </h1>
+            <p className="text-green-700 text-lg">
+              Se vedi questo, il problema era nei componenti Header/Sidebar
+            </p>
+          </div>
 
-              {/* Final Success Message */}
-              <div className="p-6 bg-blue-100 border-2 border-blue-500 rounded-lg text-center">
-                <h2 className="text-2xl font-bold text-blue-800 mb-2">
-                  ✅ DASHBOARD COMPLETA CARICATA!
-                </h2>
-                <p className="text-blue-700">
-                  Header + Sidebar + Contenuto principale = Tutto funziona!
-                </p>
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📦</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Commodities</h3>
+                <p className="text-4xl font-bold text-blue-600">1,247</p>
+                <p className="text-sm text-gray-500 mt-1">Total registered</p>
               </div>
             </div>
-          </main>
+            
+            <div className="bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">✅</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Compliance</h3>
+                <p className="text-4xl font-bold text-green-600">94.7%</p>
+                <p className="text-sm text-gray-500 mt-1">Overall rate</p>
+              </div>
+            </div>
+            
+            <div className="bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">⚠️</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Active Alerts</h3>
+                <p className="text-4xl font-bold text-red-600">8</p>
+                <p className="text-sm text-gray-500 mt-1">Requires attention</p>
+              </div>
+            </div>
+            
+            <div className="bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📈</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Export Value</h3>
+                <p className="text-4xl font-bold text-purple-600">$2.4M</p>
+                <p className="text-sm text-gray-500 mt-1">This month</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Success Message */}
+          <div className="p-8 bg-blue-50 border-2 border-blue-200 rounded-xl text-center">
+            <h2 className="text-3xl font-bold text-blue-800 mb-4">
+              🎉 DASHBOARD COMPLETAMENTE FUNZIONANTE!
+            </h2>
+            <p className="text-blue-700 text-lg mb-4">
+              Layout pulito senza Header/Sidebar complessi
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                View Reports
+              </button>
+              <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                Manage Commodities
+              </button>
+              <button className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                Export Data
+              </button>
+            </div>
+          </div>
+
+          {/* Logout */}
+          <div className="mt-8 text-center">
+            <button 
+              onClick={() => {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userType");
+                window.location.reload();
+              }}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </QueryClientProvider>

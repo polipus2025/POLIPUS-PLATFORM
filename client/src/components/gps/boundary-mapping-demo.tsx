@@ -115,7 +115,7 @@ export default function BoundaryMappingDemo({
           const newProgress = prev + 10;
           if (newProgress >= 100) {
             setIsSimulating(false);
-            console.log('✅ Cocoa plot boundary mapping simulation completed');
+            // console.log('✅ Cocoa plot boundary mapping simulation completed');
             // Auto-restart after 3 seconds for continuous demo
             if (continuousMode) {
               setTimeout(() => {
@@ -143,12 +143,12 @@ export default function BoundaryMappingDemo({
       area: 0,
       perimeter: 0
     }));
-    console.log(`🎯 Starting ${plotName} boundary mapping simulation for ${farmerName}`);
+    // console.log(`🎯 Starting ${plotName} boundary mapping simulation for ${farmerName}`);
   };
 
   const stopSimulation = () => {
     setIsSimulating(false);
-    console.log('🛑 Boundary mapping simulation stopped');
+    // console.log('🛑 Boundary mapping simulation stopped');
   };
 
   const calculatePolygonArea = (points: any[]): number => {

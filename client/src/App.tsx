@@ -12,7 +12,7 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard";
-import TestDashboard from "@/pages/test-dashboard";
+
 import Commodities from "@/pages/commodities";
 import ExporterDashboard from "@/pages/exporter-dashboard";
 import ExportLicense from "@/pages/export-license";
@@ -33,11 +33,11 @@ import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
 import OfflineSync from "@/pages/offline-sync";
 import DirectorDashboard from "@/pages/director-dashboard";
-import MobileAlertDemo from "@/pages/mobile-alert-demo";
+
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FarmerDashboard from "@/pages/farmer-dashboard";
 import Messaging from "@/pages/messaging";
-import LoginTest from "@/pages/login-test";
+
 import ExportPermitSubmission from "@/pages/export-permit-submission";
 import RealTimeVerificationDashboard from "@/pages/verification-dashboard";
 import EconomicReportingPage from "@/pages/economic-reporting";
@@ -60,11 +60,6 @@ function Router() {
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
-  // Debug: Log current route and auth status
-  console.log("Current path:", window.location.pathname);
-  console.log("Auth token:", !!authToken);
-  console.log("User type:", userType);
-  
   return (
     <Switch>
       {/* Authentication Routes - Public */}
@@ -72,23 +67,23 @@ function Router() {
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
-      <Route path="/login-test" component={LoginTest} />
+
       
       {/* Protected Routes */}
       {authToken ? (
         <>
-          {/* Dashboard - Fixed to show correct component based on user type */}
+          {/* Dashboard - Show correct component based on user type */}
           <Route path="/dashboard">
             {userType === 'farmer' ? <FarmerDashboard /> : 
              userType === 'field_agent' ? <FieldAgentDashboard /> : 
              userType === 'exporter' ? <ExporterDashboard /> :
-             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
+             <Dashboard />}
           </Route>
           <Route path="/">
             {userType === 'farmer' ? <FarmerDashboard /> : 
              userType === 'field_agent' ? <FieldAgentDashboard /> : 
              userType === 'exporter' ? <ExporterDashboard /> :
-             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
+             <Dashboard />}
           </Route>
           
           {/* Exporter Portal Routes */}
@@ -217,7 +212,7 @@ function Router() {
           {/* Offline Sync - Available to all authenticated users */}
           <Route path="/offline-sync" component={OfflineSync} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
-          <Route path="/mobile-alert-demo" component={MobileAlertDemo} />
+
           <Route path="/messaging">
             <ProtectedRoute 
               component={Messaging} 
@@ -237,17 +232,9 @@ function Router() {
         </>
       )}
       
-      {/* Always available routes - bypass auth */}
+      {/* Always available routes */}
       <Route path="/front-page" component={FrontPage} />
       <Route path="/home" component={FrontPage} />
-      <Route path="/clear-auth">
-        {() => {
-          localStorage.clear();
-          sessionStorage.clear();
-          window.location.href = '/front-page';
-          return <div>Clearing authentication...</div>;
-        }}
-      </Route>
       
       <Route component={NotFound} />
     </Switch>
@@ -255,12 +242,6 @@ function Router() {
 }
 
 function App() {
-  // For debugging: Force clear auth if accessing front page directly
-  if (window.location.pathname === "/front-page" || window.location.pathname === "/home") {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userType");
-  }
-  
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
@@ -269,8 +250,7 @@ function App() {
   const isLandingPage = window.location.pathname === "/landing" && !authToken;
   const isFrontPage = (window.location.pathname === "/" && !authToken) || 
                       window.location.pathname === "/front-page" || 
-                      window.location.pathname === "/home" ||
-                      window.location.pathname === "/clear-auth";
+                      window.location.pathname === "/home";
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   
   return (

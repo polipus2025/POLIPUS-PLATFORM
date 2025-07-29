@@ -115,7 +115,7 @@ export default function AdvancedBoundaryMapper({
         autoIntervalRef.current = setInterval(addCurrentPoint, autoInterval * 1000);
       }
 
-      console.log(`🎯 Started boundary mapping: ${boundaryName}`);
+      // console.log(`🎯 Started boundary mapping: ${boundaryName}`);
     } else {
       alert('GPS not supported on this device');
     }
@@ -133,7 +133,7 @@ export default function AdvancedBoundaryMapper({
     }
 
     setIsMapping(false);
-    console.log('🛑 Stopped boundary mapping');
+    // console.log('🛑 Stopped boundary mapping');
   };
 
   const handlePositionUpdate = (position: GeolocationPosition) => {
@@ -173,7 +173,7 @@ export default function AdvancedBoundaryMapper({
       );
       
       if (distance < minDistance) {
-        console.log(`Point skipped - too close to last point: ${distance.toFixed(1)}m`);
+        // console.log(`Point skipped - too close to last point: ${distance.toFixed(1)}m`);
         return;
       }
     }
@@ -195,7 +195,7 @@ export default function AdvancedBoundaryMapper({
     setCurrentBoundary(updatedBoundary);
     onPointAdded?.(newPoint);
 
-    console.log(`📍 Added boundary point ${newPoint.order}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
+    // console.log(`📍 Added boundary point ${newPoint.order}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
   };
 
   const removeLastPoint = () => {
@@ -207,7 +207,7 @@ export default function AdvancedBoundaryMapper({
     };
 
     setCurrentBoundary(updatedBoundary);
-    console.log('🗑️ Removed last boundary point');
+    // console.log('🗑️ Removed last boundary point');
   };
 
   const completeBoundary = () => {
@@ -228,7 +228,7 @@ export default function AdvancedBoundaryMapper({
     stopBoundaryMapping();
     onBoundaryComplete?.(completedBoundary);
 
-    console.log(`✅ Completed boundary: ${completedBoundary.name}`, {
+    // console.log(`✅ Completed boundary: ${completedBoundary.name}`, {
       points: completedBoundary.points.length,
       area: `${completedBoundary.totalArea.toFixed(2)} hectares`,
       perimeter: `${completedBoundary.perimeter.toFixed(1)} meters`
@@ -239,7 +239,7 @@ export default function AdvancedBoundaryMapper({
     stopBoundaryMapping();
     setCurrentBoundary(null);
     setBoundaryName('');
-    console.log('🔄 Reset boundary mapping');
+    // console.log('🔄 Reset boundary mapping');
   };
 
   const exportBoundaryData = () => {
@@ -267,7 +267,7 @@ export default function AdvancedBoundaryMapper({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log('💾 Exported boundary data');
+    // console.log('💾 Exported boundary data');
   };
 
   // Utility functions

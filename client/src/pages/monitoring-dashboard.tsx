@@ -17,8 +17,13 @@ import {
   CheckCircle,
   Clock,
   TrendingUp,
-  LogOut
+  LogOut,
+  Play,
+  TestTube,
+  Loader2
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { useLocation } from "wouter";
 
 export default function MonitoringDashboard() {
@@ -26,6 +31,9 @@ export default function MonitoringDashboard() {
   const [activeUsers, setActiveUsers] = useState(0);
   const [apiRequests, setApiRequests] = useState(0);
   const [systemHealth, setSystemHealth] = useState("healthy");
+  const [isTestingActive, setIsTestingActive] = useState(false);
+  const [testProgress, setTestProgress] = useState(0);
+  const [testResults, setTestResults] = useState<Array<{test: string, status: 'running' | 'passed' | 'failed', message: string}>>([]);
 
   // Real-time monitoring data
   const { data: monitoringData } = useQuery({
@@ -63,6 +71,66 @@ export default function MonitoringDashboard() {
     setLocation("/front-page");
   };
 
+  const runComprehensiveTest = async () => {
+    setIsTestingActive(true);
+    setTestProgress(0);
+    setTestResults([]);
+
+    const tests = [
+      { name: 'Authentication System', endpoint: '/api/auth/monitoring-login', method: 'POST', data: { username: 'monitor001', password: 'monitor123' } },
+      { name: 'Regulatory Portal', endpoint: '/api/auth/regulatory-login', method: 'POST', data: { username: 'admin001', password: 'admin123' } },
+      { name: 'Farmer Portal', endpoint: '/api/auth/farmer-login', method: 'POST', data: { username: 'FRM-2024-001', password: 'farmer123' } },
+      { name: 'Field Agent Portal', endpoint: '/api/auth/field-agent-login', method: 'POST', data: { username: 'AGT-2024-001', password: 'agent123' } },
+      { name: 'Exporter Portal', endpoint: '/api/auth/exporter-login', method: 'POST', data: { username: 'EXP-2024-001', password: 'exporter123' } },
+      { name: 'Dashboard API', endpoint: '/api/dashboard/metrics', method: 'GET' },
+      { name: 'Commodities Data', endpoint: '/api/commodities', method: 'GET' },
+      { name: 'GPS Mapping System', endpoint: '/api/gps-data', method: 'GET' },
+      { name: 'Internal Messaging', endpoint: '/api/messages', method: 'GET' },
+      { name: 'System Performance', endpoint: '/api/monitoring/system-metrics', method: 'GET' },
+      { name: 'Database Connection', endpoint: '/api/dashboard/farmer-stats', method: 'GET' },
+      { name: 'Export Permits', endpoint: '/api/export-permits', method: 'GET' }
+    ];
+
+    for (let i = 0; i < tests.length; i++) {
+      const test = tests[i];
+      setTestResults(prev => [...prev, { test: test.name, status: 'running', message: 'Testing...' }]);
+      
+      try {
+        const response = await fetch(test.endpoint, {
+          method: test.method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+          },
+          body: test.data ? JSON.stringify(test.data) : undefined
+        });
+
+        const isSuccess = response.status === 200 || response.status === 201;
+        
+        setTestResults(prev => prev.map(result => 
+          result.test === test.name 
+            ? { 
+                ...result, 
+                status: isSuccess ? 'passed' : 'failed', 
+                message: isSuccess ? `✓ Response: ${response.status}` : `✗ Error: ${response.status} ${response.statusText}` 
+              }
+            : result
+        ));
+      } catch (error) {
+        setTestResults(prev => prev.map(result => 
+          result.test === test.name 
+            ? { ...result, status: 'failed', message: `✗ Connection Error: ${error}` }
+            : result
+        ));
+      }
+
+      setTestProgress(((i + 1) / tests.length) * 100);
+      await new Promise(resolve => setTimeout(resolve, 800)); // Delay between tests
+    }
+
+    setIsTestingActive(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Header */}
@@ -75,14 +143,110 @@ export default function MonitoringDashboard() {
               <p className="text-sm text-blue-200">Real-time website activity monitoring</p>
             </div>
           </div>
-          <Button 
-            onClick={handleLogout}
-            variant="outline" 
-            className="border-white/30 text-white hover:bg-white/10"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="bg-green-500/20 border-green-400/50 text-green-100 hover:bg-green-500/30"
+                >
+                  <TestTube className="h-4 w-4 mr-2" />
+                  Comprehensive Test
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <TestTube className="h-5 w-5 text-blue-600" />
+                    Platform Comprehensive Testing Suite
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-600">
+                      Test all website functionality and authentication systems in real-time
+                    </p>
+                    <Button 
+                      onClick={runComprehensiveTest}
+                      disabled={isTestingActive}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isTestingActive ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Testing...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4 mr-2" />
+                          Start Test
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {isTestingActive && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Overall Progress</span>
+                        <span>{Math.round(testProgress)}%</span>
+                      </div>
+                      <Progress value={testProgress} className="w-full" />
+                    </div>
+                  )}
+
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {testResults.map((result, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          {result.status === 'running' && <Loader2 className="h-4 w-4 animate-spin text-blue-500" />}
+                          {result.status === 'passed' && <CheckCircle className="h-4 w-4 text-green-500" />}
+                          {result.status === 'failed' && <AlertTriangle className="h-4 w-4 text-red-500" />}
+                          <span className="font-medium">{result.test}</span>
+                        </div>
+                        <div className="text-sm">
+                          <Badge 
+                            variant={result.status === 'passed' ? 'default' : result.status === 'failed' ? 'destructive' : 'secondary'}
+                            className={result.status === 'running' ? 'bg-blue-100 text-blue-800' : ''}
+                          >
+                            {result.status === 'running' ? 'Testing' : result.status === 'passed' ? 'Passed' : 'Failed'}
+                          </Badge>
+                          <p className="text-xs text-gray-500 mt-1">{result.message}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {testResults.length > 0 && !isTestingActive && (
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Test Summary:</span>
+                        <div className="flex gap-4 text-sm">
+                          <span className="text-green-600">
+                            ✓ {testResults.filter(r => r.status === 'passed').length} Passed
+                          </span>
+                          <span className="text-red-600">
+                            ✗ {testResults.filter(r => r.status === 'failed').length} Failed
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Button 
+              onClick={handleLogout}
+              variant="outline" 
+              className="border-white/30 text-white hover:bg-white/10"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
 

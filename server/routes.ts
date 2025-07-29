@@ -50,6 +50,20 @@ import { z } from "zod";
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
 
+// Extend Express Request type to include user property
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        userId: number;
+        exporterId?: string;
+        role: string;
+        userType: string;
+      };
+    }
+  }
+}
+
 // Middleware to verify JWT tokens
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
@@ -488,6 +502,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Failed to register user" 
         });
       }
+    }
+  });
+
+  // Get current authenticated user endpoint
+  app.get("/api/auth/user", authenticateToken, async (req, res) => {
+    try {
+      // Extract user info from JWT token (set by authenticateToken middleware)
+      const userId = req.user.userId;
+      const user = await storage.getAuthUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          department: user.department,
+          jurisdiction: user.jurisdiction,
+          userType: req.user.userType || 'regulatory'
+        }
+      });
+
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
     }
   });
 

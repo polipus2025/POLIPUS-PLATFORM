@@ -60,6 +60,11 @@ function Router() {
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
+  // Debug: Log current route and auth status
+  console.log("Current path:", window.location.pathname);
+  console.log("Auth token:", !!authToken);
+  console.log("User type:", userType);
+  
   return (
     <Switch>
       {/* Authentication Routes - Public */}
@@ -232,9 +237,17 @@ function Router() {
         </>
       )}
       
-      {/* Always available routes */}
+      {/* Always available routes - bypass auth */}
       <Route path="/front-page" component={FrontPage} />
       <Route path="/home" component={FrontPage} />
+      <Route path="/clear-auth">
+        {() => {
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.href = '/front-page';
+          return <div>Clearing authentication...</div>;
+        }}
+      </Route>
       
       <Route component={NotFound} />
     </Switch>
@@ -242,6 +255,12 @@ function Router() {
 }
 
 function App() {
+  // For debugging: Force clear auth if accessing front page directly
+  if (window.location.pathname === "/front-page" || window.location.pathname === "/home") {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userType");
+  }
+  
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
@@ -250,7 +269,8 @@ function App() {
   const isLandingPage = window.location.pathname === "/landing" && !authToken;
   const isFrontPage = (window.location.pathname === "/" && !authToken) || 
                       window.location.pathname === "/front-page" || 
-                      window.location.pathname === "/home";
+                      window.location.pathname === "/home" ||
+                      window.location.pathname === "/clear-auth";
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   
   return (

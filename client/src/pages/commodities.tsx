@@ -118,7 +118,8 @@ export default function Commodities() {
 
   const { data: commodities = [], isLoading } = useQuery<DetailedCommodity[]>({
     queryKey: ["/api/commodities"],
-    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    refetchInterval: 60000, // Refetch every minute instead of 30 seconds  
+    staleTime: 50000, // Consider data fresh for 50 seconds
   });
 
   // Generate enhanced commodity data with compliance details

@@ -22,7 +22,8 @@ interface ComplianceChartProps {
 export default function ComplianceChart({ selectedCounty = "all" }: ComplianceChartProps) {
   const { data: commodities = [], isLoading } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
-    refetchInterval: 3000, // Refresh every 3 seconds for real-time updates
+    refetchInterval: 60000, // Refresh every minute instead of 3 seconds
+    staleTime: 50000, // Consider data fresh for 50 seconds
   });
 
   // Real-time state management
@@ -67,7 +68,7 @@ export default function ComplianceChart({ selectedCounty = "all" }: ComplianceCh
     };
 
     updateData(); // Initial update
-    const interval = setInterval(updateData, 3000); // Update every 3 seconds
+    const interval = setInterval(updateData, 30000); // Update every 30 seconds instead of 3
 
     return () => clearInterval(interval);
   }, [isRealTimeActive]);

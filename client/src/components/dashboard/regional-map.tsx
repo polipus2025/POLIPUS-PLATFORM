@@ -14,7 +14,8 @@ interface RegionalMapProps {
 export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps) {
   const { data: countyData = [], isLoading } = useQuery<ComplianceByCounty[]>({
     queryKey: ["/api/dashboard/compliance-by-county"],
-    refetchInterval: 3000, // Refresh every 3 seconds for real-time updates
+    refetchInterval: 60000, // Refresh every minute instead of 3 seconds
+    staleTime: 50000, // Consider data fresh for 50 seconds
   });
 
   // Auto-scroll state

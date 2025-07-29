@@ -21,7 +21,11 @@ import {
   MapPin,
   Calendar,
   TrendingUp,
-  Activity
+  Activity,
+  CheckSquare,
+  CheckCircle,
+  X,
+  UserPlus
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -30,16 +34,18 @@ import { useToast } from "@/hooks/use-toast";
 function FieldAgentApprovalManager() {
   const { toast } = useToast();
   
-  // Fetch inspection requests
-  const { data: inspectionRequests = [] } = useQuery({
+  // Fetch inspection requests - optimized polling with proper typing
+  const { data: inspectionRequests = [] } = useQuery<any[]>({
     queryKey: ['/api/inspection-requests'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 120000, // Refresh every 2 minutes instead of 30 seconds
+    staleTime: 100000, // Consider data fresh for 100 seconds
   });
 
-  // Fetch farmer registration requests
-  const { data: farmerRegistrationRequests = [] } = useQuery({
+  // Fetch farmer registration requests - optimized polling with proper typing
+  const { data: farmerRegistrationRequests = [] } = useQuery<any[]>({
     queryKey: ['/api/farmer-registration-requests'],
-    refetchInterval: 30000,
+    refetchInterval: 120000, // Refresh every 2 minutes instead of 30 seconds
+    staleTime: 100000, // Consider data fresh for 100 seconds
   });
 
   // Approve inspection request

@@ -116,11 +116,12 @@ export default function Sidebar() {
     "admin001"
   );
 
-  // Fetch unread message count
+  // Fetch unread message count - reduced polling to improve performance
   const { data: unreadData } = useQuery({
     queryKey: ["/api/messages", currentUserId, "unread-count"],
     queryFn: () => apiRequest(`/api/messages/${currentUserId}/unread-count`),
-    refetchInterval: 5000, // Check every 5 seconds
+    refetchInterval: 30000, // Check every 30 seconds instead of 5
+    staleTime: 25000, // Consider data fresh for 25 seconds
   });
 
   const unreadCount = unreadData?.count || 0;

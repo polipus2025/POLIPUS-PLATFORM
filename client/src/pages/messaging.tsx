@@ -124,11 +124,12 @@ export default function Messaging() {
     },
   });
 
-  // Fetch messages
+  // Fetch messages - optimized polling
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["/api/messages", currentUserId],
     queryFn: () => apiRequest(`/api/messages/${currentUserId}`),
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds instead of 5
+    staleTime: 25000, // Consider data fresh for 25 seconds
   });
 
   // Fetch unread count

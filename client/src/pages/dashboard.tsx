@@ -1255,10 +1255,10 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Charts and Regional Data */}
+      {/* Charts and Mobile Device Monitoring */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <ComplianceChart selectedCounty={selectedCounty} />
-        <RegionalMap selectedCounty={selectedCounty} />
+        <SystemAlerts />
       </div>
 
       {/* Commodity Details Table */}
@@ -1266,10 +1266,10 @@ export default function Dashboard() {
         <InspectionsTable />
       </div>
 
-      {/* Quick Actions and Alerts */}
+      {/* Quick Actions and Regional Compliance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <QuickActions />
-        <SystemAlerts />
+        <RegionalMap selectedCounty={selectedCounty} />
       </div>
 
       {/* Export Report Dialog */}

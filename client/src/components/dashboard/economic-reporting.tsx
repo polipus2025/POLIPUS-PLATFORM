@@ -359,7 +359,7 @@ export default function EconomicReporting() {
             </div>
             <div className="flex-1 flex flex-col justify-center text-center">
               <p className="text-sm font-medium text-slate-600 mb-3">Top Commodities</p>
-              <p className="text-xl font-bold text-slate-900">
+              <p className="text-lg font-bold text-slate-900">
                 Cocoa, Coffee
               </p>
               <p className="text-sm text-slate-500 mt-3">Leading exports</p>

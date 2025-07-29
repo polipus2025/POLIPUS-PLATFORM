@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
-import { MessageCircle, Send, Reply, Trash2, Clock, CheckCircle, AlertCircle, Users, Calendar, Search } from "lucide-react";
+import { MessageCircle, Send, Reply, Trash2, Clock, CheckCircle, AlertCircle, Users, Calendar, Search, MessageSquare, Bell, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
@@ -305,29 +305,40 @@ export default function Messaging() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Internal Messaging</h1>
-          <p className="text-muted-foreground">
-            Communicate with all portal users across the AgriTrace360™ platform
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <Badge variant="secondary">
-            {unreadData?.count || 0} Unread
-          </Badge>
-          <Dialog open={isComposing} onOpenChange={setIsComposing}>
+    <div className="min-h-screen isms-gradient">
+      <div className="max-w-7xl mx-auto p-8">
+        {/* Header Section - ISMS Style */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl isms-icon-bg-blue flex items-center justify-center">
+              <MessageSquare className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900">Internal Messaging</h1>
+              <p className="text-slate-600 text-lg">Secure cross-portal communication system</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg border border-blue-200">
+              <Bell className="h-4 w-4" />
+              <span className="text-sm font-medium">{unreadData?.count || 0} Unread</span>
+            </div>
+            
+            <Dialog open={isComposing} onOpenChange={setIsComposing}>
             <DialogTrigger asChild>
-              <Button>
-                <Send className="h-4 w-4 mr-2" />
+              <Button className="isms-button flex items-center gap-2">
+                <Send className="h-4 w-4" />
                 Compose Message
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl isms-card border-0 shadow-xl">
               <DialogHeader>
-                <DialogTitle>Compose New Message</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="flex items-center gap-2 text-slate-900">
+                  <Send className="h-5 w-5 text-blue-600" />
+                  Compose New Message
+                </DialogTitle>
+                <DialogDescription className="text-slate-600">
                   Send a message to users across all portals
                 </DialogDescription>
               </DialogHeader>
@@ -471,38 +482,41 @@ export default function Messaging() {
               </Form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Messages List */}
+        {/* Messages Section - ISMS Style */}
+        <div className="grid grid-cols-12 gap-6">
+        {/* Messages List - ISMS Style */}
         <div className="col-span-5">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Messages
-              </CardTitle>
-              <CardDescription>
-                All internal messages from across the platform
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+          <div className="isms-card">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                <MessageCircle className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-slate-900">Messages</h3>
+                <p className="text-slate-600">All internal platform communications</p>
+              </div>
+            </div>
+            <div className="bg-slate-50 rounded-lg overflow-hidden">
               {isLoading ? (
-                <div className="p-4 text-center text-muted-foreground">
+                <div className="p-6 text-center text-slate-600">
+                  <Clock className="h-8 w-8 mx-auto mb-2 animate-spin" />
                   Loading messages...
                 </div>
               ) : messages.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
+                <div className="p-6 text-center text-slate-600">
+                  <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   No messages found
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className="divide-y divide-slate-200">
                   {messages.map((message: Message) => (
                     <div
                       key={message.messageId}
-                      className={`p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors ${
-                        selectedMessage?.messageId === message.messageId ? "bg-muted" : ""
+                      className={`p-4 cursor-pointer hover:bg-white transition-colors ${
+                        selectedMessage?.messageId === message.messageId ? "bg-white shadow-sm" : "bg-slate-50"
                       } ${!message.isRead && message.recipientId === currentUserId ? "bg-blue-50 border-l-4 border-l-blue-500" : ""}`}
                       onClick={() => handleMessageClick(message)}
                     >
@@ -540,48 +554,34 @@ export default function Messaging() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
-        {/* Message Details */}
+        {/* Message Details - ISMS Style */}
         <div className="col-span-7">
           {selectedMessage ? (
-            <Card>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="flex items-center gap-2">
-                      {getMessageTypeIcon(selectedMessage.messageType)}
-                      {selectedMessage.subject}
-                      <Badge 
-                        className={`${getPriorityColor(selectedMessage.priority)} text-white`}
-                      >
-                        {selectedMessage.priority}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription className="mt-2">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <strong>From:</strong> {selectedMessage.senderName}
-                        </div>
-                        <div>
-                          <strong>Type:</strong> {selectedMessage.senderType}
-                        </div>
-                        <div>
-                          <strong>To:</strong> {selectedMessage.recipientName || "All Users"}
-                        </div>
-                        <div>
-                          <strong>Date:</strong> {new Date(selectedMessage.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </CardDescription>
+            <div className="isms-card">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                    {getMessageTypeIcon(selectedMessage.messageType)}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+                      {selectedMessage.subject}
+                      <div className={`px-2 py-1 rounded-full text-xs font-medium text-white ${getPriorityColor(selectedMessage.priority)}`}>
+                        {selectedMessage.priority}
+                      </div>
+                    </h3>
+                    <p className="text-slate-600">Message Details</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
                     <Dialog open={isReplying} onOpenChange={setIsReplying}>
                       <DialogTrigger asChild>
                         <Button 
-                          variant="outline" 
+                          className="isms-button flex items-center gap-2"
                           size="sm"
                           onClick={() => {
                             console.log("Reply button clicked for message:", selectedMessage?.messageId);
@@ -592,11 +592,11 @@ export default function Messaging() {
                             });
                           }}
                         >
-                          <Reply className="h-4 w-4 mr-2" />
+                          <Reply className="h-4 w-4" />
                           Reply
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-2xl isms-card border-0 shadow-xl">
                         <DialogHeader>
                           <DialogTitle>Reply to Message</DialogTitle>
                           <DialogDescription>
@@ -695,41 +695,65 @@ export default function Messaging() {
                       size="sm"
                       onClick={() => deleteMessageMutation.mutate(selectedMessage.messageId)}
                       disabled={deleteMessageMutation.isPending}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <Separator />
-              <CardContent className="pt-6">
+              
+              {/* Message Metadata - ISMS Style */}
+              <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-slate-50 rounded-lg">
+                <div>
+                  <span className="text-sm font-medium text-slate-700">From:</span>
+                  <p className="text-slate-900">{selectedMessage.senderName}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-slate-700">Type:</span>
+                  <p className="text-slate-900">{selectedMessage.senderType}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-slate-700">To:</span>
+                  <p className="text-slate-900">{selectedMessage.recipientName || "All Users"}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-slate-700">Date:</span>
+                  <p className="text-slate-900">{new Date(selectedMessage.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+              
+              {/* Message Content */}
+              <div className="bg-white p-6 rounded-lg border border-slate-200">
+                <h4 className="text-lg font-semibold text-slate-900 mb-4">Message Content</h4>
                 <div className="prose max-w-none">
-                  <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
+                  <p className="whitespace-pre-wrap text-slate-700">{selectedMessage.content}</p>
                 </div>
                 
                 {selectedMessage.hasReplies && (
-                  <div className="mt-6 pt-4 border-t">
-                    <h4 className="font-medium mb-3">Replies</h4>
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
+                  <div className="mt-6 pt-4 border-t border-slate-200">
+                    <h4 className="font-medium mb-3 text-slate-900">Replies</h4>
+                    <div className="bg-slate-50 p-4 rounded-lg">
+                      <p className="text-sm text-slate-600">
                         Reply functionality will be available here
                       </p>
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
-            <Card>
-              <CardContent className="flex items-center justify-center h-96">
-                <div className="text-center text-muted-foreground">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Select a message to view details</p>
+            <div className="isms-card">
+              <div className="flex items-center justify-center h-96">
+                <div className="text-center text-slate-600">
+                  <MessageCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">No Message Selected</h3>
+                  <p>Select a message from the list to view its details</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
+        </div>
         </div>
       </div>
     </div>

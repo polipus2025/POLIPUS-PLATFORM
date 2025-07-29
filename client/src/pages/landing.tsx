@@ -153,55 +153,36 @@ export default function Landing() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-8">
-        {/* Hero Section - ISMS Style */}
-        <div className="isms-card text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-6">
-            <Globe className="h-10 w-10 text-white" />
-          </div>
-          <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
-            Agricultural Traceability &
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
-              {" "}Compliance Platform
-            </span>
-          </h2>
-          <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-8">
-            Comprehensive commodity tracking, regulatory compliance monitoring, and farm management 
-            platform supporting all 15 Liberian counties and major cash crops with EUDR compliance integration.
+        {/* Hero Section - Simple Clean Style */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
+            Agricultural Traceability & Compliance Platform
+          </h1>
+          <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-12">
+            Comprehensive commodity tracking, regulatory compliance monitoring, and farm management platform supporting all 15 Liberian counties and major cash crops with EUDR compliance integration.
           </p>
           
-          {/* Key Features - ISMS Style */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
-                <BarChart3 className="h-6 w-6 text-white" />
-              </div>
+          {/* Key Features - Simple Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">Real-time</p>
               <p className="text-2xl font-bold text-slate-900 mb-2">Analytics</p>
               <p className="text-slate-600 text-sm">Platform</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
-                <MapPin className="h-6 w-6 text-white" />
-              </div>
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">GPS Farm</p>
               <p className="text-2xl font-bold text-slate-900 mb-2">Mapping</p>
               <p className="text-slate-600 text-sm">System</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
-                <FileCheck className="h-6 w-6 text-white" />
-              </div>
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">EUDR</p>
               <p className="text-2xl font-bold text-slate-900 mb-2">100%</p>
               <p className="text-slate-600 text-sm">Compliance</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
-                <Globe className="h-6 w-6 text-white" />
-              </div>
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">Government</p>
               <p className="text-2xl font-bold text-slate-900 mb-2">Integration</p>
               <p className="text-slate-600 text-sm">Active</p>
@@ -209,17 +190,10 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Access Portals - ISMS Style */}
-        <div className="isms-card mb-12">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
-              <Shield className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">Access Portals</h2>
-              <p className="text-slate-600">Role-based authentication for agricultural compliance management</p>
-            </div>
-          </div>
+        {/* Access Portals - Simple Clean Style */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Access Portals</h2>
+          <p className="text-slate-600 mb-8">Role-based authentication for agricultural compliance management</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Regulatory Portal */}
@@ -400,50 +374,31 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* System Overview - ISMS Style */}
-        <div className="isms-card mb-12">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-slate-900">Platform Statistics</h3>
-              <p className="text-slate-600">Comprehensive agricultural compliance management coverage</p>
-            </div>
-          </div>
+        {/* Platform Statistics - Simple Clean Style */}
+        <div className="mb-12">
+          <h3 className="text-3xl font-bold text-slate-900 mb-4">Platform Statistics</h3>
+          <p className="text-slate-600 mb-8">Comprehensive agricultural compliance management coverage</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
-                <MapPin className="h-6 w-6 text-white" />
-              </div>
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">Liberian</p>
               <p className="text-3xl font-bold text-slate-900 mb-2">15</p>
               <p className="text-slate-600 text-sm">Counties</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
-                <Leaf className="h-6 w-6 text-white" />
-              </div>
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">Cash Crop</p>
               <p className="text-3xl font-bold text-slate-900 mb-2">20+</p>
               <p className="text-slate-600 text-sm">Types</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
-                <FileCheck className="h-6 w-6 text-white" />
-              </div>
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">EUDR</p>
               <p className="text-3xl font-bold text-slate-900 mb-2">100%</p>
               <p className="text-slate-600 text-sm">Compliant</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
-                <Globe className="h-6 w-6 text-white" />
-              </div>
+            <div className="text-center">
               <p className="text-slate-600 text-sm mb-1">Government</p>
               <p className="text-3xl font-bold text-slate-900 mb-2">3</p>
               <p className="text-slate-600 text-sm">Integrations</p>

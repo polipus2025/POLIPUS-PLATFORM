@@ -108,23 +108,26 @@ export default function Dashboard() {
         <div />
       </ModernBackground> */}
       
-      {/* Simple Test Layout */}
-      <div className="min-h-screen">
-        <Header />
-        <div className="flex min-h-screen">
-          <Sidebar />
-          
-          {/* Absolute positioned main content to bypass flex issues */}
-          <main className="fixed left-64 right-0 top-[73px] bottom-0 p-6 bg-red-500 text-white overflow-auto z-10">
-            <div className="text-center p-8">
-              <h1 className="text-8xl font-bold mb-4">🔴 CRITICAL SUCCESS! 🔴</h1>
-              <p className="text-4xl mb-4">MAIN CONTENT IS NOW VISIBLE!</p>
-              <p className="text-2xl">Layout fix applied with absolute positioning!</p>
+      {/* Simplified Layout Test */}
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        
+        {/* Simple main content */}
+        <main className="flex-1 p-8 bg-red-500 text-white min-h-screen">
+          <div className="text-center">
+            <h1 className="text-6xl font-bold mb-4">🔴 SUCCESS! 🔴</h1>
+            <p className="text-3xl mb-4">ORIGINAL LAYOUT RESTORED!</p>
+            <p className="text-xl">Header and sidebar back to basic styling!</p>
+            <div className="mt-8 p-4 bg-white/20 rounded">
+              <p>✅ Header simplified</p>
+              <p>✅ Sidebar simplified</p>
+              <p>✅ Main content visible</p>
             </div>
-            
-            <div className="max-w-7xl mx-auto space-y-8 mt-4">
-              
-              {/* ISMS Header */}
+          </div>
+        </main>
+      </div>
+    </div>
               <div className="text-center mb-12">
           <div className="inline-flex items-center gap-4 mb-6">
             <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">

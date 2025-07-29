@@ -11,8 +11,8 @@ import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
-import Dashboard from "@/pages/dashboard-isms";
-import DashboardTest from "@/pages/dashboard-test";
+// import Dashboard from "@/pages/dashboard-isms";
+import DashboardSimpleTest from "@/pages/dashboard-simple-test";
 import EconomicReportingPage from "@/pages/economic-reporting";
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
           <Route path="/exporter-login" component={ExporterLogin} />
           
           {/* Main Routes */}
-          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/dashboard" component={DashboardSimpleTest} />
           <Route path="/economic-reporting" component={EconomicReportingPage} />
           <Route path="/landing" component={Landing} />
           <Route path="/portals" component={Landing} />
@@ -37,7 +37,7 @@ function App() {
             {(() => {
               const authToken = localStorage.getItem("authToken");
               if (authToken) {
-                return <DashboardTest />;
+                return <DashboardSimpleTest />;
               } else {
                 return <FrontPage />;
               }

@@ -114,10 +114,12 @@ export default function Dashboard() {
         <div className="flex">
           <Sidebar />
           
-          {/* Test Main Content */}
-          <main className="flex-1 p-6 bg-red-500 text-white" style={{minHeight: '80vh', width: 'calc(100% - 256px)'}}>
-            <h1 className="text-6xl font-bold text-center">LAYOUT TEST SUCCESS!</h1>
-            <p className="text-2xl text-center mt-4">Your dashboard is preserved and ready to restore!</p>
+          {/* Fixed Main Content */}
+          <main className="flex-1 ml-64 p-6 pt-6" style={{minHeight: 'calc(100vh - 73px)'}}>
+            <div className="bg-red-500 text-white p-8 rounded-lg mb-8">
+              <h1 className="text-6xl font-bold text-center">LAYOUT TEST SUCCESS!</h1>
+              <p className="text-2xl text-center mt-4">Header, sidebar, and main content working together!</p>
+            </div>
             
             <div className="max-w-7xl mx-auto space-y-8 mt-4">
               

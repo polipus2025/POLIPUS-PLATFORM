@@ -241,6 +241,14 @@ function App() {
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
+  // Debug logging for authentication state
+  console.log("App Authentication State:", {
+    pathname: window.location.pathname,
+    authToken: !!authToken,
+    userType,
+    tokenLength: authToken?.length
+  });
+  
   // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");
   const isLandingPage = window.location.pathname === "/landing" && !authToken;
@@ -255,7 +263,7 @@ function App() {
           <div className="min-h-screen">
             <Router />
           </div>
-        ) : (
+        ) : authToken ? (
           // Render authenticated pages with full layout
           <div className="min-h-screen bg-gray-50">
             <Header />
@@ -265,6 +273,11 @@ function App() {
                 <Router />
               </main>
             </div>
+          </div>
+        ) : (
+          // Fallback to front page if no token
+          <div className="min-h-screen">
+            <Router />
           </div>
         )}
         <Toaster />

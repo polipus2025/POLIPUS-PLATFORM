@@ -1138,7 +1138,7 @@ export default function ExporterDashboard() {
               <Button 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white p-4 h-auto justify-start"
                 onClick={() => {
-                  // console.log('Network Partnership clicked');
+
                 }}
               >
                 <div className="flex items-center gap-3">

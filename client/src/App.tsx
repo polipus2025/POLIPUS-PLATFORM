@@ -33,7 +33,7 @@ import GISMapping from "@/pages/gis-mapping";
 import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
-import OfflineSync from "@/pages/offline-sync";
+
 import DirectorDashboard from "@/pages/director-dashboard";
 
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
@@ -214,8 +214,6 @@ function Router() {
             />
           </Route>
           
-          {/* Offline Sync - Available to all authenticated users */}
-          <Route path="/offline-sync" component={OfflineSync} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
           <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
 

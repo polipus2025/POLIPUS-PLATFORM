@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { SyncStatusIndicator } from "@/components/sync/sync-status-indicator";
+
 import type { Alert } from "@shared/schema";
 import { useState, useEffect } from "react";
 
@@ -240,10 +240,7 @@ export default function Header() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-6">
-            {/* Sync Status Indicator */}
-            <SyncStatusIndicator />
-            
+          <div className="flex items-center space-x-6">            
             <div className="flex items-center space-x-2">
               <Bell className="h-5 w-5 text-gray-400" />
               {unreadCount > 0 && (

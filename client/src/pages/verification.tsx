@@ -322,7 +322,7 @@ export default function Verification() {
             setQRCodeDataURL(dataURL);
           }
         } catch (error) {
-          console.error('Error generating QR code:', error);
+
           toast({
             title: "QR Code Error",
             description: "Failed to generate QR code",

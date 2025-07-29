@@ -15,7 +15,7 @@ import {
   QrCode,
   Globe,
   Map,
-  RefreshCw,
+
   Award,
   MessageSquare,
   TrendingUp
@@ -55,7 +55,6 @@ const regulatoryNavigation = [
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Data Entry", href: "/data-entry", icon: Plus },
   { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
-  { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
 // Farmer Navigation - Only farm management features (GIS, Crop Planning, and Internal Messaging restricted to LACRA only)
@@ -64,7 +63,6 @@ const farmerNavigation = [
   { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
-  { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
 // Field Agent Navigation - Territory-limited inspection and verification (GIS restricted to LACRA only)
@@ -76,7 +74,6 @@ const fieldAgentNavigation = [
   { name: "Real-Time Verification", href: "/verification-dashboard", icon: Award },
   { name: "Mobile Data Entry", href: "/data-entry", icon: Plus },
   { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
-  { name: "Offline Sync", href: "/offline-sync", icon: RefreshCw },
 ];
 
 // Exporter Navigation - Only exporter-LACRA interaction features

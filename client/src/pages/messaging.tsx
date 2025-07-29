@@ -243,14 +243,12 @@ export default function Messaging() {
       recipientPortal,
     };
 
-    // console.log("Sending message:", messageData);
+
     sendMessageMutation.mutate(messageData);
   };
 
   const onReply = (data: any) => {
-    // console.log("onReply function called with data:", data);
     if (!selectedMessage) {
-      // console.log("No selected message found");
       return;
     }
 
@@ -269,9 +267,6 @@ export default function Messaging() {
       recipientPortal: selectedMessage.senderPortal,
       threadId: selectedMessage.threadId,
     };
-
-    // console.log("Sending reply:", replyData);
-    // console.log("To parent message:", selectedMessage.messageId);
     
     replyMessageMutation.mutate({ 
       parentMessageId: selectedMessage.messageId, 
@@ -585,7 +580,6 @@ export default function Messaging() {
                           className="isms-button flex items-center gap-2"
                           size="sm"
                           onClick={() => {
-                            // console.log("Reply button clicked for message:", selectedMessage?.messageId);
                             replyForm.reset({
                               priority: "normal",
                               messageType: "general",

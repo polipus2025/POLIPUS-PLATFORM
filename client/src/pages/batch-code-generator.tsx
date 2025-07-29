@@ -128,7 +128,10 @@ export default function BatchCodeGenerator() {
 
   const createCommodityMutation = useMutation({
     mutationFn: async (commodityData: any) => {
-      const response = await apiRequest("/api/commodities", "POST", commodityData);
+      const response = await apiRequest("/api/commodities", {
+        method: "POST",
+        body: JSON.stringify(commodityData)
+      });
       return response;
     },
     onSuccess: () => {

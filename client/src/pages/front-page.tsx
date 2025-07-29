@@ -104,7 +104,7 @@ export default function FrontPage() {
           </div>
           <div className="flex items-center justify-center gap-6 relative">
             <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
-            <div className="ml-80">
+            <div className="ml-96">
               <Link href="/landing">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />

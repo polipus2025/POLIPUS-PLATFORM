@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,10 +8,6 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
-// ALL EXTERNAL GIS COMPONENTS REMOVED - USING INLINE SOLUTION
-import AdvancedBoundaryMapper from '@/components/gps/advanced-boundary-mapper';
-import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
-import GPSMapViewer from '@/components/gps/gps-map-viewer';
 import { 
   Map, 
   Navigation, 
@@ -34,2809 +30,588 @@ import {
   Target,
   Play,
   Pause,
-  Layers
+  Layers,
+  Crop,
+  Mountain,
+  Router,
+  Database,
+  Loader2
 } from 'lucide-react';
-import { SatelliteImageryService, CropMonitoringService, NASASatelliteService, SATELLITE_PROVIDERS, GPS_SERVICES, NASA_SATELLITES } from "@/lib/satellite-services";
-// Removed error boundary - fixing import issues
-import { PDFReportGenerator } from '@/lib/pdf-report-generator';
+
+interface GPSCoordinate {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  timestamp?: string;
+}
+
+interface FarmPlot {
+  id: string;
+  name: string;
+  county: string;
+  coordinates: GPSCoordinate[];
+  area: number;
+  crop: string;
+  status: 'active' | 'inactive' | 'monitoring';
+  complianceScore: number;
+}
+
+interface SatelliteConnection {
+  constellation: string;
+  satellites: number;
+  signal: number;
+  status: 'connected' | 'connecting' | 'disconnected';
+}
 
 export default function GISMapping() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [satelliteStatus, setSatelliteStatus] = useState<any>(null);
-  const [realTimePosition, setRealTimePosition] = useState<any>(null);
+  const [isGPSActive, setIsGPSActive] = useState(false);
+  const [satelliteConnections, setSatelliteConnections] = useState<SatelliteConnection[]>([]);
+  const [currentPosition, setCurrentPosition] = useState<GPSCoordinate | null>(null);
+  const [farmPlots, setFarmPlots] = useState<FarmPlot[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [isConnectingSatellites, setIsConnectingSatellites] = useState(false);
-  const [showSystemStatus, setShowSystemStatus] = useState(false);
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  const [selectedAlert, setSelectedAlert] = useState<any>(null);
-  const [activeAnalysisType, setActiveAnalysisType] = useState<string | null>(null);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
-  const [isAnalysisDialogOpen, setIsAnalysisDialogOpen] = useState(false);
-  const [selectedCounty, setSelectedCounty] = useState<any>(null);
-  const [locationData, setLocationData] = useState<any>(null);
-  const [farmPlots, setFarmPlots] = useState<any[]>([]);
-  const [realTimeMapData, setRealTimeMapData] = useState<any>(null);
-  const [isRealTimeActive, setIsRealTimeActive] = useState(false);
-  const mapRef = useRef<any>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize real-time map data
-  const initializeRealTimeMap = async () => {
-    if (!mapContainerRef.current) return;
-    
-    setRealTimeMapData({
-      activeFarms: Math.floor(Math.random() * 1000) + 2500,
-      compliance: Math.floor(Math.random() * 15) + 85,
-      alerts: Math.floor(Math.random() * 10) + 3
-    });
-    
-    toast({
-      title: "GIS Map Activated",
-      description: "Real-time mapping system now active for Liberia",
-    });
-  };
-
-  // Connect to real satellites on component mount
+  // Initialize satellite connections
   useEffect(() => {
-    connectToSatellites();
-    const interval = setInterval(updateSatelliteData, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
+    const connections: SatelliteConnection[] = [
+      { constellation: 'GPS (USA)', satellites: 31, signal: 95, status: 'connected' },
+      { constellation: 'GLONASS (Russia)', satellites: 24, signal: 87, status: 'connected' },
+      { constellation: 'Galileo (EU)', satellites: 22, signal: 92, status: 'connected' },
+      { constellation: 'BeiDou (China)', satellites: 30, signal: 89, status: 'connected' }
+    ];
+    setSatelliteConnections(connections);
+
+    // Simulate current position (Monrovia, Liberia)
+    setCurrentPosition({
+      latitude: 6.4281,
+      longitude: -9.4295,
+      accuracy: 3.2,
+      timestamp: new Date().toISOString()
+    });
+
+    // Initialize demo farm plots
+    const demoPlots: FarmPlot[] = [
+      {
+        id: 'plot-001',
+        name: 'Cocoa Farm Alpha',
+        county: 'Montserrado',
+        coordinates: [
+          { latitude: 6.4281, longitude: -9.4295 },
+          { latitude: 6.4285, longitude: -9.4292 },
+          { latitude: 6.4288, longitude: -9.4298 },
+          { latitude: 6.4284, longitude: -9.4301 }
+        ],
+        area: 2.5,
+        crop: 'Cocoa',
+        status: 'active',
+        complianceScore: 94
+      },
+      {
+        id: 'plot-002',
+        name: 'Coffee Plantation Beta',
+        county: 'Lofa',
+        coordinates: [
+          { latitude: 8.2281, longitude: -9.7295 },
+          { latitude: 8.2285, longitude: -9.7292 },
+          { latitude: 8.2288, longitude: -9.7298 },
+          { latitude: 8.2284, longitude: -9.7301 }
+        ],
+        area: 4.1,
+        crop: 'Coffee',
+        status: 'monitoring',
+        complianceScore: 87
+      }
+    ];
+    setFarmPlots(demoPlots);
   }, []);
 
-  // Real-time data updates
-  useEffect(() => {
-    if (isRealTimeActive) {
-      const interval = setInterval(() => {
-        setRealTimeMapData((prev: any) => ({
-          activeFarms: prev?.activeFarms + Math.floor(Math.random() * 5) - 2,
-          compliance: Math.max(85, Math.min(98, prev?.compliance + Math.floor(Math.random() * 3) - 1)),
-          alerts: Math.max(0, prev?.alerts + Math.floor(Math.random() * 3) - 1)
-        }));
-      }, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [isRealTimeActive]);
-
-  const connectToSatellites = async () => {
-    setIsConnectingSatellites(true);
+  const activateGPS = async () => {
+    setIsLoading(true);
     try {
-      // Get real satellite constellation status
-      const status = await SatelliteImageryService.getSatelliteStatus();
-      setSatelliteStatus(status);
-      
-      // Get current GPS position with error handling
-      let position;
-      try {
-        position = await SatelliteImageryService.getCurrentPosition();
-        setRealTimePosition(position);
-      } catch (posError) {
-        console.warn('GPS position unavailable, using default coordinates');
-        position = { coords: { latitude: 6.4281, longitude: -9.4295 } };
-        setRealTimePosition(position);
-      }
-      
-      // Connect to NASA satellites specifically
-      const nasaImagery = await NASASatelliteService.getNASAImagery({ 
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-      
-      const modisData = await NASASatelliteService.getMODISAgriculturalData({ 
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-
-      // Get NASA Landsat field analysis
-      const landsatData = await NASASatelliteService.getLandsatFieldAnalysis({
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-
-      // Get NASA SMAP soil moisture data
-      const smapData = await NASASatelliteService.getSMAPSoilMoisture({
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-
-      // Get Global Forest Watch data using separate service
-      const { GlobalForestWatchService } = await import('@/lib/forest-watch-service');
-      
-      const gladAlerts = await GlobalForestWatchService.getGLADAlerts({
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-
-      const gfwIntegratedAlerts = await GlobalForestWatchService.getIntegratedAlerts({
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-
-      const treeCoverAnalysis = await GlobalForestWatchService.getTreeCoverAnalysis({
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-
-      const fireAlerts = await GlobalForestWatchService.getFireAlerts({
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-
-      const biodiversityData = await GlobalForestWatchService.getBiodiversityData({
-        lat: position.coords?.latitude || 6.4281, 
-        lng: position.coords?.longitude || -9.4295 
-      });
-      
-      console.log('✅ Successfully connected to satellite networks:', status);
-      console.log('🛰️ NASA GIBS imagery connected:', nasaImagery);
-      console.log('🌱 NASA MODIS agricultural data:', modisData);
-      console.log('🗺️ NASA Landsat field analysis:', landsatData);
-      console.log('💧 NASA SMAP soil moisture:', smapData);
-      console.log('🌲 GFW GLAD deforestation alerts:', gladAlerts);
-      console.log('🔍 GFW integrated alerts:', gfwIntegratedAlerts);
-      console.log('📊 GFW tree cover analysis:', treeCoverAnalysis);
-      console.log('🔥 GFW fire alerts:', fireAlerts);
-      console.log('🦋 GFW biodiversity data:', biodiversityData);
-      
-      // Store NASA data and GFW data for display
-      setSatelliteStatus((prev: any) => ({
-        ...status,
-        ...prev,
-        nasaData: { nasaImagery, modisData, landsatData, smapData },
-        gfwData: { gladAlerts, gfwIntegratedAlerts, treeCoverAnalysis, fireAlerts, biodiversityData }
-      }));
-      
-    } catch (error) {
-      console.error('❌ Satellite connection error:', error);
-      
-      // Set fallback satellite status with working defaults
-      setSatelliteStatus({
-        totalSatellites: 107,
-        connectedSatellites: 94,
-        gps: { accuracy: 'Multi-constellation GPS', signal: 'strong' },
-        constellations: {
-          gps: { active: 31, signal: 'excellent' },
-          glonass: { active: 24, signal: 'good' },
-          galileo: { active: 22, signal: 'excellent' },
-          beidou: { active: 30, signal: 'good' }
-        },
-        optimalCoverage: true,
-        nasaData: null,
-        gfwData: null
-      });
-      
-    } finally {
-      setIsConnectingSatellites(false);
-    }
-  };
-
-  const updateSatelliteData = async () => {
-    try {
-      if (satelliteStatus) {
-        const updatedStatus = await SatelliteImageryService.getSatelliteStatus();
-        setSatelliteStatus((prevStatus: any) => ({
-          ...prevStatus,
-          ...updatedStatus
-        }));
-      }
-    } catch (error) {
-      console.warn('Failed to update satellite data:', error);
-    }
-  };
-
-  // Fetch real location data
-  const { data: locations } = useQuery({
-    queryKey: ['/api/gis/locations/']
-  });
-
-  // Fetch real farm plots data
-  const { data: plotsData } = useQuery({
-    queryKey: ['/api/farm-plots/']
-  });
-
-  // Update location data when query succeeds
-  useEffect(() => {
-    if (locations) {
-      setLocationData(locations);
-    }
-  }, [locations]);
-
-  // Update farm plots when query succeeds
-  useEffect(() => {
-    if (plotsData && Array.isArray(plotsData)) {
-      setFarmPlots(plotsData);
-    }
-  }, [plotsData]);
-
-  // Real data analysis functions
-  const performYieldPrediction = async () => {
-    setActiveAnalysisType('yield-prediction');
-    setIsAnalysisDialogOpen(true);
-    
-    const results = {
-      type: 'Yield Prediction Analysis',
-      timestamp: new Date().toISOString(),
-      data: {
-        cropYieldIndex: satelliteStatus?.nasaData?.modis?.vegetation_indices?.ndvi ? 
-          (satelliteStatus.nasaData.modis.vegetation_indices.ndvi * 100).toFixed(1) : '87.3',
-        predictedYield: satelliteStatus?.nasaData?.modis?.vegetation_indices?.ndvi ? 
-          ((satelliteStatus.nasaData.modis.vegetation_indices.ndvi * 2.5) + 1.2).toFixed(2) : '3.4',
-        riskFactors: ['Optimal rainfall', 'Good soil moisture', 'Healthy vegetation'],
-        recommendations: [
-          'Continue current irrigation schedule',
-          'Monitor for pest activity in next 2 weeks',
-          'Plan harvest for optimal timing'
-        ],
-        confidence: '94%',
-        analysisBasedOn: ['NASA MODIS NDVI', 'Historical yield data', 'Weather patterns']
-      }
-    };
-    
-    setAnalysisResults(results);
-    
-    toast({
-      title: "Yield Prediction Complete",
-      description: `Analysis shows ${results.data.cropYieldIndex}% crop health index with ${results.data.predictedYield} tons/hectare predicted yield.`,
-    });
-  };
-
-  const performSoilMapping = async () => {
-    setActiveAnalysisType('soil-mapping');
-    setIsAnalysisDialogOpen(true);
-    
-    const results = {
-      type: 'Soil Analysis Report',
-      timestamp: new Date().toISOString(),
-      data: {
-        soilHealthScore: satelliteStatus?.nasaData?.smap?.soil_moisture?.soil_moisture_am ? 
-          (satelliteStatus.nasaData.smap.soil_moisture.soil_moisture_am * 100).toFixed(0) : '76',
-        moistureLevel: satelliteStatus?.nasaData?.smap?.soil_moisture?.soil_moisture_am ? 
-          `${(satelliteStatus.nasaData.smap.soil_moisture.soil_moisture_am * 100).toFixed(1)}%` : '34.2%',
-        soilType: 'Sandy loam with high organic content',
-        phLevel: '6.8 (Optimal)',
-        nutrients: {
-          nitrogen: 'Adequate',
-          phosphorus: 'Good',
-          potassium: 'Excellent'
-        },
-        recommendations: [
-          'Soil moisture is optimal for current crop',
-          'Consider nitrogen supplement in 4-6 weeks',
-          'Maintain current organic matter levels'
-        ],
-        analysisBasedOn: ['NASA SMAP soil moisture', 'Multi-spectral imagery', 'Historical soil data']
-      }
-    };
-    
-    setAnalysisResults(results);
-    
-    toast({
-      title: "Soil Analysis Complete",
-      description: `Soil health score: ${results.data.soilHealthScore}/100 with ${results.data.moistureLevel} moisture level.`,
-    });
-  };
-
-  const performClimateAnalysis = async () => {
-    setActiveAnalysisType('climate-analysis');
-    setIsAnalysisDialogOpen(true);
-    
-    const results = {
-      type: 'Climate Impact Assessment',
-      timestamp: new Date().toISOString(),
-      data: {
-        currentRisk: 'Low',
-        temperature: satelliteStatus?.nasaData?.modis?.temperature?.land_surface_temperature_day ?
-          `${(satelliteStatus.nasaData.modis.temperature.land_surface_temperature_day - 273.15).toFixed(1)}°C` : '28.5°C',
-        humidity: '72%',
-        rainfallPrediction: '15mm expected next 7 days',
-        heatStressRisk: 'Low',
-        droughtRisk: 'Very Low',
-        recommendations: [
-          'Current climate conditions are favorable',
-          'Monitor temperature trends for next 2 weeks',
-          'Maintain irrigation schedule'
-        ],
-        climateFactors: {
-          temperature: 'Optimal range',
-          rainfall: 'Adequate',
-          windSpeed: 'Moderate',
-          humidity: 'Good'
-        },
-        analysisBasedOn: ['NASA MODIS temperature', 'Weather stations', 'Climate models']
-      }
-    };
-    
-    setAnalysisResults(results);
-    
-    toast({
-      title: "Climate Analysis Complete",
-      description: `Current risk level: ${results.data.currentRisk} with temperature at ${results.data.temperature}.`,
-    });
-  };
-
-  const performResourceOptimization = async () => {
-    setActiveAnalysisType('resource-optimization');
-    setIsAnalysisDialogOpen(true);
-    
-    const results = {
-      type: 'Resource Optimization Analysis',
-      timestamp: new Date().toISOString(),
-      data: {
-        efficiencyScore: satelliteStatus?.nasaData?.modis?.vegetation_indices?.evi ? 
-          (satelliteStatus.nasaData.modis.vegetation_indices.evi * 100).toFixed(1) : '91.2',
-        waterUsage: 'Optimal - 85% efficiency',
-        fertilizerEfficiency: '92%',
-        energyConsumption: 'Good - 78% efficiency',
-        costSavings: '$2,340 potential monthly savings',
-        recommendations: [
-          'Implement precision irrigation in Plot A',
-          'Reduce fertilizer application by 15% in high-fertility zones',
-          'Optimize machinery routes to save fuel'
-        ],
-        optimizationAreas: {
-          irrigation: 'High potential',
-          fertilization: 'Medium potential',
-          pesticide: 'Low potential',
-          machinery: 'High potential'
-        },
-        analysisBasedOn: ['Satellite vegetation indices', 'Historical resource data', 'Efficiency algorithms']
-      }
-    };
-    
-    setAnalysisResults(results);
-    
-    toast({
-      title: "Resource Optimization Complete",
-      description: `Efficiency score: ${results.data.efficiencyScore}% with potential savings of ${results.data.costSavings}.`,
-    });
-  };
-
-  const gisStats = {
-    totalPlots: 1247,
-    mappedArea: '15847 hectares',
-    activeVehicles: 45,
-    trackingAccuracy: '98.7%',
-    satellitesConnected: satelliteStatus?.totalSatellites || 107,
-    gpsAccuracy: satelliteStatus?.gps?.accuracy || 'Multi-constellation GPS',
-    lastUpdate: new Date().toLocaleTimeString()
-  };
-
-  // Interactive functions
-  const handleExportData = (format: string) => {
-    toast({
-      title: "Export Started",
-      description: `Exporting GIS data in ${format} format...`,
-    });
-    
-    // Simulate export process
-    setTimeout(() => {
+      // Simulate GPS activation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsGPSActive(true);
       toast({
-        title: "Export Complete",
-        description: `GIS data exported successfully as ${format} file.`,
-      });
-      setShowExportDialog(false);
-    }, 2000);
-  };
-
-  const handleRefreshSatellites = async () => {
-    setIsConnectingSatellites(true);
-    toast({
-      title: "Refreshing Satellites",
-      description: "Reconnecting to satellite network...",
-    });
-    
-    try {
-      await connectToSatellites();
-      toast({
-        title: "Satellites Updated",
-        description: "Successfully refreshed satellite connections.",
+        title: "GPS System Activated",
+        description: "Real-time positioning and mapping now active",
       });
     } catch (error) {
       toast({
-        title: "Refresh Failed",
-        description: "Unable to refresh satellite connections.",
+        title: "GPS Activation Failed",
+        description: "Could not connect to GPS satellites",
         variant: "destructive",
       });
     } finally {
-      setIsConnectingSatellites(false);
+      setIsLoading(false);
     }
   };
 
-  const handleViewAlertDetails = (alert: any) => {
-    setSelectedAlert(alert);
+  const deactivateGPS = () => {
+    setIsGPSActive(false);
+    toast({
+      title: "GPS System Deactivated",
+      description: "GPS tracking has been disabled",
+    });
   };
 
-  // EUDR PDF Report Generation Function
-  const generateEUDRReport = async () => {
-    try {
-      toast({
-        title: "Generating EUDR Report",
-        description: "Creating comprehensive deforestation and compliance report...",
-      });
+  const LiberiaCountiesMap = () => {
+    const counties = [
+      { name: 'Montserrado', x: 220, y: 280, farms: 156, color: '#3b82f6' },
+      { name: 'Lofa', x: 180, y: 120, farms: 89, color: '#10b981' },
+      { name: 'Bong', x: 240, y: 200, farms: 134, color: '#f59e0b' },
+      { name: 'Nimba', x: 320, y: 180, farms: 178, color: '#ef4444' },
+      { name: 'Grand Bassa', x: 280, y: 260, farms: 67, color: '#8b5cf6' },
+      { name: 'Sinoe', x: 340, y: 300, farms: 45, color: '#06b6d4' },
+      { name: 'Maryland', x: 380, y: 340, farms: 23, color: '#84cc16' },
+      { name: 'Grand Cape Mount', x: 160, y: 180, farms: 34, color: '#f97316' },
+      { name: 'Gbarpolu', x: 140, y: 160, farms: 28, color: '#ec4899' }
+    ];
 
-      const reportData = {
-        coordinates: realTimePosition?.coords || { lat: 7.225282, lng: -9.003844 },
-        timestamp: new Date().toISOString(),
-        gfwData: satelliteStatus?.gfwData || {
-          gladAlerts: {
-            alerts: [
-              {
-                alert_id: "GLAD-2025-001",
-                alert_date: "2025-01-20",
-                confidence: "high",
-                area_ha: 2.5,
-                forest_type: "primary_forest",
-                alert_type: "deforestation",
-                severity: "moderate"
-              }
-            ]
-          },
-          gfwIntegratedAlerts: {
-            alert_summary: {
-              total_alerts_30days: 15,
-              high_confidence_alerts: 8,
-              total_area_ha: 45.7,
-              avg_detection_latency_days: 3
-            },
-            recommendations: [
-              "Implement immediate monitoring in high-risk zones",
-              "Deploy field verification teams",
-              "Coordinate with local authorities",
-              "Establish early warning systems"
-            ]
-          },
-          treeCoverAnalysis: {
-            tree_cover_stats: {
-              current_tree_cover_percent: 65.2,
-              tree_cover_2000_percent: 78.4,
-              tree_cover_loss_2001_2023: 13.2,
-              tree_cover_gain_2000_2012: 2.1
-            },
-            forest_change_analysis: {
-              annual_loss_rate: 0.8,
-              peak_loss_year: 2023,
-              primary_forest_extent_ha: 1250.5,
-              secondary_forest_extent_ha: 2100.3,
-              plantation_extent_ha: 450.2
-            },
-            carbon_implications: {
-              estimated_carbon_loss_tons: 8500,
-              co2_emissions_tons: 31200,
-              carbon_density_tons_per_ha: 120.5
-            }
-          },
-          fireAlerts: {
-            total_fire_alerts: 12,
-            high_confidence_fires: 8,
-            fire_alerts: [
-              {
-                alert_id: "FIRE-2025-001",
-                detection_date: "2025-01-22",
-                confidence: "high",
-                fire_type: "agricultural_burn",
-                satellite_source: "MODIS"
-              }
-            ]
-          },
-          biodiversityData: {
-            biodiversity_indicators: {
-              species_richness_index: 42.3,
-              endemic_species_count: 15,
-              threatened_species_count: 8,
-              habitat_integrity_score: 72.5
-            },
-            protected_areas: {
-              within_protected_area: false,
-              nearest_protected_area_km: 25.3,
-              protection_level: "national_park",
-              area_designation: "Sapo National Park"
-            },
-            conservation_status: {
-              priority_level: "high",
-              conservation_actions_needed: [
-                "Strengthen protection enforcement",
-                "Community engagement programs",
-                "Habitat restoration"
-              ],
-              funding_requirements_usd: 750000
-            }
-          }
-        },
-        nasaData: satelliteStatus?.nasaData || {},
-        eudrCompliance: {
-          riskLevel: "Medium Risk",
-          complianceStatus: "Compliant",
-          deforestationRisk: "Low"
-        }
-      };
-
-      const pdfGenerator = new PDFReportGenerator();
-      const filename = `AgriTrace360_EUDR_Compliance_Report_${new Date().toISOString().split('T')[0]}.pdf`;
-      
-      pdfGenerator.downloadReport(reportData, filename);
-
-      toast({
-        title: "EUDR Report Generated",
-        description: `Comprehensive compliance report downloaded as ${filename}`,
-      });
-
-    } catch (error) {
-      console.error('Error generating EUDR report:', error);
-      toast({
-        title: "Report Generation Failed",
-        description: "Unable to generate EUDR compliance report. Please try again.",
-        variant: "destructive",
-      });
-    }
+    return (
+      <div className="relative w-full h-96 bg-slate-100 rounded-xl overflow-hidden">
+        <svg viewBox="0 0 500 400" className="w-full h-full">
+          {/* Liberia country outline */}
+          <path
+            d="M150 180 L180 120 L220 110 L280 120 L320 140 L360 160 L380 180 L400 220 L390 260 L380 300 L360 340 L320 360 L280 350 L240 340 L200 320 L180 300 L160 280 L150 240 Z"
+            fill="rgba(148, 163, 184, 0.3)"
+            stroke="rgba(148, 163, 184, 0.6)"
+            strokeWidth="2"
+          />
+          
+          {/* County markers */}
+          {counties.map((county) => (
+            <g key={county.name}>
+              <circle
+                cx={county.x}
+                cy={county.y}
+                r="8"
+                fill={county.color}
+                className="cursor-pointer hover:scale-110 transition-transform"
+              />
+              <text
+                x={county.x}
+                y={county.y - 15}
+                textAnchor="middle"
+                className="text-xs font-medium fill-slate-700"
+              >
+                {county.name}
+              </text>
+              <text
+                x={county.x}
+                y={county.y + 25}
+                textAnchor="middle"
+                className="text-xs fill-slate-500"
+              >
+                {county.farms} farms
+              </text>
+            </g>
+          ))}
+          
+          {/* Farm plot indicators */}
+          {farmPlots.map((plot, index) => (
+            <circle
+              key={plot.id}
+              cx={counties[index % counties.length]?.x || 200}
+              cy={counties[index % counties.length]?.y || 200}
+              r="4"
+              fill="#22c55e"
+              className="animate-pulse"
+            />
+          ))}
+        </svg>
+        
+        {/* Map Legend */}
+        <div className="absolute bottom-4 left-4 bg-white rounded-lg p-3 shadow-sm">
+          <h4 className="text-sm font-medium text-slate-900 mb-2">Map Legend</h4>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+              <span className="text-xs text-slate-600">Active Counties</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+              <span className="text-xs text-slate-600">GPS Tracked Farms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="min-h-screen isms-gradient">
-      <div className="max-w-7xl mx-auto p-8 space-y-8">
-        <Helmet>
-          <title>GIS Mapping System - AgriTrace360™ LACRA</title>
-          <meta name="description" content="Comprehensive geospatial mapping and tracking system for agricultural operations" />
-        </Helmet>
+      <Helmet>
+        <title>GIS Mapping System - AgriTrace360 LACRA</title>
+        <meta name="description" content="Advanced GIS mapping and GPS tracking for agricultural compliance monitoring" />
+      </Helmet>
 
+      <div className="max-w-7xl mx-auto p-8">
         {/* Header Section - ISMS Style */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-2xl isms-icon-bg-green flex items-center justify-center">
-            <Map className="h-8 w-8 text-white" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl isms-icon-bg-green flex items-center justify-center">
+              <Map className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900">GIS Mapping System</h1>
+              <p className="text-slate-600 text-lg">Advanced geospatial analysis and GPS tracking for agricultural compliance</p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-slate-900">GIS Mapping System</h1>
-            <p className="text-slate-600 text-lg">Comprehensive geospatial mapping and agricultural tracking</p>
-          </div>
-          <div className="flex gap-2">
-            {/* EUDR PDF Report Button */}
-            <Button 
-              onClick={generateEUDRReport}
-              className="bg-green-600 hover:bg-green-700 text-white"
-              size="sm"
+          <div className="flex gap-3">
+            <Button
+              onClick={isGPSActive ? deactivateGPS : activateGPS}
+              disabled={isLoading}
+              className={`isms-button flex items-center gap-2 ${isGPSActive ? 'bg-red-600 hover:bg-red-700' : ''}`}
             >
-              <FileText className="h-4 w-4 mr-2" />
-              Generate EUDR Report
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isGPSActive ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+              {isGPSActive ? 'Deactivate GPS' : 'Activate GPS'}
             </Button>
-          
-          <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export Data
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Export GIS Data</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600">
-                  Choose the format for exporting your GIS data:
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button onClick={() => handleExportData('KML')} className="h-20 flex-col">
-                    <Globe className="h-6 w-6 mb-2" />
-                    <span>KML File</span>
-                    <span className="text-xs opacity-75">Google Earth</span>
-                  </Button>
-                  <Button onClick={() => handleExportData('GeoJSON')} className="h-20 flex-col" variant="outline">
-                    <Map className="h-6 w-6 mb-2" />
-                    <span>GeoJSON</span>
-                    <span className="text-xs opacity-75">Web Maps</span>
-                  </Button>
-                  <Button onClick={() => handleExportData('CSV')} className="h-20 flex-col" variant="outline">
-                    <Download className="h-6 w-6 mb-2" />
-                    <span>CSV File</span>
-                    <span className="text-xs opacity-75">Spreadsheet</span>
-                  </Button>
-                  <Button onClick={() => handleExportData('PDF Report')} className="h-20 flex-col" variant="outline">
-                    <BarChart3 className="h-6 w-6 mb-2" />
-                    <span>PDF Report</span>
-                    <span className="text-xs opacity-75">Full Report</span>
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog open={showSystemStatus} onOpenChange={setShowSystemStatus}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Activity className="h-4 w-4 mr-2" />
-                System Status
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>GIS System Status</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Satellite Connectivity</h4>
-                    <div className="text-sm space-y-1">
-                      <div className="flex justify-between">
-                        <span>Connected Satellites:</span>
-                        <span className="font-mono">{satelliteStatus?.connectedSatellites || 94}/107</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>GPS Accuracy:</span>
-                        <span className="font-mono">{satelliteStatus?.gps?.accuracy || 'Multi-constellation'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Signal Strength:</span>
-                        <Badge variant={satelliteStatus?.gps?.signal === 'strong' ? 'default' : 'secondary'}>
-                          {satelliteStatus?.gps?.signal || 'Strong'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Data Sources</h4>
-                    <div className="text-sm space-y-1">
-                      <div className="flex justify-between">
-                        <span>NASA Satellites:</span>
-                        <Badge variant="default">Active</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Global Forest Watch:</span>
-                        <Badge variant="default">Connected</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Real-time GPS:</span>
-                        <Badge variant={realTimePosition ? 'default' : 'secondary'}>
-                          {realTimePosition ? 'Active' : 'Connecting'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-4 border-t">
-                  <Button onClick={handleRefreshSatellites} disabled={isConnectingSatellites} className="w-full">
-                    <RefreshCw className={`h-4 w-4 mr-2 ${isConnectingSatellites ? 'animate-spin' : ''}`} />
-                    {isConnectingSatellites ? 'Refreshing...' : 'Refresh Connections'}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export Map Data
+            </Button>
           </div>
         </div>
 
-        {/* Quick Stats - ISMS Style */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {/* GPS Status Overview - ISMS Style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="isms-card">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                <Map className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-slate-600 font-medium">Mapped Plots</p>
-                <p className="isms-metric-number">{gisStats.totalPlots.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="isms-card">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
                 <Satellite className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">Total Area</p>
-                <p className="isms-metric-number">{gisStats.mappedArea}</p>
+                <p className="text-slate-600 text-sm">GPS Satellites</p>
+                <p className="text-3xl font-bold text-slate-900">
+                  {satelliteConnections.reduce((acc, conn) => acc + conn.satellites, 0)}
+                </p>
               </div>
             </div>
+            <p className="text-slate-600 text-sm">Connected across all constellations</p>
           </div>
 
           <div className="isms-card">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center">
-                <Truck className="h-6 w-6 text-white" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                <MapPin className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">Active Vehicles</p>
-                <p className="isms-metric-number">{gisStats.activeVehicles}</p>
+                <p className="text-slate-600 text-sm">GPS Accuracy</p>
+                <p className="text-3xl font-bold text-slate-900">{currentPosition?.accuracy || 3.2}m</p>
               </div>
             </div>
+            <p className="text-slate-600 text-sm">Real-time positioning precision</p>
           </div>
 
           <div className="isms-card">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center">
-                <BarChart3 className="h-6 w-6 text-white" />
+                <Crop className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">GPS Accuracy</p>
-                <p className="isms-metric-number">{gisStats.trackingAccuracy}</p>
+                <p className="text-slate-600 text-sm">Mapped Farms</p>
+                <p className="text-3xl font-bold text-slate-900">{farmPlots.length || 847}</p>
               </div>
             </div>
+            <p className="text-slate-600 text-sm">GPS boundary mapped plots</p>
           </div>
 
           <div className="isms-card">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center">
                 <Activity className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">Last Update</p>
-                <p className="text-lg font-bold text-slate-900">{gisStats.lastUpdate}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs text-green-600 font-medium">Live</span>
-                </div>
+                <p className="text-slate-600 text-sm">System Status</p>
+                <p className="text-3xl font-bold text-slate-900">
+                  {isGPSActive ? 'ACTIVE' : 'STANDBY'}
+                </p>
               </div>
             </div>
+            <p className="text-slate-600 text-sm">Real-time tracking status</p>
           </div>
         </div>
 
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm p-2 rounded-xl">
-            <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg">
-              <Map className="h-4 w-4" />
-              Interactive Map
-            </TabsTrigger>
-            <TabsTrigger value="realtime-gis" className="flex items-center gap-2 rounded-lg">
-              <Globe className="h-4 w-4" />
-              Real-Time GIS
-            </TabsTrigger>
-            <TabsTrigger value="farm-plots" className="flex items-center gap-2 rounded-lg">
-              <Satellite className="h-4 w-4" />
-              Farm Mapping
-            </TabsTrigger>
-            <TabsTrigger value="transportation" className="flex items-center gap-2 rounded-lg">
-              <Truck className="h-4 w-4" />
-              Vehicle Tracking
-            </TabsTrigger>
-            <TabsTrigger value="satellites" className="flex items-center gap-2 rounded-lg">
-              <Activity className="h-4 w-4" />
-              Satellites
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2 rounded-lg">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
-            </TabsTrigger>
-          </TabsList>
+        {/* GIS Mapping Tabs - ISMS Style */}
+        <div className="isms-card">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+              <Layers className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Interactive Mapping Platform</h2>
+              <p className="text-slate-600">Comprehensive geospatial analysis and monitoring tools</p>
+            </div>
+          </div>
 
-          <TabsContent value="overview" className="space-y-8">
-            <div className="grid grid-cols-1 gap-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-5 bg-slate-100 rounded-xl">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Map Overview
+              </TabsTrigger>
+              <TabsTrigger value="counties" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Counties View
+              </TabsTrigger>
+              <TabsTrigger value="satellites" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Satellite Status
+              </TabsTrigger>
+              <TabsTrigger value="tracking" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                GPS Tracking
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Map Analytics
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6">
               <div className="isms-card">
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                    <Map className="h-5 w-5 text-white" />
+                    <Globe className="h-5 w-5 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-slate-900">Liberia Counties Map</h3>
-                </div>
-                <div className="space-y-4">
-                  {/* Clean Counties Grid */}
-                  <div className="grid grid-cols-5 gap-3 p-6 bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border">
-                    <div 
-                      className="bg-red-100 p-2 rounded-lg cursor-pointer hover:bg-red-200 text-center transition-colors" 
-                      onClick={() => {
-                        setSelectedCounty({
-                          name: 'Montserrado',
-                          farms: 342,
-                          population: '1.4M',
-                          area: '1,912 km²',
-                          capital: 'Monrovia',
-                          commodities: ['Cocoa', 'Coffee', 'Rice', 'Cassava'],
-                          compliance: 94,
-                          exports: '$2.3M/year',
-                          details: 'Liberia\'s most populous county and home to the capital city of Monrovia. Major agricultural hub with strong infrastructure.'
-                        });
-                      }}
-                    >
-                      <div className="font-semibold text-sm">Montserrado</div>
-                      <div className="text-xs text-gray-600">342 farms</div>
-                    </div>
-                      <div 
-                        className="bg-blue-200 p-3 rounded cursor-pointer hover:bg-blue-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Lofa',
-                            farms: 287,
-                            population: '312,000',
-                            area: '9,982 km²',
-                            capital: 'Voinjama',
-                            commodities: ['Rice', 'Coffee', 'Palm oil', 'Rubber'],
-                            compliance: 87,
-                            exports: '$1.8M/year',
-                            details: 'Northwestern county known for rice production and coffee cultivation. Significant agricultural potential.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Lofa</div>
-                        <div className="text-xs">287 farms</div>
-                      </div>
-                      <div 
-                        className="bg-yellow-200 p-3 rounded cursor-pointer hover:bg-yellow-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Nimba',
-                            farms: 298,
-                            population: '462,000',
-                            area: '11,551 km²',
-                            capital: 'Sanniquellie',
-                            commodities: ['Rubber', 'Cocoa', 'Coffee', 'Iron ore'],
-                            compliance: 91,
-                            exports: '$3.1M/year',
-                            details: 'Largest county by area with significant mining and agricultural activities. Rich in natural resources.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Nimba</div>
-                        <div className="text-xs">298 farms</div>
-                      </div>
-                      <div 
-                        className="bg-green-200 p-3 rounded cursor-pointer hover:bg-green-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Bong',
-                            farms: 234,
-                            population: '333,000',
-                            area: '8,772 km²',
-                            capital: 'Gbarnga',
-                            commodities: ['Rubber', 'Rice', 'Cassava', 'Sweet potato'],
-                            compliance: 89,
-                            exports: '$1.6M/year',
-                            details: 'Central county with significant rubber plantations and educational institutions including Cuttington University.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Bong</div>
-                        <div className="text-xs">234 farms</div>
-                      </div>
-                      <div 
-                        className="bg-purple-200 p-3 rounded cursor-pointer hover:bg-purple-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Grand Gedeh',
-                            farms: 156,
-                            population: '125,000',
-                            area: '10,484 km²',
-                            capital: 'Zwedru',
-                            commodities: ['Cocoa', 'Coffee', 'Cassava', 'Timber'],
-                            compliance: 88,
-                            exports: '$1.1M/year',
-                            details: 'Eastern border county known for coffee production and forest resources. Strategic location for cross-border trade.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Grand Gedeh</div>
-                        <div className="text-xs">156 farms</div>
-                      </div>
-                      <div 
-                        className="bg-pink-200 p-3 rounded cursor-pointer hover:bg-pink-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Grand Bassa',
-                            farms: 198,
-                            population: '224,000',
-                            area: '7,937 km²',
-                            capital: 'Buchanan',
-                            commodities: ['Palm oil', 'Rubber', 'Cocoa', 'Rice'],
-                            compliance: 92,
-                            exports: '$2.1M/year',
-                            details: 'Coastal county with major port facilities and palm oil production. Important export hub for agricultural products.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Grand Bassa</div>
-                        <div className="text-xs">198 farms</div>
-                      </div>
-                      <div 
-                        className="bg-indigo-200 p-3 rounded cursor-pointer hover:bg-indigo-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Sinoe',
-                            farms: 167,
-                            population: '104,000',
-                            area: '10,137 km²',
-                            capital: 'Greenville',
-                            commodities: ['Palm oil', 'Rubber', 'Cocoa', 'Timber'],
-                            compliance: 85,
-                            exports: '$1.2M/year',
-                            details: 'Southeastern coastal county known for palm oil production and timber. Rich biodiversity and forest resources.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Sinoe</div>
-                        <div className="text-xs">167 farms</div>
-                      </div>
-                      <div 
-                        className="bg-orange-200 p-3 rounded cursor-pointer hover:bg-orange-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Maryland',
-                            farms: 145,
-                            population: '136,000',
-                            area: '2,297 km²',
-                            capital: 'Harper',
-                            commodities: ['Palm oil', 'Cocoa', 'Rubber', 'Rice'],
-                            compliance: 93,
-                            exports: '$1.4M/year',
-                            details: 'Southeastern coastal county with strong palm oil industry and historical significance as early settlement area.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Maryland</div>
-                        <div className="text-xs">145 farms</div>
-                      </div>
-                      <div 
-                        className="bg-teal-200 p-3 rounded cursor-pointer hover:bg-teal-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Grand Kru',
-                            farms: 134,
-                            population: '57,000',
-                            area: '3,895 km²',
-                            capital: 'Barclayville',
-                            commodities: ['Palm oil', 'Cassava', 'Rice', 'Fishing'],
-                            compliance: 86,
-                            exports: '$0.8M/year',
-                            details: 'Coastal county with fishing industry and palm oil production. Smaller population but important coastal resources.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Grand Kru</div>
-                        <div className="text-xs">134 farms</div>
-                      </div>
-
-                      {/* SECONDA RIGA - 6 CONTEE AGGIUNTIVE */}
-                      <div 
-                        className="bg-cyan-200 p-3 rounded cursor-pointer hover:bg-cyan-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'River Cess',
-                            farms: 112,
-                            population: '71,000',
-                            area: '5,594 km²',
-                            capital: 'Cestos',
-                            commodities: ['Palm oil', 'Rubber', 'Rice', 'Cassava'],
-                            compliance: 87,
-                            exports: '$0.9M/year',
-                            details: 'River-rich county with significant palm oil and rubber production. Natural water resources support agriculture.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">River Cess</div>
-                        <div className="text-xs">112 farms</div>
-                      </div>
-
-                      <div 
-                        className="bg-lime-200 p-3 rounded cursor-pointer hover:bg-lime-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Gbarpolu',
-                            farms: 98,
-                            population: '83,000',
-                            area: '9,689 km²',
-                            capital: 'Bopolu',
-                            commodities: ['Rice', 'Cassava', 'Coffee', 'Cocoa'],
-                            compliance: 84,
-                            exports: '$0.7M/year',
-                            details: 'Northwestern county with mountainous terrain and coffee cultivation. Traditional agricultural practices.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Gbarpolu</div>
-                        <div className="text-xs">98 farms</div>
-                      </div>
-
-                      <div 
-                        className="bg-rose-200 p-3 rounded cursor-pointer hover:bg-rose-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Bomi',
-                            farms: 156,
-                            population: '84,000',
-                            area: '1,942 km²',
-                            capital: 'Tubmanburg',
-                            commodities: ['Rubber', 'Rice', 'Cassava', 'Palm oil'],
-                            compliance: 90,
-                            exports: '$1.3M/year',
-                            details: 'Small but productive county with rubber plantations and good agricultural infrastructure near Monrovia.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Bomi</div>
-                        <div className="text-xs">156 farms</div>
-                      </div>
-
-                      <div 
-                        className="bg-amber-200 p-3 rounded cursor-pointer hover:bg-amber-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Grand Cape Mount',
-                            farms: 178,
-                            population: '129,000',
-                            area: '5,162 km²',
-                            capital: 'Robertsport',
-                            commodities: ['Rice', 'Cassava', 'Palm oil', 'Fishing'],
-                            compliance: 91,
-                            exports: '$1.5M/year',
-                            details: 'Coastal county with rice farming, fishing industry, and palm oil production. Strategic Atlantic location.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">G. Cape Mount</div>
-                        <div className="text-xs">178 farms</div>
-                      </div>
-
-                      <div 
-                        className="bg-emerald-200 p-3 rounded cursor-pointer hover:bg-emerald-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'Margibi',
-                            farms: 203,
-                            population: '209,000',
-                            area: '2,616 km²',
-                            capital: 'Kakata',
-                            commodities: ['Rubber', 'Palm oil', 'Rice', 'Vegetables'],
-                            compliance: 95,
-                            exports: '$2.2M/year',
-                            details: 'Highly productive county with modern agricultural facilities and proximity to Monrovia markets.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">Margibi</div>
-                        <div className="text-xs">203 farms</div>
-                      </div>
-
-                      <div 
-                        className="bg-violet-200 p-3 rounded cursor-pointer hover:bg-violet-300 text-center transform hover:scale-105 transition-all duration-200" 
-                        onClick={() => {
-                          setSelectedCounty({
-                            name: 'River Gee',
-                            farms: 89,
-                            population: '66,000',
-                            area: '5,113 km²',
-                            capital: 'Fish Town',
-                            commodities: ['Cocoa', 'Palm oil', 'Cassava', 'Fishing'],
-                            compliance: 83,
-                            exports: '$0.6M/year',
-                            details: 'Southeastern county with cocoa farms and coastal fishing. Smaller agricultural output but growing potential.'
-                          });
-                        }}
-                      >
-                        <div className="text-xl">🏛️</div>
-                        <div className="font-bold text-xs">River Gee</div>
-                        <div className="text-xs">89 farms</div>
-                      </div>
-                    </div>
-
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-green-100 to-blue-100 p-4 rounded-lg text-center border">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">🇱🇷 Liberia Counties Overview</h3>
-                    <p className="text-sm text-gray-600">15 interactive counties with agricultural data</p>
-                    <div className="flex justify-center space-x-4 mt-3 text-xs text-gray-500">
-                      <span>Total Farms: 3,247</span>
-                      <span>•</span>
-                      <span>Avg Compliance: 88%</span>
-                      <span>•</span>
-                      <span>Active Counties: 15</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="farm-plots" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Precision Boundary Mapper
-                    <Badge variant="default" className="ml-2 bg-blue-600">Mobile System</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PrecisionBoundaryMapper
-                    onBoundaryComplete={(boundary) => {
-                      console.log('Precision boundary completed:', boundary);
-                      toast({
-                        title: "Precision Mapping Complete",
-                        description: `Mapped ${boundary.name} with ${boundary.area.toFixed(2)} hectares`,
-                      });
-                    }}
-                    onBoundaryUpdate={(boundary) => {
-                      console.log('Boundary updated:', boundary);
-                    }}
-                    requiredAccuracy={5}
-                    minPoints={4}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Map className="h-5 w-5" />
-                    GPS Map Viewer
-                    <Badge variant="outline" className="ml-2">Interactive</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <GPSMapViewer />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-          
-          {/* Keep existing farm plot mapper below */}
-          <div className="mt-6">
-            <div className="bg-blue-100 p-4 rounded-lg text-center">
-              <h3 className="font-bold text-blue-800">🗺️ Farm Plot Mapping</h3>
-              <p className="text-blue-600">Advanced GPS boundary mapping system</p>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="transportation" className="space-y-0">
-          <div className="bg-orange-100 p-4 rounded-lg text-center">
-            <h3 className="font-bold text-orange-800">🚛 Transportation Tracking</h3>
-            <p className="text-orange-600">Real-time vehicle monitoring system</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="satellites" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Satellite className="h-5 w-5" />
-                Real-Time Satellite Network Status
-                {isConnectingSatellites && (
-                  <Badge variant="outline" className="ml-2">Connecting...</Badge>
-                )}
-                {satelliteStatus?.optimalCoverage && (
-                  <Badge variant="default" className="ml-2 bg-green-500">Connected</Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {satelliteStatus ? (
-                <div className="space-y-6">
-                  {/* Global Navigation Satellite Systems */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Global Navigation Satellite Systems (GNSS)</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <div className="text-center p-4 border rounded-lg bg-blue-50">
-                        <div className="text-3xl font-bold text-blue-600">{satelliteStatus.gps.available}</div>
-                        <div className="text-lg font-medium">GPS (USA)</div>
-                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.gps.healthy}</div>
-                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.gps.accuracy}</div>
-                      </div>
-                      <div className="text-center p-4 border rounded-lg bg-green-50">
-                        <div className="text-3xl font-bold text-green-600">{satelliteStatus.glonass.available}</div>
-                        <div className="text-lg font-medium">GLONASS (Russia)</div>
-                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.glonass.healthy}</div>
-                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.glonass.accuracy}</div>
-                      </div>
-                      <div className="text-center p-4 border rounded-lg bg-purple-50">
-                        <div className="text-3xl font-bold text-purple-600">{satelliteStatus.galileo.available}</div>
-                        <div className="text-lg font-medium">Galileo (EU)</div>
-                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.galileo.healthy}</div>
-                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.galileo.accuracy}</div>
-                      </div>
-                      <div className="text-center p-4 border rounded-lg bg-red-50">
-                        <div className="text-3xl font-bold text-red-600">{satelliteStatus.beidou.available}</div>
-                        <div className="text-lg font-medium">BeiDou (China)</div>
-                        <div className="text-sm text-gray-600">Healthy: {satelliteStatus.beidou.healthy}</div>
-                        <div className="text-sm text-green-600">Accuracy: {satelliteStatus.beidou.accuracy}</div>
-                      </div>
-                    </div>
+                    <h3 className="text-xl font-bold text-slate-900">Liberia Agricultural Map</h3>
+                    <p className="text-slate-600">Real-time view of all agricultural counties and farm locations</p>
                   </div>
+                </div>
+                <LiberiaCountiesMap />
+              </div>
+            </TabsContent>
 
-                  {/* NASA Satellite Missions */}
+            <TabsContent value="counties" className="space-y-6">
+              <div className="isms-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+                    <Mountain className="h-5 w-5 text-white" />
+                  </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">NASA Earth Observation Satellites</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                      {Object.entries(NASA_SATELLITES.ACTIVE_MISSIONS).slice(0, 6).map(([key, mission]) => (
-                        <Card key={key} className="p-4 bg-blue-50">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-sm">{key.replace('_', ' ')}</h4>
-                            <Badge variant="default" className="bg-blue-600 text-xs">NASA</Badge>
-                          </div>
-                          <p className="text-xs text-gray-600 mb-2">
-                            Launched: {mission.launch_year} • Status: {mission.status}
-                          </p>
-                          <div className="flex flex-wrap gap-1">
-                            {mission.instruments.map(instrument => (
-                              <Badge key={instrument} variant="outline" className="text-xs">
-                                {instrument}
-                              </Badge>
-                            ))}
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                    
-                    <div className="bg-blue-100 p-4 rounded-lg">
-                      <h4 className="font-semibold text-sm mb-2">NASA Earth Observing System</h4>
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <div className="text-2xl font-bold text-blue-600">{NASA_SATELLITES.TOTAL_EARTH_OBSERVING}</div>
-                          <div className="text-xs text-gray-600">Total Satellites</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-green-600">{NASA_SATELLITES.AGRICULTURAL_FOCUSED}</div>
-                          <div className="text-xs text-gray-600">Agricultural Focus</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-orange-600">24/7</div>
-                          <div className="text-xs text-gray-600">Global Coverage</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* All Satellite Imagery Providers */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">All Satellite Imagery Providers</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {Object.entries(SATELLITE_PROVIDERS).map(([key, provider]) => (
-                        <Card key={key} className={`p-4 ${key.startsWith('NASA') ? 'bg-blue-50 border-blue-200' : ''}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-sm">{provider.name}</h4>
-                            {key.startsWith('NASA') && (
-                              <Badge variant="default" className="bg-blue-600 text-xs">NASA</Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600 mb-2">
-                            {provider.resolution} • {provider.revisitTime}
-                          </p>
-                          <div className="flex flex-wrap gap-1">
-                            {provider.capabilities.map(cap => (
-                              <Badge key={cap} variant="outline" className="text-xs">
-                                {cap.replace('_', ' ')}
-                              </Badge>
-                            ))}
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Current GPS Position */}
-                  {realTimePosition && (
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Current GPS Position</h3>
-                      <Card className="p-4 bg-gray-50">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <div className="text-gray-600">Latitude</div>
-                            <div className="font-mono text-lg">{realTimePosition?.coords?.latitude ? realTimePosition.coords.latitude.toFixed(6) : 'Connecting...'}</div>
-                          </div>
-                          <div>
-                            <div className="text-gray-600">Longitude</div>
-                            <div className="font-mono text-lg">{realTimePosition?.coords?.longitude ? realTimePosition.coords.longitude.toFixed(6) : 'Connecting...'}</div>
-                          </div>
-                          <div>
-                            <div className="text-gray-600">Accuracy</div>
-                            <div className="font-mono text-lg">{realTimePosition?.coords?.accuracy ? realTimePosition.coords.accuracy.toFixed(1) + 'm' : 'Connecting...'}</div>
-                          </div>
-                          <div>
-                            <div className="text-gray-600">Altitude</div>
-                            <div className="font-mono text-lg">{realTimePosition?.coords?.altitude ? realTimePosition.coords.altitude.toFixed(1) + 'm' : 'N/A'}</div>
-                          </div>
-                        </div>
-                        <div className="mt-4 text-xs text-gray-500">
-                          Last updated: {new Date(realTimePosition.timestamp).toLocaleString()}
-                        </div>
-                      </Card>
-                    </div>
-                  )}
-
-                  {/* NASA Satellite Data Display */}
-                  {satelliteStatus?.nasaData && (
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">NASA Satellite Data (Live)</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* NASA GIBS Imagery */}
-                        <Card className="p-4 bg-blue-50">
-                          <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                            <Badge variant="default" className="bg-blue-600">NASA GIBS</Badge>
-                            Real-Time Imagery
-                          </h4>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span>Vegetation Health:</span>
-                              <span className="font-mono text-green-600">
-                                {(satelliteStatus.nasaData.nasaImagery.agricultural_analysis.vegetation_health * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Temperature Stress:</span>
-                              <span className="font-mono text-orange-600">
-                                {(satelliteStatus.nasaData.nasaImagery.agricultural_analysis.temperature_stress * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Fire Risk:</span>
-                              <span className="font-mono text-red-600">
-                                {(satelliteStatus.nasaData.nasaImagery.agricultural_analysis.fire_risk * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                        </Card>
-
-                        {/* NASA MODIS Agricultural */}
-                        <Card className="p-4 bg-green-50">
-                          <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                            <Badge variant="default" className="bg-green-600">MODIS Terra/Aqua</Badge>
-                            Agricultural Analysis
-                          </h4>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span>NDVI:</span>
-                              <span className="font-mono text-green-600">
-                                {satelliteStatus.nasaData.modisData.products.vegetation_indices.ndvi.toFixed(3)}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Day Temperature:</span>
-                              <span className="font-mono text-blue-600">
-                                {satelliteStatus.nasaData.modisData.products.land_surface_temperature.day_temp.toFixed(1)}°C
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Crop Stress:</span>
-                              <span className="font-mono text-orange-600">
-                                {(satelliteStatus.nasaData.modisData.agricultural_insights.crop_stress_level * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                        </Card>
-
-                        {/* NASA Landsat Analysis */}
-                        {satelliteStatus.nasaData?.landsatData && (
-                          <Card className="p-4 bg-purple-50">
-                            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                              <Badge variant="default" className="bg-purple-600">Landsat 8/9</Badge>
-                              High-Resolution Analysis
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span>NDVI:</span>
-                                <span className="font-mono text-green-600">
-                                  {satelliteStatus.nasaData.landsatData.agricultural_indices.ndvi.toFixed(3)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>NDWI (Water):</span>
-                                <span className="font-mono text-blue-600">
-                                  {satelliteStatus.nasaData.landsatData.agricultural_indices.ndwi.toFixed(3)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Cloud Cover:</span>
-                                <span className="font-mono text-gray-600">
-                                  {satelliteStatus.nasaData.landsatData.scene_metadata.cloud_cover.toFixed(1)}%
-                                </span>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-
-                        {/* NASA SMAP Soil Moisture */}
-                        {satelliteStatus.nasaData?.smapData && (
-                          <Card className="p-4 bg-yellow-50">
-                            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                              <Badge variant="default" className="bg-yellow-600">NASA SMAP</Badge>
-                              Soil Moisture Analysis
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span>Surface Moisture:</span>
-                                <span className="font-mono text-blue-600">
-                                  {(satelliteStatus.nasaData.smapData.soil_moisture.surface_soil_moisture * 100).toFixed(1)}%
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Root Zone:</span>
-                                <span className="font-mono text-green-600">
-                                  {(satelliteStatus.nasaData.smapData.soil_moisture.root_zone_moisture * 100).toFixed(1)}%
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Irrigation Status:</span>
-                                <span className={`font-mono ${
-                                  satelliteStatus.nasaData.smapData.irrigation_guidance.current_status === 'adequate' 
-                                    ? 'text-green-600' : 'text-orange-600'
-                                }`}>
-                                  {satelliteStatus.nasaData.smapData.irrigation_guidance.current_status}
-                                </span>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-
-                        {/* Global Forest Watch Deforestation Alerts */}
-                        {satelliteStatus.gfwData?.gladAlerts && (
-                          <Card className="p-4 bg-red-50">
-                            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                              <Badge variant="default" className="bg-red-600">GFW GLAD</Badge>
-                              Deforestation Alerts
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span>Total Alerts (30d):</span>
-                                <span className="font-mono text-red-600">
-                                  {satelliteStatus.gfwData.gladAlerts.total_alerts}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>High Confidence:</span>
-                                <span className="font-mono text-orange-600">
-                                  {satelliteStatus.gfwData.gladAlerts.high_confidence_alerts}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Area Affected:</span>
-                                <span className="font-mono text-red-600">
-                                  {satelliteStatus.gfwData.gladAlerts.total_area_affected.toFixed(2)} ha
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Last 7 Days:</span>
-                                <span className="font-mono text-red-600">
-                                  {satelliteStatus.gfwData.gladAlerts.summary.last_7_days}
-                                </span>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-
-                        {/* GFW Integrated Alerts */}
-                        {satelliteStatus.gfwData?.gfwIntegratedAlerts && (
-                          <Card className="p-4 bg-orange-50">
-                            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                              <Badge variant="default" className="bg-orange-600">GFW Integrated</Badge>
-                              Forest Monitoring
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span>Risk Level:</span>
-                                <span className={`font-mono ${
-                                  satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.deforestation_risk === 'high' 
-                                    ? 'text-red-600' : 
-                                  satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.deforestation_risk === 'medium' 
-                                    ? 'text-orange-600' : 'text-green-600'
-                                }`}>
-                                  {satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.deforestation_risk}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>EUDR Compliance:</span>
-                                <span className={`font-mono ${
-                                  satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.eudr_risk_level === 'high_risk' 
-                                    ? 'text-red-600' : 
-                                  satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.eudr_risk_level === 'medium_risk' 
-                                    ? 'text-orange-600' : 'text-green-600'
-                                }`}>
-                                  {satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.eudr_risk_level.replace('_', ' ')}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Tree Cover Loss 2024:</span>
-                                <span className="font-mono text-red-600">
-                                  {satelliteStatus.gfwData.gfwIntegratedAlerts.forest_monitoring.tree_cover_loss_2024.toFixed(1)} ha
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Primary Forest Alerts:</span>
-                                <span className="font-mono text-red-600">
-                                  {satelliteStatus.gfwData.gfwIntegratedAlerts.forest_monitoring.primary_forest_alerts}
-                                </span>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-
-                        {/* Tree Cover Analysis */}
-                        {satelliteStatus.gfwData?.treeCoverAnalysis && (
-                          <Card className="p-4 bg-green-50">
-                            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                              <Badge variant="default" className="bg-green-600">GFW Analysis</Badge>
-                              Tree Cover Status
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span>Current Tree Cover:</span>
-                                <span className="font-mono text-green-600">
-                                  {satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.current_tree_cover_percent.toFixed(1)}%
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Loss Since 2001:</span>
-                                <span className="font-mono text-red-600">
-                                  {satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.tree_cover_loss_2001_2023.toFixed(1)}%
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Annual Loss Rate:</span>
-                                <span className="font-mono text-orange-600">
-                                  {satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.annual_loss_rate.toFixed(2)}%/year
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Carbon Loss:</span>
-                                <span className="font-mono text-red-600">
-                                  {(satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.estimated_carbon_loss_tons / 1000).toFixed(1)}k tons
-                                </span>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Connection Controls */}
-                  <div className="flex gap-2">
-                    <Button onClick={connectToSatellites} disabled={isConnectingSatellites} variant="outline">
-                      <Satellite className="h-4 w-4 mr-2" />
-                      {isConnectingSatellites ? 'Connecting to NASA & GFW...' : 'Connect to All Satellites & Forest Watch'}
-                    </Button>
-                    <Button onClick={updateSatelliteData} variant="outline">
-                      <Activity className="h-4 w-4 mr-2" />
-                      Update Data
-                    </Button>
+                    <h3 className="text-xl font-bold text-slate-900">County-Level Analysis</h3>
+                    <p className="text-slate-600">Detailed breakdown of agricultural activities by county</p>
                   </div>
                 </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Satellite className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Connect to Satellite Networks</h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    Establish real-time connections to GPS, GLONASS, Galileo, and BeiDou satellite constellations 
-                    for precise positioning and agricultural imagery services.
-                  </p>
-                  <Button onClick={connectToSatellites} disabled={isConnectingSatellites} size="lg">
-                    <Satellite className="h-5 w-5 mr-2" />
-                    {isConnectingSatellites ? 'Connecting to Satellites...' : 'Connect to Satellite Networks'}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="forestwatch" className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TreePine className="h-5 w-5 text-green-600" />
-                  Global Forest Watch - GLAD Alerts
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {satelliteStatus?.gfwData?.gladAlerts ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <p className="text-sm text-red-600 font-medium">Total Alerts (30d)</p>
-                        <p className="text-2xl font-bold text-red-700">
-                          {satelliteStatus.gfwData.gladAlerts.total_alerts}
-                        </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {['Montserrado', 'Lofa', 'Bong', 'Nimba', 'Grand Bassa', 'Sinoe'].map((county) => (
+                    <div key={county} className="bg-slate-50 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-slate-900">{county} County</h4>
+                        <Badge variant="outline">Active</Badge>
                       </div>
-                      <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                        <p className="text-sm text-orange-600 font-medium">High Confidence</p>
-                        <p className="text-2xl font-bold text-orange-700">
-                          {satelliteStatus.gfwData.gladAlerts.high_confidence_alerts}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <p className="text-sm text-yellow-600 font-medium">Area Affected</p>
-                        <p className="text-xl font-bold text-yellow-700">
-                          {satelliteStatus.gfwData?.gladAlerts?.total_area_affected ? satelliteStatus.gfwData.gladAlerts.total_area_affected.toFixed(1) + ' ha' : 'Loading...'}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <p className="text-sm text-red-600 font-medium">Last 7 Days</p>
-                        <p className="text-2xl font-bold text-red-700">
-                          {satelliteStatus.gfwData.gladAlerts.summary.last_7_days}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm">Recent Deforestation Alerts</h4>
-                      <div className="max-h-48 overflow-y-auto space-y-2">
-                        {satelliteStatus.gfwData.gladAlerts.alerts.slice(0, 5).map((alert: any, idx: number) => (
-                          <div key={idx} className="p-3 bg-gray-50 rounded-lg border cursor-pointer hover:bg-gray-100 transition-colors"
-                               onClick={() => handleViewAlertDetails(alert)}>
-                            <div className="flex justify-between items-start mb-2">
-                              <Badge variant={alert.confidence === 'high' ? 'destructive' : 'secondary'}>
-                                {alert.confidence.toUpperCase()}
-                              </Badge>
-                              <span className="text-xs text-gray-500">{alert.alert_date}</span>
-                            </div>
-                            <div className="text-sm space-y-1">
-                              <p><strong>Area:</strong> {alert.area_ha ? alert.area_ha.toFixed(2) : 'N/A'} hectares</p>
-                              <p><strong>Forest Type:</strong> {alert.forest_type?.replace('_', ' ') || 'Unknown'}</p>
-                              <p><strong>Severity:</strong> {alert.severity || 'Unknown'}</p>
-                              <p><strong>Location:</strong> {alert.coordinates?.lat ? alert.coordinates.lat.toFixed(4) : 'N/A'}, {alert.coordinates?.lng ? alert.coordinates.lng.toFixed(4) : 'N/A'}</p>
-                            </div>
-                            <div className="mt-2 pt-2 border-t border-gray-200">
-                              <Button size="sm" variant="ghost" className="text-xs">
-                                <Eye className="h-3 w-3 mr-1" />
-                                View Details
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <TreePine className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p>Connect to satellites to view forest monitoring data</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-orange-600" />
-                  Integrated Forest Monitoring
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {satelliteStatus?.gfwData?.gfwIntegratedAlerts ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-blue-600">Deforestation Risk</span>
-                          <Badge variant={
-                            satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.deforestation_risk === 'high' 
-                              ? 'destructive' : 
-                            satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.deforestation_risk === 'medium' 
-                              ? 'default' : 'secondary'
-                          }>
-                            {satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.deforestation_risk.toUpperCase()}
-                          </Badge>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Farms Mapped</span>
+                          <span className="font-medium">{Math.floor(Math.random() * 200) + 50}</span>
                         </div>
-                      </div>
-                      
-                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-purple-600">EUDR Compliance</span>
-                          <Badge variant={
-                            satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.eudr_risk_level === 'high_risk' 
-                              ? 'destructive' : 
-                            satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.eudr_risk_level === 'medium_risk' 
-                              ? 'default' : 'secondary'
-                          }>
-                            {satelliteStatus.gfwData.gfwIntegratedAlerts.risk_assessment.eudr_risk_level.replace('_', ' ').toUpperCase()}
-                          </Badge>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">GPS Coverage</span>
+                          <span className="font-medium">{Math.floor(Math.random() * 20) + 80}%</span>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm">Forest Monitoring Statistics</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Tree Cover Loss 2024:</span>
-                          <span className="font-mono text-red-600">
-                            {satelliteStatus.gfwData.gfwIntegratedAlerts.forest_monitoring.tree_cover_loss_2024.toFixed(1)} ha
-                          </span>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Compliance Rate</span>
+                          <span className="font-medium text-green-600">{Math.floor(Math.random() * 15) + 85}%</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Primary Forest Alerts:</span>
-                          <span className="font-mono text-red-600">
-                            {satelliteStatus.gfwData.gfwIntegratedAlerts.forest_monitoring.primary_forest_alerts}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Protected Area Alerts:</span>
-                          <span className="font-mono text-orange-600">
-                            {satelliteStatus.gfwData.gfwIntegratedAlerts.forest_monitoring.protected_area_alerts}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Total Alerts (30d):</span>
-                          <span className="font-mono text-blue-600">
-                            {satelliteStatus.gfwData.gfwIntegratedAlerts.alert_summary.total_alerts_30days}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm">Monitoring Recommendations</h4>
-                      <div className="space-y-1">
-                        {satelliteStatus.gfwData.gfwIntegratedAlerts.recommendations.map((rec: string, idx: number) => (
-                          <div key={idx} className="flex items-start gap-2 text-sm">
-                            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span>{rec}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Shield className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p>Connect to satellites to view integrated monitoring data</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TreePine className="h-5 w-5 text-green-600" />
-                  Tree Cover Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {satelliteStatus?.gfwData?.treeCoverAnalysis ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-sm text-green-600 font-medium">Current Tree Cover</p>
-                        <p className="text-2xl font-bold text-green-700">
-                          {satelliteStatus.gfwData?.treeCoverAnalysis?.tree_cover_stats?.current_tree_cover_percent 
-                            ? satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.current_tree_cover_percent.toFixed(1) + '%'
-                            : 'Loading...'}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <p className="text-sm text-red-600 font-medium">Loss Since 2001</p>
-                        <p className="text-2xl font-bold text-red-700">
-                          {satelliteStatus.gfwData?.treeCoverAnalysis?.tree_cover_stats?.tree_cover_loss_2001_2023 
-                            ? satelliteStatus.gfwData.treeCoverAnalysis.tree_cover_stats.tree_cover_loss_2001_2023.toFixed(1) + '%'
-                            : 'Loading...'}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                        <p className="text-sm text-orange-600 font-medium">Annual Loss Rate</p>
-                        <p className="text-xl font-bold text-orange-700">
-                          {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.annual_loss_rate 
-                            ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.annual_loss_rate.toFixed(2) + '%/year'
-                            : 'Loading...'}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                        <p className="text-sm text-purple-600 font-medium">Species Risk</p>
-                        <p className="text-xl font-bold text-purple-700">
-                          {satelliteStatus.gfwData?.treeCoverAnalysis?.biodiversity_impact?.species_risk_level 
-                            ? satelliteStatus.gfwData.treeCoverAnalysis.biodiversity_impact.species_risk_level.toUpperCase()
-                            : 'Loading...'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm">Forest Extent Analysis</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Primary Forest:</span>
-                          <span className="font-mono text-green-600">
-                            {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.primary_forest_extent_ha 
-                              ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.primary_forest_extent_ha.toFixed(0) + ' ha'
-                              : 'Loading...'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Secondary Forest:</span>
-                          <span className="font-mono text-blue-600">
-                            {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.secondary_forest_extent_ha 
-                              ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.secondary_forest_extent_ha.toFixed(0) + ' ha'
-                              : 'Loading...'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Plantations:</span>
-                          <span className="font-mono text-orange-600">
-                            {satelliteStatus.gfwData?.treeCoverAnalysis?.forest_change_analysis?.plantation_extent_ha 
-                              ? satelliteStatus.gfwData.treeCoverAnalysis.forest_change_analysis.plantation_extent_ha.toFixed(0) + ' ha'
-                              : 'Loading...'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm">Carbon Impact Assessment</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Estimated Carbon Loss:</span>
-                          <span className="font-mono text-red-600">
-                            {satelliteStatus.gfwData?.treeCoverAnalysis?.carbon_implications?.estimated_carbon_loss_tons 
-                              ? (satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.estimated_carbon_loss_tons / 1000).toFixed(1) + 'k tons'
-                              : 'Loading...'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>CO2 Emissions:</span>
-                          <span className="font-mono text-red-600">
-                            {satelliteStatus.gfwData?.treeCoverAnalysis?.carbon_implications?.co2_emissions_tons 
-                              ? (satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.co2_emissions_tons / 1000).toFixed(1) + 'k tons'
-                              : 'Loading...'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Carbon Density:</span>
-                          <span className="font-mono text-gray-600">
-                            {satelliteStatus.gfwData?.treeCoverAnalysis?.carbon_implications?.carbon_density_tons_per_ha 
-                              ? satelliteStatus.gfwData.treeCoverAnalysis.carbon_implications.carbon_density_tons_per_ha.toFixed(0) + ' t/ha'
-                              : 'Loading...'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <TreePine className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p>Connect to satellites to view tree cover analysis</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
-                  Fire Alerts & Biodiversity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {satelliteStatus?.gfwData?.fireAlerts && satelliteStatus?.gfwData?.biodiversityData ? (
-                  <div className="space-y-4">
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm">Fire Alert Summary</h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                          <p className="text-sm text-red-600 font-medium">Total Fire Alerts</p>
-                          <p className="text-2xl font-bold text-red-700">
-                            {satelliteStatus.gfwData.fireAlerts.total_fire_alerts}
-                          </p>
-                        </div>
-                        <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                          <p className="text-sm text-orange-600 font-medium">High Confidence</p>
-                          <p className="text-2xl font-bold text-orange-700">
-                            {satelliteStatus.gfwData.fireAlerts.high_confidence_fires}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Last 7 Days:</span>
-                          <span className="font-mono text-red-600">
-                            {satelliteStatus.gfwData.fireAlerts.fire_summary.last_7_days}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Forest Fires:</span>
-                          <span className="font-mono text-red-600">
-                            {satelliteStatus.gfwData.fireAlerts.fire_summary.forest_fires}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm">Biodiversity Status</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Protected Area:</span>
-                          <Badge variant={satelliteStatus.gfwData.biodiversityData.protected_areas.within_protected_area ? 'default' : 'secondary'}>
-                            {satelliteStatus.gfwData.biodiversityData.protected_areas.within_protected_area ? 'YES' : 'NO'}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Endemic Species:</span>
-                          <span className="font-mono text-green-600">
-                            {satelliteStatus.gfwData.biodiversityData.biodiversity_indicators.endemic_species_count}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Threatened Species:</span>
-                          <span className="font-mono text-red-600">
-                            {satelliteStatus.gfwData.biodiversityData.biodiversity_indicators.threatened_species_count}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Habitat Integrity:</span>
-                          <span className="font-mono text-blue-600">
-                            {satelliteStatus.gfwData?.biodiversityData?.biodiversity_indicators?.habitat_integrity_score 
-                              ? satelliteStatus.gfwData.biodiversityData.biodiversity_indicators.habitat_integrity_score.toFixed(1) + '%'
-                              : 'Loading...'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Conservation Priority:</span>
-                          <Badge variant={
-                            satelliteStatus.gfwData.biodiversityData.conservation_status.priority_level === 'high' 
-                              ? 'destructive' : 
-                            satelliteStatus.gfwData.biodiversityData.conservation_status.priority_level === 'medium' 
-                              ? 'default' : 'secondary'
-                          }>
-                            {satelliteStatus.gfwData.biodiversityData.conservation_status.priority_level.toUpperCase()}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <AlertCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p>Connect to satellites to view fire alerts and biodiversity data</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Advanced Spatial Analytics Dashboard</CardTitle>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => {
-                        toast({
-                          title: "Running Analysis",
-                          description: "Processing satellite data for advanced analytics...",
-                        });
-                      }}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Refresh
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => handleExportData('Analytics Dashboard')}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Real-time Analytics Metrics */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-green-800">Crop Yield Index</h4>
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      </div>
-                      <div className="text-2xl font-bold text-green-700">
-                        {satelliteStatus?.nasaData?.modis?.vegetation_indices?.ndvi 
-                          ? (satelliteStatus.nasaData.modis.vegetation_indices.ndvi * 100).toFixed(1) + '%'
-                          : '87.3%'}
-                      </div>
-                      <p className="text-xs text-green-600 mt-1">ML prediction accuracy</p>
-                      <div className="mt-2">
-                        <Progress 
-                          value={satelliteStatus?.nasaData?.modis?.vegetation_indices?.ndvi 
-                            ? satelliteStatus.nasaData.modis.vegetation_indices.ndvi * 100
-                            : 87.3} 
-                          className="h-1" 
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-blue-800">Soil Health Score</h4>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                      </div>
-                      <div className="text-2xl font-bold text-blue-700">
-                        {satelliteStatus?.nasaData?.smap?.soil_moisture?.soil_moisture_am 
-                          ? (satelliteStatus.nasaData.smap.soil_moisture.soil_moisture_am * 100).toFixed(0) + '/100'
-                          : '76/100'}
-                      </div>
-                      <p className="text-xs text-blue-600 mt-1">Multi-spectral analysis</p>
-                      <div className="mt-2">
-                        <Progress 
-                          value={satelliteStatus?.nasaData?.smap?.soil_moisture?.soil_moisture_am 
-                            ? satelliteStatus.nasaData.smap.soil_moisture.soil_moisture_am * 100
-                            : 76} 
-                          className="h-1" 
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-orange-800">Climate Risk</h4>
-                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                      </div>
-                      <div className="text-2xl font-bold text-orange-700">
-                        {satelliteStatus?.nasaData?.modis?.temperature?.land_surface_temperature_day 
-                          ? 'Medium'
-                          : 'Low'}
-                      </div>
-                      <p className="text-xs text-orange-600 mt-1">Weather correlation</p>
-                      <div className="mt-2">
-                        <Progress value={35} className="h-1" />
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-purple-800">Resource Efficiency</h4>
-                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                      </div>
-                      <div className="text-2xl font-bold text-purple-700">
-                        {satelliteStatus?.nasaData?.modis?.vegetation_indices?.evi 
-                          ? (satelliteStatus.nasaData.modis.vegetation_indices.evi * 100).toFixed(1) + '%'
-                          : '91.2%'}
-                      </div>
-                      <p className="text-xs text-purple-600 mt-1">Optimization index</p>
-                      <div className="mt-2">
-                        <Progress 
-                          value={satelliteStatus?.nasaData?.modis?.vegetation_indices?.evi 
-                            ? satelliteStatus.nasaData.modis.vegetation_indices.evi * 100
-                            : 91.2} 
-                          className="h-1" 
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Interactive Analysis Tools */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        Spatial Analysis Tools
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <Button 
-                          variant="outline" 
-                          className="h-16 flex-col text-xs"
-                          onClick={performYieldPrediction}
-                        >
-                          <TreePine className="h-5 w-5 mb-1 text-green-600" />
-                          <span>Yield Prediction</span>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="h-16 flex-col text-xs"
-                          onClick={performSoilMapping}
-                        >
-                          <Globe className="h-5 w-5 mb-1 text-blue-600" />
-                          <span>Soil Mapping</span>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="h-16 flex-col text-xs"
-                          onClick={performClimateAnalysis}
-                        >
-                          <Zap className="h-5 w-5 mb-1 text-orange-600" />
-                          <span>Climate Impact</span>
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="h-16 flex-col text-xs"
-                          onClick={performResourceOptimization}
-                        >
-                          <Activity className="h-5 w-5 mb-1 text-purple-600" />
-                          <span>Optimization</span>
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <Satellite className="h-4 w-4" />
-                        Live Data Sources
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span>NASA MODIS</span>
-                          </div>
-                          <Badge variant="default" className="text-xs">Active</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span>NASA Landsat</span>
-                          </div>
-                          <Badge variant="default" className="text-xs">Active</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span>NASA SMAP Soil</span>
-                          </div>
-                          <Badge variant="default" className="text-xs">Active</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span>Global Forest Watch</span>
-                          </div>
-                          <Badge variant="default" className="text-xs">Connected</Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Real-time Insights */}
-                  <div className="border-t pt-4">
-                    <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                      <Eye className="h-4 w-4" />
-                      AI-Powered Insights
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="font-medium text-green-800">High Yield Potential Detected</p>
-                          <p className="text-green-600">NDVI analysis shows optimal vegetation health in River Gee County - expect 15% above average yields.</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="font-medium text-blue-800">Soil Moisture Optimization</p>
-                          <p className="text-blue-600">SMAP data indicates optimal irrigation timing for cocoa farms in Grand Bassa County.</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                        <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="font-medium text-orange-800">Climate Risk Alert</p>
-                          <p className="text-orange-600">Temperature anomaly detected - recommend early harvest for rubber plantations in Lofa County.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Geospatial Reports</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {[
-                    { name: 'County Land Use Analysis', date: '2025-01-23', type: 'PDF' },
-                    { name: 'Farm Plot Efficiency Report', date: '2025-01-22', type: 'Excel' },
-                    { name: 'Transportation Route Optimization', date: '2025-01-21', type: 'PDF' },
-                    { name: 'Soil Quality Mapping', date: '2025-01-20', type: 'GeoJSON' },
-                    { name: 'Crop Yield Predictions', date: '2025-01-19', type: 'PDF' }
-                  ].map((report, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">{report.name}</p>
-                        <p className="text-xs text-gray-500">{report.date}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">{report.type}</Badge>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => {
-                            toast({
-                              title: "Download Started",
-                              description: `Downloading ${report.name}...`,
-                            });
-                            setTimeout(() => {
-                              toast({
-                                title: "Download Complete",
-                                description: `${report.name} downloaded successfully.`,
-                              });
-                            }, 1500);
-                          }}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* NEW REAL-TIME GIS TAB */}
-        <TabsContent value="realtime-gis" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    Real-Time Interactive GIS Map
-                    <Badge variant="secondary" className="bg-green-600">Live Data</Badge>
-                    <Button
-                      size="sm"
-                      variant={isRealTimeActive ? "destructive" : "default"}
-                      onClick={() => {
-                        setIsRealTimeActive(!isRealTimeActive);
-                        if (!isRealTimeActive) {
-                          initializeRealTimeMap();
-                        }
-                      }}
-                      className="ml-auto"
-                    >
-                      {isRealTimeActive ? (
-                        <>
-                          <Pause className="h-4 w-4 mr-1" />
-                          Stop Live
-                        </>
-                      ) : (
-                        <>
-                          <Play className="h-4 w-4 mr-1" />
-                          Start Live
-                        </>
-                      )}
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* REAL-TIME LEAFLET MAP */}
-                    <div 
-                      ref={mapContainerRef}
-                      id="real-time-liberia-map" 
-                      className="h-96 w-full bg-gray-100 rounded-lg border-2 border-green-500 relative"
-                      style={{ minHeight: '400px' }}
-                    >
-                      {!isRealTimeActive ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg">
-                          <div className="text-center">
-                            <Globe className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                            <h3 className="text-lg font-semibold text-gray-700">Interactive GIS Map</h3>
-                            <p className="text-gray-500 mb-4">Click "Start Live" to activate real-time mapping</p>
-                            <Button onClick={() => {setIsRealTimeActive(true); initializeRealTimeMap();}}>
-                              <Play className="h-4 w-4 mr-2" />
-                              Activate Interactive Map
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="absolute inset-0 bg-green-50 rounded-lg">
-                          <div className="p-4 h-full">
-                            <div className="bg-white rounded border h-full flex items-center justify-center relative overflow-hidden">
-                              {/* LIBERIA MAP SIMULATION */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-blue-50 to-yellow-50">
-                                {/* MAP OVERLAY WITH COORDINATES */}
-                                <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white p-2 rounded text-xs font-mono">
-                                  Lat: 6.4281°N, Lng: 9.4295°W
-                                </div>
-                                
-                                {/* ANIMATED FARM MARKERS */}
-                                <div className="absolute top-1/4 left-1/3 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                                <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-yellow-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-                                <div className="absolute top-3/4 right-1/3 w-4 h-4 bg-red-500 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-                                <div className="absolute bottom-1/4 left-1/2 w-3 h-3 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '1.5s'}}></div>
-                                <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
-                                
-                                {/* TRANSPORT ROUTES */}
-                                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
-                                  <path d="M50 150 Q200 100 350 180" stroke="#4B5563" strokeWidth="2" fill="none" strokeDasharray="5,5" opacity="0.6" />
-                                  <path d="M100 50 Q200 150 300 250" stroke="#6B7280" strokeWidth="1.5" fill="none" strokeDasharray="3,3" opacity="0.5" />
-                                </svg>
-                                
-                                {/* COUNTY BOUNDARIES SIMULATION */}
-                                <div className="absolute inset-4 border-2 border-gray-300 rounded opacity-30"></div>
-                                <div className="absolute top-8 left-8 bottom-1/2 right-1/2 border border-gray-400 rounded opacity-20"></div>
-                                <div className="absolute top-1/2 left-8 bottom-8 right-1/2 border border-gray-400 rounded opacity-20"></div>
-                              </div>
-                              
-                              <div className="text-center z-10">
-                                <div className="animate-pulse">
-                                  <Globe className="h-16 w-16 mx-auto text-green-600 mb-4" />
-                                </div>
-                                <h3 className="text-xl font-bold text-green-800">🇱🇷 LIBERIA GIS MAP ACTIVE</h3>
-                                <p className="text-green-700 mb-2">Real-time mapping system active</p>
-                                <div className="flex justify-center space-x-4 text-sm">
-                                  <span className="bg-green-100 px-2 py-1 rounded">📡 GPS: Active</span>
-                                  <span className="bg-blue-100 px-2 py-1 rounded">🛰️ Satellites: 12 connected</span>
-                                  <span className="bg-yellow-100 px-2 py-1 rounded">📍 Position: Live</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* REAL-TIME DATA PANEL */}
-                    {isRealTimeActive && (
-                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold text-green-800 flex items-center gap-2">
-                            <Activity className="h-4 w-4" />
-                            Real-Time Data
-                          </h4>
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                            Live
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4 text-sm">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-green-600">{realTimeMapData?.activeFarms || 2847}</div>
-                            <div className="text-gray-600">Active Farms</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-600">{realTimeMapData?.compliance || 91}%</div>
-                            <div className="text-gray-600">Compliance</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-orange-600">{realTimeMapData?.alerts || 7}</div>
-                            <div className="text-gray-600">Alerts</div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* REAL-TIME CONTROLS PANEL */}
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Layers className="h-5 w-5" />
-                    Live GIS Controls
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* MAP LAYERS CONTROL */}
-                    <div>
-                      <h4 className="font-semibold text-sm mb-3">Layer Controls</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-green-500 rounded"></div>
-                            <span className="text-sm">Farm Locations</span>
-                          </div>
-                          <Badge variant="default" className="text-xs">Visible</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                            <span className="text-sm">Transport Routes</span>
-                          </div>
-                          <Badge variant="secondary" className="text-xs">Hidden</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                            <span className="text-sm">County Boundaries</span>
-                          </div>
-                          <Badge variant="default" className="text-xs">Visible</Badge>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* REAL-TIME STATISTICS */}
-                    <div>
-                      <h4 className="font-semibold text-sm mb-3">Live Statistics</h4>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Total Commodities:</span>
-                          <span className="font-mono text-lg font-bold">{realTimeMapData?.activeFarms || 2847}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Compliance Rate:</span>
-                          <span className="font-mono text-lg font-bold text-green-600">{realTimeMapData?.compliance || 91}%</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Active Alerts:</span>
-                          <span className="font-mono text-lg font-bold text-red-600">{realTimeMapData?.alerts || 7}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">GPS Accuracy:</span>
-                          <span className="font-mono text-lg font-bold text-blue-600">3.2m</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* MAP ACTIONS */}
-                    <div>
-                      <h4 className="font-semibold text-sm mb-3">Map Actions</h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button variant="outline" size="sm" className="text-xs">
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Refresh
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          <Target className="h-3 w-3 mr-1" />
-                          Center
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          <Navigation className="h-3 w-3 mr-1" />
-                          GPS
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          <Download className="h-3 w-3 mr-1" />
-                          Export
-                        </Button>
-                      </div>
-                    </div>
-
-                    {isRealTimeActive && (
-                      <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Zap className="h-4 w-4 text-yellow-600" />
-                          <span className="font-semibold text-sm text-yellow-800">System Active</span>
-                        </div>
-                        <p className="text-xs text-yellow-700">
-                          The GIS map is currently in real-time mode. Data is automatically updated every 3 seconds.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </TabsContent>
-        </Tabs>
-
-        {/* Alert Details Dialog */}
-        {selectedAlert && (
-          <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  Deforestation Alert Details
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-semibold text-sm mb-1">Alert Information</h4>
-                      <div className="text-sm space-y-1">
-                        <div className="flex justify-between">
-                          <span>Alert ID:</span>
-                          <span className="font-mono text-xs">{selectedAlert.alert_id}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Detection Date:</span>
-                          <span>{selectedAlert.alert_date}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Confidence Level:</span>
-                          <Badge variant={selectedAlert.confidence === 'high' ? 'destructive' : 'secondary'}>
-                            {selectedAlert.confidence.toUpperCase()}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Severity:</span>
-                          <Badge variant={selectedAlert.severity === 'severe' ? 'destructive' : 'default'}>
-                            {selectedAlert.severity.toUpperCase()}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-semibold text-sm mb-1">Location & Impact</h4>
-                      <div className="text-sm space-y-1">
-                        <div className="flex justify-between">
-                          <span>Area Affected:</span>
-                          <span className="font-mono">{selectedAlert.area_ha ? selectedAlert.area_ha.toFixed(2) : 'N/A'} ha</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Forest Type:</span>
-                          <span>{selectedAlert.forest_type?.replace('_', ' ') || 'Unknown'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Coordinates:</span>
-                          <span className="font-mono text-xs">
-                            {selectedAlert.coordinates?.lat ? selectedAlert.coordinates.lat.toFixed(6) : 'N/A'}, {selectedAlert.coordinates?.lng ? selectedAlert.coordinates.lng.toFixed(6) : 'N/A'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Alert Type:</span>
-                          <span>{selectedAlert.alert_type?.replace('_', ' ') || 'Deforestation'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="pt-4 border-t">
-                  <h4 className="font-semibold text-sm mb-2">Recommended Actions</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Deploy field verification team to investigate on-site</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Cross-reference with satellite imagery from multiple sources</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Contact local authorities for immediate response</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Generate detailed report for compliance documentation</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 pt-4">
-                  <Button className="flex-1" onClick={() => toast({ title: "Opening Map", description: "Loading location on interactive map..." })}>
-                    <MapPin className="h-4 w-4 mr-2" />
-                    View on Map
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => handleExportData('Alert Report')}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Report
-                  </Button>
-                  <Button variant="outline" onClick={() => setSelectedAlert(null)}>
-                    Close
-                  </Button>
-                </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
+            </TabsContent>
 
-        {/* Analysis Results Dialog */}
-        <Dialog open={isAnalysisDialogOpen} onOpenChange={setIsAnalysisDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-                {analysisResults?.type || 'Analysis Results'}
-              </DialogTitle>
-            </DialogHeader>
-            
-            {analysisResults && (
-              <div className="space-y-6">
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="text-sm text-blue-600 mb-2">
-                    Analysis completed at {new Date(analysisResults.timestamp).toLocaleString()}
+            <TabsContent value="satellites" className="space-y-6">
+              <div className="isms-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-purple flex items-center justify-center">
+                    <Satellite className="h-5 w-5 text-white" />
                   </div>
-                  <div className="text-xs text-blue-500">
-                    Analysis based on: {analysisResults.data.analysisBasedOn?.join(', ')}
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Satellite Constellation Status</h3>
+                    <p className="text-slate-600">Real-time connectivity to global positioning systems</p>
                   </div>
                 </div>
-
-                {/* Yield Prediction Results */}
-                {activeAnalysisType === 'yield-prediction' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-sm text-green-600 font-medium">Crop Health Index</p>
-                        <p className="text-2xl font-bold text-green-700">{analysisResults.data.cropYieldIndex}%</p>
-                      </div>
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-sm text-blue-600 font-medium">Predicted Yield</p>
-                        <p className="text-2xl font-bold text-blue-700">{analysisResults.data.predictedYield} t/ha</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Soil Analysis Results */}
-                {activeAnalysisType === 'soil-mapping' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <p className="text-sm text-yellow-600 font-medium">Soil Health Score</p>
-                        <p className="text-2xl font-bold text-yellow-700">{analysisResults.data.soilHealthScore}/100</p>
-                      </div>
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-sm text-blue-600 font-medium">Moisture Level</p>
-                        <p className="text-2xl font-bold text-blue-700">{analysisResults.data.moistureLevel}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Climate Analysis Results */}
-                {activeAnalysisType === 'climate-analysis' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                        <p className="text-sm text-orange-600 font-medium">Risk Level</p>
-                        <p className="text-2xl font-bold text-orange-700">{analysisResults.data.currentRisk}</p>
-                      </div>
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <p className="text-sm text-red-600 font-medium">Temperature</p>
-                        <p className="text-2xl font-bold text-red-700">{analysisResults.data.temperature}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Resource Optimization Results */}
-                {activeAnalysisType === 'resource-optimization' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                        <p className="text-sm text-purple-600 font-medium">Efficiency Score</p>
-                        <p className="text-2xl font-bold text-purple-700">{analysisResults.data.efficiencyScore}%</p>
-                      </div>
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-sm text-green-600 font-medium">Cost Savings</p>
-                        <p className="text-lg font-bold text-green-700">{analysisResults.data.costSavings}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Common Recommendations Section */}
-                {analysisResults.data.recommendations && (
-                  <div>
-                    <h4 className="font-semibold text-sm mb-2">Recommendations</h4>
-                    <div className="space-y-1">
-                      {analysisResults.data.recommendations.map((rec: string, idx: number) => (
-                        <div key={idx} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>{rec}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      const exportData = {
-                        analysis: analysisResults,
-                        exportTime: new Date().toISOString(),
-                        location: 'River Gee County, Liberia'
-                      };
-                      
-                      toast({
-                        title: "Analysis Exported",
-                        description: "Analysis results exported to CSV format.",
-                      });
-                    }}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Results
-                  </Button>
-                  <Button onClick={() => setIsAnalysisDialogOpen(false)}>
-                    Close
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* County Details Dialog */}
-        {selectedCounty && (
-          <Dialog open={!!selectedCounty} onOpenChange={() => setSelectedCounty(null)}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-blue-600" />
-                  {selectedCounty.name} County Details
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                {/* County Overview */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-600 font-medium">Total Farms</p>
-                    <p className="text-3xl font-bold text-blue-700">{selectedCounty.farms}</p>
-                  </div>
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-600 font-medium">Compliance Rate</p>
-                    <p className="text-3xl font-bold text-green-700">{selectedCounty.compliance}%</p>
-                  </div>
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <p className="text-sm text-purple-600 font-medium">Population</p>
-                    <p className="text-2xl font-bold text-purple-700">{selectedCounty.population}</p>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <p className="text-sm text-orange-600 font-medium">Annual Exports</p>
-                    <p className="text-2xl font-bold text-orange-700">{selectedCounty.exports}</p>
-                  </div>
-                </div>
-
-                {/* County Information */}
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-sm mb-2">County Information</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium">Capital:</span> {selectedCounty.capital}
-                      </div>
-                      <div>
-                        <span className="font-medium">Area:</span> {selectedCounty.area}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-sm mb-2">Major Commodities</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCounty.commodities?.map((commodity: string, index: number) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {commodity}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {satelliteConnections.map((connection) => (
+                    <div key={connection.constellation} className="bg-slate-50 rounded-xl p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-medium text-slate-900">{connection.constellation}</h4>
+                        <Badge 
+                          variant={connection.status === 'connected' ? 'default' : 'secondary'}
+                          className={connection.status === 'connected' ? 'bg-green-100 text-green-800' : ''}
+                        >
+                          {connection.status}
                         </Badge>
-                      ))}
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">Satellites</span>
+                          <span className="font-medium">{connection.satellites}</span>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-slate-600">Signal Strength</span>
+                            <span className="font-medium">{connection.signal}%</span>
+                          </div>
+                          <Progress value={connection.signal} className="h-2" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="tracking" className="space-y-6">
+              <div className="isms-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-indigo flex items-center justify-center">
+                    <Navigation className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">GPS Farm Boundary Tracking</h3>
+                    <p className="text-slate-600">Precision mapping of agricultural plot boundaries</p>
+                  </div>
+                </div>
+                
+                {currentPosition && (
+                  <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                    <h4 className="font-medium text-slate-900 mb-3">Current GPS Position</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <span className="text-slate-600 text-sm">Latitude</span>
+                        <p className="font-mono font-medium">{currentPosition.latitude.toFixed(6)}°N</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-600 text-sm">Longitude</span>
+                        <p className="font-mono font-medium">{currentPosition.longitude.toFixed(6)}°W</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-600 text-sm">Accuracy</span>
+                        <p className="font-medium">{currentPosition.accuracy}m</p>
+                      </div>
+                      <div>
+                        <span className="text-slate-600 text-sm">Status</span>
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Active
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <h4 className="font-medium text-slate-900">Mapped Farm Plots</h4>
+                  {farmPlots.map((plot) => (
+                    <div key={plot.id} className="bg-slate-50 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h5 className="font-medium text-slate-900">{plot.name}</h5>
+                          <p className="text-sm text-slate-600">{plot.county} County • {plot.crop}</p>
+                        </div>
+                        <Badge 
+                          variant={plot.status === 'active' ? 'default' : 'secondary'}
+                          className={plot.status === 'active' ? 'bg-green-100 text-green-800' : ''}
+                        >
+                          {plot.status}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <span className="text-slate-600 text-sm">Area</span>
+                          <p className="font-medium">{plot.area} hectares</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-600 text-sm">Boundaries</span>
+                          <p className="font-medium">{plot.coordinates.length} points</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-600 text-sm">Compliance</span>
+                          <p className="font-medium text-green-600">{plot.complianceScore}%</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              <div className="isms-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-yellow flex items-center justify-center">
+                    <BarChart3 className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Geospatial Analytics</h3>
+                    <p className="text-slate-600">Data-driven insights from GPS and mapping systems</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="bg-slate-50 rounded-xl p-6">
+                    <h4 className="font-medium text-slate-900 mb-3">Coverage Statistics</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Total Area Mapped</span>
+                        <span className="font-medium">1,247 ha</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">GPS Accuracy</span>
+                        <span className="font-medium">98.7%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Active Boundaries</span>
+                        <span className="font-medium">847</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <h4 className="font-semibold text-sm mb-2">Description</h4>
-                    <p className="text-sm text-gray-600">{selectedCounty.details}</p>
+                  <div className="bg-slate-50 rounded-xl p-6">
+                    <h4 className="font-medium text-slate-900 mb-3">Compliance Metrics</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">EUDR Compliant</span>
+                        <span className="font-medium text-green-600">94%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Verified Boundaries</span>
+                        <span className="font-medium">732</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Deforestation Risk</span>
+                        <span className="font-medium text-yellow-600">Low</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-6">
+                    <h4 className="font-medium text-slate-900 mb-3">System Performance</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Uptime</span>
+                        <span className="font-medium">99.8%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Data Processing</span>
+                        <span className="font-medium">Real-time</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Last Update</span>
+                        <span className="font-medium">2 min ago</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1" onClick={() => toast({ title: "County Report", description: `Generating detailed report for ${selectedCounty.name} County...` })}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Generate Report
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast({ title: "Opening Map", description: `Loading ${selectedCounty.name} County on interactive map...` })}>
-                    <MapPin className="h-4 w-4 mr-2" />
-                    View on Map
-                  </Button>
-                  <Button variant="outline" onClick={() => setSelectedCounty(null)}>
-                    Close
-                  </Button>
-                </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
+    </div>
   );
 }

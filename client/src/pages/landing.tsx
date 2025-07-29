@@ -62,7 +62,7 @@ export default function Landing() {
       </Helmet>
 
       {/* Header - ISMS Style */}
-      <header className="isms-card sticky top-0 z-10 mb-0">
+      <header className="bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 shadow-lg sticky top-0 z-10 mb-0">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
@@ -82,8 +82,8 @@ export default function Landing() {
                   />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">AgriTrace360™</h1>
-                  <p className="text-sm text-gray-600">Liberia Agriculture Commodity Regulatory Authority</p>
+                  <h1 className="text-xl font-bold text-white">AgriTrace360™</h1>
+                  <p className="text-sm text-slate-200">Liberia Agriculture Commodity Regulatory Authority</p>
                 </div>
               </div>
               

@@ -167,8 +167,13 @@
 }
 
 .isms-icon-bg-slate {
-  background: #e2e8f0;
-  color: #475569;
+  background: linear-gradient(135deg, #64748b, #475569);
+  color: white;
+}
+
+.isms-icon-bg-emerald {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
 }
 
 .isms-icon-bg-red {

@@ -89,16 +89,7 @@ export default function FrontPage() {
   return (
     <div className="min-h-screen isms-gradient">
       <div className="max-w-7xl mx-auto p-8">
-        {/* Header Section - ISMS Style */}
-        <div className="flex flex-col items-center text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl isms-icon-bg-blue flex items-center justify-center mb-6">
-            <Globe className="h-10 w-10 text-white" />
-          </div>
-          <h1 className="text-5xl font-bold text-slate-900 mb-4">Polipos Platform Ecosystem</h1>
-          <p className="text-slate-600 text-xl max-w-3xl">
-            Comprehensive business solutions platform featuring 8 integrated modules for enterprise management and digital transformation
-          </p>
-        </div>
+
 
         {/* Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-12">

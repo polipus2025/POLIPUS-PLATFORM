@@ -100,7 +100,7 @@ export default function FrontPage() {
               className="h-64 w-auto object-contain"
             />
             {/* Registered trademark symbol positioned over the 's' */}
-            <span className="absolute top-6 right-[calc(50%-380px)] text-xl font-bold text-slate-700">®</span>
+            <span className="absolute top-10 right-[calc(50%-380px)] text-xl font-bold text-slate-700">®</span>
           </div>
           <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
         </div>

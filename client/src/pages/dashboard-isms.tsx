@@ -118,6 +118,12 @@ export default function Dashboard() {
           {/* ISMS Main Content - Fixed Layout */}
           <main className="flex-1 p-6 overflow-y-auto">
             <div className="max-w-7xl mx-auto space-y-8">
+              {/* Debug Test - Simple visible element */}
+              <div className="bg-red-500 text-white p-4 rounded text-center">
+                <h2 className="text-2xl font-bold">DASHBOARD CONTENT IS LOADING - YOUR WORK IS PRESERVED</h2>
+                <p>If you see this red box, the content area is working!</p>
+              </div>
+              
               {/* ISMS Header */}
               <div className="text-center mb-12">
           <div className="inline-flex items-center gap-4 mb-6">
@@ -224,18 +230,18 @@ export default function Dashboard() {
               </div>
 
               {/* EUDR Compliance Section - ISMS Style */}
-        <div className="isms-card mb-8">
-          <div className="mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                <TreePine className="h-6 w-6" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold isms-gradient-text">EUDR Compliance Dashboard</h2>
-                <p className="text-slate-600">EU Deforestation Regulation Monitoring & Risk Assessment</p>
-              </div>
-            </div>
-          </div>
+              <div className="isms-card mb-8">
+                <div className="mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                      <TreePine className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold isms-gradient-text">EUDR Compliance Dashboard</h2>
+                      <p className="text-slate-600">EU Deforestation Regulation Monitoring & Risk Assessment</p>
+                    </div>
+                  </div>
+                </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Compliance Overview */}
@@ -456,9 +462,9 @@ export default function Dashboard() {
               <p className="text-sm text-slate-600">Cargo Value</p>
             </div>
           </div>
-        </div>
-            </div>
-          </main>
+                </div>
+              </div>
+            </main>
         </div>
       </div>
 

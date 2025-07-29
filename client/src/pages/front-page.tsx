@@ -87,72 +87,136 @@ export default function FrontPage() {
 
 
   return (
-    <ModernBackground variant="animated">
-      <div className="min-h-screen">
-      {/* Polipos Logo */}
-      <div className="flex justify-center pt-12 pb-12">
-        <img 
-          src={poliposLogo} 
-          alt="Polipos - Brightening the Future" 
-          className="h-48 w-auto object-contain"
-        />
-      </div>
+    <div className="min-h-screen isms-gradient">
+      <div className="max-w-7xl mx-auto p-8">
+        {/* Header Section - ISMS Style */}
+        <div className="flex flex-col items-center text-center mb-12">
+          <div className="w-20 h-20 rounded-2xl isms-icon-bg-blue flex items-center justify-center mb-6">
+            <Globe className="h-10 w-10 text-white" />
+          </div>
+          <h1 className="text-5xl font-bold text-slate-900 mb-4">Polipos Platform Ecosystem</h1>
+          <p className="text-slate-600 text-xl max-w-3xl">
+            Comprehensive business solutions platform featuring 8 integrated modules for enterprise management and digital transformation
+          </p>
+        </div>
 
-      {/* Platform Modules */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {modules.map((module) => {
-            const IconComponent = module.icon;
-            
-            return (
-              <Card 
-                key={module.id} 
-                className={`
-                  relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-105 h-64 flex flex-col
-                  ${module.isAgriTrace ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50' : 'border-gray-200 hover:border-gray-300'}
-                `}
-              >
-                {module.isAgriTrace ? (
-                  <Link href={module.route} className="flex-1 relative block">
-                    <img 
-                      src={agriTraceLogo} 
-                      alt="AgriTrace360" 
-                      className="absolute inset-0 w-full h-full object-cover cursor-pointer filter grayscale hover:grayscale-0 transition-all duration-500"
-                    />
-                  </Link>
-                ) : (
-                  <>
-                    <CardHeader className="pb-4 flex-1 flex items-center justify-center">
-                      <>
-                        <div className="flex items-center justify-center mb-4 w-full">
-                          <div className="p-3 rounded-full bg-gray-300 text-gray-500">
-                            <IconComponent className="h-6 w-6" />
-                          </div>
+        {/* Polipos Logo - ISMS Style */}
+        <div className="isms-card text-center mb-12">
+          <div className="flex justify-center py-8">
+            <img 
+              src={poliposLogo} 
+              alt="Polipos - Brightening the Future" 
+              className="h-40 w-auto object-contain"
+            />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Brightening the Future</h2>
+          <p className="text-slate-600">Innovation through technology excellence</p>
+        </div>
+
+        {/* Platform Statistics - ISMS Style */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <div className="isms-card text-center">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+              <CheckCircle className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Active Modules</p>
+            <p className="text-3xl font-bold text-slate-900 mb-2">1/8</p>
+            <p className="text-slate-600 text-sm">Operational</p>
+          </div>
+          
+          <div className="isms-card text-center">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+              <Wheat className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">AgriTrace360</p>
+            <p className="text-3xl font-bold text-slate-900 mb-2">100%</p>
+            <p className="text-slate-600 text-sm">Complete</p>
+          </div>
+
+          <div className="isms-card text-center">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-3">
+              <Settings className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">In Development</p>
+            <p className="text-3xl font-bold text-slate-900 mb-2">7</p>
+            <p className="text-slate-600 text-sm">Modules</p>
+          </div>
+
+          <div className="isms-card text-center">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
+              <Globe className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Platform Reach</p>
+            <p className="text-3xl font-bold text-slate-900 mb-2">Global</p>
+            <p className="text-slate-600 text-sm">Coverage</p>
+          </div>
+        </div>
+
+        {/* Platform Modules - ISMS Style */}
+        <div className="isms-card">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Settings className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Platform Modules</h2>
+              <p className="text-slate-600">Integrated business solutions and enterprise applications</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {modules.map((module) => {
+              const IconComponent = module.icon;
+              
+              return (
+                <div 
+                  key={module.id} 
+                  className={`
+                    isms-card transition-all duration-300 h-64 flex flex-col
+                    ${module.isAgriTrace ? 'border-green-500 hover:shadow-lg hover:scale-105' : 'opacity-60 cursor-not-allowed'}
+                  `}
+                >
+                  {module.isAgriTrace ? (
+                    <Link href={module.route} className="flex-1 relative block group">
+                      <div className="flex flex-col items-center text-center space-y-4 h-full justify-center">
+                        <div className="w-16 h-16 rounded-2xl isms-icon-bg-green flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <IconComponent className="h-8 w-8 text-white" />
                         </div>
-                        <CardTitle className="text-lg leading-tight text-center text-gray-500">
-                          {module.title}
-                        </CardTitle>
-                      </>
-                    </CardHeader>
-                    
-                    <CardContent className="pt-0 p-4">
-                      <div className="w-full text-center">
-                        <Badge variant="outline" className="text-gray-500 border-gray-300 mb-2">
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900 mb-2">{module.title}</h3>
+                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Active
+                          </Badge>
+                        </div>
+                        <Button className="isms-button w-full">
+                          <ArrowRight className="h-4 w-4 mr-2" />
+                          Enter Platform
+                        </Button>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="flex flex-col items-center text-center space-y-4 h-full justify-center p-4">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                        <IconComponent className="h-8 w-8 text-slate-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-slate-500 mb-2">{module.title}</h3>
+                        <Badge variant="outline" className="text-slate-500 border-slate-300">
                           Coming Soon
                         </Badge>
-                        <p className="text-xs text-gray-400 mt-2">
-                          This module is under development
-                        </p>
                       </div>
-                    </CardContent>
-                  </>
-                )}
-              </Card>
-            );
-          })}
+                      <p className="text-xs text-slate-400">
+                        This module is under development
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
-    </ModernBackground>
   );
 }

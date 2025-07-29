@@ -164,7 +164,7 @@ export default function Header() {
         <div className="flex justify-between items-center w-full max-w-full">
           <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-1 min-w-0 max-w-[70%]">
             <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0 max-w-full">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/50">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/50">
                 <img 
                   src={lacraLogo} 
                   alt="LACRA" 

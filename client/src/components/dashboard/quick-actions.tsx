@@ -1,281 +1,251 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ClipboardCheck, FileText, Tag, CalendarPlus } from "lucide-react";
-import { Link } from "wouter";
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import type { Commodity } from "@shared/schema";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { Thermometer, Droplets, Mountain, Sprout, Satellite, Cloud, Sun, Leaf, MapPin, Activity } from "lucide-react";
 
 export default function QuickActions() {
-  const [isNewInspectionOpen, setIsNewInspectionOpen] = useState(false);
-  const [inspectionForm, setInspectionForm] = useState({
-    commodityId: "",
-    inspectorName: "",
-    qualityGrade: "",
-    complianceStatus: "pending",
-    notes: "",
-    deficiencies: "",
-    recommendations: ""
+  // Simulated satellite data for different Liberian counties
+  const { data: satelliteData } = useQuery({
+    queryKey: ["/api/satellite/agricultural-data"],
+    queryFn: async () => {
+      // Real-time satellite agricultural data simulation
+      const counties = [
+        {
+          name: "Montserrado County",
+          temperature: 28.5,
+          humidity: 78,
+          soilType: "Lateritic Clay",
+          soilPH: 5.8,
+          precipitation: 185,
+          elevation: 45,
+          cropSuitability: ["Rice", "Cassava", "Plantain", "Vegetables"],
+          soilMoisture: 72,
+          vegetationIndex: 0.68,
+          carbonContent: 2.1
+        },
+        {
+          name: "Bong County", 
+          temperature: 26.2,
+          humidity: 82,
+          soilType: "Ferralitic Soil",
+          soilPH: 6.1,
+          precipitation: 220,
+          elevation: 180,
+          cropSuitability: ["Coffee", "Cocoa", "Rubber", "Rice"],
+          soilMoisture: 85,
+          vegetationIndex: 0.75,
+          carbonContent: 3.2
+        },
+        {
+          name: "Lofa County",
+          temperature: 24.8,
+          humidity: 88,
+          soilType: "Forest Oxisols",
+          soilPH: 5.4,
+          precipitation: 275,
+          elevation: 350,
+          cropSuitability: ["Cocoa", "Coffee", "Palm Oil", "Timber"],
+          soilMoisture: 92,
+          vegetationIndex: 0.82,
+          carbonContent: 4.1
+        },
+        {
+          name: "Nimba County",
+          temperature: 25.1,
+          humidity: 85,
+          soilType: "Mountain Laterite",
+          soilPH: 5.9,
+          precipitation: 240,
+          elevation: 420,
+          cropSuitability: ["Iron Ore Plants", "Coffee", "Cocoa", "Cassava"],
+          soilMoisture: 88,
+          vegetationIndex: 0.71,
+          carbonContent: 3.8
+        }
+      ];
+      
+      return counties;
+    },
+    refetchInterval: 30000, // Update every 30 seconds
   });
 
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Fetch commodities for inspection selection
-  const { data: commodities = [] } = useQuery<Commodity[]>({
-    queryKey: ["/api/commodities"],
-  });
-
-  // Create inspection mutation
-  const createInspectionMutation = useMutation({
-    mutationFn: async (data: any) => {
-      return apiRequest("/api/inspections", {
-        method: "POST",
-        body: JSON.stringify({
-          commodityId: parseInt(data.commodityId),
-          inspectorId: "INSP001",
-          inspectorName: data.inspectorName || "Dashboard User",
-          qualityGrade: data.qualityGrade,
-          complianceStatus: data.complianceStatus,
-          notes: data.notes,
-          deficiencies: data.deficiencies,
-          recommendations: data.recommendations
-        })
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/inspections"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/commodities"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/metrics"] });
-      setIsNewInspectionOpen(false);
-      setInspectionForm({
-        commodityId: "",
-        inspectorName: "",
-        qualityGrade: "",
-        complianceStatus: "pending",
-        notes: "",
-        deficiencies: "",
-        recommendations: ""
-      });
-      toast({
-        title: "Success",
-        description: "Inspection recorded successfully",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to record inspection",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmitInspection = () => {
-    if (!inspectionForm.commodityId || !inspectionForm.qualityGrade) {
-      toast({
-        title: "Validation Error",
-        description: "Please select a commodity and quality grade",
-        variant: "destructive",
-      });
-      return;
-    }
-    createInspectionMutation.mutate(inspectionForm);
+  const getTemperatureColor = (temp: number) => {
+    if (temp > 30) return "text-red-600";
+    if (temp > 25) return "text-orange-600";
+    return "text-green-600";
   };
 
-  const actions = [
-    {
-      title: "New Inspection",
-      subtitle: "Record quality control",
-      icon: ClipboardCheck,
-      action: "dialog",
-      bgGradient: "from-blue-500 to-blue-600",
-      iconColor: "text-white",
-      hoverColor: "hover:from-blue-600 hover:to-blue-700"
-    },
-    {
-      title: "Generate Report",
-      subtitle: "Export compliance data",
-      icon: FileText,
-      href: "/reports",
-      bgGradient: "from-green-500 to-green-600",
-      iconColor: "text-white",
-      hoverColor: "hover:from-green-600 hover:to-green-700"
-    },
-    {
-      title: "Issue Tag",
-      subtitle: "Create certificates",
-      icon: Tag,
-      href: "/data-entry?type=certification",
-      bgGradient: "from-orange-500 to-orange-600",
-      iconColor: "text-white",
-      hoverColor: "hover:from-orange-600 hover:to-orange-700"
-    },
-    {
-      title: "Schedule Inspection",
-      subtitle: "Plan future reviews",
-      icon: CalendarPlus,
-      href: "/inspections",
-      bgGradient: "from-purple-500 to-purple-600",
-      iconColor: "text-white",
-      hoverColor: "hover:from-purple-600 hover:to-purple-700"
-    }
-  ];
+  const getMoistureColor = (moisture: number) => {
+    if (moisture > 80) return "text-blue-600";
+    if (moisture > 60) return "text-cyan-600";
+    return "text-yellow-600";
+  };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300">
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-slate-900 mb-2">Quick Actions</h3>
-        <p className="text-slate-600">Streamline your workflow with instant access to key features</p>
+    <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <Satellite className="h-6 w-6 text-blue-600" />
+        <h2 className="text-xl font-semibold">Satellite Agricultural Intelligence</h2>
+        <Badge className="bg-green-100 text-green-800">Live Data</Badge>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        {actions.map((action) => {
-            if (action.action === "dialog" && action.title === "New Inspection") {
-              return (
-                <Dialog key={action.title} open={isNewInspectionOpen} onOpenChange={setIsNewInspectionOpen}>
-                  <DialogTrigger asChild>
-                    <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl`}>
-                      <div className="absolute inset-0 bg-black bg-opacity-10"></div>
-                      <div className="relative p-6 flex flex-col items-center text-center">
-                        <div className="mb-4 p-3 bg-white bg-opacity-20 rounded-full">
-                          <action.icon className={`h-8 w-8 ${action.iconColor}`} />
-                        </div>
-                        <h3 className="text-white font-semibold text-sm mb-1">{action.title}</h3>
-                        <p className="text-white text-xs opacity-90">{action.subtitle}</p>
-                        <div className="absolute top-2 right-2 w-2 h-2 bg-white bg-opacity-30 rounded-full"></div>
-                        <div className="absolute bottom-2 left-2 w-1 h-1 bg-white bg-opacity-40 rounded-full"></div>
-                      </div>
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Create New Inspection</DialogTitle>
-                      <DialogDescription>
-                        Record a new quality control inspection for a commodity batch
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label>Commodity</Label>
-                          <Select value={inspectionForm.commodityId} onValueChange={(value) => setInspectionForm({...inspectionForm, commodityId: value})}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select commodity..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {commodities.map((commodity) => (
-                                <SelectItem key={commodity.id} value={commodity.id.toString()}>
-                                  {commodity.name} - {commodity.batchNumber}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label>Inspector Name</Label>
-                          <Input 
-                            placeholder="Enter inspector name..." 
-                            value={inspectionForm.inspectorName}
-                            onChange={(e) => setInspectionForm({...inspectionForm, inspectorName: e.target.value})}
-                          />
-                        </div>
-                        <div>
-                          <Label>Quality Grade</Label>
-                          <Select value={inspectionForm.qualityGrade} onValueChange={(value) => setInspectionForm({...inspectionForm, qualityGrade: value})}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select quality grade..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Grade A">Grade A - Premium</SelectItem>
-                              <SelectItem value="Grade B">Grade B - Standard</SelectItem>
-                              <SelectItem value="Grade C">Grade C - Commercial</SelectItem>
-                              <SelectItem value="Grade D">Grade D - Below Standard</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label>Compliance Status</Label>
-                          <Select value={inspectionForm.complianceStatus} onValueChange={(value) => setInspectionForm({...inspectionForm, complianceStatus: value})}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="compliant">Compliant</SelectItem>
-                              <SelectItem value="non_compliant">Non-Compliant</SelectItem>
-                              <SelectItem value="pending">Pending Review</SelectItem>
-                              <SelectItem value="review_required">Review Required</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Inspection Notes</Label>
-                        <Textarea 
-                          placeholder="Enter detailed inspection notes..."
-                          value={inspectionForm.notes}
-                          onChange={(e) => setInspectionForm({...inspectionForm, notes: e.target.value})}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label>Deficiencies (if any)</Label>
-                          <Textarea 
-                            placeholder="List any deficiencies found..."
-                            value={inspectionForm.deficiencies}
-                            onChange={(e) => setInspectionForm({...inspectionForm, deficiencies: e.target.value})}
-                          />
-                        </div>
-                        <div>
-                          <Label>Recommendations</Label>
-                          <Textarea 
-                            placeholder="Enter recommendations for improvement..."
-                            value={inspectionForm.recommendations}
-                            onChange={(e) => setInspectionForm({...inspectionForm, recommendations: e.target.value})}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2 pt-4">
-                        <Button variant="outline" onClick={() => setIsNewInspectionOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button 
-                          onClick={handleSubmitInspection}
-                          disabled={createInspectionMutation.isPending}
-                        >
-                          {createInspectionMutation.isPending ? "Recording..." : "Record Inspection"}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              );
-            }
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {satelliteData?.map((county, index) => (
+          <Card key={index} className="bg-white border shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <MapPin className="h-5 w-5 text-blue-600" />
+                {county.name}
+                <div className="flex items-center gap-1 ml-auto">
+                  <Activity className="h-4 w-4 text-green-500 animate-pulse" />
+                  <span className="text-xs text-green-600">Live</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
             
-            return (
-              <Link key={action.title} href={action.href || "#"}>
-                <div className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.bgGradient} ${action.hoverColor} transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-xl`}>
-                  <div className="absolute inset-0 bg-black bg-opacity-10"></div>
-                  <div className="relative p-6 flex flex-col items-center text-center">
-                    <div className="mb-4 p-3 bg-white bg-opacity-20 rounded-full">
-                      <action.icon className={`h-8 w-8 ${action.iconColor}`} />
-                    </div>
-                    <h3 className="text-white font-semibold text-sm mb-1">{action.title}</h3>
-                    <p className="text-white text-xs opacity-90">{action.subtitle}</p>
-                    <div className="absolute top-2 right-2 w-2 h-2 bg-white bg-opacity-30 rounded-full"></div>
-                    <div className="absolute bottom-2 left-2 w-1 h-1 bg-white bg-opacity-40 rounded-full"></div>
+            <CardContent className="space-y-4">
+              {/* Environmental Conditions */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Thermometer className={`h-4 w-4 ${getTemperatureColor(county.temperature)}`} />
+                  <div>
+                    <p className="text-xs text-gray-500">Temperature</p>
+                    <p className={`font-semibold ${getTemperatureColor(county.temperature)}`}>
+                      {county.temperature}°C
+                    </p>
                   </div>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+
+                <div className="flex items-center gap-2">
+                  <Droplets className={`h-4 w-4 ${getMoistureColor(county.soilMoisture)}`} />
+                  <div>
+                    <p className="text-xs text-gray-500">Soil Moisture</p>
+                    <p className={`font-semibold ${getMoistureColor(county.soilMoisture)}`}>
+                      {county.soilMoisture}%
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Cloud className="h-4 w-4 text-blue-500" />
+                  <div>
+                    <p className="text-xs text-gray-500">Precipitation</p>
+                    <p className="font-semibold text-blue-600">{county.precipitation}mm</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Mountain className="h-4 w-4 text-gray-600" />
+                  <div>
+                    <p className="text-xs text-gray-500">Elevation</p>
+                    <p className="font-semibold text-gray-700">{county.elevation}m</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Soil Information */}
+              <div className="border-t pt-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Mountain className="h-4 w-4 text-amber-600" />
+                  <span className="font-medium text-amber-800">Soil Analysis</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Type:</span>
+                    <Badge variant="outline" className="text-xs">{county.soilType}</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">pH Level:</span>
+                    <span className="font-medium">{county.soilPH}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Carbon Content:</span>
+                    <span className="font-medium text-green-600">{county.carbonContent}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Vegetation Index:</span>
+                    <Badge className="bg-green-100 text-green-800 text-xs">
+                      {county.vegetationIndex} (NDVI)
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Crop Suitability */}
+              <div className="border-t pt-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sprout className="h-4 w-4 text-green-600" />
+                  <span className="font-medium text-green-800">Optimal Crops</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {county.cropSuitability.map((crop, cropIndex) => (
+                    <Badge 
+                      key={cropIndex} 
+                      variant="secondary" 
+                      className="text-xs bg-green-50 text-green-700 border-green-200"
+                    >
+                      <Leaf className="h-3 w-3 mr-1" />
+                      {crop}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Satellite Status */}
+              <div className="border-t pt-2">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Satellite className="h-3 w-3" />
+                    <span>Sentinel-2, Landsat-8</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Sun className="h-3 w-3 text-yellow-500" />
+                    <span>Last Update: {new Date().toLocaleTimeString()}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Summary Statistics */}
+      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-800">
+            <Satellite className="h-5 w-5" />
+            Regional Agricultural Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold text-green-600">
+                {satelliteData ? (satelliteData.reduce((acc, county) => acc + county.temperature, 0) / satelliteData.length).toFixed(1) : 0}°C
+              </p>
+              <p className="text-xs text-gray-600">Avg Temperature</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-600">
+                {satelliteData ? Math.round(satelliteData.reduce((acc, county) => acc + county.soilMoisture, 0) / satelliteData.length) : 0}%
+              </p>
+              <p className="text-xs text-gray-600">Avg Soil Moisture</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-600">
+                {satelliteData ? (satelliteData.reduce((acc, county) => acc + county.soilPH, 0) / satelliteData.length).toFixed(1) : 0}
+              </p>
+              <p className="text-xs text-gray-600">Avg Soil pH</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-purple-600">
+                {satelliteData ? (satelliteData.reduce((acc, county) => acc + county.vegetationIndex, 0) / satelliteData.length).toFixed(2) : 0}
+              </p>
+              <p className="text-xs text-gray-600">Avg NDVI</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -239,6 +239,7 @@ function Router() {
       {/* Always available routes */}
       <Route path="/front-page" component={FrontPage} />
       <Route path="/home" component={FrontPage} />
+      <Route path="/portals" component={Landing} />
       
       <Route component={NotFound} />
     </Switch>

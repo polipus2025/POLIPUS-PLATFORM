@@ -7,6 +7,7 @@ import RegionalMap from "@/components/dashboard/regional-map";
 import InspectionsTable from "@/components/dashboard/inspections-table";
 import QuickActions from "@/components/dashboard/quick-actions";
 import SystemAlerts from "@/components/dashboard/system-alerts";
+import BasicSystemAlerts from "@/components/dashboard/basic-system-alerts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
@@ -1255,10 +1256,13 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Charts and Mobile Device Monitoring */}
+      {/* Charts and Regional Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <ComplianceChart selectedCounty={selectedCounty} />
-        <SystemAlerts />
+        <div className="space-y-6">
+          <RegionalMap selectedCounty={selectedCounty} />
+          <BasicSystemAlerts />
+        </div>
       </div>
 
       {/* Commodity Details Table */}
@@ -1266,10 +1270,10 @@ export default function Dashboard() {
         <InspectionsTable />
       </div>
 
-      {/* Quick Actions and Regional Compliance */}
+      {/* Quick Actions and Mobile Device Monitoring */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <QuickActions />
-        <RegionalMap selectedCounty={selectedCounty} />
+        <SystemAlerts />
       </div>
 
       {/* Export Report Dialog */}

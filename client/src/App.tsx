@@ -87,7 +87,8 @@ function Router() {
             {userType === 'farmer' ? <FarmerDashboard /> : 
              userType === 'field_agent' ? <FieldAgentDashboard /> : 
              userType === 'exporter' ? <ExporterDashboard /> :
-             <Dashboard />}
+             userType === 'monitoring' ? <MonitoringDashboard /> :
+             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
           </Route>
           
           {/* Exporter Portal Routes */}

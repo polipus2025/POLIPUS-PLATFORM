@@ -51,7 +51,7 @@ export default function MonitoringLogin() {
         localStorage.setItem("userRole", "monitoring_admin");
         localStorage.setItem("userId", data.user.id);
         localStorage.setItem("username", data.user.username);
-        setLocation("/monitoring-dashboard");
+        setLocation("/");
       } else {
         setError(data.message || "Invalid monitoring credentials");
       }

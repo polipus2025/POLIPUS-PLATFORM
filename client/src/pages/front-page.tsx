@@ -102,7 +102,7 @@ export default function FrontPage() {
             {/* Registered trademark symbol positioned over the 's' */}
             <span className="absolute top-6 right-[calc(50%-60px)] text-xl font-bold text-slate-700">®</span>
           </div>
-          <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform®</h2>
+          <h2 className="text-3xl font-bold text-slate-900">Environmental Intelligence Platform</h2>
         </div>
 
         {/* Platform Statistics - ISMS Style */}

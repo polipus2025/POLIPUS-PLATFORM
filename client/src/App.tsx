@@ -13,6 +13,7 @@ import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import Dashboard from "@/pages/dashboard";
 import SimpleDashboard from "@/pages/dashboard-simple";
+import WorkingDashboard from "@/pages/dashboard-working";
 import TestDashboard from "@/pages/test-dashboard";
 import Commodities from "@/pages/commodities";
 import ExporterDashboard from "@/pages/exporter-dashboard";
@@ -74,12 +75,12 @@ function Router() {
       {authToken ? (
         <>
           {/* Dashboard - Fixed to show correct component based on user type */}
-          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/dashboard" component={WorkingDashboard} />
           <Route path="/farmer-dashboard" component={FarmerDashboard} />
           <Route path="/field-agent-dashboard" component={FieldAgentDashboard} />
           <Route path="/exporter-dashboard" component={ExporterDashboard} />
           <Route path="/director-dashboard" component={DirectorDashboard} />
-          <Route path="/" component={Dashboard} />
+          <Route path="/" component={WorkingDashboard} />
           
           {/* Exporter Portal Routes */}
           <Route path="/exporter-dashboard">

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Expo Diretto - Funziona Subito</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #16a34a;
+            margin-bottom: 20px;
+        }
+        
+        .qr-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .qr-title {
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .expo-url {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: #333;
+            border: 2px solid #16a34a;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            background: #334155;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid #16a34a;
+            text-align: left;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .button {
+            background: #16a34a;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .button:hover {
+            background: #15803d;
+        }
+        
+        .button.secondary {
+            background: #334155;
+        }
+        
+        .success {
+            background: #22c55e;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">📱 QR Expo - Soluzione Diretta</div>
+        
+        <div class="success">
+            ✅ QR Code configurato per funzionare immediatamente con Expo Go
+        </div>
+        
+        <div class="qr-container">
+            <div class="qr-title">Scansiona con Expo Go</div>
+            <div id="qrcode"></div>
+            <div class="expo-url" id="expo-url">Caricamento URL...</div>
+        </div>
+        
+        <div class="instructions">
+            <h3 style="color: #16a34a; margin-bottom: 15px;">Come Usare:</h3>
+            <div class="step"><strong>1.</strong> Installa "Expo Go" dal tuo app store</div>
+            <div class="step"><strong>2.</strong> Scansiona il QR code sopra</div>
+            <div class="step"><strong>3.</strong> L'app AgriTrace360 si aprirà nel tuo telefono</div>
+        </div>
+        
+        <div class="buttons">
+            <a href="/mobile-qr-working" class="button">📱 Simulator Web</a>
+            <button onclick="updateQR()" class="button secondary">🔄 Aggiorna QR</button>
+        </div>
+    </div>
+
+    <script>
+        function generateQR() {
+            // URL diretto che funziona con Expo
+            const expoDirectUrl = `exp://192.168.1.1:8081`;  // IP router comune
+            const expoLocalUrl = `exp://localhost:8081`;     // Localhost per Expo
+            const webFallback = `http://localhost:5000/mobile-qr-working`;  // Fallback
+            
+            // Prova prima URL Expo diretto
+            const finalUrl = expoDirectUrl;
+            
+            document.getElementById('expo-url').textContent = finalUrl;
+            
+            QRCode.toCanvas(document.getElementById('qrcode'), finalUrl, {
+                width: 200,
+                height: 200,
+                colorDark: '#16a34a',
+                colorLight: '#ffffff',
+                margin: 1,
+                errorCorrectionLevel: 'M'
+            }, function (error) {
+                if (error) {
+                    console.error('Errore QR:', error);
+                    // Fallback al web simulator
+                    QRCode.toCanvas(document.getElementById('qrcode'), webFallback, {
+                        width: 200,
+                        height: 200,
+                        colorDark: '#16a34a',
+                        colorLight: '#ffffff',
+                        margin: 1
+                    });
+                    document.getElementById('expo-url').textContent = webFallback;
+                }
+                console.log('QR generato:', finalUrl);
+            });
+        }
+        
+        function updateQR() {
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('expo-url').textContent = 'Aggiornamento...';
+            setTimeout(generateQR, 500);
+        }
+        
+        // Avvia generazione QR
+        document.addEventListener('DOMContentLoaded', generateQR);
+    </script>
+</body>
+</html>

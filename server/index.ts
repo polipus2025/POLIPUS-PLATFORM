@@ -104,6 +104,14 @@ app.get('/soluzione-mobile', (req, res) => {
   res.sendFile('soluzione-mobile.html', { root: '.' });
 });
 
+app.get('/expo-qr-funzionante', (req, res) => {
+  res.sendFile('expo-qr-funzionante.html', { root: '.' });
+});
+
+app.get('/qr-expo-diretto', (req, res) => {
+  res.sendFile('qr-expo-diretto.html', { root: '.' });
+});
+
 (async () => {
   // Seed the database with initial data
   try {

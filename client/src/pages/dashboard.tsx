@@ -616,95 +616,29 @@ export default function Dashboard() {
                 </div>
               </DialogContent>
             </Dialog>
-            {/* County Selection Visual Grid */}
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-slate-700 mb-3">Select County for Compliance Dashboard:</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-4">
-                {[
-                  { name: "All Counties", value: "all", color: "bg-blue-500" },
-                  { name: "Bomi", value: "Bomi County", color: "bg-green-500" },
-                  { name: "Bong", value: "Bong County", color: "bg-purple-500" },
-                  { name: "Gbarpolu", value: "Gbarpolu County", color: "bg-orange-500" },
-                  { name: "Grand Bassa", value: "Grand Bassa County", color: "bg-red-500" },
-                  { name: "Grand Cape Mount", value: "Grand Cape Mount County", color: "bg-teal-500" },
-                  { name: "Grand Gedeh", value: "Grand Gedeh County", color: "bg-pink-500" },
-                  { name: "Grand Kru", value: "Grand Kru County", color: "bg-indigo-500" },
-                  { name: "Lofa", value: "Lofa County", color: "bg-yellow-500" },
-                  { name: "Margibi", value: "Margibi County", color: "bg-cyan-500" },
-                  { name: "Maryland", value: "Maryland County", color: "bg-emerald-500" },
-                  { name: "Montserrado", value: "Montserrado County", color: "bg-violet-500" },
-                  { name: "Nimba", value: "Nimba County", color: "bg-rose-500" },
-                  { name: "River Cess", value: "River Cess County", color: "bg-lime-500" },
-                  { name: "River Gee", value: "River Gee County", color: "bg-amber-500" },
-                  { name: "Sinoe", value: "Sinoe County", color: "bg-slate-500" },
-                ].map((county) => (
-                  <button
-                    key={county.value}
-                    onClick={() => setSelectedCounty(county.value)}
-                    className={`p-3 rounded-lg text-white text-xs font-medium transition-all duration-200 hover:scale-105 hover:shadow-md ${
-                      selectedCounty === county.value 
-                        ? `${county.color} ring-2 ring-offset-2 ring-blue-400 shadow-lg` 
-                        : `${county.color} opacity-80 hover:opacity-100`
-                    }`}
-                  >
-                    <div className="text-center">
-                      <div className="font-semibold">{county.name}</div>
-                      {county.value !== "all" && (
-                        <div className="text-xs opacity-90 mt-1">County</div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-              
-              {/* Current Selection Display */}
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <MapPin className="h-4 w-4" />
-                <span>Currently viewing: <strong>{selectedCounty === "all" ? "All Counties" : selectedCounty}</strong></span>
-                {selectedCounty !== "all" && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setSelectedCounty("all")}
-                    className="ml-2 h-6 text-xs"
-                  >
-                    View All Counties
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Legacy Dropdown for Advanced Selection */}
-            <details className="mb-4">
-              <summary className="text-sm text-slate-500 cursor-pointer hover:text-slate-700">
-                Advanced County Selection (Dropdown)
-              </summary>
-              <div className="mt-2">
-                <Select value={selectedCounty} onValueChange={setSelectedCounty}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Select County" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Counties</SelectItem>
-                    <SelectItem value="Bomi County">Bomi County</SelectItem>
-                    <SelectItem value="Bong County">Bong County</SelectItem>
-                    <SelectItem value="Gbarpolu County">Gbarpolu County</SelectItem>
-                    <SelectItem value="Grand Bassa County">Grand Bassa County</SelectItem>
-                    <SelectItem value="Grand Cape Mount County">Grand Cape Mount County</SelectItem>
-                    <SelectItem value="Grand Gedeh County">Grand Gedeh County</SelectItem>
-                    <SelectItem value="Grand Kru County">Grand Kru County</SelectItem>
-                    <SelectItem value="Lofa County">Lofa County</SelectItem>
-                    <SelectItem value="Margibi County">Margibi County</SelectItem>
-                    <SelectItem value="Maryland County">Maryland County</SelectItem>
-                    <SelectItem value="Montserrado County">Montserrado County</SelectItem>
-                    <SelectItem value="Nimba County">Nimba County</SelectItem>
-                    <SelectItem value="River Cess County">River Cess County</SelectItem>
-                    <SelectItem value="River Gee County">River Gee County</SelectItem>
-                    <SelectItem value="Sinoe County">Sinoe County</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </details>
+            <Select value={selectedCounty} onValueChange={setSelectedCounty}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select County" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Counties</SelectItem>
+                <SelectItem value="Bomi County">Bomi County</SelectItem>
+                <SelectItem value="Bong County">Bong County</SelectItem>
+                <SelectItem value="Gbarpolu County">Gbarpolu County</SelectItem>
+                <SelectItem value="Grand Bassa County">Grand Bassa County</SelectItem>
+                <SelectItem value="Grand Cape Mount County">Grand Cape Mount County</SelectItem>
+                <SelectItem value="Grand Gedeh County">Grand Gedeh County</SelectItem>
+                <SelectItem value="Grand Kru County">Grand Kru County</SelectItem>
+                <SelectItem value="Lofa County">Lofa County</SelectItem>
+                <SelectItem value="Margibi County">Margibi County</SelectItem>
+                <SelectItem value="Maryland County">Maryland County</SelectItem>
+                <SelectItem value="Montserrado County">Montserrado County</SelectItem>
+                <SelectItem value="Nimba County">Nimba County</SelectItem>
+                <SelectItem value="River Cess County">River Cess County</SelectItem>
+                <SelectItem value="River Gee County">River Gee County</SelectItem>
+                <SelectItem value="Sinoe County">Sinoe County</SelectItem>
+              </SelectContent>
+            </Select>
             
             {/* EUDR Compliance Button */}
             <Dialog open={isEudrDialogOpen} onOpenChange={setIsEudrDialogOpen}>

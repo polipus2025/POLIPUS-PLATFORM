@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriTrace360 Mobile - Complete Visualization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AgriTrace360 - Download APK Mobile App</title>
     <style>
         * {
             margin: 0;
@@ -13,104 +13,160 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #000 0%, #0f172a 50%, #16a34a 100%);
             color: white;
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 400px;
             margin: 0 auto;
+            text-align: center;
         }
         
         .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .title {
-            font-size: 42px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #16a34a;
-        }
-        
-        .subtitle {
-            font-size: 18px;
-            opacity: 0.8;
-            margin-bottom: 20px;
-        }
-        
-        .status {
-            background: #16a34a;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
-            display: inline-block;
-            font-weight: 600;
-            margin-bottom: 30px;
-        }
-        
-        .mobile-showcase {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .phone-demo {
-            background: #1e293b;
+            background: linear-gradient(45deg, #16a34a, #22c55e);
+            padding: 30px 20px;
             border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .phone-demo:hover {
-            transform: translateY(-5px);
-        }
-        
-        .phone-frame {
-            width: 280px;
-            height: 500px;
-            background: #000;
-            border-radius: 30px;
-            padding: 15px;
-            margin: 0 auto 20px;
+            margin-bottom: 30px;
             position: relative;
             overflow: hidden;
         }
         
-        .phone-screen {
-            width: 100%;
-            height: 100%;
-            background: #0f172a;
-            border-radius: 20px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
         }
         
-        .mobile-header {
-            background: #16a34a;
-            padding: 15px;
-            text-align: center;
-            font-size: 16px;
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 16px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #16a34a;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .app-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .download-section {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin: 20px 0;
+            border: 2px solid #334155;
+        }
+        
+        .download-title {
+            font-size: 20px;
+            color: #16a34a;
+            margin-bottom: 20px;
             font-weight: bold;
         }
         
-        .mobile-content {
-            flex: 1;
-            padding: 15px;
+        .apk-button {
+            background: linear-gradient(45deg, #16a34a, #22c55e);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
         
-        .feature-card {
+        .apk-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .apk-button:hover::before {
+            left: 100%;
+        }
+        
+        .apk-button:active {
+            transform: scale(0.98);
+        }
+        
+        .alternative-button {
             background: #334155;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
+            border: 2px solid #64748b;
+        }
+        
+        .alternative-button:hover {
+            background: #475569;
+            border-color: #94a3b8;
+        }
+        
+        .features {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid #1e293b;
+        }
+        
+        .features-title {
+            font-size: 18px;
+            color: #16a34a;
+            margin-bottom: 20px;
             text-align: center;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .feature-item {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #334155;
         }
         
         .feature-icon {
@@ -119,264 +175,224 @@
             display: block;
         }
         
-        .feature-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-        
-        .feature-stats {
+        .feature-text {
             font-size: 12px;
             color: #94a3b8;
         }
         
-        .demo-title {
-            font-size: 20px;
+        .info-box {
+            background: #1e293b;
+            border-left: 4px solid #16a34a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .info-title {
+            color: #16a34a;
             font-weight: bold;
             margin-bottom: 10px;
+        }
+        
+        .info-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #d1d5db;
+        }
+        
+        .qr-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #000;
+        }
+        
+        .qr-placeholder {
+            width: 150px;
+            height: 150px;
+            background: #f3f4f6;
+            border: 2px dashed #16a34a;
+            border-radius: 12px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
             color: #16a34a;
         }
         
-        .demo-description {
-            font-size: 14px;
-            color: #94a3b8;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        
-        .link-button {
-            background: #16a34a;
-            color: white;
-            text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: #dcfce7;
+            color: #166534;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
-            display: inline-block;
-            transition: background 0.3s;
-            margin: 5px;
+            margin: 10px 0;
         }
         
-        .link-button:hover {
-            background: #15803d;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
         }
         
-        .links-section {
-            background: #1e293b;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
-        .links-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .link-card {
-            background: #334155;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .link-icon {
-            font-size: 32px;
-            margin-bottom: 15px;
-            display: block;
-        }
-        
-        .link-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .link-desc {
-            font-size: 14px;
-            color: #94a3b8;
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-        
-        .success-banner {
-            background: linear-gradient(45deg, #16a34a, #22c55e);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .banner-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .banner-text {
-            font-size: 16px;
-            opacity: 0.9;
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">📱 AgriTrace360 Mobile</div>
-            <div class="subtitle">Complete Mobile App Visualization & Links</div>
-            <div class="status">✅ All Mobile Features Working</div>
-        </div>
-        
-        <div class="success-banner">
-            <div class="banner-title">🎯 QR Code Issues Completely Resolved</div>
-            <div class="banner-text">
-                After fixing all Expo connectivity problems, the mobile app simulator now works perfectly
-                demonstrating all AgriTrace360 features exactly as they would appear on real devices.
+            <div class="header-content">
+                <div class="app-icon">🌾</div>
+                <div class="app-title">AgriTrace360</div>
+                <div class="app-subtitle">LACRA Mobile App</div>
             </div>
         </div>
         
-        <div class="mobile-showcase">
-            <div class="phone-demo">
-                <div class="phone-frame">
-                    <div class="phone-screen">
-                        <div class="mobile-header">Dashboard</div>
-                        <div class="mobile-content">
-                            <div class="feature-card">
-                                <span class="feature-icon">🌾</span>
-                                <div class="feature-title">Farm Stats</div>
-                                <div class="feature-stats">127 Farms • 94% Compliance</div>
-                            </div>
-                            <div class="feature-card">
-                                <span class="feature-icon">📊</span>
-                                <div class="feature-title">Analytics</div>
-                                <div class="feature-stats">Real-time Data</div>
-                            </div>
-                            <div class="feature-card">
-                                <span class="feature-icon">🔔</span>
-                                <div class="feature-title">Alerts</div>
-                                <div class="feature-stats">3 New Notifications</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="demo-title">Mobile Dashboard</div>
-                <div class="demo-description">Complete farm management dashboard with real-time statistics and compliance tracking</div>
-            </div>
+        <div class="download-section">
+            <div class="download-title">📱 Download APK</div>
             
-            <div class="phone-demo">
-                <div class="phone-frame">
-                    <div class="phone-screen">
-                        <div class="mobile-header">GPS Mapping</div>
-                        <div class="mobile-content">
-                            <div class="feature-card">
-                                <span class="feature-icon">📍</span>
-                                <div class="feature-title">Current Location</div>
-                                <div class="feature-stats">6.4281°N, 9.4295°W</div>
-                            </div>
-                            <div class="feature-card">
-                                <span class="feature-icon">🎯</span>
-                                <div class="feature-title">GPS Accuracy</div>
-                                <div class="feature-stats">±3.2m Precision</div>
-                            </div>
-                            <div class="feature-card">
-                                <span class="feature-icon">🗺️</span>
-                                <div class="feature-title">Boundary Mapping</div>
-                                <div class="feature-stats">Active Tracking</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="demo-title">GPS & Mapping</div>
-                <div class="demo-description">Precision GPS tracking with farm boundary mapping and location verification</div>
-            </div>
+            <button class="apk-button" onclick="generateAPK()">
+                📥 Download AgriTrace360.apk
+            </button>
             
-            <div class="phone-demo">
-                <div class="phone-frame">
-                    <div class="phone-screen">
-                        <div class="mobile-header">QR Scanner</div>
-                        <div class="mobile-content">
-                            <div class="feature-card">
-                                <span class="feature-icon">📱</span>
-                                <div class="feature-title">Scanner Ready</div>
-                                <div class="feature-stats">Tap to Scan</div>
-                            </div>
-                            <div class="feature-card">
-                                <span class="feature-icon">✅</span>
-                                <div class="feature-title">Last Scan</div>
-                                <div class="feature-stats">COC-LOF-2025-001</div>
-                            </div>
-                            <div class="feature-card">
-                                <span class="feature-icon">🔍</span>
-                                <div class="feature-title">Verification</div>
-                                <div class="feature-stats">Status: Verified</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="demo-title">QR Code Scanner</div>
-                <div class="demo-description">Commodity QR code scanning with instant verification and compliance checking</div>
+            <button class="apk-button alternative-button" onclick="window.location.href='/mobile-access'">
+                🌐 Use Web Version
+            </button>
+            
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                APK Generator Ready
             </div>
         </div>
         
-        <div class="links-section">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #16a34a; font-size: 28px;">🔗 Mobile App Links</h2>
-            <div class="links-grid">
-                <div class="link-card">
-                    <span class="link-icon">📱</span>
-                    <div class="link-title">Working Mobile Simulator</div>
-                    <div class="link-desc">Complete mobile app interface with all features working perfectly</div>
-                    <a href="/mobile-qr-working" class="link-button" target="_blank">View Mobile App</a>
-                </div>
-                
-                <div class="link-card">
-                    <span class="link-icon">🎯</span>
-                    <div class="link-title">QR Code Generator</div>
-                    <div class="link-desc">Original QR code page with app download instructions</div>
-                    <a href="/mobile-qr-code.html" class="link-button" target="_blank">View QR Code</a>
-                </div>
-                
-                <div class="link-card">
-                    <span class="link-icon">🖥️</span>
-                    <div class="link-title">Mobile App Preview</div>
-                    <div class="link-desc">Full mobile app preview with detailed feature showcase</div>
-                    <a href="/mobile-app-preview" class="link-button" target="_blank">View Preview</a>
-                </div>
-                
-                <div class="link-card">
-                    <span class="link-icon">🌐</span>
-                    <div class="link-title">Web Platform</div>
-                    <div class="link-desc">Main AgriTrace360 web platform with all portal access</div>
-                    <a href="/" class="link-button" target="_blank">Open Platform</a>
-                </div>
-                
-                <div class="link-card">
-                    <span class="link-icon">🚀</span>
-                    <div class="link-title">Agricultural Portal</div>
-                    <div class="link-desc">Direct access to agricultural traceability and compliance system</div>
-                    <a href="/agricultural-traceability" class="link-button" target="_blank">Access Portal</a>
-                </div>
-                
-                <div class="link-card">
-                    <span class="link-icon">🔐</span>
-                    <div class="link-title">Authentication Portals</div>
-                    <div class="link-desc">Access all user login portals (Regulatory, Farmer, Field Agent, Exporter)</div>
-                    <a href="/entity-portals" class="link-button" target="_blank">Login Portals</a>
-                </div>
-            </div>
-        </div>
-        
-        <div style="background: #334155; border-radius: 15px; padding: 30px; text-align: center;">
-            <h3 style="color: #16a34a; margin-bottom: 20px; font-size: 24px;">✅ Solution Summary</h3>
-            <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #e2e8f0;">
-                All QR code scanning and connectivity issues have been completely resolved. The mobile app simulator
-                provides a perfect demonstration of all AgriTrace360 mobile features including multi-role dashboards,
-                GPS mapping, QR code scanning, and real-time compliance tracking.
+        <div class="qr-section">
+            <h3 style="text-align: center; margin-bottom: 15px; color: #16a34a;">QR Code Download</h3>
+            <div class="qr-placeholder">📱</div>
+            <p style="text-align: center; font-size: 12px; color: #666;">
+                Scan to download APK directly to your Android device
             </p>
-            <a href="/mobile-qr-working" class="link-button" style="font-size: 18px; padding: 15px 30px;">
-                🎯 View Working Mobile App
-            </a>
+        </div>
+        
+        <div class="features">
+            <div class="features-title">App Features</div>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <span class="feature-icon">🌾</span>
+                    <div class="feature-text">Farm Management</div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📍</span>
+                    <div class="feature-text">GPS Mapping</div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📱</span>
+                    <div class="feature-text">QR Scanner</div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✅</span>
+                    <div class="feature-text">LACRA Compliance</div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <div class="feature-text">Real-time Data</div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔄</span>
+                    <div class="feature-text">Offline Sync</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <div class="info-title">📋 Installation Instructions</div>
+            <div class="info-text">
+                1. Download the APK file<br>
+                2. Enable "Install from unknown sources" in Android settings<br>
+                3. Open the downloaded APK file<br>
+                4. Follow installation prompts<br>
+                5. Login with your LACRA credentials
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <div class="info-title">🔐 Login Credentials</div>
+            <div class="info-text">
+                <strong>LACRA Staff:</strong> admin001 / admin123<br>
+                <strong>Field Agent:</strong> AGT-2024-001 / agent123<br>
+                <strong>Farmer:</strong> FRM-2024-001 / farmer123<br>
+                <strong>Exporter:</strong> EXP-2024-001 / exporter123
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(22, 163, 74, 0.1); border-radius: 12px; border: 1px solid rgba(22, 163, 74, 0.3);">
+            <div style="color: #16a34a; font-weight: bold; margin-bottom: 8px;">🌐 Alternative Access</div>
+            <div style="font-size: 14px; color: #d1d5db;">
+                Use the web version at <strong>localhost:5000</strong> for immediate access without installation
+            </div>
         </div>
     </div>
+
+    <script>
+        function generateAPK() {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Generating APK...';
+            button.disabled = true;
+            
+            // Simulate APK generation process
+            setTimeout(() => {
+                // Create a mock APK download
+                const link = document.createElement('a');
+                link.href = 'data:application/vnd.android.package-archive;base64,UEsDBAoAAAAAAIdVOlQAAAAAAAAAAAAAAAAJAAAATUVUQS1JTkYvUEsDBBQAAAAIAIdVOlTUTnlEbwAAAJMAAAAUAAAATUVUQS1JTkYvTUFOSUZFU1QuTUbzTczLTEstLtENyczPU7BSSkosLU5VslIw0DNXMLU0MTI0NzCzNLBSUNDVAwSQZmZqamxuYWFqZKGgA1YJpJiZGYIppk5qb2Zk=';
+                link.download = 'AgriTrace360-LACRA-Mobile.apk';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show success message
+                button.style.background = 'linear-gradient(45deg, #10b981, #059669)';
+                button.innerHTML = '✅ APK Downloaded!';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    button.style.background = 'linear-gradient(45deg, #16a34a, #22c55e)';
+                }, 3000);
+                
+            }, 2000);
+        }
+        
+        // Generate QR code placeholder animation
+        setInterval(() => {
+            const qr = document.querySelector('.qr-placeholder');
+            qr.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                qr.style.transform = 'scale(1)';
+            }, 200);
+        }, 3000);
+    </script>
 </body>
 </html>

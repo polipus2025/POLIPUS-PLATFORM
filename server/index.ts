@@ -84,6 +84,10 @@ app.get('/mobile-app-preview', (req, res) => {
   res.sendFile('mobile-app-preview.html', { root: '.' });
 });
 
+app.get('/mobile-app-preview-direct', (req, res) => {
+  res.sendFile('mobile-app-preview.html', { root: '.' });
+});
+
 app.get('/mobile-app-simulator', (req, res) => {
   res.sendFile('mobile-app-working.html', { root: '.' });
 });

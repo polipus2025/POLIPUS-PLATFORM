@@ -74,6 +74,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve mobile QR code page directly
+app.get('/mobile-qr-code.html', (req, res) => {
+  res.sendFile('mobile-qr-code.html', { root: '.' });
+});
+
+// Add mobile app routes
+app.get('/mobile-app-preview', (req, res) => {
+  res.sendFile('mobile-app-preview.html', { root: '.' });
+});
+
+app.get('/mobile-app-simulator', (req, res) => {
+  res.sendFile('mobile-app-working.html', { root: '.' });
+});
+
 (async () => {
   // Seed the database with initial data
   try {

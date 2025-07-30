@@ -116,6 +116,18 @@ app.get('/mobile-semplice', (req, res) => {
   res.sendFile('mobile-semplice.html', { root: '.' });
 });
 
+app.get('/mobile-access', (req, res) => {
+  res.sendFile('mobile-access.html', { root: '.' });
+});
+
+app.get('/mobile-qr-working', (req, res) => {
+  res.sendFile('mobile-qr-working.html', { root: '.' });
+});
+
+app.get('/soluzione-mobile', (req, res) => {
+  res.sendFile('soluzione-mobile.html', { root: '.' });
+});
+
 (async () => {
   // Seed the database with initial data
   try {

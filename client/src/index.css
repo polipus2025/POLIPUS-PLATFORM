@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-First Responsive Design */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-full {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0.5rem !important;
+  }
+  
+  .mobile-text-sm {
+    font-size: 0.875rem !important;
+  }
+  
+  .mobile-p-2 {
+    padding: 0.5rem !important;
+  }
+  
+  .mobile-grid-1 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .mobile-space-y-2 > * + * {
+    margin-top: 0.5rem !important;
+  }
+}
+
 /* Custom blinking notification animation */
 @keyframes blink-red {
   0%, 50% { 

@@ -3,141 +3,115 @@ import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'rea
 import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState('farmer');
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [gpsCoords, setGpsCoords] = useState('6.4281°N, 9.4295°W');
-  const [lastQRScan, setLastQRScan] = useState('COC-LOF-2025-001');
+  const [farmStats, setFarmStats] = useState({
+    farmsRegistered: 127,
+    complianceRate: 94,
+    qrScansToday: 23
+  });
 
-  const simulateGPS = () => {
+  const handleGPSUpdate = () => {
     const lat = (6.4281 + Math.random() * 0.01).toFixed(4);
     const lon = (9.4295 + Math.random() * 0.01).toFixed(4);
-    setGpsCoords(`${lat}°N, ${lon}°W`);
-    Alert.alert('GPS Updated', `New location: ${lat}°N, ${lon}°W`);
+    Alert.alert('GPS Updated', `Location: ${lat}°N, ${lon}°W`);
   };
 
-  const simulateQRScan = () => {
+  const handleQRScan = () => {
     const codes = ['COC-LOF-2025-001', 'RIC-MON-2025-045', 'COF-NIM-2025-123'];
     const code = codes[Math.floor(Math.random() * codes.length)];
-    setLastQRScan(code);
-    Alert.alert('QR Code Scanned', `Commodity: ${code}\nStatus: Verified ✓`);
+    setFarmStats(prev => ({ ...prev, qrScansToday: prev.qrScansToday + 1 }));
+    Alert.alert('QR Scanned', `Code: ${code}\nStatus: Verified ✓`);
   };
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
       
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>AgriTrace360 LACRA</Text>
         <Text style={styles.subtitle}>Agricultural Compliance Platform</Text>
-        <Text style={styles.userInfo}>Logged in as: {currentUser.toUpperCase()}</Text>
       </View>
 
-      {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
-        {['Dashboard', 'GPS Map', 'QR Scan', 'Profile'].map(tab => (
+      <View style={styles.tabBar}>
+        {['Dashboard', 'GPS', 'Scanner', 'Profile'].map(tab => (
           <TouchableOpacity
             key={tab}
-            style={[styles.tab, activeTab === tab.toLowerCase().replace(' ', '') && styles.activeTab]}
-            onPress={() => setActiveTab(tab.toLowerCase().replace(' ', ''))}
+            style={[styles.tab, activeTab === tab.toLowerCase() && styles.activeTab]}
+            onPress={() => setActiveTab(tab.toLowerCase())}
           >
-            <Text style={[styles.tabText, activeTab === tab.toLowerCase().replace(' ', '') && styles.activeTabText]}>
+            <Text style={[styles.tabText, activeTab === tab.toLowerCase() && styles.activeTabText]}>
               {tab}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Content */}
       <ScrollView style={styles.content}>
-        
         {activeTab === 'dashboard' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Farm Dashboard</Text>
             
-            <View style={styles.statsContainer}>
+            <View style={styles.statsRow}>
               <View style={styles.statCard}>
-                <Text style={styles.statNumber}>127</Text>
-                <Text style={styles.statLabel}>Farms Mapped</Text>
+                <Text style={styles.statNumber}>{farmStats.farmsRegistered}</Text>
+                <Text style={styles.statLabel}>Farms</Text>
               </View>
               <View style={styles.statCard}>
-                <Text style={styles.statNumber}>94%</Text>
-                <Text style={styles.statLabel}>Compliance Rate</Text>
+                <Text style={styles.statNumber}>{farmStats.complianceRate}%</Text>
+                <Text style={styles.statLabel}>Compliance</Text>
               </View>
               <View style={styles.statCard}>
-                <Text style={styles.statNumber}>23</Text>
-                <Text style={styles.statLabel}>QR Scans Today</Text>
+                <Text style={styles.statNumber}>{farmStats.qrScansToday}</Text>
+                <Text style={styles.statLabel}>QR Scans</Text>
               </View>
             </View>
 
-            <View style={styles.quickActions}>
-              <Text style={styles.sectionTitle}>Quick Actions</Text>
-              <TouchableOpacity style={styles.actionButton} onPress={simulateGPS}>
-                <Text style={styles.actionButtonText}>📍 Update GPS Location</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={simulateQRScan}>
-                <Text style={styles.actionButtonText}>📱 Scan QR Code</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.actionBtn} onPress={handleGPSUpdate}>
+              <Text style={styles.actionBtnText}>📍 Update GPS Location</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.actionBtn} onPress={handleQRScan}>
+              <Text style={styles.actionBtnText}>📱 Scan QR Code</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {activeTab === 'gpsmap' && (
+        {activeTab === 'gps' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>GPS Mapping</Text>
-            <View style={styles.gpsContainer}>
+            <View style={styles.gpsBox}>
               <Text style={styles.gpsLabel}>Current Location:</Text>
-              <Text style={styles.gpsCoords}>{gpsCoords}</Text>
-              <TouchableOpacity style={styles.actionButton} onPress={simulateGPS}>
-                <Text style={styles.actionButtonText}>🔄 Update Location</Text>
-              </TouchableOpacity>
+              <Text style={styles.gpsCoords}>6.4281°N, 9.4295°W</Text>
+              <Text style={styles.gpsAccuracy}>Accuracy: ±3.2m</Text>
             </View>
-            
-            <View style={styles.mapPlaceholder}>
-              <Text style={styles.mapText}>🗺️ Interactive Map</Text>
-              <Text style={styles.mapSubtext}>Liberian Farm Boundaries</Text>
-              <Text style={styles.mapSubtext}>GPS Accuracy: ±3.2m</Text>
-            </View>
+            <TouchableOpacity style={styles.actionBtn} onPress={handleGPSUpdate}>
+              <Text style={styles.actionBtnText}>🔄 Refresh Location</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {activeTab === 'qrscan' && (
+        {activeTab === 'scanner' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>QR Code Scanner</Text>
-            <View style={styles.qrContainer}>
-              <Text style={styles.qrLabel}>Last Scanned:</Text>
-              <Text style={styles.qrCode}>{lastQRScan}</Text>
-              <TouchableOpacity style={styles.actionButton} onPress={simulateQRScan}>
-                <Text style={styles.actionButtonText}>📷 Scan New QR Code</Text>
-              </TouchableOpacity>
+            <Text style={styles.sectionTitle}>QR Scanner</Text>
+            <View style={styles.scannerBox}>
+              <Text style={styles.scannerText}>📷</Text>
+              <Text style={styles.scannerLabel}>Point camera at QR code</Text>
             </View>
-            
-            <View style={styles.scanResults}>
-              <Text style={styles.resultTitle}>Scan Results:</Text>
-              <Text style={styles.resultText}>✅ Commodity Verified</Text>
-              <Text style={styles.resultText}>✅ LACRA Compliant</Text>
-              <Text style={styles.resultText}>✅ Export Ready</Text>
-            </View>
+            <TouchableOpacity style={styles.actionBtn} onPress={handleQRScan}>
+              <Text style={styles.actionBtnText}>📷 Start Scanning</Text>
+            </TouchableOpacity>
           </View>
         )}
 
         {activeTab === 'profile' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>User Profile</Text>
-            <View style={styles.profileContainer}>
+            <View style={styles.profileBox}>
               <Text style={styles.profileText}>Name: Moses Tuah</Text>
               <Text style={styles.profileText}>Role: Farmer</Text>
               <Text style={styles.profileText}>County: Lofa</Text>
-              <Text style={styles.profileText}>Farm ID: FRM-2024-001</Text>
-              <Text style={styles.profileText}>Status: Active</Text>
+              <Text style={styles.profileText}>ID: FRM-2024-001</Text>
             </View>
-            
-            <TouchableOpacity 
-              style={styles.switchButton} 
-              onPress={() => setCurrentUser(currentUser === 'farmer' ? 'agent' : 'farmer')}
-            >
-              <Text style={styles.switchButtonText}>Switch to {currentUser === 'farmer' ? 'Field Agent' : 'Farmer'}</Text>
-            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
@@ -153,25 +127,20 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#16a34a',
     padding: 20,
-    paddingTop: 60,
+    paddingTop: 50,
     alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
     color: 'rgba(255,255,255,0.9)',
-    marginBottom: 5,
+    marginTop: 5,
   },
-  userInfo: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  tabContainer: {
+  tabBar: {
     flexDirection: 'row',
     backgroundColor: '#1e293b',
     paddingVertical: 10,
@@ -196,7 +165,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    backgroundColor: '#0f172a',
   },
   section: {
     padding: 20,
@@ -207,7 +175,7 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 20,
   },
-  statsContainer: {
+  statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 30,
@@ -224,120 +192,68 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#16a34a',
-    marginBottom: 5,
   },
   statLabel: {
     fontSize: 12,
     color: '#94a3b8',
-    textAlign: 'center',
+    marginTop: 5,
   },
-  quickActions: {
-    marginTop: 20,
-  },
-  actionButton: {
+  actionBtn: {
     backgroundColor: '#16a34a',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
     alignItems: 'center',
   },
-  actionButtonText: {
+  actionBtnText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
-  gpsContainer: {
+  gpsBox: {
     backgroundColor: '#1e293b',
     padding: 20,
     borderRadius: 10,
-    marginBottom: 20,
     alignItems: 'center',
+    marginBottom: 20,
   },
   gpsLabel: {
     color: '#94a3b8',
     fontSize: 16,
-    marginBottom: 10,
   },
   gpsCoords: {
     color: '#16a34a',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginVertical: 10,
   },
-  mapPlaceholder: {
+  gpsAccuracy: {
+    color: '#94a3b8',
+    fontSize: 14,
+  },
+  scannerBox: {
     backgroundColor: '#1e293b',
     padding: 40,
     borderRadius: 10,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#374151',
-    borderStyle: 'dashed',
+    marginBottom: 20,
   },
-  mapText: {
-    color: '#16a34a',
-    fontSize: 24,
+  scannerText: {
+    fontSize: 48,
     marginBottom: 10,
   },
-  mapSubtext: {
-    color: '#94a3b8',
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  qrContainer: {
-    backgroundColor: '#1e293b',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  qrLabel: {
+  scannerLabel: {
     color: '#94a3b8',
     fontSize: 16,
-    marginBottom: 10,
   },
-  qrCode: {
-    color: '#16a34a',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'monospace',
-    marginBottom: 15,
-  },
-  scanResults: {
+  profileBox: {
     backgroundColor: '#1e293b',
     padding: 20,
     borderRadius: 10,
-  },
-  resultTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-  resultText: {
-    color: '#16a34a',
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  profileContainer: {
-    backgroundColor: '#1e293b',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
   },
   profileText: {
     color: '#94a3b8',
     fontSize: 16,
     marginBottom: 10,
-  },
-  switchButton: {
-    backgroundColor: '#2563eb',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  switchButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

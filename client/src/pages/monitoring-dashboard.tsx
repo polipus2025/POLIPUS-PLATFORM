@@ -20,11 +20,13 @@ import {
   LogOut,
   Play,
   TestTube,
-  Loader2
+  Loader2,
+  Smartphone
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { useLocation } from "wouter";
+import { Link } from "wouter";
 
 export default function MonitoringDashboard() {
   const [, setLocation] = useLocation();
@@ -170,6 +172,17 @@ export default function MonitoringDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/mobile-app-dashboard">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-blue-500/20 border-blue-400/50 text-blue-100 hover:bg-blue-500/30"
+              >
+                <Smartphone className="h-4 w-4 mr-2" />
+                Mobile App Dashboard
+              </Button>
+            </Link>
+            
             <Dialog>
               <DialogTrigger asChild>
                 <Button 

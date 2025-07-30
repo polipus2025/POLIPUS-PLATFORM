@@ -43,7 +43,6 @@ const getUserInfo = () => {
 // LACRA Officer/Regulatory Staff Navigation
 const regulatoryNavigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
-  { name: "Mobile App Dashboard", href: "/mobile-app-dashboard", icon: Smartphone },
   { name: "Economic Reporting", href: "/economic-reporting", icon: TrendingUp },
   { name: "Commodities", href: "/commodities", icon: Leaf },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },

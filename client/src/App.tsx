@@ -223,7 +223,7 @@ function Router() {
           <Route path="/mobile-app-dashboard">
             <ProtectedRoute 
               component={MobileAppDashboard} 
-              allowedUserTypes={['regulatory']} 
+              allowedUserTypes={['monitoring']} 
             />
           </Route>
 

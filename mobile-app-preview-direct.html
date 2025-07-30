@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriTrace360™ LACRA Mobile App Dashboard - Direct Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e6f3ff 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #16a34a;
+            margin-bottom: 10px;
+        }
+        .steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #16a34a;
+            border-radius: 4px;
+        }
+        .button {
+            display: inline-block;
+            background: #16a34a;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .button:hover {
+            background: #15803d;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #3b82f6;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        function autoLogin() {
+            // Set the authentication in localStorage for direct access
+            localStorage.setItem('authToken', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWRtaW4wMDEiLCJyb2xlIjoicmVndWxhdG9yeV9hZG1pbiIsInVzZXJUeXBlIjoicmVndWxhdG9yeSIsImlhdCI6MTc1MzgzNTU2NSwiZXhwIjoxNzUzOTIxOTY1fQ.da9lLXFNcKG-wihQSlfrtZIteqE7dsmUNBiziMtvJg4');
+            localStorage.setItem('userType', 'regulatory');
+            localStorage.setItem('user', JSON.stringify({
+                id: 2,
+                username: 'admin001',
+                firstName: 'Admin',
+                lastName: 'User',
+                role: 'regulatory_admin'
+            }));
+            
+            // Redirect to mobile app dashboard
+            window.location.href = 'http://localhost:5000/mobile-app-dashboard';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📱 AgriTrace360™ LACRA Mobile App Dashboard</div>
+            <p>Comprehensive Mobile Application Management & Analytics</p>
+        </div>
+
+        <div class="steps">
+            <h3>Quick Access Method:</h3>
+            <div class="step">
+                <strong>Step 1:</strong> Click the "Auto-Login & Access Dashboard" button below
+            </div>
+            <div class="step">
+                <strong>Step 2:</strong> You'll be automatically logged in as a regulatory user
+            </div>
+            <div class="step">
+                <strong>Step 3:</strong> The Mobile App Dashboard will open immediately
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="button" onclick="autoLogin()">🚀 Auto-Login & Access Dashboard</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">1,247</div>
+                <div class="stat-label">Total Downloads</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">892</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4.8/5.0</div>
+                <div class="stat-label">App Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">15.2 MB</div>
+                <div class="stat-label">Bundle Size</div>
+            </div>
+        </div>
+
+        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin-top: 20px;">
+            <h4>Mobile App Features Available:</h4>
+            <ul style="list-style: none; padding: 0;">
+                <li>📍 GPS Field Mapping with boundary tracking</li>
+                <li>📱 QR Code Scanner for commodity tracking</li>
+                <li>📡 Offline Sync capabilities</li>
+                <li>👥 Multi-Role Access (Farmer, Field Agent, Regulatory, Exporter)</li>
+                <li>📊 Real-time analytics and reporting</li>
+                <li>🌍 Integrated with main LACRA platform</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #6b7280;">
+            <p><strong>Alternative Access:</strong> Go to <code>localhost:5000</code> → Login with <code>admin001/admin123</code> → Click "Mobile App Dashboard" in sidebar</p>
+        </div>
+    </div>
+</body>
+</html>

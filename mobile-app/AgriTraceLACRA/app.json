@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "AgriTrace360™ LACRA Mobile",
+    "slug": "agritrace360-lacra-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#22c55e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app uses location to map farm boundaries and track agricultural activities for LACRA compliance.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location to map farm boundaries and track agricultural activities for LACRA compliance.",
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes for commodity tracking and take photos for inspection records."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#22c55e"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow AgriTrace360™ LACRA to track field locations for agricultural mapping and compliance monitoring."
+        }
+      ],
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "Allow AgriTrace360™ LACRA to scan QR codes for commodity tracking and verification."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow AgriTrace360™ LACRA to take photos for inspection records and documentation."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    }
+  }
+}

@@ -43,6 +43,7 @@ import Messaging from "@/pages/messaging";
 import ExportPermitSubmission from "@/pages/export-permit-submission";
 import RealTimeVerificationDashboard from "@/pages/verification-dashboard";
 import EconomicReportingPage from "@/pages/economic-reporting";
+import MobileAppDashboard from "@/pages/mobile-app-dashboard";
 
 import NotFound from "@/pages/not-found";
 
@@ -216,6 +217,12 @@ function Router() {
           
           <Route path="/director-dashboard" component={DirectorDashboard} />
           <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
+          <Route path="/mobile-app-dashboard">
+            <ProtectedRoute 
+              component={MobileAppDashboard} 
+              allowedUserTypes={['regulatory']} 
+            />
+          </Route>
 
           <Route path="/messaging">
             <ProtectedRoute 

@@ -88,6 +88,10 @@ app.get('/mobile-app-simulator', (req, res) => {
   res.sendFile('mobile-app-working.html', { root: '.' });
 });
 
+app.get('/mobile-qr-working', (req, res) => {
+  res.sendFile('mobile-qr-working.html', { root: '.' });
+});
+
 (async () => {
   // Seed the database with initial data
   try {

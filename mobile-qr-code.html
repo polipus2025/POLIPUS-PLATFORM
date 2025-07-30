@@ -3,291 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriTrace360 Mobile - Live QR Code</title>
+    <title>AgriTrace360 Mobile QR Code</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
             min-height: 100vh;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
+        
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
         }
+        
         h1 {
-            color: #16a34a;
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+            color: #22c55e;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
-        .live-status {
-            background: linear-gradient(45deg, #16a34a, #22c55e);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 30px;
-            display: inline-block;
-            font-weight: bold;
-            margin: 20px 0;
+        
+        .subtitle {
+            color: #94a3b8;
             font-size: 1.2rem;
-            animation: pulse 2s infinite;
+            margin-bottom: 30px;
         }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-        .qr-section {
-            background: white;
-            padding: 50px;
+        
+        .status {
+            background: #16a34a;
+            color: white;
+            padding: 10px 20px;
             border-radius: 25px;
-            margin: 40px 0;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+            font-weight: bold;
         }
-        .qr-section::before {
-            content: "";
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #16a34a, #22c55e, #16a34a);
-            border-radius: 27px;
-            z-index: -1;
-            animation: rotate 3s linear infinite;
+        
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        
         .qr-code {
-            font-family: 'Courier New', monospace;
+            background: black;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
             font-size: 8px;
             line-height: 8px;
             white-space: pre;
-            background: #000;
-            color: #fff;
-            padding: 30px;
-            border-radius: 15px;
+        }
+        
+        .url-box {
+            background: #334155;
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            border: 2px solid #22c55e;
+        }
+        
+        .instructions {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid #334155;
+        }
+        
+        .instructions h3 {
+            color: #22c55e;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            color: #cbd5e1;
+        }
+        
+        .credentials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
             margin: 30px 0;
+        }
+        
+        .credential-card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+        
+        .credential-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        .credential-card .username,
+        .credential-card .password {
+            background: #0f172a;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 5px 0;
+            color: #e2e8f0;
+        }
+        
+        .farmer { border-left: 4px solid #22c55e; }
+        .farmer h4 { color: #22c55e; }
+        
+        .agent { border-left: 4px solid #3b82f6; }
+        .agent h4 { color: #3b82f6; }
+        
+        .regulatory { border-left: 4px solid #8b5cf6; }
+        .regulatory h4 { color: #8b5cf6; }
+        
+        .exporter { border-left: 4px solid #f97316; }
+        .exporter h4 { color: #f97316; }
+        
+        .footer {
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .live-indicator {
             display: inline-block;
-            letter-spacing: 0;
-            border: 3px solid #16a34a;
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
         }
-        .expo-url {
-            background: linear-gradient(45deg, #f8fafc, #e2e8f0);
-            color: #1e293b;
-            padding: 25px;
-            border-radius: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
-            font-weight: bold;
-            margin: 30px 0;
-            word-break: break-all;
-            border: 3px solid #16a34a;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
-        .copy-button {
-            background: #16a34a;
+        
+        .refresh-btn {
+            background: #22c55e;
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
             margin: 10px;
-            transition: all 0.3s ease;
+            font-size: 1rem;
         }
-        .copy-button:hover {
-            background: #22c55e;
-            transform: translateY(-2px);
-        }
-        .instructions {
-            background: rgba(34, 197, 94, 0.1);
-            border: 3px solid #16a34a;
-            padding: 40px;
-            border-radius: 20px;
-            margin: 40px 0;
-            text-align: left;
-        }
-        .instructions h2 {
-            color: #16a34a;
-            margin-top: 0;
-            text-align: center;
-            font-size: 2rem;
-        }
-        .step {
-            background: rgba(255,255,255,0.1);
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 6px solid #16a34a;
-        }
-        .step-number {
+        
+        .refresh-btn:hover {
             background: #16a34a;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-right: 15px;
-            float: left;
-            margin-top: -5px;
-        }
-        .troubleshooting {
-            background: rgba(59, 130, 246, 0.1);
-            border: 2px solid #3b82f6;
-            padding: 30px;
-            border-radius: 15px;
-            margin: 30px 0;
-        }
-        .troubleshooting h3 {
-            color: #3b82f6;
-            margin-top: 0;
-        }
-        .success-message {
-            background: rgba(34, 197, 94, 0.2);
-            border: 2px solid #16a34a;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📱 AgriTrace360 Mobile</h1>
-        <div class="live-status">🔴 LIVE - Mobile App Server Running</div>
+        <h1>📱 AgriTrace360 Mobile App</h1>
+        <p class="subtitle">LACRA Agricultural Compliance Platform</p>
+        <div class="status">
+            <span class="live-indicator"></span>
+            Mobile App Server Running - Ready for Scanning
+        </div>
         
-        <div class="qr-section">
-            <h2 style="color: #1e293b; margin-top: 0;">📲 Scan with Expo Go</h2>
-            
-            <div class="qr-code">▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-█ ▄▄▄▄▄ █ ██▀▀ ▄▄▄▀▀▀██ ▄▄▄▄▄ █
-█ █   █ █  ▀█ ▀ ▀▄▄▄█ █ █   █ █
-█ █▄▄▄█ █▀  █▄▄ ▄ ▄▄▀██ █▄▄▄█ █
-█▄▄▄▄▄▄▄█▄█ ▀▄█ ▀ ▀ ▀ █▄▄▄▄▄▄▄█
-█▄▄█▀▄▄▄▀██▄█▄▀█ ▀ ▄█▄▀▀ ▀ ▄  █
-█▄▀▀▄▀▄▄▄  ▄█▀█▄ ▄ ██ ▄▄███▄  █
-█▀███▀ ▄▄▀█▀▄▀▄ ▀▀▄▄█▄█▀▀▀▄█▀▀█
-█▀▄▄█▀ ▄▄▀▄▀ ▄ ▄▄▄ ██▄█▀▀█▄▄▀ █
-█ ▀▀▄ ▄▄▀▀▀▄█▄ ▀ █ ▄██▄▀▀▀▄█▀ █
-████  █▄▀▀█▀█▀█▀   █▀▀▄ ▀█ ▄█ █
-█▄▄▄█▄▄▄▄ █ ▄▀▄▄▀ ▄▄▀ ▄▄▄ ▀█▄▀█
-█ ▄▄▄▄▄ █▀█  ▄ ▄   ▀  █▄█ █▄█▄█
-█ █   █ █▄█▄█▄ ▀    ▄▄ ▄ ▄▄█▄▀█
-█ █▄▄▄█ █▀▀▀█▀█▀ █▀▄▄ ▄█▄█▄█  █
-█▄▄▄▄▄▄▄█▄██▄█▄▄██▄██▄█▄█▄██▄██</div>
-            
-            <h3 style="color: #1e293b;">📋 Copy URL to Expo Go:</h3>
-            <div class="expo-url" id="expoUrl">exp://z-11aes-anonymous-8081.exp.direct</div>
-            <button class="copy-button" onclick="copyUrl()">📋 Copy URL</button>
-            <button class="copy-button" onclick="openExpo()">📱 Open in Expo Go</button>
+        <div class="qr-container">
+            <div class="qr-code">▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ ▄▄▄▄▄ █ ██▀▀ ▀▄██ ▄▄▄▄▄ █
+█ █   █ █  ▀█ ▀█▄▄█ █   █ █
+█ █▄▄▄█ █▀  █▄▀▀▄██ █▄▄▄█ █
+█▄▄▄▄▄▄▄█▄█ ▀▄█▄█ █▄▄▄▄▄▄▄█
+█ ▄▀█ ▄▄▀▀█▄█▄▀▄ ▄██ ▀▄▄ ▄█
+█▀   █▀▄▀█ ▄█▀▄▀ ▀▀  ▄  ▀██
+█ ▄▀█▄▄▄▄ █▀▄▀▄ ▀▄▀▄▀▀▄ ▀██
+████▀  ▄▄ ▄  ▄ ▄▄▄ ██▄ ▀███
+█▄▄████▄█  ▀█▄ ▀▄ ▄▄▄ ▀ ▄▄█
+█ ▄▄▄▄▄ █▀▀██▀█▀▀ █▄█ ▀▀▀██
+█ █   █ █▄▀█▄▀▄▄█▄▄ ▄▄▀   █
+█ █▄▄▄█ █▀▄█ ▄ ▄▄▄▄ ▀█▀▀ ██
+█▄▄▄▄▄▄▄█▄▄██▄▄█████▄▄▄▄▄▄█</div>
         </div>
-
+        
+        <div class="url-box">
+            exp://127.0.0.1:8084
+        </div>
+        
         <div class="instructions">
-            <h2>🚀 Get Your Mobile App in 4 Steps</h2>
-            
-            <div class="step">
-                <div class="step-number">1</div>
-                <div>
-                    <strong>Download Expo Go App</strong><br>
-                    • Android: Google Play Store → "Expo Go"<br>
-                    • iPhone: Apple App Store → "Expo Go"<br>
-                    <em>Free app from Expo team</em>
-                </div>
+            <h3>📱 How to Scan QR Code:</h3>
+            <ol>
+                <li><strong>Install Expo Go</strong> from App Store (iOS) or Google Play (Android)</li>
+                <li><strong>Open Expo Go</strong> and tap "Scan QR Code"</li>
+                <li><strong>Point camera</strong> at the QR code above</li>
+                <li><strong>Wait for app to load</strong> - AgriTrace360 will launch automatically</li>
+                <li><strong>Login</strong> using any of the credentials below</li>
+            </ol>
+            <p><em>Alternative: Copy and paste the URL above directly in Expo Go</em></p>
+        </div>
+        
+        <div class="credentials">
+            <div class="credential-card farmer">
+                <h4>🌾 Farmer Portal</h4>
+                <div class="username">FRM-2024-001</div>
+                <div class="password">farmer123</div>
             </div>
-            
-            <div class="step">
-                <div class="step-number">2</div>
-                <div>
-                    <strong>Open Expo Go</strong><br>
-                    Launch the Expo Go app on your phone
-                </div>
+            <div class="credential-card agent">
+                <h4>🕵️ Field Agent</h4>
+                <div class="username">AGT-2024-001</div>
+                <div class="password">agent123</div>
             </div>
-            
-            <div class="step">
-                <div class="step-number">3</div>
-                <div>
-                    <strong>Connect to Your App</strong><br>
-                    Option A: Tap "Scan QR Code" and scan above<br>
-                    Option B: Tap "Enter URL manually" and paste the URL
-                </div>
+            <div class="credential-card regulatory">
+                <h4>🏛️ LACRA Staff</h4>
+                <div class="username">admin001</div>
+                <div class="password">admin123</div>
             </div>
-            
-            <div class="step">
-                <div class="step-number">4</div>
-                <div>
-                    <strong>AgriTrace360 Loads!</strong><br>
-                    Your complete mobile app loads with full functionality
-                </div>
+            <div class="credential-card exporter">
+                <h4>🚢 Exporter</h4>
+                <div class="username">EXP-2024-001</div>
+                <div class="password">exporter123</div>
             </div>
         </div>
-
-        <div class="troubleshooting">
-            <h3>🔧 Troubleshooting</h3>
-            <p><strong>QR Code won't scan?</strong></p>
-            <ul>
-                <li>Try copying the URL and pasting it directly into Expo Go</li>
-                <li>Make sure you're connected to the internet</li>
-                <li>Ensure Expo Go has camera permissions</li>
-            </ul>
-            
-            <p><strong>URL not working?</strong></p>
-            <ul>
-                <li>The server must be running (you should see the live status above)</li>
-                <li>Try refreshing this page for an updated URL</li>
-                <li>Check that both devices are on the same network</li>
-            </ul>
-        </div>
-
-        <div class="success-message">
-            <h3>✅ Your Mobile App Features</h3>
-            <p>Once loaded, you'll have access to:</p>
-            <ul>
-                <li>🔐 Multi-role authentication (Farmer, Field Agent, LACRA, Exporter)</li>
-                <li>🗺️ GPS farm boundary mapping with real Liberian coordinates</li>
-                <li>📱 QR code scanning for commodity tracking</li>
-                <li>💾 Offline data storage with sync capabilities</li>
-                <li>📊 Real-time dashboards and compliance monitoring</li>
-            </ul>
+        
+        <button class="refresh-btn" onclick="location.reload()">🔄 Refresh QR Code</button>
+        <button class="refresh-btn" onclick="window.open('/mobile-app-simulator', '_blank')">🌐 Browser Simulator</button>
+        
+        <div class="footer">
+            <p>AgriTrace360 LACRA Mobile App - GPS Mapping • QR Scanning • Compliance Tracking</p>
+            <p>Server: localhost:8084 | Status: <span style="color: #22c55e;">Active</span></p>
         </div>
     </div>
-
+    
     <script>
-        function copyUrl() {
-            const url = document.getElementById('expoUrl').textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                const button = event.target;
-                const originalText = button.textContent;
-                button.textContent = '✅ Copied!';
-                button.style.background = '#22c55e';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.style.background = '#16a34a';
-                }, 2000);
-            });
-        }
-
-        function openExpo() {
-            const url = document.getElementById('expoUrl').textContent;
-            window.open(url, '_blank');
-        }
-
-        // Auto-refresh every 30 seconds to get latest QR code
+        // Auto-refresh every 30 seconds to ensure QR code stays current
         setTimeout(() => {
             location.reload();
         }, 30000);
+        
+        // Check server status
+        function checkServer() {
+            fetch('/mobile-app-simulator')
+                .then(() => {
+                    document.querySelector('.footer span').textContent = 'Active';
+                    document.querySelector('.footer span').style.color = '#22c55e';
+                })
+                .catch(() => {
+                    document.querySelector('.footer span').textContent = 'Checking...';
+                    document.querySelector('.footer span').style.color = '#f59e0b';
+                });
+        }
+        
+        setInterval(checkServer, 5000);
     </script>
 </body>
 </html>

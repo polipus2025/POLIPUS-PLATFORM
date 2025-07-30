@@ -63,7 +63,7 @@ export default function MobileQRDisplay() {
               </div>
               
               <div className="bg-slate-700 p-4 rounded-lg text-center">
-                <p className="text-green-400 font-mono text-lg">exp://127.0.0.1:8083</p>
+                <p className="text-green-400 font-mono text-lg">exp://127.0.0.1:8084</p>
                 <p className="text-slate-400 text-sm mt-2">Paste this URL in Expo Go app</p>
               </div>
               

@@ -44,6 +44,7 @@ import ExportPermitSubmission from "@/pages/export-permit-submission";
 import RealTimeVerificationDashboard from "@/pages/verification-dashboard";
 import EconomicReportingPage from "@/pages/economic-reporting";
 import MobileAppDashboard from "@/pages/mobile-app-dashboard";
+import MobileDemo from "@/pages/mobile-demo";
 
 import NotFound from "@/pages/not-found";
 
@@ -247,6 +248,7 @@ function Router() {
       <Route path="/front-page" component={FrontPage} />
       <Route path="/home" component={FrontPage} />
       <Route path="/portals" component={Landing} />
+      <Route path="/mobile-demo" component={MobileDemo} />
       
       <Route component={NotFound} />
     </Switch>

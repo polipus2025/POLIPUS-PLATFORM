@@ -9,6 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "expo build",
+    "build:apk": "expo build:android --type apk",
+    "build:ios": "expo build:ios --type simulator", 
+    "build:status": "expo build:status",
     "dev": "expo start --dev-client",
     "tunnel": "expo start --tunnel"
   },

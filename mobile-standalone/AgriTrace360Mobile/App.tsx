@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(true);
   const [farmStats, setFarmStats] = useState({
     farmsRegistered: 127,
     complianceRate: 94,
     qrScansToday: 23
   });
+
+  useEffect(() => {
+    // Simulate app initialization
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleGPSUpdate = () => {
     const lat = (6.4281 + Math.random() * 0.01).toFixed(4);
@@ -22,6 +31,17 @@ export default function App() {
     setFarmStats(prev => ({ ...prev, qrScansToday: prev.qrScansToday + 1 }));
     Alert.alert('QR Scanned', `Code: ${code}\nStatus: Verified ✓`);
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <StatusBar style="light" />
+        <Text style={styles.loadingText}>🌾</Text>
+        <Text style={styles.loadingTitle}>AgriTrace360 LACRA</Text>
+        <Text style={styles.loadingSubtitle}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -255,5 +275,23 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     fontSize: 16,
     marginBottom: 10,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 48,
+    marginBottom: 20,
+  },
+  loadingTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#16a34a',
+    marginBottom: 10,
+  },
+  loadingSubtitle: {
+    fontSize: 16,
+    color: '#94a3b8',
   },
 });

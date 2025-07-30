@@ -251,6 +251,7 @@ function Router() {
       <Route path="/portals" component={Landing} />
       <Route path="/mobile-demo" component={MobileDemo} />
       <Route path="/mobile-app-simulator" component={MobileAppSimulator} />
+      <Route path="/mobile-app-preview" component={() => window.location.href = '/mobile-app-preview-direct.html'} />
       
       <Route component={NotFound} />
     </Switch>

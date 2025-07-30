@@ -112,6 +112,10 @@ app.get('/qr-expo-diretto', (req, res) => {
   res.sendFile('qr-expo-diretto.html', { root: '.' });
 });
 
+app.get('/mobile-semplice', (req, res) => {
+  res.sendFile('mobile-semplice.html', { root: '.' });
+});
+
 (async () => {
   // Seed the database with initial data
   try {

@@ -1,33 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
-interface User {
-  id: string;
-  name: string;
-  role: 'farmer' | 'agent' | 'regulatory' | 'exporter';
-}
-
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState('farmer');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [gpsCoords, setGpsCoords] = useState('6.4281°N, 9.4295°W');
-  const [lastQRScan, setLastQRScan] = useState('');
-  const [syncStatus, setSyncStatus] = useState('synced');
-
-  const users = [
-    { id: 'farmer', name: 'Moses Tuah', role: 'farmer' as const },
-    { id: 'agent', name: 'Sarah Konneh', role: 'agent' as const },
-    { id: 'regulatory', name: 'LACRA Admin', role: 'regulatory' as const },
-    { id: 'exporter', name: 'Marcus Bawah', role: 'exporter' as const }
-  ];
-
-  const roleColors = {
-    farmer: '#16a34a',
-    agent: '#2563eb', 
-    regulatory: '#7c3aed',
-    exporter: '#ea580c'
-  };
+  const [lastQRScan, setLastQRScan] = useState('COC-LOF-2025-001');
 
   const simulateGPS = () => {
     const lat = (6.4281 + Math.random() * 0.01).toFixed(4);
@@ -43,68 +22,27 @@ export default function App() {
     Alert.alert('QR Code Scanned', `Commodity: ${code}\nStatus: Verified ✓`);
   };
 
-  const syncData = () => {
-    setSyncStatus('syncing');
-    setTimeout(() => {
-      setSyncStatus('synced');
-      Alert.alert('Sync Complete', 'All data synchronized with LACRA servers');
-    }, 2000);
-  };
-
-  if (!currentUser) {
-    return (
-      <View style={styles.container}>
-        <StatusBar style="light" />
-        <View style={styles.header}>
-          <Text style={styles.title}>AgriTrace360 LACRA</Text>
-          <Text style={styles.subtitle}>Agricultural Compliance Platform</Text>
-        </View>
-        
-        <ScrollView style={styles.content}>
-          <Text style={styles.sectionTitle}>Select Your Role:</Text>
-          {users.map(user => (
-            <TouchableOpacity
-              key={user.id}
-              style={[styles.userButton, { backgroundColor: roleColors[user.role] }]}
-              onPress={() => setCurrentUser(user)}
-            >
-              <Text style={styles.userButtonText}>{user.name}</Text>
-              <Text style={styles.userRole}>{user.role.toUpperCase()}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
       
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: roleColors[currentUser.role] }]}>
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>AgriTrace360</Text>
-          <Text style={styles.subtitle}>{currentUser.name} - {currentUser.role.toUpperCase()}</Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={() => setCurrentUser(null)}
-        >
-          <Text style={styles.logoutText}>Switch User</Text>
-        </TouchableOpacity>
+      <View style={styles.header}>
+        <Text style={styles.title}>AgriTrace360 LACRA</Text>
+        <Text style={styles.subtitle}>Agricultural Compliance Platform</Text>
+        <Text style={styles.userInfo}>Logged in as: {currentUser.toUpperCase()}</Text>
       </View>
 
       {/* Tab Navigation */}
       <View style={styles.tabContainer}>
-        {['dashboard', 'gps', 'scan', 'sync'].map(tab => (
+        {['Dashboard', 'GPS Map', 'QR Scan', 'Profile'].map(tab => (
           <TouchableOpacity
             key={tab}
-            style={[styles.tab, activeTab === tab && styles.activeTab]}
-            onPress={() => setActiveTab(tab)}
+            style={[styles.tab, activeTab === tab.toLowerCase().replace(' ', '') && styles.activeTab]}
+            onPress={() => setActiveTab(tab.toLowerCase().replace(' ', ''))}
           >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-              {tab.toUpperCase()}
+            <Text style={[styles.tabText, activeTab === tab.toLowerCase().replace(' ', '') && styles.activeTabText]}>
+              {tab}
             </Text>
           </TouchableOpacity>
         ))}
@@ -115,7 +53,7 @@ export default function App() {
         
         {activeTab === 'dashboard' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Dashboard</Text>
+            <Text style={styles.sectionTitle}>Farm Dashboard</Text>
             
             <View style={styles.statsContainer}>
               <View style={styles.statCard}>
@@ -123,102 +61,85 @@ export default function App() {
                 <Text style={styles.statLabel}>Farms Mapped</Text>
               </View>
               <View style={styles.statCard}>
-                <Text style={styles.statNumber}>89%</Text>
+                <Text style={styles.statNumber}>94%</Text>
                 <Text style={styles.statLabel}>Compliance Rate</Text>
               </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>23</Text>
+                <Text style={styles.statLabel}>QR Scans Today</Text>
+              </View>
             </View>
 
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Recent Activity</Text>
-              <Text style={styles.cardText}>• Farm boundary updated</Text>
-              <Text style={styles.cardText}>• QR code scanned: {lastQRScan || 'None'}</Text>
-              <Text style={styles.cardText}>• GPS location: {gpsCoords}</Text>
-              <Text style={styles.cardText}>• Sync status: {syncStatus}</Text>
+            <View style={styles.quickActions}>
+              <Text style={styles.sectionTitle}>Quick Actions</Text>
+              <TouchableOpacity style={styles.actionButton} onPress={simulateGPS}>
+                <Text style={styles.actionButtonText}>📍 Update GPS Location</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton} onPress={simulateQRScan}>
+                <Text style={styles.actionButtonText}>📱 Scan QR Code</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
 
-        {activeTab === 'gps' && (
+        {activeTab === 'gpsmap' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>GPS Farm Mapping</Text>
-            
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Current Location</Text>
-              <Text style={styles.locationText}>{gpsCoords}</Text>
-              <Text style={styles.cardText}>Liberia, West Africa</Text>
-              <Text style={styles.cardText}>Accuracy: 3.2 meters</Text>
+            <Text style={styles.sectionTitle}>GPS Mapping</Text>
+            <View style={styles.gpsContainer}>
+              <Text style={styles.gpsLabel}>Current Location:</Text>
+              <Text style={styles.gpsCoords}>{gpsCoords}</Text>
+              <TouchableOpacity style={styles.actionButton} onPress={simulateGPS}>
+                <Text style={styles.actionButtonText}>🔄 Update Location</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity style={styles.actionButton} onPress={simulateGPS}>
-              <Text style={styles.buttonText}>Update GPS Location</Text>
-            </TouchableOpacity>
-
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Farm Boundary Points</Text>
-              <Text style={styles.cardText}>Point 1: 6.4281°N, 9.4295°W</Text>
-              <Text style={styles.cardText}>Point 2: 6.4285°N, 9.4298°W</Text>
-              <Text style={styles.cardText}>Point 3: 6.4289°N, 9.4301°W</Text>
-              <Text style={styles.cardText}>Point 4: 6.4287°N, 9.4293°W</Text>
-              <Text style={styles.areaText}>Farm Area: 2.4 hectares</Text>
+            
+            <View style={styles.mapPlaceholder}>
+              <Text style={styles.mapText}>🗺️ Interactive Map</Text>
+              <Text style={styles.mapSubtext}>Liberian Farm Boundaries</Text>
+              <Text style={styles.mapSubtext}>GPS Accuracy: ±3.2m</Text>
             </View>
           </View>
         )}
 
-        {activeTab === 'scan' && (
+        {activeTab === 'qrscan' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>QR Code Scanner</Text>
-            
-            <View style={styles.scanArea}>
-              <Text style={styles.scanText}>Position QR code in frame</Text>
-              <View style={styles.scanFrame} />
+            <View style={styles.qrContainer}>
+              <Text style={styles.qrLabel}>Last Scanned:</Text>
+              <Text style={styles.qrCode}>{lastQRScan}</Text>
+              <TouchableOpacity style={styles.actionButton} onPress={simulateQRScan}>
+                <Text style={styles.actionButtonText}>📷 Scan New QR Code</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity style={styles.actionButton} onPress={simulateQRScan}>
-              <Text style={styles.buttonText}>Simulate QR Scan</Text>
-            </TouchableOpacity>
-
-            {lastQRScan && (
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Last Scanned</Text>
-                <Text style={styles.qrCode}>{lastQRScan}</Text>
-                <Text style={styles.cardText}>Premium Cocoa Beans</Text>
-                <Text style={styles.verifiedText}>✓ LACRA Verified</Text>
-              </View>
-            )}
+            
+            <View style={styles.scanResults}>
+              <Text style={styles.resultTitle}>Scan Results:</Text>
+              <Text style={styles.resultText}>✅ Commodity Verified</Text>
+              <Text style={styles.resultText}>✅ LACRA Compliant</Text>
+              <Text style={styles.resultText}>✅ Export Ready</Text>
+            </View>
           </View>
         )}
 
-        {activeTab === 'sync' && (
+        {activeTab === 'profile' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Data Synchronization</Text>
+            <Text style={styles.sectionTitle}>User Profile</Text>
+            <View style={styles.profileContainer}>
+              <Text style={styles.profileText}>Name: Moses Tuah</Text>
+              <Text style={styles.profileText}>Role: Farmer</Text>
+              <Text style={styles.profileText}>County: Lofa</Text>
+              <Text style={styles.profileText}>Farm ID: FRM-2024-001</Text>
+              <Text style={styles.profileText}>Status: Active</Text>
+            </View>
             
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Sync Status</Text>
-              <Text style={styles.cardText}>Status: {syncStatus}</Text>
-              <Text style={styles.cardText}>Pending uploads: 3 items</Text>
-              <Text style={styles.cardText}>Last sync: 2 minutes ago</Text>
-              <Text style={styles.cardText}>Storage used: 24.3 MB</Text>
-            </View>
-
             <TouchableOpacity 
-              style={[styles.actionButton, syncStatus === 'syncing' && styles.disabledButton]} 
-              onPress={syncData}
-              disabled={syncStatus === 'syncing'}
+              style={styles.switchButton} 
+              onPress={() => setCurrentUser(currentUser === 'farmer' ? 'agent' : 'farmer')}
             >
-              <Text style={styles.buttonText}>
-                {syncStatus === 'syncing' ? 'Syncing...' : 'Sync Now'}
-              </Text>
+              <Text style={styles.switchButtonText}>Switch to {currentUser === 'farmer' ? 'Field Agent' : 'Farmer'}</Text>
             </TouchableOpacity>
-
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Recent Sync Activity</Text>
-              <Text style={styles.cardText}>✓ GPS coordinates uploaded</Text>
-              <Text style={styles.cardText}>✓ QR scan data synced</Text>
-              <Text style={styles.cardText}>⏳ Form submission pending</Text>
-            </View>
           </View>
         )}
-
       </ScrollView>
     </View>
   );
@@ -231,50 +152,39 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#16a34a',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    padding: 20,
+    paddingTop: 60,
     alignItems: 'center',
-  },
-  headerContent: {
-    flex: 1,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+    marginBottom: 5,
   },
   subtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 5,
+  },
+  userInfo: {
     fontSize: 14,
     color: 'rgba(255,255,255,0.8)',
-    marginTop: 4,
-  },
-  logoutButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  logoutText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
   },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#1e293b',
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    paddingVertical: 10,
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
     alignItems: 'center',
+    paddingVertical: 12,
   },
   activeTab: {
     backgroundColor: '#16a34a',
+    borderRadius: 20,
+    marginHorizontal: 2,
   },
   tabText: {
     color: '#94a3b8',
@@ -286,136 +196,148 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
+    backgroundColor: '#0f172a',
   },
   section: {
-    marginBottom: 20,
+    padding: 20,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 16,
-  },
-  userButton: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  userButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  userRole: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    marginTop: 4,
+    marginBottom: 20,
   },
   statsContainer: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
+    justifyContent: 'space-between',
+    marginBottom: 30,
   },
   statCard: {
-    flex: 1,
     backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 8,
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#334155',
+    flex: 1,
+    marginHorizontal: 5,
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#16a34a',
+    marginBottom: 5,
   },
   statLabel: {
     fontSize: 12,
     color: '#94a3b8',
-    marginTop: 4,
+    textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 12,
-  },
-  cardText: {
-    color: '#94a3b8',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  locationText: {
-    color: '#16a34a',
-    fontSize: 16,
-    fontFamily: 'monospace',
-    marginBottom: 8,
+  quickActions: {
+    marginTop: 20,
   },
   actionButton: {
     backgroundColor: '#16a34a',
-    padding: 16,
-    borderRadius: 8,
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
     alignItems: 'center',
-    marginBottom: 16,
   },
-  disabledButton: {
-    backgroundColor: '#374151',
-  },
-  buttonText: {
+  actionButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
-  areaText: {
-    color: '#16a34a',
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 8,
-  },
-  scanArea: {
-    height: 200,
+  gpsContainer: {
     backgroundColor: '#1e293b',
-    borderRadius: 8,
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#334155',
   },
-  scanText: {
+  gpsLabel: {
+    color: '#94a3b8',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  gpsCoords: {
+    color: '#16a34a',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  mapPlaceholder: {
+    backgroundColor: '#1e293b',
+    padding: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#374151',
+    borderStyle: 'dashed',
+  },
+  mapText: {
+    color: '#16a34a',
+    fontSize: 24,
+    marginBottom: 10,
+  },
+  mapSubtext: {
     color: '#94a3b8',
     fontSize: 14,
-    marginBottom: 16,
+    marginBottom: 5,
   },
-  scanFrame: {
-    width: 150,
-    height: 150,
-    borderWidth: 2,
-    borderColor: '#16a34a',
-    borderStyle: 'dashed',
-    borderRadius: 8,
+  qrContainer: {
+    backgroundColor: '#1e293b',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  qrLabel: {
+    color: '#94a3b8',
+    fontSize: 16,
+    marginBottom: 10,
   },
   qrCode: {
     color: '#16a34a',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
     fontFamily: 'monospace',
-    marginBottom: 4,
+    marginBottom: 15,
   },
-  verifiedText: {
+  scanResults: {
+    backgroundColor: '#1e293b',
+    padding: 20,
+    borderRadius: 10,
+  },
+  resultTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  resultText: {
     color: '#16a34a',
-    fontSize: 14,
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  profileContainer: {
+    backgroundColor: '#1e293b',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  profileText: {
+    color: '#94a3b8',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  switchButton: {
+    backgroundColor: '#2563eb',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  switchButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontWeight: '600',
-    marginTop: 4,
   },
 });

@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 
 export default function EconomicReporting() {
-  const [selectedCounty, setSelectedCounty] = useState<string>("all");
+  const [selectedCounty, setSelectedCounty] = useState<string>("all_counties");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("2025-01");
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
@@ -187,7 +187,7 @@ export default function EconomicReporting() {
   const generateEconomicReport = () => {
     const reportData = {
       period: selectedPeriod,
-      county: selectedCounty === "all" ? "All Counties" : selectedCounty,
+      county: selectedCounty === "all_counties" ? "All Counties" : liberianCounties.find(c => c.toLowerCase().replace(/\s+/g, "_") === selectedCounty) || selectedCounty,
       totalActivities: economicActivities.length,
       totalValue: economicActivities.reduce((sum, activity) => sum + activity.value, 0),
       totalEmployment: economicActivities.reduce((sum, activity) => sum + activity.employment, 0),
@@ -235,7 +235,7 @@ export default function EconomicReporting() {
             </SelectTrigger>
             <SelectContent>
               {liberianCounties.map((county) => (
-                <SelectItem key={county} value={county.toLowerCase().replace(" ", "_")}>
+                <SelectItem key={county} value={county.toLowerCase().replace(/\s+/g, "_")}>
                   {county}
                 </SelectItem>
               ))}

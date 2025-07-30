@@ -100,6 +100,10 @@ app.get('/mobile-status', (req, res) => {
   res.sendFile('mobile-status.html', { root: '.' });
 });
 
+app.get('/soluzione-mobile', (req, res) => {
+  res.sendFile('soluzione-mobile.html', { root: '.' });
+});
+
 (async () => {
   // Seed the database with initial data
   try {

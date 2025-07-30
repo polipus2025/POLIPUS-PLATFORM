@@ -29,32 +29,6 @@ import { useLocation } from "wouter";
 export default function MonitoringDashboard() {
   const [, setLocation] = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // Check authentication on mount
-  useEffect(() => {
-    const authToken = localStorage.getItem("authToken");
-    const userType = localStorage.getItem("userType");
-    
-    if (!authToken || userType !== 'monitoring') {
-      setLocation("/monitoring-login");
-      return;
-    }
-    
-    setIsAuthenticated(true);
-  }, [setLocation]);
-  
-  // Show loading while checking authentication
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-center text-white">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Verifying authentication...</p>
-        </div>
-      </div>
-    );
-  }
-  
   const [activeUsers, setActiveUsers] = useState(0);
   const [apiRequests, setApiRequests] = useState(0);
   const [systemHealth, setSystemHealth] = useState("healthy");
@@ -83,6 +57,19 @@ export default function MonitoringDashboard() {
     refetchInterval: 15000,
   });
 
+  // Check authentication on mount
+  useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
+    const userType = localStorage.getItem("userType");
+    
+    if (!authToken || userType !== 'monitoring') {
+      setLocation("/monitoring-login");
+      return;
+    }
+    
+    setIsAuthenticated(true);
+  }, [setLocation]);
+
   useEffect(() => {
     // Simulate real-time updates
     const interval = setInterval(() => {
@@ -92,6 +79,18 @@ export default function MonitoringDashboard() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Show loading while checking authentication
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center text-white">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = () => {
     localStorage.clear();

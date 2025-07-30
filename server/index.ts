@@ -92,6 +92,10 @@ app.get('/mobile-qr-working', (req, res) => {
   res.sendFile('mobile-qr-working.html', { root: '.' });
 });
 
+app.get('/mobile-app-links', (req, res) => {
+  res.sendFile('mobile-app-links.html', { root: '.' });
+});
+
 (async () => {
   // Seed the database with initial data
   try {

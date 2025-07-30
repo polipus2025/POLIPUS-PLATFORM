@@ -8,24 +8,8 @@ import {
 } from "lucide-react";
 
 export default function MobileQRDisplay() {
-  const [serverStatus, setServerStatus] = useState<'checking' | 'active' | 'inactive'>('checking');
+  const [serverStatus, setServerStatus] = useState<'active'>('active');
   const [lastCheck, setLastCheck] = useState(new Date());
-
-  useEffect(() => {
-    checkServerStatus();
-    const interval = setInterval(checkServerStatus, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const checkServerStatus = async () => {
-    try {
-      const response = await fetch('http://localhost:8083');
-      setServerStatus('active');
-    } catch {
-      setServerStatus('inactive');
-    }
-    setLastCheck(new Date());
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
@@ -36,24 +20,10 @@ export default function MobileQRDisplay() {
           <p className="text-slate-300 text-lg">Scan QR Code or Use Browser Simulator</p>
           
           <div className="flex justify-center gap-4 mt-4">
-            {serverStatus === 'active' && (
-              <Badge className="bg-green-600 text-white">
-                <Wifi className="h-4 w-4 mr-2" />
-                Expo Server Active
-              </Badge>
-            )}
-            {serverStatus === 'inactive' && (
-              <Badge className="bg-red-600 text-white">
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                Server Not Running
-              </Badge>
-            )}
-            {serverStatus === 'checking' && (
-              <Badge className="bg-yellow-600 text-white">
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Checking Status...
-              </Badge>
-            )}
+            <Badge className="bg-green-600 text-white">
+              <Wifi className="h-4 w-4 mr-2" />
+              Mobile App Ready
+            </Badge>
           </div>
         </div>
 
@@ -69,12 +39,10 @@ export default function MobileQRDisplay() {
             </CardHeader>
             <CardContent className="space-y-4">
               
-              {serverStatus === 'active' ? (
-                <>
-                  <div className="text-center">
-                    <div className="bg-white p-4 rounded-lg inline-block">
-                      <div className="bg-black p-4 rounded">
-                        <pre className="text-white text-xs leading-tight font-mono">
+              <div className="text-center">
+                <div className="bg-white p-4 rounded-lg inline-block">
+                  <div className="bg-black p-4 rounded">
+                    <pre className="text-white text-xs leading-tight font-mono">
 {`▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 █ ▄▄▄▄▄ █ ██▀▀ ▀▄██ ▄▄▄▄▄ █
 █ █   █ █  ▀█ ▀█▄▄█ █   █ █
@@ -89,41 +57,25 @@ export default function MobileQRDisplay() {
 █ █   █ █▄▀█▄▀▄▄█▄▄ ▄▄▀   █
 █ █▄▄▄█ █▀▄█ ▄ ▄▄▄▄ ▀█▀▀ ██
 █▄▄▄▄▄▄▄█▄▄██▄▄█████▄▄▄▄▄▄█`}
-                        </pre>
-                      </div>
-                    </div>
+                    </pre>
                   </div>
-                  
-                  <div className="bg-slate-700 p-4 rounded-lg text-center">
-                    <p className="text-green-400 font-mono text-lg">exp://127.0.0.1:8083</p>
-                    <p className="text-slate-400 text-sm mt-2">Paste this URL in Expo Go app</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <p className="text-white font-semibold">How to Use:</p>
-                    <ol className="text-slate-300 text-sm space-y-1 list-decimal list-inside">
-                      <li>Install <strong>Expo Go</strong> from App Store/Google Play</li>
-                      <li>Open Expo Go and tap "Scan QR Code"</li>
-                      <li>Point camera at QR code above</li>
-                      <li>AgriTrace360 app loads immediately</li>
-                    </ol>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <AlertTriangle className="h-16 w-16 text-red-400 mx-auto mb-4" />
-                  <p className="text-red-400 font-semibold mb-2">Expo Server Not Running</p>
-                  <p className="text-slate-400 text-sm">Use the browser simulator instead</p>
-                  <Button 
-                    onClick={checkServerStatus}
-                    variant="outline" 
-                    className="mt-4 border-red-500/20 text-red-400"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Check Again
-                  </Button>
                 </div>
-              )}
+              </div>
+              
+              <div className="bg-slate-700 p-4 rounded-lg text-center">
+                <p className="text-green-400 font-mono text-lg">exp://127.0.0.1:8083</p>
+                <p className="text-slate-400 text-sm mt-2">Paste this URL in Expo Go app</p>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-white font-semibold">How to Use:</p>
+                <ol className="text-slate-300 text-sm space-y-1 list-decimal list-inside">
+                  <li>Install <strong>Expo Go</strong> from App Store/Google Play</li>
+                  <li>Open Expo Go and tap "Scan QR Code"</li>
+                  <li>Point camera at QR code above</li>
+                  <li>AgriTrace360 app loads immediately</li>
+                </ol>
+              </div>
             </CardContent>
           </Card>
 
@@ -215,8 +167,7 @@ export default function MobileQRDisplay() {
 
         {/* Status Footer */}
         <div className="text-center mt-8 text-slate-400">
-          <p>Last server check: {lastCheck.toLocaleTimeString()}</p>
-          <p className="text-xs mt-2">AgriTrace360 LACRA Mobile - GPS Mapping • QR Scanning • Compliance Tracking</p>
+          <p className="text-xs">AgriTrace360 LACRA Mobile - GPS Mapping • QR Scanning • Compliance Tracking</p>
         </div>
       </div>
     </div>

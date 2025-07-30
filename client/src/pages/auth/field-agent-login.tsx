@@ -24,7 +24,7 @@ const LIBERIAN_COUNTIES = [
 const loginSchema = z.object({
   agentId: z.string().min(1, "Agent ID is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  jurisdiction: z.string().min(1, "Jurisdiction is required"),
+  jurisdiction: z.string().optional(),
   phoneNumber: z.string().optional(),
 });
 
@@ -147,13 +147,13 @@ export default function FieldAgentLogin() {
 
               {/* Jurisdiction */}
               <div>
-                <Label htmlFor="jurisdiction">Assigned County/District *</Label>
+                <Label htmlFor="jurisdiction">Assigned County/District (Optional)</Label>
                 <Select 
                   value={form.watch("jurisdiction")} 
                   onValueChange={(value) => form.setValue("jurisdiction", value)}
                 >
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select your assigned area" />
+                    <SelectValue placeholder="Select your assigned area (optional)" />
                   </SelectTrigger>
                   <SelectContent>
                     {LIBERIAN_COUNTIES.map(county => (

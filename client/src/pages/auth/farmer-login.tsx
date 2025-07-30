@@ -24,7 +24,7 @@ const LIBERIAN_COUNTIES = [
 const loginSchema = z.object({
   farmerId: z.string().min(1, "Farmer ID is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  county: z.string().min(1, "County is required"),
+  county: z.string().optional(),
   phoneNumber: z.string().optional(),
 });
 
@@ -150,13 +150,13 @@ export default function FarmerLogin() {
 
               {/* County */}
               <div>
-                <Label htmlFor="county">County *</Label>
+                <Label htmlFor="county">County (Optional)</Label>
                 <Select 
                   value={form.watch("county")} 
                   onValueChange={(value) => form.setValue("county", value)}
                 >
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select your county" />
+                    <SelectValue placeholder="Select your county (optional)" />
                   </SelectTrigger>
                   <SelectContent>
                     {LIBERIAN_COUNTIES.map(county => (

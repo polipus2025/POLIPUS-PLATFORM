@@ -45,6 +45,7 @@ import RealTimeVerificationDashboard from "@/pages/verification-dashboard";
 import EconomicReportingPage from "@/pages/economic-reporting";
 import MobileAppDashboard from "@/pages/mobile-app-dashboard";
 import MobileDemo from "@/pages/mobile-demo";
+import MobileAppSimulator from "@/pages/mobile-app-simulator";
 
 import NotFound from "@/pages/not-found";
 
@@ -249,6 +250,7 @@ function Router() {
       <Route path="/home" component={FrontPage} />
       <Route path="/portals" component={Landing} />
       <Route path="/mobile-demo" component={MobileDemo} />
+      <Route path="/mobile-app-simulator" component={MobileAppSimulator} />
       
       <Route component={NotFound} />
     </Switch>

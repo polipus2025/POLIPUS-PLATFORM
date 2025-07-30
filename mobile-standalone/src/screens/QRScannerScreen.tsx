@@ -60,7 +60,7 @@ const QRScannerScreen: React.FC = () => {
         scannedAt: c.created_at
       })));
     } catch (error) {
-      console.error('Error loading scanned commodities:', error);
+      // Error handled silently for production
     }
   };
 

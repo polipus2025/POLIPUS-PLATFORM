@@ -49,7 +49,7 @@ const DashboardScreen: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      // Error handled silently for production
     } finally {
       setLoading(false);
       setRefreshing(false);

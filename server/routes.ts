@@ -341,7 +341,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error('Farmer login error:', error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -364,11 +363,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user exists - field agents use agentId as username
       const user = await storage.getUserByUsername(agentId);
       if (!user || user.role !== 'field_agent') {
-        console.log('Field agent login failed:', {
-          agentId,
-          userFound: !!user,
-          userRole: user?.role
-        });
         return res.status(401).json({ 
           success: false, 
           message: "Invalid field agent credentials" 
@@ -414,7 +408,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error('Field agent login error:', error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -482,7 +475,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error('Exporter login error:', error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -500,7 +492,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Logged out successfully"
       });
     } catch (error) {
-      console.error('Logout error:', error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -511,7 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", authenticateToken, async (req, res) => {
     try {
       // Only regulatory admins can register new users
-      if (req.user.role !== 'regulatory_admin') {
+      if (req.user?.role !== 'regulatory_admin') {
         return res.status(403).json({ 
           success: false, 
           message: "Only administrators can register new users" 
@@ -538,7 +529,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           errors: error.errors 
         });
       } else {
-        console.error('User registration error:', error);
         res.status(500).json({ 
           success: false, 
           message: "Failed to register user" 
@@ -551,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/user", authenticateToken, async (req, res) => {
     try {
       // Extract user info from JWT token (set by authenticateToken middleware)
-      const userId = req.user.userId;
+      const userId = req.user?.userId;
       const user = await storage.getAuthUser(userId);
       
       if (!user) {
@@ -571,12 +561,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: user.role,
           department: user.department,
           jurisdiction: user.jurisdiction,
-          userType: req.user.userType || 'regulatory'
+          userType: req.user?.userType || 'regulatory'
         }
       });
 
     } catch (error) {
-      console.error('Get user error:', error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -3288,7 +3277,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(metrics);
     } catch (error) {
-      console.error('Error fetching director metrics:', error);
       res.status(500).json({ message: 'Failed to fetch director metrics' });
     }
   });

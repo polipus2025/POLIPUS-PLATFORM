@@ -4,8 +4,6 @@ import { offlineQueueDB } from './database';
 
 export const syncWithMainPlatform = async (): Promise<void> => {
   try {
-    console.log('Starting sync with main platform...');
-    
     // Check connectivity first
     const isConnected = await syncAPI.checkConnectivity();
     if (!isConnected) {
@@ -20,10 +18,7 @@ export const syncWithMainPlatform = async (): Promise<void> => {
     
     // Update last sync time
     await AsyncStorage.setItem('lastSyncTime', new Date().toISOString());
-    
-    console.log('Sync completed successfully');
   } catch (error) {
-    console.error('Sync failed:', error);
     throw error;
   }
 };
@@ -33,11 +28,8 @@ const uploadOfflineData = async (): Promise<void> => {
     const pendingActions = await offlineQueueDB.getPendingActions();
     
     if (pendingActions.length === 0) {
-      console.log('No offline data to upload');
       return;
     }
-
-    console.log(`Uploading ${pendingActions.length} offline actions...`);
 
     for (const action of pendingActions) {
       try {
@@ -49,14 +41,11 @@ const uploadOfflineData = async (): Promise<void> => {
         
         // Remove successfully uploaded action
         await offlineQueueDB.removeAction(action.id);
-        console.log(`Uploaded action: ${action.action_type}`);
       } catch (error) {
-        console.error(`Failed to upload action ${action.id}:`, error);
         // Action remains in queue for retry
       }
     }
   } catch (error) {
-    console.error('Upload offline data failed:', error);
     throw error;
   }
 };
@@ -66,8 +55,6 @@ const downloadUpdates = async (): Promise<void> => {
     const lastSyncTime = await AsyncStorage.getItem('lastSyncTime');
     const updates = await syncAPI.downloadUpdates(lastSyncTime || '1970-01-01T00:00:00Z');
     
-    console.log(`Downloaded ${updates.length || 0} updates from main platform`);
-    
     // Process updates and update local database
     if (updates && updates.length > 0) {
       // Process different types of updates
@@ -76,7 +63,6 @@ const downloadUpdates = async (): Promise<void> => {
       }
     }
   } catch (error) {
-    console.error('Download updates failed:', error);
     throw error;
   }
 };
@@ -85,21 +71,18 @@ const processUpdate = async (update: any): Promise<void> => {
   switch (update.type) {
     case 'commodity_update':
       // Update local commodity data
-      console.log('Processing commodity update:', update.id);
       break;
       
     case 'gps_boundary_update':
       // Update GPS boundary data
-      console.log('Processing GPS boundary update:', update.id);
       break;
       
     case 'user_profile_update':
       // Update user profile cache
-      console.log('Processing user profile update:', update.id);
       break;
       
     default:
-      console.log('Unknown update type:', update.type);
+      // Unknown update type handled silently
   }
 };
 
@@ -107,9 +90,7 @@ const processUpdate = async (update: any): Promise<void> => {
 export const queueOfflineAction = async (actionType: string, data: any): Promise<void> => {
   try {
     await offlineQueueDB.addAction(actionType, data);
-    console.log(`Queued offline action: ${actionType}`);
   } catch (error) {
-    console.error('Failed to queue offline action:', error);
     throw error;
   }
 };

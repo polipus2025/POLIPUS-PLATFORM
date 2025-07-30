@@ -151,7 +151,6 @@ export default function AdvancedBoundaryMapper({
   };
 
   const handlePositionError = (error: GeolocationPositionError) => {
-    console.error('GPS Error:', error.message);
     alert(`GPS Error: ${error.message}`);
   };
 
@@ -160,7 +159,6 @@ export default function AdvancedBoundaryMapper({
 
     // Check accuracy threshold
     if (currentPosition.accuracy > minAccuracy) {
-      console.warn(`Point skipped - accuracy too low: ${currentPosition.accuracy}m`);
       return;
     }
 

@@ -278,14 +278,6 @@ export default function EconomicReporting() {
               <p className="text-3xl font-bold text-slate-900">
                 ${(economicOverview.totalGdpContribution / 1000000).toFixed(1)}M
               </p>
-              
-              {/* All Counties Listing */}
-              <div className="mt-3 pt-3 border-t border-slate-200">
-                <p className="text-xs font-medium text-slate-500 mb-2">Available Counties:</p>
-                <div className="text-xs text-slate-600 leading-relaxed">
-                  All Counties, Montserrado, Lofa, Nimba, Bong, Grand Bassa, Sinoe, Margibi, Grand Cape Mount, Gbarpolu, Bomi, Grand Gedeh, River Cess, Maryland, Grand Kru, River Gee
-                </div>
-              </div>
             </div>
           </div>
         </div>

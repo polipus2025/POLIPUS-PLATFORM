@@ -1,48 +1,29 @@
 {
-  "name": "agritrace360-mobile-standalone",
+  "name": "agritrace360-mobile",
   "version": "1.0.0",
-  "description": "AgriTrace360™ LACRA Mobile Application - Standalone Version",
-  "main": "index.js",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build": "expo build",
-    "build:apk": "expo build:android --type apk",
-    "build:ios": "expo build:ios --type simulator", 
-    "build:status": "expo build:status",
-    "dev": "expo start --dev-client",
-    "tunnel": "expo start --tunnel"
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios"
   },
   "dependencies": {
-    "expo": "~50.0.0",
+    "expo": "~49.0.0",
     "react": "18.2.0",
-    "react-native": "0.73.0",
-    "react-native-screens": "~3.29.0",
-    "react-native-safe-area-context": "4.8.2",
-    "@react-navigation/native": "^6.1.9",
-    "@react-navigation/stack": "^6.3.20",
-    "@react-navigation/bottom-tabs": "^6.5.11",
-    "react-native-gesture-handler": "~2.14.0",
-    "react-native-reanimated": "~3.6.2",
-    "expo-location": "~16.5.5",
-    "expo-camera": "~14.1.3",
-    "expo-barcode-scanner": "~12.9.3",
-    "expo-sqlite": "~13.4.0",
-    "expo-file-system": "~16.0.9",
-    "expo-sharing": "~12.0.1",
-    "react-native-maps": "1.10.0",
-    "react-native-vector-icons": "^10.0.3",
-    "@expo/vector-icons": "^14.0.0",
-    "axios": "^1.6.0",
-    "@react-native-async-storage/async-storage": "^1.21.0"
+    "react-native": "0.72.0",
+    "expo-location": "~16.1.0",
+    "expo-camera": "~13.4.0",
+    "expo-barcode-scanner": "~12.5.0",
+    "expo-sqlite": "~11.3.0",
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/stack": "^6.3.0",
+    "expo-status-bar": "~1.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "@types/react": "~18.2.45",
-    "@types/react-native": "^0.72.8",
-    "typescript": "^5.1.3"
+    "@babel/core": "^7.20.0"
   },
   "private": true
 }

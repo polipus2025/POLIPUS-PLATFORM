@@ -164,55 +164,8 @@ export default function SystemAlerts() {
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300">
+      {/* Mobile Device Monitoring Section - NOW AT TOP */}
       <div className="mb-6">
-        <h3 className="text-xl font-bold text-slate-900 mb-2">System Alerts</h3>
-        <p className="text-slate-600">Real-time notifications and compliance monitoring</p>
-      </div>
-      <div className="space-y-4">
-          {alerts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <CheckCircle className="h-8 w-8 mx-auto mb-2 text-success" />
-              <p>No alerts at this time</p>
-            </div>
-          ) : (
-            alerts.slice(0, 5).map((alert) => {
-              const IconComponent = getAlertIcon(alert.type);
-              const colors = getAlertColors(alert.type);
-              
-              return (
-                <div
-                  key={alert.id}
-                  className={`flex items-start space-x-3 p-4 border rounded-xl transition-all duration-300 hover:shadow-sm ${colors} ${
-                    alert.isRead ? 'opacity-60' : ''
-                  }`}
-                >
-                  <div className="p-2 rounded-lg bg-white bg-opacity-50">
-                    <IconComponent className="h-5 w-5 flex-shrink-0" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{alert.title}</p>
-                    <p className="text-xs text-slate-700 mt-1 opacity-90">{alert.message}</p>
-                    <p className="text-xs text-slate-600 opacity-70 mt-2">{formatTimeAgo(alert.createdAt!)}</p>
-                  </div>
-                  {!alert.isRead && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => markAsReadMutation.mutate(alert.id)}
-                      disabled={markAsReadMutation.isPending}
-                    >
-                      Mark as read
-                    </Button>
-                  )}
-                </div>
-              );
-            })
-          )}
-      </div>
-
-      {/* Mobile Device Monitoring Section */}
-      <div className="mt-6 border-t pt-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-2 bg-blue-100 rounded-lg">
             <Smartphone className="h-5 w-5 text-blue-600" />
@@ -358,6 +311,56 @@ export default function SystemAlerts() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* System Alerts Section - NOW AT BOTTOM */}
+      <div className="mt-6 border-t pt-6">
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-slate-900 mb-2">System Alerts</h3>
+          <p className="text-slate-600">Real-time notifications and compliance monitoring</p>
+        </div>
+        <div className="space-y-4">
+            {alerts.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <CheckCircle className="h-8 w-8 mx-auto mb-2 text-success" />
+                <p>No alerts at this time</p>
+              </div>
+            ) : (
+              alerts.slice(0, 5).map((alert) => {
+                const IconComponent = getAlertIcon(alert.type);
+                const colors = getAlertColors(alert.type);
+                
+                return (
+                  <div
+                    key={alert.id}
+                    className={`flex items-start space-x-3 p-4 border rounded-xl transition-all duration-300 hover:shadow-sm ${colors} ${
+                      alert.isRead ? 'opacity-60' : ''
+                    }`}
+                  >
+                    <div className="p-2 rounded-lg bg-white bg-opacity-50">
+                      <IconComponent className="h-5 w-5 flex-shrink-0" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900">{alert.title}</p>
+                      <p className="text-xs text-slate-700 mt-1 opacity-90">{alert.message}</p>
+                      <p className="text-xs text-slate-600 opacity-70 mt-2">{formatTimeAgo(alert.createdAt!)}</p>
+                    </div>
+                    {!alert.isRead && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => markAsReadMutation.mutate(alert.id)}
+                        disabled={markAsReadMutation.isPending}
+                      >
+                        Mark as read
+                      </Button>
+                    )}
+                  </div>
+                );
+              })
+            )}
         </div>
       </div>
     </div>

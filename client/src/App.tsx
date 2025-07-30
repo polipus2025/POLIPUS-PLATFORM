@@ -46,6 +46,7 @@ import EconomicReportingPage from "@/pages/economic-reporting";
 import MobileAppDashboard from "@/pages/mobile-app-dashboard";
 import MobileDemo from "@/pages/mobile-demo";
 import MobileAppSimulator from "@/pages/mobile-app-simulator";
+import MobileQRDisplay from "@/pages/mobile-qr-display";
 
 import NotFound from "@/pages/not-found";
 
@@ -251,7 +252,7 @@ function Router() {
       <Route path="/portals" component={Landing} />
       <Route path="/mobile-demo" component={MobileDemo} />
       <Route path="/mobile-app-simulator" component={MobileAppSimulator} />
-      <Route path="/mobile-app-preview" component={() => window.location.href = '/mobile-app-working.html'} />
+      <Route path="/mobile-app-preview" component={MobileQRDisplay} />
       
       <Route component={NotFound} />
     </Switch>

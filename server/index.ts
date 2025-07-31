@@ -48,11 +48,11 @@ app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 // MAINTENANCE MODE - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = true;
 
-// Maintenance mode middleware - serve maintenance page for root requests
+// Maintenance mode middleware - serve simple red protection page
 app.get('/', (req, res, next) => {
   if (MAINTENANCE_MODE) {
     res.setHeader('Content-Type', 'text/html');
-    return res.sendFile(path.resolve('./maintenance.html'));
+    return res.sendFile(path.resolve('./service-blocked.html'));
   }
   // If not in maintenance mode, continue to next middleware
   next();

@@ -92,7 +92,13 @@ const authenticateToken = (req: any, res: any, next: any) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Serve maintenance page directly
+  // Serve protection page directly
+  app.get('/service-blocked.html', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./service-blocked.html'));
+  });
+
+  // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.sendFile(path.resolve('./maintenance.html'));

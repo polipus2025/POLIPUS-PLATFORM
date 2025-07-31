@@ -51,6 +51,9 @@ import path from "path";
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
 
+// MAINTENANCE MODE - Set to true to enable maintenance mode
+const MAINTENANCE_MODE = true;
+
 // Access control state
 let isAccessBlocked = false;
 let maintenanceMessage = "Scheduled system maintenance in progress.";
@@ -88,6 +91,17 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Serve maintenance page directly
+  app.get('/maintenance.html', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./maintenance.html'));
+  });
+
+  app.get('/enable-maintenance.html', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./enable-maintenance.html'));
+  });
   
   // Health check endpoints for deployment monitoring
   app.get('/health', (req, res) => {

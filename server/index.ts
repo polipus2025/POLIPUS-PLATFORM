@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed-database";
+import path from "path";
 
 const app = express();
 
@@ -43,6 +44,19 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+// MAINTENANCE MODE - Set to true to enable maintenance mode
+const MAINTENANCE_MODE = true;
+
+// Maintenance mode middleware - serve maintenance page for root requests
+app.get('/', (req, res, next) => {
+  if (MAINTENANCE_MODE) {
+    res.setHeader('Content-Type', 'text/html');
+    return res.sendFile(path.resolve('./maintenance.html'));
+  }
+  // If not in maintenance mode, continue to next middleware
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

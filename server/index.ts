@@ -75,9 +75,7 @@ app.use((req, res, next) => {
 });
 
 // Serve mobile QR code page directly
-app.get('/mobile-qr-code.html', (req, res) => {
-  res.sendFile('mobile-qr-code.html', { root: '.' });
-});
+
 
 // Add mobile app routes
 app.get('/mobile-app-preview', (req, res) => {
@@ -88,9 +86,7 @@ app.get('/mobile-app-preview-direct', (req, res) => {
   res.sendFile('mobile-app-preview.html', { root: '.' });
 });
 
-app.get('/mobile-app-simulator', (req, res) => {
-  res.sendFile('mobile-app-working.html', { root: '.' });
-});
+
 
 app.get('/mobile-qr-working', (req, res) => {
   res.sendFile('mobile-qr-working.html', { root: '.' });
@@ -100,37 +96,15 @@ app.get('/mobile-app-links', (req, res) => {
   res.sendFile('mobile-app-links.html', { root: '.' });
 });
 
-app.get('/mobile-status', (req, res) => {
-  res.sendFile('mobile-status.html', { root: '.' });
-});
-
 app.get('/soluzione-mobile', (req, res) => {
   res.sendFile('soluzione-mobile.html', { root: '.' });
-});
-
-app.get('/expo-qr-funzionante', (req, res) => {
-  res.sendFile('expo-qr-funzionante.html', { root: '.' });
-});
-
-app.get('/qr-expo-diretto', (req, res) => {
-  res.sendFile('qr-expo-diretto.html', { root: '.' });
-});
-
-app.get('/mobile-semplice', (req, res) => {
-  res.sendFile('mobile-semplice.html', { root: '.' });
 });
 
 app.get('/mobile-access', (req, res) => {
   res.sendFile('mobile-access.html', { root: '.' });
 });
 
-app.get('/mobile-qr-working', (req, res) => {
-  res.sendFile('mobile-qr-working.html', { root: '.' });
-});
 
-app.get('/soluzione-mobile', (req, res) => {
-  res.sendFile('soluzione-mobile.html', { root: '.' });
-});
 
 (async () => {
   // Seed the database with initial data

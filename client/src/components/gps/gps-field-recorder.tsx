@@ -163,7 +163,6 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
     setCurrentRecord(newRecord);
     setIsRecording(true);
     
-    // console.log('🎯 Started field recording at:', {
       position: `${currentPosition.latitude.toFixed(6)}, ${currentPosition.longitude.toFixed(6)}`,
       accuracy: `${currentPosition.accuracy.toFixed(1)}m`
     });
@@ -185,7 +184,6 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
       recordType: currentRecord.recordType || 'inspection'
     } as FieldRecord;
 
-    // console.log('💾 Saving field record:', completeRecord);
     onRecordSaved?.(completeRecord);
     
     // Reset form

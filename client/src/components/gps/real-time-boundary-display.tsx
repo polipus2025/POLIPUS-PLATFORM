@@ -53,7 +53,6 @@ export default function RealTimeBoundaryDisplay({
       setCenterPoint(center);
       setIsComplete(points.length >= 4);
       
-      // console.log('📐 Real-time boundary calculations:', {
         points: points.length,
         area: `${area.toFixed(3)} hectares`,
         perimeter: `${perim.toFixed(1)} meters`,
@@ -151,7 +150,6 @@ export default function RealTimeBoundaryDisplay({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    // console.log('💾 Exported boundary data:', boundaryData);
   };
 
   const completeBoundary = () => {
@@ -167,7 +165,6 @@ export default function RealTimeBoundaryDisplay({
     };
 
     onComplete?.(boundaryData);
-    // console.log('✅ Boundary mapping completed:', boundaryData);
   };
 
   if (points.length === 0 && !isActive) {

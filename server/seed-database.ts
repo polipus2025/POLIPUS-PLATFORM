@@ -1,13 +1,10 @@
 import { storage } from "./storage";
 
 export async function seedDatabase() {
-  console.log("🌱 Seeding database with initial data...");
-
   try {
     // Check if data already exists
     const existingUsers = await storage.getUserByUsername("admin001");
     if (existingUsers) {
-      console.log("✅ Database already seeded, skipping...");
       return;
     }
     
@@ -16,7 +13,6 @@ export async function seedDatabase() {
       username: "admin001",
       passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
       role: "regulatory_admin",
-      userType: "regulatory",
       firstName: "Admin",
       lastName: "User",
       email: "admin@lacra.gov.lr",
@@ -27,11 +23,10 @@ export async function seedDatabase() {
       username: "AGT-2024-001",
       passwordHash: "$2b$10$E7X5pxmRqrL9HUj6xfZq1uVARFgN8hIm2ahWDqi5kEE1PjRDjn5V6",
       role: "field_agent",
-      userType: "field_agent",
       firstName: "Sarah",
       lastName: "Konneh",
       email: "sarah.konneh@lacra.gov.lr",
-      territoryCounty: "Lofa County",
+      jurisdiction: "Lofa County",
       isActive: true
     });
 
@@ -39,11 +34,10 @@ export async function seedDatabase() {
       username: "FRM-2024-001",
       passwordHash: "$2b$10$ZBncNldlxxzyP0yIQ1SWr.FsDP1ie11vnwbCKQL4QEtK5lkdhnSB6",
       role: "farmer",
-      userType: "farmer",
       firstName: "Moses",
       lastName: "Tuah",
       email: "moses.tuah@farmer.lr",
-      territoryCounty: "Lofa County",
+      jurisdiction: "Lofa County",
       isActive: true
     });
 
@@ -51,11 +45,9 @@ export async function seedDatabase() {
       username: "EXP-2024-001",
       passwordHash: "$2b$12$E1wQNWg/B1lkKxljONG7AutdwOKKPEegD8AvhL8pV3FzYsnH1IYwq",
       role: "exporter",
-      userType: "exporter",
       firstName: "Marcus",
       lastName: "Bawah",
       email: "marcus.bawah@liberiaagrieport.com",
-      companyName: "Liberia Agri Export Ltd.",
       isActive: true
     });
 
@@ -120,35 +112,24 @@ export async function seedDatabase() {
 
     // Create sample inspections
     await storage.createInspection({
-      inspectionId: "INS-2024-001",
       commodityId: 1,
       inspectorId: "AGT-2024-001",
       inspectorName: "Sarah Konneh",
       inspectionDate: new Date("2024-01-16"),
-      inspectionType: "quality_control",
-      location: "Zorzor Town, Voinjama",
-      findings: "Excellent quality, meets export standards",
-      recommendations: "Approved for export certification",
+      qualityGrade: "Premium",
       complianceStatus: "compliant",
-      followUpRequired: false,
-      gpsCoordinates: "8.4219,-9.8456"
+      recommendations: "Approved for export certification"
     });
 
     // Create sample certifications
     await storage.createCertification({
       certificateNumber: "EXP-CERT-2024-001",
       commodityId: 1,
-      certificationType: "export_quality",
+      certificateType: "export_quality",
       issuedBy: "LACRA Quality Control Division",
       issuedDate: new Date("2024-01-17"),
       expiryDate: new Date("2024-07-17"),
-      status: "valid",
-      qrCode: "https://verify.lacra.gov.lr/cert/EXP-CERT-2024-001",
-      metadata: {
-        qualityScore: 95,
-        moistureContent: 12.5,
-        defectRate: 0.2
-      }
+      status: "valid"
     });
 
     // Create sample alerts
@@ -158,17 +139,13 @@ export async function seedDatabase() {
       message: "Batch COC-2024-001 requires immediate quality review due to moisture content exceeding standards.",
       priority: "high",
       isRead: false,
-      batchNumber: "COC-2024-001",
-      county: "Grand Bassa County",
-      actionRequired: true,
       relatedEntity: "commodity",
-      entityId: 2
+      entityId: "2"
     });
 
     // Create sample tracking records
     await storage.createTrackingRecord({
       trackingNumber: "TRK-2025-07-24-001",
-      batchNumber: "COF-2024-001",
       currentLocation: "Port of Monrovia",
       status: "in_transit",
       vehicleId: "VEH-001",

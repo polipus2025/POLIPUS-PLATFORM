@@ -214,13 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Debug logging
-      console.log('Regulatory login attempt:', {
-        username,
-        requestedRole: role,
-        userRole: user.role,
-        isRegulatoryRole: ['regulatory_admin', 'regulatory_staff'].includes(role)
-      });
+      // Verify role permissions
 
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
@@ -231,13 +225,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Verify role permissions - check if user role is valid for regulatory access
+      // Check if user role is valid for regulatory access
       if (!['regulatory_admin', 'regulatory_staff'].includes(user.role)) {
-        console.log('Role verification failed:', {
-          userRole: user.role,
-          requestedRole: role,
-          isValidRole: ['regulatory_admin', 'regulatory_staff'].includes(user.role)
-        });
         return res.status(403).json({ 
           success: false, 
           message: "Access denied for this role" 

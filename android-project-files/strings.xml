@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AgriTrace360 LACRA</string>
+    <string name="app_description">Agricultural Commodity Compliance Management System</string>
+    <string name="loading_message">Loading AgriTrace360 Platform...</string>
+    <string name="connection_error">Unable to connect to AgriTrace360 platform. Please check your internet connection.</string>
+    <string name="permission_required">This permission is required for AgriTrace360 to function properly.</string>
+    <string name="location_permission_rationale">Location access is needed for GPS mapping and farm boundary tracking.</string>
+    <string name="camera_permission_rationale">Camera access is needed for QR code scanning and document capture.</string>
+    <string name="storage_permission_rationale">Storage access is needed to save reports and documents.</string>
+</resources>

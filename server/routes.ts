@@ -46,6 +46,7 @@ import {
   insertVerificationLogSchema
 } from "@shared/schema";
 import { z } from "zod";
+import path from "path";
 
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
@@ -4114,12 +4115,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // PWA Routes
+  app.get('/pwa', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'pwa-mobile.html'));
+  });
+
+  app.get('/manifest.json', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'public/manifest.json'));
+  });
+
+  app.get('/sw.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(process.cwd(), 'public/sw.js'));
+  });
+
   // Middleware to check access blocking for main routes
   app.use((req, res, next) => {
     // Allow access to the access control endpoints and static files
     if (req.path.includes('/api/access') || 
         req.path.includes('/access-blocked') ||
         req.path.includes('/admin-access') ||
+        req.path.includes('/pwa') ||
+        req.path.includes('/manifest.json') ||
+        req.path.includes('/sw.js') ||
+        req.path.includes('/pwa-icons/') ||
         req.path.includes('/assets/') ||
         req.path.includes('.css') ||
         req.path.includes('.js') ||

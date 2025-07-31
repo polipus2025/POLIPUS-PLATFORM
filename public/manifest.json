@@ -1,0 +1,118 @@
+{
+  "name": "AgriTrace360 LACRA - Agricultural Compliance Platform",
+  "short_name": "AgriTrace360",
+  "description": "Complete agricultural traceability and compliance management platform for LACRA",
+  "start_url": "/pwa",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#059669",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["agriculture", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/pwa-icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/pwa-icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/pwa-icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/pwa-icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/pwa-icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/pwa-icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/pwa-icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/pwa-icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/pwa-screenshots/mobile-dashboard.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile Dashboard"
+    },
+    {
+      "src": "/pwa-screenshots/mobile-gps.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "GPS Mapping"
+    }
+  ],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open main dashboard",
+      "url": "/pwa?shortcut=dashboard",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "GPS Mapping",
+      "short_name": "GPS",
+      "description": "Open GPS mapping",
+      "url": "/pwa?shortcut=gps",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"  
+        }
+      ]
+    },
+    {
+      "name": "Export Permits",
+      "short_name": "Permits",
+      "description": "Export permit management",
+      "url": "/pwa?shortcut=permits",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

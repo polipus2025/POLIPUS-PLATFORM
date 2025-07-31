@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "name": "agritrace360-lacra",
+  "builds": [
+    {
+      "src": "server/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "dist/**",
+          "server/**",
+          "shared/**",
+          "mobile-*.html",
+          "soluzione-mobile.html"
+        ]
+      }
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/mobile-access",
+      "dest": "/mobile-access.html"
+    },
+    {
+      "src": "/mobile-app-preview",
+      "dest": "/mobile-app-preview.html"
+    },
+    {
+      "src": "/mobile-qr-working",
+      "dest": "/mobile-qr-working.html"
+    },
+    {
+      "src": "/soluzione-mobile",
+      "dest": "/soluzione-mobile.html"
+    },
+    {
+      "src": "/mobile-app-links",
+      "dest": "/mobile-app-links.html"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/public/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "server/index.ts": {
+      "maxDuration": 30
+    }
+  }
+}

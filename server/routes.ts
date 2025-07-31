@@ -50,6 +50,10 @@ import { z } from "zod";
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
 
+// Access control state
+let isAccessBlocked = false;
+let maintenanceMessage = "Scheduled system maintenance in progress.";
+
 // Extend Express Request type to include user property
 declare global {
   namespace Express {
@@ -4080,6 +4084,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       { type: 'warning', message: 'Rate Limit Warning', details: 'High API request volume detected', timestamp: new Date(Date.now() - 5*60*1000).toLocaleTimeString() }
     ];
     res.json(auditLogs);
+  });
+
+  // Access control endpoints
+  app.get("/api/access/status", (req, res) => {
+    res.json({ 
+      isBlocked: isAccessBlocked, 
+      message: maintenanceMessage,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  app.post("/api/access/block", authenticateToken, (req, res) => {
+    const { message } = req.body;
+    isAccessBlocked = true;
+    if (message) maintenanceMessage = message;
+    res.json({ 
+      success: true, 
+      message: "Access blocked successfully",
+      maintenanceMessage: maintenanceMessage
+    });
+  });
+
+  app.post("/api/access/unblock", authenticateToken, (req, res) => {
+    isAccessBlocked = false;
+    res.json({ 
+      success: true, 
+      message: "Access unblocked successfully" 
+    });
+  });
+
+  // Middleware to check access blocking for main routes
+  app.use((req, res, next) => {
+    // Allow access to the access control endpoints and static files
+    if (req.path.includes('/api/access') || 
+        req.path.includes('/access-blocked') ||
+        req.path.includes('/admin-access') ||
+        req.path.includes('/assets/') ||
+        req.path.includes('.css') ||
+        req.path.includes('.js') ||
+        req.path.includes('.ico')) {
+      return next();
+    }
+
+    // If access is blocked, serve the blocked page
+    if (isAccessBlocked) {
+      return res.redirect('/access-blocked.html');
+    }
+
+    next();
   });
 
   const httpServer = createServer(app);

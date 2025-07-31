@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Access Control - AgriTrace360 LACRA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #059669 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .admin-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #d1d5db;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #f3f4f6;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #d1d5db;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-block {
+            background: linear-gradient(45deg, #dc2626, #b91c1c);
+            color: white;
+        }
+
+        .btn-unblock {
+            background: linear-gradient(45deg, #16a34a, #15803d);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-display {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: #d1d5db;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .status-blocked {
+            color: #fca5a5;
+        }
+
+        .status-active {
+            color: #86efac;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #86efac;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="admin-icon">⚙️</div>
+            <h1>Access Control Panel</h1>
+            <p class="subtitle">AgriTrace360 LACRA Platform</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="status-display">
+            <div class="status-label">Current Platform Status</div>
+            <div class="status-value" id="statusDisplay">Loading...</div>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Admin Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter admin username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Admin Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter admin password" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Maintenance Message (Optional)</label>
+                <textarea id="message" name="message" placeholder="Enter custom maintenance message..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn btn-block" onclick="blockAccess()">🔒 Block Access</button>
+                <button type="button" class="btn btn-unblock" onclick="unblockAccess()">🔓 Unblock Access</button>
+            </div>
+        </form>
+
+        <div class="back-link">
+            <a href="/">← Return to Platform</a>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+
+        // Check current access status
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/access/status');
+                const data = await response.json();
+                
+                const statusDisplay = document.getElementById('statusDisplay');
+                if (data.isBlocked) {
+                    statusDisplay.textContent = 'BLOCKED - ' + data.message;
+                    statusDisplay.className = 'status-value status-blocked';
+                } else {
+                    statusDisplay.textContent = 'ACTIVE - Platform accessible';
+                    statusDisplay.className = 'status-value status-active';
+                }
+            } catch (error) {
+                showAlert('Error checking status', 'error');
+            }
+        }
+
+        // Authenticate admin
+        async function authenticate() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                showAlert('Username and password required', 'error');
+                return false;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, userType: 'regulatory' })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    return true;
+                } else {
+                    showAlert('Invalid admin credentials', 'error');
+                    return false;
+                }
+            } catch (error) {
+                showAlert('Authentication failed', 'error');
+                return false;
+            }
+        }
+
+        // Block access
+        async function blockAccess() {
+            if (!await authenticate()) return;
+
+            const message = document.getElementById('message').value || "Scheduled system maintenance in progress.";
+
+            try {
+                const response = await fetch('/api/access/block', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (response.ok) {
+                    showAlert('Access blocked successfully', 'success');
+                    checkStatus();
+                } else {
+                    showAlert('Failed to block access', 'error');
+                }
+            } catch (error) {
+                showAlert('Error blocking access', 'error');
+            }
+        }
+
+        // Unblock access
+        async function unblockAccess() {
+            if (!await authenticate()) return;
+
+            try {
+                const response = await fetch('/api/access/unblock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    showAlert('Access unblocked successfully', 'success');
+                    checkStatus();
+                } else {
+                    showAlert('Failed to unblock access', 'error');
+                }
+            } catch (error) {
+                showAlert('Error unblocking access', 'error');
+            }
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkStatus();
+            
+            // Auto-refresh status every 30 seconds
+            setInterval(checkStatus, 30000);
+        });
+    </script>
+</body>
+</html>

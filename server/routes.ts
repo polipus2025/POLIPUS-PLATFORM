@@ -98,6 +98,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve('./service-blocked.html'));
   });
 
+  // Serve protection script
+  app.get('/protection.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.resolve('./public/protection.js'));
+  });
+
   // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');

@@ -156,6 +156,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Authentication routes
+  // Main login endpoint
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password, userType } = req.body;
+      
+      // Validate input
+      if (!username || !password || !userType) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, password, and userType are required" 
+        });
+      }
+
+      // Get user from storage
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Map user types to roles for validation
+      const roleMapping = {
+        'regulatory': 'regulatory_admin',
+        'farmer': 'farmer',
+        'field_agent': 'field_agent',
+        'exporter': 'exporter'
+      };
+      
+      const expectedRole = roleMapping[userType];
+      if (!expectedRole || user.role !== expectedRole) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials for this portal" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id,
+          username: user.username,
+          userType: user.userType,
+          role: user.role || user.userType
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          userType: userType,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error during authentication'
+      });
+    }
+  });
+
   // Monitoring login endpoint
   app.post('/api/auth/monitoring-login', async (req, res) => {
     try {

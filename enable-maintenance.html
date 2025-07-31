@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable Maintenance Mode - AgriTrace360</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .logo::before {
+            content: '🌾';
+            font-size: 1.5rem;
+        }
+        h1 {
+            color: #1F2937;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #6B7280;
+            margin-bottom: 2rem;
+        }
+        .instructions {
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        .step {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #F8FAFC;
+            border-radius: 6px;
+            border-left: 4px solid #10B981;
+        }
+        .code {
+            background: #1F2937;
+            color: #10B981;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .warning {
+            background: #FEE2E2;
+            border: 1px solid #EF4444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #991B1B;
+        }
+        .success {
+            background: #DCFCE7;
+            border: 1px solid #16A34A;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #166534;
+        }
+        button {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #059669;
+        }
+        .disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+        }
+        .file-preview {
+            background: #F8FAFC;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo"></div>
+            <h1>AgriTrace360™ Maintenance Mode</h1>
+            <p class="subtitle">Website Access Control System</p>
+        </div>
+
+        <div class="instructions">
+            <h3>🛠️ Maintenance Mode Instructions</h3>
+            <p>Use this system to temporarily hide the AgriTrace360 platform before going online. This shows users a professional maintenance page while you prepare for deployment.</p>
+        </div>
+
+        <div class="step">
+            <h4>Step 1: Maintenance Page Created</h4>
+            <p>✅ A professional maintenance page has been created at <code>maintenance.html</code></p>
+            <p>Features:</p>
+            <ul>
+                <li>🌾 Official LACRA and AgriTrace360 branding</li>
+                <li>🔧 Professional maintenance message in English</li>
+                <li>📱 Mobile-responsive design</li>
+                <li>⏱️ Auto-refresh every 5 minutes</li>
+                <li>📊 Progress indicator (85% complete)</li>
+                <li>📞 Contact information for support</li>
+                <li>🇱🇷 Liberian flag and local timezone</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h4>Step 2: How to Enable Maintenance Mode</h4>
+            <p>To redirect all traffic to the maintenance page, you have several options:</p>
+            
+            <h5>Option A: Server-level redirect (Recommended)</h5>
+            <div class="code">
+// Add this to your server/routes.ts at the top of your route handlers:
+
+// Maintenance mode toggle
+const MAINTENANCE_MODE = true; // Set to true to enable maintenance mode
+
+app.get('*', (req, res, next) => {
+  if (MAINTENANCE_MODE && req.path !== '/maintenance.html') {
+    return res.redirect('/maintenance.html');
+  }
+  next();
+});
+            </div>
+
+            <h5>Option B: HTML redirect on main page</h5>
+            <div class="code">
+&lt;!-- Add this to the &lt;head&gt; section of your main HTML file --&gt;
+&lt;script&gt;
+  window.location.href = '/maintenance.html';
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Step 3: Deployment Ready</h4>
+            <p>Your maintenance page is ready for deployment. It includes:</p>
+            <ul>
+                <li>✅ Professional English maintenance message</li>
+                <li>✅ LACRA official branding</li>
+                <li>✅ Mobile-responsive design</li>
+                <li>✅ Contact information</li>
+                <li>✅ Auto-refresh functionality</li>
+                <li>✅ Progress indicator</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Important Notes</h4>
+            <ul>
+                <li>The maintenance page is in English as requested</li>
+                <li>Remember to disable maintenance mode when ready to go live</li>
+                <li>The page includes auto-refresh every 5 minutes</li>
+                <li>Contact information should be updated with real LACRA details</li>
+            </ul>
+        </div>
+
+        <div class="success">
+            <h4>✅ Maintenance Page Successfully Created</h4>
+            <p>Your professional English maintenance page is ready. Access it at: <strong>/maintenance.html</strong></p>
+            <p>The page includes all LACRA branding and professional messaging needed for your online deployment.</p>
+        </div>
+
+        <div class="step">
+            <h4>Step 4: Quick Test</h4>
+            <p>You can test the maintenance page by visiting:</p>
+            <div class="code">http://localhost:5000/maintenance.html</div>
+            <button onclick="window.open('/maintenance.html', '_blank')">View Maintenance Page</button>
+        </div>
+
+        <div class="file-preview">
+            <h4>Maintenance Page Preview:</h4>
+            <p><strong>Features included:</strong></p>
+            <ul>
+                <li>🌾 AgriTrace360™ logo and branding</li>
+                <li>🏛️ LACRA official organization title</li>
+                <li>⚙️ Animated maintenance icon</li>
+                <li>📋 List of features being enhanced</li>
+                <li>📊 Progress bar (85% complete)</li>
+                <li>📞 Contact information section</li>
+                <li>🇱🇷 Liberian flag and timezone</li>
+                <li>📱 Fully mobile responsive</li>
+                <li>🔄 Auto-refresh every 5 minutes</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        console.log('🌾 AgriTrace360 Maintenance Mode Control Panel');
+        console.log('📄 Maintenance page created at: /maintenance.html');
+        console.log('🚀 Ready for deployment with professional English interface');
+    </script>
+</body>
+</html>

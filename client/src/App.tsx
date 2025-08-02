@@ -237,18 +237,19 @@ function Router() {
         </>
       ) : (
         <>
-          {/* Front Page - Main Landing */}
+          {/* Main Landing Page - Polipus with 8 modules and login buttons */}
           <Route path="/" component={FrontPage} />
-          {/* Landing page for portals */}
+          {/* Secondary landing page for AgriTrace portals */}
           <Route path="/landing" component={Landing} />
           {/* Also handle /dashboard for logged out users */}
           <Route path="/dashboard" component={FrontPage} />
         </>
       )}
       
-      {/* Always available routes */}
+      {/* Always available routes - All point to main Polipus landing page */}
       <Route path="/front-page" component={FrontPage} />
       <Route path="/home" component={FrontPage} />
+      <Route path="/main" component={FrontPage} />
       <Route path="/portals" component={Landing} />
       <Route path="/mobile-demo" component={MobileDemo} />
       <Route path="/mobile-app-simulator" component={MobileAppSimulator} />

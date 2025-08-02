@@ -8,6 +8,12 @@ AgriTrace360™ is a comprehensive web application for the Liberia Agriculture C
 
 Preferred communication style: Simple, everyday language.
 
+## Main Landing Page Configuration
+- **Primary Homepage**: The main landing page displays the Polipus logo with 8 modules and login buttons
+- **Default Route**: Root path (/) serves the FrontPage component with Polipus branding
+- **Module Structure**: 8 distinct modules including Agricultural Traceability & Compliance, Supply Chain Management, Compliance & Certification, Analytics & Reporting, Enhanced GIS Mapping, User Management, Document Management, and System Configuration
+- **Access Points**: Multiple routes (/front-page, /home, /main) all point to the same Polipus main landing page
+
 ## System Architecture
 
 The application employs a modern full-stack architecture with a clear separation of concerns.

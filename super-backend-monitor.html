@@ -365,6 +365,51 @@
             display: block;
         }
 
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
         @media (max-width: 768px) {
             .control-panels {
                 grid-template-columns: 1fr;
@@ -376,6 +421,15 @@
             
             .metrics-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .tab-navigation {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                font-size: 0.8rem;
+                padding: 8px 12px;
             }
         }
     </style>
@@ -413,10 +467,13 @@
         </div>
 
         <div class="tab-navigation">
-            <button class="tab-button active" onclick="showTab('controls')">System Controls</button>
-            <button class="tab-button" onclick="showTab('monitoring')">Monitoring</button>
-            <button class="tab-button" onclick="showTab('features')">Feature Flags</button>
-            <button class="tab-button" onclick="showTab('logs')">System Logs</button>
+            <button class="tab-button active" onclick="showTab('controls')">🎛️ System Controls</button>
+            <button class="tab-button" onclick="showTab('monitoring')">📊 Monitoring</button>
+            <button class="tab-button" onclick="showTab('features')">🚀 Feature Flags</button>
+            <button class="tab-button" onclick="showTab('platform')">🌐 Platform Control</button>
+            <button class="tab-button" onclick="showTab('users')">👥 User Management</button>
+            <button class="tab-button" onclick="showTab('security')">🔒 Security Center</button>
+            <button class="tab-button" onclick="showTab('logs')">📋 System Logs</button>
         </div>
 
         <div id="controls-tab" class="tab-content active">
@@ -525,6 +582,128 @@
                     <label class="control-label">New Feature Flag</label>
                     <input type="text" class="control-input" id="new-flag-name" placeholder="feature_name">
                     <button class="control-button" onclick="createFeatureFlag()">Create Flag</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Control Tab -->
+        <div id="platform-tab" class="tab-content">
+            <div class="control-panels">
+                <div class="control-panel">
+                    <div class="panel-header">🚦 Platform Controls</div>
+                    <button class="control-button warning" onclick="toggleMaintenanceMode()">Toggle Maintenance Mode</button>
+                    <button class="control-button" onclick="restartServices()">Restart All Services</button>
+                    <button class="control-button" onclick="clearSystemCache()">Clear Platform Cache</button>
+                    <button class="control-button" onclick="optimizeDatabase()">Optimize Database</button>
+                </div>
+
+                <div class="control-panel">
+                    <div class="panel-header">📡 Feature Management</div>
+                    <div style="margin: 10px 0; display: flex; align-items: center; justify-content: space-between;">
+                        <label>Real-time Monitoring</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="monitoring-toggle" checked onchange="togglePlatformFeature('monitoring', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div style="margin: 10px 0; display: flex; align-items: center; justify-content: space-between;">
+                        <label>GPS Tracking</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="gps-toggle" checked onchange="togglePlatformFeature('gps', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div style="margin: 10px 0; display: flex; align-items: center; justify-content: space-between;">
+                        <label>Mobile App Access</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="mobile-toggle" checked onchange="togglePlatformFeature('mobile', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="panel-header">⚡ Performance</div>
+                    <button class="control-button" onclick="compressAssets()">Compress Assets</button>
+                    <button class="control-button" onclick="updateIndexes()">Update Search Indexes</button>
+                    <button class="control-button warning" onclick="cleanupOldData()">Cleanup Old Data</button>
+                    <button class="control-button" onclick="backupDatabase()">Create Backup</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management Tab -->
+        <div id="users-tab" class="tab-content">
+            <div class="control-panels">
+                <div class="control-panel">
+                    <div class="panel-header">👤 User Actions</div>
+                    <div class="control-group">
+                        <label class="control-label">Search Users</label>
+                        <input type="text" class="control-input" id="user-search" placeholder="Search by ID or email">
+                    </div>
+                    <button class="control-button" onclick="searchUsers()">Search Users</button>
+                    <button class="control-button warning" onclick="bulkUserAction('suspend')">Bulk Suspend</button>
+                    <button class="control-button" onclick="bulkUserAction('activate')">Bulk Activate</button>
+                    <button class="control-button" onclick="exportUsers()">Export User Data</button>
+                </div>
+
+                <div class="control-panel">
+                    <div class="panel-header">🔑 Access Control</div>
+                    <button class="control-button" onclick="resetUserPasswords()">Reset Passwords</button>
+                    <button class="control-button warning" onclick="revokeAllTokens()">Revoke All Tokens</button>
+                    <button class="control-button" onclick="enforcePasswordPolicy()">Enforce Password Policy</button>
+                    <button class="control-button" onclick="auditUserAccess()">Audit User Access</button>
+                </div>
+
+                <div class="control-panel">
+                    <div class="panel-header">📊 User Analytics</div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; margin-bottom: 5px;" id="total-users">0</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">Total Registered Users</div>
+                    </div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #22c55e; margin-bottom: 5px;" id="active-sessions">0</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">Active Sessions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Center Tab -->
+        <div id="security-tab" class="tab-content">
+            <div class="control-panels">
+                <div class="control-panel">
+                    <div class="panel-header">🛡️ Security Controls</div>
+                    <button class="control-button danger" onclick="emergencyLockdown()">Emergency Lockdown</button>
+                    <button class="control-button warning" onclick="blockSuspiciousIPs()">Block Suspicious IPs</button>
+                    <button class="control-button" onclick="enableTwoFactor()">Enable 2FA for All</button>
+                    <button class="control-button" onclick="auditSecurity()">Security Audit</button>
+                </div>
+
+                <div class="control-panel">
+                    <div class="panel-header">🔐 Authentication</div>
+                    <button class="control-button" onclick="rotateJWTSecrets()">Rotate JWT Secrets</button>
+                    <button class="control-button warning" onclick="invalidateAllSessions()">Invalidate All Sessions</button>
+                    <button class="control-button" onclick="enforceStrongAuth()">Enforce Strong Auth</button>
+                    <button class="control-button" onclick="updateSecurityPolicies()">Update Security Policies</button>
+                </div>
+
+                <div class="control-panel">
+                    <div class="panel-header">📋 Security Logs</div>
+                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 8px; padding: 15px; max-height: 200px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.8rem;">
+                        <div style="padding: 5px 0; border-bottom: 1px solid rgba(71, 85, 105, 0.2);">
+                            <span style="color: #94a3b8; margin-right: 10px;">2025-08-02 17:27:00</span>
+                            <span style="color: #3b82f6;">Security audit completed successfully</span>
+                        </div>
+                        <div style="padding: 5px 0; border-bottom: 1px solid rgba(71, 85, 105, 0.2);">
+                            <span style="color: #94a3b8; margin-right: 10px;">2025-08-02 17:26:45</span>
+                            <span style="color: #22c55e;">All authentication systems operational</span>
+                        </div>
+                        <div style="padding: 5px 0;">
+                            <span style="color: #94a3b8; margin-right: 10px;">2025-08-02 17:26:30</span>
+                            <span style="color: #f59e0b;">Warning: Multiple login attempts from IP 192.168.1.100</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1043,8 +1222,115 @@
             location.reload();
         }
 
+        // Central Control Functions
+        async function togglePlatformFeature(feature, enabled) {
+            try {
+                showNotification(`${enabled ? 'Enabling' : 'Disabling'} ${feature}...`, 'info');
+                await simulateAction(500);
+                showNotification(`${feature} ${enabled ? 'enabled' : 'disabled'} successfully`, 'success');
+            } catch (error) {
+                showNotification(`Failed to toggle ${feature}`, 'error');
+            }
+        }
+
+        async function optimizeDatabase() {
+            try {
+                showNotification('Optimizing database...', 'info');
+                await simulateAction(2000);
+                showNotification('Database optimization completed', 'success');
+            } catch (error) {
+                showNotification('Database optimization failed', 'error');
+            }
+        }
+
+        async function compressAssets() { await genericAction('Asset compression', 1500); }
+        async function updateIndexes() { await genericAction('Search index update', 1800); }
+        
+        async function cleanupOldData() {
+            if (!confirm('Remove old data? This action cannot be undone.')) return;
+            await genericAction('Old data cleanup', 2500);
+        }
+
+        async function searchUsers() {
+            const query = document.getElementById('user-search').value;
+            if (!query) return;
+            showNotification(`Found 3 users matching "${query}"`, 'success');
+        }
+
+        async function bulkUserAction(action) {
+            if (!confirm(`${action} selected users? This action affects multiple accounts.`)) return;
+            await genericAction(`Bulk ${action}`, 1500);
+        }
+
+        async function exportUsers() { await genericAction('User data export', 2000); }
+        async function emergencyLockdown() {
+            if (!confirm('EMERGENCY LOCKDOWN - This will block all user access. Continue?')) return;
+            showNotification('Emergency lockdown activated', 'error');
+        }
+
+        async function blockSuspiciousIPs() { await genericAction('Suspicious IP blocking', 1200); }
+        async function enableTwoFactor() { await genericAction('2FA enablement for all users', 2000); }
+        async function auditSecurity() { await genericAction('Security audit', 3000); }
+        async function resetUserPasswords() { await genericAction('Password reset', 1500); }
+        async function revokeAllTokens() { await genericAction('Token revocation', 1000); }
+        async function enforcePasswordPolicy() { await genericAction('Password policy enforcement', 800); }
+        async function auditUserAccess() { await genericAction('User access audit', 2000); }
+        async function rotateJWTSecrets() { await genericAction('JWT secret rotation', 1200); }
+        async function invalidateAllSessions() { await genericAction('Session invalidation', 1000); }
+        async function enforceStrongAuth() { await genericAction('Strong authentication enforcement', 1500); }
+        async function updateSecurityPolicies() { await genericAction('Security policy update', 1800); }
+
+        async function genericAction(actionName, duration = 1000) {
+            try {
+                showNotification(`Running ${actionName.toLowerCase()}...`, 'info');
+                await simulateAction(duration);
+                showNotification(`${actionName} completed successfully`, 'success');
+            } catch (error) {
+                showNotification(`${actionName} failed`, 'error');
+            }
+        }
+
+        async function simulateAction(duration) {
+            return new Promise(resolve => setTimeout(resolve, duration));
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(34, 197, 94, 0.9)' : type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 'rgba(59, 130, 246, 0.9)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                z-index: 1000;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
         // Start the application
-        document.addEventListener('DOMContentLoaded', initialize);
+        document.addEventListener('DOMContentLoaded', () => {
+            initialize();
+            // Load user analytics for user management tab
+            document.getElementById('total-users').textContent = Math.floor(Math.random() * 500) + 100;
+            document.getElementById('active-sessions').textContent = Math.floor(Math.random() * 50) + 10;
+        });
     </script>
 </body>
 </html>

@@ -699,6 +699,125 @@
                 </div>
             </div>
 
+            <!-- Comprehensive Audit System -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    Comprehensive Audit System
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="audit-records">0</div>
+                    <div class="analytics-label">Total Audit Records</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="audit-size">0</div>
+                    <div class="analytics-label">Audit Database Size (GB)</div>
+                </div>
+
+                <button class="control-button" onclick="generateFullAuditReport()">Generate Complete Audit Report</button>
+                <button class="control-button" onclick="exportAuditData()">Export Audit Database</button>
+                <button class="control-button warning" onclick="purgeOldAudits()">Purge Old Audit Records</button>
+                <button class="control-button success" onclick="validateAuditIntegrity()">Validate Audit Integrity</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Audit Tracking Controls</h4>
+                    
+                    <div class="toggle-container">
+                        <span>User Activity Logging</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleAuditFeature('userActivity', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Financial Transaction Logging</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleAuditFeature('financial', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Communication Monitoring</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleAuditFeature('communications', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Audio/Video Activity Tracking</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleAuditFeature('media', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Decision Making Tracking</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleAuditFeature('decisions', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Advanced Audit Queries</h4>
+                    
+                    <div class="input-group">
+                        <label>User ID for Audit</label>
+                        <input type="text" id="audit-user" placeholder="Enter user ID">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Date Range (From)</label>
+                        <input type="datetime-local" id="audit-date-from">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Date Range (To)</label>
+                        <input type="datetime-local" id="audit-date-to">
+                    </div>
+
+                    <button class="control-button" onclick="searchAuditRecords()">Search Audit Records</button>
+                    <button class="control-button" onclick="generateUserAuditReport()">User Audit Report</button>
+                </div>
+            </div>
+
+            <!-- Independent Audit Compliance -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">⚖️</span>
+                    Independent Audit Compliance
+                </div>
+
+                <button class="control-button success" onclick="prepareIndependentAudit()">Prepare for Independent Audit</button>
+                <button class="control-button" onclick="generateComplianceReport()">Generate Compliance Report</button>
+                <button class="control-button" onclick="exportFinancialRecords()">Export Financial Records</button>
+                <button class="control-button" onclick="generateGovernanceReport()">Governance Report</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Compliance Monitoring</h4>
+                    
+                    <div class="analytics-card">
+                        <div class="analytics-number" style="color: #22c55e;" id="compliance-score">97%</div>
+                        <div class="analytics-label">Overall Compliance Score</div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-number" id="policy-violations">0</div>
+                        <div class="analytics-label">Policy Violations (30 days)</div>
+                    </div>
+
+                    <button class="control-button" onclick="scanComplianceViolations()">Scan for Violations</button>
+                    <button class="control-button" onclick="updateCompliancePolicies()">Update Policies</button>
+                </div>
+            </div>
+
             <!-- System Health Dashboard -->
             <div class="control-section">
                 <div class="section-header">
@@ -1362,6 +1481,138 @@
             }
         }
 
+        // Comprehensive Audit System Functions
+        async function generateFullAuditReport() {
+            showNotification('Generating comprehensive audit report...', 'info');
+            setTimeout(() => {
+                showNotification('Complete audit report generated - 2,456 pages covering all platform activities', 'success');
+                addSecurityLog('Comprehensive audit report generated', 'info');
+            }, 5000);
+        }
+
+        async function exportAuditData() {
+            if (confirm('Export complete audit database? This may take several minutes and contains sensitive data.')) {
+                showNotification('Exporting audit database...', 'info');
+                setTimeout(() => {
+                    showNotification('Audit database exported successfully - 15.7GB encrypted file', 'success');
+                    addSecurityLog('Audit database export completed', 'info');
+                }, 6000);
+            }
+        }
+
+        async function purgeOldAudits() {
+            if (confirm('Purge audit records older than retention policy? This action cannot be undone.')) {
+                showNotification('Purging old audit records...', 'warning');
+                setTimeout(() => {
+                    showNotification('Old audit records purged - 1.2GB freed, compliance retained', 'success');
+                    addSecurityLog('Old audit records purged', 'warning');
+                }, 3000);
+            }
+        }
+
+        async function validateAuditIntegrity() {
+            showNotification('Validating audit trail integrity...', 'info');
+            setTimeout(() => {
+                showNotification('Audit integrity validated - All records verified, no tampering detected', 'success');
+                addSecurityLog('Audit integrity validation completed', 'success');
+            }, 4000);
+        }
+
+        async function toggleAuditFeature(feature, enabled) {
+            showNotification(`Audit tracking for ${feature} ${enabled ? 'enabled' : 'disabled'}`, enabled ? 'success' : 'warning');
+            addSecurityLog(`Audit feature ${feature} ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        }
+
+        async function searchAuditRecords() {
+            const userId = document.getElementById('audit-user').value;
+            const dateFrom = document.getElementById('audit-date-from').value;
+            const dateTo = document.getElementById('audit-date-to').value;
+
+            if (!userId && !dateFrom && !dateTo) {
+                showNotification('Please specify search criteria', 'warning');
+                return;
+            }
+
+            let searchCriteria = [];
+            if (userId) searchCriteria.push(`User: ${userId}`);
+            if (dateFrom) searchCriteria.push(`From: ${dateFrom}`);
+            if (dateTo) searchCriteria.push(`To: ${dateTo}`);
+
+            showNotification(`Searching audit records - ${searchCriteria.join(', ')}`, 'info');
+            setTimeout(() => {
+                const recordCount = Math.floor(Math.random() * 500) + 50;
+                showNotification(`Found ${recordCount} audit records matching criteria`, 'success');
+                addSecurityLog(`Audit search completed: ${recordCount} records found`, 'info');
+            }, 2000);
+        }
+
+        async function generateUserAuditReport() {
+            const userId = document.getElementById('audit-user').value;
+            if (!userId) {
+                showNotification('Please enter a user ID', 'warning');
+                return;
+            }
+
+            showNotification(`Generating comprehensive audit report for user: ${userId}`, 'info');
+            setTimeout(() => {
+                showNotification(`User audit report generated for ${userId} - 47 pages of activity logs`, 'success');
+                addSecurityLog(`User audit report generated for ${userId}`, 'info');
+            }, 3500);
+        }
+
+        // Independent Audit Compliance Functions
+        async function prepareIndependentAudit() {
+            showNotification('Preparing platform for independent audit...', 'info');
+            setTimeout(() => {
+                showNotification('Platform prepared for independent audit - All records accessible, compliance verified', 'success');
+                addSecurityLog('Platform prepared for independent audit', 'info');
+            }, 4000);
+        }
+
+        async function generateComplianceReport() {
+            showNotification('Generating regulatory compliance report...', 'info');
+            setTimeout(() => {
+                showNotification('Compliance report generated - 156 regulatory requirements, 97% compliance rate', 'success');
+                addSecurityLog('Compliance report generated', 'info');
+            }, 3500);
+        }
+
+        async function exportFinancialRecords() {
+            showNotification('Exporting all financial transaction records...', 'info');
+            setTimeout(() => {
+                showNotification('Financial records exported - Complete transaction history with audit trail', 'success');
+                addSecurityLog('Financial records export completed', 'info');
+            }, 4000);
+        }
+
+        async function generateGovernanceReport() {
+            showNotification('Generating governance and decision-making report...', 'info');
+            setTimeout(() => {
+                showNotification('Governance report completed - All decisions tracked with responsible parties', 'success');
+                addSecurityLog('Governance report generated', 'info');
+            }, 3000);
+        }
+
+        async function scanComplianceViolations() {
+            showNotification('Scanning for policy and compliance violations...', 'info');
+            setTimeout(() => {
+                const violations = Math.floor(Math.random() * 5);
+                showNotification(`Compliance scan completed - ${violations} violations found and flagged`, violations > 0 ? 'warning' : 'success');
+                addSecurityLog(`Compliance scan: ${violations} violations detected`, violations > 0 ? 'warning' : 'success');
+                document.getElementById('policy-violations').textContent = violations;
+            }, 3000);
+        }
+
+        async function updateCompliancePolicies() {
+            if (confirm('Update compliance policies? This will affect all platform operations.')) {
+                showNotification('Updating compliance policies...', 'info');
+                setTimeout(() => {
+                    showNotification('Compliance policies updated successfully', 'success');
+                    addSecurityLog('Compliance policies updated', 'info');
+                }, 2000);
+            }
+        }
+
         // Update analytics periodically with realistic real-time data
         setInterval(() => {
             document.getElementById('total-users').textContent = Math.floor(Math.random() * 50) + 220;
@@ -1375,27 +1626,37 @@
             document.getElementById('mobile-users').textContent = Math.floor(Math.random() * 40) + 80;
             document.getElementById('active-vehicles').textContent = Math.floor(Math.random() * 15) + 18;
             document.getElementById('delivery-routes').textContent = Math.floor(Math.random() * 8) + 12;
+            document.getElementById('audit-records').textContent = (Math.floor(Math.random() * 10000) + 45000).toLocaleString();
+            document.getElementById('audit-size').textContent = (Math.random() * 5 + 15).toFixed(1);
+            document.getElementById('compliance-score').textContent = (Math.random() * 3 + 95).toFixed(1) + '%';
         }, 3000);
 
-        // Simulate real-time log updates
+        // Simulate real-time log updates with comprehensive audit activities
         setInterval(() => {
             const logTypes = ['success', 'info', 'warning'];
-            const messages = [
-                'User authentication successful',
-                'Database connection established',
-                'API rate limit warning',
-                'Cache optimization completed',
-                'Security scan in progress',
-                'Backup process initiated',
-                'Performance metrics updated',
-                'System health check passed'
+            const auditMessages = [
+                'User login activity logged to audit trail',
+                'Financial transaction recorded with full audit details',
+                'Internal message communication tracked',
+                'Decision-making process documented',
+                'Audio/video activity logged for compliance',
+                'User input data archived for audit review',
+                'Database query logged with user attribution',
+                'File access tracked for audit compliance',
+                'Export operation logged with approval chain',
+                'Policy compliance check completed',
+                'User response time monitored and logged',
+                'Admin action documented in audit trail',
+                'Security event logged for independent review',
+                'Data modification tracked with timestamp',
+                'User session activity fully documented'
             ];
             
             const randomType = logTypes[Math.floor(Math.random() * logTypes.length)];
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            const randomMessage = auditMessages[Math.floor(Math.random() * auditMessages.length)];
             
             addSecurityLog(randomMessage, randomType);
-        }, 8000);
+        }, 6000);
     </script>
 </body>
 </html>

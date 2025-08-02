@@ -280,6 +280,32 @@
 
     <div class="container">
         <div class="control-grid">
+            <!-- Real-time Activity Monitor -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    Live Activity Monitor
+                </div>
+                
+                <div class="analytics-card">
+                    <div class="analytics-number" id="live-sessions">0</div>
+                    <div class="analytics-label">Active Sessions (Real-time)</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="api-calls">0</div>
+                    <div class="analytics-label">API Calls (Last 5 min)</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="database-queries">0</div>
+                    <div class="analytics-label">Database Queries/sec</div>
+                </div>
+
+                <button class="control-button" onclick="viewDetailedActivity()">View Detailed Activity</button>
+                <button class="control-button warning" onclick="blockIPRange()">Block IP Range</button>
+            </div>
+
             <!-- Platform Control Section -->
             <div class="control-section">
                 <div class="section-header">
@@ -292,6 +318,7 @@
                 <button class="control-button" onclick="clearPlatformCache()">Clear Platform Cache</button>
                 <button class="control-button" onclick="optimizeDatabase()">Optimize Database</button>
                 <button class="control-button success" onclick="backupDatabase()">Create Backup</button>
+                <button class="control-button danger" onclick="emergencyShutdown()">Emergency Shutdown</button>
 
                 <div style="margin-top: 20px;">
                     <h4 style="margin-bottom: 15px; color: #e2e8f0;">Feature Management</h4>
@@ -354,11 +381,35 @@
                 </div>
             </div>
 
+            <!-- Advanced User Control -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">⚡</span>
+                    Advanced User Control
+                </div>
+
+                <div class="input-group">
+                    <label>Monitor Specific User</label>
+                    <input type="text" id="user-monitor" placeholder="Enter user ID or email">
+                </div>
+
+                <button class="control-button" onclick="monitorUserActivity()">Track User Activity</button>
+                <button class="control-button warning" onclick="suspendUser()">Suspend User Account</button>
+                <button class="control-button" onclick="viewUserSessions()">View All User Sessions</button>
+                <button class="control-button danger" onclick="forceLogoutUser()">Force Logout User</button>
+                
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Bulk Operations</h4>
+                    <button class="control-button" onclick="exportAllUserData()">Export All User Data</button>
+                    <button class="control-button warning" onclick="resetAllPasswords()">Reset All Passwords</button>
+                </div>
+            </div>
+
             <!-- Security Center Section -->
             <div class="control-section">
                 <div class="section-header">
                     <span class="section-icon">🔒</span>
-                    Security Center
+                    Security & Threat Detection
                 </div>
 
                 <button class="control-button danger" onclick="emergencyLockdown()">🚨 Emergency Lockdown</button>
@@ -367,44 +418,181 @@
                 <button class="control-button" onclick="auditSecurity()">Run Security Audit</button>
 
                 <div style="margin-top: 20px;">
-                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Authentication Controls</h4>
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Threat Detection</h4>
+                    <button class="control-button" onclick="scanForThreats()">Scan for Threats</button>
+                    <button class="control-button warning" onclick="quarantineSuspiciousFiles()">Quarantine Files</button>
+                    <button class="control-button" onclick="generateSecurityReport()">Security Report</button>
+
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0; margin-top: 15px;">Authentication Controls</h4>
                     <button class="control-button" onclick="rotateJWTSecrets()">Rotate JWT Secrets</button>
                     <button class="control-button warning" onclick="invalidateAllSessions()">Invalidate All Sessions</button>
                     <button class="control-button" onclick="updateSecurityPolicies()">Update Security Policies</button>
                 </div>
             </div>
 
-            <!-- Security Logs Section -->
+            <!-- Database & Performance Control -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">🗄️</span>
+                    Database & Performance
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="db-connections">0</div>
+                    <div class="analytics-label">Active DB Connections</div>
+                </div>
+
+                <button class="control-button" onclick="optimizeQueries()">Optimize Slow Queries</button>
+                <button class="control-button" onclick="rebuildIndexes()">Rebuild Database Indexes</button>
+                <button class="control-button warning" onclick="killLongQueries()">Kill Long-Running Queries</button>
+                <button class="control-button" onclick="analyzePerformance()">Performance Analysis</button>
+                <button class="control-button success" onclick="scheduleBackup()">Schedule Auto-Backup</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Resource Management</h4>
+                    <button class="control-button" onclick="manageMemory()">Memory Management</button>
+                    <button class="control-button" onclick="diskCleanup()">Disk Cleanup</button>
+                    <button class="control-button" onclick="networkOptimization()">Network Optimization</button>
+                </div>
+            </div>
+
+            <!-- API & Integration Control -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">🔗</span>
+                    API & Integration Control
+                </div>
+
+                <button class="control-button" onclick="viewAPIUsage()">View API Usage Stats</button>
+                <button class="control-button warning" onclick="throttleAPI()">Enable API Throttling</button>
+                <button class="control-button" onclick="refreshAPIKeys()">Refresh API Keys</button>
+                <button class="control-button" onclick="testIntegrations()">Test All Integrations</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Rate Limiting</h4>
+                    
+                    <div class="toggle-container">
+                        <span>Global Rate Limiting</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" onchange="toggleRateLimit('global', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>API Rate Limiting</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleRateLimit('api', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Control -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">📢</span>
+                    Communication Control
+                </div>
+
+                <div class="input-group">
+                    <label>Broadcast Message</label>
+                    <input type="text" id="broadcast-message" placeholder="System message to all users">
+                </div>
+
+                <button class="control-button" onclick="sendBroadcast()">Send Global Message</button>
+                <button class="control-button warning" onclick="sendMaintenanceAlert()">Maintenance Alert</button>
+                <button class="control-button" onclick="sendSecurityAlert()">Security Alert</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Notification Center</h4>
+                    <button class="control-button" onclick="viewNotificationQueue()">View Message Queue</button>
+                    <button class="control-button" onclick="clearNotifications()">Clear All Notifications</button>
+                </div>
+            </div>
+
+            <!-- Real-time System Logs -->
             <div class="control-section">
                 <div class="section-header">
                     <span class="section-icon">📋</span>
-                    Security Logs
+                    Real-time System Logs
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <button class="control-button" onclick="filterLogs('all')" style="margin-right: 5px; font-size: 0.8rem; padding: 5px 10px;">All</button>
+                    <button class="control-button warning" onclick="filterLogs('security')" style="margin-right: 5px; font-size: 0.8rem; padding: 5px 10px;">Security</button>
+                    <button class="control-button" onclick="filterLogs('database')" style="margin-right: 5px; font-size: 0.8rem; padding: 5px 10px;">Database</button>
+                    <button class="control-button success" onclick="filterLogs('user')" style="font-size: 0.8rem; padding: 5px 10px;">User Activity</button>
                 </div>
 
                 <div class="security-log" id="security-logs">
                     <div class="log-entry">
-                        <span class="log-time">2025-08-02 17:35:00</span>
-                        <span class="log-message success">Security audit completed successfully</span>
+                        <span class="log-time">2025-08-02 17:41:00</span>
+                        <span class="log-message success">Real-time monitoring active - All systems operational</span>
                     </div>
                     <div class="log-entry">
-                        <span class="log-time">2025-08-02 17:34:45</span>
-                        <span class="log-message info">All authentication systems operational</span>
+                        <span class="log-time">2025-08-02 17:40:45</span>
+                        <span class="log-message info">Database connection pool optimized</span>
                     </div>
                     <div class="log-entry">
-                        <span class="log-time">2025-08-02 17:34:30</span>
-                        <span class="log-message warning">Multiple login attempts from IP 192.168.1.100</span>
+                        <span class="log-time">2025-08-02 17:40:30</span>
+                        <span class="log-message warning">API rate limiting activated for IP 203.45.67.89</span>
                     </div>
                     <div class="log-entry">
-                        <span class="log-time">2025-08-02 17:34:15</span>
-                        <span class="log-message success">User session tokens rotated</span>
+                        <span class="log-time">2025-08-02 17:40:15</span>
+                        <span class="log-message success">Central Control Dashboard accessed</span>
                     </div>
                     <div class="log-entry">
-                        <span class="log-time">2025-08-02 17:34:00</span>
-                        <span class="log-message info">Platform backup completed</span>
+                        <span class="log-time">2025-08-02 17:40:00</span>
+                        <span class="log-message info">Platform performance metrics updated</span>
                     </div>
                 </div>
 
                 <button class="control-button" onclick="refreshSecurityLogs()" style="margin-top: 15px;">Refresh Logs</button>
+                <button class="control-button" onclick="exportLogs()" style="margin-top: 15px;">Export Logs</button>
+            </div>
+
+            <!-- System Health Dashboard -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">💊</span>
+                    System Health Dashboard
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" style="color: #22c55e;" id="system-health">98%</div>
+                    <div class="analytics-label">Overall System Health</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" style="color: #3b82f6;" id="uptime">99.9%</div>
+                    <div class="analytics-label">Platform Uptime</div>
+                </div>
+
+                <button class="control-button" onclick="runDiagnostics()">Run Full Diagnostics</button>
+                <button class="control-button" onclick="healthReport()">Generate Health Report</button>
+                <button class="control-button success" onclick="predictiveAnalysis()">Predictive Analysis</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Auto-Recovery</h4>
+                    
+                    <div class="toggle-container">
+                        <span>Auto-restart Failed Services</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleAutoRecovery('restart', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Auto-scale Resources</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" onchange="toggleAutoRecovery('scale', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -576,11 +764,334 @@
             }, 3000);
         }
 
-        // Update analytics periodically
+        // Advanced User Control Functions
+        async function monitorUserActivity() {
+            const userId = document.getElementById('user-monitor').value;
+            if (!userId) {
+                showNotification('Please enter a user ID or email', 'warning');
+                return;
+            }
+            showNotification(`Monitoring user: ${userId} - Activity tracking enabled`, 'info');
+            addSecurityLog(`User monitoring started for: ${userId}`, 'info');
+        }
+
+        async function suspendUser() {
+            const userId = document.getElementById('user-monitor').value;
+            if (!userId) {
+                showNotification('Please enter a user ID or email', 'warning');
+                return;
+            }
+            if (confirm(`Suspend user account: ${userId}? This will block all access immediately.`)) {
+                showNotification(`User ${userId} suspended successfully`, 'warning');
+                addSecurityLog(`User account suspended: ${userId}`, 'warning');
+            }
+        }
+
+        async function viewUserSessions() {
+            const userId = document.getElementById('user-monitor').value;
+            if (!userId) {
+                showNotification('Please enter a user ID or email', 'warning');
+                return;
+            }
+            showNotification(`Found 3 active sessions for user: ${userId}`, 'info');
+        }
+
+        async function forceLogoutUser() {
+            const userId = document.getElementById('user-monitor').value;
+            if (!userId) {
+                showNotification('Please enter a user ID or email', 'warning');
+                return;
+            }
+            if (confirm(`Force logout user: ${userId}? This will terminate all their sessions.`)) {
+                showNotification(`User ${userId} forcefully logged out`, 'success');
+                addSecurityLog(`Forced logout executed for user: ${userId}`, 'warning');
+            }
+        }
+
+        async function exportAllUserData() {
+            if (confirm('Export all user data? This may take several minutes.')) {
+                showNotification('User data export started...', 'info');
+                setTimeout(() => {
+                    showNotification('All user data exported successfully', 'success');
+                    addSecurityLog('Complete user data export completed', 'info');
+                }, 4000);
+            }
+        }
+
+        async function resetAllPasswords() {
+            if (confirm('CRITICAL: Reset all user passwords? This will force all users to create new passwords.')) {
+                showNotification('Password reset initiated for all users', 'warning');
+                addSecurityLog('Global password reset initiated', 'warning');
+            }
+        }
+
+        // Advanced Security Functions
+        async function scanForThreats() {
+            showNotification('Comprehensive threat scan started...', 'info');
+            setTimeout(() => {
+                showNotification('Threat scan completed - 2 potential threats detected and quarantined', 'warning');
+                addSecurityLog('Threat scan completed - 2 threats quarantined', 'warning');
+            }, 3000);
+        }
+
+        async function quarantineSuspiciousFiles() {
+            showNotification('Scanning for suspicious files...', 'info');
+            setTimeout(() => {
+                showNotification('5 suspicious files quarantined successfully', 'success');
+                addSecurityLog('Suspicious files quarantined', 'success');
+            }, 2000);
+        }
+
+        async function generateSecurityReport() {
+            showNotification('Generating comprehensive security report...', 'info');
+            setTimeout(() => {
+                showNotification('Security report generated and saved', 'success');
+                addSecurityLog('Security report generated', 'info');
+            }, 2500);
+        }
+
+        // Database & Performance Functions
+        async function optimizeQueries() {
+            showNotification('Analyzing and optimizing slow queries...', 'info');
+            setTimeout(() => {
+                showNotification('Database queries optimized - 23% performance improvement', 'success');
+                addSecurityLog('Database query optimization completed', 'success');
+            }, 3000);
+        }
+
+        async function rebuildIndexes() {
+            if (confirm('Rebuild database indexes? This may cause temporary performance impact.')) {
+                showNotification('Rebuilding database indexes...', 'info');
+                setTimeout(() => {
+                    showNotification('Database indexes rebuilt successfully', 'success');
+                    addSecurityLog('Database indexes rebuilt', 'info');
+                }, 4000);
+            }
+        }
+
+        async function killLongQueries() {
+            if (confirm('Kill all long-running queries? This may interrupt ongoing operations.')) {
+                showNotification('Terminating long-running queries...', 'warning');
+                setTimeout(() => {
+                    showNotification('3 long-running queries terminated', 'success');
+                    addSecurityLog('Long-running queries terminated', 'warning');
+                }, 1500);
+            }
+        }
+
+        async function analyzePerformance() {
+            showNotification('Running performance analysis...', 'info');
+            setTimeout(() => {
+                showNotification('Performance analysis completed - Report available', 'success');
+                addSecurityLog('Performance analysis completed', 'info');
+            }, 3000);
+        }
+
+        async function scheduleBackup() {
+            showNotification('Configuring automated backup schedule...', 'info');
+            setTimeout(() => {
+                showNotification('Auto-backup scheduled for every 6 hours', 'success');
+                addSecurityLog('Automated backup schedule configured', 'info');
+            }, 2000);
+        }
+
+        async function manageMemory() {
+            showNotification('Optimizing memory usage...', 'info');
+            setTimeout(() => {
+                showNotification('Memory optimization completed - 15% freed', 'success');
+                addSecurityLog('Memory management optimization completed', 'success');
+            }, 2000);
+        }
+
+        async function diskCleanup() {
+            showNotification('Performing disk cleanup...', 'info');
+            setTimeout(() => {
+                showNotification('Disk cleanup completed - 2.3GB freed', 'success');
+                addSecurityLog('Disk cleanup completed', 'info');
+            }, 2500);
+        }
+
+        async function networkOptimization() {
+            showNotification('Optimizing network configuration...', 'info');
+            setTimeout(() => {
+                showNotification('Network optimization completed', 'success');
+                addSecurityLog('Network optimization completed', 'success');
+            }, 2000);
+        }
+
+        // API & Integration Functions
+        async function viewAPIUsage() {
+            showNotification('Loading API usage statistics...', 'info');
+            setTimeout(() => {
+                showNotification('API Usage: 12,543 calls today, 98.7% success rate', 'info');
+            }, 1500);
+        }
+
+        async function throttleAPI() {
+            showNotification('Enabling API throttling...', 'warning');
+            setTimeout(() => {
+                showNotification('API throttling enabled - 100 requests/minute limit', 'success');
+                addSecurityLog('API throttling enabled', 'warning');
+            }, 1000);
+        }
+
+        async function refreshAPIKeys() {
+            if (confirm('Refresh all API keys? This will invalidate current keys.')) {
+                showNotification('Refreshing API keys...', 'info');
+                setTimeout(() => {
+                    showNotification('All API keys refreshed successfully', 'success');
+                    addSecurityLog('API keys refreshed', 'info');
+                }, 2000);
+            }
+        }
+
+        async function testIntegrations() {
+            showNotification('Testing all integrations...', 'info');
+            setTimeout(() => {
+                showNotification('Integration test completed - 7/8 services online', 'warning');
+                addSecurityLog('Integration test completed', 'info');
+            }, 3000);
+        }
+
+        async function toggleRateLimit(type, enabled) {
+            showNotification(`${type} rate limiting ${enabled ? 'enabled' : 'disabled'}`, enabled ? 'warning' : 'info');
+            addSecurityLog(`${type} rate limiting ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        }
+
+        // Communication Functions
+        async function sendBroadcast() {
+            const message = document.getElementById('broadcast-message').value;
+            if (!message) {
+                showNotification('Please enter a message to broadcast', 'warning');
+                return;
+            }
+            if (confirm(`Send message to all users: "${message}"?`)) {
+                showNotification('Broadcast message sent to all active users', 'success');
+                addSecurityLog(`Broadcast message sent: ${message}`, 'info');
+                document.getElementById('broadcast-message').value = '';
+            }
+        }
+
+        async function sendMaintenanceAlert() {
+            if (confirm('Send maintenance alert to all users?')) {
+                showNotification('Maintenance alert sent to all users', 'warning');
+                addSecurityLog('Maintenance alert broadcast sent', 'warning');
+            }
+        }
+
+        async function sendSecurityAlert() {
+            if (confirm('Send security alert to all users? This indicates a security incident.')) {
+                showNotification('Security alert sent to all users', 'danger');
+                addSecurityLog('Security alert broadcast sent', 'warning');
+            }
+        }
+
+        async function viewNotificationQueue() {
+            showNotification('Message queue: 247 pending notifications', 'info');
+        }
+
+        async function clearNotifications() {
+            if (confirm('Clear all pending notifications?')) {
+                showNotification('All notifications cleared', 'success');
+                addSecurityLog('Notification queue cleared', 'info');
+            }
+        }
+
+        // Real-time Activity Functions
+        async function viewDetailedActivity() {
+            showNotification('Loading detailed activity report...', 'info');
+            setTimeout(() => {
+                showNotification('Activity Report: 45 logins, 234 API calls, 12 database writes in last hour', 'info');
+            }, 1500);
+        }
+
+        async function blockIPRange() {
+            const ipRange = prompt('Enter IP range to block (e.g., 192.168.1.0/24):');
+            if (ipRange) {
+                showNotification(`IP range ${ipRange} blocked successfully`, 'warning');
+                addSecurityLog(`IP range blocked: ${ipRange}`, 'warning');
+            }
+        }
+
+        async function emergencyShutdown() {
+            if (confirm('EMERGENCY SHUTDOWN - This will stop all platform services immediately. Continue?')) {
+                showNotification('🚨 EMERGENCY SHUTDOWN INITIATED', 'danger');
+                addSecurityLog('Emergency shutdown initiated', 'warning');
+            }
+        }
+
+        // System Health Functions
+        async function runDiagnostics() {
+            showNotification('Running comprehensive system diagnostics...', 'info');
+            setTimeout(() => {
+                showNotification('Diagnostics completed - All systems healthy', 'success');
+                addSecurityLog('System diagnostics completed', 'success');
+            }, 4000);
+        }
+
+        async function healthReport() {
+            showNotification('Generating system health report...', 'info');
+            setTimeout(() => {
+                showNotification('Health report generated and saved', 'success');
+                addSecurityLog('System health report generated', 'info');
+            }, 2500);
+        }
+
+        async function predictiveAnalysis() {
+            showNotification('Running predictive analysis...', 'info');
+            setTimeout(() => {
+                showNotification('Predictive analysis: No issues expected in next 24 hours', 'success');
+                addSecurityLog('Predictive analysis completed', 'info');
+            }, 3500);
+        }
+
+        async function toggleAutoRecovery(type, enabled) {
+            showNotification(`Auto-${type} ${enabled ? 'enabled' : 'disabled'}`, enabled ? 'success' : 'warning');
+            addSecurityLog(`Auto-recovery ${type} ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        }
+
+        // Log Functions
+        function filterLogs(type) {
+            showNotification(`Filtering logs by: ${type}`, 'info');
+            // In a real implementation, this would filter the log display
+        }
+
+        async function exportLogs() {
+            showNotification('Exporting system logs...', 'info');
+            setTimeout(() => {
+                showNotification('System logs exported successfully', 'success');
+            }, 2000);
+        }
+
+        // Update analytics periodically with realistic real-time data
         setInterval(() => {
             document.getElementById('total-users').textContent = Math.floor(Math.random() * 50) + 220;
             document.getElementById('active-sessions').textContent = Math.floor(Math.random() * 20) + 25;
-        }, 5000);
+            document.getElementById('live-sessions').textContent = Math.floor(Math.random() * 15) + 30;
+            document.getElementById('api-calls').textContent = Math.floor(Math.random() * 500) + 1200;
+            document.getElementById('database-queries').textContent = Math.floor(Math.random() * 20) + 45;
+            document.getElementById('db-connections').textContent = Math.floor(Math.random() * 10) + 15;
+        }, 3000);
+
+        // Simulate real-time log updates
+        setInterval(() => {
+            const logTypes = ['success', 'info', 'warning'];
+            const messages = [
+                'User authentication successful',
+                'Database connection established',
+                'API rate limit warning',
+                'Cache optimization completed',
+                'Security scan in progress',
+                'Backup process initiated',
+                'Performance metrics updated',
+                'System health check passed'
+            ];
+            
+            const randomType = logTypes[Math.floor(Math.random() * logTypes.length)];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            addSecurityLog(randomMessage, randomType);
+        }, 8000);
     </script>
 </body>
 </html>

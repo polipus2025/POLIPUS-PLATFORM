@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AgriTrace360 PWA - Direct Install</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #059669; 
+            color: white; 
+            text-align: center; 
+            padding: 50px 20px; 
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { font-size: 2.5rem; margin-bottom: 30px; }
+        .btn { 
+            background: white; 
+            color: #059669; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 25px; 
+            font-size: 1.1rem; 
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .links { 
+            background: rgba(255,255,255,0.1); 
+            padding: 30px; 
+            border-radius: 15px; 
+            margin-top: 30px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 AgriTrace360 PWA</h1>
+        
+        <button class="btn" onclick="installPWA()">📱 Install App</button>
+        <a href="/" class="btn">🌐 Open Web Version</a>
+        <a href="/pwa-mobile-guide" class="btn">📋 Guide</a>
+        
+        <div class="links">
+            <h3>Direct Links:</h3>
+            <p>Main App: <code>http://localhost:5000/</code></p>
+            <p>Installation Guide: <code>http://localhost:5000/pwa-mobile-guide</code></p>
+            <p>App Manifest: <code>http://localhost:5000/manifest.json</code></p>
+        </div>
+    </div>
+    
+    <script src="/pwa-install.js"></script>
+    <script>
+        function installPWA() {
+            if (window.pwaInstaller) {
+                window.pwaInstaller.installApp();
+            } else {
+                alert('Open this page in Chrome, Edge, or Safari to install the PWA');
+            }
+        }
+        console.log('Simple PWA install page ready');
+    </script>
+</body>
+</html>

@@ -133,6 +133,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect('/pwa-download');
   });
 
+  // PWA Direct Download (simpler version)
+  app.get('/pwa-direct', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./pwa-direct.html'));
+  });
+
+  // PWA Install (shortest URL)
+  app.get('/install', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./simple-pwa.html'));
+  });
+
   // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');

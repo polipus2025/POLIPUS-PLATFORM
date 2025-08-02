@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriTrace360 PWA - Direct Download</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#059669">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #059669, #0d9488);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+        }
+        .logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .description {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .download-buttons {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .download-btn {
+            background: white;
+            color: #059669;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+        .links-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        .link-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🌾</div>
+        <h1>AgriTrace360 PWA</h1>
+        <p class="description">
+            Agricultural Compliance Management System<br>
+            Progressive Web App - Install to Home Screen
+        </p>
+
+        <div class="download-buttons">
+            <button class="download-btn" id="install-btn">
+                📱 Install PWA App
+            </button>
+            <a href="/" class="download-btn">
+                🌐 Open Web Version
+            </a>
+            <a href="/pwa-mobile-guide" class="download-btn">
+                📋 Installation Guide
+            </a>
+        </div>
+
+        <div class="status" id="status">
+            <strong>PWA Status:</strong> <span id="pwa-status">Checking...</span>
+        </div>
+
+        <div class="links-section">
+            <h3>Direct Access Links:</h3>
+            <div class="link-item" id="current-url">Loading current URL...</div>
+            <div class="link-item">Manifest: <span id="manifest-url"></span></div>
+            <div class="link-item">Service Worker: <span id="sw-url"></span></div>
+            <div class="link-item">Installation Guide: <span id="guide-url"></span></div>
+        </div>
+    </div>
+
+    <script src="/pwa-install.js"></script>
+    <script>
+        // Set URLs
+        const baseUrl = window.location.origin;
+        document.getElementById('current-url').textContent = `Current: ${window.location.href}`;
+        document.getElementById('manifest-url').textContent = `${baseUrl}/manifest.json`;
+        document.getElementById('sw-url').textContent = `${baseUrl}/sw.js`;
+        document.getElementById('guide-url').textContent = `${baseUrl}/pwa-mobile-guide`;
+
+        // Check PWA status
+        function checkPWAStatus() {
+            const status = document.getElementById('pwa-status');
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration) {
+                        status.textContent = '✅ Service Worker Active';
+                        status.style.color = '#4ade80';
+                    } else {
+                        status.textContent = '⚠️ Service Worker Not Registered';
+                        status.style.color = '#fbbf24';
+                    }
+                });
+            } else {
+                status.textContent = '❌ PWA Not Supported';
+                status.style.color = '#f87171';
+            }
+
+            // Check manifest
+            fetch('/manifest.json')
+                .then(response => response.ok ? 
+                    status.textContent += ' | ✅ Manifest Found' : 
+                    status.textContent += ' | ❌ Manifest Missing')
+                .catch(() => status.textContent += ' | ❌ Manifest Error');
+        }
+
+        // Install button
+        document.getElementById('install-btn').addEventListener('click', () => {
+            if (window.pwaInstaller) {
+                window.pwaInstaller.installApp();
+            } else {
+                alert('Installation not available. Please use Chrome, Edge, or Safari and ensure you are on HTTPS.');
+            }
+        });
+
+        // Initialize
+        checkPWAStatus();
+        console.log('AgriTrace360 PWA Direct Download Page Ready');
+    </script>
+</body>
+</html>

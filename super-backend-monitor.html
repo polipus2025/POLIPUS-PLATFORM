@@ -1546,10 +1546,46 @@
         }
 
         // Add logout functionality
-        function logout() {
-            localStorage.removeItem('super-backend-token');
-            authToken = null;
-            location.reload();
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    // Show logout notification
+                    showNotification('Logging out...', 'info');
+                    
+                    // Clear client-side tokens
+                    localStorage.removeItem('super-backend-token');
+                    localStorage.removeItem('authToken');
+                    sessionStorage.removeItem('super-backend-token');
+                    sessionStorage.removeItem('authToken');
+                    authToken = null;
+                    
+                    // Optional: Call logout endpoint if it exists
+                    try {
+                        await fetch('/api/auth/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                    } catch (e) {
+                        // Logout endpoint might not exist, continue anyway
+                    }
+                    
+                    // Small delay then redirect to login
+                    setTimeout(() => {
+                        window.location.href = '/super-backend';
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showNotification('Logout failed, clearing session anyway...', 'warning');
+                    // Force logout anyway
+                    setTimeout(() => {
+                        window.location.href = '/super-backend';
+                    }, 1000);
+                }
+            }
         }
 
         // Central Control Functions

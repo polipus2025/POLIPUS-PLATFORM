@@ -21,7 +21,9 @@ import {
   Play,
   TestTube,
   Loader2,
-  Smartphone
+  Smartphone,
+  Settings,
+  Terminal
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -172,6 +174,30 @@ export default function MonitoringDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Super Backend Dashboard Access */}
+            <a href="/super-backend" target="_blank" rel="noopener noreferrer">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-purple-500/20 border-purple-400/50 text-purple-100 hover:bg-purple-500/30"
+              >
+                <Terminal className="h-4 w-4 mr-2" />
+                Super Backend
+              </Button>
+            </a>
+            
+            {/* Central Control Dashboard Access */}
+            <a href="/central-control" target="_blank" rel="noopener noreferrer">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-orange-500/20 border-orange-400/50 text-orange-100 hover:bg-orange-500/30"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Central Control
+              </Button>
+            </a>
+            
             <Link href="/mobile-app-dashboard">
               <Button 
                 variant="outline" 

@@ -122,6 +122,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve('./public/pwa-icons/generate-icons.html'));
   });
 
+  // PWA Download Page - Direct installation links
+  app.get('/pwa-download', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./pwa-download.html'));
+  });
+
+  // PWA Download redirect (shorter URL)
+  app.get('/download', (req, res) => {
+    res.redirect('/pwa-download');
+  });
+
   // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');

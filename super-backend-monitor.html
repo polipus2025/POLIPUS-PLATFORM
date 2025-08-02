@@ -552,6 +552,21 @@
                 </div>
 
                 <div class="control-panel">
+                    <div class="panel-header">🎮 Dashboard Access</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                        <button class="control-button" onclick="openSuperBackendDashboard()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 500;">
+                            🚀 Super Backend Dashboard
+                        </button>
+                        <button class="control-button" onclick="openCentralControlDashboard()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: 500;">
+                            🌐 Central Control Dashboard
+                        </button>
+                    </div>
+                    <div style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">
+                        Quick access to advanced platform management dashboards
+                    </div>
+                </div>
+
+                <div class="control-panel">
                     <div class="panel-header">📊 Performance Actions</div>
                     <button class="control-button success" onclick="runHealthCheck()">Run Health Check</button>
                     <button class="control-button success" onclick="generateReport()">Generate System Report</button>

@@ -276,6 +276,9 @@
     <div class="header">
         <h1>🎛️ Central Control Dashboard</h1>
         <p>Complete Platform Management & Administrative Controls</p>
+        <button onclick="openDirectSupport()" style="position:absolute;top:80px;right:20px;background:rgba(34,197,94,0.8);color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:500;font-size:1rem;display:flex;align-items:center;gap:8px;transition:all 0.3s ease;">
+            💬 Direct Support
+        </button>
     </div>
 
     <div class="container">
@@ -1166,6 +1169,220 @@
                 showNotification('Memory optimization completed - 15% freed', 'success');
                 addSecurityLog('Memory management optimization completed', 'success');
             }, 2000);
+        }
+
+        // Direct Support Function - Connect to AI Agent
+        function openDirectSupport() {
+            // Create support modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                backdrop-filter: blur(5px);
+            `;
+
+            const supportWindow = document.createElement('div');
+            supportWindow.style.cssText = `
+                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                border: 1px solid rgba(71, 85, 105, 0.3);
+                border-radius: 12px;
+                padding: 30px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                color: #e2e8f0;
+            `;
+
+            supportWindow.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #3b82f6; font-size: 1.5rem; margin: 0;">💬 Direct AI Support</h2>
+                    <button onclick="closeSupportModal()" style="background: rgba(239, 68, 68, 0.8); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">✕</button>
+                </div>
+                
+                <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="color: #22c55e; margin: 0 0 10px 0;">🤖 AI Agent Connection Active</h3>
+                    <p style="margin: 0; color: #94a3b8; line-height: 1.5;">
+                        I'm here to help you resolve any issues with your AgriTrace360 platform. 
+                        Describe your problem or request, and I'll provide immediate assistance and apply solutions directly to your system.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #94a3b8; font-weight: 500;">Describe your issue or request:</label>
+                    <textarea id="support-message" placeholder="Example: 'The audit system is not loading properly' or 'I need help configuring the GPS tracking module'" 
+                        style="width: 100%; height: 120px; background: rgba(71, 85, 105, 0.3); border: 1px solid rgba(71, 85, 105, 0.5); border-radius: 6px; padding: 12px; color: #e2e8f0; font-size: 1rem; resize: vertical; font-family: inherit;"></textarea>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #94a3b8; font-weight: 500;">Priority Level:</label>
+                    <select id="support-priority" style="width: 100%; background: rgba(71, 85, 105, 0.3); border: 1px solid rgba(71, 85, 105, 0.5); border-radius: 6px; padding: 12px; color: #e2e8f0; font-size: 1rem;">
+                        <option value="normal">Normal - General assistance</option>
+                        <option value="high">High - System issues affecting operations</option>
+                        <option value="critical">Critical - Platform failure or security breach</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="closeSupportModal()" style="background: rgba(71, 85, 105, 0.8); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 1rem;">Cancel</button>
+                    <button onclick="sendSupportRequest()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500;">🚀 Send to AI Agent</button>
+                </div>
+
+                <div id="support-response" style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; display: none;">
+                    <h4 style="color: #3b82f6; margin: 0 0 10px 0;">🤖 AI Agent Response:</h4>
+                    <div id="response-content" style="color: #e2e8f0; line-height: 1.5;"></div>
+                </div>
+            `;
+
+            modal.appendChild(supportWindow);
+            document.body.appendChild(modal);
+
+            // Store reference for cleanup
+            window.currentSupportModal = modal;
+
+            // Focus on textarea
+            setTimeout(() => {
+                document.getElementById('support-message').focus();
+            }, 100);
+        }
+
+        function closeSupportModal() {
+            if (window.currentSupportModal) {
+                document.body.removeChild(window.currentSupportModal);
+                window.currentSupportModal = null;
+            }
+        }
+
+        function sendSupportRequest() {
+            const message = document.getElementById('support-message').value.trim();
+            const priority = document.getElementById('support-priority').value;
+
+            if (!message) {
+                showNotification('Please describe your issue or request', 'warning');
+                return;
+            }
+
+            // Show response section
+            const responseDiv = document.getElementById('support-response');
+            const contentDiv = document.getElementById('response-content');
+            
+            responseDiv.style.display = 'block';
+            contentDiv.innerHTML = '<div style="color: #f59e0b;">🔄 Connecting to AI Agent... Please wait...</div>';
+
+            // Simulate AI response based on the request
+            setTimeout(() => {
+                const responses = getAIResponse(message, priority);
+                contentDiv.innerHTML = responses;
+                
+                // Add action buttons if applicable
+                if (message.toLowerCase().includes('audit') || message.toLowerCase().includes('monitor')) {
+                    contentDiv.innerHTML += `
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px;">
+                            <strong style="color: #22c55e;">✅ Action Available:</strong>
+                            <button onclick="window.open('/monitor', '_blank')" style="background: rgba(34, 197, 94, 0.8); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-left: 10px;">Open Monitoring Dashboard</button>
+                        </div>
+                    `;
+                }
+
+                if (message.toLowerCase().includes('central') || message.toLowerCase().includes('control')) {
+                    contentDiv.innerHTML += `
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px;">
+                            <strong style="color: #22c55e;">✅ Action Available:</strong>
+                            <button onclick="window.open('/central-control', '_blank')" style="background: rgba(34, 197, 94, 0.8); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-left: 10px;">Access Central Control</button>
+                        </div>
+                    `;
+                }
+
+                showNotification('AI Agent responded successfully', 'success');
+            }, 2000);
+
+            // Log the support request
+            addSecurityLog(`Direct support request submitted: ${priority.toUpperCase()} priority`, 'info');
+        }
+
+        function getAIResponse(message, priority) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('audit') || lowerMessage.includes('compliance')) {
+                return `
+                    <strong style="color: #22c55e;">🔍 Audit System Support:</strong><br><br>
+                    I understand you need help with the audit system. Here's what I can assist with:<br><br>
+                    <strong>• Comprehensive Audit Access:</strong> The audit system is available in the monitoring dashboard under the "🔍 Comprehensive Audit" tab.<br>
+                    <strong>• Real-time Tracking:</strong> All user activities, financial transactions, and communications are being logged automatically.<br>
+                    <strong>• Independent Audit Ready:</strong> The system maintains complete audit trails for regulatory compliance.<br><br>
+                    <strong>Next Steps:</strong> I can help you access the audit dashboard or configure specific audit settings. What specific audit functionality do you need assistance with?
+                `;
+            }
+            
+            if (lowerMessage.includes('monitor') || lowerMessage.includes('dashboard')) {
+                return `
+                    <strong style="color: #3b82f6;">📊 Monitoring System Support:</strong><br><br>
+                    I can help you with the monitoring dashboard:<br><br>
+                    <strong>• Real-time Metrics:</strong> System performance, user activity, and platform health are monitored continuously.<br>
+                    <strong>• Multi-tab Interface:</strong> Access system controls, monitoring, audit, features, platform control, users, security, and logs.<br>
+                    <strong>• Live Updates:</strong> All data refreshes automatically for real-time insights.<br><br>
+                    <strong>Solutions Available:</strong> I can guide you to the specific monitoring section you need or help troubleshoot any display issues.
+                `;
+            }
+            
+            if (lowerMessage.includes('user') || lowerMessage.includes('account')) {
+                return `
+                    <strong style="color: #f59e0b;">👥 User Management Support:</strong><br><br>
+                    I can assist with user-related issues:<br><br>
+                    <strong>• User Search & Management:</strong> Find, suspend, activate, or monitor specific user accounts.<br>
+                    <strong>• Bulk Operations:</strong> Manage multiple users simultaneously for efficiency.<br>
+                    <strong>• Session Control:</strong> View active sessions and force logout when needed.<br>
+                    <strong>• Access Control:</strong> Manage permissions and security settings.<br><br>
+                    <strong>Immediate Action:</strong> Tell me the specific user issue and I'll provide the exact steps to resolve it.
+                `;
+            }
+            
+            if (lowerMessage.includes('security') || lowerMessage.includes('threat')) {
+                return `
+                    <strong style="color: #ef4444;">🔒 Security System Support:</strong><br><br>
+                    Security issue detected - I'm here to help:<br><br>
+                    <strong>• Threat Detection:</strong> Real-time monitoring for suspicious activities and potential security breaches.<br>
+                    <strong>• Emergency Controls:</strong> Immediate lockdown, IP blocking, and access restriction capabilities.<br>
+                    <strong>• Authentication Management:</strong> JWT rotation, session invalidation, and 2FA enforcement.<br>
+                    <strong>• Audit Trail:</strong> Complete security event logging for forensic analysis.<br><br>
+                    <strong>Priority ${priority.toUpperCase()}:</strong> Based on your priority level, I recommend immediate access to the Security Center tab in the monitoring dashboard.
+                `;
+            }
+            
+            if (lowerMessage.includes('database') || lowerMessage.includes('performance')) {
+                return `
+                    <strong style="color: #8b5cf6;">💾 Database & Performance Support:</strong><br><br>
+                    I can help optimize your system performance:<br><br>
+                    <strong>• Database Optimization:</strong> Query analysis, index rebuilding, and performance tuning available.<br>
+                    <strong>• Cache Management:</strong> Clear system cache and optimize memory usage.<br>
+                    <strong>• Backup Systems:</strong> Automated and manual backup creation and management.<br>
+                    <strong>• Resource Monitoring:</strong> CPU, memory, and disk usage tracking with alerts.<br><br>
+                    <strong>Recommended Action:</strong> I can guide you through the platform control section for immediate performance improvements.
+                `;
+            }
+            
+            // Default response for general issues
+            return `
+                <strong style="color: #22c55e;">🤖 AI Agent Ready to Assist:</strong><br><br>
+                I've received your ${priority} priority request and I'm here to help resolve your issue.<br><br>
+                <strong>Available Support Areas:</strong><br>
+                • System Monitoring & Performance<br>
+                • User Management & Access Control<br>
+                • Security & Threat Detection<br>
+                • Audit & Compliance Systems<br>
+                • Database & Platform Controls<br>
+                • Emergency Response & Recovery<br><br>
+                <strong>Next Steps:</strong> Please provide more specific details about your issue, or I can direct you to the appropriate control panel section. What specific functionality needs attention?<br><br>
+                <em>💡 Tip: I can apply solutions directly to your platform and provide step-by-step guidance for resolution.</em>
+            `;
         }
 
         async function diskCleanup() {

@@ -942,6 +942,13 @@
 
         // Authentication
         async function authenticateAdmin() {
+            // Check if user has been logged out intentionally
+            const logoutFlag = localStorage.getItem('logout-flag');
+            if (logoutFlag === 'true') {
+                console.log('User has been logged out, preventing auto-authentication');
+                return null;
+            }
+            
             // Check if we already have a token in localStorage
             const savedToken = localStorage.getItem('super-backend-token');
             if (savedToken) {
@@ -1524,10 +1531,49 @@
         async function initialize() {
             const token = await authenticateAdmin();
             if (!token) {
-                // Don't replace the page content, just log the authentication failure
-                console.log('Authentication failed, but continuing with demo mode');
-                // Use demo token to allow access
-                authToken = 'demo-admin-token';
+                // User has been logged out, show login screen
+                console.log('User logged out, showing login screen');
+                document.body.innerHTML = `
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #e2e8f0;">
+                        <div style="text-align: center; background: rgba(15, 23, 42, 0.8); padding: 40px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                            <h1 style="font-size: 2rem; margin-bottom: 20px; color: #3b82f6;">🚀 Super Backend Login</h1>
+                            <p style="margin-bottom: 30px; color: #94a3b8;">Please authenticate to access the Super Backend Monitor</p>
+                            <button onclick="startLogin()" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500; margin: 5px;">Login with Credentials</button>
+                            <br>
+                            <button onclick="startDemo()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500; margin: 5px;">Demo Mode</button>
+                        </div>
+                    </div>
+                    <script>
+                        function startLogin() {
+                            localStorage.removeItem('logout-flag');
+                            location.reload();
+                            setTimeout(() => {
+                                const username = prompt('Super Backend Access - Enter Username:');
+                                const password = prompt('Super Backend Access - Enter Password:');
+                                if (username && password) {
+                                    fetch('/api/auth/monitoring-login', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ username, password })
+                                    }).then(r => r.json()).then(result => {
+                                        if (result.success && result.token) {
+                                            localStorage.setItem('super-backend-token', result.token);
+                                            location.reload();
+                                        } else {
+                                            alert('Invalid credentials. Try: monitor001 / monitor123');
+                                        }
+                                    });
+                                }
+                            }, 100);
+                        }
+                        function startDemo() {
+                            localStorage.removeItem('logout-flag');
+                            localStorage.setItem('super-backend-token', 'demo-admin-token');
+                            location.reload();
+                        }
+                    </script>
+                `;
+                return;
             }
 
             await loadSystemStatus();
@@ -1557,6 +1603,10 @@
                     localStorage.removeItem('authToken');
                     sessionStorage.removeItem('super-backend-token');
                     sessionStorage.removeItem('authToken');
+                    
+                    // Set logout flag to prevent auto re-authentication
+                    localStorage.setItem('logout-flag', 'true');
+                    
                     authToken = null;
                     
                     // Optional: Call logout endpoint if it exists
@@ -1572,17 +1622,24 @@
                         // Logout endpoint might not exist, continue anyway
                     }
                     
-                    // Small delay then redirect to login
-                    setTimeout(() => {
-                        window.location.href = '/super-backend';
-                    }, 1000);
+                    // Hide the dashboard content and show login prompt
+                    document.body.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #e2e8f0;">
+                            <div style="text-align: center; background: rgba(15, 23, 42, 0.8); padding: 40px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                <h1 style="font-size: 2rem; margin-bottom: 20px; color: #3b82f6;">Logged Out Successfully</h1>
+                                <p style="margin-bottom: 30px; color: #94a3b8;">You have been logged out of Super Backend.</p>
+                                <button onclick="location.reload()" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500;">Login Again</button>
+                            </div>
+                        </div>
+                    `;
                     
                 } catch (error) {
                     console.error('Logout error:', error);
                     showNotification('Logout failed, clearing session anyway...', 'warning');
                     // Force logout anyway
+                    localStorage.setItem('logout-flag', 'true');
                     setTimeout(() => {
-                        window.location.href = '/super-backend';
+                        location.reload();
                     }, 1000);
                 }
             }

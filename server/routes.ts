@@ -185,13 +185,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Central Control Dashboard - Enhanced Super Backend
-  app.get('/control-center', (req, res) => {
+  app.get('/central-control', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.sendFile(path.resolve('./central-control.html'));
+    res.sendFile(path.resolve('./central-control-dashboard.html'));
   });
+
   app.get('/control-center', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
-    res.sendFile(path.resolve('./central-control.html'));
+    res.sendFile(path.resolve('./central-control-dashboard.html'));
   });
 
   // ==================== SUPER BACKEND CONTROL SYSTEM ====================

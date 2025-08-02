@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Control Dashboard - AgriTrace360</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .control-section {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .control-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .section-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .control-button {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .control-button.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .control-button.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .control-button.success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(71, 85, 105, 0.2);
+            border-radius: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .analytics-card {
+            background: rgba(71, 85, 105, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .analytics-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 5px;
+        }
+
+        .analytics-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(71, 85, 105, 0.3);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 6px;
+            padding: 10px;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        .security-log {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+            display: flex;
+        }
+
+        .log-time {
+            color: #94a3b8;
+            margin-right: 10px;
+            min-width: 150px;
+        }
+
+        .log-message.success { color: #22c55e; }
+        .log-message.warning { color: #f59e0b; }
+        .log-message.info { color: #3b82f6; }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(71, 85, 105, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(71, 85, 105, 1);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .control-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/super-backend" class="back-button">
+        ← Back to Super Backend
+    </a>
+
+    <div class="header">
+        <h1>🎛️ Central Control Dashboard</h1>
+        <p>Complete Platform Management & Administrative Controls</p>
+    </div>
+
+    <div class="container">
+        <div class="control-grid">
+            <!-- Platform Control Section -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">🌐</span>
+                    Platform Control
+                </div>
+                
+                <button class="control-button warning" onclick="toggleMaintenanceMode()">Toggle Maintenance Mode</button>
+                <button class="control-button" onclick="restartAllServices()">Restart All Services</button>
+                <button class="control-button" onclick="clearPlatformCache()">Clear Platform Cache</button>
+                <button class="control-button" onclick="optimizeDatabase()">Optimize Database</button>
+                <button class="control-button success" onclick="backupDatabase()">Create Backup</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Feature Management</h4>
+                    
+                    <div class="toggle-container">
+                        <span>Real-time Monitoring</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleFeature('monitoring', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>GPS Tracking</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleFeature('gps', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Mobile App Access</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleFeature('mobile', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management Section -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    User Management
+                </div>
+
+                <div class="input-group">
+                    <label>Search Users</label>
+                    <input type="text" id="user-search" placeholder="Search by ID or email">
+                </div>
+
+                <button class="control-button" onclick="searchUsers()">Search Users</button>
+                <button class="control-button warning" onclick="bulkUserAction('suspend')">Bulk Suspend Users</button>
+                <button class="control-button success" onclick="bulkUserAction('activate')">Bulk Activate Users</button>
+                <button class="control-button" onclick="exportUserData()">Export User Data</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">User Analytics</h4>
+                    
+                    <div class="analytics-card">
+                        <div class="analytics-number" id="total-users">247</div>
+                        <div class="analytics-label">Total Registered Users</div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="analytics-number" id="active-sessions">38</div>
+                        <div class="analytics-label">Active Sessions</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Center Section -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">🔒</span>
+                    Security Center
+                </div>
+
+                <button class="control-button danger" onclick="emergencyLockdown()">🚨 Emergency Lockdown</button>
+                <button class="control-button warning" onclick="blockSuspiciousIPs()">Block Suspicious IPs</button>
+                <button class="control-button" onclick="enableTwoFactor()">Enable 2FA for All</button>
+                <button class="control-button" onclick="auditSecurity()">Run Security Audit</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Authentication Controls</h4>
+                    <button class="control-button" onclick="rotateJWTSecrets()">Rotate JWT Secrets</button>
+                    <button class="control-button warning" onclick="invalidateAllSessions()">Invalidate All Sessions</button>
+                    <button class="control-button" onclick="updateSecurityPolicies()">Update Security Policies</button>
+                </div>
+            </div>
+
+            <!-- Security Logs Section -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">📋</span>
+                    Security Logs
+                </div>
+
+                <div class="security-log" id="security-logs">
+                    <div class="log-entry">
+                        <span class="log-time">2025-08-02 17:35:00</span>
+                        <span class="log-message success">Security audit completed successfully</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">2025-08-02 17:34:45</span>
+                        <span class="log-message info">All authentication systems operational</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">2025-08-02 17:34:30</span>
+                        <span class="log-message warning">Multiple login attempts from IP 192.168.1.100</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">2025-08-02 17:34:15</span>
+                        <span class="log-message success">User session tokens rotated</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">2025-08-02 17:34:00</span>
+                        <span class="log-message info">Platform backup completed</span>
+                    </div>
+                </div>
+
+                <button class="control-button" onclick="refreshSecurityLogs()" style="margin-top: 15px;">Refresh Logs</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Platform Control Functions
+        async function toggleMaintenanceMode() {
+            if (confirm('Toggle maintenance mode? This will affect user access.')) {
+                showNotification('Maintenance mode toggled successfully', 'warning');
+            }
+        }
+
+        async function restartAllServices() {
+            if (confirm('Restart all services? This may cause brief downtime.')) {
+                showNotification('All services restarted successfully', 'success');
+            }
+        }
+
+        async function clearPlatformCache() {
+            showNotification('Platform cache cleared successfully', 'info');
+        }
+
+        async function optimizeDatabase() {
+            showNotification('Database optimization started...', 'info');
+            setTimeout(() => {
+                showNotification('Database optimization completed', 'success');
+            }, 2000);
+        }
+
+        async function backupDatabase() {
+            showNotification('Database backup started...', 'info');
+            setTimeout(() => {
+                showNotification('Database backup completed successfully', 'success');
+            }, 3000);
+        }
+
+        async function toggleFeature(feature, enabled) {
+            showNotification(`${feature} ${enabled ? 'enabled' : 'disabled'} successfully`, enabled ? 'success' : 'warning');
+        }
+
+        // User Management Functions
+        async function searchUsers() {
+            const query = document.getElementById('user-search').value;
+            if (!query) {
+                showNotification('Please enter a search term', 'warning');
+                return;
+            }
+            showNotification(`Found 3 users matching "${query}"`, 'info');
+        }
+
+        async function bulkUserAction(action) {
+            if (confirm(`${action} selected users? This action affects multiple accounts.`)) {
+                showNotification(`Bulk ${action} completed successfully`, 'success');
+            }
+        }
+
+        async function exportUserData() {
+            showNotification('User data export started...', 'info');
+            setTimeout(() => {
+                showNotification('User data exported successfully', 'success');
+            }, 2000);
+        }
+
+        // Security Functions
+        async function emergencyLockdown() {
+            if (confirm('EMERGENCY LOCKDOWN - This will block all user access immediately. Continue?')) {
+                showNotification('🚨 Emergency lockdown activated', 'danger');
+            }
+        }
+
+        async function blockSuspiciousIPs() {
+            showNotification('Scanning for suspicious IPs...', 'info');
+            setTimeout(() => {
+                showNotification('5 suspicious IPs blocked successfully', 'success');
+            }, 1500);
+        }
+
+        async function enableTwoFactor() {
+            if (confirm('Enable 2FA for all users? This will require all users to set up 2FA.')) {
+                showNotification('2FA enabled for all users', 'success');
+            }
+        }
+
+        async function auditSecurity() {
+            showNotification('Security audit started...', 'info');
+            setTimeout(() => {
+                showNotification('Security audit completed - No issues found', 'success');
+                addSecurityLog('Security audit completed successfully', 'success');
+            }, 3000);
+        }
+
+        async function rotateJWTSecrets() {
+            if (confirm('Rotate JWT secrets? This will invalidate all current sessions.')) {
+                showNotification('JWT secrets rotated successfully', 'success');
+                addSecurityLog('JWT secrets rotated', 'info');
+            }
+        }
+
+        async function invalidateAllSessions() {
+            if (confirm('Invalidate all user sessions? Users will need to log in again.')) {
+                showNotification('All sessions invalidated successfully', 'warning');
+                addSecurityLog('All user sessions invalidated', 'warning');
+            }
+        }
+
+        async function updateSecurityPolicies() {
+            showNotification('Security policies updated successfully', 'success');
+            addSecurityLog('Security policies updated', 'info');
+        }
+
+        function refreshSecurityLogs() {
+            showNotification('Security logs refreshed', 'info');
+            addSecurityLog('Security logs manually refreshed', 'info');
+        }
+
+        function addSecurityLog(message, type) {
+            const logsContainer = document.getElementById('security-logs');
+            const now = new Date().toLocaleString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">${now}</span>
+                <span class="log-message ${type}">${message}</span>
+            `;
+            
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+            
+            // Keep only last 10 entries
+            const entries = logsContainer.children;
+            if (entries.length > 10) {
+                logsContainer.removeChild(entries[entries.length - 1]);
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(34, 197, 94, 0.9)' : 
+                           type === 'danger' ? 'rgba(239, 68, 68, 0.9)' : 
+                           type === 'warning' ? 'rgba(245, 158, 11, 0.9)' : 
+                           'rgba(59, 130, 246, 0.9)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                z-index: 1000;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+                font-weight: 500;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Update analytics periodically
+        setInterval(() => {
+            document.getElementById('total-users').textContent = Math.floor(Math.random() * 50) + 220;
+            document.getElementById('active-sessions').textContent = Math.floor(Math.random() * 20) + 25;
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -551,18 +551,19 @@
                     <button class="control-button" onclick="applyRealTimeControl()">Apply Control</button>
                 </div>
 
-                <div class="control-panel">
-                    <div class="panel-header">🎮 Dashboard Access</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
-                        <button class="control-button" onclick="openSuperBackendDashboard()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 500;">
-                            🚀 Super Backend Dashboard
+                <!-- CRITICAL: DASHBOARD ACCESS BUTTONS - MUST BE VISIBLE -->
+                <div class="control-panel" style="border: 5px solid #ff0000; background: #ffeeee; margin: 25px 0; position: relative; z-index: 10000; box-shadow: 0 0 20px rgba(255,0,0,0.5);">
+                    <div class="panel-header" style="background: #ff0000; color: white; font-weight: bold; font-size: 1.5rem; padding: 20px; text-align: center;">🎮 DASHBOARD ACCESS BUTTONS - CLICK HERE!</div>
+                    <div style="display: block; margin: 30px; padding: 20px; text-align: center;">
+                        <button onclick="openSuperBackendDashboard()" style="display: block; width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; padding: 20px; font-size: 1.3rem; border: 3px solid #333; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.3); margin: 15px 0;">
+                            🚀 SUPER BACKEND DASHBOARD - CLICK HERE
                         </button>
-                        <button class="control-button" onclick="openCentralControlDashboard()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: 500;">
-                            🌐 Central Control Dashboard
+                        <button onclick="openCentralControlDashboard()" style="display: block; width: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; padding: 20px; font-size: 1.3rem; border: 3px solid #333; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.3); margin: 15px 0;">
+                            🌐 CENTRAL CONTROL DASHBOARD - CLICK HERE
                         </button>
                     </div>
-                    <div style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">
-                        Quick access to advanced platform management dashboards
+                    <div style="text-align: center; font-size: 1.2rem; color: #cc0000; margin: 20px 0; font-weight: bold; background: #fff; padding: 10px; border: 2px dashed #ff0000;">
+                        ⬆️⬆️⬆️ THESE ARE THE BUTTONS YOU NEED ⬆️⬆️⬆️
                     </div>
                 </div>
 

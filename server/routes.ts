@@ -51,8 +51,8 @@ import path from "path";
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
 
-// MAINTENANCE MODE - Set to false to disable maintenance mode
-const MAINTENANCE_MODE = false;
+// MAINTENANCE MODE - Set to true to enable maintenance mode
+const MAINTENANCE_MODE = true;
 
 // Access control state
 let isAccessBlocked = false;
@@ -4322,10 +4322,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return next();
     }
 
-    // Maintenance mode is disabled - no redirect needed
-    // if (MAINTENANCE_MODE) {
-    //   return res.redirect('/service-blocked.html');
-    // }
+    // Check maintenance mode first
+    if (MAINTENANCE_MODE) {
+      return res.redirect('/service-blocked.html');
+    }
 
     // If access is blocked, serve the blocked page
     if (isAccessBlocked) {

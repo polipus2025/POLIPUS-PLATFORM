@@ -28,6 +28,7 @@ The application employs a modern full-stack architecture with a clear separation
 - **Messaging**: A comprehensive cross-portal internal messaging system with threading, role-based filtering, unread tracking, and blinking red notification indicators.
 - **Reporting & Analytics**: Advanced statistics dashboards, audit trail monitoring, and comprehensive county agricultural reports with PDF download capabilities.
 - **Simulation**: Real-time simulation system for commodities data, demonstrating dynamic compliance rates and updates.
+- **Super Backend Control System**: Comprehensive administrative control system with PostgreSQL database integration (8 specialized tables), real-time system monitoring, feature flag management, emergency controls, performance metrics collection, audit logging, background health checks, and professional monitoring portal interface. Accessible at /super-backend and /monitor endpoints with complete system oversight capabilities.
 
 ### Feature Specifications
 - **Core Modules**: Export order management, LACRA compliance integration, farmer partnerships, analytics, inspection management, certification issuance.

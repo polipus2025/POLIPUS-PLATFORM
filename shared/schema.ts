@@ -70,6 +70,169 @@ export const alerts = pgTable("alerts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Super Backend Administrative Control System
+export const systemConfigurations = pgTable("system_configurations", {
+  id: serial("id").primaryKey(),
+  configKey: text("config_key").notNull().unique(),
+  configValue: text("config_value").notNull(),
+  configType: text("config_type").notNull(), // string, number, boolean, json, array
+  category: text("category").notNull(), // security, features, integrations, monitoring, ui
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  modifiedBy: text("modified_by").notNull(),
+  modifiedAt: timestamp("modified_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const realTimeControls = pgTable("real_time_controls", {
+  id: serial("id").primaryKey(),
+  controlType: text("control_type").notNull(), // feature_toggle, access_control, maintenance, rate_limit
+  targetEntity: text("target_entity").notNull(), // user, role, ip, api_endpoint, feature
+  targetValue: text("target_value").notNull(),
+  action: text("action").notNull(), // enable, disable, block, allow, throttle
+  parameters: jsonb("parameters"), // JSON configuration for the control
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(1), // execution order
+  appliedBy: text("applied_by").notNull(),
+  appliedAt: timestamp("applied_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const backendMonitoring = pgTable("backend_monitoring", {
+  id: serial("id").primaryKey(),
+  serviceType: text("service_type").notNull(), // api, database, authentication, file_system, external_api
+  serviceName: text("service_name").notNull(),
+  status: text("status").notNull(), // healthy, warning, error, critical
+  responseTime: decimal("response_time", { precision: 10, scale: 2 }), // milliseconds
+  errorCount: integer("error_count").default(0),
+  successCount: integer("success_count").default(0),
+  cpuUsage: decimal("cpu_usage", { precision: 5, scale: 2 }), // percentage
+  memoryUsage: decimal("memory_usage", { precision: 10, scale: 2 }), // MB
+  diskUsage: decimal("disk_usage", { precision: 10, scale: 2 }), // MB
+  activeConnections: integer("active_connections").default(0),
+  lastHealthCheck: timestamp("last_health_check").defaultNow(),
+  errorDetails: text("error_details"),
+  performanceMetrics: jsonb("performance_metrics"),
+  checkedAt: timestamp("checked_at").defaultNow(),
+});
+
+export const systemOperations = pgTable("system_operations", {
+  id: serial("id").primaryKey(),
+  operationType: text("operation_type").notNull(), // deploy, backup, restore, update, restart, maintenance
+  operationName: text("operation_name").notNull(),
+  status: text("status").notNull(), // pending, running, completed, failed, cancelled
+  progress: integer("progress").default(0), // percentage
+  initiatedBy: text("initiated_by").notNull(),
+  targetEnvironment: text("target_environment").notNull(), // development, staging, production
+  parameters: jsonb("parameters"),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  duration: integer("duration"), // seconds
+  logs: text("logs"),
+  errorMessage: text("error_message"),
+  rollbackRequired: boolean("rollback_required").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const featureFlags = pgTable("feature_flags", {
+  id: serial("id").primaryKey(),
+  flagName: text("flag_name").notNull().unique(),
+  description: text("description"),
+  isEnabled: boolean("is_enabled").default(false),
+  rolloutPercentage: integer("rollout_percentage").default(0), // 0-100
+  targetRoles: text("target_roles"), // comma separated roles
+  targetUsers: text("target_users"), // comma separated user ids
+  conditions: jsonb("conditions"), // complex conditions for flag activation
+  category: text("category").notNull(), // ui, api, security, integration
+  modifiedBy: text("modified_by").notNull(),
+  modifiedAt: timestamp("modified_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const accessControlMatrix = pgTable("access_control_matrix", {
+  id: serial("id").primaryKey(),
+  resourceType: text("resource_type").notNull(), // api_endpoint, page, feature, data_table
+  resourcePath: text("resource_path").notNull(),
+  roleRequired: text("role_required").notNull(),
+  permissionLevel: text("permission_level").notNull(), // read, write, delete, admin
+  ipRestrictions: text("ip_restrictions"), // comma separated IPs or CIDR blocks
+  timeRestrictions: text("time_restrictions"), // business hours, specific times
+  geographicRestrictions: text("geographic_restrictions"), // country codes
+  isActive: boolean("is_active").default(true),
+  appliedBy: text("applied_by").notNull(),
+  appliedAt: timestamp("applied_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const emergencyControls = pgTable("emergency_controls", {
+  id: serial("id").primaryKey(),
+  controlName: text("control_name").notNull(),
+  triggerCondition: text("trigger_condition").notNull(), // high_error_rate, security_breach, system_overload
+  autoTrigger: boolean("auto_trigger").default(false),
+  actions: jsonb("actions"), // array of actions to take
+  isActive: boolean("is_active").default(true),
+  lastTriggered: timestamp("last_triggered"),
+  triggerCount: integer("trigger_count").default(0),
+  createdBy: text("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const performanceMetrics = pgTable("performance_metrics", {
+  id: serial("id").primaryKey(),
+  metricType: text("metric_type").notNull(), // response_time, error_rate, throughput, user_activity
+  metricName: text("metric_name").notNull(),
+  value: decimal("value", { precision: 15, scale: 4 }).notNull(),
+  unit: text("unit").notNull(), // ms, percentage, requests_per_second, count
+  tags: jsonb("tags"), // additional metadata
+  timestamp: timestamp("timestamp").defaultNow(),
+  aggregationPeriod: text("aggregation_period").notNull(), // minute, hour, day
+});
+
+export const backendLogs = pgTable("backend_logs", {
+  id: serial("id").primaryKey(),
+  logLevel: text("log_level").notNull(), // debug, info, warn, error, critical
+  service: text("service").notNull(),
+  message: text("message").notNull(),
+  metadata: jsonb("metadata"),
+  userId: text("user_id"),
+  sessionId: text("session_id"),
+  requestId: text("request_id"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  stackTrace: text("stack_trace"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Super Backend Schema Types
+export type SystemConfiguration = typeof systemConfigurations.$inferSelect;
+export type InsertSystemConfiguration = typeof systemConfigurations.$inferInsert;
+
+export type RealTimeControl = typeof realTimeControls.$inferSelect;
+export type InsertRealTimeControl = typeof realTimeControls.$inferInsert;
+
+export type BackendMonitoring = typeof backendMonitoring.$inferSelect;
+export type InsertBackendMonitoring = typeof backendMonitoring.$inferInsert;
+
+export type SystemOperation = typeof systemOperations.$inferSelect;
+export type InsertSystemOperation = typeof systemOperations.$inferInsert;
+
+export type FeatureFlag = typeof featureFlags.$inferSelect;
+export type InsertFeatureFlag = typeof featureFlags.$inferInsert;
+
+export type AccessControlMatrix = typeof accessControlMatrix.$inferSelect;
+export type InsertAccessControlMatrix = typeof accessControlMatrix.$inferInsert;
+
+export type EmergencyControl = typeof emergencyControls.$inferSelect;
+export type InsertEmergencyControl = typeof emergencyControls.$inferInsert;
+
+export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
+export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
+
+export type BackendLog = typeof backendLogs.$inferSelect;
+export type InsertBackendLog = typeof backendLogs.$inferInsert;
+
 // Mobile Alert Requests table for comprehensive mobile app integration
 export const mobileAlertRequests = pgTable("mobile_alert_requests", {
   id: serial("id").primaryKey(),

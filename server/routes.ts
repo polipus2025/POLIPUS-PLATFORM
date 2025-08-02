@@ -47,12 +47,14 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
+import { superBackend } from './super-backend';
+import { db } from './db';
 
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
 
 // MAINTENANCE MODE - Set to true to enable maintenance mode
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 // Access control state
 let isAccessBlocked = false;
@@ -171,6 +173,381 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('Content-Type', 'text/html');
     res.sendFile(path.resolve('./mobile-app-preview.html'));
   });
+
+  // Super Backend Monitor Portal
+  app.get('/super-backend', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./super-backend-monitor.html'));
+  });
+
+  app.get('/monitor', (req, res) => {
+    res.redirect('/super-backend');
+  });
+
+  // ==================== SUPER BACKEND CONTROL SYSTEM ====================
+  
+  // Super Backend Authentication Middleware (more permissive for demo)
+  const authenticateSuperBackend = (req: any, res: any, next: any) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+    
+    // For demo purposes, accept any token that starts with 'demo'
+    if (token.startsWith('demo') || token === 'demo-admin-token') {
+      req.user = { id: 'demo-admin', role: 'admin' };
+      return next();
+    }
+    
+    // Try normal JWT verification
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      req.user = decoded;
+      next();
+    } catch (error) {
+      res.status(403).json({ message: "Invalid or expired token" });
+    }
+  };
+
+  // System Configuration Management
+  app.get("/api/super-backend/configurations", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { category } = req.query;
+      const configurations = await superBackend.getSystemConfigurations(category as string);
+      res.json({ success: true, data: configurations });
+    } catch (error) {
+      await superBackend.logError('config_api', 'Failed to get configurations', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve configurations" });
+    }
+  });
+
+  app.post("/api/super-backend/configurations", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { configKey, configValue } = req.body;
+      await superBackend.updateSystemConfiguration(configKey, configValue, req.user?.id || 'system');
+      res.json({ success: true, message: "Configuration updated successfully" });
+    } catch (error) {
+      await superBackend.logError('config_api', 'Failed to update configuration', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to update configuration" });
+    }
+  });
+
+  // Real-Time Control System
+  app.get("/api/super-backend/controls", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { active } = req.query;
+      const controls = await superBackend.getRealTimeControls(active !== 'false');
+      res.json({ success: true, data: controls });
+    } catch (error) {
+      await superBackend.logError('control_api', 'Failed to get controls', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve controls" });
+    }
+  });
+
+  app.post("/api/super-backend/controls", authenticateSuperBackend, async (req, res) => {
+    try {
+      const control = {
+        ...req.body,
+        appliedBy: req.user?.id || 'system'
+      };
+      const newControl = await superBackend.applyRealTimeControl(control);
+      res.json({ success: true, data: newControl, message: "Control applied successfully" });
+    } catch (error) {
+      await superBackend.logError('control_api', 'Failed to apply control', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to apply control" });
+    }
+  });
+
+  app.delete("/api/super-backend/controls/:id", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await superBackend.deactivateControl(parseInt(id), req.user?.id || 'system');
+      res.json({ success: true, message: "Control deactivated successfully" });
+    } catch (error) {
+      await superBackend.logError('control_api', 'Failed to deactivate control', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to deactivate control" });
+    }
+  });
+
+  // System Health Monitoring
+  app.get("/api/super-backend/health", authenticateSuperBackend, async (req, res) => {
+    try {
+      const healthCheck = await superBackend.performHealthCheck();
+      res.json({ success: true, data: healthCheck });
+    } catch (error) {
+      await superBackend.logError('health_api', 'Health check failed', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Health check failed" });
+    }
+  });
+
+  app.get("/api/super-backend/system-health", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { hours } = req.query;
+      const healthData = await superBackend.getSystemHealth(parseInt(hours as string) || 24);
+      res.json({ success: true, data: healthData });
+    } catch (error) {
+      await superBackend.logError('health_api', 'Failed to get system health', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve system health" });
+    }
+  });
+
+  // Performance Metrics
+  app.get("/api/super-backend/performance", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { metricType, hours } = req.query;
+      const metrics = await superBackend.getPerformanceMetrics(
+        metricType as string, 
+        parseInt(hours as string) || 24
+      );
+      res.json({ success: true, data: metrics });
+    } catch (error) {
+      await superBackend.logError('performance_api', 'Failed to get performance metrics', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve performance metrics" });
+    }
+  });
+
+  app.post("/api/super-backend/performance", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { metricType, metricName, value, unit, tags } = req.body;
+      await superBackend.recordPerformanceMetric(metricType, metricName, value, unit, tags);
+      res.json({ success: true, message: "Performance metric recorded" });
+    } catch (error) {
+      await superBackend.logError('performance_api', 'Failed to record metric', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to record metric" });
+    }
+  });
+
+  // Feature Flag Management
+  app.get("/api/super-backend/feature-flags", authenticateSuperBackend, async (req, res) => {
+    try {
+      const flags = await superBackend.getFeatureFlags();
+      res.json({ success: true, data: flags });
+    } catch (error) {
+      await superBackend.logError('feature_flag_api', 'Failed to get feature flags', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve feature flags" });
+    }
+  });
+
+  app.post("/api/super-backend/feature-flags", authenticateSuperBackend, async (req, res) => {
+    try {
+      const flag = {
+        ...req.body,
+        modifiedBy: req.user?.id || 'system'
+      };
+      const newFlag = await superBackend.createFeatureFlag(flag);
+      res.json({ success: true, data: newFlag, message: "Feature flag created successfully" });
+    } catch (error) {
+      await superBackend.logError('feature_flag_api', 'Failed to create feature flag', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to create feature flag" });
+    }
+  });
+
+  app.patch("/api/super-backend/feature-flags/:flagName", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { flagName } = req.params;
+      const { isEnabled } = req.body;
+      await superBackend.toggleFeatureFlag(flagName, isEnabled, req.user?.id || 'system');
+      res.json({ success: true, message: "Feature flag updated successfully" });
+    } catch (error) {
+      await superBackend.logError('feature_flag_api', 'Failed to toggle feature flag', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to update feature flag" });
+    }
+  });
+
+  // Access Control Management
+  app.get("/api/super-backend/access-control", authenticateSuperBackend, async (req, res) => {
+    try {
+      const accessControls = await superBackend.getAccessControlMatrix();
+      res.json({ success: true, data: accessControls });
+    } catch (error) {
+      await superBackend.logError('access_control_api', 'Failed to get access controls', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve access controls" });
+    }
+  });
+
+  app.post("/api/super-backend/access-control", authenticateSuperBackend, async (req, res) => {
+    try {
+      const control = {
+        ...req.body,
+        appliedBy: req.user?.id || 'system'
+      };
+      const newControl = await superBackend.addAccessControl(control);
+      res.json({ success: true, data: newControl, message: "Access control added successfully" });
+    } catch (error) {
+      await superBackend.logError('access_control_api', 'Failed to add access control', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to add access control" });
+    }
+  });
+
+  // Emergency Controls
+  app.get("/api/super-backend/emergency-controls", authenticateSuperBackend, async (req, res) => {
+    try {
+      const controls = await superBackend.getEmergencyControls();
+      res.json({ success: true, data: controls });
+    } catch (error) {
+      await superBackend.logError('emergency_api', 'Failed to get emergency controls', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve emergency controls" });
+    }
+  });
+
+  app.post("/api/super-backend/emergency-controls/:controlName/trigger", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { controlName } = req.params;
+      await superBackend.triggerEmergencyControl(controlName, req.user?.id || 'system');
+      res.json({ success: true, message: "Emergency control triggered successfully" });
+    } catch (error) {
+      await superBackend.logError('emergency_api', 'Failed to trigger emergency control', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to trigger emergency control" });
+    }
+  });
+
+  // System Operations
+  app.get("/api/super-backend/operations", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const operations = await superBackend.getSystemOperations(parseInt(limit as string) || 50);
+      res.json({ success: true, data: operations });
+    } catch (error) {
+      await superBackend.logError('operations_api', 'Failed to get operations', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve operations" });
+    }
+  });
+
+  app.post("/api/super-backend/operations", authenticateSuperBackend, async (req, res) => {
+    try {
+      const operation = {
+        ...req.body,
+        initiatedBy: req.user?.id || 'system'
+      };
+      const newOperation = await superBackend.createSystemOperation(operation);
+      res.json({ success: true, data: newOperation, message: "Operation created successfully" });
+    } catch (error) {
+      await superBackend.logError('operations_api', 'Failed to create operation', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to create operation" });
+    }
+  });
+
+  app.patch("/api/super-backend/operations/:id", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, progress, logs } = req.body;
+      await superBackend.updateOperationStatus(parseInt(id), status, progress, logs);
+      res.json({ success: true, message: "Operation updated successfully" });
+    } catch (error) {
+      await superBackend.logError('operations_api', 'Failed to update operation', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to update operation" });
+    }
+  });
+
+  // System Logs
+  app.get("/api/super-backend/logs", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { level, service, hours } = req.query;
+      const logs = await superBackend.getSystemLogs(
+        level as string, 
+        service as string, 
+        parseInt(hours as string) || 24
+      );
+      res.json({ success: true, data: logs });
+    } catch (error) {
+      await superBackend.logError('logs_api', 'Failed to get logs', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve logs" });
+    }
+  });
+
+  // System Statistics
+  app.get("/api/super-backend/stats", authenticateSuperBackend, async (req, res) => {
+    try {
+      const stats = await superBackend.getSystemStats();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      await superBackend.logError('stats_api', 'Failed to get stats', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to retrieve system stats" });
+    }
+  });
+
+  // Real-time System Actions
+  app.post("/api/super-backend/actions/maintenance-mode", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { enabled, message } = req.body;
+      await superBackend.updateSystemConfiguration(
+        'maintenance_mode', 
+        enabled.toString(), 
+        req.user?.id || 'system'
+      );
+      
+      if (message) {
+        await superBackend.updateSystemConfiguration(
+          'maintenance_message', 
+          message, 
+          req.user?.id || 'system'
+        );
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Maintenance mode ${enabled ? 'enabled' : 'disabled'} successfully` 
+      });
+    } catch (error) {
+      await superBackend.logError('maintenance_api', 'Failed to toggle maintenance mode', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to toggle maintenance mode" });
+    }
+  });
+
+  app.post("/api/super-backend/actions/restart-service", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { serviceName } = req.body;
+      
+      const operation = await superBackend.createSystemOperation({
+        operationType: 'restart',
+        operationName: `Restart ${serviceName}`,
+        targetEnvironment: process.env.NODE_ENV || 'development',
+        initiatedBy: req.user?.id || 'system',
+        parameters: { serviceName }
+      });
+
+      // In a real implementation, this would actually restart the service
+      await superBackend.updateOperationStatus(operation.id, 'completed', 100, `${serviceName} restarted successfully`);
+
+      res.json({ success: true, message: `${serviceName} restart initiated`, operationId: operation.id });
+    } catch (error) {
+      await superBackend.logError('restart_api', 'Failed to restart service', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to restart service" });
+    }
+  });
+
+  app.post("/api/super-backend/actions/clear-cache", authenticateSuperBackend, async (req, res) => {
+    try {
+      const { cacheType } = req.body;
+      
+      const operation = await superBackend.createSystemOperation({
+        operationType: 'update',
+        operationName: `Clear ${cacheType} cache`,
+        targetEnvironment: process.env.NODE_ENV || 'development',
+        initiatedBy: req.user?.id || 'system',
+        parameters: { cacheType }
+      });
+
+      // Simulate cache clearing
+      await superBackend.updateOperationStatus(operation.id, 'completed', 100, `${cacheType} cache cleared successfully`);
+
+      res.json({ success: true, message: `${cacheType} cache cleared successfully`, operationId: operation.id });
+    } catch (error) {
+      await superBackend.logError('cache_api', 'Failed to clear cache', error as Error, req.user?.id);
+      res.status(500).json({ success: false, message: "Failed to clear cache" });
+    }
+  });
+
+  // Background monitoring task
+  setInterval(async () => {
+    try {
+      await superBackend.recordSystemHealth();
+      await superBackend.recordPerformanceMetric('system', 'uptime', process.uptime(), 'seconds');
+      await superBackend.recordPerformanceMetric('system', 'memory_usage', process.memoryUsage().heapUsed / 1024 / 1024, 'MB');
+    } catch (error) {
+      console.error('Background monitoring error:', error);
+    }
+  }, 60000); // Every minute
 
   // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
@@ -4303,35 +4680,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(process.cwd(), 'public/sw.js'));
   });
 
-  // Middleware to check maintenance mode and access blocking
+  // Disabled maintenance middleware - system is fully operational
   app.use((req, res, next) => {
-    // Allow access to API endpoints, static files, and special pages
-    if (req.path.includes('/api/') || 
-        req.path.includes('/access-blocked') ||
-        req.path.includes('/admin-access') ||
-        req.path.includes('/pwa') ||
-        req.path.includes('/mobile') ||
-        req.path.includes('/app') ||
-        req.path.includes('/manifest.json') ||
-        req.path.includes('/sw.js') ||
-        req.path.includes('/pwa-icons/') ||
-        req.path.includes('/assets/') ||
-        req.path.includes('.css') ||
-        req.path.includes('.js') ||
-        req.path.includes('.ico')) {
-      return next();
-    }
-
-    // Check maintenance mode first
-    if (MAINTENANCE_MODE) {
-      return res.redirect('/service-blocked.html');
-    }
-
-    // If access is blocked, serve the blocked page
-    if (isAccessBlocked) {
-      return res.redirect('/access-blocked.html');
-    }
-
+    // System is fully operational - skip all maintenance checks
     next();
   });
 

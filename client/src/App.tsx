@@ -235,7 +235,6 @@ function Router() {
         <>
           {/* MAIN LANDING PAGE - Polipus Logo + 8 Modules + Login Buttons */}
           <Route path="/" component={FrontPage} />
-          <Route path="/landing" component={Landing} />
           <Route path="/dashboard" component={FrontPage} />
         </>
       )}

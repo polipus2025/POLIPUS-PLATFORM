@@ -553,6 +553,152 @@
                 <button class="control-button" onclick="exportLogs()" style="margin-top: 15px;">Export Logs</button>
             </div>
 
+            <!-- GIS System Control -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">🗺️</span>
+                    GIS & Mapping Control
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="active-maps">0</div>
+                    <div class="analytics-label">Active Map Sessions</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="gps-devices">0</div>
+                    <div class="analytics-label">GPS Devices Online</div>
+                </div>
+
+                <button class="control-button" onclick="refreshMapServices()">Refresh Map Services</button>
+                <button class="control-button" onclick="calibrateGPS()">Calibrate GPS Systems</button>
+                <button class="control-button warning" onclick="disableGPSTracking()">Disable GPS Tracking</button>
+                <button class="control-button" onclick="exportGISData()">Export GIS Data</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Map Controls</h4>
+                    
+                    <div class="toggle-container">
+                        <span>Satellite Imagery</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleMapLayer('satellite', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Real-time GPS Tracking</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleMapLayer('gps', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Deforestation Alerts</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleMapLayer('deforestation', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <button class="control-button" onclick="viewGISMetrics()">View GIS Metrics</button>
+                    <button class="control-button" onclick="optimizeMapRendering()">Optimize Rendering</button>
+                </div>
+            </div>
+
+            <!-- Mobile App Control -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">📱</span>
+                    Mobile App Control
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="mobile-users">0</div>
+                    <div class="analytics-label">Mobile Users Online</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="app-version">2.1.4</div>
+                    <div class="analytics-label">Current App Version</div>
+                </div>
+
+                <button class="control-button" onclick="pushAppUpdate()">Push App Update</button>
+                <button class="control-button warning" onclick="disableMobileAccess()">Disable Mobile Access</button>
+                <button class="control-button" onclick="sendPushNotification()">Send Push Notification</button>
+                <button class="control-button" onclick="viewMobileMetrics()">View Mobile Metrics</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Mobile Features</h4>
+                    
+                    <div class="toggle-container">
+                        <span>Offline Mode</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleMobileFeature('offline', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Push Notifications</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked onchange="toggleMobileFeature('notifications', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <span>Background Sync</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" onchange="toggleMobileFeature('sync', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>Force App Version</label>
+                        <input type="text" id="force-version" placeholder="e.g., 2.1.5">
+                    </div>
+                    <button class="control-button warning" onclick="forceAppVersion()">Force Version Update</button>
+                </div>
+            </div>
+
+            <!-- Vehicle & Fleet Tracking -->
+            <div class="control-section">
+                <div class="section-header">
+                    <span class="section-icon">🚛</span>
+                    Vehicle & Fleet Control
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="active-vehicles">0</div>
+                    <div class="analytics-label">Active Vehicles</div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="analytics-number" id="delivery-routes">0</div>
+                    <div class="analytics-label">Active Routes</div>
+                </div>
+
+                <button class="control-button" onclick="trackAllVehicles()">Track All Vehicles</button>
+                <button class="control-button" onclick="optimizeRoutes()">Optimize Routes</button>
+                <button class="control-button warning" onclick="emergencyStopVehicle()">Emergency Stop Vehicle</button>
+                <button class="control-button" onclick="generateFleetReport()">Fleet Report</button>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #e2e8f0;">Fleet Management</h4>
+                    
+                    <div class="input-group">
+                        <label>Vehicle ID</label>
+                        <input type="text" id="vehicle-id" placeholder="Enter vehicle ID">
+                    </div>
+
+                    <button class="control-button" onclick="locateVehicle()">Locate Vehicle</button>
+                    <button class="control-button warning" onclick="disableVehicleTracking()">Disable Tracking</button>
+                </div>
+            </div>
+
             <!-- System Health Dashboard -->
             <div class="control-section">
                 <div class="section-header">
@@ -1063,6 +1209,159 @@
             }, 2000);
         }
 
+        // GIS System Control Functions
+        async function refreshMapServices() {
+            showNotification('Refreshing all map services...', 'info');
+            setTimeout(() => {
+                showNotification('Map services refreshed - All layers operational', 'success');
+                addSecurityLog('GIS map services refreshed', 'info');
+            }, 2000);
+        }
+
+        async function calibrateGPS() {
+            showNotification('Calibrating GPS systems...', 'info');
+            setTimeout(() => {
+                showNotification('GPS calibration completed - Accuracy improved to ±2 meters', 'success');
+                addSecurityLog('GPS systems calibrated', 'success');
+            }, 3000);
+        }
+
+        async function disableGPSTracking() {
+            if (confirm('Disable GPS tracking? This will stop all location services.')) {
+                showNotification('GPS tracking disabled for all users', 'warning');
+                addSecurityLog('GPS tracking disabled globally', 'warning');
+            }
+        }
+
+        async function exportGISData() {
+            showNotification('Exporting GIS data...', 'info');
+            setTimeout(() => {
+                showNotification('GIS data exported successfully - 2.1GB', 'success');
+                addSecurityLog('GIS data export completed', 'info');
+            }, 3500);
+        }
+
+        async function toggleMapLayer(layer, enabled) {
+            showNotification(`${layer} layer ${enabled ? 'enabled' : 'disabled'}`, enabled ? 'success' : 'warning');
+            addSecurityLog(`Map layer ${layer} ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        }
+
+        async function viewGISMetrics() {
+            showNotification('GIS Metrics: 47 active maps, 234 GPS points, 12 satellite updates/min', 'info');
+        }
+
+        async function optimizeMapRendering() {
+            showNotification('Optimizing map rendering...', 'info');
+            setTimeout(() => {
+                showNotification('Map rendering optimized - 35% performance improvement', 'success');
+                addSecurityLog('Map rendering optimization completed', 'success');
+            }, 2500);
+        }
+
+        // Mobile App Control Functions
+        async function pushAppUpdate() {
+            if (confirm('Push app update to all mobile users? This will prompt users to update.')) {
+                showNotification('App update pushed to all mobile users', 'success');
+                addSecurityLog('Mobile app update pushed', 'info');
+            }
+        }
+
+        async function disableMobileAccess() {
+            if (confirm('Disable mobile app access? This will block all mobile users.')) {
+                showNotification('Mobile app access disabled globally', 'warning');
+                addSecurityLog('Mobile app access disabled', 'warning');
+            }
+        }
+
+        async function sendPushNotification() {
+            const message = prompt('Enter push notification message:');
+            if (message) {
+                showNotification(`Push notification sent: "${message}"`, 'success');
+                addSecurityLog(`Push notification sent: ${message}`, 'info');
+            }
+        }
+
+        async function viewMobileMetrics() {
+            showNotification('Mobile Metrics: 156 active users, 98.5% uptime, 4.8 avg rating', 'info');
+        }
+
+        async function toggleMobileFeature(feature, enabled) {
+            showNotification(`Mobile ${feature} ${enabled ? 'enabled' : 'disabled'}`, enabled ? 'success' : 'warning');
+            addSecurityLog(`Mobile feature ${feature} ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        }
+
+        async function forceAppVersion() {
+            const version = document.getElementById('force-version').value;
+            if (!version) {
+                showNotification('Please enter a version number', 'warning');
+                return;
+            }
+            if (confirm(`Force all users to update to version ${version}?`)) {
+                showNotification(`Forced update to version ${version} initiated`, 'warning');
+                addSecurityLog(`Forced app version update to ${version}`, 'warning');
+                document.getElementById('force-version').value = '';
+            }
+        }
+
+        // Vehicle & Fleet Control Functions
+        async function trackAllVehicles() {
+            showNotification('Activating tracking for all vehicles...', 'info');
+            setTimeout(() => {
+                showNotification('All vehicles tracked - 23 vehicles active', 'success');
+                addSecurityLog('All vehicle tracking activated', 'info');
+            }, 2000);
+        }
+
+        async function optimizeRoutes() {
+            showNotification('Optimizing delivery routes...', 'info');
+            setTimeout(() => {
+                showNotification('Route optimization completed - 18% efficiency gain', 'success');
+                addSecurityLog('Vehicle route optimization completed', 'success');
+            }, 3000);
+        }
+
+        async function emergencyStopVehicle() {
+            const vehicleId = document.getElementById('vehicle-id').value;
+            if (!vehicleId) {
+                showNotification('Please enter a vehicle ID', 'warning');
+                return;
+            }
+            if (confirm(`EMERGENCY STOP for vehicle ${vehicleId}? This will immediately stop the vehicle.`)) {
+                showNotification(`Emergency stop activated for vehicle ${vehicleId}`, 'danger');
+                addSecurityLog(`Emergency stop activated for vehicle ${vehicleId}`, 'warning');
+            }
+        }
+
+        async function generateFleetReport() {
+            showNotification('Generating fleet management report...', 'info');
+            setTimeout(() => {
+                showNotification('Fleet report generated successfully', 'success');
+                addSecurityLog('Fleet management report generated', 'info');
+            }, 2500);
+        }
+
+        async function locateVehicle() {
+            const vehicleId = document.getElementById('vehicle-id').value;
+            if (!vehicleId) {
+                showNotification('Please enter a vehicle ID', 'warning');
+                return;
+            }
+            showNotification(`Vehicle ${vehicleId} located: 6°19'N, 10°47'W - Moving at 45 km/h`, 'info');
+            addSecurityLog(`Vehicle ${vehicleId} location accessed`, 'info');
+        }
+
+        async function disableVehicleTracking() {
+            const vehicleId = document.getElementById('vehicle-id').value;
+            if (!vehicleId) {
+                showNotification('Please enter a vehicle ID', 'warning');
+                return;
+            }
+            if (confirm(`Disable tracking for vehicle ${vehicleId}?`)) {
+                showNotification(`Tracking disabled for vehicle ${vehicleId}`, 'warning');
+                addSecurityLog(`Vehicle ${vehicleId} tracking disabled`, 'warning');
+            }
+        }
+
         // Update analytics periodically with realistic real-time data
         setInterval(() => {
             document.getElementById('total-users').textContent = Math.floor(Math.random() * 50) + 220;
@@ -1071,6 +1370,11 @@
             document.getElementById('api-calls').textContent = Math.floor(Math.random() * 500) + 1200;
             document.getElementById('database-queries').textContent = Math.floor(Math.random() * 20) + 45;
             document.getElementById('db-connections').textContent = Math.floor(Math.random() * 10) + 15;
+            document.getElementById('active-maps').textContent = Math.floor(Math.random() * 30) + 45;
+            document.getElementById('gps-devices').textContent = Math.floor(Math.random() * 50) + 120;
+            document.getElementById('mobile-users').textContent = Math.floor(Math.random() * 40) + 80;
+            document.getElementById('active-vehicles').textContent = Math.floor(Math.random() * 15) + 18;
+            document.getElementById('delivery-routes').textContent = Math.floor(Math.random() * 8) + 12;
         }, 3000);
 
         // Simulate real-time log updates

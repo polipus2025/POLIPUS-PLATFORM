@@ -1008,13 +1008,16 @@
                 });
 
                 const result = await response.json();
+                console.log('Login response:', result);
+                
                 if (result.success && result.token) {
                     authToken = result.token;
                     localStorage.setItem('super-backend-token', authToken);
-                    alert('Successfully authenticated with credentials!');
-                    location.reload();
+                    localStorage.removeItem('logout-flag'); // Clear logout flag
+                    alert('✅ Successfully authenticated! Page will reload...');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert('Invalid credentials. Try: monitor001 / monitor123');
+                    alert('❌ Authentication failed.\n\nTry these credentials:\nUsername: monitor001\nPassword: monitor123');
                 }
             } catch (error) {
                 console.error('Authentication error:', error);

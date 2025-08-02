@@ -4680,9 +4680,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(process.cwd(), 'public/sw.js'));
   });
 
-  // Disabled maintenance middleware - system is fully operational
-  app.use((req, res, next) => {
-    // System is fully operational - skip all maintenance checks
+  // Force enable main dashboard access
+  app.get('/', (req, res, next) => {
+    // Skip any middleware that might redirect to blocked pages
     next();
   });
 

@@ -45,12 +45,12 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
-// MAINTENANCE MODE - Set to true to enable maintenance mode
-const MAINTENANCE_MODE = true;
+// MAINTENANCE MODE - Disabled - System fully operational
+const MAINTENANCE_MODE = false;
 
-// Maintenance mode middleware - serve simple red protection page
+// System fully operational - no maintenance mode
 app.get('/', (req, res, next) => {
-  if (MAINTENANCE_MODE) {
+  if (false && MAINTENANCE_MODE) {
     res.setHeader('Content-Type', 'text/html');
     return res.sendFile(path.resolve('./service-blocked.html'));
   }

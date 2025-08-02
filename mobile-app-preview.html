@@ -2,837 +2,553 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AgriTrace360 Mobile App - Live Preview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriTrace360 Mobile App Preview</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #16a34a 100%);
-            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
         }
-        
-        .demo-container {
+
+        .preview-container {
             max-width: 1200px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 30px;
-            align-items: start;
         }
-        
-        .demo-info {
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid #334155;
-        }
-        
-        .demo-title {
-            font-size: 28px;
-            color: #16a34a;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        
-        .demo-description {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            color: #cbd5e1;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .feature-item {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #334155;
+
+        .header {
             text-align: center;
+            margin-bottom: 40px;
         }
-        
-        .feature-icon {
-            font-size: 24px;
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #059669;
             margin-bottom: 10px;
-            display: block;
+            font-weight: 700;
         }
-        
-        .feature-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #16a34a;
-            margin-bottom: 5px;
+
+        .header p {
+            font-size: 1.2rem;
+            color: #6b7280;
+            margin-bottom: 20px;
         }
-        
-        .feature-desc {
-            font-size: 12px;
-            color: #94a3b8;
-        }
-        
-        .phone-container {
-            position: relative;
-            width: 350px;
-            height: 700px;
-            background: #1f2937;
-            border-radius: 30px;
-            padding: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            border: 3px solid #374151;
-        }
-        
-        .phone-screen {
-            width: 100%;
-            height: 100%;
-            background: #000;
-            border-radius: 25px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .status-bar {
-            background: linear-gradient(90deg, #16a34a, #22c55e);
-            height: 35px;
+
+        .access-links {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 15px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .app-header {
-            background: #16a34a;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .app-logo {
-            width: 35px;
-            height: 35px;
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
+            gap: 15px;
             justify-content: center;
-            font-size: 18px;
-            color: #16a34a;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
         }
-        
-        .app-title {
-            flex: 1;
-        }
-        
-        .app-name {
-            font-size: 16px;
-            font-weight: bold;
+
+        .access-link {
+            background: #059669;
             color: white;
-        }
-        
-        .app-subtitle {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .app-content {
-            background: #f8fafc;
-            color: #1e293b;
-            height: calc(100% - 70px);
-            overflow-y: auto;
-        }
-        
-        .dashboard-stats {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #16a34a;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #64748b;
-        }
-        
-        .quick-actions {
-            padding: 0 20px 20px;
-        }
-        
-        .section-title {
-            font-size: 16px;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 15px;
-        }
-        
-        .action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
-        .action-btn {
-            background: white;
-            border: none;
-            padding: 20px 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        
-        .action-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .action-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-            display: block;
-        }
-        
-        .action-text {
-            font-size: 12px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-        
-        .gps-section {
-            padding: 0 20px 20px;
-            background: #f1f5f9;
-            margin: 20px;
-            border-radius: 12px;
-        }
-        
-        .gps-header {
-            padding: 15px 0;
-            border-bottom: 1px solid #e2e8f0;
-            margin-bottom: 15px;
-        }
-        
-        .gps-status {
-            display: flex;
+            transition: background 0.3s ease;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 10px;
         }
-        
-        .gps-dot {
+
+        .access-link:hover {
+            background: #047857;
+        }
+
+        .mobile-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .phone-mockup {
+            background: #1f2937;
+            border-radius: 25px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .phone-screen {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            height: 600px;
+            position: relative;
+        }
+
+        .screen-header {
+            background: linear-gradient(135deg, #059669, #0d9488);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .app-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .app-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .app-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .screen-content {
+            padding: 20px;
+            height: calc(100% - 120px);
+            overflow-y: auto;
+        }
+
+        .feature-card {
+            background: rgba(5, 150, 105, 0.1);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #059669;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #1f2937;
+        }
+
+        .feature-desc {
+            font-size: 0.85rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .gps-status {
+            background: #dcfdf7;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .status-dot {
             width: 8px;
             height: 8px;
             background: #22c55e;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
+
         .coordinates {
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 10px;
             font-family: monospace;
-            font-size: 12px;
-            color: #16a34a;
-            margin-bottom: 10px;
+            font-size: 0.8rem;
+            margin: 10px 0;
         }
-        
-        .farm-info {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .farm-name {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 5px;
-        }
-        
-        .farm-details {
-            font-size: 12px;
-            color: #64748b;
-        }
-        
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            height: 70px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #e2e8f0;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .nav-item.active {
-            color: #16a34a;
-        }
-        
-        .nav-icon {
-            font-size: 20px;
-        }
-        
-        .nav-label {
-            font-size: 10px;
-            font-weight: 500;
-        }
-        
-        .controls {
-            margin-top: 30px;
-        }
-        
-        .control-title {
-            font-size: 18px;
-            color: #16a34a;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        .control-btn {
-            background: linear-gradient(45deg, #16a34a, #22c55e);
+
+        .action-btn {
+            background: #059669;
             color: white;
             border: none;
             padding: 12px 20px;
-            border-radius: 25px;
+            border-radius: 8px;
             font-weight: 600;
+            width: 100%;
+            margin: 8px 0;
             cursor: pointer;
-            margin: 5px;
-            transition: all 0.3s;
         }
-        
-        .control-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(22, 163, 74, 0.3);
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
         }
-        
-        .control-btn.secondary {
-            background: #64748b;
+
+        .feature-grid-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
-        .demo-screen {
-            display: none;
-        }
-        
-        .demo-screen.active {
-            display: block;
-        }
-        
-        .qr-scanner {
-            background: #000;
-            height: 200px;
+
+        .spec-list {
+            background: white;
             border-radius: 12px;
-            margin: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .spec-list h3 {
+            color: #059669;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .spec-category {
+            border-left: 3px solid #059669;
+            padding-left: 15px;
+        }
+
+        .spec-category h4 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .spec-category ul {
+            list-style: none;
+        }
+
+        .spec-category li {
+            color: #6b7280;
+            margin-bottom: 5px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .spec-category li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #059669;
+            font-weight: bold;
+        }
+
+        .installation-guide {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .installation-guide h3 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .install-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .install-step {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-number {
+            background: #059669;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            font-weight: bold;
+            margin-bottom: 15px;
         }
-        
-        .qr-overlay {
-            width: 150px;
-            height: 150px;
-            border: 3px solid #16a34a;
-            border-radius: 12px;
-            position: relative;
-        }
-        
-        .qr-corner {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #22c55e;
-        }
-        
-        .qr-corner.top-left {
-            top: -3px;
-            left: -3px;
-            border-right: none;
-            border-bottom: none;
-        }
-        
-        .qr-corner.top-right {
-            top: -3px;
-            right: -3px;
-            border-left: none;
-            border-bottom: none;
-        }
-        
-        .qr-corner.bottom-left {
-            bottom: -3px;
-            left: -3px;
-            border-right: none;
-            border-top: none;
-        }
-        
-        .qr-corner.bottom-right {
-            bottom: -3px;
-            right: -3px;
-            border-left: none;
-            border-top: none;
-        }
-        
-        .scan-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #22c55e, transparent);
-            animation: scan 2s linear infinite;
-        }
-        
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
-        }
-        
-        .map-view {
-            height: 300px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            margin: 20px;
-            border-radius: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .map-marker {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            animation: bounce 2s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .access-buttons {
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .access-btn {
-            background: linear-gradient(45deg, #16a34a, #22c55e);
-            color: white;
-            text-decoration: none;
-            padding: 15px 25px;
-            border-radius: 25px;
+
+        .step-title {
             font-weight: 600;
-            display: inline-block;
-            margin: 10px;
-            transition: all 0.3s;
+            margin-bottom: 8px;
+            color: #1f2937;
         }
-        
-        .access-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(22, 163, 74, 0.3);
+
+        .step-desc {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
-        
-        .access-btn.secondary {
-            background: #64748b;
-        }
-        
+
         @media (max-width: 768px) {
-            .demo-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
+            .header h1 {
+                font-size: 2rem;
             }
             
-            .phone-container {
-                width: 100%;
-                max-width: 350px;
-                margin: 0 auto;
+            .mobile-preview {
+                grid-template-columns: 1fr;
             }
             
-            .features-grid {
-                grid-template-columns: 1fr;
+            .access-links {
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
 </head>
 <body>
-    <div class="demo-container">
-        <div class="demo-info">
-            <div class="demo-title">📱 AgriTrace360 Mobile App</div>
-            <div class="demo-description">
-                Experience the complete LACRA agricultural compliance platform optimized for mobile devices. This live preview shows exactly how the app looks and works on smartphones with full functionality for farmers, field agents, and LACRA staff.
-            </div>
+    <div class="preview-container">
+        <div class="header">
+            <h1>🌾 AgriTrace360 Mobile App</h1>
+            <p>Agricultural Compliance & GPS Tracking</p>
             
-            <div class="features-grid">
-                <div class="feature-item">
-                    <span class="feature-icon">📊</span>
-                    <div class="feature-title">Real-time Dashboard</div>
-                    <div class="feature-desc">Live farm data and compliance metrics</div>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">📍</span>
-                    <div class="feature-title">GPS Mapping</div>
-                    <div class="feature-desc">Precision boundary tracking</div>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">📱</span>
-                    <div class="feature-title">QR Scanner</div>
-                    <div class="feature-desc">Commodity tracking system</div>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">🌾</span>
-                    <div class="feature-title">LACRA Integration</div>
-                    <div class="feature-desc">Direct compliance reporting</div>
-                </div>
-            </div>
-            
-            <div class="controls">
-                <div class="control-title">Demo Controls</div>
-                <button class="control-btn" onclick="showScreen('dashboard')">Dashboard View</button>
-                <button class="control-btn" onclick="showScreen('scanner')">QR Scanner</button>
-                <button class="control-btn" onclick="showScreen('mapping')">GPS Mapping</button>
-                <button class="control-btn secondary" onclick="showScreen('dashboard')">Reset Demo</button>
-            </div>
-            
-            <div class="access-buttons">
-                <a href="/" class="access-btn">🚀 Try Full Platform</a>
-                <a href="/mobile-access" class="access-btn secondary">📱 Mobile Access</a>
+            <div class="access-links">
+                <a href="/mobile" class="access-link">
+                    📱 Open Mobile App
+                </a>
+                <a href="/mobile-app" class="access-link">
+                    🚀 Launch App
+                </a>
+                <a href="/" class="access-link">
+                    🌐 Full Dashboard
+                </a>
             </div>
         </div>
-        
-        <div class="phone-container">
-            <div class="phone-screen">
-                <div class="status-bar">
-                    <span>9:50 PM</span>
-                    <span>AgriTrace360</span>
-                    <span>🔋 100% 📶</span>
-                </div>
-                
-                <div class="app-header">
-                    <div class="app-logo">🌾</div>
-                    <div class="app-title">
-                        <div class="app-name">AgriTrace360</div>
-                        <div class="app-subtitle">LACRA Mobile Platform</div>
+
+        <div class="mobile-preview">
+            <!-- GPS Tracking Screen -->
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-header">
+                        <div class="app-icon">🌾</div>
+                        <div class="app-title">AgriTrace360</div>
+                        <div class="app-subtitle">GPS & Compliance Tracking</div>
                     </div>
-                </div>
-                
-                <!-- Dashboard Screen -->
-                <div class="demo-screen active" id="dashboard-screen">
-                    <div class="app-content">
-                        <div class="dashboard-stats">
-                            <div class="stat-card">
-                                <div class="stat-number" id="farm-count">127</div>
-                                <div class="stat-label">Active Farms</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="compliance-rate">94%</div>
-                                <div class="stat-label">Compliance Rate</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="inspections">23</div>
-                                <div class="stat-label">Inspections</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="alerts">5</div>
-                                <div class="stat-label">Active Alerts</div>
+                    <div class="screen-content">
+                        <div class="gps-status">
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                                GPS Active & Tracking
                             </div>
                         </div>
                         
-                        <div class="quick-actions">
-                            <div class="section-title">Quick Actions</div>
-                            <div class="action-grid">
-                                <button class="action-btn" onclick="showScreen('scanner')">
-                                    <span class="action-icon">📱</span>
-                                    <span class="action-text">QR Scanner</span>
-                                </button>
-                                <button class="action-btn" onclick="showScreen('mapping')">
-                                    <span class="action-icon">📍</span>
-                                    <span class="action-text">GPS Mapping</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">📊</span>
-                                    <span class="action-text">Reports</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">💬</span>
-                                    <span class="action-text">Messages</span>
-                                </button>
-                            </div>
+                        <div class="coordinates">
+                            <div>Latitude: 6.3106°N</div>
+                            <div>Longitude: 10.8047°W</div>
+                            <div>Accuracy: 3.2 meters</div>
+                            <div>Location: Monrovia, Liberia</div>
                         </div>
                         
-                        <div class="gps-section">
-                            <div class="gps-header">
-                                <div class="section-title">Current Location</div>
-                                <div class="gps-status">
-                                    <div class="gps-dot"></div>
-                                    <span style="font-size: 12px; color: #16a34a;">GPS Active</span>
-                                </div>
-                                <div class="coordinates" id="coordinates">
-                                    6.4281°N, 9.4295°W
-                                </div>
-                            </div>
-                            <div class="farm-info">
-                                <div class="farm-name">Moses Tuah's Cocoa Farm</div>
-                                <div class="farm-details">
-                                    Area: 2.3 hectares • Status: Compliant • Last Updated: 5 min ago
-                                </div>
-                            </div>
+                        <button class="action-btn">📍 Update Location</button>
+                        <button class="action-btn">📤 Share GPS Data</button>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🗺️</div>
+                            <div class="feature-title">Interactive Map</div>
+                            <div class="feature-desc">Real-time GPS mapping with farm boundaries</div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- QR Scanner Screen -->
-                <div class="demo-screen" id="scanner-screen">
-                    <div class="app-content">
-                        <div class="qr-scanner">
-                            <div class="qr-overlay">
-                                <div class="qr-corner top-left"></div>
-                                <div class="qr-corner top-right"></div>
-                                <div class="qr-corner bottom-left"></div>
-                                <div class="qr-corner bottom-right"></div>
-                                <div class="scan-line"></div>
+            </div>
+
+            <!-- Features Screen -->
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-header">
+                        <div class="app-icon">⚡</div>
+                        <div class="app-title">Smart Features</div>
+                        <div class="app-subtitle">Agricultural Intelligence</div>
+                    </div>
+                    <div class="screen-content">
+                        <div class="features-grid">
+                            <div class="feature-grid-item">
+                                <div class="feature-icon">📦</div>
+                                <div class="feature-title">Commodity Tracking</div>
+                                <div class="feature-desc">Real-time location monitoring</div>
+                            </div>
+                            <div class="feature-grid-item">
+                                <div class="feature-icon">🔍</div>
+                                <div class="feature-title">Field Inspections</div>
+                                <div class="feature-desc">Mobile inspection forms</div>
+                            </div>
+                            <div class="feature-grid-item">
+                                <div class="feature-icon">✅</div>
+                                <div class="feature-title">EUDR Compliance</div>
+                                <div class="feature-desc">Regulatory monitoring</div>
+                            </div>
+                            <div class="feature-grid-item">
+                                <div class="feature-icon">📊</div>
+                                <div class="feature-title">Analytics</div>
+                                <div class="feature-desc">Performance insights</div>
                             </div>
                         </div>
                         
-                        <div style="padding: 20px; text-align: center;">
-                            <div class="section-title">QR Code Scanner</div>
-                            <p style="color: #64748b; margin-bottom: 20px;">
-                                Position QR code within the frame to scan commodity information
-                            </p>
-                            
-                            <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-                                <div style="color: #16a34a; font-weight: 600; margin-bottom: 10px;">Last Scan Result</div>
-                                <div style="font-size: 12px; color: #1e293b;">
-                                    <strong>Commodity:</strong> Premium Cocoa Beans<br>
-                                    <strong>Batch ID:</strong> LR-2025-CCO-001<br>
-                                    <strong>Farm:</strong> Moses Tuah's Farm<br>
-                                    <strong>Status:</strong> ✅ LACRA Certified
-                                </div>
-                            </div>
-                            
-                            <button class="control-btn" onclick="simulateScan()">
-                                Simulate Scan
-                            </button>
-                        </div>
+                        <button class="action-btn">📲 Install as Native App</button>
                     </div>
                 </div>
-                
-                <!-- GPS Mapping Screen -->
-                <div class="demo-screen" id="mapping-screen">
-                    <div class="app-content">
-                        <div class="map-view">
-                            <div class="map-marker" style="top: 50%; left: 50%; animation-delay: 0s;"></div>
-                            <div class="map-marker" style="top: 30%; left: 70%; animation-delay: 0.5s;"></div>
-                            <div class="map-marker" style="top: 70%; left: 30%; animation-delay: 1s;"></div>
-                        </div>
-                        
-                        <div style="padding: 20px;">
-                            <div class="section-title">GPS Farm Mapping</div>
-                            
-                            <div class="dashboard-stats" style="margin-bottom: 20px;">
-                                <div class="stat-card">
-                                    <div class="stat-number" id="accuracy">3.2m</div>
-                                    <div class="stat-label">GPS Accuracy</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-number" id="satellites">12</div>
-                                    <div class="stat-label">Satellites</div>
-                                </div>
-                            </div>
-                            
-                            <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                                <div style="color: #16a34a; font-weight: 600; margin-bottom: 10px;">Current Boundary Mapping</div>
-                                <div style="font-size: 12px; color: #1e293b;">
-                                    <strong>Points Collected:</strong> 8/12<br>
-                                    <strong>Area Mapped:</strong> 1.8 hectares<br>
-                                    <strong>Perimeter:</strong> 540 meters<br>
-                                    <strong>Status:</strong> 🟡 In Progress
-                                </div>
-                            </div>
-                            
-                            <div style="text-align: center; margin-top: 20px;">
-                                <button class="control-btn" onclick="simulateMapping()">
-                                    Continue Mapping
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+        </div>
+
+        <div class="spec-list">
+            <h3>Technical Specifications</h3>
+            <div class="spec-grid">
+                <div class="spec-category">
+                    <h4>GPS & Location</h4>
+                    <ul>
+                        <li>High-accuracy positioning</li>
+                        <li>Real-time location tracking</li>
+                        <li>Continuous monitoring</li>
+                        <li>Offline GPS caching</li>
+                        <li>Location sharing</li>
+                        <li>Farm boundary mapping</li>
+                    </ul>
                 </div>
                 
-                <div class="bottom-nav">
-                    <div class="nav-item active" onclick="showScreen('dashboard')">
-                        <div class="nav-icon">🏠</div>
-                        <div class="nav-label">Home</div>
-                    </div>
-                    <div class="nav-item" onclick="showScreen('scanner')">
-                        <div class="nav-icon">📱</div>
-                        <div class="nav-label">Scan</div>
-                    </div>
-                    <div class="nav-item" onclick="showScreen('mapping')">
-                        <div class="nav-icon">🗺️</div>
-                        <div class="nav-label">Map</div>
-                    </div>
-                    <div class="nav-item">
-                        <div class="nav-icon">📊</div>
-                        <div class="nav-label">Reports</div>
-                    </div>
-                    <div class="nav-item">
-                        <div class="nav-icon">⚙️</div>
-                        <div class="nav-label">Settings</div>
-                    </div>
+                <div class="spec-category">
+                    <h4>Mobile Features</h4>
+                    <ul>
+                        <li>Progressive Web App (PWA)</li>
+                        <li>Offline functionality</li>
+                        <li>Native app installation</li>
+                        <li>Touch-optimized interface</li>
+                        <li>Background sync</li>
+                        <li>Push notifications</li>
+                    </ul>
+                </div>
+                
+                <div class="spec-category">
+                    <h4>Agricultural Tools</h4>
+                    <ul>
+                        <li>Commodity tracking</li>
+                        <li>Field inspection forms</li>
+                        <li>EUDR compliance monitoring</li>
+                        <li>Export documentation</li>
+                        <li>Certificate verification</li>
+                        <li>Real-time analytics</li>
+                    </ul>
+                </div>
+                
+                <div class="spec-category">
+                    <h4>Platform Support</h4>
+                    <ul>
+                        <li>iOS Safari</li>
+                        <li>Android Chrome</li>
+                        <li>Cross-platform PWA</li>
+                        <li>Responsive design</li>
+                        <li>Low bandwidth optimization</li>
+                        <li>Works in rural areas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="installation-guide">
+            <h3>Mobile Installation Guide</h3>
+            <div class="install-steps">
+                <div class="install-step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Open Mobile Browser</div>
+                    <div class="step-desc">Use Chrome on Android or Safari on iOS to access the mobile app</div>
+                </div>
+                
+                <div class="install-step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Visit App URL</div>
+                    <div class="step-desc">Navigate to the mobile app link provided above</div>
+                </div>
+                
+                <div class="install-step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Allow GPS Access</div>
+                    <div class="step-desc">Grant location permissions when prompted for GPS functionality</div>
+                </div>
+                
+                <div class="install-step">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Install as App</div>
+                    <div class="step-desc">Look for "Add to Home Screen" or "Install App" option in browser menu</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentScreen = 'dashboard';
-        
-        function showScreen(screenName) {
-            // Hide all screens
-            document.querySelectorAll('.demo-screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
+        // Add interactive demo features
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AgriTrace360 Mobile App Preview Loaded');
             
-            // Show selected screen
-            document.getElementById(screenName + '-screen').classList.add('active');
-            
-            // Update nav active state
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            if (screenName === 'dashboard') {
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
-            } else if (screenName === 'scanner') {
-                document.querySelectorAll('.nav-item')[1].classList.add('active');
-            } else if (screenName === 'mapping') {
-                document.querySelectorAll('.nav-item')[2].classList.add('active');
+            // Simulate GPS coordinates updates
+            function updateGPSDemo() {
+                const latElement = document.querySelector('.coordinates div:first-child');
+                const lngElement = document.querySelector('.coordinates div:nth-child(2)');
+                
+                if (latElement && lngElement) {
+                    // Simulate slight GPS variations around Monrovia, Liberia
+                    const baseLat = 6.3106;
+                    const baseLng = -10.8047;
+                    const variation = 0.001;
+                    
+                    const newLat = baseLat + (Math.random() - 0.5) * variation;
+                    const newLng = baseLng + (Math.random() - 0.5) * variation;
+                    
+                    latElement.textContent = `Latitude: ${newLat.toFixed(4)}°N`;
+                    lngElement.textContent = `Longitude: ${Math.abs(newLng).toFixed(4)}°W`;
+                }
             }
             
-            currentScreen = screenName;
-        }
-        
-        function simulateScan() {
-            const commodities = [
-                { name: 'Premium Cocoa Beans', id: 'LR-2025-CCO-001', farm: 'Moses Tuah Farm' },
-                { name: 'Arabica Coffee', id: 'LR-2025-COF-002', farm: 'Sarah Konneh Farm' },
-                { name: 'Organic Palm Oil', id: 'LR-2025-PLM-003', farm: 'Marcus Bawah Farm' }
-            ];
+            // Update GPS demo every 3 seconds
+            setInterval(updateGPSDemo, 3000);
             
-            const random = commodities[Math.floor(Math.random() * commodities.length)];
-            
-            // Update scan result display
-            const resultDiv = document.querySelector('#scanner-screen .section-title').nextElementSibling.nextElementSibling;
-            resultDiv.innerHTML = `
-                <div style="color: #16a34a; font-weight: 600; margin-bottom: 10px;">✅ Scan Successful!</div>
-                <div style="font-size: 12px; color: #1e293b;">
-                    <strong>Commodity:</strong> ${random.name}<br>
-                    <strong>Batch ID:</strong> ${random.id}<br>
-                    <strong>Farm:</strong> ${random.farm}<br>
-                    <strong>Status:</strong> ✅ LACRA Certified<br>
-                    <strong>Scanned:</strong> Just now
-                </div>
-            `;
-        }
-        
-        function simulateMapping() {
-            const accuracy = document.getElementById('accuracy');
-            const satellites = document.getElementById('satellites');
-            
-            // Simulate GPS improvements
-            accuracy.textContent = (Math.random() * 2 + 2).toFixed(1) + 'm';
-            satellites.textContent = Math.floor(Math.random() * 5 + 10);
-            
-            // Update mapping progress
-            const points = Math.floor(Math.random() * 4 + 9);
-            const area = (Math.random() * 0.5 + 1.5).toFixed(1);
-            const perimeter = Math.floor(Math.random() * 100 + 500);
-            
-            const statusDiv = document.querySelector('#mapping-screen .stat-card').parentElement.nextElementSibling;
-            statusDiv.innerHTML = `
-                <div style="color: #16a34a; font-weight: 600; margin-bottom: 10px;">GPS Boundary Mapping</div>
-                <div style="font-size: 12px; color: #1e293b;">
-                    <strong>Points Collected:</strong> ${points}/12<br>
-                    <strong>Area Mapped:</strong> ${area} hectares<br>
-                    <strong>Perimeter:</strong> ${perimeter} meters<br>
-                    <strong>Status:</strong> ${points >= 12 ? '✅ Complete' : '🟡 In Progress'}
-                </div>
-            `;
-        }
-        
-        // Auto-update dashboard stats
-        setInterval(() => {
-            if (currentScreen === 'dashboard') {
-                const farmCount = document.getElementById('farm-count');
-                const complianceRate = document.getElementById('compliance-rate');
-                const inspections = document.getElementById('inspections');
-                const coordinates = document.getElementById('coordinates');
-                
-                // Simulate live data updates
-                const farms = Math.floor(Math.random() * 10) + 125;
-                const compliance = Math.floor(Math.random() * 5) + 93;
-                const inspectionCount = Math.floor(Math.random() * 5) + 20;
-                
-                farmCount.textContent = farms;
-                complianceRate.textContent = compliance + '%';
-                inspections.textContent = inspectionCount;
-                
-                // Simulate GPS coordinate updates
-                const lat = (6.4281 + (Math.random() - 0.5) * 0.001).toFixed(4);
-                const lng = (-9.4295 + (Math.random() - 0.5) * 0.001).toFixed(4);
-                coordinates.textContent = `${lat}°N, ${Math.abs(lng)}°W`;
-            }
-        }, 3000);
-        
-        // Initialize with dashboard view
-        showScreen('dashboard');
+            // Add click handlers for demo buttons
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const originalText = this.textContent;
+                    this.textContent = '✓ ' + originalText.substring(2);
+                    this.style.background = '#22c55e';
+                    
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.background = '#059669';
+                    }, 2000);
+                });
+            });
+        });
     </script>
 </body>
 </html>

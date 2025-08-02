@@ -166,6 +166,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect('/mobile');
   });
 
+  // Mobile app preview
+  app.get('/preview', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./mobile-app-preview.html'));
+  });
+
   // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');

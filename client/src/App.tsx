@@ -87,13 +87,9 @@ function Router() {
              userType === 'monitoring' ? <MonitoringDashboard /> :
              <Dashboard />}
           </Route>
-          <Route path="/">
-            {userType === 'farmer' ? <FarmerDashboard /> : 
-             userType === 'field_agent' ? <FieldAgentDashboard /> : 
-             userType === 'exporter' ? <ExporterDashboard /> :
-             userType === 'monitoring' ? <MonitoringDashboard /> :
-             localStorage.getItem("userRole") === 'director' ? <DirectorDashboard /> : <Dashboard />}
-          </Route>
+          
+          {/* NEVER redirect root to dashboards - always show Polipus main page */}
+          <Route path="/" component={FrontPage} />
           
           {/* Exporter Portal Routes */}
           <Route path="/exporter-dashboard">
@@ -249,10 +245,15 @@ function Router() {
       <Route path="/home" component={FrontPage} />
       <Route path="/main" component={FrontPage} />
       <Route path="/index" component={FrontPage} />
+      
+      {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />
       <Route path="/mobile-demo" component={MobileDemo} />
       <Route path="/mobile-app-simulator" component={MobileAppSimulator} />
       <Route path="/mobile-app-preview" component={MobileQRDisplay} />
+      
+      {/* Default fallback - Always Polipus Main Landing Page */}
+      <Route path="/" component={FrontPage} />
       
       <Route component={NotFound} />
     </Switch>
@@ -265,12 +266,13 @@ function App() {
   
   // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");
-  const isLandingPage = window.location.pathname === "/landing" && !authToken;
-  const isFrontPage = (window.location.pathname === "/" && !authToken) || 
+  const isLandingPage = window.location.pathname === "/landing";
+  const isFrontPage = window.location.pathname === "/" || 
                       window.location.pathname === "/front-page" || 
-                      window.location.pathname === "/home";
+                      window.location.pathname === "/home" ||
+                      window.location.pathname === "/main";
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
-  const isMonitoringDashboard = authToken && userType === 'monitoring';
+  const isMonitoringDashboard = window.location.pathname === "/monitoring-dashboard" && authToken && userType === 'monitoring';
   
   return (
     <QueryClientProvider client={queryClient}>

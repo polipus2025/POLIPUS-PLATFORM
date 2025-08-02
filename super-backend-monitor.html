@@ -1782,7 +1782,15 @@
 
         // Navigation function to go back to main platform
         function goToLanding() {
-            window.location.href = '/';
+            // Clear any authentication tokens first to access the public landing page
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userRole');
+            sessionStorage.removeItem('authToken');
+            sessionStorage.removeItem('userType');
+            
+            // Go to the front page (main landing)
+            window.location.href = '/front-page';
         }
 
         // Direct Support Function - Connect to AI Agent

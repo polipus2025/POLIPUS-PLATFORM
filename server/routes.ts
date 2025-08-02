@@ -151,6 +151,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve('./public/pwa-download-direct.html'));
   });
 
+  // Mobile App with GPS functionality (bypasses maintenance mode)
+  app.get('/mobile', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./mobile-app.html'));
+  });
+
+  // Alternative mobile routes
+  app.get('/mobile-app', (req, res) => {
+    res.redirect('/mobile');
+  });
+
+  app.get('/app', (req, res) => {
+    res.redirect('/mobile');
+  });
+
   // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
@@ -4289,6 +4304,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.path.includes('/access-blocked') ||
         req.path.includes('/admin-access') ||
         req.path.includes('/pwa') ||
+        req.path.includes('/mobile') ||
+        req.path.includes('/app') ||
         req.path.includes('/manifest.json') ||
         req.path.includes('/sw.js') ||
         req.path.includes('/pwa-icons/') ||

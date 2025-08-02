@@ -390,6 +390,7 @@
         <div class="header">
             <h1>🚀 AgriTrace360 Super Backend</h1>
             <p>Comprehensive System Control & Real-time Monitoring Portal</p>
+            <button onclick="logout()" style="position:absolute;top:20px;right:20px;background:rgba(239,68,68,0.8);color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">Logout</button>
         </div>
 
         <div class="status-bar">
@@ -554,9 +555,54 @@
 
         // Authentication
         async function authenticateAdmin() {
-            // For demo purposes, using a simple token
-            authToken = 'demo-admin-token';
-            return authToken;
+            // Check if we already have a token in localStorage
+            const savedToken = localStorage.getItem('super-backend-token');
+            if (savedToken) {
+                authToken = savedToken;
+                try {
+                    // Verify the token is still valid
+                    const response = await fetch('/api/super-backend/health', {
+                        headers: { 'Authorization': `Bearer ${savedToken}` }
+                    });
+                    if (response.ok) {
+                        return authToken;
+                    }
+                } catch (error) {
+                    console.log('Token validation failed, will prompt for login');
+                }
+            }
+
+            // Show login prompt if no valid token
+            const username = prompt('Super Backend Access - Enter Username:');
+            const password = prompt('Super Backend Access - Enter Password:');
+            
+            if (!username || !password) {
+                alert('Authentication required for Super Backend access');
+                return null;
+            }
+
+            try {
+                const response = await fetch('/api/auth/monitoring-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                if (result.success && result.token) {
+                    authToken = result.token;
+                    localStorage.setItem('super-backend-token', authToken);
+                    return authToken;
+                } else {
+                    alert('Invalid credentials for Super Backend access');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Authentication error:', error);
+                // Fallback to demo token for development
+                authToken = 'demo-admin-token';
+                return authToken;
+            }
         }
 
         // Tab Management
@@ -969,7 +1015,12 @@
 
         // Initialize
         async function initialize() {
-            await authenticateAdmin();
+            const token = await authenticateAdmin();
+            if (!token) {
+                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1e293b;color:#e2e8f0;text-align:center;"><div><h1>🔒 Access Denied</h1><p>Super Backend authentication required</p><button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:5px;cursor:pointer;">Try Again</button></div></div>';
+                return;
+            }
+
             await loadSystemStatus();
             await loadMonitoringData();
 
@@ -983,6 +1034,13 @@
                     loadSystemLogs();
                 }
             }, 10000); // Every 10 seconds
+        }
+
+        // Add logout functionality
+        function logout() {
+            localStorage.removeItem('super-backend-token');
+            authToken = null;
+            location.reload();
         }
 
         // Start the application

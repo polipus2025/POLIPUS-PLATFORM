@@ -51,12 +51,12 @@ import path from "path";
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
 
-// MAINTENANCE MODE - Set to true to enable maintenance mode
-const MAINTENANCE_MODE = true;
+// MAINTENANCE MODE - Set to false to disable maintenance mode
+const MAINTENANCE_MODE = false;
 
 // Access control state
 let isAccessBlocked = false;
-let maintenanceMessage = "Scheduled system maintenance in progress.";
+let maintenanceMessage = "System maintenance completed - AgriTrace360 dashboard is fully operational.";
 
 // Extend Express Request type to include user property
 declare global {
@@ -4297,10 +4297,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(process.cwd(), 'public/sw.js'));
   });
 
-  // Middleware to check access blocking for main routes
+  // Middleware to check maintenance mode and access blocking
   app.use((req, res, next) => {
-    // Allow access to the access control endpoints and static files
-    if (req.path.includes('/api/access') || 
+    // Allow access to API endpoints, static files, and special pages
+    if (req.path.includes('/api/') || 
         req.path.includes('/access-blocked') ||
         req.path.includes('/admin-access') ||
         req.path.includes('/pwa') ||
@@ -4315,6 +4315,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.path.includes('.ico')) {
       return next();
     }
+
+    // Maintenance mode is disabled - no redirect needed
+    // if (MAINTENANCE_MODE) {
+    //   return res.redirect('/service-blocked.html');
+    // }
 
     // If access is blocked, serve the blocked page
     if (isAccessBlocked) {

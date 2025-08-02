@@ -45,8 +45,8 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
-// MAINTENANCE MODE - Set to true to enable maintenance mode
-const MAINTENANCE_MODE = true;
+// MAINTENANCE MODE - Set to false to disable maintenance mode
+const MAINTENANCE_MODE = false;
 
 // Maintenance mode middleware - serve simple red protection page
 app.get('/', (req, res, next) => {

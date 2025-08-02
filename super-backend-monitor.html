@@ -781,6 +781,21 @@
                 </div>
 
                 <div class="control-panel">
+                    <div class="panel-header">🎮 Dashboard Access</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                        <button class="control-button" onclick="openSuperBackendDashboard()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 500;">
+                            🚀 Super Backend Dashboard
+                        </button>
+                        <button class="control-button" onclick="openCentralControlDashboard()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: 500;">
+                            🌐 Central Control Dashboard
+                        </button>
+                    </div>
+                    <div style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">
+                        Quick access to advanced platform management dashboards
+                    </div>
+                </div>
+
+                <div class="control-panel">
                     <div class="panel-header">⚡ Performance</div>
                     <button class="control-button" onclick="compressAssets()">Compress Assets</button>
                     <button class="control-button" onclick="updateIndexes()">Update Search Indexes</button>
@@ -1793,6 +1808,37 @@
                 <strong>Next Steps:</strong> I can guide you to the appropriate tab or help configure specific settings. What would you like me to help you with?<br><br>
                 <em>💡 I have full access to your platform and can apply fixes directly.</em>
             `;
+        }
+
+        // Dashboard Access Functions
+        function openSuperBackendDashboard() {
+            const currentHost = window.location.host;
+            const protocol = window.location.protocol;
+            const superBackendUrl = `${protocol}//${currentHost}/monitor`;
+            
+            // Open in new tab with authentication
+            const newWindow = window.open(superBackendUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+            if (newWindow) {
+                newWindow.focus();
+                console.log('Opening Super Backend Dashboard:', superBackendUrl);
+            } else {
+                alert('Please allow popups to access the Super Backend Dashboard');
+            }
+        }
+
+        function openCentralControlDashboard() {
+            const currentHost = window.location.host;
+            const protocol = window.location.protocol;
+            const centralControlUrl = `${protocol}//${currentHost}/central-control`;
+            
+            // Open in new tab with authentication
+            const newWindow = window.open(centralControlUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+            if (newWindow) {
+                newWindow.focus();
+                console.log('Opening Central Control Dashboard:', centralControlUrl);
+            } else {
+                alert('Please allow popups to access the Central Control Dashboard');
+            }
         }
 
         // Start the application

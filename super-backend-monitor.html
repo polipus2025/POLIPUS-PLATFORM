@@ -992,8 +992,8 @@
 
         // Manual login function for when user wants to use real credentials
         async function manualLogin() {
-            const username = prompt('Super Backend Access - Enter Username:');
-            const password = prompt('Super Backend Access - Enter Password:');
+            const username = prompt('Enter Username:\n(Use: monitor001)');
+            const password = prompt('Enter Password:\n(Use: monitor123)');
             
             if (!username || !password) {
                 alert('Username and password required');
@@ -1576,23 +1576,27 @@
                 // Add the script functions to window
                 window.startLogin = function() {
                     localStorage.removeItem('logout-flag');
-                    const username = prompt('Super Backend Access - Enter Username:');
-                    const password = prompt('Super Backend Access - Enter Password:');
+                    const username = prompt('Enter Username:\n(Use: monitor001)');
+                    const password = prompt('Enter Password:\n(Use: monitor123)');
                     if (username && password) {
+                        console.log('Attempting login...');
                         fetch('/api/auth/monitoring-login', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ username, password })
                         }).then(r => r.json()).then(result => {
+                            console.log('Login result:', result);
                             if (result.success && result.token) {
                                 localStorage.setItem('super-backend-token', result.token);
+                                localStorage.removeItem('logout-flag');
+                                alert('Login successful! Loading dashboard...');
                                 location.reload();
                             } else {
-                                alert('Invalid credentials. Try: monitor001 / monitor123');
+                                alert('Login failed. Use:\nUsername: monitor001\nPassword: monitor123');
                             }
                         }).catch(error => {
                             console.error('Login error:', error);
-                            alert('Login failed. Please try again.');
+                            alert('Login failed. Please check your network connection.');
                         });
                     }
                 };

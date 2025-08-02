@@ -184,6 +184,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect('/super-backend');
   });
 
+  // Central Control Dashboard - Enhanced Super Backend
+  app.get('/control-center', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./central-control.html'));
+  });
+  app.get('/control-center', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./central-control.html'));
+  });
+
   // ==================== SUPER BACKEND CONTROL SYSTEM ====================
   
   // Super Backend Authentication Middleware (more permissive for demo)

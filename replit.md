@@ -24,7 +24,7 @@ The application employs a modern full-stack architecture with a clear separation
 - **Database**: PostgreSQL, managed with Drizzle ORM (PostgreSQL dialect) and Drizzle Kit for schema migrations. Uses JWT tokens and bcrypt for authentication.
 - **Authentication**: A three-tier, role-based authentication system with separate portals for regulatory staff, farmers, field agents, and exporters. Includes JWT token-based session management and secure bcrypt password hashing.
 - **Geographic Integration**: Authentic Liberian geographic data, including all 15 counties, major cities, and transportation networks, is integrated into the GIS mapping system.
-- **Mobile Integration**: Progressive Web App (PWA) implementation with mobile installation, offline functionality, and optimized interfaces. Features GPS mapping, QR code scanning, and push notifications.
+- **Mobile Integration**: Complete Progressive Web App (PWA) implementation with comprehensive mobile standalone functionality. Features automatic installation prompts, offline-first architecture, service worker caching, background sync, push notifications, custom app icons, platform-specific installation guides, and native app-like experience. Includes PWA-enabled protection page for secure deployment.
 - **Messaging**: A comprehensive cross-portal internal messaging system with threading, role-based filtering, unread tracking, and blinking red notification indicators.
 - **Reporting & Analytics**: Advanced statistics dashboards, audit trail monitoring, and comprehensive county agricultural reports with PDF download capabilities.
 - **Simulation**: Real-time simulation system for commodities data, demonstrating dynamic compliance rates and updates.

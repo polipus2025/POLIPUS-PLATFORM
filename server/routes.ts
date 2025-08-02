@@ -104,6 +104,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve('./public/protection.js'));
   });
 
+  // PWA Installation Scripts and Assets
+  app.get('/pwa-install.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.resolve('./public/pwa-install.js'));
+  });
+
+  // PWA Mobile Guide
+  app.get('/pwa-mobile-guide', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./pwa-mobile-guide.html'));
+  });
+
+  // PWA Icon Generator
+  app.get('/pwa-icons/generate', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./public/pwa-icons/generate-icons.html'));
+  });
+
   // Keep old maintenance pages accessible for admin
   app.get('/maintenance.html', (req, res) => {
     res.setHeader('Content-Type', 'text/html');

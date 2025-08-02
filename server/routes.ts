@@ -122,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve('./public/pwa-icons/generate-icons.html'));
   });
 
-  // PWA Download Page - Direct installation links
+  // PWA Download Page - Direct installation links (bypass maintenance mode)
   app.get('/pwa-download', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.sendFile(path.resolve('./pwa-download.html'));
@@ -143,6 +143,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/install', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.sendFile(path.resolve('./simple-pwa.html'));
+  });
+
+  // Direct PWA download that bypasses maintenance mode
+  app.get('/pwa-download-direct', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.resolve('./public/pwa-download-direct.html'));
   });
 
   // Keep old maintenance pages accessible for admin

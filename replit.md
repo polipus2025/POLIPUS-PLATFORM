@@ -23,6 +23,7 @@ Preferred communication style: Simple, everyday language.
   8. System Configuration
 - **ACCESS POINTS**: Multiple routes (/front-page, /home, /main, /index) all point to Polipus main landing page
 - **LOGIN ACCESS**: Through Agricultural Traceability module → /landing → portal login options
+- **MONITORING PORTAL FIX**: Login flow fixed - monitoring users now stay in monitoring dashboard after login
 
 ## System Architecture
 

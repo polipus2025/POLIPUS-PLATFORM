@@ -277,7 +277,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage || (authToken && userType === 'monitoring')) ? (
+        {(isAuthPage || isLandingPage || isFrontPage || isMonitoringDashboard) ? (
           // Render auth/landing pages or special dashboards without layout
           <div className="min-h-screen">
             <Router />

@@ -215,7 +215,6 @@ function Router() {
           </Route>
           
           <Route path="/director-dashboard" component={DirectorDashboard} />
-          <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
           <Route path="/mobile-app-dashboard">
             <ProtectedRoute 
               component={MobileAppDashboard} 
@@ -247,6 +246,9 @@ function Router() {
       
       {/* ALWAYS AVAILABLE - Landing page route - Polipus Main Page */}
       <Route path="/landing" component={FrontPage} />
+      
+      {/* ALWAYS AVAILABLE - Monitoring Dashboard */}
+      <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
       
       {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />

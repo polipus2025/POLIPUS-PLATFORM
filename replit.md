@@ -8,9 +8,10 @@ AgriTrace360™ is a comprehensive web application for the Liberia Agriculture C
 
 Preferred communication style: Simple, everyday language.
 
-## Main Landing Page Configuration (CONFIRMED & CLEANED)
-- **PRIMARY HOMEPAGE**: Main landing page displays Polipus logo with 8 modules and login buttons
-- **DEFAULT ROUTE**: Root path (/) serves FrontPage component with Polipus branding
+## Main Landing Page Configuration (CONFIRMED & FINAL)
+- **PRIMARY HOMEPAGE**: Polipus main page with 8 modules and login buttons is the ONLY landing page
+- **LANDING PAGE ROUTE**: /landing shows Polipus main page (FrontPage component) - CONFIRMED CORRECT
+- **DEFAULT ROUTES**: All main routes (/, /front-page, /home, /main, /index, /landing) serve Polipus FrontPage
 - **CLEAN SYSTEM STATUS**: Deep system cleanup completed - cache cleared, processes restarted
 - **MODULE STRUCTURE**: 8 distinct modules confirmed:
   1. Agricultural Traceability & Compliance (ACTIVE - provides login access)
@@ -21,11 +22,12 @@ Preferred communication style: Simple, everyday language.
   6. User Management
   7. Document Management
   8. System Configuration
-- **ACCESS POINTS**: Multiple routes (/front-page, /home, /main, /index) all point to Polipus main landing page
-- **LOGIN ACCESS**: Through Agricultural Traceability module → /landing → portal login options
-- **MONITORING PORTAL FIX**: Login flow fixed - monitoring users now stay in monitoring dashboard after login
-- **ADMIN CONTROLS**: Super Backend and Central Control dashboard buttons moved exclusively to Platform Monitoring Dashboard
-- **INDEPENDENT LOGOUT**: Super Backend and Central Control dashboards now logout independently and return directly to Platform Monitoring Dashboard
+- **ACCESS POINTS**: Multiple routes all point to Polipus main landing page
+- **LOGIN ACCESS**: Through Agricultural Traceability module → /portals → portal login options
+- **MONITORING PORTAL FIX**: Login flow fixed - monitoring users stay in monitoring dashboard after login
+- **ADMIN CONTROLS**: Super Backend and Central Control dashboard buttons exclusively on Platform Monitoring Dashboard
+- **NAVIGATION**: Back to Monitoring buttons added to Mobile App Dashboard and Central Control Dashboard
+- **INDEPENDENT LOGOUT**: Both admin dashboards logout independently and return to Platform Monitoring Dashboard
 
 ## System Architecture
 

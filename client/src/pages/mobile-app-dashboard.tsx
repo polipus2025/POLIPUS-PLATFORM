@@ -17,7 +17,9 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Settings
+  Settings,
+  ArrowLeft,
+  LogOut
 } from 'lucide-react';
 
 const MobileAppDashboard: React.FC = () => {
@@ -70,9 +72,36 @@ const MobileAppDashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <Smartphone className="h-8 w-8 text-green-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Mobile App Dashboard</h1>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Smartphone className="h-8 w-8 text-green-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Mobile App Dashboard</h1>
+          </div>
+          
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = '/monitoring-dashboard'}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Monitoring
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={() => {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userType");
+                window.location.href = "/monitoring-dashboard";
+              }}
+              className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
         <p className="text-gray-600 text-lg">
           AgriTrace360™ LACRA Mobile Application Management & Analytics

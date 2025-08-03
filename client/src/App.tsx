@@ -245,8 +245,8 @@ function Router() {
       <Route path="/main" component={FrontPage} />
       <Route path="/index" component={FrontPage} />
       
-      {/* ALWAYS AVAILABLE - Landing page route */}
-      <Route path="/landing" component={Landing} />
+      {/* ALWAYS AVAILABLE - Landing page route - Polipus Main Page */}
+      <Route path="/landing" component={FrontPage} />
       
       {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />

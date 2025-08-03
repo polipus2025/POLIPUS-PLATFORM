@@ -30,7 +30,7 @@ export default function FrontPage() {
       title: 'Agricultural Traceability & Compliance',
       icon: Wheat,
       color: 'bg-green-500',
-      route: '/landing',
+      route: '/portals',
       isAgriTrace: true
     },
     {

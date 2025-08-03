@@ -27,10 +27,36 @@
             position: relative;
         }
 
-        .logout-button {
+        .nav-buttons {
             position: absolute;
             top: 20px;
             right: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .logout-button {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             border: none;
@@ -298,9 +324,14 @@
     <div class="header">
         <h1>🎛️ Central Control Dashboard</h1>
         <p>Complete Platform Management & Administrative Controls</p>
-        <button onclick="logout()" class="logout-button" style="position:absolute;top:20px;right:20px;background:linear-gradient(135deg, #ef4444, #dc2626);color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:0.9rem;transition:all 0.3s ease;">
-            🚪 Logout
-        </button>
+        <div class="nav-buttons">
+            <button class="back-button" onclick="backToMonitoring()">
+                ← Back to Monitoring
+            </button>
+            <button onclick="logout()" class="logout-button">
+                🚪 Logout
+            </button>
+        </div>
         <button onclick="openDirectSupport()" style="position:absolute;top:80px;right:20px;background:rgba(34,197,94,0.8);color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:500;font-size:1rem;display:flex;align-items:center;gap:8px;transition:all 0.3s ease;">
             💬 Direct Support
         </button>
@@ -1899,6 +1930,11 @@
             
             addSecurityLog(randomMessage, randomType);
         }, 6000);
+
+        // Back to Monitoring function
+        function backToMonitoring() {
+            window.location.href = '/monitoring-dashboard';
+        }
 
         // Logout function
         function logout() {

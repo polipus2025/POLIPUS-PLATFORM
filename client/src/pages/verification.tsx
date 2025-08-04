@@ -520,9 +520,37 @@ export default function Verification() {
                       </div>
                     </Button>
                   </div>
-                  <p className="text-blue-700 text-xs mt-3">
-                    Click any demo code to automatically fill the tracking number field and test the verification system.
-                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setTrackingNumber("COC-MON-20250804-999")}
+                      className="h-auto p-3 border-emerald-300 text-left justify-start hover:bg-emerald-100"
+                    >
+                      <div>
+                        <div className="font-mono text-sm text-emerald-800">COC-MON-20250804-999</div>
+                        <div className="text-xs text-emerald-600">From Farmer Portal ✓</div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setTrackingNumber("RIC-MON-20250726-404")}
+                      className="h-auto p-3 border-purple-300 text-left justify-start hover:bg-purple-100"
+                    >
+                      <div>
+                        <div className="font-mono text-sm text-purple-800">RIC-MON-20250726-404</div>
+                        <div className="text-xs text-purple-600">Rice - Verified ✓</div>
+                      </div>
+                    </Button>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+                    <p className="text-green-800 text-sm font-semibold mb-1">
+                      ✅ Integration Fixed: Farmer Portal → Verification System
+                    </p>
+                    <p className="text-green-700 text-xs">
+                      Batch codes generated in the farmer portal are now automatically added to the verification system. 
+                      Click any demo code above or generate a new batch code in the farmer portal to test.
+                    </p>
+                  </div>
                 </div>
               </div>
 

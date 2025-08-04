@@ -10,15 +10,51 @@ const app = express();
 // MAINTENANCE MODE - ENABLED - Red maintenance page active (PRIORITY ROUTE)
 const MAINTENANCE_MODE = true;
 
+// Direct maintenance page route for testing  
+app.get('/maintenance-test', (req, res) => {
+  try {
+    const htmlPath = path.join(process.cwd(), 'maintenance.html');
+    const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.send(htmlContent);
+  } catch (error) {
+    console.error('Error serving test maintenance page:', error);
+    res.status(503).send('<h1>Test Maintenance Page Error</h1>');
+  }
+});
+
+// Simple test route
+app.get('/test-red', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head><title>Test Red Page</title></head>
+    <body style="background: red; color: white; padding: 20px; font-family: Arial;">
+      <h1>🔴 RED TEST PAGE</h1>
+      <p>If you can see this, the server is working!</p>
+      <p>Time: ${new Date().toISOString()}</p>
+      <a href="/" style="color: yellow;">Back to Home</a>
+    </body>
+    </html>
+  `);
+});
+
 // Serve red maintenance page as landing page - BEFORE any middleware
 app.get('/', (req, res, next) => {
   if (MAINTENANCE_MODE) {
+    console.log('[MAINTENANCE] Serving maintenance page for root request');
     try {
-      const htmlContent = fs.readFileSync('./maintenance.html', 'utf8');
+      const htmlPath = path.join(process.cwd(), 'maintenance.html');
+      const htmlContent = fs.readFileSync(htmlPath, 'utf8');
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+      res.setHeader('X-Maintenance-Mode', 'active');
+      console.log('[MAINTENANCE] Successfully served maintenance page');
       return res.send(htmlContent);
     } catch (error) {
       console.error('Error serving maintenance page:', error);
@@ -199,12 +235,15 @@ app.get('/mobile-access', (req, res) => {
       }
       
       // Serve maintenance page for all other requests
+      console.log('[MAINTENANCE] Serving maintenance page for:', req.path);
       try {
-        const htmlContent = fs.readFileSync('./maintenance.html', 'utf8');
+        const htmlPath = path.join(process.cwd(), 'maintenance.html');
+        const htmlContent = fs.readFileSync(htmlPath, 'utf8');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
+        res.setHeader('X-Maintenance-Mode', 'active');
         res.send(htmlContent);
       } catch (error) {
         console.error('Error serving maintenance page:', error);

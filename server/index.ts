@@ -8,7 +8,7 @@ import fs from "fs";
 const app = express();
 
 // MAINTENANCE MODE - ENABLED - Red maintenance page active
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 // Direct maintenance page route for testing  
 app.get('/maintenance-test', (req, res) => {

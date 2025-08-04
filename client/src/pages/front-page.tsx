@@ -18,7 +18,10 @@ import {
   ArrowRight,
   CheckCircle,
   Globe,
-  Satellite
+  Satellite,
+  TreePine,
+  Waves,
+  DollarSign
 } from 'lucide-react';
 import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
@@ -31,56 +34,64 @@ export default function FrontPage() {
       icon: Wheat,
       color: 'bg-green-500',
       route: '/portals',
-      isAgriTrace: true
+      isAgriTrace: true,
+      description: 'Complete agricultural commodity tracking & LACRA compliance system'
     },
     {
       id: 2,
-      title: 'Supply Chain Management',
+      title: 'Live Trace',
       icon: Truck,
       color: 'bg-blue-500',
-      route: '/supply-chain'
+      route: '/live-trace',
+      description: 'Livestock movement monitoring and control system'
     },
     {
       id: 3,
-      title: 'Compliance & Certification',
-      icon: Shield,
+      title: 'Land Map360',
+      icon: MapPin,
       color: 'bg-purple-500',
-      route: '/compliance'
+      route: '/land-map360',
+      description: 'Land mapping and dispute prevention services'
     },
     {
       id: 4,
-      title: 'Analytics & Reporting',
-      icon: BarChart3,
+      title: 'Mine Watch',
+      icon: Shield,
       color: 'bg-orange-500',
-      route: '/analytics'
+      route: '/mine-watch',
+      description: 'Mineral resource protection and community safeguarding'
     },
     {
       id: 5,
-      title: 'Enhanced GIS Mapping',
-      icon: Satellite,
+      title: 'Forest Guard',
+      icon: TreePine,
       color: 'bg-teal-500',
-      route: '/enhanced-gis-mapping'
+      route: '/forest-guard',
+      description: 'Forest protection and carbon credit management'
     },
     {
       id: 6,
-      title: 'User Management',
-      icon: Users,
+      title: 'Aqua Trace',
+      icon: Waves,
       color: 'bg-indigo-500',
-      route: '/users'
+      route: '/aqua-trace',
+      description: 'Ocean & river monitoring with fishing rights protection'
     },
     {
       id: 7,
-      title: 'Document Management',
-      icon: FileText,
-      color: 'bg-red-500',
-      route: '/documents'
+      title: 'Blue Carbon 360',
+      icon: DollarSign,
+      color: 'bg-cyan-500',
+      route: '/blue-carbon360',
+      description: 'Conservation economics and real economic benefits'
     },
     {
       id: 8,
-      title: 'System Configuration',
-      icon: Settings,
-      color: 'bg-gray-500',
-      route: '/settings'
+      title: 'Environment Protection Agency',
+      icon: Globe,
+      color: 'bg-emerald-500',
+      route: '/epa-portal',
+      description: 'Environmental monitoring and carbon credit certification'
     }
   ];
 
@@ -173,46 +184,37 @@ export default function FrontPage() {
               return (
                 <div 
                   key={module.id} 
-                  className={`
-                    isms-card transition-all duration-300 h-64 flex flex-col
-                    ${module.isAgriTrace ? 'border-green-500 hover:shadow-lg hover:scale-105' : 'opacity-60 cursor-not-allowed'}
-                  `}
+                  className="isms-card transition-all duration-300 h-80 flex flex-col hover:shadow-lg hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
                 >
-                  {module.isAgriTrace ? (
-                    <Link href={module.route} className="flex-1 relative block group">
-                      <div className="flex flex-col items-center text-center space-y-4 h-full justify-center">
-                        <div className="w-16 h-16 rounded-2xl isms-icon-bg-green flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <IconComponent className="h-8 w-8 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-900 mb-2">{module.title}</h3>
-                          <Badge className="bg-green-100 text-green-800 border-green-200">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Active
-                          </Badge>
-                        </div>
-                        <Button className="isms-button w-full">
-                          <ArrowRight className="h-4 w-4 mr-2" />
-                          Enter Platform
-                        </Button>
+                  <Link href={module.route} className="flex-1 relative block group">
+                    <div className="flex flex-col items-center text-center space-y-3 h-full justify-center p-4">
+                      <div className={`w-16 h-16 rounded-2xl ${module.isAgriTrace ? 'isms-icon-bg-green' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <IconComponent className="h-8 w-8 text-white" />
                       </div>
-                    </Link>
-                  ) : (
-                    <div className="flex flex-col items-center text-center space-y-4 h-full justify-center p-4">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                        <IconComponent className="h-8 w-8 text-slate-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium text-slate-500 mb-2">{module.title}</h3>
-                        <Badge variant="outline" className="text-slate-500 border-slate-300">
-                          Coming Soon
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">{module.title}</h3>
+                        {module.description && (
+                          <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                            {module.description}
+                          </p>
+                        )}
+                        <Badge className={module.isAgriTrace ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
+                          {module.isAgriTrace ? (
+                            <>
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Active
+                            </>
+                          ) : (
+                            "Coming Soon"
+                          )}
                         </Badge>
                       </div>
-                      <p className="text-xs text-slate-400">
-                        This module is under development
-                      </p>
+                      <Button className={`w-full ${module.isAgriTrace ? 'isms-button' : 'bg-slate-400 hover:bg-slate-500'}`}>
+                        <ArrowRight className="h-4 w-4 mr-2" />
+                        {module.isAgriTrace ? 'Enter Platform' : 'View Details'}
+                      </Button>
                     </div>
-                  )}
+                  </Link>
                 </div>
               );
             })}

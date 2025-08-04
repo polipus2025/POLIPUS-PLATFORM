@@ -48,6 +48,15 @@ import MobileDemo from "@/pages/mobile-demo";
 import MobileAppSimulator from "@/pages/mobile-app-simulator";
 import MobileQRDisplay from "@/pages/mobile-qr-display";
 
+// New Portal Pages
+import LiveTracePortal from "@/pages/portals/live-trace-portal";
+import LandMap360Portal from "@/pages/portals/land-map360-portal";
+import MineWatchPortal from "@/pages/portals/mine-watch-portal";
+import ForestGuardPortal from "@/pages/portals/forest-guard-portal";
+import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
+import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
+import EPAPortal from "@/pages/portals/epa-portal";
+
 import NotFound from "@/pages/not-found";
 
 // Helper component to check user access to routes
@@ -249,6 +258,15 @@ function Router() {
       
       {/* ALWAYS AVAILABLE - Monitoring Dashboard */}
       <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
+      
+      {/* New Portal Routes - Public Access for Coming Soon Pages */}
+      <Route path="/live-trace" component={LiveTracePortal} />
+      <Route path="/land-map360" component={LandMap360Portal} />
+      <Route path="/mine-watch" component={MineWatchPortal} />
+      <Route path="/forest-guard" component={ForestGuardPortal} />
+      <Route path="/aqua-trace" component={AquaTracePortal} />
+      <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
+      <Route path="/epa-portal" component={EPAPortal} />
       
       {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />

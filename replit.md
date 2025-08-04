@@ -15,15 +15,15 @@ Preferred communication style: Simple, everyday language.
 - **LANDING PAGE ROUTE**: /landing shows Polipus main page (FrontPage component) - CONFIRMED CORRECT
 - **DEFAULT ROUTES**: All main routes (/, /front-page, /home, /main, /index, /landing) serve Polipus FrontPage
 - **CLEAN SYSTEM STATUS**: Deep system cleanup completed - cache cleared, processes restarted
-- **MODULE STRUCTURE**: 8 distinct modules confirmed:
-  1. Agricultural Traceability & Compliance (ACTIVE - provides login access)
-  2. Supply Chain Management  
-  3. Compliance & Certification
-  4. Analytics & Reporting
-  5. Enhanced GIS Mapping
-  6. User Management
-  7. Document Management
-  8. System Configuration
+- **MODULE STRUCTURE**: 8 specialized modules confirmed:
+  1. Agricultural Traceability & Compliance (ACTIVE - complete LACRA system with all existing functions)
+  2. Live Trace (Livestock movement monitoring and control system)
+  3. Land Map360 (Land mapping and dispute prevention services)
+  4. Mine Watch (Mineral resource protection and community safeguarding)
+  5. Forest Guard (Forest protection and carbon credit management)
+  6. Aqua Trace (Ocean & river monitoring with fishing rights protection)
+  7. Blue Carbon 360 (Conservation economics and real economic benefits)
+  8. Environment Protection Agency (Environmental monitoring and carbon credit certification)
 - **ACCESS POINTS**: Multiple routes all point to Polipus main landing page
 - **LOGIN ACCESS**: Through Agricultural Traceability module → /portals → portal login options
 - **MONITORING PORTAL FIX**: Login flow fixed - monitoring users stay in monitoring dashboard after login

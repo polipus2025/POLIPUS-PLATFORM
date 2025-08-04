@@ -7,14 +7,8 @@ import fs from "fs";
 
 const app = express();
 
-// MAINTENANCE MODE - ENABLED - Red maintenance page active (PRIORITY ROUTE)
+// MAINTENANCE MODE - ENABLED - Red maintenance page active
 const MAINTENANCE_MODE = true;
-
-// Override NODE_ENV to production when in maintenance mode to bypass Vite
-if (MAINTENANCE_MODE) {
-  process.env.NODE_ENV = 'production';
-  console.log('[MAINTENANCE] Forcing production mode to bypass Vite');
-}
 
 // Direct maintenance page route for testing  
 app.get('/maintenance-test', (req, res) => {
@@ -48,24 +42,10 @@ app.get('/test-red', (req, res) => {
   `);
 });
 
-// Serve maintenance page directly at root
-app.get('/', (req, res, next) => {
-  if (MAINTENANCE_MODE) {
-    console.log('[MAINTENANCE] Serving maintenance page directly');
-    try {
-      const htmlPath = path.join(process.cwd(), 'maintenance.html');
-      const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      return res.send(htmlContent);
-    } catch (error) {
-      console.error('Error serving maintenance page:', error);
-      return res.status(503).send('<h1>System Maintenance</h1><p>Please try again later.</p>');
-    }
-  }
-  next();
+// CLEAN MAINTENANCE ROUTE - Serve red maintenance page
+app.get('/', (req, res) => {
+  console.log('[MAINTENANCE] Loading red maintenance page');
+  res.sendFile('maintenance.html', { root: '.' });
 });
 
 // Security and CORS headers for production deployment
@@ -222,15 +202,11 @@ app.get('/mobile-access', (req, res) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "development" && !MAINTENANCE_MODE) {
+  // Clean setup - no Vite in maintenance mode
+  if (!MAINTENANCE_MODE && app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    // Serve static files when in production or maintenance mode
     app.use(express.static('.'));
-    console.log('[SERVER] Static file serving enabled');
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT

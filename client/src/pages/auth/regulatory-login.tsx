@@ -64,7 +64,7 @@ export default function RegulatoryLogin() {
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("userType", "regulatory");
         
-        // Redirect to dashboard
+        // Redirect to regulatory dashboard
         window.location.href = "/dashboard";
       }
     } catch (error: any) {

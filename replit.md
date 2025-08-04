@@ -10,7 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 **Maintenance Page Preference**: Always use the generic maintenance page template (red gradient background, "Website Maintenance" title, no specific branding) for any maintenance page requests. This template is stored in server/index.ts as inline HTML.
 
-**Module Development Strategy**: Ready to simultaneously develop all 7 new modules (Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, EPA Portal) with complete functionality, maintaining consistent ISMS.online-inspired design system and professional standards from AgriTrace360. Will create full database schemas, backend APIs, frontend interfaces, and cross-module integration for each portal.
+**Module Development Strategy**: Ready to simultaneously develop all 7 new modules (Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, Carbon Trace) with complete functionality, maintaining consistent ISMS.online-inspired design system and professional standards from AgriTrace360. Will create full database schemas, backend APIs, frontend interfaces, and cross-module integration for each portal.
 
 ## Main Landing Page Configuration (CONFIRMED & FINAL)
 - **PRIMARY HOMEPAGE**: Polipus main page with 8 modules and login buttons is the ONLY landing page
@@ -25,7 +25,7 @@ Preferred communication style: Simple, everyday language.
   5. Forest Guard (Forest protection and carbon credit management)
   6. Aqua Trace (Ocean & river monitoring with fishing rights protection)
   7. Blue Carbon 360 (Conservation economics and real economic benefits)
-  8. Environment Protection Agency (Environmental monitoring and carbon credit certification)
+  8. Carbon Trace (Environmental monitoring and carbon credit certification)
 - **ACCESS POINTS**: Multiple routes all point to Polipus main landing page
 - **LOGIN ACCESS**: Through Agricultural Traceability module → /portals → portal login options
 - **MONITORING PORTAL FIX**: Login flow fixed - monitoring users stay in monitoring dashboard after login

@@ -15,7 +15,7 @@ import {
   Shield
 } from 'lucide-react';
 
-export default function EPAPortal() {
+export default function CarbonTracePortal() {
   const features = [
     {
       title: 'Environmental Monitoring',
@@ -46,7 +46,7 @@ export default function EPAPortal() {
   return (
     <div className="min-h-screen isms-gradient">
       <Helmet>
-        <title>EPA Portal - Environment Protection Agency</title>
+        <title>Carbon Trace Portal - Environmental Monitoring</title>
         <meta name="description" content="Environmental monitoring and carbon credit certification" />
       </Helmet>
 
@@ -58,7 +58,7 @@ export default function EPAPortal() {
               <Globe className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Environment Protection Agency</h1>
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Carbon Trace</h1>
           <p className="text-xl text-slate-600 mb-6">
             Environmental Monitoring and Carbon Credit Certification
           </p>
@@ -95,9 +95,9 @@ export default function EPAPortal() {
             </div>
             <h2 className="text-2xl font-bold text-slate-900 mb-4">Development In Progress</h2>
             <p className="text-slate-600 mb-8 max-w-2xl mx-auto">
-              The Environment Protection Agency portal is currently under development. This 
-              comprehensive environmental oversight platform will provide monitoring, carbon 
-              credit certification, compliance oversight, and impact reporting capabilities.
+              The Carbon Trace portal is currently under development. This comprehensive 
+              environmental monitoring platform will provide carbon tracking, credit certification, 
+              environmental compliance oversight, and impact reporting capabilities.
             </p>
             <div className="flex justify-center gap-4">
               <Link href="/">

@@ -55,7 +55,7 @@ import MineWatchPortal from "@/pages/portals/mine-watch-portal";
 import ForestGuardPortal from "@/pages/portals/forest-guard-portal";
 import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
 import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
-import EPAPortal from "@/pages/portals/epa-portal";
+import CarbonTracePortal from "@/pages/portals/carbon-trace-portal";
 
 import NotFound from "@/pages/not-found";
 
@@ -266,7 +266,7 @@ function Router() {
       <Route path="/forest-guard" component={ForestGuardPortal} />
       <Route path="/aqua-trace" component={AquaTracePortal} />
       <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
-      <Route path="/epa-portal" component={EPAPortal} />
+      <Route path="/carbon-trace" component={CarbonTracePortal} />
       
       {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />

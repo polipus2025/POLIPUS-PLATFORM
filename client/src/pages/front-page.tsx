@@ -87,10 +87,10 @@ export default function FrontPage() {
     },
     {
       id: 8,
-      title: 'Environment Protection Agency',
+      title: 'Carbon Trace',
       icon: Globe,
       color: 'bg-emerald-500',
-      route: '/epa-portal',
+      route: '/carbon-trace',
       description: 'Environmental monitoring and carbon credit certification'
     }
   ];

@@ -51,7 +51,7 @@ app.get('/', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriTrace360 - Maintenance Mode | LACRA</title>
+    <title>Website Maintenance</title>
     <style>
         * {
             margin: 0;
@@ -86,22 +86,6 @@ app.get('/', (req, res) => {
             height: 5px;
             background: linear-gradient(90deg, #dc2626, #991b1b, #7f1d1d);
         }
-        .logo-section {
-            margin-bottom: 2rem;
-        }
-        .logo {
-            width: 120px;
-            height: 80px;
-            background: linear-gradient(45deg, #10B981, #059669);
-            border-radius: 15px;
-            margin: 0 auto 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
         .maintenance-icon {
             font-size: 4rem;
             margin-bottom: 1.5rem;
@@ -132,30 +116,23 @@ app.get('/', (req, res) => {
 </head>
 <body>
     <div class="maintenance-container">
-        <!-- Logo and Branding -->
-        <div class="logo-section">
-            <div class="logo">LACRA</div>
-            <h1 style="font-size: 1.8rem; color: #dc2626; margin-bottom: 0.5rem;">AgriTrace360</h1>
-            <p style="color: #6B7280;">Agricultural Traceability Platform</p>
-        </div>
-
         <!-- Maintenance Content -->
-        <div class="maintenance-icon">🔴</div>
-        <h2 class="maintenance-title">System Maintenance in Progress</h2>
+        <div class="maintenance-icon">⚙️</div>
+        <h2 class="maintenance-title">Site Under Maintenance</h2>
         <p class="maintenance-subtitle">
-            We're currently upgrading our agricultural traceability platform to enhance your experience. 
-            Our team is working to bring you improved features and performance.
+            We're currently performing scheduled maintenance to improve our services. 
+            Our team is working to complete these updates as quickly as possible.
         </p>
         
         <div class="progress-container">
             <p style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Maintenance Status</p>
-            <p style="color: #6B7280;">✓ Database optimization complete</p>
-            <p style="color: #6B7280;">✓ Security updates applied</p>
-            <p style="color: #dc2626;">⚙️ Feature enhancements in progress...</p>
+            <p style="color: #6B7280;">✓ System updates applied</p>
+            <p style="color: #6B7280;">✓ Security enhancements complete</p>
+            <p style="color: #dc2626;">⚙️ Performance optimizations in progress...</p>
         </div>
         
         <p style="color: #9CA3AF; font-size: 0.9rem; margin-top: 2rem;">
-            Expected completion: Soon | Auto-refresh in 5 minutes
+            We'll be back online shortly | Auto-refresh in 5 minutes
         </p>
     </div>
 

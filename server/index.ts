@@ -58,6 +58,40 @@ app.get('/', (req, res, next) => {
   next();
 });
 
+// Polipus maintenance page routes (direct HTML serving, bypassing Vite)
+app.get('/polipus-maintenance', (req, res) => {
+  const fs = require('fs');
+  try {
+    const htmlContent = fs.readFileSync('./polipus-maintenance.html', 'utf8');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.send(htmlContent);
+  } catch (error) {
+    res.status(404).send('Polipus maintenance page not found');
+  }
+});
+
+app.get('/maintenance-polipus', (req, res) => {
+  const fs = require('fs');
+  try {
+    const htmlContent = fs.readFileSync('./polipus-maintenance.html', 'utf8');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.send(htmlContent);
+  } catch (error) {
+    res.status(404).send('Polipus maintenance page not found');
+  }
+});
+
+app.get('/maintenance-polipus', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.sendFile(path.resolve('./polipus-maintenance.html'));
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -117,6 +151,8 @@ app.get('/soluzione-mobile', (req, res) => {
 app.get('/mobile-access', (req, res) => {
   res.sendFile('mobile-access.html', { root: '.' });
 });
+
+
 
 
 

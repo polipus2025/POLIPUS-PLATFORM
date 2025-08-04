@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polipus® - Platform Maintenance | General Environmental Intelligence Platform</title>
+    <meta name="description" content="Polipus General Environmental Intelligence Platform is temporarily under maintenance. We're enhancing our 8-module system for better environmental monitoring and intelligence services.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        .maintenance-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 3rem;
+            text-align: center;
+            max-width: 700px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .maintenance-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6, #f59e0b);
+        }
+
+        .logo-section {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .polipus-logo {
+            max-width: 280px;
+            height: auto;
+            margin: 0 auto 1.5rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            display: block;
+        }
+
+        .trademark {
+            position: absolute;
+            top: -10px;
+            right: calc(50% - 140px);
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #1e293b;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .platform-subtitle {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .maintenance-icon {
+            font-size: 3.5rem;
+            margin: 2rem 0 1.5rem;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .maintenance-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #1e293b, #475569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .maintenance-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .module-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .module-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .module-number {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #64748b;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .module-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.3;
+            margin-top: 0.5rem;
+        }
+
+        .active-module {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border-color: #10b981;
+        }
+
+        .active-module .module-number {
+            background: #10b981;
+        }
+
+        .status-section {
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2.5rem 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .status-title {
+            color: #1e293b;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .progress-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .progress-text {
+            color: #10b981;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #10b981, #059669);
+            height: 100%;
+            width: 92%;
+            border-radius: 5px;
+            animation: pulse-progress 3s ease-in-out infinite;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes pulse-progress {
+            0%, 100% { width: 90%; }
+            50% { width: 95%; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .eta-info {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .eta-title {
+            color: #92400e;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .eta-text {
+            color: #a16207;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .contact-section {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 2rem;
+        }
+
+        .contact-title {
+            color: #991b1b;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-text {
+            color: #b91c1c;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .footer-info {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .refresh-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            border: 1px solid #bae6fd;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .maintenance-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .polipus-logo {
+                max-width: 220px;
+            }
+            
+            .platform-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .maintenance-title {
+                font-size: 1.8rem;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .trademark {
+                right: calc(50% - 110px);
+            }
+        }
+
+        /* Animation for smooth entrance */
+        .maintenance-container {
+            animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="maintenance-container">
+        <!-- Polipus Logo and Branding -->
+        <div class="logo-section">
+            <img 
+                src="/attached_assets/polipos logo 1_1753394173408.jpg" 
+                alt="Polipus - Brightening the Future" 
+                class="polipus-logo"
+            />
+            <span class="trademark">®</span>
+            <h1 class="platform-subtitle">General Environmental Intelligence Platform</h1>
+        </div>
+
+        <!-- Maintenance Content -->
+        <div class="maintenance-icon">⚙️</div>
+        <h2 class="maintenance-title">Platform Maintenance in Progress</h2>
+        <p class="maintenance-subtitle">
+            We're enhancing our comprehensive 8-module environmental intelligence system to provide you with 
+            improved monitoring capabilities and better user experience across all modules.
+        </p>
+
+        <!-- 8 Modules Grid -->
+        <div class="modules-grid">
+            <div class="module-item active-module">
+                <div class="module-number">1</div>
+                <div class="module-title">Agricultural Traceability & Compliance</div>
+            </div>
+            <div class="module-item">
+                <div class="module-number">2</div>
+                <div class="module-title">Supply Chain Management</div>
+            </div>
+            <div class="module-item">
+                <div class="module-number">3</div>
+                <div class="module-title">Compliance & Certification</div>
+            </div>
+            <div class="module-item">
+                <div class="module-number">4</div>
+                <div class="module-title">Analytics & Reporting</div>
+            </div>
+            <div class="module-item">
+                <div class="module-number">5</div>
+                <div class="module-title">Enhanced GIS Mapping</div>
+            </div>
+            <div class="module-item">
+                <div class="module-number">6</div>
+                <div class="module-title">User Management</div>
+            </div>
+            <div class="module-item">
+                <div class="module-number">7</div>
+                <div class="module-title">Document Management</div>
+            </div>
+            <div class="module-item">
+                <div class="module-number">8</div>
+                <div class="module-title">System Configuration</div>
+            </div>
+        </div>
+
+        <!-- Status Section -->
+        <div class="status-section">
+            <h3 class="status-title">Maintenance Status</h3>
+            <div class="progress-container">
+                <div class="progress-text">System Enhancement Progress: 92% Complete</div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div class="eta-info">
+                <div class="eta-title">
+                    ⏱️ Estimated Completion Time
+                </div>
+                <div class="eta-text">
+                    Expected to be back online within the next 2-4 hours.<br>
+                    All modules will be fully operational upon completion.
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="contact-section">
+            <div class="contact-title">Need Immediate Technical Support?</div>
+            <div class="contact-text">
+                Contact our Platform Operations Team<br>
+                📧 support@polipus.com<br>
+                📞 Technical Hotline Available<br>
+                🌐 Platform Status Updates Available
+            </div>
+        </div>
+
+        <!-- Auto-refresh indicator -->
+        <div class="refresh-indicator">
+            🔄 Auto-refreshing every 5 minutes
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-info">
+            <p>
+                <strong>Polipus® General Environmental Intelligence Platform</strong><br>
+                Brightening the Future through Advanced Environmental Monitoring<br>
+                Current Status: Module 1 (Agricultural Traceability) - Active & Operational<br>
+                © 2025 Polipus - All Rights Reserved
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh every 5 minutes to check if maintenance is complete
+        setTimeout(() => {
+            window.location.reload();
+        }, 300000); // 5 minutes
+
+        // Enhanced interactive feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌟 Polipus® Platform - Environmental Intelligence System Maintenance Mode');
+            console.log('📊 8 Modules: 1 Active, 7 Under Enhancement');
+            console.log('🔧 Expected completion: 2-4 hours');
+            
+            // Update time display with local timezone
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZoneName: 'short'
+            });
+            
+            // Add timestamp to footer
+            const footer = document.querySelector('.footer-info p');
+            if (footer) {
+                footer.innerHTML += `<br><small>⏰ Last updated: ${timeString}</small>`;
+            }
+
+            // Add subtle animation to active module
+            const activeModule = document.querySelector('.active-module');
+            if (activeModule) {
+                setInterval(() => {
+                    activeModule.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        activeModule.style.transform = 'scale(1)';
+                    }, 1000);
+                }, 5000);
+            }
+
+            // Simulate real-time progress updates
+            const progressFill = document.querySelector('.progress-fill');
+            const progressText = document.querySelector('.progress-text');
+            let currentProgress = 92;
+            
+            setInterval(() => {
+                if (currentProgress < 99) {
+                    currentProgress += Math.random() * 0.5;
+                    progressFill.style.width = `${Math.min(currentProgress, 99)}%`;
+                    progressText.textContent = `System Enhancement Progress: ${Math.floor(currentProgress)}% Complete`;
+                }
+            }, 30000); // Update every 30 seconds
+        });
+
+        // Prevent right-click context menu for a more app-like experience
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Add keyboard shortcut for manual refresh
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -187,17 +187,30 @@ app.get('/mobile-access', (req, res) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    // In development mode, override Vite for maintenance
-    if (MAINTENANCE_MODE) {
-      app.get('*', (req, res, next) => {
-        if (req.path === '/') {
-          return res.redirect(301, '/maintenance.html');
-        }
-        next();
-      });
-    }
+  if (app.get("env") === "development" && !MAINTENANCE_MODE) {
     await setupVite(app, server);
+  } else if (app.get("env") === "development" && MAINTENANCE_MODE) {
+    // In maintenance mode, serve maintenance page for all requests except API and static assets
+    app.get('*', (req, res, next) => {
+      // Allow API requests to pass through
+      if (req.path.startsWith('/api/') || req.path.startsWith('/attached_assets/') || req.path.includes('.')) {
+        next();
+        return;
+      }
+      
+      // Serve maintenance page for all other requests
+      try {
+        const htmlContent = fs.readFileSync('./maintenance.html', 'utf8');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.send(htmlContent);
+      } catch (error) {
+        console.error('Error serving maintenance page:', error);
+        res.status(503).send('<h1>System Maintenance</h1><p>Please try again later.</p>');
+      }
+    });
   } else {
     serveStatic(app);
   }

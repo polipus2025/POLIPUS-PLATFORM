@@ -42,27 +42,12 @@ app.get('/test-red', (req, res) => {
   `);
 });
 
-// Serve red maintenance page as landing page - BEFORE any middleware
+// Force redirect to maintenance page
 app.get('/', (req, res, next) => {
   if (MAINTENANCE_MODE) {
-    console.log('[MAINTENANCE] Serving maintenance page for root request');
-    try {
-      const htmlPath = path.join(process.cwd(), 'maintenance.html');
-      const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      res.setHeader('X-Maintenance-Mode', 'active');
-      console.log('[MAINTENANCE] Successfully served maintenance page');
-      return res.send(htmlContent);
-    } catch (error) {
-      console.error('Error serving maintenance page:', error);
-      res.status(503).send('<h1>System Maintenance</h1><p>Please try again later.</p>');
-      return;
-    }
+    console.log('[MAINTENANCE] Redirecting to maintenance page');
+    return res.redirect(302, '/maintenance.html');
   }
-  // If not in maintenance mode, continue to next middleware
   next();
 });
 
@@ -226,30 +211,8 @@ app.get('/mobile-access', (req, res) => {
   if (app.get("env") === "development" && !MAINTENANCE_MODE) {
     await setupVite(app, server);
   } else if (app.get("env") === "development" && MAINTENANCE_MODE) {
-    // In maintenance mode, serve maintenance page for all requests except API and static assets
-    app.get('*', (req, res, next) => {
-      // Allow API requests to pass through
-      if (req.path.startsWith('/api/') || req.path.startsWith('/attached_assets/') || req.path.includes('.')) {
-        next();
-        return;
-      }
-      
-      // Serve maintenance page for all other requests
-      console.log('[MAINTENANCE] Serving maintenance page for:', req.path);
-      try {
-        const htmlPath = path.join(process.cwd(), 'maintenance.html');
-        const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('X-Maintenance-Mode', 'active');
-        res.send(htmlContent);
-      } catch (error) {
-        console.error('Error serving maintenance page:', error);
-        res.status(503).send('<h1>System Maintenance</h1><p>Please try again later.</p>');
-      }
-    });
+    // Serve static files normally in maintenance mode
+    app.use(express.static('.'));
   } else {
     serveStatic(app);
   }

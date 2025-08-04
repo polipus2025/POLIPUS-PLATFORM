@@ -511,12 +511,12 @@ export default function Verification() {
                     </Button>
                     <Button 
                       variant="outline"
-                      onClick={() => setTrackingNumber("RIC-MON-20250726-404")}
-                      className="h-auto p-3 border-purple-300 text-left justify-start hover:bg-purple-100"
+                      onClick={() => setTrackingNumber("COC-LOF-20250712-562")}
+                      className="h-auto p-3 border-orange-300 text-left justify-start hover:bg-orange-100"
                     >
                       <div>
-                        <div className="font-mono text-sm text-purple-800">RIC-MON-20250726-404</div>
-                        <div className="text-xs text-purple-600">Rice - Verified ✓</div>
+                        <div className="font-mono text-sm text-orange-800">COC-LOF-20250712-562</div>
+                        <div className="text-xs text-orange-600">Cocoa - Recently Added ✓</div>
                       </div>
                     </Button>
                   </div>

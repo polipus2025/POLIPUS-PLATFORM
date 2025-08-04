@@ -236,6 +236,58 @@ export async function seedDatabase() {
       threadId: "THR-1737723200-005"
     });
 
+    // Create sample tracking records for verification testing
+    await storage.createTrackingRecord({
+      trackingNumber: "COC-LOF-20250712-562",
+      commodityId: 1,
+      farmerId: 1,
+      currentStatus: "verified",
+      currentLocation: "Lofa County Processing Center",
+      originLocation: "Zorzor Town, Voinjama District",
+      destinationLocation: "Port of Monrovia",
+      estimatedArrival: new Date("2025-08-15"),
+      createdByUserId: 1,
+      complianceStatus: "compliant",
+      qualityScore: 95,
+      traceabilityScore: 98,
+      chain: ["Farm", "Processing", "Export"],
+      verified: true
+    });
+
+    await storage.createTrackingRecord({
+      trackingNumber: "COF-BNG-20250701-123",
+      commodityId: 2,
+      farmerId: 2,
+      currentStatus: "in_transit",
+      currentLocation: "Bong County Collection Center",
+      originLocation: "Gbarnga Town",
+      destinationLocation: "Port of Monrovia",
+      estimatedArrival: new Date("2025-08-20"),
+      createdByUserId: 1,
+      complianceStatus: "compliant",
+      qualityScore: 92,
+      traceabilityScore: 95,
+      chain: ["Farm", "Collection", "Transport"],
+      verified: true
+    });
+
+    await storage.createTrackingRecord({
+      trackingNumber: "PAL-NIM-20250620-789",
+      commodityId: 3,
+      farmerId: 3,
+      currentStatus: "processing",
+      currentLocation: "Nimba County Processing Facility",
+      originLocation: "Sanniquellie",
+      destinationLocation: "Port of Buchanan",
+      estimatedArrival: new Date("2025-09-01"),
+      createdByUserId: 1,
+      complianceStatus: "pending_review",
+      qualityScore: 88,
+      traceabilityScore: 90,
+      chain: ["Farm", "Processing"],
+      verified: false
+    });
+
     console.log("✅ Database seeded successfully!");
   } catch (error) {
     console.error("❌ Error seeding database:", error);

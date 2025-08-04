@@ -451,7 +451,15 @@ export default function Verification() {
                       className="h-12 mt-2"
                     />
                   </div>
-                  <div className="flex items-end">
+                  <div className="flex items-end gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setTrackingNumber("COC-LOF-20250723-401")}
+                      className="h-12 px-4 border-blue-300 text-blue-700 hover:bg-blue-50"
+                    >
+                      <QrCode className="h-4 w-4 mr-2" />
+                      Try Demo
+                    </Button>
                     <Button 
                       onClick={handleVerification} 
                       disabled={verifyMutation.isPending}
@@ -470,6 +478,51 @@ export default function Verification() {
                       )}
                     </Button>
                   </div>
+                </div>
+                
+                {/* Demo Tracking Codes Section */}
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                      <QrCode className="h-4 w-4 text-white" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-blue-900">Try These Working Demo Codes:</h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setTrackingNumber("COC-LOF-20250723-401")}
+                      className="h-auto p-3 border-blue-300 text-left justify-start hover:bg-blue-100"
+                    >
+                      <div>
+                        <div className="font-mono text-sm text-blue-800">COC-LOF-20250723-401</div>
+                        <div className="text-xs text-blue-600">Cocoa - Verified ✓</div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setTrackingNumber("COF-LOF-20250727-405")}
+                      className="h-auto p-3 border-green-300 text-left justify-start hover:bg-green-100"
+                    >
+                      <div>
+                        <div className="font-mono text-sm text-green-800">COF-LOF-20250727-405</div>
+                        <div className="text-xs text-green-600">Coffee - Exported ✓</div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setTrackingNumber("RIC-MON-20250726-404")}
+                      className="h-auto p-3 border-purple-300 text-left justify-start hover:bg-purple-100"
+                    >
+                      <div>
+                        <div className="font-mono text-sm text-purple-800">RIC-MON-20250726-404</div>
+                        <div className="text-xs text-purple-600">Rice - Verified ✓</div>
+                      </div>
+                    </Button>
+                  </div>
+                  <p className="text-blue-700 text-xs mt-3">
+                    Click any demo code to automatically fill the tracking number field and test the verification system.
+                  </p>
                 </div>
               </div>
 

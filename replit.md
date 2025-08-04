@@ -10,6 +10,8 @@ Preferred communication style: Simple, everyday language.
 
 **Maintenance Page Preference**: Always use the generic maintenance page template (red gradient background, "Website Maintenance" title, no specific branding) for any maintenance page requests. This template is stored in server/index.ts as inline HTML.
 
+**Module Development Strategy**: Ready to simultaneously develop all 7 new modules (Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, EPA Portal) with complete functionality, maintaining consistent ISMS.online-inspired design system and professional standards from AgriTrace360. Will create full database schemas, backend APIs, frontend interfaces, and cross-module integration for each portal.
+
 ## Main Landing Page Configuration (CONFIRMED & FINAL)
 - **PRIMARY HOMEPAGE**: Polipus main page with 8 modules and login buttons is the ONLY landing page
 - **LANDING PAGE ROUTE**: /landing shows Polipus main page (FrontPage component) - CONFIRMED CORRECT

@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed-database";
 import path from "path";
+import fs from "fs";
 
 const app = express();
 
@@ -60,7 +61,6 @@ app.get('/', (req, res, next) => {
 
 // Polipus maintenance page routes (direct HTML serving, bypassing Vite)
 app.get('/polipus-maintenance', (req, res) => {
-  const fs = require('fs');
   try {
     const htmlContent = fs.readFileSync('./polipus-maintenance.html', 'utf8');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -69,12 +69,12 @@ app.get('/polipus-maintenance', (req, res) => {
     res.setHeader('Expires', '0');
     res.send(htmlContent);
   } catch (error) {
+    console.error('Error serving Polipus maintenance page:', error);
     res.status(404).send('Polipus maintenance page not found');
   }
 });
 
 app.get('/maintenance-polipus', (req, res) => {
-  const fs = require('fs');
   try {
     const htmlContent = fs.readFileSync('./polipus-maintenance.html', 'utf8');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -83,14 +83,12 @@ app.get('/maintenance-polipus', (req, res) => {
     res.setHeader('Expires', '0');
     res.send(htmlContent);
   } catch (error) {
+    console.error('Error serving Polipus maintenance page:', error);
     res.status(404).send('Polipus maintenance page not found');
   }
 });
 
-app.get('/maintenance-polipus', (req, res) => {
-  res.setHeader('Content-Type', 'text/html');
-  res.sendFile(path.resolve('./polipus-maintenance.html'));
-});
+
 
 app.use((req, res, next) => {
   const start = Date.now();

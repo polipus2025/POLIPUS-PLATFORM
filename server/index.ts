@@ -7,6 +7,29 @@ import fs from "fs";
 
 const app = express();
 
+// MAINTENANCE MODE - ENABLED - Red maintenance page active (PRIORITY ROUTE)
+const MAINTENANCE_MODE = true;
+
+// Serve red maintenance page as landing page - BEFORE any middleware
+app.get('/', (req, res, next) => {
+  if (MAINTENANCE_MODE) {
+    try {
+      const htmlContent = fs.readFileSync('./maintenance.html', 'utf8');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      return res.send(htmlContent);
+    } catch (error) {
+      console.error('Error serving maintenance page:', error);
+      res.status(503).send('<h1>System Maintenance</h1><p>Please try again later.</p>');
+      return;
+    }
+  }
+  // If not in maintenance mode, continue to next middleware
+  next();
+});
+
 // Security and CORS headers for production deployment
 app.use((req, res, next) => {
   // CORS headers for custom domain support
@@ -46,18 +69,7 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
-// MAINTENANCE MODE - Disabled - System fully operational
-const MAINTENANCE_MODE = false;
 
-// System fully operational - no maintenance mode
-app.get('/', (req, res, next) => {
-  if (false && MAINTENANCE_MODE) {
-    res.setHeader('Content-Type', 'text/html');
-    return res.sendFile(path.resolve('./service-blocked.html'));
-  }
-  // If not in maintenance mode, continue to next middleware
-  next();
-});
 
 // Polipus maintenance page routes (direct HTML serving, bypassing Vite)
 app.get('/polipus-maintenance', (req, res) => {
@@ -176,6 +188,15 @@ app.get('/mobile-access', (req, res) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
+    // In development mode, override Vite for maintenance
+    if (MAINTENANCE_MODE) {
+      app.get('*', (req, res, next) => {
+        if (req.path === '/') {
+          return res.redirect(301, '/maintenance.html');
+        }
+        next();
+      });
+    }
     await setupVite(app, server);
   } else {
     serveStatic(app);

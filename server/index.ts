@@ -7,7 +7,7 @@ import fs from "fs";
 
 const app = express();
 
-// MAINTENANCE MODE - ENABLED - Red maintenance page active
+// MAINTENANCE MODE - DISABLED - Polipus system active
 const MAINTENANCE_MODE = false;
 
 // Direct maintenance page route for testing  
@@ -42,114 +42,8 @@ app.get('/test-red', (req, res) => {
   `);
 });
 
-// DIRECT MAINTENANCE PAGE - Inline HTML to bypass file issues
-app.get('/', (req, res) => {
-  console.log('[MAINTENANCE] Serving inline red maintenance page');
-  const maintenanceHTML = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Maintenance</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #333;
-        }
-        .maintenance-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            padding: 3rem;
-            text-align: center;
-            max-width: 600px;
-            width: 90%;
-            position: relative;
-        }
-        .maintenance-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #dc2626, #991b1b, #7f1d1d);
-        }
-        .maintenance-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            animation: rotate 3s linear infinite;
-        }
-        @keyframes rotate {
-            to { transform: rotate(360deg); }
-        }
-        .maintenance-title {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #dc2626;
-            margin-bottom: 1rem;
-        }
-        .maintenance-subtitle {
-            font-size: 1.1rem;
-            color: #6B7280;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-        .progress-container {
-            background: #f3f4f6;
-            border-radius: 10px;
-            padding: 1rem;
-            margin: 2rem 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="maintenance-container">
-        <!-- Maintenance Content -->
-        <div class="maintenance-icon">⚙️</div>
-        <h2 class="maintenance-title">Site Under Maintenance</h2>
-        <p class="maintenance-subtitle">
-            We're currently performing scheduled maintenance to improve our services. 
-            Our team is working to complete these updates as quickly as possible.
-        </p>
-        
-        <div class="progress-container">
-            <p style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Maintenance Status</p>
-            <p style="color: #6B7280;">✓ System updates applied</p>
-            <p style="color: #6B7280;">✓ Security enhancements complete</p>
-            <p style="color: #dc2626;">⚙️ Performance optimizations in progress...</p>
-        </div>
-        
-        <p style="color: #9CA3AF; font-size: 0.9rem; margin-top: 2rem;">
-            We'll be back online shortly | Auto-refresh in 5 minutes
-        </p>
-    </div>
-
-    <script>
-        setTimeout(() => {
-            window.location.reload();
-        }, 300000);
-    </script>
-</body>
-</html>`;
-  
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.send(maintenanceHTML);
-});
+// MAINTENANCE ROUTE DISABLED - Let React app handle root route
+// (Maintenance mode can be restored by uncommenting this route and setting MAINTENANCE_MODE = true)
 
 // Security and CORS headers for production deployment
 app.use((req, res, next) => {

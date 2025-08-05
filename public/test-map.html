@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Map Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { 
+            height: 400px; 
+            width: 100%;
+            border: 2px solid #333;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .loading { background-color: #fef3cd; border: 1px solid #fecba1; }
+        .success { background-color: #d1edff; border: 1px solid #bee5eb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Basic Leaflet Map Test</h1>
+    <div id="status" class="status loading">Loading map...</div>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        console.log('Starting basic map test...');
+        const statusDiv = document.getElementById('status');
+        
+        try {
+            // Test if Leaflet loaded
+            if (typeof L === 'undefined') {
+                throw new Error('Leaflet library did not load');
+            }
+            console.log('Leaflet library loaded successfully');
+            
+            // Create map
+            const map = L.map('map').setView([6.4281, -9.4295], 13);
+            console.log('Map instance created');
+            
+            // Add tile layer
+            const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            });
+            
+            tileLayer.on('loading', function() {
+                console.log('Tiles are loading...');
+                statusDiv.textContent = 'Loading map tiles...';
+            });
+            
+            tileLayer.on('load', function() {
+                console.log('Tiles loaded successfully!');
+                statusDiv.className = 'status success';
+                statusDiv.textContent = 'Map loaded successfully! ✓';
+            });
+            
+            tileLayer.on('tileerror', function(e) {
+                console.error('Tile loading error:', e);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = 'Map tiles failed to load - Network issue detected';
+            });
+            
+            tileLayer.addTo(map);
+            
+            // Add a marker
+            const marker = L.marker([6.4281, -9.4295])
+                .addTo(map)
+                .bindPopup('Monrovia, Liberia<br>Test Location')
+                .openPopup();
+            
+            console.log('Marker added successfully');
+            
+        } catch (error) {
+            console.error('Map initialization error:', error);
+            statusDiv.className = 'status error';
+            statusDiv.textContent = 'Failed to initialize map: ' + error.message;
+        }
+    </script>
+</body>
+</html>

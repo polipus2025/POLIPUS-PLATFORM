@@ -177,7 +177,7 @@ export default function FarmerDashboard() {
                 </Button>
               </Link>
 
-              <Link href="/gps-mapping">
+              <Link href="/farmer-gps-mapping">
                 <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
                   <MapPin className="h-6 w-6 text-blue-600" />
                   <span className="text-sm">GPS Mapping</span>

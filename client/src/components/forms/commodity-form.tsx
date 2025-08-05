@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,13 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { CalendarIcon, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { insertCommoditySchema, type InsertCommodity } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { COUNTIES, COMMODITY_TYPES, QUALITY_GRADES } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import InteractiveBoundaryMapper from "@/components/maps/interactive-boundary-mapper";
 
 interface CommodityFormProps {
   onSuccess?: () => void;
@@ -23,6 +26,8 @@ interface CommodityFormProps {
 export default function CommodityForm({ onSuccess }: CommodityFormProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [isLocationMappingOpen, setIsLocationMappingOpen] = useState(false);
+  const [sourceLocation, setSourceLocation] = useState<{latitude: number; longitude: number} | null>(null);
 
   const form = useForm<InsertCommodity>({
     resolver: zodResolver(insertCommoditySchema),
@@ -299,6 +304,44 @@ export default function CommodityForm({ onSuccess }: CommodityFormProps) {
               </FormItem>
             )}
           />
+
+          {/* Source Location Interactive Mapping */}
+          <div className="md:col-span-2">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h4 className="font-medium text-blue-900">Source Location Mapping</h4>
+                  <p className="text-sm text-blue-700">Click on map to set precise source location</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsLocationMappingOpen(true)}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Select on Map
+                </Button>
+              </div>
+              
+              {sourceLocation && (
+                <div className="bg-white p-3 rounded border border-blue-200">
+                  <div className="text-sm font-medium text-gray-900 mb-1">Selected Location:</div>
+                  <div className="text-sm text-gray-600 font-mono">
+                    Lat: {sourceLocation.latitude.toFixed(6)}, Lng: {sourceLocation.longitude.toFixed(6)}
+                  </div>
+                </div>
+              )}
+              
+              {!sourceLocation && (
+                <div className="text-center py-3">
+                  <MapPin className="w-6 h-6 text-blue-400 mx-auto mb-1" />
+                  <p className="text-sm text-blue-600">No location selected</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
           <div className="flex justify-end space-x-4 pt-4 border-t border-slate-200">
@@ -320,6 +363,45 @@ export default function CommodityForm({ onSuccess }: CommodityFormProps) {
           </div>
         </form>
       </Form>
+
+      {/* Interactive Location Mapping Dialog */}
+      <Dialog open={isLocationMappingOpen} onOpenChange={setIsLocationMappingOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              Select Commodity Source Location
+            </DialogTitle>
+            <DialogDescription>
+              Click on the map to select the precise location where this commodity was sourced or harvested.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-6">
+            <InteractiveBoundaryMapper
+              onBoundaryComplete={(boundary) => {
+                if (boundary.points.length > 0) {
+                  const location = {
+                    latitude: boundary.points[0].latitude,
+                    longitude: boundary.points[0].longitude
+                  };
+                  
+                  setSourceLocation(location);
+                  
+                  toast({
+                    title: "Location Selected",
+                    description: `Source location set to ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`,
+                  });
+                  
+                  setIsLocationMappingOpen(false);
+                }
+              }}
+              minPoints={1}
+              maxPoints={1}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

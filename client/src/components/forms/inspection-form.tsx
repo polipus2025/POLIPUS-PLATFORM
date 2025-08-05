@@ -9,7 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { CalendarIcon, MapPin } from "lucide-react";
+import InteractiveBoundaryMapper from "@/components/maps/interactive-boundary-mapper";
 import { format } from "date-fns";
 import { insertInspectionSchema, type InsertInspection, type Commodity } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
@@ -20,6 +22,8 @@ import { cn } from "@/lib/utils";
 export default function InspectionForm() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [isLocationMappingOpen, setIsLocationMappingOpen] = useState(false);
+  const [inspectionLocation, setInspectionLocation] = useState<{latitude: number; longitude: number} | null>(null);
 
   const { data: commodities = [] } = useQuery<Commodity[]>({
     queryKey: ["/api/commodities"],
@@ -335,6 +339,42 @@ export default function InspectionForm() {
               </FormItem>
             )}
           />
+
+          {/* Inspection Location Interactive Mapping */}
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h4 className="font-medium text-green-900">Inspection Location</h4>
+                <p className="text-sm text-green-700">Mark the exact location where inspection was conducted</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsLocationMappingOpen(true)}
+                className="border-green-300 text-green-700 hover:bg-green-100"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Mark Location
+              </Button>
+            </div>
+            
+            {inspectionLocation && (
+              <div className="bg-white p-3 rounded border border-green-200">
+                <div className="text-sm font-medium text-gray-900 mb-1">Inspection Conducted At:</div>
+                <div className="text-sm text-gray-600 font-mono">
+                  Lat: {inspectionLocation.latitude.toFixed(6)}, Lng: {inspectionLocation.longitude.toFixed(6)}
+                </div>
+              </div>
+            )}
+            
+            {!inspectionLocation && (
+              <div className="text-center py-3">
+                <MapPin className="w-6 h-6 text-green-400 mx-auto mb-1" />
+                <p className="text-sm text-green-600">No inspection location marked</p>
+              </div>
+            )}
+          </div>
         </div>
 
           <div className="flex justify-end space-x-4 pt-4 border-t border-slate-200">
@@ -356,6 +396,45 @@ export default function InspectionForm() {
           </div>
         </form>
       </Form>
+
+      {/* Interactive Inspection Location Mapping Dialog */}
+      <Dialog open={isLocationMappingOpen} onOpenChange={setIsLocationMappingOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-green-600" />
+              Mark Inspection Location
+            </DialogTitle>
+            <DialogDescription>
+              Click on the map to mark the exact location where this inspection was conducted.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-6">
+            <InteractiveBoundaryMapper
+              onBoundaryComplete={(boundary) => {
+                if (boundary.points.length > 0) {
+                  const location = {
+                    latitude: boundary.points[0].latitude,
+                    longitude: boundary.points[0].longitude
+                  };
+                  
+                  setInspectionLocation(location);
+                  
+                  toast({
+                    title: "Inspection Location Marked",
+                    description: `Location set to ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`,
+                  });
+                  
+                  setIsLocationMappingOpen(false);
+                }
+              }}
+              minPoints={1}
+              maxPoints={1}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
+import InteractiveBoundaryMapper from "@/components/maps/interactive-boundary-mapper";
 
 // Farmer form schema
 const farmerFormSchema = z.object({
@@ -69,6 +70,7 @@ export default function FarmersPage() {
   const [selectedFarmer, setSelectedFarmer] = useState<any>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
+  const [isInteractiveMappingOpen, setIsInteractiveMappingOpen] = useState(false);
   const [farmBoundaries, setFarmBoundaries] = useState<Array<{lat: number, lng: number, point: number}>>([]);
   const [landMapData, setLandMapData] = useState({
     totalArea: 0,
@@ -595,16 +597,28 @@ export default function FarmersPage() {
                               </div>
                             </div>
 
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setIsMapDialogOpen(true)}
-                              className="w-full border-green-300 text-green-700 hover:bg-green-50"
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Detailed Map
-                            </Button>
+                            <div className="space-y-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsMapDialogOpen(true)}
+                                className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Detailed Map
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsInteractiveMappingOpen(true)}
+                                className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                              >
+                                <MapPin className="w-4 h-4 mr-2" />
+                                Interactive Farm Mapping
+                              </Button>
+                            </div>
                           </div>
                         )}
                         
@@ -1128,6 +1142,73 @@ export default function FarmersPage() {
               <Button onClick={() => setIsMapDialogOpen(false)}>
                 Close Map View
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Interactive Farm Mapping Dialog */}
+        <Dialog open={isInteractiveMappingOpen} onOpenChange={setIsInteractiveMappingOpen}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-blue-600" />
+                Interactive Farm Boundary Mapping
+              </DialogTitle>
+              <DialogDescription>
+                Create precise farm boundaries by clicking on the map or using GPS positioning.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="mt-6">
+              <InteractiveBoundaryMapper
+                onBoundaryComplete={(boundary) => {
+                  // Convert boundary data to match our farm boundaries format
+                  const newBoundaries = boundary.points.map((point, index) => ({
+                    lat: point.latitude,
+                    lng: point.longitude,
+                    point: index + 1
+                  }));
+                  
+                  setFarmBoundaries(newBoundaries);
+                  
+                  // Update land map data
+                  setLandMapData({
+                    totalArea: boundary.area,
+                    cultivatedArea: boundary.area * 0.8, // Assume 80% cultivated
+                    soilType: 'Fertile Loam',
+                    waterSources: ['River', 'Well'],
+                    accessRoads: true,
+                    elevationData: {
+                      min: 50,
+                      max: 120,
+                      average: 85
+                    }
+                  });
+                  
+                  // Update form with the new boundary data
+                  form.setValue("farmBoundaries", newBoundaries);
+                  form.setValue("landMapData", {
+                    totalArea: boundary.area,
+                    cultivatedArea: boundary.area * 0.8,
+                    soilType: 'Fertile Loam',
+                    waterSources: ['River', 'Well'],
+                    accessRoads: true,
+                    elevationData: {
+                      min: 50,
+                      max: 120,
+                      average: 85
+                    }
+                  });
+                  
+                  toast({
+                    title: "Interactive Mapping Complete",
+                    description: `Farm boundary created with ${boundary.points.length} points covering ${boundary.area.toFixed(2)} hectares`,
+                  });
+                  
+                  setIsInteractiveMappingOpen(false);
+                }}
+                minPoints={3}
+              />
             </div>
           </DialogContent>
         </Dialog>

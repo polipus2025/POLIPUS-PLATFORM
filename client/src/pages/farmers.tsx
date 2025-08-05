@@ -105,13 +105,70 @@ export default function FarmersPage() {
     }
   };
 
+  // Auto-detect current GPS location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation Not Supported",
+        description: "Your browser doesn't support GPS location detection",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Detecting Location",
+      description: "Getting your current GPS coordinates...",
+    });
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const coordinates = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        
+        form.setValue("gpsCoordinates", coordinates);
+        
+        toast({
+          title: "Location Detected",
+          description: `GPS coordinates set to: ${coordinates}`,
+        });
+      },
+      (error) => {
+        let errorMessage = "Failed to get location";
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Please enable location services.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out.";
+            break;
+        }
+        
+        toast({
+          title: "Location Error",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
+
   // Generate GPS coordinates for land mapping
   const generateGPSMapping = () => {
     const baseCoords = form.getValues("gpsCoordinates");
     if (!baseCoords) {
       toast({
-        title: "GPS Coordinates Required",
-        description: "Please enter GPS coordinates before mapping land boundaries",
+        title: "No GPS Coordinates",
+        description: "Please get your current location or enter coordinates manually",
         variant: "destructive"
       });
       return;
@@ -454,9 +511,22 @@ export default function FarmersPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>GPS Coordinates</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="e.g., 8.4219,-9.8456" />
-                            </FormControl>
+                            <div className="flex gap-2">
+                              <FormControl>
+                                <Input {...field} placeholder="e.g., 8.4219,-9.8456" data-testid="input-gps-coordinates" />
+                              </FormControl>
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={getCurrentLocation}
+                                data-testid="button-get-location"
+                                className="shrink-0"
+                              >
+                                <MapPin className="w-4 h-4 mr-1" />
+                                Get Location
+                              </Button>
+                            </div>
+                            <FormDescription>Click "Get Location" to auto-detect your GPS coordinates</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}

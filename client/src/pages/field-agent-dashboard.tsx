@@ -217,95 +217,101 @@ export default function FieldAgentDashboard() {
         <meta name="description" content="Field operations dashboard for LACRA field agents" />
       </Helmet>
 
-      <div className="p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                <Users className="h-8 w-8 text-orange-600" />
-                Field Agent Operations
-              </h1>
-              <p className="text-gray-600">
-                Agent {agentId} - {jurisdiction} Territory
-              </p>
+      <div className="p-3 sm:p-6">
+        {/* Mobile-Responsive Header */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600 mt-1 sm:mt-0" />
+              <div>
+                <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+                  Field Agent Operations
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600">
+                  Agent {agentId} - {jurisdiction} Territory
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Territory Coverage</p>
-              <Badge className="bg-orange-100 text-orange-800">{jurisdiction}</Badge>
+            <div className="text-left sm:text-right w-full sm:w-auto">
+              <p className="text-xs sm:text-sm text-gray-600">Territory Coverage</p>
+              <Badge className="bg-orange-100 text-orange-800 text-xs sm:text-sm">{jurisdiction}</Badge>
             </div>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Mobile-Responsive Quick Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Users className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Registered Farmers</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalFarmers}</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                <div className="sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Registered Farmers</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{totalFarmers}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Clock className="h-8 w-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Pending Inspections</p>
-                  <p className="text-2xl font-bold text-gray-900">{pendingInspections}</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
+                <div className="sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Pending Inspections</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{pendingInspections}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Completed Today</p>
-                  <p className="text-2xl font-bold text-gray-900">{completedToday}</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                <div className="sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Completed Today</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{completedToday}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <TreePine className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Commodities</p>
-                  <p className="text-2xl font-bold text-gray-900">{commoditiesInJurisdiction}</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+                <TreePine className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                <div className="sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Active Commodities</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{commoditiesInJurisdiction}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <ClipboardCheck className="h-4 w-4" />
-              Overview
+        {/* Mobile-Responsive Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-0">
+            <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+              <ClipboardCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Home</span>
             </TabsTrigger>
-            <TabsTrigger value="farmers" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Farmer Management
+            <TabsTrigger value="farmers" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Farmer Management</span>
+              <span className="sm:hidden">Farmers</span>
             </TabsTrigger>
-            <TabsTrigger value="inspections" className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              Field Inspections
+            <TabsTrigger value="inspections" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Field Inspections</span>
+              <span className="sm:hidden">Inspect</span>
             </TabsTrigger>
-            <TabsTrigger value="territory" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Territory Mapping
+            <TabsTrigger value="territory" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
+              <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Territory Mapping</span>
+              <span className="sm:hidden">Map</span>
             </TabsTrigger>
           </TabsList>
 

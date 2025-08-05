@@ -349,28 +349,30 @@ export default function DirectorDashboard() {
         <meta name="description" content="Executive dashboard for LACRA Director - Mobile alert verification and compliance oversight" />
       </Helmet>
 
-      <div className="p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                <Crown className="h-8 w-8 text-purple-600" />
-                Director Dashboard
-              </h1>
-              <p className="text-gray-600">
-                Executive oversight of mobile alerts and compliance verification
-              </p>
+      <div className="p-3 sm:p-6">
+        {/* Mobile-Responsive Header */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <Crown className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 mt-1 sm:mt-0" />
+              <div>
+                <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+                  Director Dashboard
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600">
+                  Executive oversight of mobile alerts and compliance verification
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Role</p>
-              <Badge className="bg-purple-100 text-purple-800">LACRA Director</Badge>
+            <div className="text-left sm:text-right w-full sm:w-auto">
+              <p className="text-xs sm:text-sm text-gray-600">Role</p>
+              <Badge className="bg-purple-100 text-purple-800 text-xs sm:text-sm">LACRA Director</Badge>
             </div>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Mobile-Responsive Quick Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card>
             <CardContent className="flex items-center p-6">
               <div className="flex items-center justify-between w-full">

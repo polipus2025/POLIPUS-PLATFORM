@@ -84,28 +84,91 @@ export default function InspectionsTable() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <CardTitle className="text-lg font-semibold text-neutral">Recent Commodity Inspections</CardTitle>
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
             <div className="relative">
               <Input
                 type="text"
                 placeholder="Search commodities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-64"
+                className="pl-10 w-full sm:w-64"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             </div>
-            <Button className="bg-lacra-green hover:bg-green-700">
+            <Button className="bg-lacra-green hover:bg-green-700 justify-center">
               <Plus className="h-4 w-4 mr-2" />
-              New Inspection
+              <span className="hidden sm:inline">New Inspection</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* Mobile Card View */}
+        <div className="block lg:hidden space-y-4">
+          {filteredData.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No commodity data available. Add commodities and inspections to see them here.
+            </div>
+          ) : (
+            filteredData.slice(0, 10).map((item) => (
+              <div key={item.id} className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <i className={`fas fa-${getCommodityIcon(item.type)} text-amber-600 mr-3`}></i>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm text-gray-500">{item.batchNumber}</div>
+                    </div>
+                  </div>
+                  {getStatusBadge(item.status)}
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">County:</span>
+                    <div className="font-medium">{item.county}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Grade:</span>
+                    <div>{getGradeBadge(item.qualityGrade)}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Inspector:</span>
+                    <div className="font-medium">{item.inspection?.inspectorName || 'Not assigned'}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Date:</span>
+                    <div className="font-medium">
+                      {item.inspection?.inspectionDate 
+                        ? new Date(item.inspection.inspectionDate).toLocaleDateString()
+                        : 'Not inspected'
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="ghost" size="sm" className="text-lacra-blue hover:text-blue-700 flex-1">
+                    View
+                  </Button>
+                  {item.status === 'compliant' ? (
+                    <Button variant="ghost" size="sm" className="text-lacra-green hover:text-green-700 flex-1">
+                      Certify
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" size="sm" className="text-warning hover:text-orange-700 flex-1">
+                      Review
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

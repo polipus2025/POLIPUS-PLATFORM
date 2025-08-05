@@ -41,77 +41,78 @@ export default function FarmerDashboard() {
   ).length : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-0">
+      {/* Mobile-Responsive Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Welcome back, {farmerName}!
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
             Farmer ID: {farmerId} | Your farm management dashboard
           </p>
         </div>
-        <div className="flex gap-3">
-          <Link href="/batch-code-generator">
-            <Button className="bg-green-600 hover:bg-green-700">
+        <div className="flex gap-3 w-full sm:w-auto">
+          <Link href="/batch-code-generator" className="flex-1 sm:flex-none">
+            <Button className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
               <Package className="h-4 w-4 mr-2" />
-              Generate Batch Code
+              <span className="hidden sm:inline">Generate Batch Code</span>
+              <span className="sm:hidden">New Batch</span>
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Mobile-Responsive Statistics Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">Total Farm Plots</p>
-                <p className="text-3xl font-bold text-green-900">{totalPlots}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-green-600">Total Farm Plots</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-900">{totalPlots}</p>
                 <p className="text-xs text-green-600 mt-1">Registered plots</p>
               </div>
-              <MapPin className="h-12 w-12 text-green-600" />
+              <MapPin className="h-8 w-8 sm:h-12 sm:w-12 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600">Active Crop Plans</p>
-                <p className="text-3xl font-bold text-blue-900">{activeCropPlans}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-blue-600">Active Crop Plans</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-900">{activeCropPlans}</p>
                 <p className="text-xs text-blue-600 mt-1">Current season</p>
               </div>
-              <Calendar className="h-12 w-12 text-blue-600" />
+              <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">Total Harvested</p>
-                <p className="text-3xl font-bold text-orange-900">{totalHarvested.toFixed(1)}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-orange-600">Total Harvested</p>
+                <p className="text-2xl sm:text-3xl font-bold text-orange-900">{totalHarvested.toFixed(1)}</p>
                 <p className="text-xs text-orange-600 mt-1">Metric tons</p>
               </div>
-              <Package className="h-12 w-12 text-orange-600" />
+              <Package className="h-8 w-8 sm:h-12 sm:w-12 text-orange-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Pending Inspections</p>
-                <p className="text-3xl font-bold text-purple-900">{pendingInspections}</p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-purple-600">Pending Inspections</p>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-900">{pendingInspections}</p>
                 <p className="text-xs text-purple-600 mt-1">Awaiting review</p>
               </div>
-              <Clock className="h-12 w-12 text-purple-600" />
+              <Clock className="h-8 w-8 sm:h-12 sm:w-12 text-purple-600" />
             </div>
           </CardContent>
         </Card>

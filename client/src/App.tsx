@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
+import MobileNav from "@/components/layout/mobile-nav";
 import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
@@ -310,10 +311,11 @@ function App() {
             <Header />
             <div className="flex">
               <Sidebar />
-              <main className="flex-1 min-w-0 overflow-hidden">
+              <main className="flex-1 min-w-0 overflow-hidden pb-16 lg:pb-0">
                 <Router />
               </main>
             </div>
+            <MobileNav />
           </div>
         )}
         <Toaster />

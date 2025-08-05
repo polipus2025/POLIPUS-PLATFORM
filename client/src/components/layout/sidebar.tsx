@@ -127,23 +127,23 @@ export default function Sidebar() {
   const navigationItems = getNavigationItems(userType, role);
 
   return (
-    <aside className="w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto shrink-0">
-      <nav className="p-6">
+    <aside className="hidden lg:block w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto shrink-0">
+      <nav className="p-4 lg:p-6">
         {/* Main Navigation Section */}
-        <div className="mb-8">
+        <div className="mb-6 lg:mb-8">
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             {userType === 'farmer' ? 'Farm Management' : 
              userType === 'field_agent' ? 'Field Operations' : 
              userType === 'exporter' ? 'Export Operations' :
              'Regulatory Compliance'}
           </h3>
-          <ul className="space-y-2">
+          <ul className="space-y-1 lg:space-y-2">
             {navigationItems.map((item) => {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
                   <Link href={item.href} className={cn(
-                    "flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-colors relative",
+                    "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base",
                     isActive
                       ? userType === 'farmer' 
                         ? "text-green-700 bg-green-50"
@@ -154,13 +154,13 @@ export default function Sidebar() {
                         : "text-lacra-blue bg-blue-50"
                       : "text-gray-600 hover:bg-gray-50"
                   )}>
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
+                    <item.icon className="h-4 w-4 lg:h-5 lg:w-5" />
+                    <span className="truncate">{item.name}</span>
                     {/* Show blinking red notification for Internal Messaging */}
                     {item.name === "Internal Messaging" && unreadCount > 0 && (
                       <div className="ml-auto flex items-center space-x-1">
-                        <div className="w-3 h-3 rounded-full blink-red"></div>
-                        <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded-full animate-pulse">
+                        <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full blink-red"></div>
+                        <span className="text-xs font-bold text-red-600 bg-red-100 px-1 lg:px-2 py-1 rounded-full animate-pulse">
                           {unreadCount}
                         </span>
                       </div>

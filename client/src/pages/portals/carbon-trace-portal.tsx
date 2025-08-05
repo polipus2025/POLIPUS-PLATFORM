@@ -304,7 +304,7 @@ export default function CarbonTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/sustainability-manager-login">
+                <a href="/carbon-trace-sustainability-manager-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -348,7 +348,7 @@ export default function CarbonTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/carbon-auditor-login">
+                <a href="/carbon-trace-carbon-auditor-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -392,7 +392,7 @@ export default function CarbonTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/climate-policy-analyst-login">
+                <a href="/carbon-trace-climate-policy-analyst-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

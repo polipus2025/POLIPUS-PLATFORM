@@ -56,6 +56,9 @@ import BlueCarbonPolicyAdvisoryLogin from "@/pages/auth/blue-carbon-policy-advis
 
 // Carbon Trace Authentication
 import CarbonTraceRegulatoryLogin from "@/pages/auth/carbon-trace-regulatory-login";
+import CarbonTraceSustainabilityManagerLogin from "@/pages/auth/carbon-trace-sustainability-manager-login";
+import CarbonTraceCarbonAuditorLogin from "@/pages/auth/carbon-trace-carbon-auditor-login";
+import CarbonTraceClimatePolicyAnalystLogin from "@/pages/auth/carbon-trace-climate-policy-analyst-login";
 import MonitoringDashboard from "@/pages/monitoring-dashboard";
 import Dashboard from "@/pages/dashboard";
 
@@ -184,6 +187,9 @@ function Router() {
 
       {/* Carbon Trace Authentication Routes */}
       <Route path="/carbon-trace-regulatory-login" component={CarbonTraceRegulatoryLogin} />
+      <Route path="/carbon-trace-sustainability-manager-login" component={CarbonTraceSustainabilityManagerLogin} />
+      <Route path="/carbon-trace-carbon-auditor-login" component={CarbonTraceCarbonAuditorLogin} />
+      <Route path="/carbon-trace-climate-policy-analyst-login" component={CarbonTraceClimatePolicyAnalystLogin} />
 
       
       {/* Protected Routes */}

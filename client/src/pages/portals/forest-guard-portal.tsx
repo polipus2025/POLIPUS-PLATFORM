@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Trees, Satellite, Camera, TreePine } from "lucide-react";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Trees, Satellite, Camera, TreePine, Bird } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { useState, useEffect } from "react";
@@ -267,36 +267,36 @@ export default function ForestGuardPortal() {
               </Button>
             </div>
 
-            {/* Conservation Scientist Portal */}
+            {/* Conservation Officer Portal */}
             <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
               <div className="text-center pb-3">
                 <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Satellite className="h-6 w-6 text-white" />
+                  <TreePine className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Conservation Scientist Portal
+                  Conservation Officer Portal
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
-                  Research specialists
+                  Wildlife conservation officers
                 </p>
               </div>
               
               <div className="space-y-2 mb-4 flex-1">
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Research analysis</span>
+                  <span className="leading-tight">Species protection</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Satellite data</span>
+                  <span className="leading-tight">Anti-poaching operations</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Environmental reports</span>
+                  <span className="leading-tight">Habitat restoration</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-blue-600 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Scientific studies</span>
+                  <span className="leading-tight">Wildlife monitoring</span>
                 </div>
               </div>
               
@@ -304,43 +304,43 @@ export default function ForestGuardPortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/conservation-scientist-login">
+                <a href="/forest-guard-conservation-officer-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
               </Button>
             </div>
 
-            {/* Carbon Credit Trader Portal */}
+            {/* Wildlife Biologist Portal */}
             <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
               <div className="text-center pb-3">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Leaf className="h-6 w-6 text-white" />
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Bird className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Carbon Credit Trader Portal
+                  Wildlife Biologist Portal
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
-                  Carbon market specialists
+                  Research scientists
                 </p>
               </div>
               
               <div className="space-y-2 mb-4 flex-1">
                 <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Credit trading</span>
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Species research</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Market analysis</span>
+                  <span className="leading-tight">Population studies</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Carbon verification</span>
+                  <span className="leading-tight">Behavioral ecology</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Investment tracking</span>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Conservation genetics</span>
                 </div>
               </div>
               
@@ -348,43 +348,43 @@ export default function ForestGuardPortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/carbon-trader-login">
+                <a href="/forest-guard-wildlife-biologist-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
               </Button>
             </div>
 
-            {/* Government Inspector Portal */}
+            {/* Community Liaison Portal */}
             <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
               <div className="text-center pb-3">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-teal flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Shield className="h-6 w-6 text-white" />
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Users className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Government Inspector Portal
+                  Community Liaison Portal
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
-                  Regulatory officials
+                  Community engagement specialists
                 </p>
               </div>
               
               <div className="space-y-2 mb-4 flex-1">
                 <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Compliance monitoring</span>
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Community outreach</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Policy enforcement</span>
+                  <span className="leading-tight">Cultural preservation</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Regulatory oversight</span>
+                  <div className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Traditional knowledge</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Violation reports</span>
+                  <span className="leading-tight">Conflict mediation</span>
                 </div>
               </div>
               
@@ -392,7 +392,7 @@ export default function ForestGuardPortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/government-inspector-login">
+                <a href="/forest-guard-community-liaison-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

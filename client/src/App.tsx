@@ -38,6 +38,9 @@ import MineWatchTransportCoordinatorLogin from "@/pages/auth/mine-watch-transpor
 // Forest Guard Authentication
 import ForestGuardRegulatoryLogin from "@/pages/auth/forest-guard-regulatory-login";
 import ForestGuardRangerLogin from "@/pages/auth/forest-guard-ranger-login";
+import ForestGuardConservationOfficerLogin from "@/pages/auth/forest-guard-conservation-officer-login";
+import ForestGuardWildlifeBiologistLogin from "@/pages/auth/forest-guard-wildlife-biologist-login";
+import ForestGuardCommunityLiaisonLogin from "@/pages/auth/forest-guard-community-liaison-login";
 
 // Aqua Trace Authentication
 import AquaTraceRegulatoryLogin from "@/pages/auth/aqua-trace-regulatory-login";
@@ -157,6 +160,9 @@ function Router() {
       {/* Forest Guard Authentication Routes */}
       <Route path="/forest-guard-regulatory-login" component={ForestGuardRegulatoryLogin} />
       <Route path="/forest-guard-ranger-login" component={ForestGuardRangerLogin} />
+      <Route path="/forest-guard-conservation-officer-login" component={ForestGuardConservationOfficerLogin} />
+      <Route path="/forest-guard-wildlife-biologist-login" component={ForestGuardWildlifeBiologistLogin} />
+      <Route path="/forest-guard-community-liaison-login" component={ForestGuardCommunityLiaisonLogin} />
 
       {/* Aqua Trace Authentication Routes */}
       <Route path="/aqua-trace-regulatory-login" component={AquaTraceRegulatoryLogin} />

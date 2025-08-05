@@ -94,26 +94,81 @@ const LeafletMap = ({
           shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
         });
 
-        // Create map instance
-        mapInstanceRef.current = L.map(mapRef.current).setView(mapCenter, 16);
+        // Create map instance with proper options
+        console.log('Creating map with center:', mapCenter);
+        mapInstanceRef.current = L.map(mapRef.current, {
+          center: mapCenter,
+          zoom: 16,
+          zoomControl: true,
+          scrollWheelZoom: true,
+          doubleClickZoom: false,
+          touchZoom: true,
+          boxZoom: true,
+          keyboard: true,
+          dragging: true,
+          closePopupOnClick: true,
+          preferCanvas: false
+        });
         
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        console.log('Map instance created:', mapInstanceRef.current);
+        
+        // Add multiple tile layer options for better reliability
+        const tileUrls = [
+          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+        ];
+        
+        // Add primary tile layer
+        const primaryTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors',
-          maxZoom: 20
-        }).addTo(mapInstanceRef.current);
+          maxZoom: 20,
+          minZoom: 1,
+          detectRetina: true
+        });
+        
+        primaryTileLayer.addTo(mapInstanceRef.current);
+        console.log('Tile layer added to map');
+        
+        // Add success handler for tile loading
+        primaryTileLayer.on('tileload', () => {
+          console.log('Tiles are loading successfully');
+        });
+        
+        // Add error handling for tile loading
+        primaryTileLayer.on('tileerror', (e: any) => {
+          console.warn('Tile loading error:', e);
+          // Try alternative tile source on error
+          setTimeout(() => {
+            if (mapInstanceRef.current) {
+              console.log('Trying fallback tile layer');
+              const fallbackLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+              });
+              fallbackLayer.addTo(mapInstanceRef.current);
+            }
+          }, 1000);
+        });
 
         // Handle map clicks
         mapInstanceRef.current.on('click', (e: any) => {
           onMapClick(e.latlng.lat, e.latlng.lng);
         });
 
-        // Force map resize after a short delay
-        setTimeout(() => {
+        // Force map resize with multiple attempts
+        const resizeMap = () => {
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
+            // Set view again to ensure proper rendering
+            mapInstanceRef.current.setView(mapCenter, 16);
           }
-        }, 100);
+        };
+        
+        // Multiple resize attempts for better reliability
+        setTimeout(resizeMap, 100);
+        setTimeout(resizeMap, 500);
+        setTimeout(resizeMap, 1000);
         
       } catch (error) {
         console.error('Error initializing map:', error);
@@ -289,7 +344,13 @@ const LeafletMap = ({
       <div 
         ref={mapRef} 
         className="w-full h-[300px] sm:h-[400px] md:h-[450px] rounded-lg border border-gray-200 bg-gray-100 touch-manipulation"
-        style={{ minHeight: '300px' }}
+        style={{ 
+          minHeight: '300px',
+          height: '400px',
+          width: '100%',
+          position: 'relative',
+          zIndex: 1
+        }}
       />
       <div className="absolute top-2 right-2 bg-white rounded-md shadow-sm p-1 sm:p-2 text-xs text-gray-600 max-w-[140px] sm:max-w-none">
         <span className="hidden sm:inline">Click on map to add boundary points</span>

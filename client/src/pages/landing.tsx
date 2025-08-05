@@ -61,20 +61,20 @@ export default function Landing() {
         <meta name="description" content="Comprehensive agricultural commodity compliance management system for the Liberia Agriculture Commodity Regulatory Authority" />
       </Helmet>
 
-      {/* Header - ISMS Style */}
+      {/* Mobile-Responsive Header - ISMS Style */}
       <header className="isms-card sticky top-0 z-10 mb-0">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-lg overflow-hidden">
+            <div className="flex items-center gap-3 sm:gap-8">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg overflow-hidden">
                   <img 
                     src={lacraLogo} 
                     alt="LACRA Official Logo" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="w-12 h-12 rounded-lg overflow-hidden">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg overflow-hidden">
                   <img 
                     src={agriTraceLogo} 
                     alt="AgriTrace360 Logo" 
@@ -82,8 +82,9 @@ export default function Landing() {
                   />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">AgriTrace360™</h1>
-                  <p className="text-sm text-gray-600">Liberia Agriculture Commodity Regulatory Authority</p>
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">AgriTrace360™</h1>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Liberia Agriculture Commodity Regulatory Authority</p>
+                  <p className="text-xs text-gray-600 sm:hidden">LACRA</p>
                 </div>
               </div>
               

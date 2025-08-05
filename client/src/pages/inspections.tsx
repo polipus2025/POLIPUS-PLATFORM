@@ -45,17 +45,17 @@ export default function Inspections() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="mb-6">
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
+      <div className="p-3 sm:p-6">
+        <div className="mb-4 sm:mb-6">
+          <Skeleton className="h-6 sm:h-8 w-48 sm:w-64 mb-2" />
+          <Skeleton className="h-3 sm:h-4 w-64 sm:w-96" />
         </div>
         <Card>
           <CardHeader>
-            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-5 sm:h-6 w-32 sm:w-48" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-48 sm:h-64 w-full" />
           </CardContent>
         </Card>
       </div>

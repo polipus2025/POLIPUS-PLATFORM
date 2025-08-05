@@ -99,23 +99,23 @@ export default function FrontPage() {
 
   return (
     <div className="min-h-screen isms-gradient">
-      <div className="max-w-7xl mx-auto p-8">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
 
-        {/* Polipos Logo - ISMS Style */}
-        <div className="isms-card text-center mb-12">
-          <div className="flex justify-center py-6 relative">
+        {/* Mobile-Responsive Polipos Logo - ISMS Style */}
+        <div className="isms-card text-center mb-8 sm:mb-12">
+          <div className="flex justify-center py-4 sm:py-6 relative">
             <img 
               src={poliposLogo} 
               alt="Polipos - Brightening the Future" 
-              className="h-64 w-auto object-contain"
+              className="h-32 sm:h-48 md:h-64 w-auto object-contain"
             />
             {/* Registered trademark symbol positioned over the 's' */}
-            <span className="absolute top-16 right-[calc(50%-380px)] text-xl font-black text-slate-800 drop-shadow-sm">®</span>
+            <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>
-          <div className="flex items-center justify-center relative">
-            <h2 className="text-3xl font-bold text-slate-900">General Environmental Intelligence Platform</h2>
-            <div className="absolute right-0">
+          <div className="flex flex-col sm:flex-row items-center justify-center relative gap-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
+            <div className="sm:absolute sm:right-0">
               <Link href="/monitoring-login">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />
@@ -126,75 +126,75 @@ export default function FrontPage() {
           </div>
         </div>
 
-        {/* Platform Statistics - ISMS Style */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        {/* Mobile-Responsive Platform Statistics - ISMS Style */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
           <div className="isms-card text-center">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
-              <CheckCircle className="h-6 w-6 text-white" />
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
-            <p className="text-slate-600 text-sm mb-1">Active Modules</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">1/8</p>
-            <p className="text-slate-600 text-sm">Operational</p>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">Active Modules</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">1/8</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Operational</p>
           </div>
           
           <div className="isms-card text-center">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
-              <span className="text-white font-bold text-lg">EU</span>
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <span className="text-white font-bold text-sm sm:text-lg">EU</span>
             </div>
-            <p className="text-slate-600 text-sm mb-1">AgriTrace360</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">EUDR 100%</p>
-            <p className="text-slate-600 text-sm">Compliance</p>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">AgriTrace360</p>
+            <p className="text-lg sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">EUDR 100%</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Compliance</p>
           </div>
 
           <div className="isms-card text-center">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-3">
-              <Settings className="h-6 w-6 text-white" />
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <Settings className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
-            <p className="text-slate-600 text-sm mb-1">In Development</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">7</p>
-            <p className="text-slate-600 text-sm">Modules</p>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">In Development</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">7</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Modules</p>
           </div>
 
           <div className="isms-card text-center">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
-              <Globe className="h-6 w-6 text-white" />
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <Globe className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
-            <p className="text-slate-600 text-sm mb-1">Platform Reach</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">Global</p>
-            <p className="text-slate-600 text-sm">Coverage</p>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">Platform Reach</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">Global</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Coverage</p>
           </div>
         </div>
 
-        {/* Platform Modules - ISMS Style */}
+        {/* Mobile-Responsive Platform Modules - ISMS Style */}
         <div className="isms-card">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
-              <Settings className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-3 mb-6 sm:mb-8">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Platform Modules</h2>
-              <p className="text-slate-600">Integrated business solutions and enterprise applications</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Platform Modules</h2>
+              <p className="text-sm sm:text-base text-slate-600">Integrated business solutions and enterprise applications</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {modules.map((module) => {
               const IconComponent = module.icon;
               
               return (
                 <div 
                   key={module.id} 
-                  className="isms-card transition-all duration-300 h-80 flex flex-col hover:shadow-lg hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
+                  className="isms-card transition-all duration-300 h-64 sm:h-80 flex flex-col hover:shadow-lg hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
                 >
                   <Link href={module.route} className="flex-1 relative block group">
-                    <div className="flex flex-col items-center text-center space-y-3 h-full justify-center p-4">
-                      <div className={`w-16 h-16 rounded-2xl ${module.isAgriTrace ? 'isms-icon-bg-green' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <IconComponent className="h-8 w-8 text-white" />
+                    <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 h-full justify-center p-3 sm:p-4">
+                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'isms-icon-bg-green' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-slate-900 mb-2">{module.title}</h3>
+                        <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
                         {module.description && (
-                          <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                          <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
                             {module.description}
                           </p>
                         )}
@@ -209,8 +209,8 @@ export default function FrontPage() {
                           )}
                         </Badge>
                       </div>
-                      <Button className={`w-full ${module.isAgriTrace ? 'isms-button' : 'bg-slate-400 hover:bg-slate-500'}`}>
-                        <ArrowRight className="h-4 w-4 mr-2" />
+                      <Button className={`w-full text-xs sm:text-sm ${module.isAgriTrace ? 'isms-button' : 'bg-slate-400 hover:bg-slate-500'}`}>
+                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         {module.isAgriTrace ? 'Enter Platform' : 'View Details'}
                       </Button>
                     </div>

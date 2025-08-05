@@ -62,13 +62,13 @@ export default function ExporterLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-3 sm:p-4">
       <Helmet>
         <title>Exporter Portal Login - AgriTrace360™</title>
         <meta name="description" content="Secure login portal for licensed exporters accessing AgriTrace360™ export management system" />
       </Helmet>
 
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+      <Card className="w-full max-w-sm sm:max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center pb-4">
           <div className="flex justify-center items-center gap-3 mb-4">
             <div className="w-16 h-16 rounded-lg overflow-hidden">

@@ -70,7 +70,7 @@ export default function FieldAgentLogin() {
         localStorage.setItem("userRole", "field_agent");
         localStorage.setItem("userType", "field_agent");
         localStorage.setItem("agentId", data.agentId);
-        localStorage.setItem("jurisdiction", data.jurisdiction);
+        localStorage.setItem("jurisdiction", data.jurisdiction || "");
         
         // Redirect to dashboard
         window.location.href = "/dashboard";
@@ -89,13 +89,13 @@ export default function FieldAgentLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-50 flex items-center justify-center p-3 sm:p-4">
       <Helmet>
         <title>Field Agent Portal Login - AgriTrace360™ LACRA</title>
         <meta name="description" content="Secure login portal for LACRA field agents and extension officers" />
       </Helmet>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm sm:max-w-md">
         <Card className="shadow-2xl border-0">
           <CardHeader className="text-center pb-6">
             <div className="flex justify-center items-center gap-3 mb-4">

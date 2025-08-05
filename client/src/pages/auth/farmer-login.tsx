@@ -92,13 +92,13 @@ export default function FarmerLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-3 sm:p-4">
       <Helmet>
         <title>Farmer Portal Login - AgriTrace360™ LACRA</title>
         <meta name="description" content="Secure login portal for registered farmers in Liberia" />
       </Helmet>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm sm:max-w-md">
         <Card className="shadow-2xl border-0">
           <CardHeader className="text-center pb-6">
             <div className="flex justify-center items-center gap-3 mb-4">

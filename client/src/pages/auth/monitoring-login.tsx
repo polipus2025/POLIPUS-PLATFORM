@@ -64,8 +64,8 @@ export default function MonitoringLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-sm sm:max-w-md">
         <Card className="bg-white shadow-2xl border-0">
           <CardHeader className="text-center pb-2">
             <div className="flex justify-center mb-4">

@@ -66,58 +66,57 @@ const LeafletMap = ({
   useEffect(() => {
     // Initialize Leaflet map only on client side
     const initMap = async () => {
-      if (typeof window === 'undefined' || !mapRef.current) return;
+      if (typeof window === 'undefined' || !mapRef.current || mapInstanceRef.current) return;
 
-      // Dynamic import for Leaflet to avoid SSR issues
-      const L = (await import('leaflet')).default;
-      
-      // Import Leaflet CSS
-      if (!document.querySelector('link[href*="leaflet.css"]')) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(link);
-      }
-
-      // Fix Leaflet default markers
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-      });
-
-      if (!mapInstanceRef.current) {
-        mapInstanceRef.current = L.map(mapRef.current, {
-          center: mapCenter,
-          zoom: 16,
-          zoomControl: true,
-          scrollWheelZoom: true,
-          doubleClickZoom: false,
-          tap: true,
-          tapTolerance: 20,
-          touchZoom: true,
-          bounceAtZoomLimits: false,
-          maxZoom: 20,
-          minZoom: 10
-        });
+      try {
+        // Dynamic import for Leaflet to avoid SSR issues
+        const L = (await import('leaflet')).default;
         
-        // Add OpenStreetMap tiles with better mobile rendering
+        // Import Leaflet CSS
+        if (!document.querySelector('link[href*="leaflet.css"]')) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          document.head.appendChild(link);
+          
+          // Wait for CSS to load
+          await new Promise(resolve => {
+            link.onload = resolve;
+            setTimeout(resolve, 1000); // Fallback timeout
+          });
+        }
+
+        // Fix Leaflet default markers
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        });
+
+        // Create map instance
+        mapInstanceRef.current = L.map(mapRef.current).setView(mapCenter, 16);
+        
+        // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors',
-          maxZoom: 20,
-          detectRetina: true
+          maxZoom: 20
         }).addTo(mapInstanceRef.current);
 
-        // Handle map clicks with improved mobile support
+        // Handle map clicks
         mapInstanceRef.current.on('click', (e: any) => {
           onMapClick(e.latlng.lat, e.latlng.lng);
         });
 
-        // Handle mobile touch events
-        mapInstanceRef.current.on('touchstart', (e: any) => {
-          e.originalEvent.preventDefault();
-        });
+        // Force map resize after a short delay
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
+        }, 100);
+        
+      } catch (error) {
+        console.error('Error initializing map:', error);
       }
     };
 
@@ -126,11 +125,15 @@ const LeafletMap = ({
     return () => {
       // Cleanup map instance on unmount
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch (error) {
+          console.warn('Error cleaning up map:', error);
+        }
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [mapCenter]);
 
   useEffect(() => {
     const updateMap = async () => {
@@ -172,7 +175,7 @@ const LeafletMap = ({
           iconSize: [26, 26],
           iconAnchor: [13, 13],
           className: 'boundary-point-marker'
-        });
+        }) as any;
 
         const marker = L.marker([point.latitude, point.longitude], { icon: markerIcon })
           .bindPopup(`
@@ -191,7 +194,7 @@ const LeafletMap = ({
 
       // Draw polygon if we have 3 or more points
       if (points.length >= 3) {
-        const latlngs = points.map(p => [p.latitude, p.longitude]);
+        const latlngs = points.map(p => [p.latitude, p.longitude] as [number, number]);
         polygonRef.current = L.polygon(latlngs, {
           color: '#3b82f6',
           fillColor: '#dbeafe',
@@ -260,7 +263,7 @@ const LeafletMap = ({
         iconSize: [30, 30],
         iconAnchor: [15, 15],
         className: 'current-position-marker'
-      });
+      }) as any;
 
       currentPositionMarkerRef.current = L.marker([
         currentPosition.coords.latitude, 

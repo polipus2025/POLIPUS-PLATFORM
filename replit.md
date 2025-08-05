@@ -8,6 +8,10 @@ Preferred communication style: Simple, everyday language.
 **Maintenance Page Preference**: Always use the generic maintenance page template (red gradient background, "Website Maintenance" title, no specific branding) for any maintenance page requests. This template is stored in server/index.ts as inline HTML.
 **Module Development Strategy**: Ready to simultaneously develop all 7 new modules (Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, Carbon Trace) with complete functionality, maintaining consistent ISMS.online-inspired design system and professional standards from AgriTrace360. Will create full database schemas, backend APIs, frontend interfaces, and cross-module integration for each portal.
 
+### Recent Successful Implementations (January 2025)
+- **Professional PDF Report System**: Implemented comprehensive farmer report generation with proper PDF format using jsPDF, featuring official LACRA letterhead, structured layouts, GPS coordinate tables, and compliance badges. Both comprehensive and EUDR compliance reports working perfectly.
+- **Dashboard Navigation Fix**: Resolved critical routing issue where dashboard button showed Polipus landing page instead of user-specific dashboards. Fixed navigation menu items to point to "/dashboard" route for all user types (regulatory, farmer, field agent, exporter).
+
 ### System Architecture
 The application employs a modern full-stack architecture with a clear separation of concerns.
 

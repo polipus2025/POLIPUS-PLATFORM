@@ -10,6 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import GPSDiagnosticSystem from '@/components/gps/gps-diagnostic-system';
 import InteractiveBoundaryMapper from '@/components/maps/interactive-boundary-mapper';
+import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
+import DeforestationReportComponent from "@/components/reports/deforestation-report";
+import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
+import { createComplianceReports, ComplianceReportData } from "@/components/reports/report-storage";
 import { 
   Map, 
   Navigation, 
@@ -72,6 +76,8 @@ export default function GISMapping() {
   const [currentPosition, setCurrentPosition] = useState<GPSCoordinate | null>(null);
   const [farmPlots, setFarmPlots] = useState<FarmPlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [complianceReports, setComplianceReports] = useState<any>(null);
+  const [isGeneratingReports, setIsGeneratingReports] = useState(false);
   const { toast } = useToast();
 
   // Initialize satellite connections
@@ -199,6 +205,62 @@ export default function GISMapping() {
       title: "GPS System Deactivated",
       description: "GPS tracking has been disabled",
     });
+  };
+
+  // Generate compliance reports for GIS mapping data
+  const generateGISComplianceReports = async () => {
+    if (farmPlots.length === 0) {
+      toast({
+        title: "No Farm Data",
+        description: "Please load farm plot data first to generate compliance reports",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGeneratingReports(true);
+    
+    try {
+      const farmerId = localStorage.getItem("farmerId") || `FRM-${Date.now()}`;
+      const farmerName = localStorage.getItem("farmerFirstName") || "Farm Owner";
+      const totalArea = farmPlots.reduce((sum, plot) => sum + plot.area, 0);
+      const avgCompliance = farmPlots.reduce((sum, plot) => sum + plot.complianceScore, 0) / farmPlots.length;
+      
+      // Use first farm plot coordinates as representative
+      const coordinates = farmPlots[0].coordinates.length > 0 
+        ? `${farmPlots[0].coordinates[0].latitude.toFixed(6)}, ${farmPlots[0].coordinates[0].longitude.toFixed(6)}`
+        : "N/A";
+
+      const reportData: ComplianceReportData = {
+        farmerId,
+        farmerName,
+        coordinates,
+        boundaryData: {
+          name: `GIS Mapping Analysis - ${farmPlots.length} Farm Plots`,
+          area: totalArea,
+          perimeter: 0, // Not applicable for multiple plots
+          points: farmPlots.reduce((sum, plot) => sum + plot.coordinates.length, 0),
+          accuracy: avgCompliance > 90 ? 'excellent' : avgCompliance > 80 ? 'good' : 'fair'
+        }
+      };
+
+      const reports = await createComplianceReports(reportData);
+      setComplianceReports(reports);
+
+      toast({
+        title: "✅ LACRA GIS Compliance Reports Generated",
+        description: `EUDR and deforestation analysis reports created for ${farmPlots.length} farm plots`,
+      });
+    } catch (error) {
+      console.error('Error generating GIS compliance reports:', error);
+      toast({
+        title: "Error Generating Reports",
+        description: "Failed to create compliance reports. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingReports(false);
+    }
   };
 
   const LiberiaCountiesMap = () => {
@@ -683,6 +745,118 @@ export default function GISMapping() {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* LACRA Compliance Reports Section */}
+                <div className="mt-6 isms-card">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl isms-icon-bg-emerald flex items-center justify-center">
+                        <Shield className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900">LACRA Compliance Reports</h3>
+                        <p className="text-slate-600">Generate official EUDR and deforestation analysis reports</p>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={generateGISComplianceReports}
+                      disabled={isGeneratingReports || farmPlots.length === 0}
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      {isGeneratingReports ? 'Generating...' : 'Generate Reports'}
+                    </Button>
+                  </div>
+
+                  {complianceReports ? (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <p className="text-sm text-emerald-800 mb-4">
+                          📋 Official LACRA compliance reports generated for {farmPlots.length} farm plots with colorful letterhead and comprehensive analysis.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                          {/* EUDR Compliance Report */}
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 w-full"
+                              >
+                                <TreePine className="h-3 w-3 mr-2" />
+                                <span className="text-xs">View EUDR Report</span>
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <TreePine className="h-5 w-5 text-emerald-600" />
+                                  EUDR Compliance Assessment
+                                </DialogTitle>
+                              </DialogHeader>
+                              <EUDRComplianceReportComponent 
+                                report={complianceReports.eudrCompliance}
+                              />
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Deforestation Analysis Report */}
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 w-full"
+                              >
+                                <Satellite className="h-3 w-3 mr-2" />
+                                <span className="text-xs">View Deforestation Report</span>
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                                  Deforestation Analysis
+                                </DialogTitle>
+                              </DialogHeader>
+                              <DeforestationReportComponent 
+                                report={complianceReports.deforestationReport}
+                              />
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* PDF Download - EUDR */}
+                          <Button 
+                            onClick={() => generateEUDRCompliancePDF(complianceReports.eudrCompliance)}
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100 w-full"
+                          >
+                            <Download className="h-3 w-3 mr-2" />
+                            <span className="text-xs">Download EUDR PDF</span>
+                          </Button>
+
+                          {/* PDF Download - Deforestation */}
+                          <Button 
+                            onClick={() => generateDeforestationPDF(complianceReports.deforestationReport)}
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 w-full"
+                          >
+                            <Download className="h-3 w-3 mr-2" />
+                            <span className="text-xs">Download Deforestation PDF</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-slate-50 rounded-lg text-center">
+                      <p className="text-slate-600 mb-2">No compliance reports generated yet</p>
+                      <p className="text-sm text-slate-500">Click "Generate Reports" to create LACRA compliance documentation</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </TabsContent>

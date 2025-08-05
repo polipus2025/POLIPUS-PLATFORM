@@ -13,8 +13,19 @@ import {
   Maximize,
   Settings,
   Eye,
-  EyeOff
+  EyeOff,
+  FileText,
+  TreePine,
+  Satellite,
+  AlertTriangle,
+  Shield
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
+import DeforestationReportComponent from "@/components/reports/deforestation-report";
+import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
+import { createComplianceReports, ComplianceReportData } from "@/components/reports/report-storage";
+import { useToast } from "@/hooks/use-toast";
 
 interface MapLayer {
   id: string;
@@ -49,6 +60,7 @@ interface GPSMapViewerProps {
   zoom?: number;
   onPointClick?: (point: GPSPoint) => void;
   onBoundsChange?: (bounds: MapBounds) => void;
+  showComplianceReports?: boolean;
 }
 
 export default function GPSMapViewer({
@@ -57,7 +69,8 @@ export default function GPSMapViewer({
   center = { lat: 6.3133, lng: -10.7969 }, // Monrovia, Liberia
   zoom = 15,
   onPointClick,
-  onBoundsChange
+  onBoundsChange,
+  showComplianceReports = true
 }: GPSMapViewerProps) {
   const [mapLayers, setMapLayers] = useState<MapLayer[]>([
     { id: 'satellite', name: 'Satellite View', type: 'satellite', visible: true, opacity: 100 },
@@ -72,6 +85,9 @@ export default function GPSMapViewer({
   const [mapCenter, setMapCenter] = useState(center);
   const [showMeasurements, setShowMeasurements] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<GPSPoint | null>(null);
+  const [complianceReports, setComplianceReports] = useState<any>(null);
+  const [isGeneratingReports, setIsGeneratingReports] = useState(false);
+  const { toast } = useToast();
 
   // Toggle layer visibility
   const toggleLayer = (layerId: string) => {
@@ -153,6 +169,69 @@ export default function GPSMapViewer({
     return area * 111319.9 * 111319.9 / 10000;
   };
 
+  // Calculate total area of all boundaries
+  const calculateTotalArea = (): number => {
+    if (boundaries.length === 0) return 0;
+    
+    return boundaries.reduce((total, boundary) => {
+      return total + calculateBoundaryArea(boundary);
+    }, 0);
+  };
+
+  // Calculate total distance of GPS points
+  const calculateTotalDistance = (): number => {
+    if (gpsPoints.length < 2) return 0;
+    
+    let totalDistance = 0;
+    for (let i = 0; i < gpsPoints.length - 1; i++) {
+      totalDistance += calculateDistance(gpsPoints[i], gpsPoints[i + 1]);
+    }
+    return totalDistance;
+  };
+
+  // Generate compliance reports for current GPS data
+  const generateComplianceReports = async () => {
+    setIsGeneratingReports(true);
+    
+    try {
+      const farmerId = localStorage.getItem("farmerId") || `FRM-${Date.now()}`;
+      const farmerName = localStorage.getItem("farmerFirstName") || "Farm Owner";
+      const coordinates = gpsPoints.length > 0 
+        ? `${gpsPoints[0].latitude.toFixed(6)}, ${gpsPoints[0].longitude.toFixed(6)}`
+        : "N/A";
+
+      const reportData: ComplianceReportData = {
+        farmerId,
+        farmerName,
+        coordinates,
+        boundaryData: {
+          name: `GPS Map Analysis ${new Date().toLocaleDateString()}`,
+          area: calculateTotalArea(),
+          perimeter: calculateTotalDistance(),
+          points: gpsPoints.length,
+          accuracy: 'good'
+        }
+      };
+
+      const reports = await createComplianceReports(reportData);
+      setComplianceReports(reports);
+
+      toast({
+        title: "✅ LACRA Compliance Reports Generated",
+        description: "EUDR compliance and deforestation analysis reports are ready for viewing and download",
+      });
+    } catch (error) {
+      console.error('Error generating compliance reports:', error);
+      toast({
+        title: "Error Generating Reports",
+        description: "Failed to create compliance reports. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingReports(false);
+    }
+  };
+
   // Export map data
   const exportMapData = () => {
     const mapData = {
@@ -224,6 +303,18 @@ export default function GPSMapViewer({
                 <Download className="h-4 w-4 mr-1" />
                 Export
               </Button>
+              {showComplianceReports && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={generateComplianceReports}
+                  disabled={isGeneratingReports || gpsPoints.length === 0}
+                  className="bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+                >
+                  <Shield className="h-4 w-4 mr-1" />
+                  {isGeneratingReports ? 'Generating...' : 'LACRA Reports'}
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -518,6 +609,101 @@ export default function GPSMapViewer({
               <div>
                 <p className="text-sm text-gray-600">Timestamp</p>
                 <p className="text-sm">{selectedPoint.timestamp.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* LACRA Compliance Reports */}
+      {complianceReports && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-emerald-600" />
+              LACRA Compliance Reports
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                <p className="text-sm text-emerald-800 mb-3">
+                  📋 Official LACRA compliance reports generated for GPS mapping data with colorful letterhead and comprehensive analysis.
+                </p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* EUDR Compliance Report */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 w-full"
+                      >
+                        <TreePine className="h-3 w-3 mr-2" />
+                        <span className="text-xs">View EUDR Report</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <TreePine className="h-5 w-5 text-emerald-600" />
+                          EUDR Compliance Assessment
+                        </DialogTitle>
+                      </DialogHeader>
+                      <EUDRComplianceReportComponent 
+                        report={complianceReports.eudrCompliance}
+                      />
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Deforestation Analysis Report */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 w-full"
+                      >
+                        <Satellite className="h-3 w-3 mr-2" />
+                        <span className="text-xs">View Deforestation Report</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5 text-amber-600" />
+                          Deforestation Analysis
+                        </DialogTitle>
+                      </DialogHeader>
+                      <DeforestationReportComponent 
+                        report={complianceReports.deforestationReport}
+                      />
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* PDF Download - EUDR */}
+                  <Button 
+                    onClick={() => generateEUDRCompliancePDF(complianceReports.eudrCompliance)}
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100 w-full"
+                  >
+                    <Download className="h-3 w-3 mr-2" />
+                    <span className="text-xs">Download EUDR PDF</span>
+                  </Button>
+
+                  {/* PDF Download - Deforestation */}
+                  <Button 
+                    onClick={() => generateDeforestationPDF(complianceReports.deforestationReport)}
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 w-full"
+                  >
+                    <Download className="h-3 w-3 mr-2" />
+                    <span className="text-xs">Download Deforestation PDF</span>
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>

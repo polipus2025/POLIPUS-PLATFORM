@@ -14,8 +14,19 @@ import {
   Eye,
   Navigation,
   Target,
-  CheckCircle
+  CheckCircle,
+  FileText,
+  Download,
+  TreePine,
+  Satellite,
+  AlertTriangle,
+  Shield
 } from 'lucide-react';
+import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
+import DeforestationReportComponent from "@/components/reports/deforestation-report";
+import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
+import { createComplianceReports, ComplianceReportData } from "@/components/reports/report-storage";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface BoundaryPoint {
   id: string;
@@ -36,12 +47,16 @@ interface BoundaryMapping {
   accuracyLevel: 'excellent' | 'good' | 'fair' | 'poor';
   createdAt: Date;
   completedAt?: Date;
+  complianceReports?: {
+    eudrCompliance: any;
+    deforestationReport: any;
+  };
 }
 
 interface InteractiveBoundaryMapperProps {
   existingBoundary?: BoundaryMapping;
   onBoundaryUpdate?: (boundary: BoundaryMapping) => void;
-  onBoundaryComplete?: (boundary: BoundaryMapping) => void;
+  onBoundaryComplete?: (boundary: BoundaryMapping & { complianceReports: any }) => void;
   minPoints?: number;
 }
 
@@ -518,7 +533,7 @@ export default function InteractiveBoundaryMapper({
     });
   };
 
-  const completeBoundary = () => {
+  const completeBoundary = async () => {
     if (!currentBoundary || currentBoundary.points.length < minPoints) {
       toast({
         title: "Insufficient Points",
@@ -534,18 +549,64 @@ export default function InteractiveBoundaryMapper({
       completedAt: new Date()
     };
 
-    setCurrentBoundary(completedBoundary);
-    onBoundaryComplete?.(completedBoundary);
+    // Generate compliance reports automatically
+    const farmerId = localStorage.getItem("farmerId") || `FRM-${Date.now()}`;
+    const farmerName = localStorage.getItem("farmerFirstName") || "Farm Owner";
+    const coordinates = currentBoundary.points.length > 0 
+      ? `${currentBoundary.points[0].latitude.toFixed(6)}, ${currentBoundary.points[0].longitude.toFixed(6)}`
+      : "N/A";
 
-    // Save to localStorage for demonstration
-    const savedBoundaries = JSON.parse(localStorage.getItem('farmBoundaries') || '[]');
-    savedBoundaries.push(completedBoundary);
-    localStorage.setItem('farmBoundaries', JSON.stringify(savedBoundaries));
+    try {
+      // Create comprehensive compliance reports
+      const reportData: ComplianceReportData = {
+        farmerId,
+        farmerName,
+        coordinates,
+        boundaryData: {
+          name: completedBoundary.name,
+          area: completedBoundary.area,
+          perimeter: completedBoundary.perimeter,
+          points: completedBoundary.points.length,
+          accuracy: completedBoundary.accuracyLevel
+        }
+      };
 
-    toast({
-      title: "✅ Boundary Completed",
-      description: `Farm boundary "${completedBoundary.name}" has been saved with ${completedBoundary.points.length} points and ${completedBoundary.area.toFixed(2)} hectares`,
-    });
+      const complianceReports = await createComplianceReports(reportData);
+      
+      // Add reports to boundary data
+      const boundaryWithReports = {
+        ...completedBoundary,
+        complianceReports
+      };
+
+      setCurrentBoundary(boundaryWithReports);
+      onBoundaryComplete?.(boundaryWithReports);
+
+      // Save to localStorage for demonstration
+      const savedBoundaries = JSON.parse(localStorage.getItem('farmBoundaries') || '[]');
+      savedBoundaries.push(boundaryWithReports);
+      localStorage.setItem('farmBoundaries', JSON.stringify(savedBoundaries));
+
+      toast({
+        title: "✅ Boundary Completed with LACRA Reports",
+        description: `Farm boundary "${completedBoundary.name}" saved with EUDR and deforestation analysis reports`,
+      });
+    } catch (error) {
+      console.error('Error generating compliance reports:', error);
+      
+      setCurrentBoundary(completedBoundary);
+      onBoundaryComplete?.(completedBoundary);
+
+      // Save to localStorage for demonstration
+      const savedBoundaries = JSON.parse(localStorage.getItem('farmBoundaries') || '[]');
+      savedBoundaries.push(completedBoundary);
+      localStorage.setItem('farmBoundaries', JSON.stringify(savedBoundaries));
+
+      toast({
+        title: "✅ Boundary Completed",
+        description: `Farm boundary "${completedBoundary.name}" has been saved with ${completedBoundary.points.length} points and ${completedBoundary.area.toFixed(2)} hectares`,
+      });
+    }
   };
 
   const resetBoundary = () => {
@@ -720,15 +781,105 @@ export default function InteractiveBoundaryMapper({
             </div>
 
             {currentBoundary.status === 'completed' && (
-              <div className="mt-4 p-3 bg-green-100 rounded-lg border border-green-200">
-                <h4 className="font-medium text-green-800 text-sm mb-2">📍 Saved Boundary Details</h4>
-                <div className="text-xs text-green-700 space-y-1">
-                  <div><strong>Name:</strong> {currentBoundary.name}</div>
-                  <div><strong>GPS Points:</strong> {currentBoundary.points.length} recorded</div>
-                  <div><strong>Total Area:</strong> {currentBoundary.area.toFixed(3)} hectares</div>
-                  <div><strong>Boundary Length:</strong> {currentBoundary.perimeter.toFixed(1)} meters</div>
-                  <div><strong>Status:</strong> Completed and saved to system</div>
+              <div className="mt-4 space-y-3">
+                <div className="p-3 bg-green-100 rounded-lg border border-green-200">
+                  <h4 className="font-medium text-green-800 text-sm mb-2">📍 Saved Boundary Details</h4>
+                  <div className="text-xs text-green-700 space-y-1">
+                    <div><strong>Name:</strong> {currentBoundary.name}</div>
+                    <div><strong>GPS Points:</strong> {currentBoundary.points.length} recorded</div>
+                    <div><strong>Total Area:</strong> {currentBoundary.area.toFixed(3)} hectares</div>
+                    <div><strong>Boundary Length:</strong> {currentBoundary.perimeter.toFixed(1)} meters</div>
+                    <div><strong>Status:</strong> Completed and saved to system</div>
+                  </div>
                 </div>
+
+                {/* EUDR Compliance and Deforestation Reports */}
+                {currentBoundary.complianceReports && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-blue-800 text-sm mb-3 flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      LACRA Compliance Reports Generated
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {/* EUDR Compliance Report */}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 w-full"
+                          >
+                            <FileText className="h-3 w-3 mr-2" />
+                            <span className="text-xs">View EUDR Report</span>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <TreePine className="h-5 w-5 text-emerald-600" />
+                              EUDR Compliance Assessment
+                            </DialogTitle>
+                          </DialogHeader>
+                          <EUDRComplianceReportComponent 
+                            report={currentBoundary.complianceReports.eudrCompliance}
+                          />
+                        </DialogContent>
+                      </Dialog>
+
+                      {/* Deforestation Analysis Report */}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 w-full"
+                          >
+                            <Satellite className="h-3 w-3 mr-2" />
+                            <span className="text-xs">View Deforestation Report</span>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <AlertTriangle className="h-5 w-5 text-amber-600" />
+                              Deforestation Analysis
+                            </DialogTitle>
+                          </DialogHeader>
+                          <DeforestationReportComponent 
+                            report={currentBoundary.complianceReports.deforestationReport}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+
+                    {/* PDF Download Buttons */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                      <Button 
+                        onClick={() => generateEUDRCompliancePDF(currentBoundary.complianceReports.eudrCompliance)}
+                        variant="outline" 
+                        size="sm" 
+                        className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100 w-full"
+                      >
+                        <Download className="h-3 w-3 mr-2" />
+                        <span className="text-xs">Download EUDR PDF</span>
+                      </Button>
+
+                      <Button 
+                        onClick={() => generateDeforestationPDF(currentBoundary.complianceReports.deforestationReport)}
+                        variant="outline" 
+                        size="sm" 
+                        className="bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 w-full"
+                      >
+                        <Download className="h-3 w-3 mr-2" />
+                        <span className="text-xs">Download Deforestation PDF</span>
+                      </Button>
+                    </div>
+
+                    <div className="text-xs text-blue-600 mt-2">
+                      📋 Reports include LACRA letterhead and official compliance documentation
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

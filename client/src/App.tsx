@@ -41,6 +41,7 @@ import BatchCodeGenerator from "@/pages/batch-code-generator";
 import DirectorDashboard from "@/pages/director-dashboard";
 
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
+import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
 import FarmerDashboard from "@/pages/farmer-dashboard";
 import Messaging from "@/pages/messaging";
 
@@ -199,6 +200,12 @@ function Router() {
             <ProtectedRoute 
               component={FarmerGPSMapping} 
               allowedUserTypes={['farmer']} 
+            />
+          </Route>
+          <Route path="/field-agent-farm-mapping">
+            <ProtectedRoute 
+              component={FieldAgentFarmMapping} 
+              allowedUserTypes={['field_agent']} 
             />
           </Route>
           <Route path="/crop-planning">

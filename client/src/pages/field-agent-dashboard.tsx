@@ -559,14 +559,11 @@ export default function FieldAgentDashboard() {
                     variant="outline" 
                     className="h-20 flex flex-col gap-2"
                     onClick={() => {
-                      toast({
-                        title: 'GPS Mapping Started',
-                        description: `GPS mapping tool launched for ${jurisdiction} territory`,
-                      });
+                      window.location.href = '/field-agent-farm-mapping';
                     }}
                   >
                     <Map className="h-6 w-6" />
-                    GPS Mapping
+                    Farm Land Mapping
                   </Button>
 
                   <Button 
@@ -703,14 +700,11 @@ Registration: ${farmer.registeredBy || 'Unknown'}`;
                   <p className="text-gray-600 mb-4">Interactive territory map and GPS tools</p>
                   <Button
                     onClick={() => {
-                      toast({
-                        title: 'GPS Territory Mapping',
-                        description: `Launching GPS mapping interface for ${jurisdiction}. Ensure GPS is enabled on your device.`,
-                      });
+                      window.location.href = '/field-agent-farm-mapping';
                     }}
                   >
                     <MapPin className="h-4 w-4 mr-2" />
-                    Launch GPS Mapping
+                    Launch Farm Land Mapping
                   </Button>
                 </div>
               </CardContent>

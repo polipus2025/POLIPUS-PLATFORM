@@ -20,7 +20,7 @@ import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
-// Farmer form schema
+// Farmer form schema - simplified to match database requirements
 const farmerFormSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -33,24 +33,7 @@ const farmerFormSchema = z.object({
   farmSize: z.string().optional(),
   farmSizeUnit: z.string().default("hectares"),
   agreementSigned: z.boolean().default(false),
-  profilePicture: z.string().optional(),
-  farmBoundaries: z.array(z.object({
-    lat: z.number(),
-    lng: z.number(),
-    point: z.number()
-  })).optional(),
-  landMapData: z.object({
-    totalArea: z.number().optional(),
-    cultivatedArea: z.number().optional(),
-    soilType: z.string().optional(),
-    waterSources: z.array(z.string()).optional(),
-    accessRoads: z.boolean().optional(),
-    elevationData: z.object({
-      min: z.number().optional(),
-      max: z.number().optional(),
-      average: z.number().optional()
-    }).optional()
-  }).optional()
+  profilePicture: z.string().optional()
 });
 
 type FarmerFormData = z.infer<typeof farmerFormSchema>;
@@ -74,7 +57,7 @@ export default function FarmersPage() {
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [isInteractiveMappingOpen, setIsInteractiveMappingOpen] = useState(false);
   const [farmBoundaries, setFarmBoundaries] = useState<Array<{lat: number, lng: number, point: number}>>([]);
-  const [landMapData, setLandMapData] = useState({
+  const [landMapData, setLandMapData] = useState<any>({
     totalArea: 0,
     cultivatedArea: 0,
     soilType: '',
@@ -104,15 +87,7 @@ export default function FarmersPage() {
       farmSizeUnit: "hectares",
       agreementSigned: false,
       profilePicture: "",
-      farmBoundaries: [],
-      landMapData: {
-        totalArea: 0,
-        cultivatedArea: 0,
-        soilType: '',
-        waterSources: [],
-        accessRoads: false,
-        elevationData: { min: 0, max: 0, average: 0 }
-      }
+      farmBoundaries: []
     },
   });
 
@@ -209,13 +184,11 @@ export default function FarmersPage() {
 
       // If compliance reports exist, save them separately and update farmer record
       if (landMapData?.eudrCompliance && landMapData?.deforestationReport) {
-        const complianceReports = {
-          eudrCompliance: landMapData.eudrCompliance,
-          deforestationReport: landMapData.deforestationReport
-        };
-        
         try {
-          await updateFarmerWithReports(farmerId, farmerData, complianceReports);
+          await updateFarmerWithReports(farmerId, farmerData, {
+            eudrCompliance: landMapData.eudrCompliance,
+            deforestationReport: landMapData.deforestationReport
+          });
         } catch (reportError) {
           console.warn('Compliance reports could not be saved separately, but data is preserved in farmer record:', reportError);
         }
@@ -230,7 +203,7 @@ export default function FarmersPage() {
       setProfileImage(null);
       setFarmBoundaries([]);
       
-      const hasReports = landMapData?.eudrCompliance && landMapData?.deforestationReport;
+
       setLandMapData({
         totalArea: 0,
         cultivatedArea: 0,
@@ -242,9 +215,7 @@ export default function FarmersPage() {
       
       toast({
         title: "Success",
-        description: hasReports 
-          ? `Farmer onboarded successfully with EUDR compliance reports. Report IDs: ${landMapData.eudrCompliance.reportId}, ${landMapData.deforestationReport.reportId}`
-          : "Farmer has been successfully onboarded with profile picture and land mapping data.",
+        description: "Farmer has been successfully onboarded with profile picture and land mapping data.",
       });
     },
     onError: (error: any) => {

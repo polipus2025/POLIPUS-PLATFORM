@@ -590,7 +590,7 @@ export class DatabaseStorage implements IStorage {
 
   // Sync operations
   async getGovernmentSyncLogsByEntity(entity: string): Promise<GovernmentSyncLog[]> {
-    return await db.select().from(governmentSyncLog).where(eq(governmentSyncLog.entityId, entity));
+    return await db.select().from(governmentSyncLog).where(eq(governmentSyncLog.entityType, entity));
   }
 
   async getGovernmentSyncLogsByType(type: string): Promise<GovernmentSyncLog[]> {
@@ -853,11 +853,8 @@ export class DatabaseStorage implements IStorage {
     return updatedRecord;
   }
 
-  async verifyTrackingRecord(trackingNumber: string): Promise<TrackingRecord | null> {
-    const [record] = await db.select().from(trackingRecords).where(eq(trackingRecords.trackingNumber, trackingNumber));
-    if (!record) {
-      return null;
-    }
+  async verifyTrackingRecord(id: number): Promise<TrackingRecord> {
+    const [record] = await db.select().from(trackingRecords).where(eq(trackingRecords.id, id));
     return record;
   }
 

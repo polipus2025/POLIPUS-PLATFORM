@@ -249,6 +249,11 @@ export default function FrontPage() {
                   Installation Guide
                 </Button>
               </Link>
+              <Link href="/pwa-test">
+                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-700">
+                  Debug PWA
+                </Button>
+              </Link>
             </div>
             <div className="mt-4 flex items-center justify-center gap-6 text-xs sm:text-sm text-slate-500">
               <div className="flex items-center gap-1">

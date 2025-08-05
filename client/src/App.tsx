@@ -52,6 +52,7 @@ import MobileDemo from "@/pages/mobile-demo";
 import MobileAppSimulator from "@/pages/mobile-app-simulator";
 import MobileQRDisplay from "@/pages/mobile-qr-display";
 import MobileAppDownload from "@/pages/mobile-app-download";
+import PWATest from "@/pages/pwa-test";
 
 // New Portal Pages
 import LiveTracePortal from "@/pages/portals/live-trace-portal";
@@ -293,6 +294,7 @@ function Router() {
       <Route path="/mobile-app-download" component={MobileAppDownload} />
       <Route path="/install-app" component={MobileAppDownload} />
       <Route path="/download-app" component={MobileAppDownload} />
+      <Route path="/pwa-test" component={PWATest} />
       
       {/* Default fallback - Always Polipus Main Landing Page */}
       <Route path="/" component={FrontPage} />

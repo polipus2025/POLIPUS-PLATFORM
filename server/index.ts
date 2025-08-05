@@ -1,6 +1,6 @@
 import express from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, log } from "./vite";
+import { log } from "./vite";
 
 const app = express();
 
@@ -160,9 +160,30 @@ if (MAINTENANCE_MODE) {
       console.log('📊 Initializing database connections...');
       const httpServer = await registerRoutes(app);
       
-      // Setup Vite development server
-      console.log('⚡ Setting up Vite development server...');
-      await setupVite(app, httpServer);
+      // Setup Vite for development or serve static files for production
+      if (process.env.NODE_ENV === 'production') {
+        console.log('🏭 Production mode - serving static files...');
+        const express = await import('express');
+        const path = await import('path');
+        const fs = await import('fs');
+        
+        const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+        
+        if (fs.existsSync(distPath)) {
+          app.use(express.default.static(distPath));
+          app.use("*", (_req, res) => {
+            res.sendFile(path.resolve(distPath, "index.html"));
+          });
+        } else {
+          console.log('⚠️ Build files not found, falling back to development mode');
+          const { setupVite } = await import('./vite');
+          await setupVite(app, httpServer);
+        }
+      } else {
+        console.log('⚡ Development mode - setting up Vite server...');
+        const { setupVite } = await import('./vite');
+        await setupVite(app, httpServer);
+      }
       
       // Start the server
       const port = parseInt(process.env.PORT || '5000', 10);

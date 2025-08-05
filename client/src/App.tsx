@@ -31,6 +31,7 @@ import CropPlanning from "@/pages/crop-planning";
 
 import GovernmentIntegration from "@/pages/government-integration";
 import GISMapping from "@/pages/gis-mapping";
+import GPSTest from "@/pages/gps-test";
 import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
@@ -200,6 +201,12 @@ function Router() {
             <ProtectedRoute 
               component={GISMapping} 
               allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          <Route path="/gps-test">
+            <ProtectedRoute 
+              component={GPSTest} 
+              allowedUserTypes={['regulatory', 'field_agent']} 
             />
           </Route>
           <Route path="/economic-reporting">

@@ -369,17 +369,38 @@ export class SatelliteImageryService {
   static async getCurrentPosition(): Promise<GeolocationPosition> {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocation not supported'));
+        reject(new Error('GPS not supported by this browser'));
         return;
+      }
+      
+      // Check for HTTPS requirement
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        console.warn('High accuracy GPS requires HTTPS connection');
       }
       
       navigator.geolocation.getCurrentPosition(
         resolve,
-        reject,
+        (error) => {
+          let message = "GPS error occurred";
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              message = "GPS permission denied. Please allow location access in your browser settings.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              message = "GPS position unavailable. Make sure GPS is enabled on your device.";
+              break;
+            case error.TIMEOUT:
+              message = "GPS request timed out. Please try again.";
+              break;
+            default:
+              message = `GPS error: ${error.message}`;
+          }
+          reject(new Error(message));
+        },
         {
           enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
+          timeout: 15000,
+          maximumAge: 60000 // Allow cached position for 1 minute
         }
       );
     });

@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
+import GPSDiagnosticSystem from '@/components/gps/gps-diagnostic-system';
 import { 
   Map, 
   Navigation, 
@@ -64,7 +65,7 @@ interface SatelliteConnection {
 }
 
 export default function GISMapping() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('diagnostic');
   const [isGPSActive, setIsGPSActive] = useState(false);
   const [satelliteConnections, setSatelliteConnections] = useState<SatelliteConnection[]>([]);
   const [currentPosition, setCurrentPosition] = useState<GPSCoordinate | null>(null);
@@ -129,17 +130,61 @@ export default function GISMapping() {
   const activateGPS = async () => {
     setIsLoading(true);
     try {
-      // Simulate GPS activation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!navigator.geolocation) {
+        throw new Error('GPS not supported by this browser');
+      }
+
+      // Check for HTTPS (required for high accuracy GPS)
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        toast({
+          title: "HTTPS Required",
+          description: "High accuracy GPS requires HTTPS connection",
+          variant: "destructive",
+        });
+      }
+
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          resolve, 
+          (error) => {
+            let message = "GPS error occurred";
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                message = "GPS permission denied. Please allow location access.";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                message = "GPS position unavailable. Check your device settings.";
+                break;
+              case error.TIMEOUT:
+                message = "GPS timeout. Please try again.";
+                break;
+            }
+            reject(new Error(message));
+          }, 
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 60000
+          }
+        );
+      });
+
+      setCurrentPosition({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        timestamp: new Date().toISOString()
+      });
+
       setIsGPSActive(true);
       toast({
         title: "GPS System Activated",
-        description: "Real-time positioning and mapping now active",
+        description: `Real GPS position acquired with ${position.coords.accuracy.toFixed(1)}m accuracy`,
       });
     } catch (error) {
       toast({
         title: "GPS Activation Failed",
-        description: "Could not connect to GPS satellites",
+        description: error instanceof Error ? error.message : "Could not connect to GPS satellites",
         variant: "destructive",
       });
     } finally {
@@ -350,7 +395,10 @@ export default function GISMapping() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 bg-slate-100 rounded-xl">
+            <TabsList className="grid w-full grid-cols-6 bg-slate-100 rounded-xl">
+              <TabsTrigger value="diagnostic" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                GPS Diagnostic
+              </TabsTrigger>
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 Map Overview
               </TabsTrigger>
@@ -367,6 +415,10 @@ export default function GISMapping() {
                 Map Analytics
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="diagnostic" className="space-y-6">
+              <GPSDiagnosticSystem />
+            </TabsContent>
 
             <TabsContent value="overview" className="space-y-6">
               <div className="isms-card">

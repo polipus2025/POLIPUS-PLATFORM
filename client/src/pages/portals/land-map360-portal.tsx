@@ -260,7 +260,7 @@ export default function LandMap360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/land-map360-regulatory-login">
+                <a href="/land-map360-surveyor-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

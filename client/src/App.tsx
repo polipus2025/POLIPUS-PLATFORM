@@ -23,12 +23,15 @@ import LiveTraceExporterLogin from "@/pages/auth/live-trace-exporter-login";
 
 // Land Map360 Authentication
 import LandMap360RegulatoryLogin from "@/pages/auth/land-map360-regulatory-login";
+import LandMap360SurveyorLogin from "@/pages/auth/land-map360-surveyor-login";
 
 // Mine Watch Authentication
 import MineWatchRegulatoryLogin from "@/pages/auth/mine-watch-regulatory-login";
+import MineWatchMiningEngineerLogin from "@/pages/auth/mine-watch-mining-engineer-login";
 
 // Forest Guard Authentication
 import ForestGuardRegulatoryLogin from "@/pages/auth/forest-guard-regulatory-login";
+import ForestGuardRangerLogin from "@/pages/auth/forest-guard-ranger-login";
 
 // Aqua Trace Authentication
 import AquaTraceRegulatoryLogin from "@/pages/auth/aqua-trace-regulatory-login";
@@ -133,12 +136,15 @@ function Router() {
 
       {/* Land Map360 Authentication Routes */}
       <Route path="/land-map360-regulatory-login" component={LandMap360RegulatoryLogin} />
+      <Route path="/land-map360-surveyor-login" component={LandMap360SurveyorLogin} />
 
       {/* Mine Watch Authentication Routes */}
       <Route path="/mine-watch-regulatory-login" component={MineWatchRegulatoryLogin} />
+      <Route path="/mine-watch-mining-engineer-login" component={MineWatchMiningEngineerLogin} />
 
       {/* Forest Guard Authentication Routes */}
       <Route path="/forest-guard-regulatory-login" component={ForestGuardRegulatoryLogin} />
+      <Route path="/forest-guard-ranger-login" component={ForestGuardRangerLogin} />
 
       {/* Aqua Trace Authentication Routes */}
       <Route path="/aqua-trace-regulatory-login" component={AquaTraceRegulatoryLogin} />

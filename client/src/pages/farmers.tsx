@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
-import WorkingMapBoundary from "@/components/maps/working-map-boundary";
+import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
 
 // Farmer form schema
 const farmerFormSchema = z.object({
@@ -1162,7 +1162,7 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <WorkingMapBoundary
+              <EUDRComplianceMapper
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({
@@ -1187,7 +1187,7 @@ export default function FarmersPage() {
                     }
                   });
                   
-                  // Update form with the new boundary data
+                  // Update form with the new boundary data including EUDR compliance
                   form.setValue("farmBoundaries", newBoundaries);
                   form.setValue("landMapData", {
                     totalArea: boundary.area,
@@ -1199,12 +1199,14 @@ export default function FarmersPage() {
                       min: 50,
                       max: 120,
                       average: 85
-                    }
+                    },
+                    eudrCompliance: boundary.eudrCompliance,
+                    deforestationReport: boundary.deforestationReport
                   });
                   
                   toast({
-                    title: "Interactive Mapping Complete",
-                    description: `Farm boundary created with ${boundary.points.length} points covering ${boundary.area.toFixed(2)} hectares`,
+                    title: "EUDR Compliance Mapping Complete",
+                    description: `Farm boundary created with ${boundary.points.length} points. EUDR Risk: ${boundary.eudrCompliance.riskLevel.toUpperCase()}, Compliance Score: ${boundary.eudrCompliance.complianceScore}%`,
                   });
                   
                   setIsInteractiveMappingOpen(false);

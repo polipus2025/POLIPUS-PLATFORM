@@ -117,261 +117,275 @@ export default function FarmersPage() {
 
   // Generate and download PDF report
   const generateAndDownloadReport = async (reportData: any, fileName: string) => {
-    // Create a comprehensive HTML report
-    const htmlContent = generateReportHTML(reportData);
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF();
     
-    // Create blob and download
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName.replace('.pdf', '.html');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (reportData.reportType === 'eudr_compliance') {
+      generateEUDRPDF(doc, reportData);
+    } else {
+      generateComprehensivePDF(doc, reportData);
+    }
+    
+    doc.save(fileName);
   };
 
-  // Generate HTML report content
-  const generateReportHTML = (reportData: any) => {
-    const { farmerInfo, reportType } = reportData;
+  // Generate EUDR Compliance PDF
+  const generateEUDRPDF = (doc: any, reportData: any) => {
+    const { farmerInfo } = reportData;
     const currentDate = new Date().toLocaleDateString();
     
-    if (reportType === 'eudr_compliance') {
-      return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>EUDR Compliance Report - ${farmerInfo.farmerId}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2563eb; padding-bottom: 20px; }
-            .section { margin-bottom: 25px; }
-            .section h3 { color: #2563eb; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .field { margin-bottom: 10px; }
-            .label { font-weight: bold; color: #374151; }
-            .value { color: #1f2937; }
-            .eudr-status { padding: 8px 16px; border-radius: 4px; display: inline-block; }
-            .compliant { background-color: #10b981; color: white; }
-            .non-compliant { background-color: #ef4444; color: white; }
-            .logo { text-align: center; margin-bottom: 20px; }
-          </style>
-        </head>
-        <body>
-          <div class="logo">
-            <h1 style="color: #2563eb;">🌿 LACRA - AgriTrace360™</h1>
-            <p style="color: #6b7280;">Liberia Agriculture Commodity Regulatory Authority</p>
-          </div>
-          
-          <div class="header">
-            <h2>EU Deforestation Regulation (EUDR) Compliance Report</h2>
-            <p>Generated on: ${currentDate}</p>
-            <p>Farmer ID: ${farmerInfo.farmerId}</p>
-          </div>
-
-          <div class="section">
-            <h3>Farmer Information</h3>
-            <div class="grid">
-              <div class="field">
-                <span class="label">Name:</span>
-                <span class="value">${farmerInfo.firstName} ${farmerInfo.lastName}</span>
-              </div>
-              <div class="field">
-                <span class="label">County:</span>
-                <span class="value">${farmerInfo.county}</span>
-              </div>
-              <div class="field">
-                <span class="label">Farm Size:</span>
-                <span class="value">${farmerInfo.farmSize || 'Not specified'} ${farmerInfo.farmSizeUnit || 'hectares'}</span>
-              </div>
-              <div class="field">
-                <span class="label">GPS Coordinates:</span>
-                <span class="value">${farmerInfo.gpsCoordinates || 'Not provided'}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="section">
-            <h3>EUDR Compliance Status</h3>
-            <div class="field">
-              <span class="label">Overall Status:</span>
-              <span class="eudr-status compliant">✓ COMPLIANT</span>
-            </div>
-            <div class="field">
-              <span class="label">Risk Assessment:</span>
-              <span class="value">Low Risk - No deforestation detected since 2020</span>
-            </div>
-            <div class="field">
-              <span class="label">Last Verification:</span>
-              <span class="value">${currentDate}</span>
-            </div>
-          </div>
-
-          ${farmerInfo.landMapData ? `
-          <div class="section">
-            <h3>Land Analysis Data</h3>
-            <div class="grid">
-              <div class="field">
-                <span class="label">Total Area:</span>
-                <span class="value">${farmerInfo.landMapData.totalArea} hectares</span>
-              </div>
-              <div class="field">
-                <span class="label">Cultivated Area:</span>
-                <span class="value">${farmerInfo.landMapData.cultivatedArea} hectares</span>
-              </div>
-              <div class="field">
-                <span class="label">Soil Type:</span>
-                <span class="value">${farmerInfo.landMapData.soilType}</span>
-              </div>
-              <div class="field">
-                <span class="label">Water Sources:</span>
-                <span class="value">${farmerInfo.landMapData.waterSources?.join(', ') || 'None documented'}</span>
-              </div>
-            </div>
-          </div>
-          ` : ''}
-
-          ${farmerInfo.farmBoundaries ? `
-          <div class="section">
-            <h3>Farm Boundaries (GPS Coordinates)</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr style="background-color: #f3f4f6;">
-                <th style="border: 1px solid #d1d5db; padding: 8px;">Point</th>
-                <th style="border: 1px solid #d1d5db; padding: 8px;">Latitude</th>
-                <th style="border: 1px solid #d1d5db; padding: 8px;">Longitude</th>
-              </tr>
-              ${farmerInfo.farmBoundaries.map((point: any) => `
-                <tr>
-                  <td style="border: 1px solid #d1d5db; padding: 8px;">${point.point}</td>
-                  <td style="border: 1px solid #d1d5db; padding: 8px;">${point.lat.toFixed(6)}</td>
-                  <td style="border: 1px solid #d1d5db; padding: 8px;">${point.lng.toFixed(6)}</td>
-                </tr>
-              `).join('')}
-            </table>
-          </div>
-          ` : ''}
-
-          <div class="section">
-            <h3>Certification</h3>
-            <p>This report certifies that the farm operated by ${farmerInfo.firstName} ${farmerInfo.lastName} 
-            (ID: ${farmerInfo.farmerId}) is compliant with EU Deforestation Regulation requirements as of ${currentDate}.</p>
-            
-            <p style="margin-top: 30px; text-align: center; color: #6b7280;">
-              Generated by AgriTrace360™ - LACRA Digital Compliance System<br/>
-              Report ID: EUDR-${farmerInfo.farmerId}-${Date.now()}
-            </p>
-          </div>
-        </body>
-        </html>
-      `;
-    } else {
-      // Comprehensive report
-      return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Comprehensive Farmer Report - ${farmerInfo.farmerId}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #059669; padding-bottom: 20px; }
-            .section { margin-bottom: 25px; }
-            .section h3 { color: #059669; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .field { margin-bottom: 10px; }
-            .label { font-weight: bold; color: #374151; }
-            .value { color: #1f2937; }
-            .status { padding: 4px 12px; border-radius: 4px; display: inline-block; }
-            .active { background-color: #10b981; color: white; }
-            .logo { text-align: center; margin-bottom: 20px; }
-          </style>
-        </head>
-        <body>
-          <div class="logo">
-            <h1 style="color: #059669;">🌿 LACRA - AgriTrace360™</h1>
-            <p style="color: #6b7280;">Liberia Agriculture Commodity Regulatory Authority</p>
-          </div>
-          
-          <div class="header">
-            <h2>Comprehensive Farmer Profile Report</h2>
-            <p>Generated on: ${currentDate}</p>
-            <p>Farmer ID: ${farmerInfo.farmerId}</p>
-          </div>
-
-          <div class="section">
-            <h3>Personal Information</h3>
-            <div class="grid">
-              <div class="field">
-                <span class="label">Full Name:</span>
-                <span class="value">${farmerInfo.firstName} ${farmerInfo.lastName}</span>
-              </div>
-              <div class="field">
-                <span class="label">Phone Number:</span>
-                <span class="value">${farmerInfo.phoneNumber || 'Not provided'}</span>
-              </div>
-              <div class="field">
-                <span class="label">ID Number:</span>
-                <span class="value">${farmerInfo.idNumber || 'Not provided'}</span>
-              </div>
-              <div class="field">
-                <span class="label">Status:</span>
-                <span class="status active">${farmerInfo.status.toUpperCase()}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="section">
-            <h3>Location & Farm Information</h3>
-            <div class="grid">
-              <div class="field">
-                <span class="label">County:</span>
-                <span class="value">${farmerInfo.county}</span>
-              </div>
-              <div class="field">
-                <span class="label">District:</span>
-                <span class="value">${farmerInfo.district || 'Not specified'}</span>
-              </div>
-              <div class="field">
-                <span class="label">Village:</span>
-                <span class="value">${farmerInfo.village || 'Not specified'}</span>
-              </div>
-              <div class="field">
-                <span class="label">GPS Coordinates:</span>
-                <span class="value">${farmerInfo.gpsCoordinates || 'Not provided'}</span>
-              </div>
-              <div class="field">
-                <span class="label">Farm Size:</span>
-                <span class="value">${farmerInfo.farmSize || 'Not specified'} ${farmerInfo.farmSizeUnit || 'hectares'}</span>
-              </div>
-              <div class="field">
-                <span class="label">Agreement Status:</span>
-                <span class="value">${farmerInfo.agreementSigned ? '✓ Signed' : '⏳ Pending'}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="section">
-            <h3>Registration Details</h3>
-            <div class="field">
-              <span class="label">Onboarding Date:</span>
-              <span class="value">${farmerInfo.onboardingDate ? new Date(farmerInfo.onboardingDate).toLocaleDateString() : 'Not available'}</span>
-            </div>
-            <div class="field">
-              <span class="label">Registration ID:</span>
-              <span class="value">${farmerInfo.farmerId}</span>
-            </div>
-          </div>
-
-          <p style="margin-top: 40px; text-align: center; color: #6b7280;">
-            Generated by AgriTrace360™ - LACRA Farmer Management System<br/>
-            Report ID: COMP-${farmerInfo.farmerId}-${Date.now()}<br/>
-            This report contains confidential farmer information - Handle according to LACRA data protection policies
-          </p>
-        </body>
-        </html>
-      `;
+    // Header with LACRA branding
+    doc.setFillColor(37, 99, 235); // Blue background
+    doc.rect(0, 0, 210, 30, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.text('🌿 LACRA - AgriTrace360™', 105, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text('Liberia Agriculture Commodity Regulatory Authority', 105, 22, { align: 'center' });
+    
+    // Main title
+    doc.setTextColor(37, 99, 235);
+    doc.setFontSize(16);
+    doc.text('EU DEFORESTATION REGULATION (EUDR)', 105, 45, { align: 'center' });
+    doc.text('COMPLIANCE CERTIFICATION REPORT', 105, 52, { align: 'center' });
+    
+    // Report details
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${currentDate}`, 20, 65);
+    doc.text(`Farmer ID: ${farmerInfo.farmerId}`, 20, 72);
+    
+    // Farmer Information Section
+    doc.setFontSize(12);
+    doc.setTextColor(37, 99, 235);
+    doc.text('FARMER INFORMATION', 20, 85);
+    doc.setLineWidth(0.5);
+    doc.line(20, 87, 190, 87);
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    let yPos = 95;
+    doc.text(`Name: ${farmerInfo.firstName} ${farmerInfo.lastName}`, 20, yPos);
+    doc.text(`County: ${farmerInfo.county}`, 110, yPos);
+    yPos += 7;
+    doc.text(`Farm Size: ${farmerInfo.farmSize || 'Not specified'} ${farmerInfo.farmSizeUnit || 'hectares'}`, 20, yPos);
+    doc.text(`Phone: ${farmerInfo.phoneNumber || 'Not provided'}`, 110, yPos);
+    yPos += 7;
+    doc.text(`GPS Coordinates: ${farmerInfo.gpsCoordinates || 'Not provided'}`, 20, yPos);
+    
+    // EUDR Compliance Status
+    yPos += 15;
+    doc.setFontSize(12);
+    doc.setTextColor(37, 99, 235);
+    doc.text('EUDR COMPLIANCE STATUS', 20, yPos);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    
+    // Compliance badge
+    doc.setFillColor(16, 185, 129); // Green background
+    doc.rect(20, yPos, 40, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.text('✓ COMPLIANT', 22, yPos + 5);
+    
+    doc.setTextColor(0, 0, 0);
+    yPos += 15;
+    doc.text('Risk Assessment: Low Risk - No deforestation detected since 2020', 20, yPos);
+    doc.text(`Last Verification: ${currentDate}`, 20, yPos + 7);
+    doc.text('Certification Status: Valid for EU export compliance', 20, yPos + 14);
+    
+    // Land Analysis (if available)
+    if (farmerInfo.landMapData) {
+      yPos += 25;
+      doc.setFontSize(12);
+      doc.setTextColor(37, 99, 235);
+      doc.text('LAND ANALYSIS DATA', 20, yPos);
+      doc.line(20, yPos + 2, 190, yPos + 2);
+      
+      yPos += 10;
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text(`Total Area: ${farmerInfo.landMapData.totalArea} hectares`, 20, yPos);
+      doc.text(`Cultivated Area: ${farmerInfo.landMapData.cultivatedArea} hectares`, 110, yPos);
+      yPos += 7;
+      doc.text(`Soil Type: ${farmerInfo.landMapData.soilType}`, 20, yPos);
+      doc.text(`Water Sources: ${farmerInfo.landMapData.waterSources?.join(', ') || 'None documented'}`, 110, yPos);
     }
+
+    // GPS Boundaries Table (if available)
+    if (farmerInfo.farmBoundaries && farmerInfo.farmBoundaries.length > 0) {
+      yPos += 20;
+      doc.setFontSize(12);
+      doc.setTextColor(37, 99, 235);
+      doc.text('FARM BOUNDARIES (GPS COORDINATES)', 20, yPos);
+      doc.line(20, yPos + 2, 190, yPos + 2);
+      
+      yPos += 10;
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+      
+      // Table headers
+      doc.setFillColor(243, 244, 246);
+      doc.rect(20, yPos, 170, 6, 'F');
+      doc.text('Point', 25, yPos + 4);
+      doc.text('Latitude', 70, yPos + 4);
+      doc.text('Longitude', 130, yPos + 4);
+      
+      yPos += 6;
+      farmerInfo.farmBoundaries.forEach((point: any, index: number) => {
+        if (yPos > 270) { // Add new page if needed
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(point.point.toString(), 25, yPos + 4);
+        doc.text(point.lat.toFixed(6), 70, yPos + 4);
+        doc.text(point.lng.toFixed(6), 130, yPos + 4);
+        yPos += 6;
+      });
+    }
+    
+    // Certification Statement
+    yPos += 15;
+    if (yPos > 260) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFontSize(12);
+    doc.setTextColor(37, 99, 235);
+    doc.text('CERTIFICATION', 20, yPos);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    const certText = `This report certifies that the farm operated by ${farmerInfo.firstName} ${farmerInfo.lastName} (ID: ${farmerInfo.farmerId}) is compliant with EU Deforestation Regulation requirements as of ${currentDate}.`;
+    const lines = doc.splitTextToSize(certText, 170);
+    doc.text(lines, 20, yPos);
+    
+    // Footer
+    yPos += 25;
+    doc.setFontSize(8);
+    doc.setTextColor(107, 114, 128);
+    doc.text('Generated by AgriTrace360™ - LACRA Digital Compliance System', 105, yPos, { align: 'center' });
+    doc.text(`Report ID: EUDR-${farmerInfo.farmerId}-${Date.now()}`, 105, yPos + 5, { align: 'center' });
   };
+
+  // Generate Comprehensive PDF
+  const generateComprehensivePDF = (doc: any, reportData: any) => {
+    const { farmerInfo } = reportData;
+    const currentDate = new Date().toLocaleDateString();
+    
+    // Header with LACRA branding
+    doc.setFillColor(5, 150, 105); // Green background
+    doc.rect(0, 0, 210, 30, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.text('🌿 LACRA - AgriTrace360™', 105, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text('Liberia Agriculture Commodity Regulatory Authority', 105, 22, { align: 'center' });
+    
+    // Main title
+    doc.setTextColor(5, 150, 105);
+    doc.setFontSize(16);
+    doc.text('COMPREHENSIVE FARMER PROFILE REPORT', 105, 45, { align: 'center' });
+    
+    // Report details
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${currentDate}`, 20, 60);
+    doc.text(`Farmer ID: ${farmerInfo.farmerId}`, 20, 67);
+    
+    // Personal Information Section
+    doc.setFontSize(12);
+    doc.setTextColor(5, 150, 105);
+    doc.text('PERSONAL INFORMATION', 20, 80);
+    doc.setLineWidth(0.5);
+    doc.line(20, 82, 190, 82);
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    let yPos = 90;
+    doc.text(`Full Name: ${farmerInfo.firstName} ${farmerInfo.lastName}`, 20, yPos);
+    doc.text(`Phone: ${farmerInfo.phoneNumber || 'Not provided'}`, 110, yPos);
+    yPos += 7;
+    doc.text(`ID Number: ${farmerInfo.idNumber || 'Not provided'}`, 20, yPos);
+    
+    // Status badge
+    doc.setFillColor(16, 185, 129);
+    doc.rect(110, yPos - 3, 25, 6, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.text(farmerInfo.status.toUpperCase(), 112, yPos);
+    
+    // Location & Farm Information
+    yPos += 15;
+    doc.setFontSize(12);
+    doc.setTextColor(5, 150, 105);
+    doc.text('LOCATION & FARM INFORMATION', 20, yPos);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`County: ${farmerInfo.county}`, 20, yPos);
+    doc.text(`District: ${farmerInfo.district || 'Not specified'}`, 110, yPos);
+    yPos += 7;
+    doc.text(`Village: ${farmerInfo.village || 'Not specified'}`, 20, yPos);
+    doc.text(`Farm Size: ${farmerInfo.farmSize || 'Not specified'} ${farmerInfo.farmSizeUnit || 'hectares'}`, 110, yPos);
+    yPos += 7;
+    doc.text(`GPS Coordinates: ${farmerInfo.gpsCoordinates || 'Not provided'}`, 20, yPos);
+    doc.text(`Agreement: ${farmerInfo.agreementSigned ? '✓ Signed' : '⏳ Pending'}`, 110, yPos);
+    
+    // Registration Details
+    yPos += 15;
+    doc.setFontSize(12);
+    doc.setTextColor(5, 150, 105);
+    doc.text('REGISTRATION DETAILS', 20, yPos);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Onboarding Date: ${farmerInfo.onboardingDate ? new Date(farmerInfo.onboardingDate).toLocaleDateString() : 'Not available'}`, 20, yPos);
+    doc.text(`Registration ID: ${farmerInfo.farmerId}`, 20, yPos + 7);
+    
+    // Land Analysis (if available)
+    if (farmerInfo.landMapData) {
+      yPos += 20;
+      doc.setFontSize(12);
+      doc.setTextColor(5, 150, 105);
+      doc.text('LAND ANALYSIS DATA', 20, yPos);
+      doc.line(20, yPos + 2, 190, yPos + 2);
+      
+      yPos += 10;
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text(`Total Area: ${farmerInfo.landMapData.totalArea} hectares`, 20, yPos);
+      doc.text(`Cultivated Area: ${farmerInfo.landMapData.cultivatedArea} hectares`, 110, yPos);
+      yPos += 7;
+      doc.text(`Soil Type: ${farmerInfo.landMapData.soilType}`, 20, yPos);
+      doc.text(`Water Sources: ${farmerInfo.landMapData.waterSources?.join(', ') || 'None documented'}`, 110, yPos);
+    }
+    
+    // Footer
+    yPos += 30;
+    if (yPos > 270) {
+      doc.addPage();
+      yPos = 20;
+    }
+    
+    doc.setFontSize(8);
+    doc.setTextColor(107, 114, 128);
+    doc.text('Generated by AgriTrace360™ - LACRA Farmer Management System', 105, yPos, { align: 'center' });
+    doc.text(`Report ID: COMP-${farmerInfo.farmerId}-${Date.now()}`, 105, yPos + 5, { align: 'center' });
+    doc.text('This report contains confidential farmer information - Handle according to LACRA data protection policies', 105, yPos + 10, { align: 'center' });
+  };
+
+
 
   const { data: farmers = [], isLoading } = useQuery({
     queryKey: ["/api/farmers"],

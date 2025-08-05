@@ -229,10 +229,8 @@ export default function FarmersPage() {
 
   const createFarmerMutation = useMutation({
     mutationFn: async (data: FarmerFormData) => {
-      const farmerId = `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
       const farmerData = {
         ...data,
-        farmerId,
         status: "active",
         onboardingDate: new Date().toISOString(),
         profilePicture: profileImage,
@@ -240,16 +238,20 @@ export default function FarmersPage() {
         landMapData: landMapData,
       };
       
+      console.log("Submitting farmer data:", farmerData);
+      
       // Create farmer record
       const farmer = await apiRequest("/api/farmers", {
         method: "POST",
         body: JSON.stringify(farmerData),
       });
+      
+      console.log("Farmer created successfully:", farmer);
 
       // If compliance reports exist, save them separately and update farmer record
-      if (landMapData?.eudrCompliance && landMapData?.deforestationReport) {
+      if (landMapData?.eudrCompliance && landMapData?.deforestationReport && farmer?.farmerId) {
         try {
-          await updateFarmerWithReports(farmerId, farmerData, {
+          await updateFarmerWithReports(farmer.farmerId, farmerData, {
             eudrCompliance: landMapData.eudrCompliance,
             deforestationReport: landMapData.deforestationReport
           });
@@ -283,9 +285,10 @@ export default function FarmersPage() {
       });
     },
     onError: (error: any) => {
+      console.error("Farmer onboarding error:", error);
       toast({
         title: "Error",
-        description: "Failed to onboard farmer. Please try again.",
+        description: `Failed to onboard farmer: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     },

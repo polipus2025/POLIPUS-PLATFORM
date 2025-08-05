@@ -304,7 +304,7 @@ export default function LandMap360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/property-owner-login">
+                <a href="/land-map360-property-owner-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -348,7 +348,7 @@ export default function LandMap360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/gis-analyst-login">
+                <a href="/land-map360-gis-analyst-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -392,7 +392,7 @@ export default function LandMap360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/government-inspector-login">
+                <a href="/land-map360-government-inspector-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

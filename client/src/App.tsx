@@ -24,6 +24,9 @@ import LiveTraceExporterLogin from "@/pages/auth/live-trace-exporter-login";
 // Land Map360 Authentication
 import LandMap360RegulatoryLogin from "@/pages/auth/land-map360-regulatory-login";
 import LandMap360SurveyorLogin from "@/pages/auth/land-map360-surveyor-login";
+import LandMap360PropertyOwnerLogin from "@/pages/auth/land-map360-property-owner-login";
+import LandMap360GISAnalystLogin from "@/pages/auth/land-map360-gis-analyst-login";
+import LandMap360GovernmentInspectorLogin from "@/pages/auth/land-map360-government-inspector-login";
 
 // Mine Watch Authentication
 import MineWatchRegulatoryLogin from "@/pages/auth/mine-watch-regulatory-login";
@@ -137,6 +140,9 @@ function Router() {
       {/* Land Map360 Authentication Routes */}
       <Route path="/land-map360-regulatory-login" component={LandMap360RegulatoryLogin} />
       <Route path="/land-map360-surveyor-login" component={LandMap360SurveyorLogin} />
+      <Route path="/land-map360-property-owner-login" component={LandMap360PropertyOwnerLogin} />
+      <Route path="/land-map360-gis-analyst-login" component={LandMap360GISAnalystLogin} />
+      <Route path="/land-map360-government-inspector-login" component={LandMap360GovernmentInspectorLogin} />
 
       {/* Mine Watch Authentication Routes */}
       <Route path="/mine-watch-regulatory-login" component={MineWatchRegulatoryLogin} />

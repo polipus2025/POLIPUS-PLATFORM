@@ -31,6 +31,9 @@ import LandMap360GovernmentInspectorLogin from "@/pages/auth/land-map360-governm
 // Mine Watch Authentication
 import MineWatchRegulatoryLogin from "@/pages/auth/mine-watch-regulatory-login";
 import MineWatchMiningEngineerLogin from "@/pages/auth/mine-watch-mining-engineer-login";
+import MineWatchMineOperatorLogin from "@/pages/auth/mine-watch-mine-operator-login";
+import MineWatchEnvironmentalPortalLogin from "@/pages/auth/mine-watch-environmental-portal-login";
+import MineWatchTransportCoordinatorLogin from "@/pages/auth/mine-watch-transport-coordinator-login";
 
 // Forest Guard Authentication
 import ForestGuardRegulatoryLogin from "@/pages/auth/forest-guard-regulatory-login";
@@ -147,6 +150,9 @@ function Router() {
       {/* Mine Watch Authentication Routes */}
       <Route path="/mine-watch-regulatory-login" component={MineWatchRegulatoryLogin} />
       <Route path="/mine-watch-mining-engineer-login" component={MineWatchMiningEngineerLogin} />
+      <Route path="/mine-watch-mine-operator-login" component={MineWatchMineOperatorLogin} />
+      <Route path="/mine-watch-environmental-portal-login" component={MineWatchEnvironmentalPortalLogin} />
+      <Route path="/mine-watch-transport-coordinator-login" component={MineWatchTransportCoordinatorLogin} />
 
       {/* Forest Guard Authentication Routes */}
       <Route path="/forest-guard-regulatory-login" component={ForestGuardRegulatoryLogin} />

@@ -304,7 +304,7 @@ export default function MineWatchPortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/mine-operator-login">
+                <a href="/mine-watch-mine-operator-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -348,7 +348,7 @@ export default function MineWatchPortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/environmental-inspector-login">
+                <a href="/mine-watch-environmental-portal-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -392,7 +392,7 @@ export default function MineWatchPortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/transport-coordinator-login">
+                <a href="/mine-watch-transport-coordinator-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

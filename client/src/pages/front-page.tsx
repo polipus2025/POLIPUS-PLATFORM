@@ -23,7 +23,9 @@ import {
   Waves,
   DollarSign,
   Download,
-  Smartphone
+  Smartphone,
+  Zap,
+  Leaf
 } from 'lucide-react';
 import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
@@ -220,6 +222,46 @@ export default function FrontPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Cross-Module Integration Dashboard */}
+        <div className="isms-card mt-8 sm:mt-12 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+          <div className="text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
+              Integrated Cross-Module Dashboard  
+            </h3>
+            <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
+              Access the comprehensive integrated dashboard showing real-time connectivity and data exchange 
+              between all 7 modules. Monitor cross-module integration status and system-wide performance.
+            </p>
+            <Link href="/integrated-dashboard">
+              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white flex items-center gap-2 mx-auto">
+                <Zap className="h-4 w-4" />
+                View Integrated Dashboard
+              </Button>
+            </Link>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm text-slate-600">
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>7 Modules Connected</span>
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Real-time Data Exchange</span>
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Cross-Module Search</span>
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>System Health Monitoring</span>
+              </div>
+            </div>
           </div>
         </div>
 

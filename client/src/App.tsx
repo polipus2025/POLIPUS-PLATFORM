@@ -72,6 +72,7 @@ import ForestGuardDashboard from "@/pages/portals/forest-guard-dashboard";
 import AquaTraceDashboard from "@/pages/portals/aqua-trace-dashboard";
 import BlueCarbon360Dashboard from "@/pages/portals/blue-carbon360-dashboard";
 import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
+import IntegratedDashboard from "@/pages/integrated-dashboard";
 
 import NotFound from "@/pages/not-found";
 
@@ -322,6 +323,7 @@ function Router() {
       <Route path="/aqua-trace-dashboard" component={AquaTraceDashboard} />
       <Route path="/blue-carbon360-dashboard" component={BlueCarbon360Dashboard} />
       <Route path="/carbon-trace-dashboard" component={CarbonTraceDashboard} />
+      <Route path="/integrated-dashboard" component={IntegratedDashboard} />
       
       {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />

@@ -199,10 +199,43 @@ app.get('/mobile-access', (req, res) => {
     throw err;
   });
 
-  // Clean setup - no Vite in maintenance mode
-  if (!MAINTENANCE_MODE && app.get("env") === "development") {
+  // Setup serving based on environment
+  if (!MAINTENANCE_MODE && process.env.NODE_ENV === "development") {
     await setupVite(app, server);
+  } else if (!MAINTENANCE_MODE) {
+    // Production mode - serve built client files
+    try {
+      serveStatic(app);
+    } catch (error) {
+      log(`⚠️  Static serving failed, using fallback: ${error.message}`, "express");
+      // Production fallback - serve from client directory
+      const clientIndexPath = path.join(process.cwd(), 'client', 'index.html');
+      app.use(express.static(path.join(process.cwd(), 'client')));
+      app.use("*", (_req, res) => {
+        if (fs.existsSync(clientIndexPath)) {
+          res.sendFile(clientIndexPath);
+        } else {
+          // Ultimate fallback - inline HTML with React
+          res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Polipus Environmental Platform</title>
+              <link rel="stylesheet" href="/src/index.css">
+            </head>
+            <body>
+              <div id="root">Loading Polipus Platform...</div>
+              <script type="module" src="/src/main.tsx"></script>
+            </body>
+            </html>
+          `);
+        }
+      });
+    }
   } else {
+    // Maintenance mode - serve static files only
     app.use(express.static('.'));
   }
 

@@ -88,16 +88,35 @@ const LeafletMap = ({
       });
 
       if (!mapInstanceRef.current) {
-        mapInstanceRef.current = L.map(mapRef.current).setView(mapCenter, 15);
+        mapInstanceRef.current = L.map(mapRef.current, {
+          center: mapCenter,
+          zoom: 16,
+          zoomControl: true,
+          scrollWheelZoom: true,
+          doubleClickZoom: false,
+          tap: true,
+          tapTolerance: 20,
+          touchZoom: true,
+          bounceAtZoomLimits: false,
+          maxZoom: 20,
+          minZoom: 10
+        });
         
-        // Add OpenStreetMap tiles
+        // Add OpenStreetMap tiles with better mobile rendering
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors'
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 20,
+          detectRetina: true
         }).addTo(mapInstanceRef.current);
 
-        // Handle map clicks
+        // Handle map clicks with improved mobile support
         mapInstanceRef.current.on('click', (e: any) => {
           onMapClick(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Handle mobile touch events
+        mapInstanceRef.current.on('touchstart', (e: any) => {
+          e.originalEvent.preventDefault();
         });
       }
     };
@@ -129,10 +148,42 @@ const LeafletMap = ({
         polygonRef.current = null;
       }
 
-      // Add boundary point markers
+      // Add boundary point markers with better visibility
       points.forEach((point, index) => {
-        const marker = L.marker([point.latitude, point.longitude])
-          .bindPopup(`Point ${point.order}<br/>Accuracy: ${point.accuracy.toFixed(1)}m<br/>Time: ${point.timestamp.toLocaleTimeString()}`)
+        const isFirst = index === 0;
+        const isLast = index === points.length - 1;
+        
+        // Create custom marker icons for better visibility
+        const markerIcon = L.divIcon({
+          html: `<div style="
+            background-color: ${isFirst ? '#22c55e' : isLast ? '#ef4444' : '#3b82f6'};
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+          ">${point.order}</div>`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13],
+          className: 'boundary-point-marker'
+        });
+
+        const marker = L.marker([point.latitude, point.longitude], { icon: markerIcon })
+          .bindPopup(`
+            <div style="font-size: 12px;">
+              <strong>Point ${point.order}</strong><br/>
+              Lat: ${point.latitude.toFixed(6)}<br/>
+              Lng: ${point.longitude.toFixed(6)}<br/>
+              Accuracy: ${point.accuracy.toFixed(1)}m<br/>
+              Time: ${point.timestamp.toLocaleTimeString()}
+            </div>
+          `)
           .addTo(mapInstanceRef.current);
         
         markersRef.current.push(marker);
@@ -172,11 +223,42 @@ const LeafletMap = ({
         mapInstanceRef.current.removeLayer(currentPositionMarkerRef.current);
       }
 
-      // Add current position marker
+      // Add current position marker with pulsing animation
       const currentIcon = L.divIcon({
-        html: '<div style="background-color: #ef4444; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
+        html: `
+          <div style="position: relative;">
+            <div style="
+              background-color: #3b82f6;
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              border: 3px solid white;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+              position: relative;
+              z-index: 2;
+            "></div>
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              background-color: rgba(59, 130, 246, 0.3);
+              animation: pulse 2s infinite;
+              z-index: 1;
+            "></div>
+          </div>
+          <style>
+            @keyframes pulse {
+              0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+              100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+            }
+          </style>
+        `,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
         className: 'current-position-marker'
       });
 
@@ -184,7 +266,15 @@ const LeafletMap = ({
         currentPosition.coords.latitude, 
         currentPosition.coords.longitude
       ], { icon: currentIcon })
-        .bindPopup(`Current Position<br/>Accuracy: ${currentPosition.coords.accuracy.toFixed(1)}m`)
+        .bindPopup(`
+          <div style="font-size: 12px;">
+            <strong>📍 Your Location</strong><br/>
+            Lat: ${currentPosition.coords.latitude.toFixed(6)}<br/>
+            Lng: ${currentPosition.coords.longitude.toFixed(6)}<br/>
+            Accuracy: ${currentPosition.coords.accuracy.toFixed(1)}m<br/>
+            <small>Tap "Add GPS Position" to use this location</small>
+          </div>
+        `)
         .addTo(mapInstanceRef.current);
     };
 
@@ -202,6 +292,27 @@ const LeafletMap = ({
         <span className="hidden sm:inline">Click on map to add boundary points</span>
         <span className="sm:hidden">Tap to add points</span>
       </div>
+      
+      {/* GPS Status Indicator */}
+      {currentPosition && (
+        <div className="absolute top-2 left-2 bg-green-100 border border-green-200 rounded-md shadow-sm p-1 sm:p-2 text-xs text-green-700">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="hidden sm:inline">GPS: {currentPosition.coords.accuracy.toFixed(0)}m</span>
+            <span className="sm:hidden">GPS ✓</span>
+          </div>
+        </div>
+      )}
+      
+      {!currentPosition && (
+        <div className="absolute top-2 left-2 bg-orange-100 border border-orange-200 rounded-md shadow-sm p-1 sm:p-2 text-xs text-orange-700">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-orange-500 rounded-full animate-spin"></div>
+            <span className="hidden sm:inline">Getting GPS...</span>
+            <span className="sm:hidden">GPS...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -221,23 +332,36 @@ export default function InteractiveBoundaryMapper({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Get current GPS position
+    // Get current GPS position with enhanced mobile support
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
+      // Watch position for real-time updates
+      const watchId = navigator.geolocation.watchPosition(
         (position) => {
           setCurrentPosition(position);
-          setMapCenter([position.coords.latitude, position.coords.longitude]);
+          // Only center map on first GPS fix to avoid disrupting user interaction
+          if (!currentPosition) {
+            setMapCenter([position.coords.latitude, position.coords.longitude]);
+          }
         },
         (error) => {
           console.warn('GPS not available:', error);
+          toast({
+            title: "GPS Location",
+            description: "Please enable location services for better accuracy",
+            variant: "destructive"
+          });
           // Keep default center (Monrovia)
         },
         {
           enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000
+          timeout: 15000,
+          maximumAge: 60000 // Cache position for 1 minute
         }
       );
+
+      return () => {
+        navigator.geolocation.clearWatch(watchId);
+      };
     }
   }, []);
 
@@ -349,9 +473,14 @@ export default function InteractiveBoundaryMapper({
     setCurrentBoundary(completedBoundary);
     onBoundaryComplete?.(completedBoundary);
 
+    // Save to localStorage for demonstration
+    const savedBoundaries = JSON.parse(localStorage.getItem('farmBoundaries') || '[]');
+    savedBoundaries.push(completedBoundary);
+    localStorage.setItem('farmBoundaries', JSON.stringify(savedBoundaries));
+
     toast({
-      title: "Boundary Completed",
-      description: `Farm boundary "${completedBoundary.name}" has been saved successfully`,
+      title: "✅ Boundary Completed",
+      description: `Farm boundary "${completedBoundary.name}" has been saved with ${completedBoundary.points.length} points and ${completedBoundary.area.toFixed(2)} hectares`,
     });
   };
 
@@ -444,9 +573,17 @@ export default function InteractiveBoundaryMapper({
 
       {/* Control Buttons */}
       <div className="flex flex-col sm:flex-row flex-wrap gap-2">
-        <Button onClick={addCurrentGPSPosition} variant="outline" size="sm" className="w-full sm:w-auto">
+        <Button 
+          onClick={addCurrentGPSPosition} 
+          variant="outline" 
+          size="sm" 
+          className="w-full sm:w-auto bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100"
+          disabled={!currentPosition}
+        >
           <Target className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-          <span className="text-xs sm:text-sm">Add GPS Position</span>
+          <span className="text-xs sm:text-sm">
+            {currentPosition ? 'Add GPS Position' : 'Getting GPS...'}
+          </span>
         </Button>
         <Button onClick={removeLastPoint} variant="outline" size="sm" disabled={!currentBoundary?.points.length} className="w-full sm:w-auto">
           <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
@@ -469,9 +606,26 @@ export default function InteractiveBoundaryMapper({
 
       {/* Boundary Information */}
       {currentBoundary && (
-        <Card>
+        <Card className={currentBoundary.status === 'completed' ? 'border-green-200 bg-green-50' : ''}>
           <CardHeader>
-            <CardTitle>Boundary Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              {currentBoundary.status === 'completed' ? (
+                <>
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  Completed Boundary
+                </>
+              ) : (
+                <>
+                  <Target className="h-5 w-5 text-blue-600" />
+                  Boundary Information
+                </>
+              )}
+            </CardTitle>
+            {currentBoundary.status === 'completed' && (
+              <p className="text-sm text-green-700">
+                ✅ Boundary saved successfully on {currentBoundary.completedAt?.toLocaleString()}
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -500,6 +654,19 @@ export default function InteractiveBoundaryMapper({
                 </Badge>
               </div>
             </div>
+
+            {currentBoundary.status === 'completed' && (
+              <div className="mt-4 p-3 bg-green-100 rounded-lg border border-green-200">
+                <h4 className="font-medium text-green-800 text-sm mb-2">📍 Saved Boundary Details</h4>
+                <div className="text-xs text-green-700 space-y-1">
+                  <div><strong>Name:</strong> {currentBoundary.name}</div>
+                  <div><strong>GPS Points:</strong> {currentBoundary.points.length} recorded</div>
+                  <div><strong>Total Area:</strong> {currentBoundary.area.toFixed(3)} hectares</div>
+                  <div><strong>Boundary Length:</strong> {currentBoundary.perimeter.toFixed(1)} meters</div>
+                  <div><strong>Status:</strong> Completed and saved to system</div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

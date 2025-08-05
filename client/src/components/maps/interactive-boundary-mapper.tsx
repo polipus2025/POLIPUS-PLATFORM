@@ -114,74 +114,81 @@ const LeafletMap = ({
   }, []);
 
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    const updateMap = async () => {
+      if (!mapInstanceRef.current || typeof window === 'undefined') return;
 
-    const L = require('leaflet');
+      const L = (await import('leaflet')).default;
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => mapInstanceRef.current?.removeLayer(marker));
-    markersRef.current = [];
+      // Clear existing markers
+      markersRef.current.forEach(marker => mapInstanceRef.current?.removeLayer(marker));
+      markersRef.current = [];
 
-    // Clear existing polygon
-    if (polygonRef.current) {
-      mapInstanceRef.current.removeLayer(polygonRef.current);
-      polygonRef.current = null;
-    }
+      // Clear existing polygon
+      if (polygonRef.current) {
+        mapInstanceRef.current.removeLayer(polygonRef.current);
+        polygonRef.current = null;
+      }
 
-    // Add boundary point markers
-    points.forEach((point, index) => {
-      const marker = L.marker([point.latitude, point.longitude])
-        .bindPopup(`Point ${point.order}<br/>Accuracy: ${point.accuracy.toFixed(1)}m<br/>Time: ${point.timestamp.toLocaleTimeString()}`)
-        .addTo(mapInstanceRef.current);
-      
-      markersRef.current.push(marker);
-    });
+      // Add boundary point markers
+      points.forEach((point, index) => {
+        const marker = L.marker([point.latitude, point.longitude])
+          .bindPopup(`Point ${point.order}<br/>Accuracy: ${point.accuracy.toFixed(1)}m<br/>Time: ${point.timestamp.toLocaleTimeString()}`)
+          .addTo(mapInstanceRef.current);
+        
+        markersRef.current.push(marker);
+      });
 
-    // Draw polygon if we have 3 or more points
-    if (points.length >= 3) {
-      const latlngs = points.map(p => [p.latitude, p.longitude]);
-      polygonRef.current = L.polygon(latlngs, {
-        color: '#3b82f6',
-        fillColor: '#dbeafe',
-        fillOpacity: 0.3,
-        weight: 2
-      }).addTo(mapInstanceRef.current);
+      // Draw polygon if we have 3 or more points
+      if (points.length >= 3) {
+        const latlngs = points.map(p => [p.latitude, p.longitude]);
+        polygonRef.current = L.polygon(latlngs, {
+          color: '#3b82f6',
+          fillColor: '#dbeafe',
+          fillOpacity: 0.3,
+          weight: 2
+        }).addTo(mapInstanceRef.current);
 
-      // Fit map bounds to show all points
-      const group = new L.featureGroup([...markersRef.current, polygonRef.current]);
-      mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
-    } else if (points.length > 0) {
-      // Fit bounds to markers only
-      const group = new L.featureGroup(markersRef.current);
-      mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
-    }
+        // Fit map bounds to show all points
+        const group = new L.featureGroup([...markersRef.current, polygonRef.current]);
+        mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
+      } else if (points.length > 0) {
+        // Fit bounds to markers only
+        const group = new L.featureGroup(markersRef.current);
+        mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
+      }
+    };
+
+    updateMap();
   }, [points]);
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !currentPosition) return;
+    const updateCurrentPosition = async () => {
+      if (!mapInstanceRef.current || !currentPosition || typeof window === 'undefined') return;
 
-    const L = require('leaflet');
+      const L = (await import('leaflet')).default;
 
-    // Remove existing current position marker
-    if (currentPositionMarkerRef.current) {
-      mapInstanceRef.current.removeLayer(currentPositionMarkerRef.current);
-    }
+      // Remove existing current position marker
+      if (currentPositionMarkerRef.current) {
+        mapInstanceRef.current.removeLayer(currentPositionMarkerRef.current);
+      }
 
-    // Add current position marker
-    const currentIcon = L.divIcon({
-      html: '<div style="background-color: #ef4444; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>',
-      iconSize: [16, 16],
-      iconAnchor: [8, 8],
-      className: 'current-position-marker'
-    });
+      // Add current position marker
+      const currentIcon = L.divIcon({
+        html: '<div style="background-color: #ef4444; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+        className: 'current-position-marker'
+      });
 
-    currentPositionMarkerRef.current = L.marker([
-      currentPosition.coords.latitude, 
-      currentPosition.coords.longitude
-    ], { icon: currentIcon })
-      .bindPopup(`Current Position<br/>Accuracy: ${currentPosition.coords.accuracy.toFixed(1)}m`)
-      .addTo(mapInstanceRef.current);
+      currentPositionMarkerRef.current = L.marker([
+        currentPosition.coords.latitude, 
+        currentPosition.coords.longitude
+      ], { icon: currentIcon })
+        .bindPopup(`Current Position<br/>Accuracy: ${currentPosition.coords.accuracy.toFixed(1)}m`)
+        .addTo(mapInstanceRef.current);
+    };
 
+    updateCurrentPosition();
   }, [currentPosition]);
 
   return (

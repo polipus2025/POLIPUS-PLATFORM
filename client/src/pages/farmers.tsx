@@ -16,12 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
-import InteractiveBoundaryMapper from "@/components/maps/interactive-boundary-mapper";
-import SimpleTestMap from "@/components/maps/simple-test-map";
-import WorkingBoundaryMapper from "@/components/maps/working-boundary-mapper";
-import BasicHtmlMap from "@/components/maps/basic-html-map";
-import MinimalLeafletTest from "@/components/maps/minimal-leaflet-test";
-import EmbeddedTestMap from "@/components/maps/embedded-test-map";
+import SimpleBoundaryMapper from "@/components/maps/simple-boundary-mapper";
 
 // Farmer form schema
 const farmerFormSchema = z.object({
@@ -1166,15 +1161,8 @@ export default function FarmersPage() {
               </DialogDescription>
             </DialogHeader>
             
-            <div className="mt-6 space-y-6">
-              {/* Multiple test approaches to diagnose the issue */}
-              <EmbeddedTestMap />
-              <MinimalLeafletTest />
-              <SimpleTestMap />
-              
-              <div>
-                <h4 className="text-lg font-semibold mb-2">Working Boundary Mapper</h4>
-                <WorkingBoundaryMapper
+            <div className="mt-6">
+              <SimpleBoundaryMapper
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({
@@ -1223,7 +1211,6 @@ export default function FarmersPage() {
                 }}
                 minPoints={3}
               />
-              </div>
             </div>
           </DialogContent>
         </Dialog>

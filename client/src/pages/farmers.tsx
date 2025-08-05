@@ -20,7 +20,7 @@ import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
-// Farmer form schema - simplified to match database requirements
+// Farmer form schema - includes all fields used in the form
 const farmerFormSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -33,7 +33,13 @@ const farmerFormSchema = z.object({
   farmSize: z.string().optional(),
   farmSizeUnit: z.string().default("hectares"),
   agreementSigned: z.boolean().default(false),
-  profilePicture: z.string().optional()
+  profilePicture: z.string().optional(),
+  farmBoundaries: z.array(z.object({
+    lat: z.number(),
+    lng: z.number(),
+    point: z.number()
+  })).optional(),
+  landMapData: z.any().optional()
 });
 
 type FarmerFormData = z.infer<typeof farmerFormSchema>;
@@ -87,7 +93,8 @@ export default function FarmersPage() {
       farmSizeUnit: "hectares",
       agreementSigned: false,
       profilePicture: "",
-      farmBoundaries: []
+      farmBoundaries: [],
+      landMapData: null
     },
   });
 
@@ -635,7 +642,7 @@ export default function FarmersPage() {
                               <div className="bg-white p-2 rounded border">
                                 <div className="font-medium text-gray-900 mb-1">Water Sources</div>
                                 <div className="flex flex-wrap gap-1">
-                                  {landMapData.waterSources.map((source, index) => (
+                                  {landMapData.waterSources.map((source: any, index: number) => (
                                     <Badge key={index} variant="secondary" className="text-xs">
                                       {source}
                                     </Badge>
@@ -782,7 +789,7 @@ export default function FarmersPage() {
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-lacra-blue" />
                 <div className="ml-4">
-                  <div className="text-2xl font-bold text-neutral">{farmers.length}</div>
+                  <div className="text-2xl font-bold text-neutral">{(farmers as any[])?.length || 0}</div>
                   <p className="text-sm text-gray-500">Total Farmers</p>
                 </div>
               </div>
@@ -816,7 +823,7 @@ export default function FarmersPage() {
                 <MapPin className="h-8 w-8 text-warning" />
                 <div className="ml-4">
                   <div className="text-2xl font-bold text-warning">
-                    {new Set(farmers.map((f: any) => f.county)).size}
+                    {new Set((farmers as any[])?.map((f: any) => f.county)).size || 0}
                   </div>
                   <p className="text-sm text-gray-500">Counties Covered</p>
                 </div>
@@ -1164,7 +1171,7 @@ export default function FarmersPage() {
                         <div className="font-medium text-cyan-900">Water Resources</div>
                         {landMapData.waterSources.length > 0 ? (
                           <div className="space-y-1">
-                            {landMapData.waterSources.map((source, index) => (
+                            {landMapData.waterSources.map((source: any, index: number) => (
                               <div key={index} className="text-cyan-700 text-sm">• {source}</div>
                             ))}
                           </div>

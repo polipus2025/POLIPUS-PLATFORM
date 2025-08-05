@@ -21,6 +21,7 @@ import SimpleTestMap from "@/components/maps/simple-test-map";
 import WorkingBoundaryMapper from "@/components/maps/working-boundary-mapper";
 import BasicHtmlMap from "@/components/maps/basic-html-map";
 import MinimalLeafletTest from "@/components/maps/minimal-leaflet-test";
+import EmbeddedTestMap from "@/components/maps/embedded-test-map";
 
 // Farmer form schema
 const farmerFormSchema = z.object({
@@ -1167,7 +1168,7 @@ export default function FarmersPage() {
             
             <div className="mt-6 space-y-6">
               {/* Multiple test approaches to diagnose the issue */}
-              <BasicHtmlMap />
+              <EmbeddedTestMap />
               <MinimalLeafletTest />
               <SimpleTestMap />
               

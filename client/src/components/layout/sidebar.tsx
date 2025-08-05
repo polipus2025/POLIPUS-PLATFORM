@@ -42,7 +42,7 @@ const getUserInfo = () => {
 
 // LACRA Officer/Regulatory Staff Navigation
 const regulatoryNavigation = [
-  { name: "Dashboard", href: "/", icon: BarChart3 },
+  { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Economic Reporting", href: "/economic-reporting", icon: TrendingUp },
   { name: "Commodities", href: "/commodities", icon: Leaf },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
@@ -59,7 +59,7 @@ const regulatoryNavigation = [
 
 // Farmer Navigation - Only farm management features (GIS, Crop Planning, and Internal Messaging restricted to LACRA only)
 const farmerNavigation = [
-  { name: "Farm Dashboard", href: "/", icon: BarChart3 },
+  { name: "Farm Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
   { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
@@ -67,7 +67,7 @@ const farmerNavigation = [
 
 // Field Agent Navigation - Territory-limited inspection and verification (GIS restricted to LACRA only)
 const fieldAgentNavigation = [
-  { name: "Field Operations", href: "/", icon: BarChart3 },
+  { name: "Field Operations", href: "/dashboard", icon: BarChart3 },
   { name: "Territory Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Farmer Registration", href: "/farmers", icon: Users },
   { name: "Document Verification", href: "/verification", icon: Shield },

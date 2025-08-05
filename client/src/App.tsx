@@ -97,11 +97,23 @@ function Router() {
         <>
           {/* Dashboard - Show correct component based on user type */}
           <Route path="/dashboard">
-            {userType === 'farmer' ? <FarmerDashboard /> : 
-             userType === 'field_agent' ? <FieldAgentDashboard /> : 
-             userType === 'exporter' ? <ExporterDashboard /> :
-             userType === 'monitoring' ? <MonitoringDashboard /> :
-             <Dashboard />}
+            {() => {
+              const userType = localStorage.getItem("userType");
+              switch(userType) {
+                case 'farmer':
+                  return <FarmerDashboard />;
+                case 'field_agent':
+                  return <FieldAgentDashboard />;
+                case 'exporter':
+                  return <ExporterDashboard />;
+                case 'monitoring':
+                  return <MonitoringDashboard />;
+                case 'regulatory':
+                  return <Dashboard />;
+                default:
+                  return <Dashboard />; // Default to regulatory dashboard
+              }
+            }}
           </Route>
           
           {/* NEVER redirect root to dashboards - always show Polipus main page */}
@@ -322,13 +334,14 @@ function App() {
                       window.location.pathname === "/front-page" || 
                       window.location.pathname === "/home" ||
                       window.location.pathname === "/main";
+  const isDashboardPage = window.location.pathname === "/dashboard";
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   const isMonitoringDashboard = window.location.pathname === "/monitoring-dashboard" && authToken && userType === 'monitoring';
   
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage || isMonitoringDashboard) ? (
+        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage)) ? (
           // Render auth/landing pages or special dashboards without layout
           <div className="min-h-screen">
             <Router />

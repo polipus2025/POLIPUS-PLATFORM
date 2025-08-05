@@ -619,19 +619,20 @@ export default function GPSMapViewer({
       {complianceReports && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-emerald-600" />
-              LACRA Compliance Reports
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+              <span className="hidden sm:inline">LACRA Compliance Reports</span>
+              <span className="sm:hidden">Compliance Reports</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                <p className="text-sm text-emerald-800 mb-3">
+                <p className="text-xs sm:text-sm text-emerald-800 mb-3">
                   📋 Official LACRA compliance reports generated for GPS mapping data with colorful letterhead and comprehensive analysis.
                 </p>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3">
                   {/* EUDR Compliance Report */}
                   <Dialog>
                     <DialogTrigger asChild>
@@ -640,15 +641,19 @@ export default function GPSMapViewer({
                         size="sm" 
                         className="bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 w-full"
                       >
-                        <TreePine className="h-3 w-3 mr-2" />
-                        <span className="text-xs">View EUDR Report</span>
+                        <TreePine className="h-3 w-3 mr-1 sm:mr-2" />
+                        <span className="text-xs">
+                          <span className="hidden sm:inline">View EUDR Report</span>
+                          <span className="sm:hidden">EUDR</span>
+                        </span>
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
                       <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                          <TreePine className="h-5 w-5 text-emerald-600" />
-                          EUDR Compliance Assessment
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <TreePine className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+                          <span className="hidden sm:inline">EUDR Compliance Assessment</span>
+                          <span className="sm:hidden">EUDR Report</span>
                         </DialogTitle>
                       </DialogHeader>
                       <EUDRComplianceReportComponent 
@@ -665,15 +670,19 @@ export default function GPSMapViewer({
                         size="sm" 
                         className="bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 w-full"
                       >
-                        <Satellite className="h-3 w-3 mr-2" />
-                        <span className="text-xs">View Deforestation Report</span>
+                        <Satellite className="h-3 w-3 mr-1 sm:mr-2" />
+                        <span className="text-xs">
+                          <span className="hidden sm:inline">View Deforestation Report</span>
+                          <span className="sm:hidden">Deforestation</span>
+                        </span>
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
                       <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                          <AlertTriangle className="h-5 w-5 text-amber-600" />
-                          Deforestation Analysis
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+                          <span className="hidden sm:inline">Deforestation Analysis</span>
+                          <span className="sm:hidden">Deforestation Report</span>
                         </DialogTitle>
                       </DialogHeader>
                       <DeforestationReportComponent 
@@ -689,8 +698,11 @@ export default function GPSMapViewer({
                     size="sm" 
                     className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100 w-full"
                   >
-                    <Download className="h-3 w-3 mr-2" />
-                    <span className="text-xs">Download EUDR PDF</span>
+                    <Download className="h-3 w-3 mr-1 sm:mr-2" />
+                    <span className="text-xs">
+                      <span className="hidden sm:inline">Download EUDR PDF</span>
+                      <span className="sm:hidden">EUDR PDF</span>
+                    </span>
                   </Button>
 
                   {/* PDF Download - Deforestation */}
@@ -700,8 +712,11 @@ export default function GPSMapViewer({
                     size="sm" 
                     className="bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 w-full"
                   >
-                    <Download className="h-3 w-3 mr-2" />
-                    <span className="text-xs">Download Deforestation PDF</span>
+                    <Download className="h-3 w-3 mr-1 sm:mr-2" />
+                    <span className="text-xs">
+                      <span className="hidden sm:inline">Download Deforestation PDF</span>
+                      <span className="sm:hidden">Defor. PDF</span>
+                    </span>
                   </Button>
                 </div>
               </div>

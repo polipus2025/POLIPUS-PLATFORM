@@ -813,11 +813,12 @@ export default function InteractiveBoundaryMapper({
                             <span className="text-xs">View EUDR Report</span>
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
                           <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <TreePine className="h-5 w-5 text-emerald-600" />
-                              EUDR Compliance Assessment
+                            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                              <TreePine className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+                              <span className="hidden sm:inline">EUDR Compliance Assessment</span>
+                              <span className="sm:hidden">EUDR Report</span>
                             </DialogTitle>
                           </DialogHeader>
                           <EUDRComplianceReportComponent 
@@ -838,11 +839,12 @@ export default function InteractiveBoundaryMapper({
                             <span className="text-xs">View Deforestation Report</span>
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
                           <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <AlertTriangle className="h-5 w-5 text-amber-600" />
-                              Deforestation Analysis
+                            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+                              <span className="hidden sm:inline">Deforestation Analysis</span>
+                              <span className="sm:hidden">Deforestation Report</span>
                             </DialogTitle>
                           </DialogHeader>
                           <DeforestationReportComponent 

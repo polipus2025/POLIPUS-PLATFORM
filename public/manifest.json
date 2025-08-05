@@ -1,15 +1,15 @@
 {
-  "name": "AgriTrace360 LACRA - Agricultural Compliance Platform",
-  "short_name": "AgriTrace360",
-  "description": "Complete agricultural traceability and compliance management platform for LACRA",
-  "start_url": "/pwa",
+  "name": "Polipus Environmental Intelligence Platform",
+  "short_name": "Polipus",
+  "description": "Complete 8-module environmental intelligence platform for agricultural traceability, land mapping, livestock monitoring, forest protection, and carbon management",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#1e40af",
+  "background_color": "#0f172a",
   "theme_color": "#059669",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["agriculture", "business", "productivity"],
+  "categories": ["agriculture", "business", "productivity", "environmental", "mapping"],
   "icons": [
     {
       "src": "/pwa-icons/icon-72x72.png",
@@ -79,10 +79,10 @@
   "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "Open main dashboard",
-      "url": "/pwa?shortcut=dashboard",
+      "name": "Agricultural Traceability",
+      "short_name": "AgriTrace",
+      "description": "Access agricultural compliance system",
+      "url": "/portals?module=1",
       "icons": [
         {
           "src": "/pwa-icons/icon-96x96.png",
@@ -91,10 +91,10 @@
       ]
     },
     {
-      "name": "GPS Mapping",
-      "short_name": "GPS",
-      "description": "Open GPS mapping",
-      "url": "/pwa?shortcut=gps",
+      "name": "Live Trace",
+      "short_name": "Livestock",
+      "description": "Livestock monitoring system",
+      "url": "/coming-soon/live-trace",
       "icons": [
         {
           "src": "/pwa-icons/icon-96x96.png",
@@ -103,10 +103,22 @@
       ]
     },
     {
-      "name": "Export Permits",
-      "short_name": "Permits",
-      "description": "Export permit management",
-      "url": "/pwa?shortcut=permits",
+      "name": "Land Map360",
+      "short_name": "LandMap",
+      "description": "Land mapping and disputes",
+      "url": "/coming-soon/land-map360",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Forest Guard",
+      "short_name": "Forest",
+      "description": "Forest protection system",
+      "url": "/coming-soon/forest-guard",
       "icons": [
         {
           "src": "/pwa-icons/icon-96x96.png",

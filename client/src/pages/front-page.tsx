@@ -21,7 +21,9 @@ import {
   Satellite,
   TreePine,
   Waves,
-  DollarSign
+  DollarSign,
+  Download,
+  Smartphone
 } from 'lucide-react';
 import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
@@ -218,6 +220,50 @@ export default function FrontPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Mobile App Download Section */}
+        <div className="isms-card mt-8 sm:mt-12">
+          <div className="text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl isms-icon-bg-green flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Smartphone className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
+              Download Polipus Mobile App
+            </h3>
+            <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
+              Install our Progressive Web App for the complete mobile experience. Access all 8 modules offline, 
+              get push notifications, and enjoy native app-like performance on your mobile device.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <Link href="/mobile-app-download">
+                <Button className="isms-button flex items-center gap-2" data-testid="button-download-app">
+                  <Download className="h-4 w-4" />
+                  Download App
+                </Button>
+              </Link>
+              <Link href="/install-app">
+                <Button variant="outline" className="flex items-center gap-2 border-slate-200 hover:bg-slate-50" data-testid="button-install-instructions">
+                  <Smartphone className="h-4 w-4" />
+                  Installation Guide
+                </Button>
+              </Link>
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-6 text-xs sm:text-sm text-slate-500">
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Works Offline</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Push Notifications</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Native Performance</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

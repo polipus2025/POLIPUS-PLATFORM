@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
+import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
@@ -50,6 +51,7 @@ import MobileAppDashboard from "@/pages/mobile-app-dashboard";
 import MobileDemo from "@/pages/mobile-demo";
 import MobileAppSimulator from "@/pages/mobile-app-simulator";
 import MobileQRDisplay from "@/pages/mobile-qr-display";
+import MobileAppDownload from "@/pages/mobile-app-download";
 
 // New Portal Pages
 import LiveTracePortal from "@/pages/portals/live-trace-portal";
@@ -288,6 +290,9 @@ function Router() {
       <Route path="/mobile-demo" component={MobileDemo} />
       <Route path="/mobile-app-simulator" component={MobileAppSimulator} />
       <Route path="/mobile-app-preview" component={MobileQRDisplay} />
+      <Route path="/mobile-app-download" component={MobileAppDownload} />
+      <Route path="/install-app" component={MobileAppDownload} />
+      <Route path="/download-app" component={MobileAppDownload} />
       
       {/* Default fallback - Always Polipus Main Landing Page */}
       <Route path="/" component={FrontPage} />
@@ -332,6 +337,9 @@ function App() {
             <MobileNav />
           </div>
         )}
+        
+        {/* PWA Install Prompt - Show on all pages */}
+        <PWAInstallPrompt />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

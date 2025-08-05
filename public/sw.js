@@ -1,16 +1,18 @@
-// Service Worker for AgriTrace360 PWA
-const CACHE_NAME = 'agritrace360-v1.0.0';
-const API_CACHE_NAME = 'agritrace360-api-v1.0.0';
+// Service Worker for Polipus Environmental Intelligence Platform PWA
+const CACHE_NAME = 'polipus-platform-v2.0.0';
+const API_CACHE_NAME = 'polipus-api-v2.0.0';
 
 // Static assets to cache
 const STATIC_CACHE_URLS = [
   '/',
-  '/pwa',
+  '/landing',
+  '/front-page',
   '/manifest.json',
   '/pwa-icons/icon-192x192.png',
   '/pwa-icons/icon-512x512.png',
-  '/assets/LACRA LOGO_1753406166355.jpg',
-  '/assets/image_1753452947513.png'
+  '/mobile-app-download',
+  '/install-app',
+  '/portals'
 ];
 
 // API endpoints to cache

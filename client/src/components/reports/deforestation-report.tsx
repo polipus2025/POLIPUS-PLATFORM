@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Download, TreePine, AlertTriangle, TrendingDown, TrendingUp, Leaf, Zap, Globe } from "lucide-react";
-import { generateDeforestationPDF } from "@/lib/pdf-generator";
+import { generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
 
 interface DeforestationReport {
   forestLossDetected: boolean;

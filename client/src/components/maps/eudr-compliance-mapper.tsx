@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MapPin, RotateCcw, Check, Map, AlertTriangle, FileText, Download, TreePine, Satellite } from "lucide-react";
 import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
 import DeforestationReportComponent from "@/components/reports/deforestation-report";
-import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/pdf-generator";
+import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
 import { createComplianceReports, ComplianceReportData } from "@/components/reports/report-storage";
 
 interface BoundaryPoint {

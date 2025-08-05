@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Download, FileText, AlertTriangle, CheckCircle, XCircle, Clock, MapPin, Calendar, Shield } from "lucide-react";
-import { generateEUDRCompliancePDF } from "@/lib/pdf-generator";
+import { generateEUDRCompliancePDF } from "@/lib/enhanced-pdf-generator";
 
 interface EUDRComplianceReport {
   riskLevel: 'low' | 'standard' | 'high';

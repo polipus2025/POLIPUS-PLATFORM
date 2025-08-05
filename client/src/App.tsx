@@ -14,6 +14,30 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import MonitoringLogin from "@/pages/auth/monitoring-login";
+
+// LiveTrace Authentication
+import LiveTraceRegulatoryLogin from "@/pages/auth/live-trace-regulatory-login";
+import LiveTraceFarmerLogin from "@/pages/auth/live-trace-farmer-login";
+import LiveTraceFieldAgentLogin from "@/pages/auth/live-trace-field-agent-login";
+import LiveTraceExporterLogin from "@/pages/auth/live-trace-exporter-login";
+
+// Land Map360 Authentication
+import LandMap360RegulatoryLogin from "@/pages/auth/land-map360-regulatory-login";
+
+// Mine Watch Authentication
+import MineWatchRegulatoryLogin from "@/pages/auth/mine-watch-regulatory-login";
+
+// Forest Guard Authentication
+import ForestGuardRegulatoryLogin from "@/pages/auth/forest-guard-regulatory-login";
+
+// Aqua Trace Authentication
+import AquaTraceRegulatoryLogin from "@/pages/auth/aqua-trace-regulatory-login";
+
+// Blue Carbon 360 Authentication
+import BlueCarbon360RegulatoryLogin from "@/pages/auth/blue-carbon360-regulatory-login";
+
+// Carbon Trace Authentication
+import CarbonTraceRegulatoryLogin from "@/pages/auth/carbon-trace-regulatory-login";
 import MonitoringDashboard from "@/pages/monitoring-dashboard";
 import Dashboard from "@/pages/dashboard";
 
@@ -100,6 +124,30 @@ function Router() {
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
       <Route path="/monitoring-login" component={MonitoringLogin} />
+
+      {/* LiveTrace Authentication Routes */}
+      <Route path="/live-trace-regulatory-login" component={LiveTraceRegulatoryLogin} />
+      <Route path="/live-trace-farmer-login" component={LiveTraceFarmerLogin} />
+      <Route path="/live-trace-field-agent-login" component={LiveTraceFieldAgentLogin} />
+      <Route path="/live-trace-exporter-login" component={LiveTraceExporterLogin} />
+
+      {/* Land Map360 Authentication Routes */}
+      <Route path="/land-map360-regulatory-login" component={LandMap360RegulatoryLogin} />
+
+      {/* Mine Watch Authentication Routes */}
+      <Route path="/mine-watch-regulatory-login" component={MineWatchRegulatoryLogin} />
+
+      {/* Forest Guard Authentication Routes */}
+      <Route path="/forest-guard-regulatory-login" component={ForestGuardRegulatoryLogin} />
+
+      {/* Aqua Trace Authentication Routes */}
+      <Route path="/aqua-trace-regulatory-login" component={AquaTraceRegulatoryLogin} />
+
+      {/* Blue Carbon 360 Authentication Routes */}
+      <Route path="/blue-carbon360-regulatory-login" component={BlueCarbon360RegulatoryLogin} />
+
+      {/* Carbon Trace Authentication Routes */}
+      <Route path="/carbon-trace-regulatory-login" component={CarbonTraceRegulatoryLogin} />
 
       
       {/* Protected Routes */}

@@ -260,7 +260,7 @@ export default function LiveTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/veterinary-login">
+                <a href="/live-trace-regulatory-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -304,7 +304,7 @@ export default function LiveTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/rancher-login">
+                <a href="/live-trace-farmer-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -348,7 +348,7 @@ export default function LiveTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/field-agent-login">
+                <a href="/live-trace-field-agent-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -392,7 +392,7 @@ export default function LiveTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/transport-login">
+                <a href="/live-trace-exporter-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

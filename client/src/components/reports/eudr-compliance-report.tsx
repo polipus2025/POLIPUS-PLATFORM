@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Download, FileText, AlertTriangle, CheckCircle, XCircle, Clock, MapPin, Calendar, Shield } from "lucide-react";
+import { generateEUDRCompliancePDF } from "@/lib/pdf-generator";
 
 interface EUDRComplianceReport {
   riskLevel: 'low' | 'standard' | 'high';
@@ -22,7 +23,7 @@ interface EUDRReportProps {
   farmArea: number;
   farmerId: string;
   farmerName: string;
-  onDownload: () => void;
+  onDownload?: () => void;
 }
 
 export default function EUDRComplianceReportComponent({ 
@@ -228,7 +229,16 @@ export default function EUDRComplianceReportComponent({
 
       {/* Action Buttons */}
       <div className="flex justify-center gap-4 pt-6">
-        <Button onClick={onDownload} className="bg-blue-600 hover:bg-blue-700">
+        <Button 
+          onClick={async () => {
+            if (onDownload) {
+              onDownload();
+            } else {
+              await generateEUDRCompliancePDF(report, farmArea, farmerId, farmerName);
+            }
+          }} 
+          className="bg-blue-600 hover:bg-blue-700"
+        >
           <Download className="h-4 w-4 mr-2" />
           Download PDF Report
         </Button>

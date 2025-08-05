@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Download, TreePine, AlertTriangle, TrendingDown, TrendingUp, Leaf, Zap, Globe } from "lucide-react";
+import { generateDeforestationPDF } from "@/lib/pdf-generator";
 
 interface DeforestationReport {
   forestLossDetected: boolean;
@@ -22,7 +23,7 @@ interface DeforestationReportProps {
   farmArea: number;
   farmerId: string;
   farmerName: string;
-  onDownload: () => void;
+  onDownload?: () => void;
 }
 
 export default function DeforestationReportComponent({ 
@@ -301,7 +302,16 @@ export default function DeforestationReportComponent({
 
       {/* Action Buttons */}
       <div className="flex justify-center gap-4 pt-6">
-        <Button onClick={onDownload} className="bg-green-600 hover:bg-green-700">
+        <Button 
+          onClick={async () => {
+            if (onDownload) {
+              onDownload();
+            } else {
+              await generateDeforestationPDF(report, farmArea, farmerId, farmerName);
+            }
+          }} 
+          className="bg-green-600 hover:bg-green-700"
+        >
           <Download className="h-4 w-4 mr-2" />
           Download PDF Report
         </Button>

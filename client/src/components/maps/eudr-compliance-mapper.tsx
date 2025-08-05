@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MapPin, RotateCcw, Check, Map, AlertTriangle, FileText, Download, TreePine, Satellite } from "lucide-react";
 import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
 import DeforestationReportComponent from "@/components/reports/deforestation-report";
+import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/pdf-generator";
 
 interface BoundaryPoint {
   latitude: number;
@@ -419,19 +420,28 @@ export default function EUDRComplianceMapper({
     }
   };
 
-  const downloadReport = (type: 'eudr' | 'deforestation') => {
-    // Trigger PDF generation (in a real app, this would call a backend service)
-    const reportData = type === 'eudr' ? eudrReport : deforestationReport;
-    console.log(`Generating ${type} PDF report:`, reportData);
-    
-    // For now, download as JSON (in production, this would be a PDF)
-    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${type}-report-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadReport = async (type: 'eudr' | 'deforestation') => {
+    try {
+      const reportData = type === 'eudr' ? eudrReport : deforestationReport;
+      if (!reportData) return;
+      
+      if (type === 'eudr') {
+        await generateEUDRCompliancePDF(reportData, area, "FRM-2024-001", "Sample Farmer");
+      } else {
+        await generateDeforestationPDF(reportData, area, "FRM-2024-001", "Sample Farmer");
+      }
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      // Fallback to JSON
+      const reportData = type === 'eudr' ? eudrReport : deforestationReport;
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${type}-report-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   const canComplete = points.length >= minPoints;

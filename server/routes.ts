@@ -2483,13 +2483,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/farmers", async (req, res) => {
     try {
-      const validatedData = insertFarmerSchema.parse(req.body);
+      // Auto-generate farmerId if not provided
+      const farmerData = {
+        ...req.body,
+        farmerId: req.body.farmerId || `FARM-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+      };
+      
+      const validatedData = insertFarmerSchema.parse(farmerData);
       const farmer = await storage.createFarmer(validatedData);
       res.status(201).json(farmer);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
+      console.error("Failed to create farmer:", error);
       res.status(500).json({ message: "Failed to create farmer" });
     }
   });

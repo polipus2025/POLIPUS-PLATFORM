@@ -44,6 +44,9 @@ import ForestGuardCommunityLiaisonLogin from "@/pages/auth/forest-guard-communit
 
 // Aqua Trace Authentication
 import AquaTraceRegulatoryLogin from "@/pages/auth/aqua-trace-regulatory-login";
+import AquaTraceMarineBiologistLogin from "@/pages/auth/aqua-trace-marine-biologist-login";
+import AquaTraceCoastGuardLogin from "@/pages/auth/aqua-trace-coast-guard-login";
+import AquaTraceHarborMasterLogin from "@/pages/auth/aqua-trace-harbor-master-login";
 
 // Blue Carbon 360 Authentication
 import BlueCarbon360RegulatoryLogin from "@/pages/auth/blue-carbon360-regulatory-login";
@@ -166,6 +169,9 @@ function Router() {
 
       {/* Aqua Trace Authentication Routes */}
       <Route path="/aqua-trace-regulatory-login" component={AquaTraceRegulatoryLogin} />
+      <Route path="/aqua-trace-marine-biologist-login" component={AquaTraceMarineBiologistLogin} />
+      <Route path="/aqua-trace-coast-guard-login" component={AquaTraceCoastGuardLogin} />
+      <Route path="/aqua-trace-harbor-master-login" component={AquaTraceHarborMasterLogin} />
 
       {/* Blue Carbon 360 Authentication Routes */}
       <Route path="/blue-carbon360-regulatory-login" component={BlueCarbon360RegulatoryLogin} />

@@ -304,7 +304,7 @@ export default function AquaTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/marine-biologist-login">
+                <a href="/aqua-trace-marine-biologist-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -348,7 +348,7 @@ export default function AquaTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/coast-guard-login">
+                <a href="/aqua-trace-coast-guard-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -392,7 +392,7 @@ export default function AquaTracePortal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/harbor-master-login">
+                <a href="/aqua-trace-harbor-master-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

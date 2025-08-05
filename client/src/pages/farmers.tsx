@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
-import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
+import WorkingMapBoundary from "@/components/maps/working-map-boundary";
 
 // Farmer form schema
 const farmerFormSchema = z.object({
@@ -1162,7 +1162,7 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <RealMapBoundaryMapper
+              <WorkingMapBoundary
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({

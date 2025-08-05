@@ -195,11 +195,12 @@ const LeafletMap = ({
     <div className="relative">
       <div 
         ref={mapRef} 
-        className="w-full h-[400px] rounded-lg border border-gray-200 bg-gray-100"
-        style={{ minHeight: '400px' }}
+        className="w-full h-[300px] sm:h-[400px] md:h-[450px] rounded-lg border border-gray-200 bg-gray-100 touch-manipulation"
+        style={{ minHeight: '300px' }}
       />
-      <div className="absolute top-2 right-2 bg-white rounded-md shadow-sm p-2 text-xs text-gray-600">
-        Click on map to add boundary points
+      <div className="absolute top-2 right-2 bg-white rounded-md shadow-sm p-1 sm:p-2 text-xs text-gray-600 max-w-[140px] sm:max-w-none">
+        <span className="hidden sm:inline">Click on map to add boundary points</span>
+        <span className="sm:hidden">Tap to add points</span>
       </div>
     </div>
   );
@@ -442,26 +443,27 @@ export default function InteractiveBoundaryMapper({
       </Card>
 
       {/* Control Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={addCurrentGPSPosition} variant="outline">
-          <Target className="h-4 w-4 mr-2" />
-          Add GPS Position
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+        <Button onClick={addCurrentGPSPosition} variant="outline" size="sm" className="w-full sm:w-auto">
+          <Target className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+          <span className="text-xs sm:text-sm">Add GPS Position</span>
         </Button>
-        <Button onClick={removeLastPoint} variant="outline" disabled={!currentBoundary?.points.length}>
-          <Trash2 className="h-4 w-4 mr-2" />
-          Remove Last Point
+        <Button onClick={removeLastPoint} variant="outline" size="sm" disabled={!currentBoundary?.points.length} className="w-full sm:w-auto">
+          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+          <span className="text-xs sm:text-sm">Remove Last Point</span>
         </Button>
         <Button 
           onClick={completeBoundary} 
           disabled={!currentBoundary || currentBoundary.points.length < minPoints}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+          size="sm"
         >
-          <CheckCircle className="h-4 w-4 mr-2" />
-          Complete Boundary
+          <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+          <span className="text-xs sm:text-sm">Complete Boundary</span>
         </Button>
-        <Button onClick={resetBoundary} variant="destructive">
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Reset
+        <Button onClick={resetBoundary} variant="destructive" size="sm" className="w-full sm:w-auto">
+          <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+          <span className="text-xs sm:text-sm">Reset</span>
         </Button>
       </div>
 
@@ -472,28 +474,28 @@ export default function InteractiveBoundaryMapper({
             <CardTitle>Boundary Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Points</p>
-                <p className="text-2xl font-bold">{currentBoundary.points.length}</p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Points</p>
+                <p className="text-lg sm:text-2xl font-bold">{currentBoundary.points.length}</p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Area</p>
-                <p className="text-2xl font-bold">{currentBoundary.area.toFixed(3)}</p>
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Area</p>
+                <p className="text-lg sm:text-2xl font-bold">{currentBoundary.area.toFixed(3)}</p>
                 <p className="text-xs text-gray-500">hectares</p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Perimeter</p>
-                <p className="text-2xl font-bold">{currentBoundary.perimeter.toFixed(1)}</p>
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Perimeter</p>
+                <p className="text-lg sm:text-2xl font-bold">{currentBoundary.perimeter.toFixed(1)}</p>
                 <p className="text-xs text-gray-500">meters</p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Accuracy</p>
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Accuracy</p>
                 <Badge variant={
                   currentBoundary.accuracyLevel === 'excellent' ? 'default' :
                   currentBoundary.accuracyLevel === 'good' ? 'secondary' :
                   currentBoundary.accuracyLevel === 'fair' ? 'outline' : 'destructive'
-                }>
+                } className="text-xs">
                   {currentBoundary.accuracyLevel}
                 </Badge>
               </div>
@@ -504,11 +506,11 @@ export default function InteractiveBoundaryMapper({
 
       {/* Instructions */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-medium text-blue-800 mb-2">How to Create Farm Boundaries:</h3>
-            <ol className="text-sm text-blue-700 space-y-1">
-              <li>1. <strong>Click on the map</strong> to add boundary points where you want them</li>
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
+            <h3 className="font-medium text-blue-800 mb-2 text-sm sm:text-base">How to Create Farm Boundaries:</h3>
+            <ol className="text-xs sm:text-sm text-blue-700 space-y-1">
+              <li>1. <strong className="hidden sm:inline">Click on the map</strong><strong className="sm:hidden">Tap the map</strong> to add boundary points where you want them</li>
               <li>2. <strong>Use "Add GPS Position"</strong> to add your current location as a point</li>
               <li>3. <strong>Walk around your farm</strong> and add points along the perimeter</li>
               <li>4. <strong>Complete the boundary</strong> when you have at least {minPoints} points</li>

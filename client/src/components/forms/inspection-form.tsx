@@ -341,21 +341,25 @@ export default function InspectionForm() {
           />
 
           {/* Inspection Location Interactive Mapping */}
-          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h4 className="font-medium text-green-900">Inspection Location</h4>
-                <p className="text-sm text-green-700">Mark the exact location where inspection was conducted</p>
+          <div className="bg-green-50 p-3 sm:p-4 rounded-lg border border-green-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium text-green-900 text-sm sm:text-base">Inspection Location</h4>
+                <p className="text-xs sm:text-sm text-green-700">
+                  <span className="hidden sm:inline">Mark the exact location where inspection was conducted</span>
+                  <span className="sm:hidden">Mark inspection location</span>
+                </p>
               </div>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setIsLocationMappingOpen(true)}
-                className="border-green-300 text-green-700 hover:bg-green-100"
+                className="border-green-300 text-green-700 hover:bg-green-100 w-full sm:w-auto text-xs sm:text-sm"
               >
-                <MapPin className="w-4 h-4 mr-2" />
-                Mark Location
+                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                <span className="hidden sm:inline">Mark Location</span>
+                <span className="sm:hidden">Mark Location</span>
               </Button>
             </div>
             
@@ -399,14 +403,16 @@ export default function InspectionForm() {
 
       {/* Interactive Inspection Location Mapping Dialog */}
       <Dialog open={isLocationMappingOpen} onOpenChange={setIsLocationMappingOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-green-600" />
-              Mark Inspection Location
+        <DialogContent className="w-[95vw] max-w-5xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+          <DialogHeader className="pb-3">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+              <span className="hidden sm:inline">Mark Inspection Location</span>
+              <span className="sm:hidden">Inspection Location</span>
             </DialogTitle>
-            <DialogDescription>
-              Click on the map to mark the exact location where this inspection was conducted.
+            <DialogDescription className="text-xs sm:text-sm">
+              <span className="hidden sm:inline">Click on the map to mark the exact location where this inspection was conducted.</span>
+              <span className="sm:hidden">Tap map to mark location</span>
             </DialogDescription>
           </DialogHeader>
           

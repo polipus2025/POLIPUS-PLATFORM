@@ -1148,14 +1148,16 @@ export default function FarmersPage() {
 
         {/* Interactive Farm Mapping Dialog */}
         <Dialog open={isInteractiveMappingOpen} onOpenChange={setIsInteractiveMappingOpen}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                Interactive Farm Boundary Mapping
+          <DialogContent className="w-[95vw] max-w-6xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+            <DialogHeader className="pb-3">
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                <span className="hidden sm:inline">Interactive Farm Boundary Mapping</span>
+                <span className="sm:hidden">Farm Mapping</span>
               </DialogTitle>
-              <DialogDescription>
-                Create precise farm boundaries by clicking on the map or using GPS positioning.
+              <DialogDescription className="text-xs sm:text-sm">
+                <span className="hidden sm:inline">Create precise farm boundaries by clicking on the map or using GPS positioning.</span>
+                <span className="sm:hidden">Tap map to create boundaries</span>
               </DialogDescription>
             </DialogHeader>
             

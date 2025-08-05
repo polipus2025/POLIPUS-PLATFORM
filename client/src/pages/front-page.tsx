@@ -213,9 +213,9 @@ export default function FrontPage() {
                           )}
                         </Badge>
                       </div>
-                      <Button className={`w-full text-xs sm:text-sm ${module.isAgriTrace ? 'isms-button' : 'bg-slate-400 hover:bg-slate-500'}`}>
+                      <Button className="w-full text-xs sm:text-sm isms-button">
                         <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                        {module.isAgriTrace ? 'Enter Platform' : 'View Details'}
+                        Enter Platform
                       </Button>
                     </div>
                   </Link>

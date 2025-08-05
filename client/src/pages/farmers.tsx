@@ -526,7 +526,7 @@ export default function FarmersPage() {
                                 Get Location
                               </Button>
                             </div>
-                            <FormDescription>Click "Get Location" to auto-detect your GPS coordinates</FormDescription>
+                            <p className="text-sm text-muted-foreground">Click "Get Location" to auto-detect your GPS coordinates</p>
                             <FormMessage />
                           </FormItem>
                         )}

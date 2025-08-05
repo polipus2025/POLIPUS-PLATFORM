@@ -17,6 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
 import InteractiveBoundaryMapper from "@/components/maps/interactive-boundary-mapper";
+import SimpleTestMap from "@/components/maps/simple-test-map";
+import WorkingBoundaryMapper from "@/components/maps/working-boundary-mapper";
 
 // Farmer form schema
 const farmerFormSchema = z.object({
@@ -1162,7 +1164,12 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <InteractiveBoundaryMapper
+              {/* Test map to verify Leaflet works */}
+              <SimpleTestMap />
+              
+              <div className="mt-6">
+                <h4 className="text-lg font-semibold mb-2">Working Boundary Mapper</h4>
+                <WorkingBoundaryMapper
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({
@@ -1211,6 +1218,7 @@ export default function FarmersPage() {
                 }}
                 minPoints={3}
               />
+              </div>
             </div>
           </DialogContent>
         </Dialog>

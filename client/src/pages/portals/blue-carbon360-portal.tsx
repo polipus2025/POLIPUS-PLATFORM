@@ -304,7 +304,7 @@ export default function BlueCarbon360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/conservation-economist-login">
+                <a href="/blue-carbon-conservation-economist-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -348,7 +348,7 @@ export default function BlueCarbon360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/marine-conservationist-login">
+                <a href="/blue-carbon-marine-conservation-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
@@ -392,7 +392,7 @@ export default function BlueCarbon360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/policy-advisor-login">
+                <a href="/blue-carbon-policy-advisory-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

@@ -50,6 +50,9 @@ import AquaTraceHarborMasterLogin from "@/pages/auth/aqua-trace-harbor-master-lo
 
 // Blue Carbon 360 Authentication
 import BlueCarbon360RegulatoryLogin from "@/pages/auth/blue-carbon360-regulatory-login";
+import BlueCarbonConservationEconomistLogin from "@/pages/auth/blue-carbon-conservation-economist-login";
+import BlueCarbonMarineConservationLogin from "@/pages/auth/blue-carbon-marine-conservation-login";
+import BlueCarbonPolicyAdvisoryLogin from "@/pages/auth/blue-carbon-policy-advisory-login";
 
 // Carbon Trace Authentication
 import CarbonTraceRegulatoryLogin from "@/pages/auth/carbon-trace-regulatory-login";
@@ -175,6 +178,9 @@ function Router() {
 
       {/* Blue Carbon 360 Authentication Routes */}
       <Route path="/blue-carbon360-regulatory-login" component={BlueCarbon360RegulatoryLogin} />
+      <Route path="/blue-carbon-conservation-economist-login" component={BlueCarbonConservationEconomistLogin} />
+      <Route path="/blue-carbon-marine-conservation-login" component={BlueCarbonMarineConservationLogin} />
+      <Route path="/blue-carbon-policy-advisory-login" component={BlueCarbonPolicyAdvisoryLogin} />
 
       {/* Carbon Trace Authentication Routes */}
       <Route path="/carbon-trace-regulatory-login" component={CarbonTraceRegulatoryLogin} />

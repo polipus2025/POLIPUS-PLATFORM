@@ -260,7 +260,7 @@ export default function BlueCarbon360Portal() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/carbon-trader-login">
+                <a href="/blue-carbon360-regulatory-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

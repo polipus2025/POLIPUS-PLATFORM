@@ -20,7 +20,7 @@ import {
   TreePine
 } from 'lucide-react';
 import GPSDiagnosticSystem from '@/components/gps/gps-diagnostic-system';
-import PrecisionBoundaryMapper from '@/components/gps/precision-boundary-mapper';
+import InteractiveBoundaryMapper from '@/components/maps/interactive-boundary-mapper';
 
 export default function FarmerGPSMapping() {
   const [activeTab, setActiveTab] = useState('diagnostic');
@@ -189,7 +189,7 @@ export default function FarmerGPSMapping() {
                     <li>4. Save your boundary map for compliance documentation</li>
                   </ol>
                 </div>
-                <PrecisionBoundaryMapper 
+                <InteractiveBoundaryMapper 
                   onBoundaryComplete={(boundary) => {
                     toast({
                       title: "Farm Boundary Saved",

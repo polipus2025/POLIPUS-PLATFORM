@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import GPSDiagnosticSystem from '@/components/gps/gps-diagnostic-system';
+import InteractiveBoundaryMapper from '@/components/maps/interactive-boundary-mapper';
 import { 
   Map, 
   Navigation, 
@@ -395,9 +396,12 @@ export default function GISMapping() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6 bg-slate-100 rounded-xl">
+            <TabsList className="grid w-full grid-cols-7 bg-slate-100 rounded-xl">
               <TabsTrigger value="diagnostic" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 GPS Diagnostic
+              </TabsTrigger>
+              <TabsTrigger value="mapping" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Boundary Mapping
               </TabsTrigger>
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 Map Overview
@@ -418,6 +422,29 @@ export default function GISMapping() {
 
             <TabsContent value="diagnostic" className="space-y-6">
               <GPSDiagnosticSystem />
+            </TabsContent>
+
+            <TabsContent value="mapping" className="space-y-6">
+              <div className="isms-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl isms-icon-bg-green flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Interactive Farm Boundary Mapping</h3>
+                    <p className="text-slate-600">Create precise farm boundaries using real map interaction and GPS positioning</p>
+                  </div>
+                </div>
+                <InteractiveBoundaryMapper 
+                  onBoundaryComplete={(boundary) => {
+                    toast({
+                      title: "Farm Boundary Created",
+                      description: `${boundary.name} mapped successfully with ${boundary.points.length} points covering ${boundary.area.toFixed(2)} hectares`,
+                    });
+                  }}
+                  minPoints={3}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="overview" className="space-y-6">

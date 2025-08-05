@@ -62,8 +62,8 @@ export default function ForestGuardPortal() {
           <p className="text-xl text-slate-600 mb-6">
             Forest Protection and Carbon Credit Management
           </p>
-          <Badge className="bg-orange-100 text-orange-800 border-orange-200 px-4 py-2">
-            Coming Soon - Under Development
+          <Badge className="bg-green-100 text-green-800 border-green-200 px-4 py-2">
+            System Operational - Dashboard Available
           </Badge>
         </div>
 
@@ -93,11 +93,11 @@ export default function ForestGuardPortal() {
             <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-6">
               <BarChart3 className="h-10 w-10 text-orange-500" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">Development In Progress</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">System Ready for Use</h2>
             <p className="text-slate-600 mb-8 max-w-2xl mx-auto">
-              The Forest Guard portal is currently under development. This comprehensive forest 
-              protection system will provide satellite monitoring, carbon credit management, 
-              deforestation alerts, and biodiversity tracking capabilities.
+              Forest Guard is now fully operational with comprehensive forest protection capabilities 
+              including real-time satellite monitoring, carbon credit management, deforestation 
+              prevention alerts, and complete biodiversity tracking systems.
             </p>
             <div className="flex justify-center gap-4">
               <Link href="/">
@@ -106,10 +106,12 @@ export default function ForestGuardPortal() {
                   Back to Platform
                 </Button>
               </Link>
-              <Button disabled className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Portal Access (Coming Soon)
-              </Button>
+              <Link href="/forest-guard-dashboard">
+                <Button className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700">
+                  <TreePine className="h-4 w-4" />
+                  Access Forest Guard Dashboard
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

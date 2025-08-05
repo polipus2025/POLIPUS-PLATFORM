@@ -62,8 +62,8 @@ export default function LiveTracePortal() {
           <p className="text-xl text-slate-600 mb-6">
             Livestock Movement Monitoring and Control System
           </p>
-          <Badge className="bg-orange-100 text-orange-800 border-orange-200 px-4 py-2">
-            Coming Soon - Under Development
+          <Badge className="bg-green-100 text-green-800 border-green-200 px-4 py-2">
+            System Operational - Dashboard Available
           </Badge>
         </div>
 
@@ -93,11 +93,11 @@ export default function LiveTracePortal() {
             <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-6">
               <BarChart3 className="h-10 w-10 text-orange-500" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">Development In Progress</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">System Ready for Use</h2>
             <p className="text-slate-600 mb-8 max-w-2xl mx-auto">
-              The Live Trace portal is currently under development. This comprehensive livestock 
-              monitoring system will provide real-time tracking, health monitoring, and movement 
-              control capabilities for agricultural communities.
+              The Live Trace portal is now fully operational with comprehensive livestock 
+              monitoring capabilities including real-time tracking, health monitoring, and movement 
+              control systems for agricultural communities.
             </p>
             <div className="flex justify-center gap-4">
               <Link href="/">
@@ -106,10 +106,12 @@ export default function LiveTracePortal() {
                   Back to Platform
                 </Button>
               </Link>
-              <Button disabled className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Portal Access (Coming Soon)
-              </Button>
+              <Link href="/live-trace-dashboard">
+                <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                  <Users className="h-4 w-4" />
+                  Access Live Trace Dashboard
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

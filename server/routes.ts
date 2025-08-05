@@ -92,6 +92,8 @@ const authenticateToken = (req: any, res: any, next: any) => {
   });
 };
 
+import { registerPolipusRoutes } from './polipus-routes';
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Serve protection page directly
@@ -4752,6 +4754,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('Content-Type', 'application/javascript');
     res.sendFile(path.join(process.cwd(), 'public/sw.js'));
   });
+
+  // Register all Polipus module routes
+  registerPolipusRoutes(app);
 
   // Force enable main dashboard access
   app.get('/', (req, res, next) => {

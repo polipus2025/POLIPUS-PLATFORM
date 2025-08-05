@@ -64,6 +64,15 @@ import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
 import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
 import CarbonTracePortal from "@/pages/portals/carbon-trace-portal";
 
+// New Module Dashboards
+import LiveTraceDashboard from "@/pages/portals/live-trace-dashboard";
+import LandMap360Dashboard from "@/pages/portals/land-map360-dashboard";
+import MineWatchDashboard from "@/pages/portals/mine-watch-dashboard";
+import ForestGuardDashboard from "@/pages/portals/forest-guard-dashboard";
+import AquaTraceDashboard from "@/pages/portals/aqua-trace-dashboard";
+import BlueCarbon360Dashboard from "@/pages/portals/blue-carbon360-dashboard";
+import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
+
 import NotFound from "@/pages/not-found";
 
 // Helper component to check user access to routes
@@ -304,6 +313,15 @@ function Router() {
       <Route path="/aqua-trace" component={AquaTracePortal} />
       <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
       <Route path="/carbon-trace" component={CarbonTracePortal} />
+      
+      {/* New Module Dashboard Routes - Fully Functional */}
+      <Route path="/live-trace-dashboard" component={LiveTraceDashboard} />
+      <Route path="/land-map360-dashboard" component={LandMap360Dashboard} />
+      <Route path="/mine-watch-dashboard" component={MineWatchDashboard} />
+      <Route path="/forest-guard-dashboard" component={ForestGuardDashboard} />
+      <Route path="/aqua-trace-dashboard" component={AquaTraceDashboard} />
+      <Route path="/blue-carbon360-dashboard" component={BlueCarbon360Dashboard} />
+      <Route path="/carbon-trace-dashboard" component={CarbonTraceDashboard} />
       
       {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />

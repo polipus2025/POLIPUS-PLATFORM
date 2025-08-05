@@ -233,6 +233,598 @@ export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
 export type BackendLog = typeof backendLogs.$inferSelect;
 export type InsertBackendLog = typeof backendLogs.$inferInsert;
 
+// ========================================
+// POLIPUS 7 MODULES DATABASE SCHEMAS
+// ========================================
+
+// MODULE 2: LIVE TRACE - Livestock Movement Monitoring
+export const livestock = pgTable("livestock", {
+  id: serial("id").primaryKey(),
+  animalId: text("animal_id").notNull().unique(),
+  species: text("species").notNull(), // cattle, goat, sheep, pig, chicken
+  breed: text("breed"),
+  ownerId: text("owner_id").notNull(),
+  ownerName: text("owner_name").notNull(),
+  county: text("county").notNull(),
+  district: text("district"),
+  village: text("village"),
+  currentLocation: text("current_location"), // GPS coordinates
+  movementStatus: text("movement_status").default("stationary"), // stationary, moving, quarantined, restricted
+  healthStatus: text("health_status").default("healthy"), // healthy, sick, vaccinated, under_treatment
+  lastVaccination: timestamp("last_vaccination"),
+  nextVaccination: timestamp("next_vaccination"),
+  quarantineStatus: boolean("quarantine_status").default(false),
+  quarantineReason: text("quarantine_reason"),
+  quarantineEndDate: timestamp("quarantine_end_date"),
+  gpsTrackingEnabled: boolean("gps_tracking_enabled").default(true),
+  alertsEnabled: boolean("alerts_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const livestockMovements = pgTable("livestock_movements", {
+  id: serial("id").primaryKey(),
+  animalId: text("animal_id").references(() => livestock.animalId).notNull(),
+  fromLocation: text("from_location").notNull(),
+  toLocation: text("to_location").notNull(),
+  movementDate: timestamp("movement_date").notNull(),
+  movementReason: text("movement_reason").notNull(), // grazing, sale, veterinary, breeding
+  permitRequired: boolean("permit_required").default(false),
+  permitNumber: text("permit_number"),
+  transporterId: text("transporter_id"),
+  transporterName: text("transporter_name"),
+  distance: decimal("distance", { precision: 10, scale: 2 }), // kilometers
+  duration: integer("duration"), // minutes
+  status: text("status").default("pending"), // pending, approved, in_transit, completed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const livestockAlerts = pgTable("livestock_alerts", {
+  id: serial("id").primaryKey(),
+  animalId: text("animal_id").references(() => livestock.animalId).notNull(),
+  alertType: text("alert_type").notNull(), // health, movement, quarantine, vaccination_due, unusual_activity
+  severity: text("severity").notNull(), // low, medium, high, critical
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  location: text("location"),
+  isRead: boolean("is_read").default(false),
+  isResolved: boolean("is_resolved").default(false),
+  resolvedBy: text("resolved_by"),
+  resolvedAt: timestamp("resolved_at"),
+  resolution: text("resolution"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MODULE 3: LAND MAP360 - Land Mapping & Dispute Prevention
+export const landParcels = pgTable("land_parcels", {
+  id: serial("id").primaryKey(),
+  parcelId: text("parcel_id").notNull().unique(),
+  title: text("title").notNull(),
+  ownerId: text("owner_id").notNull(),
+  ownerName: text("owner_name").notNull(),
+  ownerType: text("owner_type").notNull(), // individual, family, community, government, organization
+  county: text("county").notNull(),
+  district: text("district"),
+  village: text("village"),
+  landUse: text("land_use").notNull(), // residential, agricultural, commercial, forest, mining, water
+  area: decimal("area", { precision: 12, scale: 4 }).notNull(), // hectares
+  boundaries: jsonb("boundaries").notNull(), // GPS boundary coordinates
+  registrationStatus: text("registration_status").default("pending"), // pending, registered, disputed, suspended
+  registrationDate: timestamp("registration_date"),
+  lastSurveyDate: timestamp("last_survey_date"),
+  surveyorId: text("surveyor_id"),
+  disputes: jsonb("disputes"), // array of dispute records
+  encroachments: jsonb("encroachments"), // detected encroachments
+  legalDocuments: jsonb("legal_documents"), // array of legal document references
+  taxStatus: text("tax_status").default("current"), // current, overdue, exempt
+  marketValue: decimal("market_value", { precision: 15, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const landDisputes = pgTable("land_disputes", {
+  id: serial("id").primaryKey(),
+  disputeId: text("dispute_id").notNull().unique(),
+  parcelId: text("parcel_id").references(() => landParcels.parcelId).notNull(),
+  disputeType: text("dispute_type").notNull(), // boundary, ownership, inheritance, encroachment, usage_rights
+  claimantId: text("claimant_id").notNull(),
+  claimantName: text("claimant_name").notNull(),
+  defendantId: text("defendant_id").notNull(),
+  defendantName: text("defendant_name").notNull(),
+  description: text("description").notNull(),
+  evidence: jsonb("evidence"), // photos, documents, witness statements
+  mediatorId: text("mediator_id"),
+  mediatorName: text("mediator_name"),
+  status: text("status").default("submitted"), // submitted, under_review, mediation, resolved, court_referral
+  priority: text("priority").default("medium"), // low, medium, high, urgent
+  submittedDate: timestamp("submitted_date").defaultNow(),
+  resolutionDate: timestamp("resolution_date"),
+  resolution: text("resolution"),
+  appealDeadline: timestamp("appeal_deadline"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const surveyRecords = pgTable("survey_records", {
+  id: serial("id").primaryKey(),
+  surveyId: text("survey_id").notNull().unique(),
+  parcelId: text("parcel_id").references(() => landParcels.parcelId).notNull(),
+  surveyorId: text("surveyor_id").notNull(),
+  surveyorName: text("surveyor_name").notNull(),
+  surveyDate: timestamp("survey_date").notNull(),
+  surveyType: text("survey_type").notNull(), // initial, re_survey, dispute_resolution, boundary_clarification
+  equipment: text("equipment"), // GPS, drone, traditional_survey
+  accuracy: text("accuracy"), // high, medium, low
+  boundaryPoints: jsonb("boundary_points").notNull(),
+  areaCalculated: decimal("area_calculated", { precision: 12, scale: 4 }),
+  discrepancies: text("discrepancies"),
+  recommendations: text("recommendations"),
+  photos: jsonb("photos"), // survey photos
+  status: text("status").default("completed"), // pending, completed, verified, rejected
+  verifiedBy: text("verified_by"),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MODULE 4: MINE WATCH - Mineral Resource Protection
+export const miningOperations = pgTable("mining_operations", {
+  id: serial("id").primaryKey(),
+  operationId: text("operation_id").notNull().unique(),
+  operatorName: text("operator_name").notNull(),
+  licenseNumber: text("license_number").notNull().unique(),
+  mineralType: text("mineral_type").notNull(), // gold, diamond, iron_ore, bauxite, rutile
+  county: text("county").notNull(),
+  district: text("district"),
+  operationArea: jsonb("operation_area").notNull(), // GPS boundaries
+  areaSize: decimal("area_size", { precision: 10, scale: 2 }), // hectares
+  licenseType: text("license_type").notNull(), // exploration, mining, small_scale, large_scale
+  issueDate: timestamp("issue_date").notNull(),
+  expiryDate: timestamp("expiry_date").notNull(),
+  status: text("status").default("active"), // active, suspended, expired, revoked, pending_renewal
+  employeeCount: integer("employee_count"),
+  communityAgreement: boolean("community_agreement").default(false),
+  environmentalImpact: text("environmental_impact"), // low, medium, high, severe
+  rehabilitationPlan: text("rehabilitation_plan"),
+  safetyRecord: jsonb("safety_record"),
+  productionData: jsonb("production_data"),
+  compliance: jsonb("compliance"), // regulatory compliance tracking
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const communityImpacts = pgTable("community_impacts", {
+  id: serial("id").primaryKey(),
+  impactId: text("impact_id").notNull().unique(),
+  operationId: text("operation_id").references(() => miningOperations.operationId).notNull(),
+  communityName: text("community_name").notNull(),
+  impactType: text("impact_type").notNull(), // displacement, water_contamination, noise, dust, traffic, employment
+  severity: text("severity").notNull(), // minimal, moderate, significant, severe
+  affectedPopulation: integer("affected_population"),
+  description: text("description").notNull(),
+  mitigationMeasures: text("mitigation_measures"),
+  compensationProvided: boolean("compensation_provided").default(false),
+  compensationAmount: decimal("compensation_amount", { precision: 12, scale: 2 }),
+  status: text("status").default("identified"), // identified, assessed, mitigated, resolved, ongoing
+  reportedBy: text("reported_by"),
+  reportedDate: timestamp("reported_date").defaultNow(),
+  resolutionDate: timestamp("resolution_date"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  nextReviewDate: timestamp("next_review_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const miningInspections = pgTable("mining_inspections", {
+  id: serial("id").primaryKey(),
+  inspectionId: text("inspection_id").notNull().unique(),
+  operationId: text("operation_id").references(() => miningOperations.operationId).notNull(),
+  inspectorId: text("inspector_id").notNull(),
+  inspectorName: text("inspector_name").notNull(),
+  inspectionDate: timestamp("inspection_date").notNull(),
+  inspectionType: text("inspection_type").notNull(), // routine, complaint_based, compliance, safety, environmental
+  findings: text("findings").notNull(),
+  violations: jsonb("violations"), // array of violations found
+  recommendations: text("recommendations"),
+  correctionDeadline: timestamp("correction_deadline"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  nextInspectionDate: timestamp("next_inspection_date"),
+  complianceScore: integer("compliance_score"), // 0-100
+  photos: jsonb("photos"),
+  status: text("status").default("completed"), // scheduled, in_progress, completed, follow_up_required
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MODULE 5: FOREST GUARD - Forest Protection & Carbon Credits
+export const forestAreas = pgTable("forest_areas", {
+  id: serial("id").primaryKey(),
+  forestId: text("forest_id").notNull().unique(),
+  name: text("name").notNull(),
+  forestType: text("forest_type").notNull(), // primary, secondary, plantation, mangrove, gallery
+  county: text("county").notNull(),
+  district: text("district"),
+  boundaries: jsonb("boundaries").notNull(), // GPS coordinates
+  totalArea: decimal("total_area", { precision: 10, scale: 2 }).notNull(), // hectares
+  protectedArea: decimal("protected_area", { precision: 10, scale: 2 }), // hectares
+  conservationStatus: text("conservation_status").notNull(), // protected, managed, unrestricted, degraded
+  biodiversityIndex: decimal("biodiversity_index", { precision: 5, scale: 2 }),
+  carbonStock: decimal("carbon_stock", { precision: 12, scale: 2 }), // tonnes
+  lastSurveyDate: timestamp("last_survey_date"),
+  deforestationRisk: text("deforestation_risk").default("low"), // low, medium, high, critical
+  managementPlan: text("management_plan"),
+  communityInvolvement: boolean("community_involvement").default(false),
+  touristActivities: boolean("tourist_activities").default(false),
+  research: boolean("research_activities").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const deforestationAlerts = pgTable("deforestation_alerts", {
+  id: serial("id").primaryKey(),
+  alertId: text("alert_id").notNull().unique(),
+  forestId: text("forest_id").references(() => forestAreas.forestId).notNull(),
+  detectionDate: timestamp("detection_date").defaultNow(),
+  location: text("location").notNull(), // GPS coordinates
+  areaAffected: decimal("area_affected", { precision: 8, scale: 4 }), // hectares
+  severity: text("severity").notNull(), // low, medium, high, critical
+  cause: text("cause"), // logging, agriculture, mining, infrastructure, fire, natural
+  alertSource: text("alert_source").notNull(), // satellite, field_patrol, community_report, drone_survey
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: text("verified_by"),
+  verifiedAt: timestamp("verified_at"),
+  actionTaken: text("action_taken"),
+  status: text("status").default("pending"), // pending, verified, false_positive, action_taken, resolved
+  photos: jsonb("photos"),
+  priority: text("priority").default("medium"), // low, medium, high, urgent
+  estimatedLoss: decimal("estimated_loss", { precision: 10, scale: 2 }), // USD value
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const carbonCredits = pgTable("carbon_credits", {
+  id: serial("id").primaryKey(),
+  creditId: text("credit_id").notNull().unique(),
+  forestId: text("forest_id").references(() => forestAreas.forestId).notNull(),
+  projectName: text("project_name").notNull(),
+  projectType: text("project_type").notNull(), // conservation, reforestation, sustainable_management, agroforestry
+  creditsGenerated: decimal("credits_generated", { precision: 10, scale: 2 }), // tonnes CO2
+  verificationStandard: text("verification_standard"), // VCS, Gold_Standard, CDM, Plan_Vivo
+  issuanceDate: timestamp("issuance_date").notNull(),
+  expiryDate: timestamp("expiry_date"),
+  pricePerCredit: decimal("price_per_credit", { precision: 8, scale: 2 }), // USD
+  status: text("status").default("issued"), // issued, sold, retired, expired, pending_verification
+  buyerId: text("buyer_id"),
+  buyerName: text("buyer_name"),
+  saleDate: timestamp("sale_date"),
+  salePrice: decimal("sale_price", { precision: 12, scale: 2 }), // USD
+  verification: jsonb("verification"), // verification documents and details
+  biodiversityBenefits: text("biodiversity_benefits"),
+  communityBenefits: text("community_benefits"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MODULE 6: AQUA TRACE - Ocean & River Monitoring
+export const waterBodies = pgTable("water_bodies", {
+  id: serial("id").primaryKey(),
+  waterId: text("water_id").notNull().unique(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // ocean, river, lake, stream, wetland, coastal
+  county: text("county").notNull(),
+  district: text("district"),
+  coordinates: jsonb("coordinates").notNull(), // GPS boundary/area
+  size: decimal("size", { precision: 12, scale: 4 }), // square kilometers
+  depth: decimal("average_depth", { precision: 8, scale: 2 }), // meters
+  salinity: text("salinity"), // fresh, brackish, salt
+  protectionStatus: text("protection_status").default("unprotected"), // protected, managed, unprotected, restricted
+  fishingRights: jsonb("fishing_rights"), // permitted fishing activities
+  qualityStatus: text("quality_status").default("good"), // excellent, good, fair, poor, polluted
+  lastQualityAssessment: timestamp("last_quality_assessment"),
+  biodiversityIndex: decimal("biodiversity_index", { precision: 5, scale: 2 }),
+  touristActivities: boolean("tourist_activities").default(false),
+  commercialUse: boolean("commercial_use").default(false),
+  communityAccess: boolean("community_access").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const waterQualityMonitoring = pgTable("water_quality_monitoring", {
+  id: serial("id").primaryKey(),
+  monitoringId: text("monitoring_id").notNull().unique(),
+  waterId: text("water_id").references(() => waterBodies.waterId).notNull(),
+  measurementDate: timestamp("measurement_date").notNull(),
+  location: text("location").notNull(), // specific GPS point
+  pH: decimal("ph", { precision: 4, scale: 2 }),
+  dissolvedOxygen: decimal("dissolved_oxygen", { precision: 6, scale: 2 }), // mg/L
+  temperature: decimal("temperature", { precision: 5, scale: 2 }), // Celsius
+  turbidity: decimal("turbidity", { precision: 8, scale: 2 }), // NTU
+  salinity: decimal("salinity", { precision: 6, scale: 2 }), // ppt
+  nitrates: decimal("nitrates", { precision: 8, scale: 4 }), // mg/L
+  phosphates: decimal("phosphates", { precision: 8, scale: 4 }), // mg/L
+  bacteria: decimal("bacteria", { precision: 10, scale: 2 }), // CFU/100ml
+  heavyMetals: jsonb("heavy_metals"), // various metal concentrations
+  pollutants: jsonb("pollutants"), // detected pollutants
+  overallQuality: text("overall_quality").notNull(), // excellent, good, fair, poor, dangerous
+  monitoredBy: text("monitored_by").notNull(),
+  equipment: text("equipment"),
+  weather: text("weather_conditions"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const fishingPermits = pgTable("fishing_permits", {
+  id: serial("id").primaryKey(),
+  permitId: text("permit_id").notNull().unique(),
+  waterId: text("water_id").references(() => waterBodies.waterId).notNull(),
+  fisherName: text("fisher_name").notNull(),
+  fisherId: text("fisher_id").notNull(),
+  permitType: text("permit_type").notNull(), // subsistence, commercial, tourist, research
+  fishingMethod: text("fishing_method").notNull(), // net, line, trap, trawl
+  speciesPermitted: jsonb("species_permitted"), // allowed fish species
+  quotaLimits: jsonb("quota_limits"), // catch limits per species
+  seasonRestrictions: text("season_restrictions"),
+  areaRestrictions: jsonb("area_restrictions"), // specific zones
+  issueDate: timestamp("issue_date").notNull(),
+  expiryDate: timestamp("expiry_date").notNull(),
+  fee: decimal("fee", { precision: 8, scale: 2 }),
+  status: text("status").default("active"), // active, suspended, expired, revoked, pending_renewal
+  violations: jsonb("violations"), // recorded violations
+  renewalEligible: boolean("renewal_eligible").default(true),
+  conditions: text("conditions"), // special conditions
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const pollutionReports = pgTable("pollution_reports", {
+  id: serial("id").primaryKey(),
+  reportId: text("report_id").notNull().unique(),
+  waterId: text("water_id").references(() => waterBodies.waterId).notNull(),
+  reportType: text("report_type").notNull(), // spill, discharge, contamination, fish_kill, algae_bloom
+  location: text("location").notNull(), // GPS coordinates
+  reportedBy: text("reported_by").notNull(),
+  reportDate: timestamp("report_date").defaultNow(),
+  pollutionSource: text("pollution_source"), // industrial, agricultural, domestic, mining, ship, unknown
+  severity: text("severity").notNull(), // minor, moderate, major, catastrophic
+  description: text("description").notNull(),
+  estimatedArea: decimal("estimated_area", { precision: 10, scale: 4 }), // square kilometers
+  species_affected: jsonb("species_affected"),
+  photos: jsonb("photos"),
+  samples: jsonb("samples"), // water/tissue samples taken
+  immediateAction: text("immediate_action"),
+  investigationStatus: text("investigation_status").default("pending"), // pending, investigating, completed, closed
+  remediation: text("remediation"),
+  responsible_party: text("responsible_party"),
+  penalties: decimal("penalties", { precision: 12, scale: 2 }), // USD
+  status: text("status").default("open"), // open, investigating, resolved, closed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MODULE 7: BLUE CARBON 360 - Conservation Economics
+export const conservationProjects = pgTable("conservation_projects", {
+  id: serial("id").primaryKey(),
+  projectId: text("project_id").notNull().unique(),
+  name: text("name").notNull(),
+  projectType: text("project_type").notNull(), // marine_protected_area, wetland_restoration, mangrove_conservation, sustainable_fishing
+  location: text("location").notNull(),
+  county: text("county").notNull(),
+  coordinates: jsonb("coordinates").notNull(),
+  area: decimal("area", { precision: 10, scale: 2 }), // hectares
+  ecosystem: text("ecosystem").notNull(), // mangrove, coral_reef, seagrass, salt_marsh, wetland
+  startDate: timestamp("start_date").notNull(),
+  plannedDuration: integer("planned_duration"), // months
+  currentPhase: text("current_phase").default("planning"), // planning, implementation, monitoring, completed
+  leadOrganization: text("lead_organization").notNull(),
+  partners: jsonb("partners"), // array of partner organizations
+  totalBudget: decimal("total_budget", { precision: 15, scale: 2 }), // USD
+  fundingSources: jsonb("funding_sources"),
+  carbonSequestration: decimal("carbon_sequestration", { precision: 12, scale: 2 }), // tonnes CO2/year
+  biodiversityImpact: text("biodiversity_impact"),
+  communityBenefits: jsonb("community_benefits"),
+  economicImpact: decimal("economic_impact", { precision: 12, scale: 2 }), // USD annual value
+  jobsCreated: integer("jobs_created"),
+  status: text("status").default("active"), // active, completed, suspended, cancelled
+  monitoring: jsonb("monitoring"), // monitoring protocols and schedules
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const carbonMarketplace = pgTable("carbon_marketplace", {
+  id: serial("id").primaryKey(),
+  listingId: text("listing_id").notNull().unique(),
+  projectId: text("project_id").references(() => conservationProjects.projectId).notNull(),
+  creditType: text("credit_type").notNull(), // blue_carbon, reforestation, renewable_energy, conservation
+  quantity: decimal("quantity", { precision: 10, scale: 2 }), // tonnes CO2
+  pricePerCredit: decimal("price_per_credit", { precision: 8, scale: 2 }), // USD
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }), // USD
+  listingDate: timestamp("listing_date").defaultNow(),
+  sellerId: text("seller_id").notNull(),
+  sellerName: text("seller_name").notNull(),
+  buyerId: text("buyer_id"),
+  buyerName: text("buyer_name"),
+  transactionDate: timestamp("transaction_date"),
+  verificationStandard: text("verification_standard"), // VCS, Gold_Standard, Plan_Vivo
+  vintage: integer("vintage"), // year credits were generated
+  additionalBenefits: jsonb("additional_benefits"), // biodiversity, community, sdg
+  status: text("status").default("available"), // available, pending, sold, retired, cancelled
+  commission: decimal("commission", { precision: 8, scale: 2 }), // marketplace commission percentage
+  fees: decimal("fees", { precision: 8, scale: 2 }), // USD
+  certificates: jsonb("certificates"), // verification certificates
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const economicImpactTracking = pgTable("economic_impact_tracking", {
+  id: serial("id").primaryKey(),
+  trackingId: text("tracking_id").notNull().unique(),
+  projectId: text("project_id").references(() => conservationProjects.projectId).notNull(),
+  measurementDate: timestamp("measurement_date").notNull(),
+  metricType: text("metric_type").notNull(), // revenue, employment, tourism, fisheries, carbon_sales
+  value: decimal("value", { precision: 15, scale: 2 }), // USD or numerical value
+  unit: text("unit").notNull(), // USD, jobs, visitors, tonnes, percentage
+  beneficiaryType: text("beneficiary_type").notNull(), // local_community, government, private_sector, environment
+  directImpact: decimal("direct_impact", { precision: 12, scale: 2 }), // USD
+  indirectImpact: decimal("indirect_impact", { precision: 12, scale: 2 }), // USD
+  multiplierEffect: decimal("multiplier_effect", { precision: 5, scale: 2 }), // economic multiplier
+  sustainabilityScore: integer("sustainability_score"), // 0-100
+  roi: decimal("roi", { precision: 8, scale: 4 }), // return on investment percentage
+  breakEvenDate: timestamp("break_even_date"),
+  measuredBy: text("measured_by").notNull(),
+  methodology: text("methodology"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// MODULE 8: CARBON TRACE - Environmental Monitoring
+export const emissionSources = pgTable("emission_sources", {
+  id: serial("id").primaryKey(),
+  sourceId: text("source_id").notNull().unique(),
+  name: text("name").notNull(),
+  sourceType: text("source_type").notNull(), // industrial, transportation, agriculture, energy, waste, deforestation
+  sector: text("sector").notNull(), // manufacturing, transport, power, mining, agriculture, forestry
+  location: text("location").notNull(), // GPS coordinates
+  county: text("county").notNull(),
+  district: text("district"),
+  operatorName: text("operator_name").notNull(),
+  licenseNumber: text("license_number"),
+  capacity: decimal("capacity", { precision: 12, scale: 2 }), // operational capacity
+  capacityUnit: text("capacity_unit"), // MW, tonnes/day, vehicles/day
+  emissionTypes: jsonb("emission_types"), // CO2, CH4, N2O, other GHGs
+  baselineEmissions: decimal("baseline_emissions", { precision: 12, scale: 2 }), // tonnes CO2eq/year
+  currentEmissions: decimal("current_emissions", { precision: 12, scale: 2 }), // tonnes CO2eq/year
+  reductionTarget: decimal("reduction_target", { precision: 8, scale: 2 }), // percentage
+  targetDate: timestamp("target_date"),
+  mitigationMeasures: jsonb("mitigation_measures"),
+  monitoring: jsonb("monitoring"), // monitoring equipment and protocols
+  reportingFrequency: text("reporting_frequency"), // daily, weekly, monthly, quarterly, annually
+  lastReported: timestamp("last_reported"),
+  status: text("status").default("active"), // active, inactive, under_construction, decommissioned
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emissionMeasurements = pgTable("emission_measurements", {
+  id: serial("id").primaryKey(),
+  measurementId: text("measurement_id").notNull().unique(),
+  sourceId: text("source_id").references(() => emissionSources.sourceId).notNull(),
+  measurementDate: timestamp("measurement_date").notNull(),
+  co2: decimal("co2", { precision: 12, scale: 4 }), // tonnes
+  methane: decimal("methane", { precision: 12, scale: 4 }), // tonnes
+  nitrousOxide: decimal("nitrous_oxide", { precision: 12, scale: 4 }), // tonnes
+  otherGHGs: jsonb("other_ghgs"), // other greenhouse gases
+  totalCO2Equivalent: decimal("total_co2_equivalent", { precision: 12, scale: 4 }), // tonnes CO2eq
+  measurementMethod: text("measurement_method").notNull(), // direct_measurement, calculation, estimation, remote_sensing
+  equipment: text("equipment"),
+  accuracy: text("accuracy"), // high, medium, low
+  weather: text("weather_conditions"),
+  operationalData: jsonb("operational_data"), // production levels, fuel consumption, etc.
+  qualityAssurance: boolean("quality_assurance").default(false),
+  verifiedBy: text("verified_by"),
+  verifiedAt: timestamp("verified_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const carbonOffset = pgTable("carbon_offset", {
+  id: serial("id").primaryKey(),
+  offsetId: text("offset_id").notNull().unique(),
+  sourceId: text("source_id").references(() => emissionSources.sourceId),
+  offsetType: text("offset_type").notNull(), // renewable_energy, energy_efficiency, reforestation, carbon_capture
+  projectName: text("project_name").notNull(),
+  location: text("location").notNull(),
+  offsetQuantity: decimal("offset_quantity", { precision: 12, scale: 2 }), // tonnes CO2eq
+  verificationStandard: text("verification_standard"), // VCS, CDM, Gold_Standard, CAR
+  vintage: integer("vintage"), // year offset was generated
+  price: decimal("price", { precision: 8, scale: 2 }), // USD per tonne
+  purchaseDate: timestamp("purchase_date"),
+  retirementDate: timestamp("retirement_date"),
+  certificate: text("certificate"), // certificate number or document
+  permanence: text("permanence"), // permanent, temporary, buffer
+  additionality: boolean("additionality").default(true),
+  cobenefits: jsonb("cobenefits"), // biodiversity, social, economic benefits
+  status: text("status").default("purchased"), // purchased, verified, retired, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const environmentalAlerts = pgTable("environmental_alerts", {
+  id: serial("id").primaryKey(),
+  alertId: text("alert_id").notNull().unique(),
+  alertType: text("alert_type").notNull(), // emission_spike, target_breach, equipment_failure, compliance_issue
+  sourceId: text("source_id").references(() => emissionSources.sourceId),
+  severity: text("severity").notNull(), // low, medium, high, critical
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  detectedAt: timestamp("detected_at").defaultNow(),
+  thresholdExceeded: decimal("threshold_exceeded", { precision: 12, scale: 4 }),
+  actualValue: decimal("actual_value", { precision: 12, scale: 4 }),
+  automaticAlert: boolean("automatic_alert").default(true),
+  actionRequired: text("action_required"),
+  responsibleParty: text("responsible_party"),
+  acknowledgedBy: text("acknowledged_by"),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedBy: text("resolved_by"),
+  resolvedAt: timestamp("resolved_at"),
+  resolution: text("resolution"),
+  status: text("status").default("open"), // open, acknowledged, resolved, false_alarm
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ========================================
+// POLIPUS SCHEMA EXPORT TYPES
+// ========================================
+
+// Live Trace Types
+export type Livestock = typeof livestock.$inferSelect;
+export type InsertLivestock = typeof livestock.$inferInsert;
+export type LivestockMovement = typeof livestockMovements.$inferSelect;
+export type InsertLivestockMovement = typeof livestockMovements.$inferInsert;
+export type LivestockAlert = typeof livestockAlerts.$inferSelect;
+export type InsertLivestockAlert = typeof livestockAlerts.$inferInsert;
+
+// Land Map360 Types
+export type LandParcel = typeof landParcels.$inferSelect;
+export type InsertLandParcel = typeof landParcels.$inferInsert;
+export type LandDispute = typeof landDisputes.$inferSelect;
+export type InsertLandDispute = typeof landDisputes.$inferInsert;
+export type SurveyRecord = typeof surveyRecords.$inferSelect;
+export type InsertSurveyRecord = typeof surveyRecords.$inferInsert;
+
+// Mine Watch Types
+export type MiningOperation = typeof miningOperations.$inferSelect;
+export type InsertMiningOperation = typeof miningOperations.$inferInsert;
+export type CommunityImpact = typeof communityImpacts.$inferSelect;
+export type InsertCommunityImpact = typeof communityImpacts.$inferInsert;
+export type MiningInspection = typeof miningInspections.$inferSelect;
+export type InsertMiningInspection = typeof miningInspections.$inferInsert;
+
+// Forest Guard Types
+export type ForestArea = typeof forestAreas.$inferSelect;
+export type InsertForestArea = typeof forestAreas.$inferInsert;
+export type DeforestationAlert = typeof deforestationAlerts.$inferSelect;
+export type InsertDeforestationAlert = typeof deforestationAlerts.$inferInsert;
+export type CarbonCredit = typeof carbonCredits.$inferSelect;
+export type InsertCarbonCredit = typeof carbonCredits.$inferInsert;
+
+// Aqua Trace Types
+export type WaterBody = typeof waterBodies.$inferSelect;
+export type InsertWaterBody = typeof waterBodies.$inferInsert;
+export type WaterQualityMonitoring = typeof waterQualityMonitoring.$inferSelect;
+export type InsertWaterQualityMonitoring = typeof waterQualityMonitoring.$inferInsert;
+export type FishingPermit = typeof fishingPermits.$inferSelect;
+export type InsertFishingPermit = typeof fishingPermits.$inferInsert;
+export type PollutionReport = typeof pollutionReports.$inferSelect;
+export type InsertPollutionReport = typeof pollutionReports.$inferInsert;
+
+// Blue Carbon 360 Types
+export type ConservationProject = typeof conservationProjects.$inferSelect;
+export type InsertConservationProject = typeof conservationProjects.$inferInsert;
+export type CarbonMarketplace = typeof carbonMarketplace.$inferSelect;
+export type InsertCarbonMarketplace = typeof carbonMarketplace.$inferInsert;
+export type EconomicImpactTracking = typeof economicImpactTracking.$inferSelect;
+export type InsertEconomicImpactTracking = typeof economicImpactTracking.$inferInsert;
+
+// Carbon Trace Types
+export type EmissionSource = typeof emissionSources.$inferSelect;
+export type InsertEmissionSource = typeof emissionSources.$inferInsert;
+export type EmissionMeasurement = typeof emissionMeasurements.$inferSelect;
+export type InsertEmissionMeasurement = typeof emissionMeasurements.$inferInsert;
+export type CarbonOffset = typeof carbonOffset.$inferSelect;
+export type InsertCarbonOffset = typeof carbonOffset.$inferInsert;
+export type EnvironmentalAlert = typeof environmentalAlerts.$inferSelect;
+export type InsertEnvironmentalAlert = typeof environmentalAlerts.$inferInsert;
+
 // Mobile Alert Requests table for comprehensive mobile app integration
 export const mobileAlertRequests = pgTable("mobile_alert_requests", {
   id: serial("id").primaryKey(),

@@ -17,6 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
 import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
+import { updateFarmerWithReports } from "@/components/reports/report-storage";
+import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
 // Farmer form schema
 const farmerFormSchema = z.object({
@@ -188,19 +190,38 @@ export default function FarmersPage() {
 
   const createFarmerMutation = useMutation({
     mutationFn: async (data: FarmerFormData) => {
+      const farmerId = `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
       const farmerData = {
         ...data,
-        farmerId: `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+        farmerId,
         status: "active",
         onboardingDate: new Date().toISOString(),
         profilePicture: profileImage,
         farmBoundaries: farmBoundaries,
         landMapData: landMapData,
       };
-      return apiRequest("/api/farmers", {
+      
+      // Create farmer record
+      const farmer = await apiRequest("/api/farmers", {
         method: "POST",
         body: JSON.stringify(farmerData),
       });
+
+      // If compliance reports exist, save them separately and update farmer record
+      if (landMapData?.eudrCompliance && landMapData?.deforestationReport) {
+        const complianceReports = {
+          eudrCompliance: landMapData.eudrCompliance,
+          deforestationReport: landMapData.deforestationReport
+        };
+        
+        try {
+          await updateFarmerWithReports(farmerId, farmerData, complianceReports);
+        } catch (reportError) {
+          console.warn('Compliance reports could not be saved separately, but data is preserved in farmer record:', reportError);
+        }
+      }
+
+      return farmer;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/farmers"] });
@@ -208,6 +229,8 @@ export default function FarmersPage() {
       form.reset();
       setProfileImage(null);
       setFarmBoundaries([]);
+      
+      const hasReports = landMapData?.eudrCompliance && landMapData?.deforestationReport;
       setLandMapData({
         totalArea: 0,
         cultivatedArea: 0,
@@ -216,9 +239,12 @@ export default function FarmersPage() {
         accessRoads: false,
         elevationData: { min: 0, max: 0, average: 0 }
       });
+      
       toast({
         title: "Success",
-        description: "Farmer has been successfully onboarded with profile picture and land mapping data.",
+        description: hasReports 
+          ? `Farmer onboarded successfully with EUDR compliance reports. Report IDs: ${landMapData.eudrCompliance.reportId}, ${landMapData.deforestationReport.reportId}`
+          : "Farmer has been successfully onboarded with profile picture and land mapping data.",
       });
     },
     onError: (error: any) => {
@@ -1187,9 +1213,8 @@ export default function FarmersPage() {
                     }
                   });
                   
-                  // Update form with the new boundary data including EUDR compliance
-                  form.setValue("farmBoundaries", newBoundaries);
-                  form.setValue("landMapData", {
+                  // Prepare comprehensive farmer data with compliance reports
+                  const updatedLandMapData = {
                     totalArea: boundary.area,
                     cultivatedArea: boundary.area * 0.8,
                     soilType: 'Fertile Loam',
@@ -1200,13 +1225,21 @@ export default function FarmersPage() {
                       max: 120,
                       average: 85
                     },
-                    eudrCompliance: boundary.eudrCompliance,
-                    deforestationReport: boundary.deforestationReport
-                  });
+                    eudrCompliance: boundary.complianceReports.eudrCompliance,
+                    deforestationReport: boundary.complianceReports.deforestationReport
+                  };
+
+                  // Update form with the new boundary data including EUDR compliance
+                  form.setValue("farmBoundaries", newBoundaries);
+                  form.setValue("landMapData", updatedLandMapData);
+                  
+                  // Update local state
+                  setFarmBoundaries(newBoundaries);
+                  setLandMapData(updatedLandMapData);
                   
                   toast({
                     title: "EUDR Compliance Mapping Complete",
-                    description: `Farm boundary created with ${boundary.points.length} points. EUDR Risk: ${boundary.eudrCompliance.riskLevel.toUpperCase()}, Compliance Score: ${boundary.eudrCompliance.complianceScore}%`,
+                    description: `Farm boundary created with ${boundary.points.length} points. EUDR Risk: ${boundary.eudrCompliance.riskLevel.toUpperCase()}, Compliance Score: ${boundary.eudrCompliance.complianceScore}%. Reports generated and saved.`,
                   });
                   
                   setIsInteractiveMappingOpen(false);

@@ -2233,6 +2233,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const report = await storage.createReport(req.body);
+      res.status(201).json(report);
+    } catch (error) {
+      console.error("Error creating report:", error);
+      res.status(500).json({ message: "Failed to create report" });
+    }
+  });
+
   // Enhanced export report generation with real data (GET endpoint for simple access)
   app.get("/api/reports/export-data", async (req, res) => {
     try {

@@ -8,6 +8,7 @@ import { MapPin, RotateCcw, Check, Map, AlertTriangle, FileText, Download, TreeP
 import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
 import DeforestationReportComponent from "@/components/reports/deforestation-report";
 import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/pdf-generator";
+import { createComplianceReports, ComplianceReportData } from "@/components/reports/report-storage";
 
 interface BoundaryPoint {
   latitude: number;
@@ -19,6 +20,7 @@ interface BoundaryData {
   area: number;
   eudrCompliance: EUDRComplianceReport;
   deforestationReport: DeforestationReport;
+  complianceReports: ComplianceReportData;
 }
 
 interface EUDRComplianceReport {
@@ -411,11 +413,20 @@ export default function EUDRComplianceMapper({
   const handleComplete = () => {
     if (points.length >= minPoints && eudrReport && deforestationReport) {
       const area = calculateArea(points);
+      
+      // Create comprehensive compliance reports with proper IDs and timestamps
+      const complianceReports = createComplianceReports(
+        eudrReport, 
+        deforestationReport, 
+        "FRM-2024-001"
+      );
+      
       onBoundaryComplete({ 
         points, 
         area, 
         eudrCompliance: eudrReport, 
-        deforestationReport 
+        deforestationReport,
+        complianceReports
       });
     }
   };

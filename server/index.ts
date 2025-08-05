@@ -1,22 +1,16 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { seedDatabase } from "./seed-database";
-import path from "path";
-import fs from "fs";
+import express from "express";
 
 const app = express();
 
 // MAINTENANCE MODE - ENABLED - Generic maintenance page active
 const MAINTENANCE_MODE = true;
 
-// IMMEDIATE MAINTENANCE CHECK - Block normal execution if in maintenance mode
 if (MAINTENANCE_MODE) {
   console.log('🔧 MAINTENANCE MODE: Generic maintenance page active');
   
-  // Maintenance page for ALL routes
+  // Serve maintenance page for all routes
   app.use('*', (req, res) => {
-    const maintenanceHTML = `
+    res.send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -109,146 +103,13 @@ if (MAINTENANCE_MODE) {
         </div>
       </body>
       </html>
-    `;
-    
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.send(maintenanceHTML);
+    `);
   });
   
-  // Start server in maintenance mode immediately
+  // Start server
   const port = parseInt(process.env.PORT || '5000', 10);
-  const server = app.listen(port, '0.0.0.0', () => {
+  app.listen(port, '0.0.0.0', () => {
     console.log(`🔧 MAINTENANCE MODE ACTIVE - Generic maintenance page serving on 0.0.0.0:${port}`);
-    console.log(`🌐 Visit: http://localhost:${port}`);
+    console.log(`🌐 Maintenance page is now visible at port ${port}`);
   });
-  
-  // Handle graceful shutdown
-  process.on('SIGTERM', () => {
-    console.log('🔧 Maintenance mode server shutting down...');
-    server.close();
-  });
-  
-  // Exit early - don't run normal server setup
-  process.exit(0);
 }
-
-// Normal server setup continues below (only runs when MAINTENANCE_MODE = false)
-
-// Security and CORS headers for production deployment
-app.use((req, res, next) => {
-  // CORS headers for custom domain support
-  const allowedOrigins = [
-    'http://localhost:80',
-    'https://localhost:80',
-    process.env.REPL_SLUG ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : null,
-    process.env.CUSTOM_DOMAIN ? `https://${process.env.CUSTOM_DOMAIN}` : null,
-    process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null
-  ].filter(Boolean);
-
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin as string) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  // Security headers for production
-  if (process.env.NODE_ENV === 'production') {
-    res.header('X-Frame-Options', 'DENY');
-    res.header('X-Content-Type-Options', 'nosniff');
-    res.header('X-XSS-Protection', '1; mode=block');
-    res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  }
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
-
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
-
-(async () => {
-  // Seed the database with initial data
-  try {
-    await seedDatabase();
-  } catch (error) {
-    log("Database seeding skipped (likely already seeded)");
-  }
-
-  const server = await registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  // Setup serving based on environment
-  if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
-  } else {
-    // Production mode - serve built client files
-    try {
-      serveStatic(app);
-    } catch (error: any) {
-      log(`⚠️  Static serving failed, using fallback: ${error.message}`, "express");
-      // Production fallback - serve from client directory
-      const clientIndexPath = path.join(process.cwd(), 'client', 'index.html');
-      app.use(express.static(path.join(process.cwd(), 'client')));
-      app.use("*", (_req, res) => {
-        if (fs.existsSync(clientIndexPath)) {
-          res.sendFile(clientIndexPath);
-        } else {
-          // Ultimate fallback - inline HTML with React
-          res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Polipus Environmental Platform</title>
-              <link rel="stylesheet" href="/src/index.css">
-            </head>
-            <body>
-              <div id="root">Loading Polipus Platform...</div>
-              <script type="module" src="/src/main.tsx"></script>
-            </body>
-            </html>
-          `);
-        }
-      });
-    }
-  }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  
-  // Production configuration for custom domains
-  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '0.0.0.0';
-  
-  server.listen({
-    port,
-    host,
-    reusePort: true,
-  }, () => {
-    log(`🌱 AgriTrace360 LACRA serving on ${host}:${port}`);
-    if (process.env.NODE_ENV === 'production') {
-      log(`🔒 Production mode - Custom domain ready`);
-      log(`📡 Database connected: ${process.env.DATABASE_URL ? 'YES' : 'NO'}`);
-    }
-  });
-})();

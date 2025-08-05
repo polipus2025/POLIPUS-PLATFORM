@@ -231,8 +231,6 @@ export default function FarmersPage() {
     mutationFn: async (data: FarmerFormData) => {
       const farmerData = {
         ...data,
-        status: "active",
-        onboardingDate: new Date().toISOString(),
         profilePicture: profileImage,
         farmBoundaries: farmBoundaries,
         landMapData: landMapData,

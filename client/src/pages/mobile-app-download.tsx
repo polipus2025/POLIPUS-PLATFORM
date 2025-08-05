@@ -40,6 +40,23 @@ export default function MobileAppDownload() {
       } catch (error) {
         console.error('Installation failed:', error);
       }
+    } else {
+      // Fallback for browsers that don't support beforeinstallprompt
+      const isChrome = /chrome|chromium|crios/i.test(navigator.userAgent);
+      const isEdge = /edg/i.test(navigator.userAgent);
+      const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+      
+      let instructions = 'To install this app:\n\n';
+      
+      if (isChrome || isEdge) {
+        instructions += 'Chrome/Edge:\n1. Look for the install icon (⊞) in the address bar\n2. OR go to browser menu (⋮) > "Install app"\n3. Click "Install" to add to your home screen';
+      } else if (isSafari) {
+        instructions += 'Safari:\n1. Tap the share button (⤴)\n2. Scroll down and select "Add to Home Screen"\n3. Tap "Add" to install';
+      } else {
+        instructions += 'Most browsers:\n1. Look for an install option in your browser menu\n2. OR bookmark this page for easy access\n3. The app works great in your browser too!';
+      }
+      
+      alert(instructions);
     }
   };
 
@@ -142,20 +159,20 @@ export default function MobileAppDownload() {
                 </div>
               )}
 
-              {/* Fallback for other browsers */}
+              {/* Manual Installation for Chrome/Edge */}
               {!installPrompt && !isIOS && (
-                <div className="bg-blue-600/20 border border-blue-500/50 rounded-lg p-6 max-w-md mx-auto">
-                  <h3 className="text-white font-semibold mb-2">Browser Not Supported</h3>
-                  <p className="text-blue-200 text-sm mb-4">
-                    For the best experience, please use Chrome, Edge, or Safari to install the app.
+                <div className="bg-emerald-600/20 border border-emerald-500/50 rounded-lg p-6 max-w-md mx-auto">
+                  <h3 className="text-white font-semibold mb-2">Manual Installation</h3>
+                  <p className="text-emerald-200 text-sm mb-4">
+                    Chrome/Edge: Look for the install icon in your address bar, or use the browser menu and select "Install app"
                   </p>
-                  <a
-                    href="/"
-                    className="inline-flex items-center space-x-2 text-blue-300 hover:text-blue-200 transition-colors"
+                  <button
+                    onClick={handleInstallApp}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
                   >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Continue in Browser</span>
-                  </a>
+                    <Download className="w-5 h-5" />
+                    <span>Show Install Instructions</span>
+                  </button>
                 </div>
               )}
             </div>

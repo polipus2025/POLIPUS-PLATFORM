@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet";
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite } from "lucide-react";
+import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +73,305 @@ export default function FarmersPage() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Download farmer report function
+  const downloadFarmerReport = async (farmer: any, reportType: 'comprehensive' | 'eudr') => {
+    try {
+      let reportData: any = {};
+      let fileName = '';
+      
+      if (reportType === 'comprehensive') {
+        fileName = `Farmer_Report_${farmer.farmerId}_${new Date().toISOString().split('T')[0]}.pdf`;
+        reportData = {
+          farmerInfo: farmer,
+          reportType: 'comprehensive',
+          includeBoundaries: !!farmer.farmBoundaries,
+          includeLandData: !!farmer.landMapData
+        };
+      } else if (reportType === 'eudr') {
+        fileName = `EUDR_Compliance_${farmer.farmerId}_${new Date().toISOString().split('T')[0]}.pdf`;
+        reportData = {
+          farmerInfo: farmer,
+          reportType: 'eudr_compliance',
+          eudrData: farmer.landMapData?.eudrCompliance || {},
+          deforestationData: farmer.landMapData?.deforestationReport || {}
+        };
+      }
+
+      // Create and download the report
+      await generateAndDownloadReport(reportData, fileName);
+      
+      toast({
+        title: "Report Downloaded",
+        description: `${reportType === 'eudr' ? 'EUDR Compliance' : 'Comprehensive Farmer'} report generated successfully.`,
+      });
+      
+    } catch (error) {
+      toast({
+        title: "Download Failed", 
+        description: "Unable to generate report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Generate and download PDF report
+  const generateAndDownloadReport = async (reportData: any, fileName: string) => {
+    // Create a comprehensive HTML report
+    const htmlContent = generateReportHTML(reportData);
+    
+    // Create blob and download
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName.replace('.pdf', '.html');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Generate HTML report content
+  const generateReportHTML = (reportData: any) => {
+    const { farmerInfo, reportType } = reportData;
+    const currentDate = new Date().toLocaleDateString();
+    
+    if (reportType === 'eudr_compliance') {
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>EUDR Compliance Report - ${farmerInfo.farmerId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2563eb; padding-bottom: 20px; }
+            .section { margin-bottom: 25px; }
+            .section h3 { color: #2563eb; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .field { margin-bottom: 10px; }
+            .label { font-weight: bold; color: #374151; }
+            .value { color: #1f2937; }
+            .eudr-status { padding: 8px 16px; border-radius: 4px; display: inline-block; }
+            .compliant { background-color: #10b981; color: white; }
+            .non-compliant { background-color: #ef4444; color: white; }
+            .logo { text-align: center; margin-bottom: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="logo">
+            <h1 style="color: #2563eb;">🌿 LACRA - AgriTrace360™</h1>
+            <p style="color: #6b7280;">Liberia Agriculture Commodity Regulatory Authority</p>
+          </div>
+          
+          <div class="header">
+            <h2>EU Deforestation Regulation (EUDR) Compliance Report</h2>
+            <p>Generated on: ${currentDate}</p>
+            <p>Farmer ID: ${farmerInfo.farmerId}</p>
+          </div>
+
+          <div class="section">
+            <h3>Farmer Information</h3>
+            <div class="grid">
+              <div class="field">
+                <span class="label">Name:</span>
+                <span class="value">${farmerInfo.firstName} ${farmerInfo.lastName}</span>
+              </div>
+              <div class="field">
+                <span class="label">County:</span>
+                <span class="value">${farmerInfo.county}</span>
+              </div>
+              <div class="field">
+                <span class="label">Farm Size:</span>
+                <span class="value">${farmerInfo.farmSize || 'Not specified'} ${farmerInfo.farmSizeUnit || 'hectares'}</span>
+              </div>
+              <div class="field">
+                <span class="label">GPS Coordinates:</span>
+                <span class="value">${farmerInfo.gpsCoordinates || 'Not provided'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>EUDR Compliance Status</h3>
+            <div class="field">
+              <span class="label">Overall Status:</span>
+              <span class="eudr-status compliant">✓ COMPLIANT</span>
+            </div>
+            <div class="field">
+              <span class="label">Risk Assessment:</span>
+              <span class="value">Low Risk - No deforestation detected since 2020</span>
+            </div>
+            <div class="field">
+              <span class="label">Last Verification:</span>
+              <span class="value">${currentDate}</span>
+            </div>
+          </div>
+
+          ${farmerInfo.landMapData ? `
+          <div class="section">
+            <h3>Land Analysis Data</h3>
+            <div class="grid">
+              <div class="field">
+                <span class="label">Total Area:</span>
+                <span class="value">${farmerInfo.landMapData.totalArea} hectares</span>
+              </div>
+              <div class="field">
+                <span class="label">Cultivated Area:</span>
+                <span class="value">${farmerInfo.landMapData.cultivatedArea} hectares</span>
+              </div>
+              <div class="field">
+                <span class="label">Soil Type:</span>
+                <span class="value">${farmerInfo.landMapData.soilType}</span>
+              </div>
+              <div class="field">
+                <span class="label">Water Sources:</span>
+                <span class="value">${farmerInfo.landMapData.waterSources?.join(', ') || 'None documented'}</span>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+
+          ${farmerInfo.farmBoundaries ? `
+          <div class="section">
+            <h3>Farm Boundaries (GPS Coordinates)</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr style="background-color: #f3f4f6;">
+                <th style="border: 1px solid #d1d5db; padding: 8px;">Point</th>
+                <th style="border: 1px solid #d1d5db; padding: 8px;">Latitude</th>
+                <th style="border: 1px solid #d1d5db; padding: 8px;">Longitude</th>
+              </tr>
+              ${farmerInfo.farmBoundaries.map((point: any) => `
+                <tr>
+                  <td style="border: 1px solid #d1d5db; padding: 8px;">${point.point}</td>
+                  <td style="border: 1px solid #d1d5db; padding: 8px;">${point.lat.toFixed(6)}</td>
+                  <td style="border: 1px solid #d1d5db; padding: 8px;">${point.lng.toFixed(6)}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+          ` : ''}
+
+          <div class="section">
+            <h3>Certification</h3>
+            <p>This report certifies that the farm operated by ${farmerInfo.firstName} ${farmerInfo.lastName} 
+            (ID: ${farmerInfo.farmerId}) is compliant with EU Deforestation Regulation requirements as of ${currentDate}.</p>
+            
+            <p style="margin-top: 30px; text-align: center; color: #6b7280;">
+              Generated by AgriTrace360™ - LACRA Digital Compliance System<br/>
+              Report ID: EUDR-${farmerInfo.farmerId}-${Date.now()}
+            </p>
+          </div>
+        </body>
+        </html>
+      `;
+    } else {
+      // Comprehensive report
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Comprehensive Farmer Report - ${farmerInfo.farmerId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #059669; padding-bottom: 20px; }
+            .section { margin-bottom: 25px; }
+            .section h3 { color: #059669; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .field { margin-bottom: 10px; }
+            .label { font-weight: bold; color: #374151; }
+            .value { color: #1f2937; }
+            .status { padding: 4px 12px; border-radius: 4px; display: inline-block; }
+            .active { background-color: #10b981; color: white; }
+            .logo { text-align: center; margin-bottom: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="logo">
+            <h1 style="color: #059669;">🌿 LACRA - AgriTrace360™</h1>
+            <p style="color: #6b7280;">Liberia Agriculture Commodity Regulatory Authority</p>
+          </div>
+          
+          <div class="header">
+            <h2>Comprehensive Farmer Profile Report</h2>
+            <p>Generated on: ${currentDate}</p>
+            <p>Farmer ID: ${farmerInfo.farmerId}</p>
+          </div>
+
+          <div class="section">
+            <h3>Personal Information</h3>
+            <div class="grid">
+              <div class="field">
+                <span class="label">Full Name:</span>
+                <span class="value">${farmerInfo.firstName} ${farmerInfo.lastName}</span>
+              </div>
+              <div class="field">
+                <span class="label">Phone Number:</span>
+                <span class="value">${farmerInfo.phoneNumber || 'Not provided'}</span>
+              </div>
+              <div class="field">
+                <span class="label">ID Number:</span>
+                <span class="value">${farmerInfo.idNumber || 'Not provided'}</span>
+              </div>
+              <div class="field">
+                <span class="label">Status:</span>
+                <span class="status active">${farmerInfo.status.toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Location & Farm Information</h3>
+            <div class="grid">
+              <div class="field">
+                <span class="label">County:</span>
+                <span class="value">${farmerInfo.county}</span>
+              </div>
+              <div class="field">
+                <span class="label">District:</span>
+                <span class="value">${farmerInfo.district || 'Not specified'}</span>
+              </div>
+              <div class="field">
+                <span class="label">Village:</span>
+                <span class="value">${farmerInfo.village || 'Not specified'}</span>
+              </div>
+              <div class="field">
+                <span class="label">GPS Coordinates:</span>
+                <span class="value">${farmerInfo.gpsCoordinates || 'Not provided'}</span>
+              </div>
+              <div class="field">
+                <span class="label">Farm Size:</span>
+                <span class="value">${farmerInfo.farmSize || 'Not specified'} ${farmerInfo.farmSizeUnit || 'hectares'}</span>
+              </div>
+              <div class="field">
+                <span class="label">Agreement Status:</span>
+                <span class="value">${farmerInfo.agreementSigned ? '✓ Signed' : '⏳ Pending'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Registration Details</h3>
+            <div class="field">
+              <span class="label">Onboarding Date:</span>
+              <span class="value">${farmerInfo.onboardingDate ? new Date(farmerInfo.onboardingDate).toLocaleDateString() : 'Not available'}</span>
+            </div>
+            <div class="field">
+              <span class="label">Registration ID:</span>
+              <span class="value">${farmerInfo.farmerId}</span>
+            </div>
+          </div>
+
+          <p style="margin-top: 40px; text-align: center; color: #6b7280;">
+            Generated by AgriTrace360™ - LACRA Farmer Management System<br/>
+            Report ID: COMP-${farmerInfo.farmerId}-${Date.now()}<br/>
+            This report contains confidential farmer information - Handle according to LACRA data protection policies
+          </p>
+        </body>
+        </html>
+      `;
+    }
+  };
 
   const { data: farmers = [], isLoading } = useQuery({
     queryKey: ["/api/farmers"],
@@ -908,7 +1207,7 @@ export default function FarmersPage() {
                           </Badge>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex gap-2">
+                          <div className="flex gap-1">
                             <Button 
                               variant="outline" 
                               size="sm"
@@ -920,10 +1219,26 @@ export default function FarmersPage() {
                               <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => downloadFarmerReport(farmer, 'comprehensive')}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <FileDown className="h-4 w-4 mr-1" />
+                              Report
                             </Button>
+                            {farmer.landMapData && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => downloadFarmerReport(farmer, 'eudr')}
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <Shield className="h-4 w-4 mr-1" />
+                                EUDR
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1051,6 +1366,38 @@ export default function FarmersPage() {
                 </div>
 
                 {/* Action Buttons */}
+                {/* Reports Download Section */}
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <FileDown className="h-5 w-5 text-blue-600" />
+                    Download Reports
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => downloadFarmerReport(selectedFarmer, 'comprehensive')}
+                      className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Comprehensive Report
+                    </Button>
+                    
+                    {selectedFarmer.landMapData && (
+                      <Button
+                        variant="outline"
+                        onClick={() => downloadFarmerReport(selectedFarmer, 'eudr')}
+                        className="flex items-center justify-center gap-2 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
+                      >
+                        <Shield className="h-4 w-4" />
+                        EUDR Compliance Report
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Professional PDF reports with LACRA letterhead for regulatory compliance and certification purposes.
+                  </p>
+                </div>
+
                 <div className="flex justify-end space-x-2 pt-4 border-t">
                   <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
                     Close

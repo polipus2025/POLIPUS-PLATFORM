@@ -32,7 +32,7 @@ export default function SimpleBoundaryMapper({
     const initMap = () => {
       setStatus('Loading map...');
       
-      // Create map content using innerHTML
+      // Create map content using innerHTML with real satellite imagery
       mapRef.current!.innerHTML = `
         <style>
           .simple-map { 
@@ -41,21 +41,18 @@ export default function SimpleBoundaryMapper({
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             position: relative;
-            background: #f3f4f6;
+            background: url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/13/3977/4113') center/cover;
             cursor: crosshair;
             overflow: hidden;
           }
-          .map-grid {
+          .map-overlay {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: 
-              linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-              linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.5;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            pointer-events: none;
           }
           .map-marker {
             position: absolute;
@@ -87,7 +84,7 @@ export default function SimpleBoundaryMapper({
           }
         </style>
         <div class="simple-map" id="simple-map">
-          <div class="map-grid"></div>
+          <div class="map-overlay"></div>
           <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
           </svg>
         </div>

@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MapPin, RotateCcw, Check, Map, AlertTriangle, FileText, Download, TreePine, Satellite } from "lucide-react";
+import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
+import DeforestationReportComponent from "@/components/reports/deforestation-report";
 
 interface BoundaryPoint {
   latitude: number;
@@ -417,8 +420,12 @@ export default function EUDRComplianceMapper({
   };
 
   const downloadReport = (type: 'eudr' | 'deforestation') => {
-    const report = type === 'eudr' ? eudrReport : deforestationReport;
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    // Trigger PDF generation (in a real app, this would call a backend service)
+    const reportData = type === 'eudr' ? eudrReport : deforestationReport;
+    console.log(`Generating ${type} PDF report:`, reportData);
+    
+    // For now, download as JSON (in production, this would be a PDF)
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -479,10 +486,32 @@ export default function EUDRComplianceMapper({
                 <FileText className="h-5 w-5" />
                 EUDR Compliance Report
               </CardTitle>
-              <Button variant="outline" size="sm" onClick={() => downloadReport('eudr')}>
-                <Download className="h-4 w-4 mr-1" />
-                Download
-              </Button>
+              <div className="flex gap-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <FileText className="h-4 w-4 mr-1" />
+                      View Full Report
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>EUDR Compliance Report</DialogTitle>
+                    </DialogHeader>
+                    <EUDRComplianceReportComponent
+                      report={eudrReport}
+                      farmArea={area}
+                      farmerId="FRM-2024-001"
+                      farmerName="Sample Farmer"
+                      onDownload={() => downloadReport('eudr')}
+                    />
+                  </DialogContent>
+                </Dialog>
+                <Button variant="outline" size="sm" onClick={() => downloadReport('eudr')}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -507,29 +536,13 @@ export default function EUDRComplianceMapper({
               </div>
             </div>
             
-            <div>
-              <h5 className="font-medium mb-2">Required Documentation</h5>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {eudrReport.documentationRequired.map((doc, index) => (
-                  <div key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    {doc}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h5 className="font-medium mb-2">Recommendations</h5>
-              <div className="space-y-2">
-                {eudrReport.recommendations.map((rec, index) => (
-                  <Alert key={index}>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription className="text-sm">{rec}</AlertDescription>
-                  </Alert>
-                ))}
-              </div>
-            </div>
+            <Alert className="bg-blue-50 border-blue-200">
+              <FileText className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Report Summary:</strong> {eudrReport.riskLevel === 'high' ? 'Enhanced due diligence required' : 'Standard compliance procedures apply'}. 
+                Click "View Full Report" for detailed analysis and documentation requirements.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
       )}
@@ -543,10 +556,32 @@ export default function EUDRComplianceMapper({
                 <TreePine className="h-5 w-5" />
                 Deforestation Analysis Report
               </CardTitle>
-              <Button variant="outline" size="sm" onClick={() => downloadReport('deforestation')}>
-                <Download className="h-4 w-4 mr-1" />
-                Download
-              </Button>
+              <div className="flex gap-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <TreePine className="h-4 w-4 mr-1" />
+                      View Full Report
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Deforestation Analysis Report</DialogTitle>
+                    </DialogHeader>
+                    <DeforestationReportComponent
+                      report={deforestationReport}
+                      farmArea={area}
+                      farmerId="FRM-2024-001"
+                      farmerName="Sample Farmer"
+                      onDownload={() => downloadReport('deforestation')}
+                    />
+                  </DialogContent>
+                </Dialog>
+                <Button variant="outline" size="sm" onClick={() => downloadReport('deforestation')}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -577,25 +612,22 @@ export default function EUDRComplianceMapper({
             </div>
 
             {deforestationReport.forestLossDate && (
-              <Alert>
+              <Alert className="border-red-200 bg-red-50">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Forest loss detected on {deforestationReport.forestLossDate}. Mitigation measures required.
+                <AlertDescription className="text-red-800">
+                  <strong>Critical:</strong> Forest loss detected on {deforestationReport.forestLossDate}. 
+                  View full report for detailed mitigation requirements.
                 </AlertDescription>
               </Alert>
             )}
 
-            <div>
-              <h5 className="font-medium mb-2">Mitigation Recommendations</h5>
-              <div className="space-y-2">
-                {deforestationReport.recommendations.map((rec, index) => (
-                  <div key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    {rec}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Alert className="bg-green-50 border-green-200">
+              <TreePine className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Environmental Analysis Complete:</strong> Carbon impact assessment and biodiversity analysis included. 
+                Click "View Full Report" for comprehensive environmental data.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
       )}

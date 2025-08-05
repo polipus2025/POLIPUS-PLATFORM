@@ -1,214 +1,152 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { Helmet } from 'react-helmet';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQuery } from '@tanstack/react-query';
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Globe, 
-  QrCode, 
-  FileText, 
-  Shield, 
-  Camera, 
-  Upload, 
-  CheckCircle, 
-  AlertTriangle,
-  Clock,
-  Smartphone,
-  Activity,
-  Eye,
-  Plus,
-  BarChart3,
-  TrendingUp,
-  Settings,
-  Zap,
-  Layers,
-  Navigation,
-  Compass,
-  Map,
-  Scale,
-  Ruler
-} from 'lucide-react';
-import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import { Helmet } from "react-helmet";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Map, Layers, Compass, Satellite } from "lucide-react";
+import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
+import { useState, useEffect } from "react";
 
 export default function LandMap360Portal() {
+  // Time, Date, and Weather State
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
-  const [isPermitApplicationOpen, setIsPermitApplicationOpen] = useState(false);
+  const [weather, setWeather] = useState({
+    condition: 'sunny',
+    temperature: '28°C',
+    location: 'Monrovia, Liberia'
+  });
 
-  // Real-time clock update
+  // Update time every second
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
-  // Weather simulation
-  const [weather] = useState({
-    temperature: "28°C",
-    condition: "Partly Cloudy",
-    location: "Monrovia, Liberia"
-  });
+  // Simulate weather updates (in a real app, this would fetch from a weather API)
+  useEffect(() => {
+    const weatherConditions = [
+      { condition: 'sunny', temperature: '28°C', icon: Sun },
+      { condition: 'cloudy', temperature: '26°C', icon: Cloud },
+      { condition: 'partly-cloudy', temperature: '25°C', icon: Cloud },
+      { condition: 'rainy', temperature: '24°C', icon: CloudRain }
+    ];
+    
+    // Update weather every 5 minutes (simulated)
+    const weatherTimer = setInterval(() => {
+      const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+      setWeather(prev => ({ ...prev, ...randomWeather }));
+    }, 300000); // 5 minutes
 
-  // Core Features Data
-  const { data: stats } = useQuery({
-    queryKey: ["/api/land-map360/stats"],
-  });
+    return () => clearInterval(weatherTimer);
+  }, []);
 
-  // Core modules as per framework
-  const coreFeatures = [
-    {
-      id: 1,
-      title: "User Dashboard",
-      description: "Land management summary and notifications",
-      icon: BarChart3,
-      color: "bg-purple-500",
-      route: "/land-map360-dashboard"
-    },
-    {
-      id: 2,
-      title: "Interactive GIS Map",
-      description: "Real-time land boundary visualization",
-      icon: Map,
-      color: "bg-green-500",
-      features: ["Satellite Imagery", "Boundary Mapping", "Conflict Detection"]
-    },
-    {
-      id: 3,
-      title: "Land Registration",
-      description: "Property owners and parcel registration",
-      icon: Globe,
-      color: "bg-blue-500",
-      features: ["Owner Profiles", "Parcel Records", "Title Documentation"]
-    },
-    {
-      id: 4,
-      title: "Survey & Permits",
-      description: "Land survey applications and approvals",
-      icon: FileText,
-      color: "bg-orange-500",
-      features: ["Survey Requests", "Permit Tracking", "Legal Documentation"]
-    },
-    {
-      id: 5,
-      title: "QR Land Certificates",
-      description: "Digital land certificates with QR codes",
-      icon: QrCode,
-      color: "bg-red-500",
-      features: ["Digital Certificates", "Ownership Verification", "Transfer Records"]
-    },
-    {
-      id: 6,
-      title: "Dispute Resolution",
-      description: "Land conflict monitoring and resolution",
-      icon: Shield,
-      color: "bg-teal-500",
-      features: ["Conflict Detection", "Mediation Process", "Resolution Tracking"]
-    },
-    {
-      id: 7,
-      title: "Document Management",
-      description: "Land documents and evidence storage",
-      icon: Upload,
-      color: "bg-indigo-500",
-      features: ["Document Upload", "Evidence Management", "Photo Documentation"]
-    },
-    {
-      id: 8,
-      title: "Boundary Surveying",
-      description: "Professional land surveying tools",
-      icon: Compass,
-      color: "bg-cyan-500",
-      features: ["GPS Surveying", "Boundary Marking", "Area Calculation"]
-    },
-    {
-      id: 9,
-      title: "Mobile Field Tools",
-      description: "Offline surveying and data collection",
-      icon: Smartphone,
-      color: "bg-pink-500",
-      features: ["Offline Mapping", "Field Data Collection", "GPS Integration"]
-    },
-    {
-      id: 10,
-      title: "Land Analytics",
-      description: "Property analytics and reporting",
-      icon: TrendingUp,
-      color: "bg-yellow-500",
-      features: ["Usage Analytics", "Conflict Reports", "Ownership Statistics"]
+  const getWeatherIcon = () => {
+    switch (weather.condition) {
+      case 'sunny': return Sun;
+      case 'rainy': return CloudRain;
+      case 'cloudy':
+      case 'partly-cloudy':
+      default: return Cloud;
     }
-  ];
+  };
 
-  // User roles as per framework
-  const userRoles = [
-    { role: "Administrator", access: "Full system access", users: "National ICT, LLA Officials" },
-    { role: "LLA Director", access: "All land data", users: "Liberia Land Authority Directors" },
-    { role: "Survey Officer", access: "Survey and mapping", users: "Licensed Surveyors, Field Officers" },
-    { role: "Data Entry Officer", access: "Record creation", users: "County staff, Registration clerks" },
-    { role: "Legal Partners", access: "View legal documents", users: "Law firms, Legal advisors" },
-    { role: "Property Owner", access: "Own property data", users: "Landowners, Community leaders" }
-  ];
-
-  // Integration points
-  const integrationPoints = [
-    { module: "MineWatch", purpose: "Mining concession boundary verification" },
-    { module: "ForestGuard", purpose: "Forest reserve boundary management" },
-    { module: "AquaTrace", purpose: "Coastal and water boundary mapping" },
-    { module: "LLA System", purpose: "Official land registry integration" }
-  ];
+  const WeatherIcon = getWeatherIcon();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen isms-gradient">
       <Helmet>
-        <title>Land Map360 - Land Mapping & Dispute Prevention | Polipus Platform</title>
-        <meta name="description" content="Comprehensive land mapping and boundary management system for Liberian land administration" />
+        <title>Land Map360 - Comprehensive Land Mapping Platform | Ministry of Lands</title>
+        <meta name="description" content="Advanced land surveying and mapping system for Liberian land management and property registration" />
       </Helmet>
 
-      {/* Header - AgriTrace Style */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
-              <img src={agriTraceLogo} alt="LACRA Logo" className="h-12 w-12 object-contain" />
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Land Map360</h1>
-                <p className="text-sm text-slate-600">Land Mapping & Dispute Prevention</p>
+      {/* Mobile-Responsive Header - ISMS Style */}
+      <header className="isms-card sticky top-0 z-10 mb-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 sm:gap-8">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg overflow-hidden">
+                  <img 
+                    src={lacraLogo} 
+                    alt="LACRA Official Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg overflow-hidden">
+                  <img 
+                    src={agriTraceLogo} 
+                    alt="Land Map360 Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">Land Map360</h1>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Ministry of Lands, Mines & Energy</p>
+                  <p className="text-xs text-gray-600 sm:hidden">MOLME</p>
+                </div>
               </div>
-            </div>
-            
-            {/* Time and Weather */}
-            <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-2 rounded-lg border border-purple-100">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-green-600" />
-                <div className="text-sm">
-                  <div className="font-medium text-gray-900">
-                    {currentTime.toLocaleTimeString('en-US', { 
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true
-                    })}
+              
+              {/* Time, Date, and Weather Widget */}
+              <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-green-50 to-blue-50 px-4 py-2 rounded-lg border border-green-100">
+                {/* Date and Time */}
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-green-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleDateString('en-US', { 
+                        weekday: 'short',
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Weather */}
+                <div className="flex items-center space-x-2 border-l border-green-200 pl-4">
+                  <WeatherIcon className="h-4 w-4 text-indigo-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">{weather.temperature}</div>
+                    <div className="text-xs text-gray-600">{weather.location}</div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-2 border-l border-purple-200 pl-4">
-                <Globe className="h-4 w-4 text-orange-600" />
-                <div className="text-sm">
-                  <div className="font-medium text-gray-900">{weather.temperature}</div>
-                  <div className="text-xs text-gray-600">{weather.location}</div>
-                </div>
+              {/* Mobile compact view */}
+              <div className="lg:hidden flex items-center space-x-3 bg-gradient-to-r from-green-50 to-blue-50 px-3 py-1 rounded-lg border border-green-100">
+                <Clock className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-gray-900">
+                  {currentTime.toLocaleTimeString('en-US', { 
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                </span>
+                <WeatherIcon className="h-4 w-4 text-indigo-600" />
+                <span className="text-sm font-medium text-gray-900">{weather.temperature}</span>
               </div>
             </div>
             
             <div className="text-right">
               <p className="text-sm text-gray-600">Republic of Liberia</p>
-              <p className="text-xs text-gray-500">Liberia Land Authority</p>
+              <p className="text-xs text-gray-500">Ministry of Lands, Mines & Energy</p>
             </div>
           </div>
         </div>
@@ -216,292 +154,359 @@ export default function LandMap360Portal() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-8">
-        {/* Hero Section */}
+        {/* Hero Section - ISMS Style */}
         <div className="isms-card text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl bg-purple-500 flex items-center justify-center mx-auto mb-6">
-            <MapPin className="h-10 w-10 text-white" />
+          <div className="w-20 h-20 rounded-2xl isms-icon-bg-green flex items-center justify-center mx-auto mb-6">
+            <Map className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
-            Land Map360
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
-              {" "}Digital Land Management
+            Comprehensive Land
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
+              {" "}Mapping Platform
             </span>
           </h2>
           <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-8">
-            Advanced land mapping, boundary management, and dispute prevention system 
-            for secure property rights and transparent land administration in Liberia.
+            Advanced land surveying and mapping system for Liberian land management and property registration 
+            with satellite imagery, GPS surveying, and comprehensive GIS analytics.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/land-map360-dashboard">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Access Dashboard
-              </Button>
-            </Link>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={() => setIsRegistrationOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Register Land Parcel
-            </Button>
-          </div>
-        </div>
-
-        {/* System Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Total Land Parcels</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats?.totalParcels || 0}</p>
-                </div>
-                <MapPin className="h-8 w-8 text-purple-500" />
+          
+          {/* Key Features - ISMS Style */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+                <Satellite className="h-6 w-6 text-white" />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Registered Owners</p>
-                  <p className="text-3xl font-bold text-green-600">{stats?.registeredOwners || 0}</p>
-                </div>
-                <Activity className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Resolved Disputes</p>
-                  <p className="text-3xl font-bold text-teal-600">{stats?.resolvedDisputes || 0}</p>
-                </div>
-                <Shield className="h-8 w-8 text-teal-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Active Surveys</p>
-                  <p className="text-3xl font-bold text-orange-600">{stats?.activeSurveys || 0}</p>
-                </div>
-                <Compass className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Core Features Grid */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-slate-900">Core Platform Features</h2>
-              <p className="text-slate-600">Comprehensive land management capabilities</p>
+              <p className="text-slate-600 text-sm mb-1">Satellite</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Imagery</p>
+              <p className="text-slate-600 text-sm">System</p>
             </div>
-            <Badge className="bg-green-100 text-green-800 border-green-200">
-              <CheckCircle className="h-4 w-4 mr-1" />
-              All Systems Operational
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coreFeatures.map((feature) => {
-              const IconComponent = feature.icon;
-              return (
-                <Card key={feature.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center`}>
-                        <IconComponent className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{feature.title}</CardTitle>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 mb-4">{feature.description}</p>
-                    {feature.features && (
-                      <div className="space-y-2">
-                        {feature.features.map((feat, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-sm text-slate-600">
-                            <CheckCircle className="h-3 w-3 text-green-500" />
-                            <span>{feat}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {feature.route && (
-                      <Link href={feature.route}>
-                        <Button className="w-full mt-4" variant="outline">
-                          Access Module
-                        </Button>
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">GPS</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Surveying</p>
+              <p className="text-slate-600 text-sm">Tools</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+                <Layers className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">GIS</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">100%</p>
+              <p className="text-slate-600 text-sm">Coverage</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Government</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Integration</p>
+              <p className="text-slate-600 text-sm">Active</p>
+            </div>
           </div>
         </div>
 
-        {/* User Roles Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">User Access Control</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userRoles.map((role, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-purple-500" />
-                    {role.role}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600 mb-2"><strong>Access:</strong> {role.access}</p>
-                  <p className="text-slate-600"><strong>Users:</strong> {role.users}</p>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Access Portals - ISMS Style */}
+        <div className="isms-card mb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Access Portals</h2>
+              <p className="text-slate-600">Role-based authentication for land mapping management</p>
+            </div>
           </div>
-        </div>
-
-        {/* Integration Points */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">Cross-Module Integration</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {integrationPoints.map((integration, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-purple-500" />
-                    {integration.module}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">{integration.purpose}</p>
-                  <Badge className="mt-2 bg-green-100 text-green-800 border-green-200">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Connected
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="isms-card">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button 
-              onClick={() => setIsRegistrationOpen(true)}
-              className="h-20 flex flex-col items-center justify-center gap-2"
-              variant="outline"
-            >
-              <Plus className="h-6 w-6" />
-              <span className="text-sm">Register</span>
-            </Button>
-            <Button 
-              onClick={() => setIsPermitApplicationOpen(true)}
-              className="h-20 flex flex-col items-center justify-center gap-2"
-              variant="outline"
-            >
-              <FileText className="h-6 w-6" />
-              <span className="text-sm">Survey Request</span>
-            </Button>
-            <Link href="/land-map360-dashboard">
-              <Button className="h-20 w-full flex flex-col items-center justify-center gap-2" variant="outline">
-                <BarChart3 className="h-6 w-6" />
-                <span className="text-sm">Dashboard</span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Surveyor Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Compass className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Surveyor Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Licensed land surveyors
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">GPS surveying</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Land mapping</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Boundary marking</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-slate-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Survey reports</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/surveyor-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
               </Button>
-            </Link>
-            <Button className="h-20 flex flex-col items-center justify-center gap-2" variant="outline">
-              <QrCode className="h-6 w-6" />
-              <span className="text-sm">Verify Title</span>
-            </Button>
+            </div>
+
+            {/* Property Owner Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Map className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Property Owner Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Land owners
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Property registration</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Title verification</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Land boundaries</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-indigo-600 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Documentation</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/property-owner-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+
+            {/* GIS Analyst Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Layers className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  GIS Analyst Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Mapping specialists
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Spatial analysis</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Map creation</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Data analysis</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Geographic insights</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/gis-analyst-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+
+            {/* Government Inspector Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Government Inspector Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Land regulation officials
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Compliance monitoring</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Land use verification</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Regulatory oversight</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Inspection reports</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/government-inspector-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* System Overview - ISMS Style */}
+        <div className="isms-card mb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Platform Statistics</h3>
+              <p className="text-slate-600">Comprehensive land mapping coverage</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Liberian</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">15</p>
+              <p className="text-slate-600 text-sm">Counties</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                <Map className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Land</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">1M+</p>
+              <p className="text-slate-600 text-sm">Parcels</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+                <Satellite className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Satellite</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">Real-time</p>
+              <p className="text-slate-600 text-sm">Imagery</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Government</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">5</p>
+              <p className="text-slate-600 text-sm">Integrations</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information - ISMS Style */}
+        <div className="isms-card text-center">
+          <div className="w-16 h-16 rounded-2xl isms-icon-bg-slate flex items-center justify-center mx-auto mb-6">
+            <Shield className="h-8 w-8 text-white" />
+          </div>
+          <h4 className="text-xl font-semibold text-slate-900 mb-4">
+            Need Help Accessing the System?
+          </h4>
+          <p className="text-slate-600 mb-6">
+            Contact your local land office or system administrator for account setup and technical support.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Land Registry Hotline</p>
+              <p className="text-slate-600">+231 77 LAND-1</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Email Support</p>
+              <p className="text-slate-600">support@molme.gov.lr</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Emergency</p>
+              <p className="text-slate-600">+231 88 LAND-911</p>
+            </div>
           </div>
         </div>
       </main>
 
-      {/* Registration Dialog */}
-      <Dialog open={isRegistrationOpen} onOpenChange={setIsRegistrationOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Register New Land Parcel</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Land Type</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="agricultural">Agricultural</SelectItem>
-                    <SelectItem value="commercial">Commercial</SelectItem>
-                    <SelectItem value="industrial">Industrial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Parcel ID</label>
-                <Input placeholder="Auto-generated" disabled />
-              </div>
+      {/* Footer - ISMS Style */}
+      <footer className="isms-card mt-12">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div>
-              <label className="text-sm font-medium">Property Owner</label>
-              <Input placeholder="Enter owner name" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">County</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select county" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="montserrado">Montserrado</SelectItem>
-                    <SelectItem value="nimba">Nimba</SelectItem>
-                    <SelectItem value="bong">Bong</SelectItem>
-                    <SelectItem value="lofa">Lofa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Area (hectares)</label>
-                <Input placeholder="Enter land area" />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setIsRegistrationOpen(false)}>
-                Cancel
-              </Button>
-              <Button className="bg-purple-600 hover:bg-purple-700">
-                Register Parcel
-              </Button>
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img 
+                src={agriTraceLogo} 
+                alt="Land Map360 Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Back to Platform */}
-      <div className="fixed bottom-6 left-6">
-        <Link href="/">
-          <Button variant="outline" className="flex items-center gap-2 bg-white shadow-lg">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Platform
-          </Button>
-        </Link>
-      </div>
+          <p className="text-slate-600 mb-2 font-medium">
+            © 2025 Ministry of Lands, Mines & Energy
+          </p>
+          <p className="text-sm text-slate-500">
+            Land Map360 - Securing Liberia's Land Future
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

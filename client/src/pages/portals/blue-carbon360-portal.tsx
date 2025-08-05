@@ -1,490 +1,512 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { Helmet } from 'react-helmet';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQuery } from '@tanstack/react-query';
-import { 
-  ArrowLeft, 
-  DollarSign, 
-  Globe, 
-  QrCode, 
-  FileText, 
-  Shield, 
-  Camera, 
-  Upload, 
-  CheckCircle, 
-  AlertTriangle,
-  Clock,
-  Smartphone,
-  Activity,
-  Eye,
-  Plus,
-  BarChart3,
-  TrendingUp,
-  Settings,
-  Zap,
-  Coins,
-  TreePine,
-  Waves,
-  HandCoins,
-  Building2,
-  Target
-} from 'lucide-react';
-import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import { Helmet } from "react-helmet";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Waves, Heart, DollarSign, TrendingUp } from "lucide-react";
+import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
+import { useState, useEffect } from "react";
 
 export default function BlueCarbon360Portal() {
+  // Time, Date, and Weather State
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
-  const [isPermitApplicationOpen, setIsPermitApplicationOpen] = useState(false);
+  const [weather, setWeather] = useState({
+    condition: 'sunny',
+    temperature: '28°C',
+    location: 'Monrovia, Liberia'
+  });
 
+  // Update time every second
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
-  const [weather] = useState({
-    temperature: "28°C",
-    condition: "Partly Cloudy",
-    location: "Monrovia, Liberia"
-  });
+  // Simulate weather updates (in a real app, this would fetch from a weather API)
+  useEffect(() => {
+    const weatherConditions = [
+      { condition: 'sunny', temperature: '28°C', icon: Sun },
+      { condition: 'cloudy', temperature: '26°C', icon: Cloud },
+      { condition: 'partly-cloudy', temperature: '25°C', icon: Cloud },
+      { condition: 'rainy', temperature: '24°C', icon: CloudRain }
+    ];
+    
+    // Update weather every 5 minutes (simulated)
+    const weatherTimer = setInterval(() => {
+      const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+      setWeather(prev => ({ ...prev, ...randomWeather }));
+    }, 300000); // 5 minutes
 
-  const { data: stats } = useQuery({
-    queryKey: ["/api/blue-carbon360/stats"],
-  });
+    return () => clearInterval(weatherTimer);
+  }, []);
 
-  const coreFeatures = [
-    {
-      id: 1,
-      title: "Conservation Dashboard",
-      description: "Economic impact and conservation overview",
-      icon: BarChart3,
-      color: "bg-cyan-500",
-      route: "/blue-carbon360-dashboard"
-    },
-    {
-      id: 2,
-      title: "Conservation Economics Map",
-      description: "Real-time conservation project tracking",
-      icon: Target,
-      color: "bg-green-500",
-      features: ["Project Mapping", "Economic Impact Zones", "Conservation ROI"]
-    },
-    {
-      id: 3,
-      title: "Project Registration",
-      description: "Conservation projects and organizations",
-      icon: Building2,
-      color: "bg-blue-500",
-      features: ["Project Profiles", "Organization Records", "Partnership Management"]
-    },
-    {
-      id: 4,
-      title: "Carbon Trading Permits",
-      description: "Carbon credit applications and trading",
-      icon: FileText,
-      color: "bg-purple-500",
-      features: ["Credit Applications", "Trading Permits", "Verification Process"]
-    },
-    {
-      id: 5,
-      title: "QR Conservation Certificates",
-      description: "Digital conservation certificates",
-      icon: QrCode,
-      color: "bg-red-500",
-      features: ["Digital Certificates", "Impact Verification", "Trading Records"]
-    },
-    {
-      id: 6,
-      title: "Economic Monitoring",
-      description: "Conservation economic impact tracking",
-      icon: HandCoins,
-      color: "bg-teal-500",
-      features: ["Economic Impact", "Community Benefits", "Revenue Tracking"]
-    },
-    {
-      id: 7,
-      title: "Document Management",
-      description: "Conservation and economic documents",
-      icon: Upload,
-      color: "bg-indigo-500",
-      features: ["Project Documents", "Economic Reports", "Impact Evidence"]
-    },
-    {
-      id: 8,
-      title: "Carbon Credit Trading",
-      description: "Blue and forest carbon credit marketplace",
-      icon: Coins,
-      color: "bg-orange-500",
-      features: ["Credit Marketplace", "Trading Platform", "Price Monitoring"]
-    },
-    {
-      id: 9,
-      title: "Mobile Economic Tools",
-      description: "Field economic data collection",
-      icon: Smartphone,
-      color: "bg-pink-500",
-      features: ["Economic Surveys", "Impact Assessment", "Community Data"]
-    },
-    {
-      id: 10,
-      title: "Conservation Analytics",
-      description: "Economic and environmental analytics",
-      icon: TrendingUp,
-      color: "bg-yellow-500",
-      features: ["Impact Analytics", "Economic Reports", "Conservation Metrics"]
+  const getWeatherIcon = () => {
+    switch (weather.condition) {
+      case 'sunny': return Sun;
+      case 'rainy': return CloudRain;
+      case 'cloudy':
+      case 'partly-cloudy':
+      default: return Cloud;
     }
-  ];
+  };
 
-  const userRoles = [
-    { role: "Administrator", access: "Full system access", users: "National ICT, Economic Planning" },
-    { role: "Economics Director", access: "All economic data", users: "Ministry of Finance, Economic Planning" },
-    { role: "Conservation Officer", access: "Project monitoring", users: "Conservation Officers, Project Managers" },
-    { role: "Data Entry Officer", access: "Record creation", users: "Economic clerks, Project assistants" },
-    { role: "Trading Partners", access: "Carbon trading data", users: "Carbon brokers, International buyers" },
-    { role: "Community Groups", access: "Community project data", users: "Conservation groups, Local communities" }
-  ];
-
-  const integrationPoints = [
-    { module: "ForestGuard", purpose: "Forest conservation and carbon credit generation" },
-    { module: "AquaTrace", purpose: "Marine conservation and blue carbon programs" },
-    { module: "CarbonTrace", purpose: "Carbon credit verification and trading integration" },
-    { module: "LandMap360", purpose: "Conservation area boundary and ownership management" }
-  ];
+  const WeatherIcon = getWeatherIcon();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen isms-gradient">
       <Helmet>
-        <title>Blue Carbon 360 - Conservation Economics | Polipus Platform</title>
-        <meta name="description" content="Conservation economics and carbon credit trading system for Liberian environmental sector" />
+        <title>Blue Carbon 360 - Ocean Conservation Economics Platform | Ministry of Environment</title>
+        <meta name="description" content="Advanced blue carbon credit and ocean conservation economics system for Liberian marine ecosystems" />
       </Helmet>
 
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
-              <img src={agriTraceLogo} alt="LACRA Logo" className="h-12 w-12 object-contain" />
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Blue Carbon 360</h1>
-                <p className="text-sm text-slate-600">Conservation Economics & Real Benefits</p>
+      {/* Mobile-Responsive Header - ISMS Style */}
+      <header className="isms-card sticky top-0 z-10 mb-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 sm:gap-8">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg overflow-hidden">
+                  <img 
+                    src={lacraLogo} 
+                    alt="LACRA Official Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg overflow-hidden">
+                  <img 
+                    src={agriTraceLogo} 
+                    alt="Blue Carbon 360 Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">Blue Carbon 360</h1>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Ministry of Environment & Climate</p>
+                  <p className="text-xs text-gray-600 sm:hidden">MEC</p>
+                </div>
               </div>
-            </div>
-            
-            <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-cyan-50 to-green-50 px-4 py-2 rounded-lg border border-cyan-100">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-green-600" />
-                <div className="text-sm">
-                  <div className="font-medium text-gray-900">
-                    {currentTime.toLocaleTimeString('en-US', { 
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true
-                    })}
+              
+              {/* Time, Date, and Weather Widget */}
+              <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-lg border border-blue-100">
+                {/* Date and Time */}
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleDateString('en-US', { 
+                        weekday: 'short',
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-indigo-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Weather */}
+                <div className="flex items-center space-x-2 border-l border-blue-200 pl-4">
+                  <WeatherIcon className="h-4 w-4 text-purple-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">{weather.temperature}</div>
+                    <div className="text-xs text-gray-600">{weather.location}</div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-2 border-l border-cyan-200 pl-4">
-                <Globe className="h-4 w-4 text-orange-600" />
-                <div className="text-sm">
-                  <div className="font-medium text-gray-900">{weather.temperature}</div>
-                  <div className="text-xs text-gray-600">{weather.location}</div>
-                </div>
+              {/* Mobile compact view */}
+              <div className="lg:hidden flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-1 rounded-lg border border-blue-100">
+                <Clock className="h-4 w-4 text-indigo-600" />
+                <span className="text-sm font-medium text-gray-900">
+                  {currentTime.toLocaleTimeString('en-US', { 
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                </span>
+                <WeatherIcon className="h-4 w-4 text-purple-600" />
+                <span className="text-sm font-medium text-gray-900">{weather.temperature}</span>
               </div>
             </div>
             
             <div className="text-right">
               <p className="text-sm text-gray-600">Republic of Liberia</p>
-              <p className="text-xs text-gray-500">Economic Planning & Conservation</p>
+              <p className="text-xs text-gray-500">Ministry of Environment & Climate</p>
             </div>
           </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto p-8">
+        {/* Hero Section - ISMS Style */}
         <div className="isms-card text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl bg-cyan-500 flex items-center justify-center mx-auto mb-6">
-            <DollarSign className="h-10 w-10 text-white" />
+          <div className="w-20 h-20 rounded-2xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-6">
+            <Heart className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
-            Blue Carbon 360
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-green-600">
-              {" "}Conservation Economics
+            Ocean Conservation
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              {" "}Economics Platform
             </span>
           </h2>
           <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-8">
-            Advanced conservation economics platform for carbon credit trading, economic impact assessment, 
-            and sustainable environmental finance management in Liberia.
+            Advanced blue carbon credit and ocean conservation economics system for Liberian marine ecosystems 
+            with carbon trading, ecosystem valuation, and comprehensive conservation impact measurement.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/blue-carbon360-dashboard">
-              <Button className="bg-cyan-600 hover:bg-cyan-700 text-white flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Access Dashboard
-              </Button>
-            </Link>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={() => setIsRegistrationOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Register Conservation Project
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Conservation Projects</p>
-                  <p className="text-3xl font-bold text-cyan-600">{stats?.totalProjects || 0}</p>
-                </div>
-                <Target className="h-8 w-8 text-cyan-500" />
+          
+          {/* Key Features - ISMS Style */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                <DollarSign className="h-6 w-6 text-white" />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Active Projects</p>
-                  <p className="text-3xl font-bold text-green-600">{stats?.activeProjects || 0}</p>
-                </div>
-                <Activity className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Carbon Credits</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats?.carbonCredits || 0}</p>
-                </div>
-                <Coins className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Economic Impact ($)</p>
-                  <p className="text-3xl font-bold text-orange-600">{stats?.economicImpact || 0}K</p>
-                </div>
-                <HandCoins className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-slate-900">Core Platform Features</h2>
-              <p className="text-slate-600">Comprehensive conservation economics management</p>
+              <p className="text-slate-600 text-sm mb-1">Blue Carbon</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Trading</p>
+              <p className="text-slate-600 text-sm">System</p>
             </div>
-            <Badge className="bg-green-100 text-green-800 border-green-200">
-              <CheckCircle className="h-4 w-4 mr-1" />
-              All Systems Operational
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coreFeatures.map((feature) => {
-              const IconComponent = feature.icon;
-              return (
-                <Card key={feature.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center`}>
-                        <IconComponent className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{feature.title}</CardTitle>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 mb-4">{feature.description}</p>
-                    {feature.features && (
-                      <div className="space-y-2">
-                        {feature.features.map((feat, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-sm text-slate-600">
-                            <CheckCircle className="h-3 w-3 text-green-500" />
-                            <span>{feat}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {feature.route && (
-                      <Link href={feature.route}>
-                        <Button className="w-full mt-4" variant="outline">
-                          Access Module
-                        </Button>
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center mx-auto mb-3">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Ecosystem</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Valuation</p>
+              <p className="text-slate-600 text-sm">Analytics</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-sky flex items-center justify-center mx-auto mb-3">
+                <Heart className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Conservation</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Impact</p>
+              <p className="text-slate-600 text-sm">Tracking</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Government</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Integration</p>
+              <p className="text-slate-600 text-sm">Active</p>
+            </div>
           </div>
         </div>
 
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">User Access Control</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userRoles.map((role, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-cyan-500" />
-                    {role.role}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600 mb-2"><strong>Access:</strong> {role.access}</p>
-                  <p className="text-slate-600"><strong>Users:</strong> {role.users}</p>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Access Portals - ISMS Style */}
+        <div className="isms-card mb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Access Portals</h2>
+              <p className="text-slate-600">Role-based authentication for ocean conservation economics</p>
+            </div>
           </div>
-        </div>
-
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">Cross-Module Integration</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {integrationPoints.map((integration, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-cyan-500" />
-                    {integration.module}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">{integration.purpose}</p>
-                  <Badge className="mt-2 bg-green-100 text-green-800 border-green-200">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Connected
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div className="isms-card">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button 
-              onClick={() => setIsRegistrationOpen(true)}
-              className="h-20 flex flex-col items-center justify-center gap-2"
-              variant="outline"
-            >
-              <Plus className="h-6 w-6" />
-              <span className="text-sm">New Project</span>
-            </Button>
-            <Button 
-              onClick={() => setIsPermitApplicationOpen(true)}
-              className="h-20 flex flex-col items-center justify-center gap-2"
-              variant="outline"
-            >
-              <FileText className="h-6 w-6" />
-              <span className="text-sm">Trading Permit</span>
-            </Button>
-            <Link href="/blue-carbon360-dashboard">
-              <Button className="h-20 w-full flex flex-col items-center justify-center gap-2" variant="outline">
-                <BarChart3 className="h-6 w-6" />
-                <span className="text-sm">Dashboard</span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Carbon Trader Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Carbon Trader Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Blue carbon specialists
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Carbon trading</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Market analysis</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-sky-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Credit verification</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-slate-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Investment tracking</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/carbon-trader-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
               </Button>
-            </Link>
-            <Button className="h-20 flex flex-col items-center justify-center gap-2" variant="outline">
-              <Coins className="h-6 w-6" />
-              <span className="text-sm">Trade Credits</span>
-            </Button>
+            </div>
+
+            {/* Conservation Economist Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Conservation Economist Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Environmental economists
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Ecosystem valuation</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Economic modeling</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-sky-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Cost-benefit analysis</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-purple-600 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Policy recommendations</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/conservation-economist-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+
+            {/* Marine Conservationist Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-sky flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Heart className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Marine Conservationist Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Conservation specialists
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-sky-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Impact assessment</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Conservation projects</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Ecosystem monitoring</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Community engagement</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/marine-conservationist-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+
+            {/* Policy Advisor Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Policy Advisor Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Government policy makers
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Policy development</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Regulatory framework</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-sky-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Strategic planning</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">International cooperation</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/policy-advisor-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* System Overview - ISMS Style */}
+        <div className="isms-card mb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Platform Statistics</h3>
+              <p className="text-slate-600">Comprehensive ocean conservation economics coverage</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Marine</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">580</p>
+              <p className="text-slate-600 text-sm">Kilometers</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-indigo flex items-center justify-center mx-auto mb-3">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Carbon</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">$50M+</p>
+              <p className="text-slate-600 text-sm">Value</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-sky flex items-center justify-center mx-auto mb-3">
+                <Heart className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Conservation</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">24/7</p>
+              <p className="text-slate-600 text-sm">Monitoring</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Government</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">6</p>
+              <p className="text-slate-600 text-sm">Integrations</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information - ISMS Style */}
+        <div className="isms-card text-center">
+          <div className="w-16 h-16 rounded-2xl isms-icon-bg-slate flex items-center justify-center mx-auto mb-6">
+            <Shield className="h-8 w-8 text-white" />
+          </div>
+          <h4 className="text-xl font-semibold text-slate-900 mb-4">
+            Need Help Accessing the System?
+          </h4>
+          <p className="text-slate-600 mb-6">
+            Contact your local environment office or system administrator for account setup and technical support.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Blue Carbon Hotline</p>
+              <p className="text-slate-600">+231 77 BLUE-1</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Email Support</p>
+              <p className="text-slate-600">support@mec.gov.lr</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Emergency</p>
+              <p className="text-slate-600">+231 88 BLUE-911</p>
+            </div>
           </div>
         </div>
       </main>
 
-      <Dialog open={isRegistrationOpen} onOpenChange={setIsRegistrationOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Register New Conservation Project</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Project Type</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="forest">Forest Conservation</SelectItem>
-                    <SelectItem value="marine">Marine Conservation</SelectItem>
-                    <SelectItem value="community">Community Conservation</SelectItem>
-                    <SelectItem value="carbon">Carbon Credit Project</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Project ID</label>
-                <Input placeholder="Auto-generated" disabled />
-              </div>
+      {/* Footer - ISMS Style */}
+      <footer className="isms-card mt-12">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div>
-              <label className="text-sm font-medium">Project Name</label>
-              <Input placeholder="Enter project name" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">County</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select county" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sinoe">Sinoe</SelectItem>
-                    <SelectItem value="maryland">Maryland</SelectItem>
-                    <SelectItem value="grand-kru">Grand Kru</SelectItem>
-                    <SelectItem value="river-cess">River Cess</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Expected Economic Impact ($)</label>
-                <Input placeholder="Enter impact estimate" />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setIsRegistrationOpen(false)}>
-                Cancel
-              </Button>
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
-                Register Conservation Project
-              </Button>
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img 
+                src={agriTraceLogo} 
+                alt="Blue Carbon 360 Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="fixed bottom-6 left-6">
-        <Link href="/">
-          <Button variant="outline" className="flex items-center gap-2 bg-white shadow-lg">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Platform
-          </Button>
-        </Link>
-      </div>
+          <p className="text-slate-600 mb-2 font-medium">
+            © 2025 Ministry of Environment & Climate
+          </p>
+          <p className="text-sm text-slate-500">
+            Blue Carbon 360 - Securing Liberia's Ocean Future
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

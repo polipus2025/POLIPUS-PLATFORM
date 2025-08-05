@@ -1,490 +1,512 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { Helmet } from 'react-helmet';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQuery } from '@tanstack/react-query';
-import { 
-  ArrowLeft, 
-  Leaf, 
-  Globe, 
-  QrCode, 
-  FileText, 
-  Shield, 
-  Camera, 
-  Upload, 
-  CheckCircle, 
-  AlertTriangle,
-  Clock,
-  Smartphone,
-  Activity,
-  Eye,
-  Plus,
-  BarChart3,
-  TrendingUp,
-  Settings,
-  Zap,
-  Cloud,
-  Factory,
-  TreePine,
-  Recycle,
-  Target,
-  Thermometer
-} from 'lucide-react';
-import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import { Helmet } from "react-helmet";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Zap, TrendingUp, DollarSign, Activity } from "lucide-react";
+import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
+import { useState, useEffect } from "react";
 
 export default function CarbonTracePortal() {
+  // Time, Date, and Weather State
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
-  const [isPermitApplicationOpen, setIsPermitApplicationOpen] = useState(false);
+  const [weather, setWeather] = useState({
+    condition: 'sunny',
+    temperature: '28°C',
+    location: 'Monrovia, Liberia'
+  });
 
+  // Update time every second
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
-  const [weather] = useState({
-    temperature: "28°C",
-    condition: "Partly Cloudy",
-    location: "Monrovia, Liberia"
-  });
+  // Simulate weather updates (in a real app, this would fetch from a weather API)
+  useEffect(() => {
+    const weatherConditions = [
+      { condition: 'sunny', temperature: '28°C', icon: Sun },
+      { condition: 'cloudy', temperature: '26°C', icon: Cloud },
+      { condition: 'partly-cloudy', temperature: '25°C', icon: Cloud },
+      { condition: 'rainy', temperature: '24°C', icon: CloudRain }
+    ];
+    
+    // Update weather every 5 minutes (simulated)
+    const weatherTimer = setInterval(() => {
+      const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+      setWeather(prev => ({ ...prev, ...randomWeather }));
+    }, 300000); // 5 minutes
 
-  const { data: stats } = useQuery({
-    queryKey: ["/api/carbon-trace/stats"],
-  });
+    return () => clearInterval(weatherTimer);
+  }, []);
 
-  const coreFeatures = [
-    {
-      id: 1,
-      title: "Carbon Dashboard",
-      description: "Environmental monitoring and emission tracking",
-      icon: BarChart3,
-      color: "bg-green-500",
-      route: "/carbon-trace-dashboard"
-    },
-    {
-      id: 2,
-      title: "Emission Monitoring Map",
-      description: "Real-time carbon emission tracking",
-      icon: Cloud,
-      color: "bg-blue-500",
-      features: ["Emission Tracking", "Source Monitoring", "Real-time Alerts"]
-    },
-    {
-      id: 3,
-      title: "Source Registration",
-      description: "Emission sources and carbon projects",
-      icon: Factory,
-      color: "bg-red-500",
-      features: ["Industrial Sources", "Carbon Projects", "Offset Programs"]
-    },
-    {
-      id: 4,
-      title: "Carbon Permits",
-      description: "Carbon credit and offset permits",
-      icon: FileText,
-      color: "bg-purple-500",
-      features: ["Offset Applications", "Credit Permits", "Compliance Tracking"]
-    },
-    {
-      id: 5,
-      title: "QR Carbon Certificates",
-      description: "Digital carbon certificates and verification",
-      icon: QrCode,
-      color: "bg-orange-500",
-      features: ["Digital Certificates", "Offset Verification", "Trading Records"]
-    },
-    {
-      id: 6,
-      title: "Environmental Compliance",
-      description: "Carbon compliance monitoring and alerts",
-      icon: Shield,
-      color: "bg-teal-500",
-      features: ["Compliance Monitoring", "Environmental Alerts", "Regulation Tracking"]
-    },
-    {
-      id: 7,
-      title: "Document Management",
-      description: "Carbon and environmental documents",
-      icon: Upload,
-      color: "bg-indigo-500",
-      features: ["Carbon Reports", "Environmental Studies", "Compliance Documents"]
-    },
-    {
-      id: 8,
-      title: "Carbon Offset Tracking",
-      description: "Carbon offset project monitoring",
-      icon: Recycle,
-      color: "bg-cyan-500",
-      features: ["Offset Projects", "Impact Tracking", "Verification System"]
-    },
-    {
-      id: 9,
-      title: "Mobile Carbon Tools",
-      description: "Field carbon measurement and reporting",
-      icon: Smartphone,
-      color: "bg-pink-500",
-      features: ["Field Measurements", "Emission Reports", "Mobile Monitoring"]
-    },
-    {
-      id: 10,
-      title: "Carbon Analytics",
-      description: "Environmental impact and carbon analytics",
-      icon: TrendingUp,
-      color: "bg-yellow-500",
-      features: ["Emission Analytics", "Impact Reports", "Carbon Footprint Analysis"]
+  const getWeatherIcon = () => {
+    switch (weather.condition) {
+      case 'sunny': return Sun;
+      case 'rainy': return CloudRain;
+      case 'cloudy':
+      case 'partly-cloudy':
+      default: return Cloud;
     }
-  ];
+  };
 
-  const userRoles = [
-    { role: "Administrator", access: "Full system access", users: "National ICT, EPA Officials" },
-    { role: "EPA Director", access: "All environmental data", users: "Environmental Protection Agency Directors" },
-    { role: "Environmental Officer", access: "Monitoring and compliance", users: "Environmental Officers, Carbon Auditors" },
-    { role: "Data Entry Officer", access: "Record creation", users: "Environmental clerks, Carbon assistants" },
-    { role: "Industry Partners", access: "Company emission data", users: "Industrial companies, Carbon traders" },
-    { role: "Research Institutions", access: "Research data", users: "Universities, Environmental researchers" }
-  ];
-
-  const integrationPoints = [
-    { module: "LiveTrace", purpose: "Livestock carbon footprint and methane emission tracking" },
-    { module: "MineWatch", purpose: "Mining carbon emissions and environmental impact" },
-    { module: "ForestGuard", purpose: "Forest carbon sequestration and REDD+ programs" },
-    { module: "BlueCarbon360", purpose: "Carbon credit trading and offset verification" }
-  ];
+  const WeatherIcon = getWeatherIcon();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen isms-gradient">
       <Helmet>
-        <title>Carbon Trace - Environmental Monitoring & Carbon Credits | Polipus Platform</title>
-        <meta name="description" content="Comprehensive carbon emission monitoring and environmental compliance system for Liberia" />
+        <title>Carbon Trace - Environmental Carbon Monitoring Platform | Ministry of Environment</title>
+        <meta name="description" content="Advanced carbon footprint tracking and environmental monitoring system for Liberian sustainability initiatives" />
       </Helmet>
 
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
-              <img src={agriTraceLogo} alt="LACRA Logo" className="h-12 w-12 object-contain" />
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Carbon Trace</h1>
-                <p className="text-sm text-slate-600">Environmental Monitoring & Carbon Credits</p>
+      {/* Mobile-Responsive Header - ISMS Style */}
+      <header className="isms-card sticky top-0 z-10 mb-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 sm:gap-8">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg overflow-hidden">
+                  <img 
+                    src={lacraLogo} 
+                    alt="LACRA Official Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg overflow-hidden">
+                  <img 
+                    src={agriTraceLogo} 
+                    alt="Carbon Trace Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">Carbon Trace</h1>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Ministry of Environment & Climate</p>
+                  <p className="text-xs text-gray-600 sm:hidden">MEC</p>
+                </div>
               </div>
-            </div>
-            
-            <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-green-50 to-blue-50 px-4 py-2 rounded-lg border border-green-100">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-green-600" />
-                <div className="text-sm">
-                  <div className="font-medium text-gray-900">
-                    {currentTime.toLocaleTimeString('en-US', { 
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true
-                    })}
+              
+              {/* Time, Date, and Weather Widget */}
+              <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-emerald-50 to-green-50 px-4 py-2 rounded-lg border border-emerald-100">
+                {/* Date and Time */}
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-emerald-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleDateString('en-US', { 
+                        weekday: 'short',
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-green-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">
+                      {currentTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                      })}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Weather */}
+                <div className="flex items-center space-x-2 border-l border-emerald-200 pl-4">
+                  <WeatherIcon className="h-4 w-4 text-lime-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">{weather.temperature}</div>
+                    <div className="text-xs text-gray-600">{weather.location}</div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-2 border-l border-green-200 pl-4">
-                <Globe className="h-4 w-4 text-orange-600" />
-                <div className="text-sm">
-                  <div className="font-medium text-gray-900">{weather.temperature}</div>
-                  <div className="text-xs text-gray-600">{weather.location}</div>
-                </div>
+              {/* Mobile compact view */}
+              <div className="lg:hidden flex items-center space-x-3 bg-gradient-to-r from-emerald-50 to-green-50 px-3 py-1 rounded-lg border border-emerald-100">
+                <Clock className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-gray-900">
+                  {currentTime.toLocaleTimeString('en-US', { 
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                </span>
+                <WeatherIcon className="h-4 w-4 text-lime-600" />
+                <span className="text-sm font-medium text-gray-900">{weather.temperature}</span>
               </div>
             </div>
             
             <div className="text-right">
               <p className="text-sm text-gray-600">Republic of Liberia</p>
-              <p className="text-xs text-gray-500">Environmental Protection Agency</p>
+              <p className="text-xs text-gray-500">Ministry of Environment & Climate</p>
             </div>
           </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto p-8">
+        {/* Hero Section - ISMS Style */}
         <div className="isms-card text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl bg-green-500 flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 rounded-2xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-6">
             <Leaf className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
-            Carbon Trace
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
-              {" "}Environmental Monitoring
+            Environmental Carbon
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-600">
+              {" "}Monitoring Platform
             </span>
           </h2>
           <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-8">
-            Advanced carbon emission monitoring, environmental compliance tracking, and carbon credit 
-            certification system for sustainable environmental management in Liberia.
+            Advanced carbon footprint tracking and environmental monitoring system for Liberian sustainability initiatives 
+            with emissions tracking, carbon offset verification, and comprehensive environmental impact assessment.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/carbon-trace-dashboard">
-              <Button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Access Dashboard
-              </Button>
-            </Link>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={() => setIsRegistrationOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Register Emission Source
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Emission Sources</p>
-                  <p className="text-3xl font-bold text-green-600">{stats?.totalSources || 0}</p>
-                </div>
-                <Factory className="h-8 w-8 text-green-500" />
+          
+          {/* Key Features - ISMS Style */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+                <Activity className="h-6 w-6 text-white" />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Active Sources</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats?.activeSources || 0}</p>
-                </div>
-                <Activity className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Carbon Offsets</p>
-                  <p className="text-3xl font-bold text-teal-600">{stats?.carbonOffsets || 0}</p>
-                </div>
-                <Recycle className="h-8 w-8 text-teal-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">Environmental Alerts</p>
-                  <p className="text-3xl font-bold text-red-600">{stats?.environmentalAlerts || 0}</p>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-slate-900">Core Platform Features</h2>
-              <p className="text-slate-600">Comprehensive environmental monitoring capabilities</p>
+              <p className="text-slate-600 text-sm mb-1">Emissions</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Tracking</p>
+              <p className="text-slate-600 text-sm">Real-time</p>
             </div>
-            <Badge className="bg-green-100 text-green-800 border-green-200">
-              <CheckCircle className="h-4 w-4 mr-1" />
-              All Systems Operational
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coreFeatures.map((feature) => {
-              const IconComponent = feature.icon;
-              return (
-                <Card key={feature.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center`}>
-                        <IconComponent className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{feature.title}</CardTitle>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 mb-4">{feature.description}</p>
-                    {feature.features && (
-                      <div className="space-y-2">
-                        {feature.features.map((feat, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-sm text-slate-600">
-                            <CheckCircle className="h-3 w-3 text-green-500" />
-                            <span>{feat}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {feature.route && (
-                      <Link href={feature.route}>
-                        <Button className="w-full mt-4" variant="outline">
-                          Access Module
-                        </Button>
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Carbon</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Offset</p>
+              <p className="text-slate-600 text-sm">Verification</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-lime flex items-center justify-center mx-auto mb-3">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Environmental</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Impact</p>
+              <p className="text-slate-600 text-sm">Assessment</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Government</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Integration</p>
+              <p className="text-slate-600 text-sm">Active</p>
+            </div>
           </div>
         </div>
 
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">User Access Control</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userRoles.map((role, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-green-500" />
-                    {role.role}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600 mb-2"><strong>Access:</strong> {role.access}</p>
-                  <p className="text-slate-600"><strong>Users:</strong> {role.users}</p>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Access Portals - ISMS Style */}
+        <div className="isms-card mb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Access Portals</h2>
+              <p className="text-slate-600">Role-based authentication for environmental carbon monitoring</p>
+            </div>
           </div>
-        </div>
-
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">Cross-Module Integration</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {integrationPoints.map((integration, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-green-500" />
-                    {integration.module}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">{integration.purpose}</p>
-                  <Badge className="mt-2 bg-green-100 text-green-800 border-green-200">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Connected
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div className="isms-card">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button 
-              onClick={() => setIsRegistrationOpen(true)}
-              className="h-20 flex flex-col items-center justify-center gap-2"
-              variant="outline"
-            >
-              <Plus className="h-6 w-6" />
-              <span className="text-sm">Register Source</span>
-            </Button>
-            <Button 
-              onClick={() => setIsPermitApplicationOpen(true)}
-              className="h-20 flex flex-col items-center justify-center gap-2"
-              variant="outline"
-            >
-              <FileText className="h-6 w-6" />
-              <span className="text-sm">Carbon Permit</span>
-            </Button>
-            <Link href="/carbon-trace-dashboard">
-              <Button className="h-20 w-full flex flex-col items-center justify-center gap-2" variant="outline">
-                <BarChart3 className="h-6 w-6" />
-                <span className="text-sm">Dashboard</span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Environmental Scientist Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Leaf className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Environmental Scientist Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Climate researchers
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Emissions research</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Climate modeling</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-lime-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Data analysis</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-slate-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Scientific reports</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/environmental-scientist-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
               </Button>
-            </Link>
-            <Button className="h-20 flex flex-col items-center justify-center gap-2" variant="outline">
-              <Cloud className="h-6 w-6" />
-              <span className="text-sm">Monitor Emissions</span>
-            </Button>
+            </div>
+
+            {/* Sustainability Manager Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Sustainability Manager Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Corporate sustainability
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Carbon reporting</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Sustainability metrics</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-lime-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">ESG compliance</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-teal-600 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Impact tracking</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/sustainability-manager-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+
+            {/* Carbon Auditor Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-lime flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <FileCheck className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Carbon Auditor Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Verification specialists
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-lime-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Carbon auditing</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Verification processes</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Compliance checking</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Certification</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/carbon-auditor-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+
+            {/* Climate Policy Analyst Portal */}
+            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
+              <div className="text-center pb-3">
+                <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                  Climate Policy Analyst Portal
+                </h3>
+                <p className="text-slate-600 text-xs leading-tight">
+                  Government policy analysts
+                </p>
+              </div>
+              
+              <div className="space-y-2 mb-4 flex-1">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Policy analysis</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Climate planning</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-lime-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">Regulatory framework</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-teal-500 mt-1 flex-shrink-0"></div>
+                  <span className="leading-tight">International cooperation</span>
+                </div>
+              </div>
+              
+              <Button 
+                asChild 
+                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+              >
+                <a href="/climate-policy-analyst-login">
+                  Access Portal
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* System Overview - ISMS Style */}
+        <div className="isms-card mb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Platform Statistics</h3>
+              <p className="text-slate-600">Comprehensive environmental carbon monitoring coverage</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Liberian</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">15</p>
+              <p className="text-slate-600 text-sm">Counties</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+                <Activity className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Carbon</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">5MT+</p>
+              <p className="text-slate-600 text-sm">Tracked</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-lime flex items-center justify-center mx-auto mb-3">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Environmental</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">24/7</p>
+              <p className="text-slate-600 text-sm">Monitoring</p>
+            </div>
+            
+            <div className="isms-card text-center">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Government</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">5</p>
+              <p className="text-slate-600 text-sm">Integrations</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information - ISMS Style */}
+        <div className="isms-card text-center">
+          <div className="w-16 h-16 rounded-2xl isms-icon-bg-slate flex items-center justify-center mx-auto mb-6">
+            <Shield className="h-8 w-8 text-white" />
+          </div>
+          <h4 className="text-xl font-semibold text-slate-900 mb-4">
+            Need Help Accessing the System?
+          </h4>
+          <p className="text-slate-600 mb-6">
+            Contact your local environment office or system administrator for account setup and technical support.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Carbon Hotline</p>
+              <p className="text-slate-600">+231 77 CARBON-1</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Email Support</p>
+              <p className="text-slate-600">support@mec.gov.lr</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900">Emergency</p>
+              <p className="text-slate-600">+231 88 CARBON-911</p>
+            </div>
           </div>
         </div>
       </main>
 
-      <Dialog open={isRegistrationOpen} onOpenChange={setIsRegistrationOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Register New Emission Source</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Source Type</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="industrial">Industrial Facility</SelectItem>
-                    <SelectItem value="transportation">Transportation</SelectItem>
-                    <SelectItem value="energy">Energy Production</SelectItem>
-                    <SelectItem value="agriculture">Agricultural</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Source ID</label>
-                <Input placeholder="Auto-generated" disabled />
-              </div>
+      {/* Footer - ISMS Style */}
+      <footer className="isms-card mt-12">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div>
-              <label className="text-sm font-medium">Source Name/Company</label>
-              <Input placeholder="Enter source name" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">County</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select county" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="montserrado">Montserrado</SelectItem>
-                    <SelectItem value="margibi">Margibi</SelectItem>
-                    <SelectItem value="bong">Bong</SelectItem>
-                    <SelectItem value="nimba">Nimba</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Estimated Annual Emissions (tCO2e)</label>
-                <Input placeholder="Enter emission estimate" />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setIsRegistrationOpen(false)}>
-                Cancel
-              </Button>
-              <Button className="bg-green-600 hover:bg-green-700">
-                Register Emission Source
-              </Button>
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img 
+                src={agriTraceLogo} 
+                alt="Carbon Trace Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="fixed bottom-6 left-6">
-        <Link href="/">
-          <Button variant="outline" className="flex items-center gap-2 bg-white shadow-lg">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Platform
-          </Button>
-        </Link>
-      </div>
+          <p className="text-slate-600 mb-2 font-medium">
+            © 2025 Ministry of Environment & Climate
+          </p>
+          <p className="text-sm text-slate-500">
+            Carbon Trace - Securing Liberia's Environmental Future
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

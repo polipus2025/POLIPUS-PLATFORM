@@ -66,6 +66,7 @@ export default function FieldAgentLogin() {
 
 
     try {
+      console.log('Submitting field agent login:', data);
       const result = await apiRequest("/api/auth/field-agent-login", {
         method: "POST",
         body: JSON.stringify({
@@ -73,6 +74,8 @@ export default function FieldAgentLogin() {
           userType: "field_agent"
         })
       });
+      
+      console.log('Login result:', result);
       
       if (result && result.success) {
         toast({
@@ -91,10 +94,11 @@ export default function FieldAgentLogin() {
         window.location.href = "/dashboard";
       }
     } catch (error: any) {
+      console.error('Field agent login error:', error);
       const errorMessage = error.message || "Login failed. Please check your credentials.";
       setError(errorMessage);
       toast({
-        title: "Login Failed",
+        title: "Login Failed", 
         description: errorMessage,
         variant: "destructive",
       });

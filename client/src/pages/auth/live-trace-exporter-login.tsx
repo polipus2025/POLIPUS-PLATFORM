@@ -63,7 +63,7 @@ export default function LiveTraceExporterLogin() {
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("userType", "live-trace-exporter");
         
-        window.location.href = "/live-trace-dashboard";
+        window.location.href = "/livetrace/dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

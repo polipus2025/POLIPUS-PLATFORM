@@ -65,7 +65,7 @@ export default function LiveTraceRegulatoryLogin() {
         localStorage.setItem("userType", "live-trace-regulatory");
         
         // Redirect to dashboard
-        window.location.href = "/live-trace-dashboard";
+        window.location.href = "/livetrace/dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

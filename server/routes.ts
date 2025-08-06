@@ -762,6 +762,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // LiveTrace Authentication Endpoints
+  app.post('/api/auth/live-trace-regulatory-login', async (req, res) => {
+    try {
+      const { username, password, role } = req.body;
+      
+      // Validate input
+      if (!username || !password || !role) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, password, and role are required" 
+        });
+      }
+
+      // Get user from storage
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id,
+          username: user.username,
+          userType: 'live-trace-regulatory',
+          role: role
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          userType: 'live-trace-regulatory',
+          role: role,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    } catch (error) {
+      console.error('LiveTrace regulatory login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error during authentication'
+      });
+    }
+  });
+
+  app.post('/api/auth/live-trace-farmer-login', async (req, res) => {
+    try {
+      const { username, password, role } = req.body;
+      
+      if (!username || !password || !role) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, password, and role are required" 
+        });
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      const token = jwt.sign(
+        { 
+          userId: user.id,
+          username: user.username,
+          userType: 'live-trace-farmer',
+          role: role
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          userType: 'live-trace-farmer',
+          role: role,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    } catch (error) {
+      console.error('LiveTrace farmer login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error during authentication'
+      });
+    }
+  });
+
+  app.post('/api/auth/live-trace-field-agent-login', async (req, res) => {
+    try {
+      const { username, password, role } = req.body;
+      
+      if (!username || !password || !role) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, password, and role are required" 
+        });
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      const token = jwt.sign(
+        { 
+          userId: user.id,
+          username: user.username,
+          userType: 'live-trace-field-agent',
+          role: role
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          userType: 'live-trace-field-agent',
+          role: role,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    } catch (error) {
+      console.error('LiveTrace field agent login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error during authentication'
+      });
+    }
+  });
+
+  app.post('/api/auth/live-trace-exporter-login', async (req, res) => {
+    try {
+      const { username, password, role } = req.body;
+      
+      if (!username || !password || !role) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, password, and role are required" 
+        });
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      const token = jwt.sign(
+        { 
+          userId: user.id,
+          username: user.username,
+          userType: 'live-trace-exporter',
+          role: role
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          userType: 'live-trace-exporter',
+          role: role,
+          firstName: user.firstName,
+          lastName: user.lastName
+        }
+      });
+    } catch (error) {
+      console.error('LiveTrace exporter login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error during authentication'
+      });
+    }
+  });
+
   app.post("/api/auth/regulatory-login", async (req, res) => {
     try {
       const { username, password, role, department, userType } = req.body;

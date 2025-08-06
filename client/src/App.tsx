@@ -61,6 +61,7 @@ import CarbonTraceCarbonAuditorLogin from "@/pages/auth/carbon-trace-carbon-audi
 import CarbonTraceClimatePolicyAnalystLogin from "@/pages/auth/carbon-trace-climate-policy-analyst-login";
 
 // LiveTrace Portal Pages
+import LiveTraceMainDashboard from "@/pages/livetrace/live-trace-main-dashboard";
 import VeterinaryDashboard from "@/pages/livetrace/veterinary-dashboard";
 import HealthMonitoring from "@/pages/livetrace/health-monitoring";
 import DiseaseTracking from "@/pages/livetrace/disease-tracking";
@@ -203,10 +204,11 @@ function Router() {
       <Route path="/carbon-trace-climate-policy-analyst-login" component={CarbonTraceClimatePolicyAnalystLogin} />
 
       {/* LiveTrace Portal Routes */}
+      <Route path="/livetrace/dashboard" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/health-monitoring" component={HealthMonitoring} />
+      <Route path="/livetrace/disease-tracking" component={DiseaseTracking} />
+      <Route path="/livetrace/vaccination-records" component={VaccinationRecords} />
       <Route path="/livetrace-veterinary-dashboard" component={VeterinaryDashboard} />
-      <Route path="/livetrace-health-monitoring" component={HealthMonitoring} />
-      <Route path="/livetrace-disease-tracking" component={DiseaseTracking} />
-      <Route path="/livetrace-vaccination-records" component={VaccinationRecords} />
       <Route path="/livetrace-treatment-plans" component={TreatmentPlans} />
       <Route path="/livetrace-rancher-dashboard" component={RancherDashboard} />
       <Route path="/livetrace-field-agent-dashboard" component={LiveTraceFieldAgentDashboard} />

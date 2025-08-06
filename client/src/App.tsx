@@ -508,11 +508,14 @@ function App() {
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   const isMonitoringDashboard = window.location.pathname === "/monitoring-dashboard" && authToken && userType === 'monitoring';
   
+  // LiveTrace pages should use their own independent layout
+  const isLiveTracePage = window.location.pathname.startsWith("/livetrace");
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage)) ? (
-          // Render auth/landing pages or special dashboards without layout
+        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage) ? (
+          // Render auth/landing pages, special dashboards, or LiveTrace pages without AgriTrace layout
           <div className="min-h-screen">
             <Router />
           </div>

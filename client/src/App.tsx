@@ -9,6 +9,7 @@ import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
+import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
@@ -97,7 +98,6 @@ import CropPlanning from "@/pages/crop-planning";
 
 import GovernmentIntegration from "@/pages/government-integration";
 import GISMapping from "@/pages/gis-mapping";
-import GPSTest from "@/pages/gps-test";
 import FarmerGPSMapping from "@/pages/farmer-gps-mapping";
 import InternationalStandards from "@/pages/international-standards";
 import Verification from "@/pages/verification";
@@ -159,6 +159,9 @@ function Router() {
   
   return (
     <Switch>
+      {/* GPS Testing - Public Access */}
+      <Route path="/gps-test" component={GPSTest} />
+      
       {/* Authentication Routes - Public */}
       <Route path="/regulatory-login" component={RegulatoryLogin} />
       <Route path="/farmer-login" component={FarmerLogin} />

@@ -118,8 +118,24 @@ export default function FieldAgentLogin() {
 
       <OfflineDetector />
       
-      {/* GPS Testing Center for Field Agents */}
+      {/* Simple GPS Test - Always Visible */}
       <div className="w-full max-w-4xl mb-6">
+        <div className="bg-blue-100 border border-blue-300 rounded-lg p-4 mb-4">
+          <h3 className="font-bold text-blue-800">GPS System Test</h3>
+          <p className="text-blue-700">Testing GPS integration for mobile devices</p>
+          <button 
+            onClick={() => {
+              navigator.geolocation.getCurrentPosition(
+                (pos) => alert(`GPS Working! Lat: ${pos.coords.latitude}, Lng: ${pos.coords.longitude}`),
+                (err) => alert(`GPS Error: ${err.message}`)
+              );
+            }}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Test GPS Now
+          </button>
+        </div>
+        
         <MobileGPSTester />
         
         <GPSPermissionHandler 

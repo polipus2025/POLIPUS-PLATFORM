@@ -54,7 +54,7 @@ export default function FrontPage() {
       title: 'Land Map360',
       icon: MapPin,
       color: 'bg-purple-500',
-      route: '/land-map360',
+      route: '/landmap360-portal',
       description: 'Land mapping and dispute prevention services'
     },
     {

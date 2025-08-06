@@ -258,6 +258,7 @@ function Router() {
       <Route path="/livetrace-transport-dashboard" component={TransportDashboard} />
 
       {/* LandMap360 Portal Routes */}
+      <Route path="/landmap360-portal" component={LandMap360Portal} />
       <Route path="/landmap360/main-dashboard" component={LandMap360MainDashboard} />
       <Route path="/landmap360/surveyor-dashboard" component={SurveyorDashboard} />
       <Route path="/landmap360/administrator-dashboard" component={AdministratorDashboard} />

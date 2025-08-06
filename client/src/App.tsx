@@ -22,11 +22,7 @@ import LiveTraceFieldAgentLogin from "@/pages/auth/live-trace-field-agent-login"
 import LiveTraceExporterLogin from "@/pages/auth/live-trace-exporter-login";
 
 // Land Map360 Authentication
-import LandMap360RegulatoryLogin from "@/pages/auth/land-map360-regulatory-login";
-import LandMap360SurveyorLogin from "@/pages/auth/land-map360-surveyor-login";
-import LandMap360PropertyOwnerLogin from "@/pages/auth/land-map360-property-owner-login";
-import LandMap360GISAnalystLogin from "@/pages/auth/land-map360-gis-analyst-login";
-import LandMap360GovernmentInspectorLogin from "@/pages/auth/land-map360-government-inspector-login";
+import LandMap360Login from "@/pages/auth/landmap360-login";
 
 // Mine Watch Authentication
 import MineWatchRegulatoryLogin from "@/pages/auth/mine-watch-regulatory-login";
@@ -75,6 +71,13 @@ import RancherDashboard from "@/pages/livetrace/rancher-dashboard";
 import LiveTraceFarmerDashboard from "@/pages/livetrace/farmer-dashboard";
 import LiveTraceFieldAgentDashboard from "@/pages/livetrace/field-agent-dashboard";
 import TransportDashboard from "@/pages/livetrace/transport-dashboard";
+
+// LandMap360 Dashboard Pages  
+import LandMap360MainDashboard from "@/pages/landmap360/main-dashboard";
+import SurveyorDashboard from "@/pages/landmap360/surveyor-dashboard";
+import AdministratorDashboard from "@/pages/landmap360/administrator-dashboard";
+import RegistrarDashboard from "@/pages/landmap360/registrar-dashboard";
+import InspectorDashboard from "@/pages/landmap360/inspector-dashboard";
 
 import MonitoringDashboard from "@/pages/monitoring-dashboard";
 import Dashboard from "@/pages/dashboard";
@@ -170,11 +173,7 @@ function Router() {
       <Route path="/live-trace-exporter-login" component={LiveTraceExporterLogin} />
 
       {/* Land Map360 Authentication Routes */}
-      <Route path="/land-map360-regulatory-login" component={LandMap360RegulatoryLogin} />
-      <Route path="/land-map360-surveyor-login" component={LandMap360SurveyorLogin} />
-      <Route path="/land-map360-property-owner-login" component={LandMap360PropertyOwnerLogin} />
-      <Route path="/land-map360-gis-analyst-login" component={LandMap360GISAnalystLogin} />
-      <Route path="/land-map360-government-inspector-login" component={LandMap360GovernmentInspectorLogin} />
+      <Route path="/landmap360-login" component={LandMap360Login} />
 
       {/* Mine Watch Authentication Routes */}
       <Route path="/mine-watch-regulatory-login" component={MineWatchRegulatoryLogin} />
@@ -257,6 +256,13 @@ function Router() {
       <Route path="/livetrace-rancher-dashboard" component={RancherDashboard} />
       <Route path="/livetrace-field-agent-dashboard" component={LiveTraceFieldAgentDashboard} />
       <Route path="/livetrace-transport-dashboard" component={TransportDashboard} />
+
+      {/* LandMap360 Portal Routes */}
+      <Route path="/landmap360/main-dashboard" component={LandMap360MainDashboard} />
+      <Route path="/landmap360/surveyor-dashboard" component={SurveyorDashboard} />
+      <Route path="/landmap360/administrator-dashboard" component={AdministratorDashboard} />
+      <Route path="/landmap360/registrar-dashboard" component={RegistrarDashboard} />
+      <Route path="/landmap360/inspector-dashboard" component={InspectorDashboard} />
 
       {/* Protected Routes */}
       {authToken ? (

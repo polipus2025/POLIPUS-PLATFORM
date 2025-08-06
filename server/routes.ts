@@ -1281,6 +1281,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // LandMap360 Login endpoint
+  app.post("/api/auth/landmap360-login", async (req, res) => {
+    try {
+      const { username, password, role, county, userType } = req.body;
+      
+      // Validate input
+      if (!username || !password || !role) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, password, and role are required" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Verify role matches LandMap360 roles
+      const landMapRoles = ['surveyor', 'administrator', 'registrar', 'inspector', 'analyst', 'manager'];
+      if (!landMapRoles.includes(role)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid role for LandMap360 system" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          username: user.username, 
+          role: role,
+          userType: 'landmap360'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: role,
+          county: county,
+          userType: 'landmap360'
+        }
+      });
+
+    } catch (error) {
+      console.error('LandMap360 login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Logout endpoint
   app.post("/api/auth/logout", async (req, res) => {
     try {
@@ -1481,6 +1559,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(auditData);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  // LandMap360 API Endpoints
+  app.get("/api/landmap360/dashboard-stats", async (req, res) => {
+    try {
+      const stats = {
+        totalParcels: 15847,
+        registeredParcels: 12634,
+        pendingRegistrations: 458,
+        activeSurveys: 23,
+        completedSurveys: 312,
+        disputes: 8,
+        resolvedDisputes: 156,
+        gpsAccuracy: 98.7,
+        surveyorsActive: 15,
+        totalArea: "2,847,392",
+        registeredArea: "2,234,156",
+        pendingArea: "158,432"
+      };
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch LandMap360 dashboard stats" });
+    }
+  });
+
+  app.get("/api/landmap360/surveyor-stats", async (req, res) => {
+    try {
+      const stats = {
+        activeSurveys: 8,
+        completedSurveys: 47,
+        totalArea: 2847.5,
+        gpsAccuracy: 98.7,
+        pendingSurveys: 5,
+        scheduledSurveys: 12,
+        equipmentStatus: "optimal",
+        batteryLevel: 87
+      };
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch surveyor stats" });
+    }
+  });
+
+  app.get("/api/landmap360/recent-surveys", async (req, res) => {
+    try {
+      const surveys = [
+        {
+          id: "SV-045",
+          parcelId: "LM-2025-045",
+          location: "Nimba County - Sanniquellie",
+          area: 3.24,
+          completedDate: "2025-01-05",
+          accuracy: 99.2,
+          surveyType: "Boundary Survey",
+          client: "Ministry of Lands"
+        }
+      ];
+      res.json(surveys);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recent surveys" });
+    }
+  });
+
+  app.get("/api/landmap360/disputes", async (req, res) => {
+    try {
+      const disputes = [
+        {
+          id: "DSP-001",
+          parcelId: "LM-2024-567",
+          location: "Montserrado County",
+          type: "Boundary Dispute",
+          status: "under_investigation",
+          dateReported: "2025-01-03"
+        }
+      ];
+      res.json(disputes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch disputes" });
     }
   });
 

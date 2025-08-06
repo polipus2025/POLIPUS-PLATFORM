@@ -62,6 +62,7 @@ import CarbonTraceClimatePolicyAnalystLogin from "@/pages/auth/carbon-trace-clim
 
 // LiveTrace Portal Pages
 import LiveTraceMainDashboard from "@/pages/livetrace/live-trace-main-dashboard";
+import SystemOverview from "@/pages/livetrace/system-overview";
 import VeterinaryDashboard from "@/pages/livetrace/veterinary-dashboard";
 import HealthMonitoring from "@/pages/livetrace/health-monitoring";
 import DiseaseTracking from "@/pages/livetrace/disease-tracking";
@@ -209,7 +210,7 @@ function Router() {
       <Route path="/livetrace/disease-tracking" component={DiseaseTracking} />
       <Route path="/livetrace/vaccination-records" component={VaccinationRecords} />
       <Route path="/livetrace/treatment-plans" component={TreatmentPlans} />
-      <Route path="/livetrace/system-overview" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/system-overview" component={SystemOverview} />
       <Route path="/livetrace/compliance-monitoring" component={HealthMonitoring} />
       <Route path="/livetrace/disease-surveillance" component={DiseaseTracking} />
       <Route path="/livetrace/farm-registrations" component={LiveTraceMainDashboard} />

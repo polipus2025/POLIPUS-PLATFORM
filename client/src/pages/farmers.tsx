@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet";
 import { useState, useRef } from "react";
+import { GPSPermissionHandler } from "@/components/gps-permission-handler";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -621,6 +622,22 @@ export default function FarmersPage() {
         <title>Farmer Management - AgriTrace360™</title>
         <meta name="description" content="Manage farmer onboarding, agreements, and profile information in the LACRA agricultural compliance system." />
       </Helmet>
+      
+      {/* GPS Permission Handler for farmer registration and mapping */}
+      <GPSPermissionHandler 
+        onPermissionGranted={(position) => {
+          console.log('GPS enabled for farmer management:', position.coords);
+          // Auto-fill coordinates if registration form is active
+          if (form && !form.getValues("gpsCoordinates")) {
+            form.setValue("gpsCoordinates", `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+          }
+        }}
+        onPermissionDenied={() => {
+          console.log('GPS access denied - limited mapping features');
+        }}
+        showCard={true}
+        autoRequest={false}
+      />
 
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">

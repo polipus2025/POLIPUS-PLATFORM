@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet";
 import { useState } from "react";
+import { GPSPermissionHandler } from "@/components/gps-permission-handler";
 import ModernBackground from "@/components/ui/modern-background";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import ComplianceChart from "@/components/dashboard/compliance-chart";
@@ -478,6 +479,28 @@ export default function Dashboard() {
           <title>Dashboard - AgriTrace360™ LACRA</title>
           <meta name="description" content="Real-time agricultural commodity compliance monitoring dashboard for Liberia Agriculture Commodity Regulatory Authority" />
         </Helmet>
+        
+        {/* GPS Permission Handler for location-dependent users */}
+        {(userType === 'field_agent' || userType === 'farmer' || userRole === 'farmer') && (
+          <GPSPermissionHandler 
+            onPermissionGranted={(position) => {
+              console.log('GPS enabled for dashboard operations:', position.coords);
+              toast({
+                title: "Location Services Active",
+                description: "GPS tracking enabled for field operations and compliance monitoring",
+              });
+            }}
+            onPermissionDenied={() => {
+              toast({
+                title: "GPS Required for Field Operations",
+                description: "Location services are essential for farming activities and compliance tracking",
+                variant: "destructive",
+              });
+            }}
+            showCard={true}
+            autoRequest={true}
+          />
+        )}
 
       {/* Dashboard Header - Modern ISMS Style */}
       <div className="mb-12 text-center">

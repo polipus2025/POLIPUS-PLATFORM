@@ -208,8 +208,46 @@ function Router() {
       <Route path="/livetrace/health-monitoring" component={HealthMonitoring} />
       <Route path="/livetrace/disease-tracking" component={DiseaseTracking} />
       <Route path="/livetrace/vaccination-records" component={VaccinationRecords} />
+      <Route path="/livetrace/treatment-plans" component={TreatmentPlans} />
+      <Route path="/livetrace/system-overview" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/compliance-monitoring" component={HealthMonitoring} />
+      <Route path="/livetrace/disease-surveillance" component={DiseaseTracking} />
+      <Route path="/livetrace/farm-registrations" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/health-inspections" component={HealthMonitoring} />
+      <Route path="/livetrace/quarantine-management" component={DiseaseTracking} />
+      <Route path="/livetrace/export-certifications" component={VaccinationRecords} />
+      <Route path="/livetrace/analytics" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/policy-management" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/messaging" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/lab-results" component={HealthMonitoring} />
+      <Route path="/livetrace/animal-registry" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/emergency-response" component={DiseaseTracking} />
+      <Route path="/livetrace/reports" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/my-livestock" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/health-records" component={HealthMonitoring} />
+      <Route path="/livetrace/vaccination-schedule" component={VaccinationRecords} />
+      <Route path="/livetrace/feed-management" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/breeding-records" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/gps-tracking" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/farm-reports" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/qr-scanner" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/farm-inspections" component={HealthMonitoring} />
+      <Route path="/livetrace/mobile-data-entry" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/gps-mapping" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/animal-tagging" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/photo-docs" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/health-assessments" component={HealthMonitoring} />
+      <Route path="/livetrace/field-reports" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/emergency-alerts" component={DiseaseTracking} />
+      <Route path="/livetrace/live-tracking" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/route-planning" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/vehicle-management" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/shipment-scheduling" component={VaccinationRecords} />
+      <Route path="/livetrace/health-certificates" component={HealthMonitoring} />
+      <Route path="/livetrace/delivery-tracking" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/transport-reports" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/emergency-protocols" component={DiseaseTracking} />
       <Route path="/livetrace-veterinary-dashboard" component={VeterinaryDashboard} />
-      <Route path="/livetrace-treatment-plans" component={TreatmentPlans} />
       <Route path="/livetrace-rancher-dashboard" component={RancherDashboard} />
       <Route path="/livetrace-field-agent-dashboard" component={LiveTraceFieldAgentDashboard} />
       <Route path="/livetrace-transport-dashboard" component={TransportDashboard} />

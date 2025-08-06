@@ -828,12 +828,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/live-trace-farmer-login', async (req, res) => {
     try {
-      const { username, password, role } = req.body;
+      const { username, password } = req.body;
       
-      if (!username || !password || !role) {
+      if (!username || !password) {
         return res.status(400).json({ 
           success: false, 
-          message: "Username, password, and role are required" 
+          message: "Username and password are required" 
         });
       }
 
@@ -858,7 +858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: user.id,
           username: user.username,
           userType: 'live-trace-farmer',
-          role: role
+          role: 'farmer'
         },
         JWT_SECRET,
         { expiresIn: '24h' }
@@ -871,7 +871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: user.id,
           username: user.username,
           userType: 'live-trace-farmer',
-          role: role,
+          role: 'farmer',
           firstName: user.firstName,
           lastName: user.lastName
         }

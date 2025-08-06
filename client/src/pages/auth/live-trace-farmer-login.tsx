@@ -69,11 +69,19 @@ export default function LiveTraceFarmerLogin() {
           description: "Welcome to LiveTrace Farmer Portal",
         });
         
+        // Clear any existing authentication data first
+        localStorage.clear();
+        
+        // Set the new authentication data
         localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "live-trace-farmer");
+        localStorage.setItem("username", result.user.username);
+        if (result.user.firstName) localStorage.setItem("firstName", result.user.firstName);
+        if (result.user.lastName) localStorage.setItem("lastName", result.user.lastName);
         
-        window.location.href = "/livetrace/farmer-dashboard";
+        // Force redirect to farmer dashboard
+        window.location.replace("/livetrace/farmer-dashboard");
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

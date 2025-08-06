@@ -40,6 +40,24 @@ export default function LiveTraceExporterLogin() {
 
   const selectedRole = form.watch("role");
 
+  // Auto-fill test credentials function
+  const fillTestCredentials = (role: string) => {
+    const credentials = {
+      exporter: { username: "exporter001", password: "password123", role: "exporter", exportType: "Live Animals" },
+      trader: { username: "trader001", password: "password123", role: "trader", exportType: "Meat Products" },
+      distributor: { username: "distributor001", password: "password123", role: "distributor", exportType: "Dairy Products" },
+      processor: { username: "processor001", password: "password123", role: "processor", exportType: "Processed Goods" }
+    };
+    
+    const cred = credentials[role as keyof typeof credentials];
+    if (cred) {
+      form.setValue("username", cred.username);
+      form.setValue("password", cred.password);
+      form.setValue("role", cred.role);
+      form.setValue("exportType", cred.exportType);
+    }
+  };
+
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     setError("");
@@ -204,6 +222,49 @@ export default function LiveTraceExporterLogin() {
                 />
               </div>
             )}
+
+            {/* Test Credentials Buttons */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500 text-center mb-3">Quick Test Access:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('exporter')}
+                  className="text-xs"
+                >
+                  Exporter Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('trader')}
+                  className="text-xs"
+                >
+                  Trader Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('distributor')}
+                  className="text-xs"
+                >
+                  Distributor Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('processor')}
+                  className="text-xs"
+                >
+                  Processor Test
+                </Button>
+              </div>
+            </div>
 
             <Button 
               type="submit" 

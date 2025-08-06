@@ -40,6 +40,24 @@ export default function LiveTraceFieldAgentLogin() {
 
   const selectedRole = form.watch("role");
 
+  // Auto-fill test credentials function
+  const fillTestCredentials = (role: string) => {
+    const credentials = {
+      field_agent: { username: "field001", password: "password123", role: "field_agent", region: "Montserrado County" },
+      inspector: { username: "inspector001", password: "password123", role: "inspector", region: "Bong County" },
+      coordinator: { username: "coordinator001", password: "password123", role: "coordinator", region: "Nimba County" },
+      technician: { username: "tech001", password: "password123", role: "technician", region: "Grand Bassa County" }
+    };
+    
+    const cred = credentials[role as keyof typeof credentials];
+    if (cred) {
+      form.setValue("username", cred.username);
+      form.setValue("password", cred.password);
+      form.setValue("role", cred.role);
+      form.setValue("region", cred.region);
+    }
+  };
+
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     setError("");
@@ -204,6 +222,49 @@ export default function LiveTraceFieldAgentLogin() {
                 />
               </div>
             )}
+
+            {/* Test Credentials Buttons */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500 text-center mb-3">Quick Test Access:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('field_agent')}
+                  className="text-xs"
+                >
+                  Agent Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('inspector')}
+                  className="text-xs"
+                >
+                  Inspector Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('coordinator')}
+                  className="text-xs"
+                >
+                  Coordinator Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('technician')}
+                  className="text-xs"
+                >
+                  Tech Test
+                </Button>
+              </div>
+            </div>
 
             <Button 
               type="submit" 

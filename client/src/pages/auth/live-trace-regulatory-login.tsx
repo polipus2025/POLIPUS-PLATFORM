@@ -40,6 +40,24 @@ export default function LiveTraceRegulatoryLogin() {
 
   const selectedRole = form.watch("role");
 
+  // Auto-fill test credentials function
+  const fillTestCredentials = (role: string) => {
+    const credentials = {
+      admin: { username: "admin001", password: "password123", role: "admin", department: "Administration" },
+      director: { username: "director001", password: "password123", role: "director", department: "Policy & Strategy" },
+      manager: { username: "manager001", password: "password123", role: "manager", department: "Operations" },
+      supervisor: { username: "supervisor001", password: "password123", role: "supervisor", department: "Field Operations" }
+    };
+    
+    const cred = credentials[role as keyof typeof credentials];
+    if (cred) {
+      form.setValue("username", cred.username);
+      form.setValue("password", cred.password);
+      form.setValue("role", cred.role);
+      form.setValue("department", cred.department);
+    }
+  };
+
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     setError("");

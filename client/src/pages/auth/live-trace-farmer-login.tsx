@@ -40,6 +40,24 @@ export default function LiveTraceFarmerLogin() {
 
   const selectedRole = form.watch("role");
 
+  // Auto-fill test credentials function
+  const fillTestCredentials = (role: string) => {
+    const credentials = {
+      rancher: { username: "rancher001", password: "password123", role: "rancher", farmSize: "Large (100+ animals)" },
+      farmer: { username: "farmer001", password: "password123", role: "farmer", farmSize: "Medium (50-100 animals)" },
+      smallholder: { username: "smallholder001", password: "password123", role: "smallholder", farmSize: "Small (10-50 animals)" },
+      cooperative: { username: "coop001", password: "password123", role: "cooperative", farmSize: "Cooperative (200+ animals)" }
+    };
+    
+    const cred = credentials[role as keyof typeof credentials];
+    if (cred) {
+      form.setValue("username", cred.username);
+      form.setValue("password", cred.password);
+      form.setValue("role", cred.role);
+      form.setValue("farmSize", cred.farmSize);
+    }
+  };
+
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     setError("");
@@ -204,6 +222,49 @@ export default function LiveTraceFarmerLogin() {
                 />
               </div>
             )}
+
+            {/* Test Credentials Buttons */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500 text-center mb-3">Quick Test Access:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('rancher')}
+                  className="text-xs"
+                >
+                  Rancher Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('farmer')}
+                  className="text-xs"
+                >
+                  Farmer Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('smallholder')}
+                  className="text-xs"
+                >
+                  Small Farm Test
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fillTestCredentials('cooperative')}
+                  className="text-xs"
+                >
+                  Coop Test
+                </Button>
+              </div>
+            </div>
 
             <Button 
               type="submit" 

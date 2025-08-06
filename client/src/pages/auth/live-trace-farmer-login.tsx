@@ -16,8 +16,6 @@ import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.string().min(1, "Role selection is required"),
-  farmSize: z.string().optional(),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -33,28 +31,22 @@ export default function LiveTraceFarmerLogin() {
     defaultValues: {
       username: "",
       password: "",
-      role: "",
-      farmSize: "",
     },
   });
-
-  const selectedRole = form.watch("role");
 
   // Auto-fill test credentials function
   const fillTestCredentials = (role: string) => {
     const credentials = {
-      rancher: { username: "rancher001", password: "password123", role: "rancher", farmSize: "Large (100+ animals)" },
-      farmer: { username: "farmer001", password: "password123", role: "farmer", farmSize: "Medium (50-100 animals)" },
-      smallholder: { username: "smallholder001", password: "password123", role: "smallholder", farmSize: "Small (10-50 animals)" },
-      cooperative: { username: "coop001", password: "password123", role: "cooperative", farmSize: "Cooperative (200+ animals)" }
+      rancher: { username: "rancher001", password: "password123" },
+      farmer: { username: "farmer001", password: "password123" },
+      smallholder: { username: "smallholder001", password: "password123" },
+      cooperative: { username: "coop001", password: "password123" }
     };
     
     const cred = credentials[role as keyof typeof credentials];
     if (cred) {
       form.setValue("username", cred.username);
       form.setValue("password", cred.password);
-      form.setValue("role", cred.role);
-      form.setValue("farmSize", cred.farmSize);
     }
   };
 
@@ -78,7 +70,7 @@ export default function LiveTraceFarmerLogin() {
         });
         
         localStorage.setItem("authToken", result.token);
-        localStorage.setItem("userRole", data.role);
+        localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "live-trace-farmer");
         
         window.location.href = "/livetrace/dashboard";
@@ -96,17 +88,7 @@ export default function LiveTraceFarmerLogin() {
     }
   };
 
-  const roles = [
-    { value: "small-farmer", label: "Small-Scale Farmer", farmSize: "Under 5 hectares" },
-    { value: "medium-farmer", label: "Medium-Scale Farmer", farmSize: "5-20 hectares" },
-    { value: "large-farmer", label: "Large-Scale Farmer", farmSize: "Over 20 hectares" },
-    { value: "cooperative-lead", label: "Cooperative Leader", farmSize: "Multiple farms" }
-  ];
 
-  const getFarmSizeForRole = (roleValue: string) => {
-    const role = roles.find(r => r.value === roleValue);
-    return role?.farmSize || "";
-  };
 
   return (
     <div className="min-h-screen isms-gradient flex items-center justify-center p-4">
@@ -184,44 +166,7 @@ export default function LiveTraceFarmerLogin() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="role">Farm Category</Label>
-              <Select 
-                value={form.watch("role")} 
-                onValueChange={(value) => {
-                  form.setValue("role", value);
-                  form.setValue("farmSize", getFarmSizeForRole(value));
-                }}
-              >
-                <SelectTrigger data-testid="select-role">
-                  <SelectValue placeholder="Select your farm category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.role && (
-                <p className="text-sm text-red-600">{form.formState.errors.role.message}</p>
-              )}
-            </div>
 
-            {selectedRole && (
-              <div className="space-y-2">
-                <Label htmlFor="farmSize">Farm Size</Label>
-                <Input
-                  id="farmSize"
-                  type="text"
-                  value={getFarmSizeForRole(selectedRole)}
-                  readOnly
-                  className="w-full bg-slate-50"
-                  data-testid="input-farm-size"
-                />
-              </div>
-            )}
 
             {/* Test Credentials Buttons */}
             <div className="mt-4 pt-4 border-t border-gray-200">

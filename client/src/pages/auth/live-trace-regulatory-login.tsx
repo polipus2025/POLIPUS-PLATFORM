@@ -93,6 +93,18 @@ export default function LiveTraceRegulatoryLogin() {
     return role?.department || "";
   };
 
+  const handleTestLogin = () => {
+    form.setValue("username", "admin001");
+    form.setValue("password", "password123");
+    form.setValue("role", "livestock-director");
+    form.setValue("department", "Livestock Management");
+    
+    toast({
+      title: "Test Credentials Filled",
+      description: "Click 'Access Portal' to login with test credentials",
+    });
+  };
+
   return (
     <div className="min-h-screen isms-gradient flex items-center justify-center p-4">
       <Helmet>
@@ -210,21 +222,36 @@ export default function LiveTraceRegulatoryLogin() {
               </div>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full isms-button"
-              disabled={isLoading}
-              data-testid="button-login"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing in...
-                </div>
-              ) : (
-                "Access LiveTrace Portal"
-              )}
-            </Button>
+            <div className="space-y-3">
+              <Button 
+                type="button"
+                onClick={handleTestLogin}
+                variant="outline"
+                className="w-full border-green-500 text-green-700 hover:bg-green-50"
+                data-testid="button-test-login"
+              >
+                <span className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Fill Test Credentials
+                </span>
+              </Button>
+
+              <Button 
+                type="submit" 
+                className="w-full isms-button"
+                disabled={isLoading}
+                data-testid="button-login"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  "Access LiveTrace Portal"
+                )}
+              </Button>
+            </div>
           </form>
 
           {/* Footer */}

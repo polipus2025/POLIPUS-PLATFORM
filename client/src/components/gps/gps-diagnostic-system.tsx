@@ -81,7 +81,6 @@ export default function GPSDiagnosticSystem() {
             setGpsStatus(prev => ({ ...prev, permission: permissionStatus.state }));
           };
         } catch (err) {
-          console.log('Permission API not fully supported');
         }
       }
 
@@ -198,7 +197,6 @@ export default function GPSDiagnosticSystem() {
     try {
       await getCurrentPosition();
     } catch (error) {
-      console.error('GPS permission request failed:', error);
     }
   };
 

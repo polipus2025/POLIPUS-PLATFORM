@@ -38,7 +38,6 @@ export default function MobileAppDownload() {
           localStorage.setItem('pwa-installed', 'true');
         }
       } catch (error) {
-        console.error('Installation failed:', error);
       }
     } else {
       // Fallback for browsers that don't support beforeinstallprompt

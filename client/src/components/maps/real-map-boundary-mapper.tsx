@@ -52,12 +52,10 @@ export default function RealMapBoundaryMapper({
         const testImg = new Image();
         
         testImg.onload = () => {
-          console.log(`Satellite tile ${tileIndex} loaded successfully`);
           createMapWithTile(tileUrl);
         };
         
         testImg.onerror = () => {
-          console.log(`Satellite tile ${tileIndex} failed, trying next...`);
           setCurrentTile(tileIndex + 1);
           setTimeout(() => tryLoadTile(tileIndex + 1), 500);
         };

@@ -442,7 +442,6 @@ export default function EUDRComplianceMapper({
         await generateDeforestationPDF(reportData, area, "FRM-2024-001", "Sample Farmer");
       }
     } catch (error) {
-      console.error('PDF generation failed:', error);
       // Fallback to JSON
       const reportData = type === 'eudr' ? eudrReport : deforestationReport;
       const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });

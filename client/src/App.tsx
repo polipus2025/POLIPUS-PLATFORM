@@ -283,7 +283,7 @@ function Router() {
             }}
           </Route>
           
-          {/* NEVER redirect root to dashboards - always show Polipus main page */}
+          {/* Root route */}
           <Route path="/" component={FrontPage} />
           
           {/* Exporter Portal Routes */}
@@ -456,8 +456,6 @@ function Router() {
       <Route path="/home" component={FrontPage} />
       <Route path="/main" component={FrontPage} />
       <Route path="/index" component={FrontPage} />
-      
-      {/* ALWAYS AVAILABLE - Landing page route - Polipus Main Page */}
       <Route path="/landing" component={FrontPage} />
       
       {/* ALWAYS AVAILABLE - Monitoring Dashboard */}
@@ -498,9 +496,7 @@ function Router() {
       <Route path="/download-app" component={MobileAppDownload} />
       <Route path="/pwa-test" component={PWATest} />
       
-      {/* Default fallback - Always Polipus Main Landing Page */}
-      <Route path="/" component={FrontPage} />
-      
+      {/* Default fallback */}
       <Route component={NotFound} />
     </Switch>
   );

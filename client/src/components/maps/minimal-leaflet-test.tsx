@@ -77,7 +77,6 @@ export default function MinimalLeafletTest() {
         });
         
         tileLayer.on('tileerror', (e: any) => {
-          console.error('Tile error:', e);
           setError('Failed to load map tiles. Check network connection.');
         });
         
@@ -95,10 +94,8 @@ export default function MinimalLeafletTest() {
           }
         }, 15000);
         
-        console.log('Minimal Leaflet test completed successfully');
         
       } catch (err) {
-        console.error('Minimal Leaflet test failed:', err);
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
         setStatus('Failed to initialize');
       }

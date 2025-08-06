@@ -623,7 +623,6 @@ Agreement: ${farmer.agreementSigned ? 'Signed' : 'Pending'}
 Status: ${farmer.status}
 Registration: ${farmer.registeredBy || 'Unknown'}`;
                             
-                            // console.log('Farmer Details:', farmerDetails);
                             toast({
                               title: 'Farmer Profile Opened',
                               description: `Loading complete profile for ${farmer.firstName} ${farmer.lastName}`,

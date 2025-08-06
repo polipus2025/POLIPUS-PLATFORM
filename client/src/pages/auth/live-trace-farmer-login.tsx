@@ -70,7 +70,10 @@ export default function LiveTraceFarmerLogin() {
         });
         
         // Clear any existing authentication data first
-        localStorage.clear();
+        // Clear authentication data
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userType");
+        localStorage.removeItem("farmerId");
         
         // Set the new authentication data
         localStorage.setItem("authToken", result.token);
@@ -80,8 +83,6 @@ export default function LiveTraceFarmerLogin() {
         if (result.user.firstName) localStorage.setItem("firstName", result.user.firstName);
         if (result.user.lastName) localStorage.setItem("lastName", result.user.lastName);
         
-        console.log("Redirecting to farmer dashboard...");
-        console.log("Current userType:", localStorage.getItem("userType"));
         
         // Short delay to ensure localStorage is set, then redirect
         setTimeout(() => {

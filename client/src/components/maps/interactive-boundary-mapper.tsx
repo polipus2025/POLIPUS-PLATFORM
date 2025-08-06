@@ -110,7 +110,6 @@ const LeafletMap = ({
         });
 
         // Create map instance with proper options
-        console.log('Creating map with center:', mapCenter);
         mapInstanceRef.current = L.map(mapRef.current, {
           center: mapCenter,
           zoom: 16,
@@ -125,7 +124,6 @@ const LeafletMap = ({
           preferCanvas: false
         });
         
-        console.log('Map instance created:', mapInstanceRef.current);
         
         // Add multiple tile layer options for better reliability
         const tileUrls = [
@@ -143,20 +141,16 @@ const LeafletMap = ({
         });
         
         primaryTileLayer.addTo(mapInstanceRef.current);
-        console.log('Tile layer added to map');
         
         // Add success handler for tile loading
         primaryTileLayer.on('tileload', () => {
-          console.log('Tiles are loading successfully');
         });
         
         // Add error handling for tile loading
         primaryTileLayer.on('tileerror', (e: any) => {
-          console.warn('Tile loading error:', e);
           // Try alternative tile source on error
           setTimeout(() => {
             if (mapInstanceRef.current) {
-              console.log('Trying fallback tile layer');
               const fallbackLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 18
@@ -186,7 +180,6 @@ const LeafletMap = ({
         setTimeout(resizeMap, 1000);
         
       } catch (error) {
-        console.error('Error initializing map:', error);
       }
     };
 
@@ -198,7 +191,6 @@ const LeafletMap = ({
         try {
           mapInstanceRef.current.remove();
         } catch (error) {
-          console.warn('Error cleaning up map:', error);
         }
         mapInstanceRef.current = null;
       }
@@ -423,7 +415,6 @@ export default function InteractiveBoundaryMapper({
           }
         },
         (error) => {
-          console.warn('GPS not available:', error);
           toast({
             title: "GPS Location",
             description: "Please enable location services for better accuracy",
@@ -592,7 +583,6 @@ export default function InteractiveBoundaryMapper({
         description: `Farm boundary "${completedBoundary.name}" saved with EUDR and deforestation analysis reports`,
       });
     } catch (error) {
-      console.error('Error generating compliance reports:', error);
       
       setCurrentBoundary(completedBoundary);
       onBoundaryComplete?.(completedBoundary);

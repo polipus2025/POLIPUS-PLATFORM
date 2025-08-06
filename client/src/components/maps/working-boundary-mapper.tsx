@@ -73,12 +73,10 @@ export default function WorkingBoundaryMapper({
         
         // Handle tile loading
         tileLayer.on('load', () => {
-          console.log('Map tiles loaded successfully');
           setIsMapReady(true);
         });
         
         tileLayer.on('tileerror', (e) => {
-          console.error('Tile loading error:', e);
         });
 
         // Handle map clicks to add boundary points
@@ -98,10 +96,8 @@ export default function WorkingBoundaryMapper({
           }
         }, 100);
 
-        console.log('Working boundary mapper initialized successfully');
 
       } catch (error) {
-        console.error('Error initializing working boundary mapper:', error);
       }
     };
 

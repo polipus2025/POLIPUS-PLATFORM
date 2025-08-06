@@ -221,7 +221,6 @@ export default function GPSMapViewer({
         description: "EUDR compliance and deforestation analysis reports are ready for viewing and download",
       });
     } catch (error) {
-      console.error('Error generating compliance reports:', error);
       toast({
         title: "Error Generating Reports",
         description: "Failed to create compliance reports. Please try again.",

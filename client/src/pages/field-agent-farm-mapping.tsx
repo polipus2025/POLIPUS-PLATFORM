@@ -202,7 +202,6 @@ export default function FieldAgentFarmMapping() {
       method: activeTab === 'manual' ? 'manual_coordinates' : 'interactive_mapping'
     };
 
-    console.log('Saving farm boundary:', boundaryData);
 
     toast({
       title: "Farm Boundary Saved",

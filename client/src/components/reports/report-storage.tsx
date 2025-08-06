@@ -90,7 +90,6 @@ export const saveComplianceReports = async (
     });
 
   } catch (error) {
-    console.error('Failed to save compliance reports:', error);
     throw error;
   }
 };
@@ -120,7 +119,6 @@ export const updateFarmerWithReports = async (
     await saveComplianceReports(farmerId, reports);
 
   } catch (error) {
-    console.error('Failed to update farmer with reports:', error);
     throw error;
   }
 };

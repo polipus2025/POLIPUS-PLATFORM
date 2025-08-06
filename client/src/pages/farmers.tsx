@@ -549,7 +549,6 @@ export default function FarmersPage() {
         landMapData: landMapData,
       };
       
-      console.log("Submitting farmer data:", farmerData);
       
       // Create farmer record
       const farmer = await apiRequest("/api/farmers", {
@@ -557,7 +556,6 @@ export default function FarmersPage() {
         body: JSON.stringify(farmerData),
       });
       
-      console.log("Farmer created successfully:", farmer);
 
       // If compliance reports exist, save them separately and update farmer record
       if (landMapData?.eudrCompliance && landMapData?.deforestationReport && farmer?.farmerId) {
@@ -567,7 +565,6 @@ export default function FarmersPage() {
             deforestationReport: landMapData.deforestationReport
           });
         } catch (reportError) {
-          console.warn('Compliance reports could not be saved separately, but data is preserved in farmer record:', reportError);
         }
       }
 
@@ -596,7 +593,6 @@ export default function FarmersPage() {
       });
     },
     onError: (error: any) => {
-      console.error("Farmer onboarding error:", error);
       toast({
         title: "Error",
         description: `Failed to onboard farmer: ${error.message || 'Unknown error'}`,

@@ -113,7 +113,6 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
           });
         },
         (error) => {
-          console.error('GPS Error:', error);
         },
         {
           enableHighAccuracy: true,

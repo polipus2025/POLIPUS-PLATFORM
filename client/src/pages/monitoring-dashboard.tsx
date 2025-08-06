@@ -97,7 +97,13 @@ export default function MonitoringDashboard() {
   }
 
   const handleLogout = () => {
-    localStorage.clear();
+    // Clear only authentication-related data
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userType");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("farmerId");
+    localStorage.removeItem("firstName");
+    localStorage.removeItem("lastName");
     setLocation("/front-page");
   };
 

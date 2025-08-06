@@ -7,7 +7,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
-        console.log('Polipus PWA: Service Worker registered successfully:', registration.scope);
         
         // Force update service worker immediately
         if (registration.waiting) {
@@ -21,12 +20,10 @@ if ('serviceWorker' in navigator) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed') {
                 if (navigator.serviceWorker.controller) {
-                  console.log('Polipus PWA: New content is available; please refresh.');
                   // Auto-update for better offline experience
                   newWorker.postMessage({ type: 'SKIP_WAITING' });
                   window.location.reload();
                 } else {
-                  console.log('Polipus PWA: Content is cached for offline use.');
                 }
               }
             });
@@ -42,7 +39,6 @@ if ('serviceWorker' in navigator) {
         });
       })
       .catch((error) => {
-        console.log('Polipus PWA: Service Worker registration failed:', error);
       });
   });
 }

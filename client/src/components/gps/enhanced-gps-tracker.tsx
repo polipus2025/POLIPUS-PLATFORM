@@ -142,7 +142,6 @@ export default function EnhancedGPSTracker({
       },
       (error) => {
         setGpsStatus('error');
-        console.error('GPS Error:', error);
       },
       gpsOptions
     );

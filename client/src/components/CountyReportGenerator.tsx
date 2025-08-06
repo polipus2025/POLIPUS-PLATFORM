@@ -366,7 +366,6 @@ export default function CountyReportGenerator() {
       pdf.save(`${county.name}_County_Agricultural_Report_${currentDate.replace(/\//g, '-')}.pdf`);
       
     } catch (error) {
-      console.error('PDF generation error:', error);
     } finally {
       setIsGenerating(false);
       setProgress(0);

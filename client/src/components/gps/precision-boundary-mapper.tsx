@@ -144,7 +144,6 @@ export default function PrecisionBoundaryMapper({
         navigator.geolocation.getCurrentPosition(
           addBoundaryPoint,
           (error) => {
-            console.error('GPS Error:', error);
             setGpsStatus('error');
           },
           gpsOptions
@@ -157,7 +156,6 @@ export default function PrecisionBoundaryMapper({
           // Position available for manual capture
         },
         (error) => {
-          console.error('GPS Error:', error);
           setGpsStatus('error');
         },
         gpsOptions
@@ -188,7 +186,6 @@ export default function PrecisionBoundaryMapper({
     navigator.geolocation.getCurrentPosition(
       addBoundaryPoint,
       (error) => {
-        console.error('GPS Error:', error);
         setGpsStatus('error');
       },
       {

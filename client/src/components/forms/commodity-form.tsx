@@ -115,7 +115,6 @@ export default function CommodityForm({ onSuccess }: CommodityFormProps) {
         description: "EUDR and deforestation analysis reports created for source location",
       });
     } catch (error) {
-      console.error('Error generating commodity compliance reports:', error);
       toast({
         title: "Error Generating Reports",
         description: "Failed to create compliance reports. Please try again.",

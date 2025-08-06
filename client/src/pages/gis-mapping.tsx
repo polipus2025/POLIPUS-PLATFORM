@@ -252,7 +252,6 @@ export default function GISMapping() {
         description: `EUDR and deforestation analysis reports created for ${farmPlots.length} farm plots`,
       });
     } catch (error) {
-      console.error('Error generating GIS compliance reports:', error);
       toast({
         title: "Error Generating Reports",
         description: "Failed to create compliance reports. Please try again.",

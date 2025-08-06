@@ -74,10 +74,6 @@ export default function FarmerDashboard() {
   const token = localStorage.getItem("authToken");
 
   // Debug information
-  console.log("Farmer Dashboard Loading...");
-  console.log("UserType:", userType);
-  console.log("UserRole:", userRole);
-  console.log("Token exists:", !!token);
 
   // Fetch livestock data for this farmer
   const { data: farmerStats = {} } = useQuery({

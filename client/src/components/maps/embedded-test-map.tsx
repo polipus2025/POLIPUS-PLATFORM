@@ -47,7 +47,6 @@ export default function EmbeddedTestMap() {
       }
 
       try {
-        console.log('Creating embedded map...');
         
         // Create map
         const map = L.map(mapDiv).setView([6.4281, -9.4295], 13);
@@ -59,13 +58,11 @@ export default function EmbeddedTestMap() {
         });
         
         tileLayer.on('load', () => {
-          console.log('Embedded map tiles loaded successfully!');
           statusDiv.className = 'embedded-status success';
           statusDiv.textContent = 'Embedded map loaded successfully! ✓';
         });
         
         tileLayer.on('tileerror', (e: any) => {
-          console.error('Embedded map tile error:', e);
           statusDiv.className = 'embedded-status error';
           statusDiv.textContent = 'Network error: Could not load map tiles';
         });
@@ -78,10 +75,8 @@ export default function EmbeddedTestMap() {
           .bindPopup('Embedded Test - Monrovia, Liberia')
           .openPopup();
           
-        console.log('Embedded map initialized successfully');
         
       } catch (error) {
-        console.error('Embedded map error:', error);
         statusDiv.className = 'embedded-status error';
         statusDiv.textContent = 'Failed to create map: ' + error;
       }

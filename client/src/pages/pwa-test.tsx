@@ -164,7 +164,6 @@ export default function PWATest() {
           runPWAChecks(); // Refresh checks
         }
       } catch (error) {
-        console.error('Install failed:', error);
       }
     }
   };

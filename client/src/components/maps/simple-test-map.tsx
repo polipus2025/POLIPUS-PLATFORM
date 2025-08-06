@@ -42,10 +42,8 @@ export default function SimpleTestMap() {
           .bindPopup('Test Location - Monrovia, Liberia')
           .openPopup();
 
-        console.log('Simple test map loaded successfully');
 
       } catch (error) {
-        console.error('Error loading simple test map:', error);
       }
     };
 

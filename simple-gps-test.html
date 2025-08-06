@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile GPS Test - AgriTrace360</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container { 
+            max-width: 500px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #333;
+        }
+        h1 { 
+            text-align: center; 
+            color: #2c3e50; 
+            margin-bottom: 30px;
+        }
+        #testButton { 
+            width: 100%; 
+            padding: 15px; 
+            background: linear-gradient(45deg, #667eea, #764ba2); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        #testButton:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        #testButton:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            transform: none;
+        }
+        #result { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border-left: 4px solid #667eea; 
+            white-space: pre-wrap; 
+            min-height: 50px;
+        }
+        .status { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 15px 0; 
+            padding: 10px; 
+            background: #e9ecef; 
+            border-radius: 6px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .instructions { 
+            background: #fff3cd; 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin-top: 20px; 
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Mobile GPS Testing Center</h1>
+        
+        <button id="testButton" onclick="testGPS()">Test GPS Permission</button>
+        
+        <div id="result">Click the button above to test your device's GPS functionality.</div>
+        
+        <div class="status">
+            <span><strong>Connection:</strong> <span id="connection">Checking...</span></span>
+            <span><strong>GPS Support:</strong> <span id="gpsSupport">Checking...</span></span>
+        </div>
+        
+        <div class="instructions">
+            <h4>📱 Instructions:</h4>
+            <ol>
+                <li>Click "Test GPS Permission" button</li>
+                <li>Allow location access when prompted</li>
+                <li>Wait for coordinates to appear</li>
+                <li>Check accuracy measurement</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Update status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('connection').textContent = navigator.onLine ? 'Online' : 'Offline';
+            document.getElementById('gpsSupport').textContent = 'geolocation' in navigator ? 'Available' : 'Not Available';
+        });
+
+        function testGPS() {
+            const button = document.getElementById('testButton');
+            const result = document.getElementById('result');
+            
+            button.disabled = true;
+            button.textContent = 'Testing GPS...';
+            result.textContent = 'Requesting GPS permission...';
+            result.className = '';
+
+            if (!navigator.geolocation) {
+                result.textContent = 'GPS not supported on this device';
+                result.className = 'error';
+                button.disabled = false;
+                button.textContent = 'Test GPS Permission';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    const timestamp = new Date().toLocaleString();
+                    
+                    result.textContent = `✅ GPS Working Successfully!
+
+📍 Location Details:
+Latitude: ${latitude.toFixed(6)}
+Longitude: ${longitude.toFixed(6)}
+Accuracy: ±${Math.round(accuracy)} meters
+
+🕐 Timestamp: ${timestamp}
+
+🎯 Your device's GPS is functioning correctly and location services are enabled.`;
+                    
+                    result.className = 'success';
+                    button.disabled = false;
+                    button.textContent = 'Test GPS Again';
+                },
+                function(error) {
+                    let errorMsg = '❌ GPS Error:\n\n';
+                    
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg += '🚫 Permission Denied\n';
+                            errorMsg += 'Location access was denied. To fix this:\n';
+                            errorMsg += '• Click the location icon in your browser address bar\n';
+                            errorMsg += '• Select "Allow" for location permissions\n';
+                            errorMsg += '• Try the test again';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg += '📍 Position Unavailable\n';
+                            errorMsg += 'GPS signal not available. To fix this:\n';
+                            errorMsg += '• Make sure you\'re not indoors\n';
+                            errorMsg += '• Check device location settings\n';
+                            errorMsg += '• Try moving to an area with better signal';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg += '⏱️ Request Timeout\n';
+                            errorMsg += 'GPS request took too long. To fix this:\n';
+                            errorMsg += '• Try the test again\n';
+                            errorMsg += '• Make sure you have good signal\n';
+                            errorMsg += '• Check if location services are enabled';
+                            break;
+                        default:
+                            errorMsg += '🔧 Unknown Error\n';
+                            errorMsg += `Error: ${error.message}`;
+                    }
+                    
+                    result.textContent = errorMsg;
+                    result.className = 'error';
+                    button.disabled = false;
+                    button.textContent = 'Try GPS Test Again';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
+    </script>
+</body>
+</html>

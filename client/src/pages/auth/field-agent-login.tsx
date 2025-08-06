@@ -13,6 +13,8 @@ import { Users, MapPin, AlertCircle, Eye, EyeOff, Clipboard } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { OfflineDetector } from "@/components/offline-detector";
+import { GPSPermissionHandler } from "@/components/gps-permission-handler";
+import { MobileGPSTester } from "@/components/mobile-gps-tester";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 const LIBERIAN_COUNTIES = [
@@ -115,6 +117,30 @@ export default function FieldAgentLogin() {
       </Helmet>
 
       <OfflineDetector />
+      
+      {/* GPS Testing Center for Field Agents */}
+      <div className="w-full max-w-4xl mb-6">
+        <MobileGPSTester />
+        
+        <GPSPermissionHandler 
+          onPermissionGranted={(position) => {
+            console.log('GPS enabled for field agent operations:', position.coords);
+            toast({
+              title: "Location Services Active",
+              description: "GPS tracking enabled for field inspections and reporting",
+            });
+          }}
+          onPermissionDenied={() => {
+            toast({
+              title: "GPS Required for Field Work",
+              description: "Location services are essential for field agent operations",
+              variant: "destructive",
+            });
+          }}
+          showCard={true}
+          autoRequest={false}
+        />
+      </div>
 
       <div className="w-full max-w-sm sm:max-w-md">
         <Card className="shadow-2xl border-0">

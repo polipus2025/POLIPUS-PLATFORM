@@ -135,8 +135,8 @@ export default function LiveTraceMainDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       <Helmet>
-        <title>LiveTrace Dashboard - Real-time Livestock Monitoring | LACRA</title>
-        <meta name="description" content="Comprehensive livestock tracking and health monitoring dashboard for Liberian agricultural operations" />
+        <title>LiveTrace Dashboard - Real-time Livestock Monitoring System</title>
+        <meta name="description" content="Comprehensive livestock tracking and health monitoring dashboard for agricultural operations" />
       </Helmet>
 
       <LiveTraceHeader />

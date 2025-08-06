@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Cloud, Sun, CloudRain, Bell, User, Settings, LogOut } from "lucide-react";
+import { Calendar, Clock, Cloud, Sun, CloudRain, Bell, User, Settings, LogOut, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -9,8 +9,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
-import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
+// LiveTrace uses its own branding, independent from AgriTrace
 
 export default function LiveTraceHeader() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -72,22 +71,11 @@ export default function LiveTraceHeader() {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 max-w-7xl mx-auto">
           
-          {/* Logo and Title */}
+          {/* LiveTrace Logo and Title */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden">
-                <img 
-                  src={lacraLogo} 
-                  alt="LACRA Official Logo" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="w-8 h-8 rounded-lg overflow-hidden">
-                <img 
-                  src={agriTraceLogo} 
-                  alt="LiveTrace Logo" 
-                  className="w-full h-full object-cover"
-                />
+              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center">
+                <Heart className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">LiveTrace</h1>

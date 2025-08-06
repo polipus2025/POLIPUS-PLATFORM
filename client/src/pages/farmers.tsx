@@ -636,7 +636,7 @@ export default function FarmersPage() {
           console.log('GPS access denied - limited mapping features');
         }}
         showCard={true}
-        autoRequest={false}
+        autoRequest={true}
       />
 
       <div className="p-6">

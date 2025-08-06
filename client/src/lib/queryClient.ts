@@ -17,30 +17,46 @@ export async function apiRequest(
 ): Promise<any> {
   const { method = 'GET', body, headers = {} } = options || {};
   
+  // Check if offline before making request
+  if (!navigator.onLine) {
+    throw new Error('You are currently offline. Please check your internet connection and try again.');
+  }
+  
   // Add authorization header if token exists
   const token = localStorage.getItem('authToken');
   const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
   
-  const res = await fetch(url, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders,
-      ...headers,
-    },
-    body,
-    credentials: "include",
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders,
+        ...headers,
+      },
+      body,
+      credentials: "include",
+    });
 
-  await throwIfResNotOk(res);
-  
-  // Check if response is HTML instead of JSON
-  const contentType = res.headers.get('content-type');
-  if (contentType && contentType.includes('text/html')) {
-    throw new Error('Received HTML response instead of JSON - possible authentication issue');
+    await throwIfResNotOk(res);
+    
+    // Check if response is HTML instead of JSON
+    const contentType = res.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      throw new Error('Received HTML response instead of JSON - possible authentication issue');
+    }
+    
+    return await res.json();
+  } catch (error: any) {
+    // Handle network errors more gracefully
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Network connection failed. Please check your internet connection and try again.');
+    }
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Unable to connect to the server. Please check your internet connection.');
+    }
+    throw error;
   }
-  
-  return await res.json();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

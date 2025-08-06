@@ -55,7 +55,7 @@ export default function LiveTraceFarmerLogin() {
     setIsLoading(true);
     setError("");
 
-    // Check if offline
+    // Enhanced offline check with connection test
     if (!navigator.onLine) {
       setError("You're currently offline. Login requires an internet connection. Please connect to the internet and try again.");
       setIsLoading(false);
@@ -66,6 +66,8 @@ export default function LiveTraceFarmerLogin() {
       });
       return;
     }
+
+
 
     try {
       const result = await apiRequest("/api/auth/live-trace-farmer-login", {

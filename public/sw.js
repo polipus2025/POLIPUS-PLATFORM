@@ -1,10 +1,12 @@
 // Service Worker for Polipus Environmental Intelligence Platform PWA
-const CACHE_NAME = 'polipus-platform-v2.0.0';
-const API_CACHE_NAME = 'polipus-api-v2.0.0';
+const CACHE_NAME = 'polipus-platform-v2.1.0';
+const API_CACHE_NAME = 'polipus-api-v2.1.0';
+const ASSETS_CACHE_NAME = 'polipus-assets-v2.1.0';
 
 // Static assets to cache
 const STATIC_CACHE_URLS = [
   '/',
+  '/index.html',
   '/landing',
   '/front-page',
   '/manifest.json',
@@ -12,7 +14,13 @@ const STATIC_CACHE_URLS = [
   '/pwa-icons/icon-512x512.png',
   '/mobile-app-download',
   '/install-app',
-  '/portals'
+  '/portals',
+  '/pwa-offline.html',
+  // Authentication pages for offline access
+  '/live-trace-farmer-login',
+  '/live-trace-regulatory-login',
+  '/regulatory-login',
+  '/farmer-login'
 ];
 
 // API endpoints to cache
@@ -25,21 +33,30 @@ const API_CACHE_URLS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('AgriTrace360 PWA: Service Worker installing...');
+  console.log('Polipus PWA: Service Worker installing...');
   
   event.waitUntil(
     Promise.all([
+      // Cache static pages
       caches.open(CACHE_NAME).then((cache) => {
-        console.log('AgriTrace360 PWA: Caching static assets');
+        console.log('Polipus PWA: Caching static pages');
         return cache.addAll(STATIC_CACHE_URLS.map(url => new Request(url, { cache: 'no-cache' })));
       }),
-      caches.open(API_CACHE_NAME).then((cache) => {
-        console.log('AgriTrace360 PWA: Preparing API cache');
+      // Prepare API cache
+      caches.open(API_CACHE_NAME).then(() => {
+        console.log('Polipus PWA: API cache ready');
+        return Promise.resolve();
+      }),
+      // Prepare assets cache
+      caches.open(ASSETS_CACHE_NAME).then(() => {
+        console.log('Polipus PWA: Assets cache ready');
         return Promise.resolve();
       })
     ]).then(() => {
-      console.log('AgriTrace360 PWA: Installation complete');
+      console.log('Polipus PWA: Installation complete');
       return self.skipWaiting();
+    }).catch((error) => {
+      console.error('Polipus PWA: Installation failed:', error);
     })
   );
 });
@@ -52,14 +69,16 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
-            console.log('AgriTrace360 PWA: Deleting old cache:', cacheName);
+          if (cacheName !== CACHE_NAME && 
+              cacheName !== API_CACHE_NAME && 
+              cacheName !== ASSETS_CACHE_NAME) {
+            console.log('Polipus PWA: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('AgriTrace360 PWA: Activation complete');
+      console.log('Polipus PWA: Activation complete');
       return self.clients.claim();
     })
   );
@@ -86,7 +105,7 @@ self.addEventListener('fetch', (event) => {
   // Static assets - Cache First strategy
   if (isStaticAsset(url.pathname)) {
     event.respondWith(
-      cacheFirstWithFallback(request)
+      cacheFirstWithFallback(request, ASSETS_CACHE_NAME)
     );
     return;
   }
@@ -132,7 +151,7 @@ async function networkFirstWithFallback(request) {
     
     // Return offline page for HTML requests
     if (request.headers.get('accept')?.includes('text/html')) {
-      return caches.match('/pwa');
+      return caches.match('/pwa-offline.html') || caches.match('/');
     }
     
     // Return offline response for API requests
@@ -156,7 +175,7 @@ async function networkFirstWithFallback(request) {
 }
 
 // Cache First strategy for static assets
-async function cacheFirstWithFallback(request) {
+async function cacheFirstWithFallback(request, cacheName = ASSETS_CACHE_NAME) {
   try {
     // Try cache first
     const cachedResponse = await caches.match(request);
@@ -167,21 +186,26 @@ async function cacheFirstWithFallback(request) {
     // Fetch from network and cache
     const response = await fetch(request);
     if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
+      const cache = await caches.open(cacheName);
       cache.put(request, response.clone());
     }
     
     return response;
   } catch (error) {
-    console.log('AgriTrace360 PWA: Failed to fetch asset:', request.url);
+    console.log('Polipus PWA: Failed to fetch asset:', request.url);
     throw error;
   }
 }
 
 // Check if URL is a static asset
 function isStaticAsset(pathname) {
-  const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.woff', '.woff2'];
-  return staticExtensions.some(ext => pathname.endsWith(ext)) || pathname.includes('/assets/');
+  const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.otf', '.webp'];
+  const staticPaths = ['/assets/', '/pwa-icons/', '/pwa-splash/', '/src/', '/@vite/', '/@fs/'];
+  
+  return staticExtensions.some(ext => pathname.endsWith(ext)) || 
+         staticPaths.some(path => pathname.includes(path)) ||
+         pathname === '/manifest.json' ||
+         pathname === '/favicon.ico';
 }
 
 // Background sync for offline actions
@@ -275,4 +299,12 @@ self.addEventListener('notificationclick', (event) => {
   }
 });
 
-console.log('AgriTrace360 PWA: Service Worker loaded successfully');
+// Handle messages from the client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Polipus PWA: Skipping waiting phase');
+    self.skipWaiting();
+  }
+});
+
+console.log('Polipus PWA: Service Worker loaded successfully');

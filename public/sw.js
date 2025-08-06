@@ -1,9 +1,9 @@
 // Service Worker for Polipus Environmental Intelligence Platform PWA
-const CACHE_NAME = 'polipus-platform-v2.1.0';
-const API_CACHE_NAME = 'polipus-api-v2.1.0';
-const ASSETS_CACHE_NAME = 'polipus-assets-v2.1.0';
+const CACHE_NAME = 'polipus-platform-v2.2.0';
+const API_CACHE_NAME = 'polipus-api-v2.2.0';
+const ASSETS_CACHE_NAME = 'polipus-assets-v2.2.0';
 
-// Static assets to cache
+// Static assets to cache - Essential pages for offline use
 const STATIC_CACHE_URLS = [
   '/',
   '/index.html',
@@ -16,11 +16,18 @@ const STATIC_CACHE_URLS = [
   '/install-app',
   '/portals',
   '/pwa-offline.html',
-  // Authentication pages for offline access
+  '/field-agent-login.html',
+  // Main authentication pages
+  '/regulatory-login',
+  '/farmer-login',
+  '/field-agent-login',
+  '/exporter-login',
+  // LiveTrace module pages
   '/live-trace-farmer-login',
   '/live-trace-regulatory-login',
-  '/regulatory-login',
-  '/farmer-login'
+  '/livetrace-login',
+  // LandMap360 module pages
+  '/landmap360-login'
 ];
 
 // API endpoints to cache
@@ -151,6 +158,11 @@ async function networkFirstWithFallback(request) {
     
     // Return offline page for HTML requests
     if (request.headers.get('accept')?.includes('text/html')) {
+      // For login pages, try to redirect to the main landing page instead of offline page
+      const url = new URL(request.url);
+      if (url.pathname.includes('login')) {
+        return caches.match('/') || caches.match('/pwa-offline.html');
+      }
       return caches.match('/pwa-offline.html') || caches.match('/');
     }
     

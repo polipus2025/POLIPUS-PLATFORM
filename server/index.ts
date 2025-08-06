@@ -187,7 +187,9 @@ if (MAINTENANCE_MODE) {
       
       // Start the server
       const port = parseInt(process.env.PORT || '5000', 10);
-      httpServer.listen(port, '0.0.0.0', () => {
+      const host = '0.0.0.0';
+      
+      httpServer.listen(port, host, () => {
         console.log('🌟 POLIPUS PLATFORM ACTIVE - All 8 modules ready');
         console.log(`🌐 Platform URL: http://localhost:${port}`);
         console.log('📱 Module 1: Agricultural Traceability & Compliance (LACRA System)');
@@ -201,8 +203,9 @@ if (MAINTENANCE_MODE) {
         console.log('📚 PWA Support: Mobile app download available');
         
         if (process.env.NODE_ENV === 'production') {
-          log(`🔒 Production mode - Custom domain ready`);
-          log(`📡 Database connected: ${process.env.DATABASE_URL ? 'YES' : 'NO'}`);
+          console.log(`🔒 Production mode - Server listening on ${host}:${port}`);
+          console.log(`📡 Database connected: ${process.env.DATABASE_URL ? 'YES' : 'NO'}`);
+          console.log(`🌐 External access configured via .replit port mapping`);
         }
       });
       

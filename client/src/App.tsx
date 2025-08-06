@@ -257,13 +257,7 @@ function Router() {
       <Route path="/livetrace-field-agent-dashboard" component={LiveTraceFieldAgentDashboard} />
       <Route path="/livetrace-transport-dashboard" component={TransportDashboard} />
 
-      {/* LandMap360 Portal Routes */}
-      <Route path="/landmap360-portal" component={LandMap360Portal} />
-      <Route path="/landmap360/main-dashboard" component={LandMap360MainDashboard} />
-      <Route path="/landmap360/surveyor-dashboard" component={SurveyorDashboard} />
-      <Route path="/landmap360/administrator-dashboard" component={AdministratorDashboard} />
-      <Route path="/landmap360/registrar-dashboard" component={RegistrarDashboard} />
-      <Route path="/landmap360/inspector-dashboard" component={InspectorDashboard} />
+
 
       {/* Protected Routes */}
       {authToken ? (
@@ -472,6 +466,7 @@ function Router() {
       {/* New Portal Routes - Public Access for Coming Soon Pages */}
       <Route path="/live-trace" component={LiveTracePortal} />
       <Route path="/land-map360" component={LandMap360Portal} />
+      <Route path="/landmap360-portal" component={LandMap360Portal} />
       <Route path="/mine-watch" component={MineWatchPortal} />
       <Route path="/forest-guard" component={ForestGuardPortal} />
       <Route path="/aqua-trace" component={AquaTracePortal} />
@@ -481,6 +476,11 @@ function Router() {
       {/* New Module Dashboard Routes - Fully Functional */}
       <Route path="/live-trace-dashboard" component={LiveTraceDashboard} />
       <Route path="/land-map360-dashboard" component={LandMap360Dashboard} />
+      <Route path="/landmap360/main-dashboard" component={LandMap360MainDashboard} />
+      <Route path="/landmap360/surveyor-dashboard" component={SurveyorDashboard} />
+      <Route path="/landmap360/administrator-dashboard" component={AdministratorDashboard} />
+      <Route path="/landmap360/registrar-dashboard" component={RegistrarDashboard} />
+      <Route path="/landmap360/inspector-dashboard" component={InspectorDashboard} />
       <Route path="/mine-watch-dashboard" component={MineWatchDashboard} />
       <Route path="/forest-guard-dashboard" component={ForestGuardDashboard} />
       <Route path="/aqua-trace-dashboard" component={AquaTraceDashboard} />
@@ -521,14 +521,15 @@ function App() {
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   const isMonitoringDashboard = window.location.pathname === "/monitoring-dashboard" && authToken && userType === 'monitoring';
   
-  // LiveTrace pages should use their own independent layout
+  // LiveTrace and LandMap360 pages should use their own independent layout
   const isLiveTracePage = window.location.pathname.startsWith("/livetrace");
+  const isLandMap360Page = window.location.pathname.startsWith("/landmap360") || window.location.pathname === "/land-map360";
   
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage) ? (
-          // Render auth/landing pages, special dashboards, or LiveTrace pages without AgriTrace layout
+        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page) ? (
+          // Render auth/landing pages, special dashboards, LiveTrace, or LandMap360 pages without AgriTrace layout
           <div className="min-h-screen">
             <Router />
           </div>

@@ -80,8 +80,13 @@ export default function LiveTraceFarmerLogin() {
         if (result.user.firstName) localStorage.setItem("firstName", result.user.firstName);
         if (result.user.lastName) localStorage.setItem("lastName", result.user.lastName);
         
-        // Force redirect to farmer dashboard
-        window.location.replace("/livetrace/farmer-dashboard");
+        console.log("Redirecting to farmer dashboard...");
+        console.log("Current userType:", localStorage.getItem("userType"));
+        
+        // Short delay to ensure localStorage is set, then redirect
+        setTimeout(() => {
+          window.location.href = "/livetrace/farmer-dashboard";
+        }, 100);
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

@@ -73,6 +73,12 @@ export default function FarmerDashboard() {
   const userRole = localStorage.getItem("userRole");
   const token = localStorage.getItem("authToken");
 
+  // Debug information
+  console.log("Farmer Dashboard Loading...");
+  console.log("UserType:", userType);
+  console.log("UserRole:", userRole);
+  console.log("Token exists:", !!token);
+
   // Fetch livestock data for this farmer
   const { data: farmerStats = {} } = useQuery({
     queryKey: ['/api/livetrace/farmer-livestock-stats', selectedTimeRange],
@@ -184,8 +190,9 @@ export default function FarmerDashboard() {
           {/* Header Section */}
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Farmer Dashboard</h1>
-              <p className="text-slate-600">Livestock Management & Monitoring</p>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">🐄 LiveTrace Farmer Dashboard</h1>
+              <p className="text-slate-600">Livestock Management & Monitoring Portal</p>
+              <p className="text-xs text-green-600 mt-1">Welcome, {localStorage.getItem("firstName") || localStorage.getItem("username") || "Farmer"}</p>
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-green-600">{formatTime(currentTime)}</div>

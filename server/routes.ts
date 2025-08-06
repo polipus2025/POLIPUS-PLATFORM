@@ -4996,6 +4996,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(process.cwd(), 'public/sw.js'));
   });
 
+  // LiveTrace Farmer Dashboard API endpoints
+  app.get("/api/livetrace/farmer-livestock-stats", async (req, res) => {
+    try {
+      const { timeRange = "today" } = req.query;
+      const stats = {
+        totalAnimals: 187,
+        healthyAnimals: 174,
+        underTreatment: 8,
+        criticalCases: 5,
+        dailyFeedConsumption: 2340,
+        feedStock: 18650,
+        daysOfFeedRemaining: 8,
+        activeGPSTags: 182,
+        offlineGPSTags: 5,
+        avgDailyMovement: 3.2
+      };
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch farmer livestock stats" });
+    }
+  });
+
+  app.get("/api/livetrace/farmer-gps-tracking", async (req, res) => {
+    try {
+      const gpsData = [
+        { 
+          id: 1, 
+          tag: "GPS-A047", 
+          animal: "Cow #A047", 
+          lat: 6.3156, 
+          lng: -10.8074, 
+          pasture: "Pasture A", 
+          lastUpdate: "2 min ago", 
+          status: "active" 
+        },
+        { 
+          id: 2, 
+          tag: "GPS-A048", 
+          animal: "Cow #A048", 
+          lat: 6.3162, 
+          lng: -10.8081, 
+          pasture: "Pasture A", 
+          lastUpdate: "3 min ago", 
+          status: "active" 
+        },
+        { 
+          id: 3, 
+          tag: "GPS-B023", 
+          animal: "Cow #B023", 
+          lat: 6.3145, 
+          lng: -10.8095, 
+          pasture: "Pasture B", 
+          lastUpdate: "1 min ago", 
+          status: "active" 
+        },
+        { 
+          id: 4, 
+          tag: "GPS-G012", 
+          animal: "Goat #G012", 
+          lat: 6.3178, 
+          lng: -10.8067, 
+          pasture: "Goat Area", 
+          lastUpdate: "15 min ago", 
+          status: "offline" 
+        }
+      ];
+      res.json(gpsData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch GPS tracking data" });
+    }
+  });
+
+  app.get("/api/livetrace/farmer-feed-management", async (req, res) => {
+    try {
+      const feedData = [
+        {
+          id: 1,
+          feedType: "Cattle Feed (Premium)",
+          currentStock: 12500,
+          dailyConsumption: 1850,
+          daysRemaining: 7,
+          costPerKg: 2.50,
+          supplier: "Liberian Feed Co.",
+          lastRestock: "2025-01-01"
+        },
+        {
+          id: 2,
+          feedType: "Goat/Sheep Feed",
+          currentStock: 6150,
+          dailyConsumption: 490,
+          daysRemaining: 12,
+          costPerKg: 1.80,
+          supplier: "Agri Supply Ltd.",
+          lastRestock: "2024-12-28"
+        }
+      ];
+      res.json(feedData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch feed management data" });
+    }
+  });
+
+  app.get("/api/livetrace/farmer-health-alerts", async (req, res) => {
+    try {
+      const healthAlerts = [
+        {
+          id: 1,
+          type: "critical",
+          category: "health",
+          animalId: "A047",
+          animalType: "Cow",
+          message: "Cow #A047 showing signs of illness - elevated temperature",
+          symptoms: ["elevated temperature", "lethargy", "loss of appetite"],
+          location: "Pasture A",
+          timestamp: "2025-01-06T13:15:00Z",
+          status: "investigating",
+          veterinarianContacted: true,
+          actionRequired: "Immediate veterinary consultation"
+        },
+        {
+          id: 2,
+          type: "warning",
+          category: "vaccination",
+          animalId: "B-GROUP",
+          animalType: "Cattle Herd",
+          message: "Cattle Herd B due for annual vaccination in 3 days",
+          location: "Pasture B",
+          timestamp: "2025-01-06T09:00:00Z",
+          status: "scheduled",
+          veterinarianContacted: false,
+          actionRequired: "Schedule vaccination appointment"
+        },
+        {
+          id: 3,
+          type: "info",
+          category: "routine",
+          animalId: "G012",
+          animalType: "Goat",
+          message: "Routine health check completed - all normal",
+          location: "Goat Area",
+          timestamp: "2025-01-06T08:30:00Z",
+          status: "completed",
+          veterinarianContacted: false,
+          actionRequired: "None"
+        }
+      ];
+      res.json(healthAlerts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch health alerts" });
+    }
+  });
+
   // Register all Polipus module routes
   registerPolipusRoutes(app);
 

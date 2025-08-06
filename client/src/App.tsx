@@ -72,6 +72,7 @@ import DiseaseTracking from "@/pages/livetrace/disease-tracking";
 import VaccinationRecords from "@/pages/livetrace/vaccination-records";
 import TreatmentPlans from "@/pages/livetrace/treatment-plans";
 import RancherDashboard from "@/pages/livetrace/rancher-dashboard";
+import LiveTraceFarmerDashboard from "@/pages/livetrace/farmer-dashboard";
 import LiveTraceFieldAgentDashboard from "@/pages/livetrace/field-agent-dashboard";
 import TransportDashboard from "@/pages/livetrace/transport-dashboard";
 
@@ -233,6 +234,7 @@ function Router() {
       <Route path="/livetrace/feed-management" component={LiveTraceMainDashboard} />
       <Route path="/livetrace/breeding-records" component={LiveTraceMainDashboard} />
       <Route path="/livetrace/gps-tracking" component={LiveTraceMainDashboard} />
+      <Route path="/livetrace/farmer-dashboard" component={LiveTraceFarmerDashboard} />
       <Route path="/livetrace/farm-reports" component={LiveTraceMainDashboard} />
       <Route path="/livetrace/qr-scanner" component={LiveTraceMainDashboard} />
       <Route path="/livetrace/farm-inspections" component={HealthMonitoring} />

@@ -73,7 +73,7 @@ export default function LiveTraceFarmerLogin() {
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "live-trace-farmer");
         
-        window.location.href = "/livetrace/dashboard";
+        window.location.href = "/livetrace/farmer-dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

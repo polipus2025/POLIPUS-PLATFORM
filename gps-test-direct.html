@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 300px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; }
+        .result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>GPS Test</h2>
+        <button onclick="testGPS()">Test My GPS</button>
+        <div id="result" class="result">Click button to test GPS</div>
+    </div>
+    <script>
+        function testGPS() {
+            document.getElementById('result').innerHTML = 'Testing...';
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    document.getElementById('result').innerHTML = 
+                        `SUCCESS!<br>Lat: ${pos.coords.latitude}<br>Lng: ${pos.coords.longitude}<br>Accuracy: ${pos.coords.accuracy}m`;
+                },
+                err => {
+                    document.getElementById('result').innerHTML = `Error: ${err.message}`;
+                }
+            );
+        }
+    </script>
+</body>
+</html>

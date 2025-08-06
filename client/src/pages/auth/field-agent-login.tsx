@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Users, MapPin, AlertCircle, Eye, EyeOff, Clipboard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { OfflineDetector } from "@/components/offline-detector";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 const LIBERIAN_COUNTIES = [
@@ -49,6 +50,18 @@ export default function FieldAgentLogin() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     setError("");
+
+    // Check if offline
+    if (!navigator.onLine) {
+      setError("You're currently offline. Login requires an internet connection. Please connect to the internet and try again.");
+      setIsLoading(false);
+      toast({
+        title: "Offline Mode",
+        description: "Internet connection required for login",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const result = await apiRequest("/api/auth/field-agent-login", {
@@ -94,6 +107,8 @@ export default function FieldAgentLogin() {
         <title>Field Agent Portal Login - AgriTrace360™ LACRA</title>
         <meta name="description" content="Secure login portal for LACRA field agents and extension officers" />
       </Helmet>
+
+      <OfflineDetector />
 
       <div className="w-full max-w-sm sm:max-w-md">
         <Card className="shadow-2xl border-0">

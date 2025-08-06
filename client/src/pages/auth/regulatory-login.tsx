@@ -44,6 +44,18 @@ export default function RegulatoryLogin() {
     setIsLoading(true);
     setError("");
 
+    // Check if offline
+    if (!navigator.onLine) {
+      setError("You're currently offline. Login requires an internet connection. Please connect to the internet and try again.");
+      setIsLoading(false);
+      toast({
+        title: "Offline Mode",
+        description: "Internet connection required for login",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const result = await apiRequest("/api/auth/regulatory-login", {
         method: "POST",

@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Leaf, Building2, AlertCircle, Eye, EyeOff, Truck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { OfflineDetector } from "@/components/offline-detector";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 const loginSchema = z.object({
@@ -53,6 +54,18 @@ export default function LiveTraceFarmerLogin() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     setError("");
+
+    // Check if offline
+    if (!navigator.onLine) {
+      setError("You're currently offline. Login requires an internet connection. Please connect to the internet and try again.");
+      setIsLoading(false);
+      toast({
+        title: "Offline Mode",
+        description: "Internet connection required for login",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const result = await apiRequest("/api/auth/live-trace-farmer-login", {
@@ -110,6 +123,10 @@ export default function LiveTraceFarmerLogin() {
         <title>LiveTrace Farmer Login - Livestock Management Portal | Ministry of Agriculture</title>
         <meta name="description" content="Farmer access portal for LiveTrace livestock management and tracking system" />
       </Helmet>
+
+      <OfflineDetector />
+
+      <OfflineDetector />
 
       <div className="w-full max-w-md">
         <div className="isms-card">

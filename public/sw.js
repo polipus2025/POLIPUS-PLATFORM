@@ -158,9 +158,14 @@ async function networkFirstWithFallback(request) {
     
     // Return offline page for HTML requests
     if (request.headers.get('accept')?.includes('text/html')) {
-      // For login pages, try to redirect to the main landing page instead of offline page
       const url = new URL(request.url);
+      // For login pages, serve them from cache so users can see the offline login message
       if (url.pathname.includes('login')) {
+        const cachedLoginPage = await caches.match(request);
+        if (cachedLoginPage) {
+          return cachedLoginPage;
+        }
+        // If no cached login page, redirect to main page or offline page
         return caches.match('/') || caches.match('/pwa-offline.html');
       }
       return caches.match('/pwa-offline.html') || caches.match('/');

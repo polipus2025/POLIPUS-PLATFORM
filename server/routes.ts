@@ -838,7 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Test credentials for LiveTrace farmers
-      const testCredentials = {
+      const testCredentials: Record<string, { password: string; firstName: string; lastName: string }> = {
         farmer001: { password: 'password123', firstName: 'John', lastName: 'Farmer' },
         rancher001: { password: 'password123', firstName: 'Mike', lastName: 'Rancher' },
         smallholder001: { password: 'password123', firstName: 'Mary', lastName: 'Smallholder' },
@@ -1050,7 +1050,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Test credentials for development
-      const testCredentials = {
+      const testCredentials: Record<string, { password: string; role: string; firstName: string; lastName: string }> = {
         admin001: { password: 'password123', role: 'regulatory_admin', firstName: 'Admin', lastName: 'User' },
         admin: { password: 'admin123', role: 'regulatory_admin', firstName: 'Administrator', lastName: 'LACRA' },
         inspector001: { password: 'password123', role: 'inspector', firstName: 'Inspector', lastName: 'User' }
@@ -1227,7 +1227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Test credentials for field agents
-      const testCredentials = {
+      const testCredentials: Record<string, { password: string; firstName: string; lastName: string }> = {
         agent001: { password: 'password123', firstName: 'Field', lastName: 'Agent' },
         agent002: { password: 'password123', firstName: 'John', lastName: 'Inspector' },
         field001: { password: 'password123', firstName: 'Maria', lastName: 'Officer' }
@@ -1399,7 +1399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Test credentials for LandMap360
       const landMapRoles = ['surveyor', 'administrator', 'registrar', 'inspector', 'analyst', 'manager'];
-      const landMapCredentials = {
+      const landMapCredentials: Record<string, { password: string; firstName: string; lastName: string }> = {
         admin: { password: 'admin123', firstName: 'Land', lastName: 'Administrator' },
         surveyor001: { password: 'password123', firstName: 'John', lastName: 'Surveyor' },
         inspector001: { password: 'password123', firstName: 'Mary', lastName: 'Inspector' }

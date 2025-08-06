@@ -1036,7 +1036,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user role is valid for regulatory access
-      if (!['regulatory_admin', 'regulatory_staff'].includes(user.role)) {
+      if (!['regulatory_admin', 'regulatory_staff', 'admin', 'inspector', 'director'].includes(user.role)) {
         return res.status(403).json({ 
           success: false, 
           message: "Access denied for this role" 

@@ -837,6 +837,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Test credentials for LiveTrace farmers
+      const testCredentials = {
+        farmer001: { password: 'password123', firstName: 'John', lastName: 'Farmer' },
+        rancher001: { password: 'password123', firstName: 'Mike', lastName: 'Rancher' },
+        smallholder001: { password: 'password123', firstName: 'Mary', lastName: 'Smallholder' },
+        coop001: { password: 'password123', firstName: 'Coop', lastName: 'Manager' }
+      };
+
+      if (testCredentials[username] && testCredentials[username].password === password) {
+        const token = jwt.sign(
+          { 
+            userId: 2,
+            username: username,
+            userType: 'live-trace-farmer',
+            role: 'farmer'
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 2,
+            username: username,
+            userType: 'live-trace-farmer',
+            role: 'farmer',
+            firstName: testCredentials[username].firstName,
+            lastName: testCredentials[username].lastName
+          }
+        });
+      }
+
       const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(401).json({ 
@@ -1015,7 +1049,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if user exists
+      // Test credentials for development
+      const testCredentials = {
+        admin001: { password: 'password123', role: 'regulatory_admin', firstName: 'Admin', lastName: 'User' },
+        admin: { password: 'admin123', role: 'regulatory_admin', firstName: 'Administrator', lastName: 'LACRA' },
+        inspector001: { password: 'password123', role: 'inspector', firstName: 'Inspector', lastName: 'User' }
+      };
+
+      if (testCredentials[username] && testCredentials[username].password === password) {
+        const token = jwt.sign(
+          { 
+            userId: 1,
+            username: username,
+            userType: 'regulatory',
+            role: testCredentials[username].role
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 1,
+            username: username,
+            userType: 'regulatory',
+            role: testCredentials[username].role,
+            firstName: testCredentials[username].firstName,
+            lastName: testCredentials[username].lastName
+          }
+        });
+      }
+
+      // Check if user exists in database
       const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(401).json({ 
@@ -1159,6 +1226,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Test credentials for field agents
+      const testCredentials = {
+        agent001: { password: 'password123', firstName: 'Field', lastName: 'Agent' },
+        agent002: { password: 'password123', firstName: 'John', lastName: 'Inspector' },
+        field001: { password: 'password123', firstName: 'Maria', lastName: 'Officer' }
+      };
+
+      if (testCredentials[agentId] && testCredentials[agentId].password === password) {
+        const token = jwt.sign(
+          { 
+            userId: 101,
+            agentId: agentId,
+            userType: 'field_agent',
+            role: 'field_agent',
+            jurisdiction: jurisdiction || 'Montserrado County'
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 101,
+            agentId: agentId,
+            userType: 'field_agent',
+            role: 'field_agent',
+            jurisdiction: jurisdiction || 'Montserrado County',
+            phoneNumber: phoneNumber || '',
+            firstName: testCredentials[agentId].firstName,
+            lastName: testCredentials[agentId].lastName
+          }
+        });
+      }
+
       // Check if user exists - field agents use agentId as username
       const user = await storage.getUserByUsername(agentId);
       if (!user || user.role !== 'field_agent') {
@@ -1294,7 +1397,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if user exists
+      // Test credentials for LandMap360
+      const landMapRoles = ['surveyor', 'administrator', 'registrar', 'inspector', 'analyst', 'manager'];
+      const landMapCredentials = {
+        admin: { password: 'admin123', firstName: 'Land', lastName: 'Administrator' },
+        surveyor001: { password: 'password123', firstName: 'John', lastName: 'Surveyor' },
+        inspector001: { password: 'password123', firstName: 'Mary', lastName: 'Inspector' }
+      };
+
+      if (landMapCredentials[username] && landMapCredentials[username].password === password && landMapRoles.includes(role)) {
+        const token = jwt.sign(
+          { 
+            userId: 3,
+            username: username,
+            userType: 'landmap360',
+            role: role
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 3,
+            username: username,
+            userType: 'landmap360',
+            role: role,
+            firstName: landMapCredentials[username].firstName,
+            lastName: landMapCredentials[username].lastName,
+            county: county || 'Montserrado'
+          }
+        });
+      }
+
+      // Check if user exists in database
       const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(401).json({ 
@@ -1304,7 +1442,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify role matches LandMap360 roles
-      const landMapRoles = ['surveyor', 'administrator', 'registrar', 'inspector', 'analyst', 'manager'];
       if (!landMapRoles.includes(role)) {
         return res.status(400).json({ 
           success: false, 

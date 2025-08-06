@@ -59,6 +59,17 @@ import CarbonTraceRegulatoryLogin from "@/pages/auth/carbon-trace-regulatory-log
 import CarbonTraceSustainabilityManagerLogin from "@/pages/auth/carbon-trace-sustainability-manager-login";
 import CarbonTraceCarbonAuditorLogin from "@/pages/auth/carbon-trace-carbon-auditor-login";
 import CarbonTraceClimatePolicyAnalystLogin from "@/pages/auth/carbon-trace-climate-policy-analyst-login";
+
+// LiveTrace Portal Pages
+import VeterinaryDashboard from "@/pages/livetrace/veterinary-dashboard";
+import HealthMonitoring from "@/pages/livetrace/health-monitoring";
+import DiseaseTracking from "@/pages/livetrace/disease-tracking";
+import VaccinationRecords from "@/pages/livetrace/vaccination-records";
+import TreatmentPlans from "@/pages/livetrace/treatment-plans";
+import RancherDashboard from "@/pages/livetrace/rancher-dashboard";
+import LiveTraceFieldAgentDashboard from "@/pages/livetrace/field-agent-dashboard";
+import TransportDashboard from "@/pages/livetrace/transport-dashboard";
+
 import MonitoringDashboard from "@/pages/monitoring-dashboard";
 import Dashboard from "@/pages/dashboard";
 
@@ -191,7 +202,16 @@ function Router() {
       <Route path="/carbon-trace-carbon-auditor-login" component={CarbonTraceCarbonAuditorLogin} />
       <Route path="/carbon-trace-climate-policy-analyst-login" component={CarbonTraceClimatePolicyAnalystLogin} />
 
-      
+      {/* LiveTrace Portal Routes */}
+      <Route path="/livetrace-veterinary-dashboard" component={VeterinaryDashboard} />
+      <Route path="/livetrace-health-monitoring" component={HealthMonitoring} />
+      <Route path="/livetrace-disease-tracking" component={DiseaseTracking} />
+      <Route path="/livetrace-vaccination-records" component={VaccinationRecords} />
+      <Route path="/livetrace-treatment-plans" component={TreatmentPlans} />
+      <Route path="/livetrace-rancher-dashboard" component={RancherDashboard} />
+      <Route path="/livetrace-field-agent-dashboard" component={LiveTraceFieldAgentDashboard} />
+      <Route path="/livetrace-transport-dashboard" component={TransportDashboard} />
+
       {/* Protected Routes */}
       {authToken ? (
         <>

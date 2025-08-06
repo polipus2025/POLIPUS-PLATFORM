@@ -144,17 +144,17 @@ export default function LiveTraceMainDashboard() {
       <div className="flex">
         <LiveTraceSidebar />
         
-        <main className="flex-1 ml-64 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 ml-64">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
             
             {/* Dashboard Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 text-center lg:text-left">
+              <div className="flex-1">
                 <h1 className="text-3xl font-bold text-gray-900">LiveTrace Dashboard</h1>
                 <p className="text-gray-600 mt-1">Real-time livestock monitoring and health management</p>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center lg:justify-end gap-4">
                 <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Select Region" />
@@ -184,7 +184,7 @@ export default function LiveTraceMainDashboard() {
             </div>
 
             {/* Key Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium opacity-90">Total Livestock</CardTitle>
@@ -240,15 +240,17 @@ export default function LiveTraceMainDashboard() {
 
             {/* Main Content Tabs */}
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-1 md:grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="health">Health Monitoring</TabsTrigger>
-                <TabsTrigger value="transport">Transport Tracking</TabsTrigger>
-                <TabsTrigger value="alerts">Alerts & Actions</TabsTrigger>
-              </TabsList>
+              <div className="flex justify-center mb-6">
+                <TabsList className="grid w-full max-w-2xl grid-cols-2 md:grid-cols-4">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="health">Health Monitoring</TabsTrigger>
+                  <TabsTrigger value="transport">Transport Tracking</TabsTrigger>
+                  <TabsTrigger value="alerts">Alerts & Actions</TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 max-w-7xl mx-auto">
                   
                   {/* Farm Status Overview */}
                   <Card>
@@ -398,7 +400,7 @@ export default function LiveTraceMainDashboard() {
               </TabsContent>
 
               <TabsContent value="alerts" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 max-w-7xl mx-auto">
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">

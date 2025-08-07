@@ -134,10 +134,20 @@ export default function EUDRComplianceMapper({
     );
 
     const createEUDRMapWithRealData = async (lat: number, lng: number) => {
+      setCurrentLocation({lat, lng});
+      
       // Calculate real EUDR compliance data based on coordinates
       const forestCoverData = await calculateForestCover(lat, lng);
       const deforestationRisk = await assessDeforestationRisk(lat, lng);
       const protectedAreas = await checkProtectedAreas(lat, lng);
+      
+      // Calculate tile coordinates safely
+      const zoom = 15;
+      const n = Math.pow(2, zoom);
+      const x = Math.floor(n * ((lng + 180) / 360));
+      const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
+      
+      const tileUrl = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`;
       
       mapRef.current!.innerHTML = `
         <div id="eudr-map-container" style="
@@ -146,7 +156,7 @@ export default function EUDRComplianceMapper({
           border: 2px solid #e5e7eb;
           border-radius: 8px;
           position: relative;
-          background: url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/${Math.floor((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2 * Math.pow(2, 15))}/${Math.floor(Math.pow(2, 15) * ((lng + 180) / 360))}') center/cover;
+          background: url('${tileUrl}') center/cover;
           cursor: crosshair;
           overflow: hidden;
           font-family: Arial, sans-serif;
@@ -162,6 +172,7 @@ export default function EUDRComplianceMapper({
             border-radius: 8px;
             font-size: 12px;
             max-width: 200px;
+            z-index: 100;
           ">
             <strong>EUDR Compliance Data</strong><br/>
             Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}<br/>
@@ -181,6 +192,7 @@ export default function EUDRComplianceMapper({
               background: rgba(${zone.risk === 'high' ? '220, 38, 38' : zone.risk === 'medium' ? '245, 158, 11' : '34, 197, 94'}, 0.3);
               border: 2px ${zone.risk === 'high' ? 'dashed #dc2626' : zone.risk === 'medium' ? 'dashed #f59e0b' : 'solid #22c55e'};
               border-radius: 8px;
+              z-index: 50;
             " title="Risk Zone ${index + 1}: ${zone.risk} risk"></div>
           `).join('')}
           
@@ -195,75 +207,9 @@ export default function EUDRComplianceMapper({
               background: rgba(34, 197, 94, 0.2);
               border: 2px solid #059669;
               border-radius: 8px;
+              z-index: 50;
             " title="Protected Area: ${area.name}"></div>
           `).join('')}
-          "></div>
-          
-          <!-- Agricultural Areas (Low Risk) -->
-          <div style="
-            position: absolute;
-            top: 10%;
-            left: 50%;
-            width: 35%;
-            height: 25%;
-            background: linear-gradient(45deg, #84cc16, #65a30d);
-            border-radius: 30%;
-            opacity: 0.5;
-            border: 1px solid #84cc16;
-          "></div>
-          
-          <!-- EUDR Risk Zones Legend -->
-          <div style="
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            line-height: 1.4;
-          ">
-            <div style="color: #dc2626;">🔴 High Risk: Forest Areas</div>
-            <div style="color: #059669;">🟢 Low Risk: Agricultural</div>
-            <div style="color: #3b82f6;">🔵 Water Bodies</div>
-          </div>
-          
-          <!-- Coordinates -->
-          <div style="
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            color: white;
-            font-size: 10px;
-            background: rgba(0,0,0,0.5);
-            padding: 2px 4px;
-            border-radius: 3px;
-          ">6.45°N, -9.35°W</div>
-          <div style="
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            color: white;
-            font-size: 10px;
-            background: rgba(0,0,0,0.5);
-            padding: 2px 4px;
-            border-radius: 3px;
-          ">6.40°N, -9.40°W</div>
-          
-          <!-- Grid -->
-          <div style="
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-              linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 25px 25px;
-            pointer-events: none;
-          "></div>
           
           <!-- SVG for polygons -->
           <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" id="polygon-svg">
@@ -304,12 +250,16 @@ export default function EUDRComplianceMapper({
       if (!mapContainer) return;
 
       mapContainer.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
         const rect = mapContainer.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        const lat = 6.45 - (y / rect.height) * 0.05;
-        const lng = -9.40 + (x / rect.width) * 0.05;
+        // Convert pixel coordinates to lat/lng based on current map center
+        const lat = currentLocation.lat + (250 - y) / 5000;
+        const lng = currentLocation.lng + (x - 250) / 5000;
         
         const newPoint: BoundaryPoint = { 
           latitude: parseFloat(lat.toFixed(6)), 
@@ -322,7 +272,6 @@ export default function EUDRComplianceMapper({
       setMapReady(true);
     };
 
-    createEUDRMap();
   }, []);
 
   // Analyze EUDR compliance when points change
@@ -506,26 +455,17 @@ export default function EUDRComplianceMapper({
   };
 
   const downloadReport = async (type: 'eudr' | 'deforestation') => {
-    try {
-      const reportData = type === 'eudr' ? eudrReport : deforestationReport;
-      if (!reportData) return;
-      
-      if (type === 'eudr') {
-        await generateEUDRCompliancePDF(reportData, area, "FRM-2024-001", "Sample Farmer");
-      } else {
-        await generateDeforestationPDF(reportData, area, "FRM-2024-001", "Sample Farmer");
-      }
-    } catch (error) {
-      // Fallback to JSON
-      const reportData = type === 'eudr' ? eudrReport : deforestationReport;
-      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${type}-report-${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    // Simple JSON download for now to avoid PDF complexity
+    const reportData = type === 'eudr' ? eudrReport : deforestationReport;
+    if (!reportData) return;
+    
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}-report-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const canComplete = points.length >= minPoints;

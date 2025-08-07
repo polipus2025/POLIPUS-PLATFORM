@@ -1160,6 +1160,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Test credentials for farmers
+      const testFarmerCredentials: Record<string, { password: string; firstName: string; lastName: string; county: string }> = {
+        farmer001: { password: 'password123', firstName: 'John', lastName: 'Farmer', county: 'Montserrado County' },
+        farmer002: { password: 'password123', firstName: 'Mary', lastName: 'Crops', county: 'Bong County' },
+        test_farmer: { password: 'password123', firstName: 'Test', lastName: 'Farmer', county: 'Grand Bassa County' }
+      };
+
+      if (testFarmerCredentials[farmerId] && testFarmerCredentials[farmerId].password === password) {
+        const token = jwt.sign(
+          { 
+            userId: 201,
+            farmerId: farmerId,
+            userType: 'farmer',
+            role: 'farmer',
+            jurisdiction: county || testFarmerCredentials[farmerId].county
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 201,
+            farmerId: farmerId,
+            userType: 'farmer',
+            role: 'farmer',
+            jurisdiction: county || testFarmerCredentials[farmerId].county,
+            firstName: testFarmerCredentials[farmerId].firstName,
+            lastName: testFarmerCredentials[farmerId].lastName
+          }
+        });
+      }
+
       // Check if user exists - farmers use farmerId as username
       const user = await storage.getUserByUsername(farmerId);
       if (!user || user.role !== 'farmer') {

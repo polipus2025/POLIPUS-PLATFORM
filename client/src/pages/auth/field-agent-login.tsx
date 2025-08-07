@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Users, MapPin, AlertCircle, Eye, EyeOff, Clipboard, Satellite } from "lucide-react";
+import { Users, MapPin, AlertCircle, Eye, EyeOff, Clipboard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 // import { OfflineDetector } from "@/components/offline-detector"; // Removed to allow offline functionality
@@ -38,7 +37,6 @@ export default function FieldAgentLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const [gpsStatus, setGpsStatus] = useState<string>("Ready to test");
   const { toast } = useToast();
 
   const form = useForm<LoginForm>({
@@ -164,67 +162,7 @@ export default function FieldAgentLogin() {
                   AgriTrace360™ Mobile Operations
                 </p>
                 
-                {/* Compact GPS Test Button */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-3 text-xs px-3 py-1 h-auto border-blue-200 text-blue-600 hover:bg-blue-50"
-                    >
-                      <Satellite className="h-3 w-3 mr-1" />
-                      Test GPS
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                      <DialogTitle className="text-base">Mobile GPS Testing Center</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="text-sm text-gray-600">
-                        <p><strong>GPS Status:</strong> {gpsStatus}</p>
-                      </div>
-                      
-                      <Button
-                        onClick={() => {
-                          setGpsStatus("Testing location access...");
-                          navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                              const coords = `Lat: ${pos.coords.latitude.toFixed(6)}, Lng: ${pos.coords.longitude.toFixed(6)}`;
-                              setGpsStatus(`GPS Working! ${coords}`);
-                              toast({
-                                title: "GPS Location Found",
-                                description: coords,
-                              });
-                            },
-                            (err) => {
-                              setGpsStatus(`GPS Error: ${err.message}`);
-                              toast({
-                                title: "GPS Error",
-                                description: err.message,
-                                variant: "destructive",
-                              });
-                            }
-                          );
-                        }}
-                        className="w-full bg-blue-500 hover:bg-blue-600"
-                      >
-                        <Satellite className="h-4 w-4 mr-2" />
-                        Test GPS Permission
-                      </Button>
-                      
-                      <div className="text-xs text-gray-500">
-                        <p><strong>Testing Instructions:</strong></p>
-                        <ol className="list-decimal list-inside space-y-1">
-                          <li>Click "Test GPS Permission" button</li>
-                          <li>Allow location access when prompted</li>
-                          <li>Wait for location detection</li>
-                          <li>Check accuracy and coordinates</li>
-                        </ol>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+
               </CardHeader>
 
               <CardContent className="px-4 pb-6">

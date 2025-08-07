@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import GlobalGPSDetector from '@/components/global-gps-detector';
 
 export default function FrontPage() {
   const modules = [
@@ -120,12 +121,7 @@ export default function FrontPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center relative gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             <div className="sm:absolute sm:right-0 flex flex-col sm:flex-row gap-2">
-              <Link href="/gps-test-direct">
-                <Button variant="outline" className="flex items-center gap-2 text-xs sm:text-sm">
-                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
-                  GPS Test
-                </Button>
-              </Link>
+              <GlobalGPSDetector />
               <Link href="#login-portals">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />

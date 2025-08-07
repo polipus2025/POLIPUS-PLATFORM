@@ -18,8 +18,16 @@ export async function apiRequest(
   const { method = 'GET', body, headers = {} } = options || {};
   
   // Check if offline before making request
-  if (!navigator.onLine) {
+  // Check if offline mode is enabled
+  const isOfflineMode = localStorage.getItem("offlineMode") === "true";
+  
+  if (!navigator.onLine && !isOfflineMode) {
     throw new Error('You are currently offline. Please check your internet connection and try again.');
+  }
+  
+  // If offline mode is enabled, try to handle request locally
+  if (!navigator.onLine && isOfflineMode) {
+    return handleOfflineRequest(url, options || {});
   }
   
   // Add authorization header if token exists
@@ -57,6 +65,45 @@ export async function apiRequest(
     }
     throw error;
   }
+}
+
+// Handle offline requests with mock data
+async function handleOfflineRequest(url: string, options: RequestInit): Promise<any> {
+  console.log('Handling offline request:', url);
+  
+  // Mock authentication responses
+  if (url.includes('/api/auth/field-agent-login')) {
+    return {
+      success: true,
+      message: "Offline authentication successful",
+      user: {
+        id: "offline-user",
+        type: "field_agent",
+        agentId: "agent001"
+      }
+    };
+  }
+  
+  // Mock dashboard data
+  if (url.includes('/api/dashboard/metrics')) {
+    return {
+      success: true,
+      data: {
+        totalFarms: 150,
+        activeFarmers: 120,
+        pendingInspections: 25,
+        completedInspections: 95,
+        offlineMode: true
+      }
+    };
+  }
+  
+  // Default offline response
+  return {
+    success: false,
+    message: "Feature not available offline",
+    offlineMode: true
+  };
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

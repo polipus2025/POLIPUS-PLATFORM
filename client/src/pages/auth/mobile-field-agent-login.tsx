@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, MapPin, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Users, MapPin, AlertCircle, Eye, EyeOff, Satellite } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
@@ -32,6 +33,7 @@ export default function MobileFieldAgentLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [gpsStatus, setGpsStatus] = useState<string>("Ready to test");
   const { toast } = useToast();
 
   const form = useForm<LoginForm>({
@@ -91,21 +93,7 @@ export default function MobileFieldAgentLogin() {
       {/* Mobile Container */}
       <div className="max-w-sm mx-auto">
         
-        {/* Compact GPS Test */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-          <h4 className="font-semibold text-blue-800 text-sm mb-2">Mobile GPS Testing Center</h4>
-          <button 
-            onClick={() => {
-              navigator.geolocation.getCurrentPosition(
-                (pos) => alert(`GPS Working!\nLat: ${pos.coords.latitude.toFixed(6)}\nLng: ${pos.coords.longitude.toFixed(6)}`),
-                (err) => alert(`GPS Error: ${err.message}`)
-              );
-            }}
-            className="w-full px-3 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-          >
-            Test GPS Permission
-          </button>
-        </div>
+
 
         {/* Login Card */}
         <Card className="shadow-lg border-0 bg-white">
@@ -128,6 +116,68 @@ export default function MobileFieldAgentLogin() {
             <p className="text-gray-600 text-sm">
               Mobile Field Operations
             </p>
+            
+            {/* Compact GPS Test Button */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 text-xs px-3 py-1 h-auto border-blue-200 text-blue-600 hover:bg-blue-50"
+                >
+                  <Satellite className="h-3 w-3 mr-1" />
+                  Test GPS
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle className="text-base">Mobile GPS Testing Center</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600">
+                    <p><strong>GPS Status:</strong> {gpsStatus}</p>
+                  </div>
+                  
+                  <Button
+                    onClick={() => {
+                      setGpsStatus("Testing location access...");
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const coords = `Lat: ${pos.coords.latitude.toFixed(6)}, Lng: ${pos.coords.longitude.toFixed(6)}`;
+                          setGpsStatus(`GPS Working! ${coords}`);
+                          toast({
+                            title: "GPS Location Found",
+                            description: coords,
+                          });
+                        },
+                        (err) => {
+                          setGpsStatus(`GPS Error: ${err.message}`);
+                          toast({
+                            title: "GPS Error",
+                            description: err.message,
+                            variant: "destructive",
+                          });
+                        }
+                      );
+                    }}
+                    className="w-full bg-blue-500 hover:bg-blue-600"
+                  >
+                    <Satellite className="h-4 w-4 mr-2" />
+                    Test GPS Permission
+                  </Button>
+                  
+                  <div className="text-xs text-gray-500">
+                    <p><strong>Testing Instructions:</strong></p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>Click "Test GPS Permission" button</li>
+                      <li>Allow location access when prompted</li>
+                      <li>Wait for location detection</li>
+                      <li>Check accuracy and coordinates</li>
+                    </ol>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardHeader>
 
           <CardContent className="px-4 pb-6">

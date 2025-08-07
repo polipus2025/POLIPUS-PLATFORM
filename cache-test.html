@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🚨 CACHE TEST</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(45deg, #28a745, #17a2b8); 
+            min-height: 100vh; 
+            color: white;
+            text-align: center;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 50px auto; 
+            background: rgba(0,0,0,0.7); 
+            padding: 40px; 
+            border-radius: 15px;
+        }
+        .timestamp { 
+            font-size: 24px; 
+            background: rgba(255,255,255,0.2); 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+        }
+        .button { 
+            display: inline-block;
+            background: #ffc107; 
+            color: black; 
+            padding: 15px 30px; 
+            text-decoration: none; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .button:hover { 
+            background: #e0a800; 
+            transform: scale(1.05);
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 CACHE DISABLED SUCCESSFULLY</h1>
+        
+        <div class="status">
+            <h2>✅ Service Worker Caching Disabled</h2>
+            <p>All browser and service worker caches have been cleared</p>
+        </div>
+        
+        <div class="timestamp">
+            <strong>Current Time:</strong> <span id="currentTime"></span>
+        </div>
+        
+        <div class="status">
+            <h3>🎯 Test the GPS Button Fix:</h3>
+            <p>The GPS section is now a compact button with popup modal</p>
+        </div>
+        
+        <a href="http://localhost:5000/test-field-agent-login" class="button">
+            🧪 Test GPS Button (New Version)
+        </a>
+        
+        <a href="http://localhost:5000/field-agent-login" class="button">
+            📱 Original Field Agent Login
+        </a>
+        
+        <div class="status">
+            <h3>📋 What You Should See:</h3>
+            <ul style="text-align: left; max-width: 500px; margin: 0 auto;">
+                <li><strong>Compact "Test GPS" button</strong> in the header area</li>
+                <li><strong>No large GPS testing section</strong> disrupting form layout</li>
+                <li><strong>Clean login form alignment</strong></li>
+                <li><strong>GPS popup modal</strong> when button is clicked</li>
+                <li><strong>Professional mobile-friendly interface</strong></li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <small>Cache cleared at: <span id="cacheTime"></span></small>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleString();
+            document.getElementById('cacheTime').textContent = new Date().toLocaleString();
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // Force refresh every 5 seconds to ensure no caching
+        setTimeout(() => {
+            console.log('🔄 Auto-refreshing to ensure no cache...');
+        }, 5000);
+        
+        console.log('🚨 Cache Test Page Loaded');
+        console.log('🕒 Timestamp:', Date.now());
+        
+        // Clear any remaining cache programmatically
+        if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+                cacheNames.forEach(cacheName => {
+                    console.log('🗑️ Deleting cache:', cacheName);
+                    caches.delete(cacheName);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

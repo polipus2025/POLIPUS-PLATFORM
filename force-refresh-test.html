@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Test - Field Agent Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-button { 
+            background: #2563eb; color: white; padding: 15px 30px; 
+            border: none; border-radius: 8px; font-size: 16px; 
+            cursor: pointer; margin: 10px; display: block; width: 200px;
+        }
+        .test-button:hover { background: #1d4ed8; }
+        .result { 
+            background: #f3f4f6; padding: 15px; margin: 10px 0; 
+            border-radius: 8px; border-left: 4px solid #2563eb; 
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Cache Testing Tool - Field Agent Login</h1>
+    <p><strong>Time:</strong> <span id="timestamp"></span></p>
+    
+    <button class="test-button" onclick="openOriginal()">
+        📱 Open Field Agent Login (Original)
+    </button>
+    
+    <button class="test-button" onclick="openMobile()">
+        📱 Open Mobile Field Agent Login (New)
+    </button>
+    
+    <button class="test-button" onclick="forceRefresh()">
+        🔄 Force Clear Cache & Open
+    </button>
+    
+    <div class="result">
+        <h3>🎯 What to Look For:</h3>
+        <ul>
+            <li><strong>Green "MOBILE UPDATE" indicator</strong> in top-right corner with timestamp</li>
+            <li><strong>Blue-green background</strong> instead of orange-yellow</li>
+            <li><strong>Compact mobile layout</strong> with smaller elements</li>
+            <li><strong>GPS Testing section</strong> at the top</li>
+        </ul>
+    </div>
+    
+    <div class="result">
+        <h3>🔐 Test Login Credentials:</h3>
+        <ul>
+            <li><strong>Agent ID:</strong> agent001</li>
+            <li><strong>Password:</strong> password123</li>
+        </ul>
+    </div>
+
+    <script>
+        // Update timestamp every second
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+        }
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+        
+        function openOriginal() {
+            const url = 'http://localhost:5000/field-agent-login?t=' + Date.now();
+            window.open(url, '_blank');
+        }
+        
+        function openMobile() {
+            const url = 'http://localhost:5000/mobile-field-agent-login?t=' + Date.now();
+            window.open(url, '_blank');
+        }
+        
+        function forceRefresh() {
+            const url = 'http://localhost:5000/field-agent-login?cache=false&t=' + Date.now();
+            const newWindow = window.open(url, '_blank');
+            
+            // Force a hard refresh after opening
+            setTimeout(() => {
+                if (newWindow && !newWindow.closed) {
+                    newWindow.location.reload(true);
+                }
+            }, 1000);
+        }
+        
+        console.log('🔧 Cache Testing Tool Ready');
+        console.log('📱 Testing mobile responsiveness updates');
+        console.log('⏰ Current time:', new Date().toLocaleTimeString());
+    </script>
+</body>
+</html>

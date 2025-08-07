@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Users, MapPin, AlertCircle, Eye, EyeOff, Clipboard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { OfflineDetector } from "@/components/offline-detector";
+// import { OfflineDetector } from "@/components/offline-detector"; // Removed to allow offline functionality
 import { GPSPermissionHandler } from "@/components/gps-permission-handler";
 import { MobileGPSTester } from "@/components/mobile-gps-tester";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
@@ -79,32 +79,22 @@ export default function FieldAgentLogin() {
     setIsLoading(true);
     setError("");
 
-    // Check if offline and handle accordingly
-    const isOffline = !navigator.onLine;
-    
-    if (isOffline) {
-      // Try offline authentication with cached credentials
+    try {
+      // First try offline authentication if available
       const offlineAuth = await tryOfflineAuthentication(data);
       if (offlineAuth.success) {
         toast({
-          title: "Offline Login Success",
-          description: "Authenticated using cached credentials",
+          title: "Login Successful",
+          description: "Welcome to your Field Agent Portal (Offline Mode)",
         });
         setTimeout(() => {
           window.location.href = "/field-agent-dashboard";
         }, 1000);
         setIsLoading(false);
         return;
-      } else {
-        setError("Offline authentication failed. Please check your credentials or connect to the internet.");
-        setIsLoading(false);
-        return;
       }
-    }
 
-
-
-    try {
+      // If offline auth fails, try online authentication
       console.log('Submitting field agent login:', data);
       const result = await apiRequest("/api/auth/field-agent-login", {
         method: "POST",
@@ -145,6 +135,20 @@ export default function FieldAgentLogin() {
       }
     } catch (error: any) {
       console.error('Field agent login error:', error);
+      // Try offline authentication as fallback
+      const offlineAuth = await tryOfflineAuthentication(data);
+      if (offlineAuth.success) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome to your Field Agent Portal (Offline Mode)",
+        });
+        setTimeout(() => {
+          window.location.href = "/field-agent-dashboard";
+        }, 1000);
+        setIsLoading(false);
+        return;
+      }
+      
       const errorMessage = error.message || "Login failed. Please check your credentials.";
       setError(errorMessage);
       toast({
@@ -164,7 +168,7 @@ export default function FieldAgentLogin() {
         <meta name="description" content="Secure login portal for LACRA field agents and extension officers" />
       </Helmet>
 
-      <OfflineDetector />
+      {/* <OfflineDetector /> Removed to enable offline authentication */}
       
       {/* Simple GPS Test - Always Visible */}
       <div className="w-full max-w-4xl mb-6">

@@ -26,19 +26,45 @@ export default function RealMapBoundaryMapper({
   const [status, setStatus] = useState('Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);
   const [currentTile, setCurrentTile] = useState(0);
+  const [mapCenter, setMapCenter] = useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295}); // Default to Monrovia
 
-  // Satellite tile URLs for Monrovia, Liberia area
-  const satelliteTiles = [
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/13/3977/4113',
-    'https://mt1.google.com/vt/lyrs=s&x=4113&y=3977&z=13',
-    'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/256/13/4113/3977?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
-  ];
+  // Function to get satellite tile URLs based on GPS coordinates
+  const getSatelliteTiles = (lat: number, lng: number, zoom: number = 15) => {
+    // Convert lat/lng to tile coordinates
+    const n = Math.pow(2, zoom);
+    const x = Math.floor(n * ((lng + 180) / 360));
+    const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
+    
+    return [
+      `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
+      `https://mt1.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
+      `https://tiles.stadiamaps.com/tiles/alidade_satellite/${zoom}/${x}/${y}.jpg`,
+      `https://wxs.ign.fr/choisirgeoportail/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX=${zoom}&TILEROW=${y}&TILECOL=${x}`,
+    ];
+  };
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    const initMap = () => {
-      setStatus('Loading satellite imagery...');
+    // Get user's GPS location or use default
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setMapCenter({lat, lng});
+        setStatus(`Loading satellite imagery for ${lat.toFixed(4)}, ${lng.toFixed(4)}...`);
+        initMapWithCoordinates(lat, lng);
+      },
+      (error) => {
+        console.log('GPS not available, using default location');
+        setStatus('Loading satellite imagery for default location...');
+        initMapWithCoordinates(mapCenter.lat, mapCenter.lng);
+      },
+      { timeout: 5000, enableHighAccuracy: true }
+    );
+
+    const initMapWithCoordinates = (lat: number, lng: number) => {
+      const satelliteTiles = getSatelliteTiles(lat, lng);
       
       // Try different satellite imagery sources
       const tryLoadTile = (tileIndex: number) => {
@@ -52,7 +78,7 @@ export default function RealMapBoundaryMapper({
         const testImg = new Image();
         
         testImg.onload = () => {
-          createMapWithTile(tileUrl);
+          createMapWithTile(tileUrl, lat, lng);
         };
         
         testImg.onerror = () => {
@@ -66,7 +92,7 @@ export default function RealMapBoundaryMapper({
       tryLoadTile(0);
     };
 
-    const createMapWithTile = (tileUrl: string) => {
+    const createMapWithTile = (tileUrl: string, centerLat: number, centerLng: number) => {
       mapRef.current!.innerHTML = `
         <style>
           .real-map { 
@@ -131,15 +157,15 @@ export default function RealMapBoundaryMapper({
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        // Convert pixel coordinates to lat/lng (Monrovia area)
-        const lat = 6.4281 + (200 - y) / 5000; // More realistic conversion
-        const lng = -9.4295 + (x - 200) / 5000;
+        // Convert pixel coordinates to lat/lng based on current map center
+        const lat = centerLat + (200 - y) / 5000; // More realistic conversion
+        const lng = centerLng + (x - 200) / 5000;
         
         const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
         setPoints(prev => [...prev, newPoint]);
       });
 
-      setStatus('Satellite map ready - Click to mark farm boundaries');
+      setStatus(`Real-time satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark farm boundaries`);
       setMapReady(true);
     };
 

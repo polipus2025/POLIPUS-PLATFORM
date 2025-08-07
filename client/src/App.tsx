@@ -293,6 +293,14 @@ function Router() {
           {/* Root route */}
           <Route path="/" component={FrontPage} />
           
+          {/* Field Agent Dashboard Route */}
+          <Route path="/field-agent-dashboard">
+            <ProtectedRoute 
+              component={FieldAgentDashboard} 
+              allowedUserTypes={['field_agent']} 
+            />
+          </Route>
+          
           {/* Exporter Portal Routes */}
           <Route path="/exporter-dashboard">
             <ProtectedRoute 
@@ -366,6 +374,14 @@ function Router() {
             <ProtectedRoute 
               component={InternationalStandards} 
               allowedUserTypes={['regulatory']} 
+            />
+          </Route>
+          
+          {/* Field Agent Specific Routes */}
+          <Route path="/field-agent-farm-mapping">
+            <ProtectedRoute 
+              component={FieldAgentFarmMapping} 
+              allowedUserTypes={['field_agent']} 
             />
           </Route>
           

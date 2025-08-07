@@ -102,7 +102,7 @@ export default function FrontPage() {
 
 
   return (
-    <div className="min-h-screen isms-gradient">
+    <div className="min-h-screen isms-gradient" style={{ overflowY: 'auto', height: 'auto' }}>
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
 

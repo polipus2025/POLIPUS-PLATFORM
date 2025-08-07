@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile-First Responsive Design */
+/* Simplified Mobile Styles */
 @media (max-width: 768px) {
   .mobile-hidden {
     display: none !important;
@@ -10,24 +10,14 @@
   
   .mobile-full {
     width: 100% !important;
-    margin: 0 !important;
-    padding: 0.5rem !important;
   }
   
   .mobile-text-sm {
     font-size: 0.875rem !important;
   }
   
-  .mobile-p-2 {
-    padding: 0.5rem !important;
-  }
-  
   .mobile-grid-1 {
     grid-template-columns: 1fr !important;
-  }
-  
-  .mobile-space-y-2 > * + * {
-    margin-top: 0.5rem !important;
   }
 }
 
@@ -404,83 +394,36 @@
   to { transform: rotate(360deg); }
 }
 
-/* Mobile-First Responsive Design for AgriTrace360 Dashboard */
+/* Simplified Base Styles */
 @layer base {
   html {
     font-size: 16px;
   }
   
   body {
+    margin: 0;
+    padding: 0;
     overflow-x: hidden;
-    overflow-y: auto;
-    max-width: 100vw;
-    height: auto;
-    min-height: 100vh;
+    width: 100%;
   }
   
-  /* Prevent horizontal scroll on all elements */
   * {
     box-sizing: border-box;
-    max-width: 100%;
-  }
-  
-  /* Mobile viewport handling */
-  @media screen and (max-width: 768px) {
-    html {
-      font-size: 14px;
-    }
-    
-    body {
-      overflow-x: hidden;
-      overflow-y: auto;
-      padding: 0;
-      margin: 0;
-      height: auto;
-      min-height: 100vh;
-    }
-    
-    /* Force all containers to stay within viewport */
-    .container, main, section, div {
-      max-width: 100vw;
-      overflow-x: hidden;
-    }
   }
 }
 
 @layer components {
-  /* Mobile-First Responsive Components */
+  /* Simplified Components */
   .mobile-container {
-    @apply w-full max-w-full overflow-x-hidden box-border;
-  }
-  
-  .mobile-safe-grid {
-    @apply grid w-full max-w-full overflow-x-hidden gap-2 sm:gap-4 md:gap-6;
+    @apply w-full;
   }
   
   .mobile-card {
-    @apply w-full max-w-full overflow-hidden p-3 md:p-6;
+    @apply w-full p-3 md:p-6;
   }
   
   .mobile-button {
     @apply w-full sm:w-auto min-h-[44px] text-sm md:text-base px-3 py-2 md:px-4 md:py-2;
-  }
-  
-  .mobile-text-safe {
-    @apply break-words max-w-full;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-  }
-  
-  .mobile-header-safe {
-    @apply w-full max-w-full overflow-x-hidden px-2 sm:px-4 md:px-6 py-2 md:py-4;
-  }
-  
-  .mobile-dialog-safe {
-    @apply w-[95vw] max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto;
-  }
-  
-  .mobile-hide-overflow {
-    @apply overflow-x-hidden max-w-full;
   }
 }
 
@@ -633,9 +576,7 @@
     line-height: 1.2;
   }
 
-  .mobile-hide-overflow {
-    overflow: hidden;
-  }
+
 
   /* Auto-scroll animation for regional compliance */
   @keyframes fadeInUp {

@@ -15,18 +15,26 @@ interface BoundaryData {
 interface RealMapBoundaryMapperProps {
   onBoundaryComplete: (boundary: BoundaryData) => void;
   minPoints?: number;
+  maxPoints?: number;
+  enableRealTimeGPS?: boolean;
 }
 
 export default function RealMapBoundaryMapper({ 
   onBoundaryComplete, 
-  minPoints = 3 
+  minPoints = 3,
+  maxPoints = 20,
+  enableRealTimeGPS = true
 }: RealMapBoundaryMapperProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);
   const [currentTile, setCurrentTile] = useState(0);
-  const [mapCenter, setMapCenter] = useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295}); // Default to Monrovia
+  const [mapCenter, setMapCenter] = useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295});
+  const [isTrackingGPS, setIsTrackingGPS] = useState(false);
+  const [gpsWatchId, setGpsWatchId] = useState<number | null>(null);
+  const [currentGPSPosition, setCurrentGPSPosition] = useState<{lat: number, lng: number} | null>(null);
+  const [trackingAccuracy, setTrackingAccuracy] = useState<number | null>(null);
 
   // Function to get satellite tile URLs based on GPS coordinates
   const getSatelliteTiles = (lat: number, lng: number, zoom: number = 15) => {
@@ -243,7 +251,7 @@ export default function RealMapBoundaryMapper({
       setMapReady(true);
     };
 
-    initMap();
+    // Map initialization handled by initMapWithCoordinates function
   }, []);
 
   // Update visual markers when points change
@@ -292,6 +300,76 @@ export default function RealMapBoundaryMapper({
     }
   }, [points, mapReady]);
 
+  // Real-time GPS tracking functions
+  const startGPSTracking = () => {
+    if (!navigator.geolocation) {
+      setStatus('GPS not available on this device');
+      return;
+    }
+
+    setIsTrackingGPS(true);
+    setStatus('Starting GPS tracking for field boundary mapping...');
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 1000
+    };
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        
+        setCurrentGPSPosition({lat, lng});
+        setTrackingAccuracy(accuracy);
+        setStatus(`GPS tracking active - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints}`);
+        
+        // Update map center to follow user
+        setMapCenter({lat, lng});
+      },
+      (error) => {
+        console.error('GPS Error:', error);
+        setStatus(`GPS Error: ${error.message}`);
+        setIsTrackingGPS(false);
+      },
+      options
+    );
+
+    setGpsWatchId(watchId);
+  };
+
+  const stopGPSTracking = () => {
+    if (gpsWatchId !== null) {
+      navigator.geolocation.clearWatch(gpsWatchId);
+      setGpsWatchId(null);
+    }
+    setIsTrackingGPS(false);
+    setCurrentGPSPosition(null);
+    setStatus('GPS tracking stopped');
+  };
+
+  const addCurrentGPSPoint = () => {
+    if (!currentGPSPosition) {
+      setStatus('No GPS position available');
+      return;
+    }
+
+    if (points.length >= maxPoints) {
+      setStatus(`Maximum ${maxPoints} points reached`);
+      return;
+    }
+
+    const newPoint: BoundaryPoint = {
+      latitude: currentGPSPosition.lat,
+      longitude: currentGPSPosition.lng
+    };
+
+    setPoints(prev => [...prev, newPoint]);
+    setStatus(`Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
+  };
+
   const calculateArea = (points: BoundaryPoint[]): number => {
     if (points.length < 3) return 0;
     
@@ -319,35 +397,98 @@ export default function RealMapBoundaryMapper({
   const canComplete = points.length >= minPoints;
   const area = calculateArea(points);
 
+  // Clean up GPS tracking on unmount
+  useEffect(() => {
+    return () => {
+      if (gpsWatchId !== null) {
+        navigator.geolocation.clearWatch(gpsWatchId);
+      }
+    };
+  }, [gpsWatchId]);
+
   return (
     <div className="space-y-4">
       {/* Instructions */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
         <div className="flex items-center gap-2 mb-2">
           <Satellite className="h-5 w-5 text-green-600" />
-          <h4 className="font-medium text-green-900">Real Satellite Farm Mapping</h4>
+          <h4 className="font-medium text-green-900">Real-Time GPS Field Boundary Mapping</h4>
         </div>
         <p className="text-sm text-green-800 mb-2">
-          Click on the satellite imagery below to mark your farm boundaries. The system loads real aerial imagery of Liberia.
+          Walk around your field and add GPS points in real-time to create accurate boundaries. 
+          Supports {minPoints}-{maxPoints} points for precise mapping.
         </p>
-        <div className="text-xs text-green-700">
-          • Yellow = Start point • Blue = Middle points • Red = End point
+        {enableRealTimeGPS && (
+          <div className="text-xs text-green-700 bg-green-100 p-2 rounded">
+            💡 Walk to each corner/boundary point and press "Add GPS Point" for real-time field mapping
+          </div>
+        )}
+      </div>
+
+      {/* GPS Tracking Status */}
+      {enableRealTimeGPS && (
+        <div className={`border rounded-lg p-3 ${isTrackingGPS ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">
+              {isTrackingGPS ? '📍 GPS Tracking Active' : '📍 GPS Tracking Inactive'}
+            </span>
+            {trackingAccuracy && (
+              <span className="text-xs text-gray-600">
+                Accuracy: {trackingAccuracy.toFixed(1)}m
+              </span>
+            )}
+          </div>
+          {currentGPSPosition && (
+            <div className="text-xs text-gray-600 mb-2">
+              Current Position: {currentGPSPosition.lat.toFixed(6)}, {currentGPSPosition.lng.toFixed(6)}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button
+              onClick={startGPSTracking}
+              disabled={isTrackingGPS}
+              size="sm"
+              variant={isTrackingGPS ? "secondary" : "default"}
+            >
+              {isTrackingGPS ? 'Tracking...' : 'Start GPS Tracking'}
+            </Button>
+            <Button
+              onClick={stopGPSTracking}
+              disabled={!isTrackingGPS}
+              size="sm"
+              variant="outline"
+            >
+              Stop Tracking
+            </Button>
+            <Button
+              onClick={addCurrentGPSPoint}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
+              size="sm"
+              variant="default"
+            >
+              Add GPS Point ({points.length}/{maxPoints})
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Status */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-blue-800">{status}</span>
+          <div className="text-xs text-blue-600">
+            Points: {points.length}/{minPoints}+ {area > 0 && `• Area: ${area.toFixed(2)} hectares`}
+          </div>
         </div>
       </div>
 
-      {/* Status and Controls */}
+      {/* Controls */}
       <div className="flex justify-between items-center">
-        <div className="text-sm">
-          <span className="font-medium">Status: {status}</span>
-          <div className="text-gray-600">
-            Points: {points.length} | {area > 0 && `Area: ~${area.toFixed(2)} hectares`}
-          </div>
-        </div>
-        <div className="space-x-2">
+        <div className="flex gap-2">
           <Button
+            onClick={handleReset}
             variant="outline"
             size="sm"
-            onClick={handleReset}
             disabled={points.length === 0}
           >
             <RotateCcw className="h-4 w-4 mr-1" />
@@ -359,7 +500,7 @@ export default function RealMapBoundaryMapper({
             size="sm"
           >
             <Check className="h-4 w-4 mr-1" />
-            Complete ({points.length}/{minPoints})
+            Complete ({points.length}/{minPoints}+)
           </Button>
         </div>
       </div>

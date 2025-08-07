@@ -18,16 +18,14 @@ export async function apiRequest(
   const { method = 'GET', body, headers = {} } = options || {};
   
   // Check if offline before making request
-  // Check if offline mode is enabled
-  const isOfflineMode = localStorage.getItem("offlineMode") === "true";
-  
-  if (!navigator.onLine && !isOfflineMode) {
-    throw new Error('You are currently offline. Please check your internet connection and try again.');
-  }
-  
-  // If offline mode is enabled, try to handle request locally
-  if (!navigator.onLine && isOfflineMode) {
-    return handleOfflineRequest(url, options || {});
+  // Allow offline functionality - disable offline checks
+  // Always try to handle requests locally if offline
+  if (!navigator.onLine) {
+    try {
+      return handleOfflineRequest(url, options || {});
+    } catch (error) {
+      // If offline handler fails, continue with normal request
+    }
   }
   
   // Add authorization header if token exists

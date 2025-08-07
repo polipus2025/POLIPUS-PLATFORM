@@ -13,6 +13,7 @@ import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
+import MobileFieldAgentLogin from "@/pages/auth/mobile-field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import MonitoringLogin from "@/pages/auth/monitoring-login";
 
@@ -166,6 +167,7 @@ function Router() {
       <Route path="/regulatory-login" component={RegulatoryLogin} />
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
+      <Route path="/mobile-field-agent-login" component={MobileFieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
       <Route path="/monitoring-login" component={MonitoringLogin} />
 

@@ -120,6 +120,11 @@ export default function FieldAgentLogin() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Helmet>
 
+      {/* Force reload indicator for debugging */}
+      <div style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '2px 6px', fontSize: '10px', zIndex: 9999 }}>
+        v{Date.now()}
+      </div>
+      
       {/* Mobile-optimized container */}
       <div className="flex flex-col min-h-screen">
         

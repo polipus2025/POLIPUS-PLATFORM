@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #10b981; color: white; border: none; cursor: pointer; }
+        button:hover { background: #059669; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 5px; }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔐 Quick Login Test</h2>
+        <form id="testForm">
+            <input type="text" id="agentId" placeholder="Agent ID" value="agent001">
+            <input type="password" id="password" placeholder="Password" value="password123">
+            <button type="submit">Test Login</button>
+        </form>
+        <div id="result"></div>
+        <hr>
+        <button onclick="window.location.href='/field-agent-login'">Go to Real Login Page</button>
+        <button onclick="window.location.href='/field-agent-dashboard'">Go to Dashboard</button>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const agentId = document.getElementById('agentId').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('result');
+            
+            // Test the same logic as the real login
+            if ((agentId === "agent001" || agentId === "agent002" || agentId === "field001") && password === "password123") {
+                // Store auth data
+                localStorage.setItem("authToken", "offline-token-" + Date.now());
+                localStorage.setItem("userType", "field_agent");
+                localStorage.setItem("userRole", "field_agent");
+                localStorage.setItem("agentId", agentId);
+                localStorage.setItem("offlineMode", "true");
+                
+                result.innerHTML = '<div class="success">✅ Login Successful! Credentials stored.<br><button onclick="window.location.href=\'/field-agent-dashboard\'">Go to Dashboard</button></div>';
+            } else {
+                result.innerHTML = '<div class="error">❌ Invalid credentials. Use agent001/password123</div>';
+            }
+        });
+    </script>
+</body>
+</html>

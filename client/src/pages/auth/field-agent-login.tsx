@@ -90,7 +90,10 @@ export default function FieldAgentLogin() {
           title: "Offline Login Success",
           description: "Authenticated using cached credentials",
         });
-        window.location.href = "/field-agent-dashboard";
+        setTimeout(() => {
+          window.location.href = "/field-agent-dashboard";
+        }, 1000);
+        setIsLoading(false);
         return;
       } else {
         setError("Offline authentication failed. Please check your credentials or connect to the internet.");
@@ -126,8 +129,19 @@ export default function FieldAgentLogin() {
         localStorage.setItem("agentId", data.agentId);
         localStorage.setItem("jurisdiction", data.jurisdiction || "");
         
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
+        // Redirect to field agent dashboard
+        setTimeout(() => {
+          window.location.href = "/field-agent-dashboard";
+        }, 1000);
+        setIsLoading(false);
+        return;
+      } else {
+        setError("Login failed. Please check your credentials.");
+        toast({
+          title: "Login Failed",
+          description: "Invalid credentials. Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
       console.error('Field agent login error:', error);

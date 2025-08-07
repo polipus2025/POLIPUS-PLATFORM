@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Field Agent Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #334155;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #475569;
+            border-radius: 5px;
+            background: #475569;
+            color: white;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #059669;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔐 Test Field Agent Login</h2>
+        <p>Test credentials: agent001 / password123</p>
+        
+        <form id="loginForm">
+            <input type="text" id="agentId" placeholder="Agent ID" value="agent001">
+            <input type="password" id="password" placeholder="Password" value="password123">
+            <button type="submit">Test Login</button>
+        </form>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="window.location.href='/field-agent-login'">Go to Real Login Page</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const agentId = document.getElementById('agentId').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Testing login...';
+            
+            try {
+                const response = await fetch('/api/auth/field-agent-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        agentId: agentId,
+                        password: password,
+                        userType: 'field_agent'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div style="color: #10b981;">
+                            ✅ Login Successful!<br>
+                            Agent: ${result.user.agentId}<br>
+                            Role: ${result.user.role}<br>
+                            Jurisdiction: ${result.user.jurisdiction}<br>
+                            <button onclick="redirectToDashboard('${result.token}', '${result.user.agentId}')">
+                                Go to Dashboard
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div style="color: #ef4444;">❌ Login Failed: ${result.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div style="color: #ef4444;">❌ Error: ${error.message}</div>`;
+            }
+        });
+        
+        function redirectToDashboard(token, agentId) {
+            localStorage.setItem("authToken", token);
+            localStorage.setItem("userRole", "field_agent");
+            localStorage.setItem("userType", "field_agent");
+            localStorage.setItem("agentId", agentId);
+            
+            window.location.href = "/field-agent-dashboard";
+        }
+    </script>
+</body>
+</html>

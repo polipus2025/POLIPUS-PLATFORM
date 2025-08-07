@@ -115,7 +115,7 @@ export default function FieldAgentLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-red-500">
       <Helmet>
         <title>Field Agent Portal Login - AgriTrace360™ LACRA</title>
         <meta name="description" content="Secure login portal for LACRA field agents and extension officers" />
@@ -131,6 +131,11 @@ export default function FieldAgentLogin() {
       <div className="flex flex-col min-h-screen">
         
 
+
+        {/* FORCE UPDATE TEST - BRIGHT RED BACKGROUND */}
+        <div className="bg-yellow-400 p-4 text-black text-center font-bold text-2xl">
+          🚨 THIS IS THE NEW VERSION WITH GPS BUTTON 🚨
+        </div>
 
         {/* Login Form Container - Mobile Centered */}
         <div className="flex-1 flex items-center justify-center px-4 pb-4">
@@ -149,8 +154,8 @@ export default function FieldAgentLogin() {
                     <Users className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">
-                  LACRA Field Agent Portal
+                <CardTitle className="text-lg sm:text-xl font-bold text-red-900 leading-tight">
+                  🚨 UPDATED VERSION - GPS BUTTON ACTIVE 🚨
                 </CardTitle>
                 <p className="text-gray-600 text-sm mt-1">
                   Liberia Agriculture Commodity Regulatory Authority

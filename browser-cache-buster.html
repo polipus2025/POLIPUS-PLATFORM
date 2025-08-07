@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🚨 FORCE BROWSER REFRESH</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4); 
+            min-height: 100vh; 
+            color: white;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.1); 
+            padding: 30px; 
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { text-align: center; font-size: 2em; margin-bottom: 30px; }
+        .button { 
+            display: block;
+            width: 100%;
+            background: #ff4757; 
+            color: white; 
+            padding: 20px; 
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px; 
+            font-size: 18px; 
+            font-weight: bold;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+        .button:hover { 
+            background: #ff3742; 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .info { 
+            background: rgba(255,255,255,0.2); 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+        }
+        .timestamp { 
+            text-align: center; 
+            font-size: 1.2em; 
+            margin: 20px 0;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 FORCE BROWSER REFRESH</h1>
+        
+        <div class="timestamp">
+            Current Time: <span id="timestamp"></span>
+        </div>
+        
+        <div class="info">
+            <h3>🎯 What You Should See:</h3>
+            <ul>
+                <li><strong>Purple-Pink Background</strong> (not blue-green)</li>
+                <li><strong>Red "CACHE BUSTER" indicator</strong> in top-right corner</li>
+                <li><strong>Small "Test GPS" button</strong> in the login header (not large section)</li>
+                <li><strong>Compact login form</strong> without GPS disruption</li>
+            </ul>
+        </div>
+        
+        <a href="javascript:void(0)" onclick="openWithCacheBust()" class="button">
+            🚀 OPEN FIELD AGENT LOGIN (Cache Busted)
+        </a>
+        
+        <a href="javascript:void(0)" onclick="openMobileVersion()" class="button">
+            📱 OPEN MOBILE VERSION (Cache Busted)
+        </a>
+        
+        <a href="javascript:void(0)" onclick="clearAllCache()" class="button">
+            🗑️ CLEAR ALL CACHE & RELOAD
+        </a>
+        
+        <div class="info">
+            <h3>🔧 Manual Steps if Still Not Working:</h3>
+            <ol>
+                <li>Press <strong>Ctrl+Shift+R</strong> (Windows) or <strong>Cmd+Shift+R</strong> (Mac)</li>
+                <li>Press <strong>F12</strong> → Network tab → Check "Disable cache"</li>
+                <li>Clear browser data: Settings → Privacy → Clear browsing data</li>
+                <li>Try incognito/private browsing mode</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        }
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+        
+        function openWithCacheBust() {
+            const timestamp = Date.now();
+            const url = `http://localhost:5000/field-agent-login?v=${timestamp}&cache=false&bust=true`;
+            const newWindow = window.open(url, '_blank');
+            
+            // Force reload after opening
+            setTimeout(() => {
+                if (newWindow && !newWindow.closed) {
+                    newWindow.location.href = url + '&reload=' + Math.random();
+                }
+            }, 500);
+        }
+        
+        function openMobileVersion() {
+            const timestamp = Date.now();
+            const url = `http://localhost:5000/mobile-field-agent-login?v=${timestamp}&cache=false&bust=true`;
+            window.open(url, '_blank');
+        }
+        
+        function clearAllCache() {
+            if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                    cacheNames.forEach(function(cacheName) {
+                        caches.delete(cacheName);
+                    });
+                });
+            }
+            
+            // Clear localStorage
+            localStorage.clear();
+            
+            // Clear sessionStorage  
+            sessionStorage.clear();
+            
+            alert('Cache cleared! Now opening page...');
+            openWithCacheBust();
+        }
+        
+        console.log('🚨 Cache Buster Tool Active');
+        console.log('🕒 Timestamp:', Date.now());
+    </script>
+</body>
+</html>

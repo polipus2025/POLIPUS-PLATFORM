@@ -115,7 +115,7 @@ export default function FieldAgentLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <Helmet>
         <title>Field Agent Portal Login - AgriTrace360™ LACRA</title>
         <meta name="description" content="Secure login portal for LACRA field agents and extension officers" />
@@ -123,8 +123,8 @@ export default function FieldAgentLogin() {
       </Helmet>
 
       {/* Force reload indicator for debugging */}
-      <div style={{ position: 'fixed', top: 0, right: 0, background: 'lime', color: 'black', padding: '4px 8px', fontSize: '12px', zIndex: 9999 }}>
-        MOBILE UPDATE v{Date.now()}
+      <div style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '8px 16px', fontSize: '14px', zIndex: 9999, fontWeight: 'bold' }}>
+        🚨 CACHE BUSTER v{Date.now()} 🚨
       </div>
       
       {/* Mobile-optimized container */}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #334155;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #059669;
+        }
+        .result {
+            background: #1f2937;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .online { color: #10b981; }
+        .offline { color: #ef4444; }
+        input {
+            background: #475569;
+            color: white;
+            border: 1px solid #64748b;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Complete Offline Login Test</h1>
+    
+    <div class="test-section">
+        <h3>Connection Status</h3>
+        <div id="connectionStatus">Checking...</div>
+        <button onclick="toggleOfflineSimulation()">Toggle Offline Simulation</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Manual Login Test</h3>
+        <div>
+            <input type="text" id="agentId" placeholder="Agent ID" value="agent001">
+            <input type="password" id="password" placeholder="Password" value="password123">
+            <button onclick="testDirectAuthentication()">Test Direct Auth</button>
+        </div>
+        <div id="authResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Offline Authentication Logic Test</h3>
+        <button onclick="testOfflineLogic()">Test Offline Auth Function</button>
+        <div id="offlineResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Local Storage Test</h3>
+        <button onclick="testLocalStorage()">Test Storage Operations</button>
+        <div id="storageResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Navigation Test</h3>
+        <button onclick="testNavigation()">Test Navigation to Dashboard</button>
+        <div id="navResult" class="result"></div>
+    </div>
+
+    <script>
+        let isSimulatingOffline = false;
+        
+        function updateConnectionStatus() {
+            const status = document.getElementById('connectionStatus');
+            const realOnline = navigator.onLine;
+            const effectiveOnline = realOnline && !isSimulatingOffline;
+            
+            status.innerHTML = `
+                <div>Real Connection: <span class="${realOnline ? 'online' : 'offline'}">${realOnline ? 'Online' : 'Offline'}</span></div>
+                <div>Simulated: <span class="${isSimulatingOffline ? 'offline' : 'online'}">${isSimulatingOffline ? 'Offline Mode' : 'Normal Mode'}</span></div>
+                <div>Effective Status: <span class="${effectiveOnline ? 'online' : 'offline'}">${effectiveOnline ? 'Online' : 'Offline'}</span></div>
+            `;
+        }
+        
+        function toggleOfflineSimulation() {
+            isSimulatingOffline = !isSimulatingOffline;
+            updateConnectionStatus();
+        }
+        
+        // Test offline authentication logic directly
+        function testOfflineLogic() {
+            const result = document.getElementById('offlineResult');
+            result.innerHTML = 'Testing offline authentication...';
+            
+            const testAccounts = [
+                { agentId: "agent001", password: "password123" },
+                { agentId: "agent002", password: "password123" },
+                { agentId: "field001", password: "password123" },
+            ];
+            
+            const credentials = {
+                agentId: document.getElementById('agentId').value,
+                password: document.getElementById('password').value
+            };
+            
+            const isValidAccount = testAccounts.some(
+                account => account.agentId === credentials.agentId && account.password === credentials.password
+            );
+            
+            if (isValidAccount) {
+                // Test storage operations
+                try {
+                    localStorage.setItem("authToken", "offline-token-" + Date.now());
+                    localStorage.setItem("userType", "field_agent");
+                    localStorage.setItem("userId", credentials.agentId);
+                    localStorage.setItem("offlineMode", "true");
+                    
+                    result.innerHTML = `
+                        <div class="online">✅ Offline Authentication SUCCESS</div>
+                        <div>Agent: ${credentials.agentId}</div>
+                        <div>Token: ${localStorage.getItem("authToken")}</div>
+                        <div>User Type: ${localStorage.getItem("userType")}</div>
+                    `;
+                } catch (error) {
+                    result.innerHTML = `<div class="offline">❌ Storage Error: ${error.message}</div>`;
+                }
+            } else {
+                result.innerHTML = `<div class="offline">❌ Invalid credentials: ${credentials.agentId}</div>`;
+            }
+        }
+        
+        // Test direct authentication
+        async function testDirectAuthentication() {
+            const result = document.getElementById('authResult');
+            result.innerHTML = 'Testing authentication...';
+            
+            const credentials = {
+                agentId: document.getElementById('agentId').value,
+                password: document.getElementById('password').value,
+                userType: "field_agent"
+            };
+            
+            try {
+                // Try network request first
+                const response = await fetch('/api/auth/field-agent-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(credentials)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <div class="online">✅ ONLINE Authentication SUCCESS</div>
+                        <div>Agent: ${data.user.agentId}</div>
+                        <div>Role: ${data.user.role}</div>
+                        <div>Token: ${data.token.substring(0, 20)}...</div>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="offline">❌ Online Auth Failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="offline">❌ Network Error: ${error.message}</div>
+                    <div>Falling back to offline authentication...</div>
+                `;
+                
+                // Test offline fallback
+                setTimeout(() => {
+                    testOfflineLogic();
+                    const offlineResult = document.getElementById('offlineResult').innerHTML;
+                    result.innerHTML += `<div>Offline Fallback Result: ${offlineResult}</div>`;
+                }, 1000);
+            }
+        }
+        
+        // Test local storage
+        function testLocalStorage() {
+            const result = document.getElementById('storageResult');
+            
+            try {
+                // Test basic storage operations
+                localStorage.setItem('test', 'working');
+                const testValue = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                
+                // Check current auth data
+                const authToken = localStorage.getItem('authToken');
+                const userType = localStorage.getItem('userType');
+                const userId = localStorage.getItem('userId');
+                
+                result.innerHTML = `
+                    <div class="online">✅ Local Storage Working</div>
+                    <div>Test Value: ${testValue}</div>
+                    <div>Current Auth Token: ${authToken || 'None'}</div>
+                    <div>Current User Type: ${userType || 'None'}</div>
+                    <div>Current User ID: ${userId || 'None'}</div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="offline">❌ Storage Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test navigation
+        function testNavigation() {
+            const result = document.getElementById('navResult');
+            
+            // Set up auth data for navigation test
+            localStorage.setItem("authToken", "test-token-" + Date.now());
+            localStorage.setItem("userType", "field_agent");
+            localStorage.setItem("userId", "agent001");
+            
+            result.innerHTML = `
+                <div class="online">✅ Navigation Test Ready</div>
+                <div>Auth Token Set: ${localStorage.getItem("authToken")}</div>
+                <div><a href="/field-agent-dashboard" style="color: #10b981;">Click to Navigate to Dashboard</a></div>
+                <div><button onclick="window.location.href='/field-agent-dashboard'">Direct Navigation</button></div>
+            `;
+        }
+        
+        // Initialize
+        updateConnectionStatus();
+        
+        // Listen for connection changes
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+    </script>
+</body>
+</html>

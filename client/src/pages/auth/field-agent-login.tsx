@@ -78,87 +78,66 @@ export default function FieldAgentLogin() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     setError("");
+    
+    console.log('Starting authentication for:', data.agentId);
 
-    try {
-      // First try offline authentication if available
-      const offlineAuth = await tryOfflineAuthentication(data);
-      if (offlineAuth.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to your Field Agent Portal (Offline Mode)",
-        });
-        setTimeout(() => {
-          window.location.href = "/field-agent-dashboard";
-        }, 1000);
-        setIsLoading(false);
-        return;
-      }
-
-      // If offline auth fails, try online authentication
-      console.log('Submitting field agent login:', data);
-      const result = await apiRequest("/api/auth/field-agent-login", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          userType: "field_agent"
-        })
-      });
-      
-      console.log('Login result:', result);
-      
-      if (result && result.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to your Field Agent Portal",
-        });
-        
-        // Store session data
-        localStorage.setItem("authToken", result.token);
-        localStorage.setItem("userRole", "field_agent");
-        localStorage.setItem("userType", "field_agent");
-        localStorage.setItem("agentId", data.agentId);
-        localStorage.setItem("jurisdiction", data.jurisdiction || "");
-        
-        // Redirect to field agent dashboard
-        setTimeout(() => {
-          window.location.href = "/field-agent-dashboard";
-        }, 1000);
-        setIsLoading(false);
-        return;
-      } else {
-        setError("Login failed. Please check your credentials.");
-        toast({
-          title: "Login Failed",
-          description: "Invalid credentials. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      console.error('Field agent login error:', error);
-      // Try offline authentication as fallback
-      const offlineAuth = await tryOfflineAuthentication(data);
-      if (offlineAuth.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to your Field Agent Portal (Offline Mode)",
-        });
-        setTimeout(() => {
-          window.location.href = "/field-agent-dashboard";
-        }, 1000);
-        setIsLoading(false);
-        return;
-      }
-      
-      const errorMessage = error.message || "Login failed. Please check your credentials.";
-      setError(errorMessage);
+    // ALWAYS try offline authentication first (works both online and offline)
+    const offlineAuth = await tryOfflineAuthentication(data);
+    if (offlineAuth.success) {
+      console.log('Offline authentication successful');
       toast({
-        title: "Login Failed", 
-        description: errorMessage,
-        variant: "destructive",
+        title: "Login Successful",
+        description: "Welcome to your Field Agent Portal",
       });
-    } finally {
-      setIsLoading(false);
+      
+      // Immediate redirect without delay
+      window.location.href = "/field-agent-dashboard";
+      return;
     }
+
+    // Only try online authentication if offline fails AND we're online
+    if (navigator.onLine) {
+      try {
+        console.log('Trying online authentication...');
+        const result = await apiRequest("/api/auth/field-agent-login", {
+          method: "POST",
+          body: JSON.stringify({
+            ...data,
+            userType: "field_agent"
+          })
+        });
+        
+        if (result && result.success) {
+          console.log('Online authentication successful');
+          toast({
+            title: "Login Successful",
+            description: "Welcome to your Field Agent Portal",
+          });
+          
+          // Store session data
+          localStorage.setItem("authToken", result.token);
+          localStorage.setItem("userRole", "field_agent");
+          localStorage.setItem("userType", "field_agent");
+          localStorage.setItem("agentId", data.agentId);
+          localStorage.setItem("jurisdiction", data.jurisdiction || "");
+          
+          // Immediate redirect
+          window.location.href = "/field-agent-dashboard";
+          return;
+        }
+      } catch (error: any) {
+        console.error('Online authentication failed:', error);
+      }
+    }
+    
+    // If we reach here, both offline and online failed
+    setError("Invalid credentials. Please check your Agent ID and password.");
+    toast({
+      title: "Login Failed", 
+      description: "Invalid credentials. Please verify your information.",
+      variant: "destructive",
+    });
+    setIsLoading(false);
   };
 
   return (

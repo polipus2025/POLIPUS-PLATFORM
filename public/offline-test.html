@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polipus Offline Functionality Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #10b981;
+    }
+    
+    .status {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .status-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .test-button {
+      background: linear-gradient(45deg, #059669, #047857);
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+    
+    .test-button:hover {
+      transform: translateY(-2px);
+    }
+    
+    .test-button.success {
+      background: linear-gradient(45deg, #10b981, #059669);
+    }
+    
+    .test-button.error {
+      background: linear-gradient(45deg, #ef4444, #dc2626);
+    }
+    
+    .results {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .result-item {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .status-icon {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌍 Polipus Platform - Offline Test Center</h1>
+    
+    <div class="status">
+      <div class="status-card">
+        <h3>Connection Status</h3>
+        <div id="connectionStatus">Checking...</div>
+      </div>
+      <div class="status-card">
+        <h3>Service Worker</h3>
+        <div id="swStatus">Checking...</div>
+      </div>
+    </div>
+    
+    <h3>Test All Modules Offline:</h3>
+    <div class="test-grid">
+      <button class="test-button" onclick="testRoute('/')">Main Page</button>
+      <button class="test-button" onclick="testRoute('/front-page')">Polipus Landing</button>
+      <button class="test-button" onclick="testRoute('/gps-test-direct')">GPS Test</button>
+      <button class="test-button" onclick="testRoute('/regulatory-login')">LACRA Login</button>
+      <button class="test-button" onclick="testRoute('/farmer-login')">Farmer Login</button>
+      <button class="test-button" onclick="testRoute('/live-trace-farmer-login')">LiveTrace Login</button>
+      <button class="test-button" onclick="testRoute('/landmap360-login')">LandMap360 Login</button>
+      <button class="test-button" onclick="testRoute('/portals')">All Portals</button>
+      <button class="test-button" onclick="testAllRoutes()">Test All Routes</button>
+    </div>
+    
+    <button class="test-button" onclick="simulateOffline()" style="width: 100%; margin-bottom: 20px;">
+      📶 Simulate Offline Mode
+    </button>
+    
+    <div class="results" id="results">
+      <div class="result-item">
+        <span>Ready to test offline functionality...</span>
+        <span class="status-icon">⏳</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isOfflineMode = false;
+    
+    // Check initial status
+    window.addEventListener('load', () => {
+      updateConnectionStatus();
+      checkServiceWorker();
+      
+      // Listen for online/offline events
+      window.addEventListener('online', updateConnectionStatus);
+      window.addEventListener('offline', updateConnectionStatus);
+    });
+    
+    function updateConnectionStatus() {
+      const status = document.getElementById('connectionStatus');
+      if (navigator.onLine && !isOfflineMode) {
+        status.innerHTML = '✅ Online';
+        status.style.color = '#10b981';
+      } else {
+        status.innerHTML = '❌ Offline';
+        status.style.color = '#ef4444';
+      }
+    }
+    
+    function checkServiceWorker() {
+      const status = document.getElementById('swStatus');
+      
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(registration => {
+          if (registration) {
+            status.innerHTML = '✅ Active';
+            status.style.color = '#10b981';
+          } else {
+            status.innerHTML = '❌ Not Registered';
+            status.style.color = '#ef4444';
+          }
+        });
+      } else {
+        status.innerHTML = '❌ Not Supported';
+        status.style.color = '#ef4444';
+      }
+    }
+    
+    async function testRoute(route) {
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = 'Testing...';
+      
+      try {
+        const response = await fetch(route, {
+          cache: isOfflineMode ? 'force-cache' : 'default'
+        });
+        
+        const success = response.ok;
+        addResult(route, success ? 'Success' : 'Failed', success);
+        
+        button.className = success ? 'test-button success' : 'test-button error';
+        button.textContent = success ? '✅ ' + originalText : '❌ ' + originalText;
+        
+      } catch (error) {
+        addResult(route, 'Error: ' + error.message, false);
+        button.className = 'test-button error';
+        button.textContent = '❌ ' + originalText;
+      }
+      
+      setTimeout(() => {
+        button.className = 'test-button';
+        button.textContent = originalText;
+      }, 3000);
+    }
+    
+    async function testAllRoutes() {
+      const routes = [
+        '/',
+        '/front-page',
+        '/gps-test-direct',
+        '/regulatory-login',
+        '/farmer-login',
+        '/live-trace-farmer-login',
+        '/landmap360-login',
+        '/portals'
+      ];
+      
+      addResult('Testing all routes...', 'Starting bulk test', true);
+      
+      let successCount = 0;
+      
+      for (const route of routes) {
+        try {
+          const response = await fetch(route, {
+            cache: isOfflineMode ? 'force-cache' : 'default'
+          });
+          
+          if (response.ok) {
+            successCount++;
+            addResult(route, 'Success', true);
+          } else {
+            addResult(route, 'Failed', false);
+          }
+        } catch (error) {
+          addResult(route, 'Error: ' + error.message, false);
+        }
+        
+        // Small delay to avoid overwhelming
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      
+      addResult(`Bulk test complete: ${successCount}/${routes.length} routes working`, 
+                successCount === routes.length ? 'All working' : 'Some failed', 
+                successCount === routes.length);
+    }
+    
+    function simulateOffline() {
+      isOfflineMode = !isOfflineMode;
+      const button = event.target;
+      
+      if (isOfflineMode) {
+        button.textContent = '🌐 Exit Offline Mode';
+        button.style.background = 'linear-gradient(45deg, #ef4444, #dc2626)';
+        addResult('Offline mode enabled', 'Testing with cache-only', true);
+      } else {
+        button.textContent = '📶 Simulate Offline Mode';
+        button.style.background = 'linear-gradient(45deg, #059669, #047857)';
+        addResult('Online mode restored', 'Testing with network', true);
+      }
+      
+      updateConnectionStatus();
+    }
+    
+    function addResult(route, status, success) {
+      const results = document.getElementById('results');
+      const item = document.createElement('div');
+      item.className = 'result-item';
+      
+      const time = new Date().toLocaleTimeString();
+      const icon = success ? '✅' : '❌';
+      
+      item.innerHTML = `
+        <span><strong>${route}</strong> - ${status} (${time})</span>
+        <span class="status-icon">${icon}</span>
+      `;
+      
+      results.insertBefore(item, results.firstChild);
+      
+      // Limit to 20 results
+      while (results.children.length > 20) {
+        results.removeChild(results.lastChild);
+      }
+    }
+  </script>
+</body>
+</html>

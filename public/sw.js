@@ -17,17 +17,36 @@ const STATIC_CACHE_URLS = [
   '/portals',
   '/pwa-offline.html',
   '/field-agent-login.html',
+  '/gps-test-direct',
   // Main authentication pages
   '/regulatory-login',
   '/farmer-login',
-  '/field-agent-login',
+  '/field-agent-login', 
   '/exporter-login',
   // LiveTrace module pages
   '/live-trace-farmer-login',
   '/live-trace-regulatory-login',
+  '/live-trace-field-agent-login',
   '/livetrace-login',
   // LandMap360 module pages
-  '/landmap360-login'
+  '/landmap360-login',
+  '/landmap360-portal',
+  // All module entry points
+  '/live-trace',
+  '/mine-watch',
+  '/forest-guard',
+  '/aqua-trace',
+  '/blue-carbon360',
+  '/carbon-trace',
+  // Dashboard routes
+  '/dashboard',
+  '/regulatory-dashboard',
+  '/farmer-dashboard',
+  '/field-agent-dashboard',
+  '/exporter-dashboard',
+  '/live-trace-farmer-dashboard',
+  '/live-trace-regulatory-dashboard',
+  '/landmap360-dashboard'
 ];
 
 // API endpoints to cache

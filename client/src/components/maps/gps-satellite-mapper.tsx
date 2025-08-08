@@ -26,17 +26,25 @@ export default function GPSSatelliteMapper({
   const [mappingActive, setMappingActive] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Calculate area using shoelace formula
+  // Calculate area using precise shoelace formula for GPS coordinates
   const calculateArea = (mapPoints: BoundaryPoint[]) => {
     if (mapPoints.length < 3) return 0;
     
+    // Use proper GPS coordinate area calculation
     let area = 0;
     for (let i = 0; i < mapPoints.length; i++) {
       const j = (i + 1) % mapPoints.length;
-      area += mapPoints[i].latitude * mapPoints[j].longitude;
-      area -= mapPoints[j].latitude * mapPoints[i].longitude;
+      area += mapPoints[i].longitude * mapPoints[j].latitude;
+      area -= mapPoints[j].longitude * mapPoints[i].latitude;
     }
-    return Math.abs(area) / 2 * 12100; // Convert to hectares
+    
+    // Convert to hectares using accurate GPS degree to meter conversion
+    // 1 degree ≈ 111,320 meters at equator
+    const areaInSquareMeters = Math.abs(area) * 111320 * 111320 / 2;
+    const areaInHectares = areaInSquareMeters / 10000; // 1 hectare = 10,000 m²
+    
+    console.log(`📐 Land Area Calculation: ${areaInSquareMeters.toFixed(0)} m² = ${areaInHectares.toFixed(3)} hectares`);
+    return areaInHectares;
   };
 
   // Calculate EUDR risk based on coordinates
@@ -429,12 +437,14 @@ export default function GPSSatelliteMapper({
         });
       }
 
-      console.log(`🌍 EUDR & DEFORESTATION ANALYSIS: ${overallRisk} risk, ${area.toFixed(1)} hectares, ${deforestationRisk} deforestation risk, ${complianceStatus}`);
-      setStatus(`🌍 EUDR COMPLIANCE: ${points.length} connected points, ${area.toFixed(1)}Ha boundary, ${overallRisk.toUpperCase()} risk`);
+      const perimeter = calculatePerimeter(points);
+      console.log(`🌍 EUDR & DEFORESTATION ANALYSIS: ${overallRisk} risk, ${area.toFixed(3)} hectares, ${perimeter.toFixed(1)}m perimeter, ${deforestationRisk} deforestation risk, ${complianceStatus}`);
+      setStatus(`🌍 BOUNDARY READY: ${points.length} connected points, ${area.toFixed(3)}Ha area, ${perimeter.toFixed(0)}m perimeter, ${overallRisk.toUpperCase()} risk`);
     } else if (points.length >= 2) {
-      setStatus(`🔗 ${points.length} points mapped and connected - Need ${minPoints - points.length} more for EUDR analysis`);
+      const partialPerimeter = points.length > 1 ? calculatePerimeter([...points, points[0]]) : 0;
+      setStatus(`🔗 ${points.length} points mapped and connected (${partialPerimeter.toFixed(0)}m perimeter) - Need ${minPoints - points.length} more to complete boundary`);
     } else {
-      setStatus(`📍 ${points.length} boundary point mapped - Add more points to create connected boundary`);
+      setStatus(`📍 ${points.length} boundary point mapped - Add more points to create connected boundary with area calculation`);
     }
   }, [points, minPoints, mapCenter]);
 
@@ -476,8 +486,84 @@ export default function GPSSatelliteMapper({
   const completeBoundary = () => {
     if (points.length >= minPoints) {
       const area = calculateArea(points);
-      onBoundaryComplete({ points, area });
+      const perimeter = calculatePerimeter(points);
+      
+      // Provide comprehensive land data
+      const landData = {
+        points: points,
+        area: area,
+        perimeter: perimeter,
+        coordinates: points.map((p, i) => ({
+          point: String.fromCharCode(65 + i),
+          latitude: p.latitude,
+          longitude: p.longitude
+        })),
+        centerPoint: calculateCenterPoint(points),
+        boundingBox: calculateBoundingBox(points),
+        metrics: {
+          areaInHectares: area,
+          areaInSquareMeters: area * 10000,
+          perimeterInMeters: perimeter,
+          numberOfPoints: points.length
+        }
+      };
+      
+      onBoundaryComplete(landData);
+      setStatus(`✅ BOUNDARY COMPLETED! ${points.length} connected points forming ${area.toFixed(3)} hectares of mapped land with full GPS data`);
+      
+      console.log('🎯 Complete Land Area Data:', landData);
     }
+  };
+
+  // Calculate perimeter of the boundary
+  const calculatePerimeter = (mapPoints: BoundaryPoint[]) => {
+    if (mapPoints.length < 2) return 0;
+    
+    let perimeter = 0;
+    for (let i = 0; i < mapPoints.length; i++) {
+      const j = (i + 1) % mapPoints.length;
+      const distance = calculateDistance(mapPoints[i], mapPoints[j]);
+      perimeter += distance;
+    }
+    return perimeter;
+  };
+
+  // Calculate distance between two GPS points using Haversine formula
+  const calculateDistance = (point1: BoundaryPoint, point2: BoundaryPoint) => {
+    const R = 6371000; // Earth's radius in meters
+    const lat1Rad = point1.latitude * Math.PI / 180;
+    const lat2Rad = point2.latitude * Math.PI / 180;
+    const deltaLat = (point2.latitude - point1.latitude) * Math.PI / 180;
+    const deltaLng = (point2.longitude - point1.longitude) * Math.PI / 180;
+
+    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+              Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+              Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    
+    return R * c; // Distance in meters
+  };
+
+  // Calculate center point of the boundary
+  const calculateCenterPoint = (mapPoints: BoundaryPoint[]) => {
+    const totalLat = mapPoints.reduce((sum, p) => sum + p.latitude, 0);
+    const totalLng = mapPoints.reduce((sum, p) => sum + p.longitude, 0);
+    return {
+      latitude: totalLat / mapPoints.length,
+      longitude: totalLng / mapPoints.length
+    };
+  };
+
+  // Calculate bounding box
+  const calculateBoundingBox = (mapPoints: BoundaryPoint[]) => {
+    const lats = mapPoints.map(p => p.latitude);
+    const lngs = mapPoints.map(p => p.longitude);
+    return {
+      north: Math.max(...lats),
+      south: Math.min(...lats),
+      east: Math.max(...lngs),
+      west: Math.min(...lngs)
+    };
   };
 
   // PDF Report Generation Functions

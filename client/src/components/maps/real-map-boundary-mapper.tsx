@@ -449,35 +449,48 @@ export default function RealMapBoundaryMapper({
       svg.appendChild(polyline);
     }
 
-    // Create filled polygon when we have 3+ points
+    // CRITICAL: Create filled polygon with EUDR risk visualization when 3+ points exist
     if (points.length >= 3) {
+      console.log(`Creating polygon boundary with ${points.length} points and risk overlay`);
+      
       const pointsStr = points.map(point => {
-        const x = Math.max(12, Math.min(388, (point.longitude + 9.4295) * 5000 + 200));
-        const y = Math.max(12, Math.min(388, 200 - (point.latitude - 6.4281) * 5000));
+        let x, y;
+        if (mapElement.id === 'real-map') {
+          x = (point.longitude - mapCenter.lng) * 5000 + 200;
+          y = 200 - (point.latitude - mapCenter.lat) * 5000;
+        } else {
+          x = (point.longitude + 9.4295) * 5000 + 200;
+          y = 200 - (point.latitude - 6.4281) * 5000;
+        }
+        x = Math.max(12, Math.min(388, x));
+        y = Math.max(12, Math.min(388, y));
         return `${x},${y}`;
       }).join(' ');
       
-      // Calculate overall area risk
+      // Calculate overall area risk for coloring
       const areaRisk = calculateAreaRisk(points);
+      console.log(`Area risk level: ${areaRisk.level}`);
       
+      // Create main boundary polygon with risk-based styling
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
       polygon.setAttribute('points', pointsStr);
       polygon.setAttribute('class', `farm-boundary risk-${areaRisk.level}`);
       
-      // Set polygon color based on risk level with cross-hatch pattern
-      if (areaRisk.level === 'high') {
-        polygon.setAttribute('fill', 'url(#crosshatch-red)');
-        polygon.setAttribute('stroke', '#dc2626');
-      } else if (areaRisk.level === 'standard') {
-        polygon.setAttribute('fill', 'url(#crosshatch-yellow)');
-        polygon.setAttribute('stroke', '#f59e0b');
-      } else {
-        polygon.setAttribute('fill', 'url(#crosshatch-green)');
-        polygon.setAttribute('stroke', '#10b981');
-      }
+      // Apply EUDR risk-based visual styling with crosshatch patterns
+      const riskColors = {
+        high: { fill: 'url(#crosshatch-red)', stroke: '#dc2626', bgColor: 'rgba(220, 38, 38, 0.4)' },
+        standard: { fill: 'url(#crosshatch-yellow)', stroke: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.4)' },
+        low: { fill: 'url(#crosshatch-green)', stroke: '#22c55e', bgColor: 'rgba(34, 197, 94, 0.4)' }
+      };
       
+      const riskStyle = riskColors[areaRisk.level];
+      polygon.setAttribute('fill', riskStyle.fill);
+      polygon.setAttribute('stroke', riskStyle.stroke);
       polygon.setAttribute('stroke-width', '4');
       polygon.setAttribute('stroke-dasharray', '8,4');
+      polygon.setAttribute('opacity', '0.9');
+      
+      console.log(`✓ Polygon created with ${areaRisk.level} risk styling and crosshatch pattern`);
       
 
       

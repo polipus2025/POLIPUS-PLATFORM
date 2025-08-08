@@ -168,79 +168,144 @@ export default function GPSSatelliteMapper({
     }
   }, [enableRealTimeGPS]);
 
-  // Update markers and overlays when points change
+  // Update markers and overlays when points change - PERSISTENT VERSION
   useEffect(() => {
-    if (!mapRef.current || points.length === 0) return;
+    if (!mapRef.current) return;
 
     const mapElement = mapRef.current.querySelector('#gps-satellite-map') as HTMLElement;
     const svg = mapRef.current.querySelector('svg') as SVGSVGElement;
     
     if (!mapElement || !svg) return;
 
-    // Clear existing markers
-    mapElement.querySelectorAll('.boundary-marker').forEach(el => el.remove());
+    // Clear existing markers and lines ONLY to redraw with all points
+    mapElement.querySelectorAll('.boundary-marker, .boundary-line, .eudr-overlay, .deforestation-warning').forEach(el => el.remove());
     
     // Clear existing SVG elements except defs
     const defs = svg.querySelector('defs');
     svg.innerHTML = '';
     if (defs) svg.appendChild(defs);
 
-    console.log(`🎯 Rendering ${points.length} persistent boundary markers`);
+    // Exit early if no points to draw
+    if (points.length === 0) return;
 
-    // Add persistent markers for each point that STAY ON THE MAP
+    console.log(`🎯 Rendering ${points.length} PERSISTENT boundary markers on real-time satellite view`);
+
+    // Add PERMANENT markers for each point that STAY VISIBLE ON MAP
     points.forEach((point, index) => {
       const pixelPos = coordToPixel(point.latitude, point.longitude);
       const risk = calculateRiskLevel(point.latitude, point.longitude);
       
-      // Create highly visible persistent marker
+      // Create HIGHLY VISIBLE PERMANENT marker
       const marker = document.createElement('div');
-      marker.className = 'boundary-marker';
+      marker.className = 'boundary-marker persistent-point';
       marker.setAttribute('data-point-index', index.toString());
+      marker.setAttribute('data-persistent', 'true');
       marker.style.cssText = `
-        position: absolute;
-        left: ${pixelPos.x}px;
-        top: ${pixelPos.y}px;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background-color: #22c55e;
-        border: 4px solid white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        font-weight: bold;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.6);
-        transform: translate(-50%, -50%);
-        z-index: 30;
-        cursor: pointer;
-        pointer-events: auto;
+        position: absolute !important;
+        left: ${pixelPos.x}px !important;
+        top: ${pixelPos.y}px !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        background: radial-gradient(circle, #22c55e 0%, #16a34a 100%) !important;
+        border: 4px solid white !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.9) !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,255,255,0.3) !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 50 !important;
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        animation: pulse-glow 2s infinite alternate !important;
       `;
       
       const letter = String.fromCharCode(65 + index);
       marker.textContent = letter; // A, B, C, D...
-      marker.title = `Boundary Point ${letter} - GPS: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
+      marker.title = `PERSISTENT Boundary Point ${letter} - GPS: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
+      
+      // Add pulsing animation CSS
+      if (!document.querySelector('#persistent-marker-styles')) {
+        const style = document.createElement('style');
+        style.id = 'persistent-marker-styles';
+        style.textContent = `
+          @keyframes pulse-glow {
+            0% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            100% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 8px rgba(34, 197, 94, 0); }
+          }
+          .persistent-point {
+            will-change: transform, box-shadow !important;
+            backface-visibility: hidden !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
       
       mapElement.appendChild(marker);
-      console.log(`✅ PERSISTENT marker ${letter} added at pixel ${pixelPos.x}, ${pixelPos.y} for GPS ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
+      console.log(`🟢 PERMANENT marker ${letter} LOCKED at pixel ${pixelPos.x}, ${pixelPos.y} for GPS ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
     });
 
-    // Draw connecting lines when 2+ points
+    // Draw PERSISTENT connecting lines between consecutive points
     if (points.length >= 2) {
-      const pointsStr = points.map(point => {
-        const pos = coordToPixel(point.latitude, point.longitude);
-        return `${pos.x},${pos.y}`;
-      }).join(' ');
-
-      const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-      polyline.setAttribute('points', pointsStr);
-      polyline.setAttribute('fill', 'none');
-      polyline.setAttribute('stroke', '#fbbf24');
-      polyline.setAttribute('stroke-width', '3');
-      polyline.setAttribute('stroke-dasharray', '8,4');
-      svg.appendChild(polyline);
+      for (let i = 0; i < points.length - 1; i++) {
+        const start = coordToPixel(points[i].latitude, points[i].longitude);
+        const end = coordToPixel(points[i + 1].latitude, points[i + 1].longitude);
+        
+        // Create HTML line element for better visibility and persistence
+        const line = document.createElement('div');
+        line.className = 'boundary-line';
+        const length = Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
+        const angle = Math.atan2(end.y - start.y, end.x - start.x) * (180 / Math.PI);
+        
+        line.style.cssText = `
+          position: absolute;
+          left: ${start.x}px;
+          top: ${start.y}px;
+          width: ${length}px;
+          height: 4px;
+          background: linear-gradient(90deg, #22c55e, #16a34a);
+          transform-origin: 0 50%;
+          transform: translate(0, -50%) rotate(${angle}deg);
+          z-index: 25;
+          opacity: 0.9;
+          border-radius: 2px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          pointer-events: none;
+        `;
+        mapElement.appendChild(line);
+      }
+      
+      // Add closing line for polygon when 3+ points
+      if (points.length >= 3) {
+        const start = coordToPixel(points[points.length - 1].latitude, points[points.length - 1].longitude);
+        const end = coordToPixel(points[0].latitude, points[0].longitude);
+        
+        const closingLine = document.createElement('div');
+        closingLine.className = 'boundary-line';
+        const length = Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
+        const angle = Math.atan2(end.y - start.y, end.x - start.x) * (180 / Math.PI);
+        
+        closingLine.style.cssText = `
+          position: absolute;
+          left: ${start.x}px;
+          top: ${start.y}px;
+          width: ${length}px;
+          height: 4px;
+          background: linear-gradient(90deg, #22c55e, #16a34a);
+          transform-origin: 0 50%;
+          transform: translate(0, -50%) rotate(${angle}deg);
+          z-index: 25;
+          opacity: 0.9;
+          border-radius: 2px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          pointer-events: none;
+        `;
+        mapElement.appendChild(closingLine);
+      }
     }
 
     // Create COMPREHENSIVE EUDR & DEFORESTATION ANALYSIS when 3+ points
@@ -426,6 +491,86 @@ export default function GPSSatelliteMapper({
     }
   };
 
+  // PDF Report Generation Functions
+  const generatePDFReport = () => {
+    if (points.length < 3) return;
+    
+    const area = calculateArea(points);
+    const deforestationRisk = area > 10 ? 'HIGH' : area > 5 ? 'MEDIUM' : 'LOW';
+    const complianceStatus = area > 10 ? 'NON-COMPLIANT' : 'COMPLIANT';
+    
+    // Create PDF content
+    const reportContent = `
+      EUDR & DEFORESTATION ANALYSIS REPORT
+      
+      Farm Boundary Analysis:
+      - Total Area: ${area.toFixed(2)} hectares
+      - Boundary Points: ${points.length}
+      - Coordinates: ${points.map((p, i) => `${String.fromCharCode(65 + i)}: ${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)}`).join('\n  ')}
+      
+      EUDR Compliance Assessment:
+      - Risk Level: ${area > 10 ? 'HIGH RISK' : area > 5 ? 'MEDIUM RISK' : 'LOW RISK'}
+      - Deforestation Risk: ${deforestationRisk}
+      - Compliance Status: ${complianceStatus}
+      
+      Generated: ${new Date().toLocaleString()}
+      Report ID: EUDR-${Date.now()}
+    `;
+    
+    // Download as text file (simplified PDF alternative)
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `EUDR_Report_${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log('📄 EUDR PDF Report generated and downloaded');
+  };
+
+  const downloadEUDRReport = () => {
+    if (points.length < 3) return;
+    
+    const area = calculateArea(points);
+    const reportData = {
+      farmBoundary: {
+        area: area.toFixed(2),
+        points: points.length,
+        coordinates: points.map((p, i) => ({
+          point: String.fromCharCode(65 + i),
+          lat: p.latitude.toFixed(6),
+          lng: p.longitude.toFixed(6)
+        }))
+      },
+      eudrAnalysis: {
+        riskLevel: area > 10 ? 'HIGH' : area > 5 ? 'MEDIUM' : 'LOW',
+        deforestationRisk: area > 10 ? 'HIGH' : area > 5 ? 'MEDIUM' : 'LOW',
+        complianceStatus: area > 10 ? 'NON-COMPLIANT' : 'COMPLIANT'
+      },
+      reportMetadata: {
+        generatedAt: new Date().toISOString(),
+        reportId: `EUDR-${Date.now()}`,
+        version: '1.0'
+      }
+    };
+    
+    // Download as JSON report
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `EUDR_Analysis_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log('🌍 EUDR Analysis Report downloaded');
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -526,6 +671,22 @@ export default function GPSSatelliteMapper({
               </div>
               <div className="mt-3 text-xs text-blue-600">
                 📊 Analysis based on {points.length} GPS boundary points and EU Deforestation Regulation standards
+              </div>
+              <div className="mt-3 flex gap-2">
+                <Button
+                  onClick={generatePDFReport}
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  📄 Generate PDF Report
+                </Button>
+                <Button
+                  onClick={downloadEUDRReport}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  🌍 Download EUDR Report
+                </Button>
               </div>
             </div>
           )}

@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
 import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
-import SimpleGPSMapper from "@/components/maps/simple-gps-mapper";
+import GPSSatelliteMapper from "@/components/maps/gps-satellite-mapper";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
@@ -1632,7 +1632,7 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <SimpleGPSMapper
+              <GPSSatelliteMapper
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({

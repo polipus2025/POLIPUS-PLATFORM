@@ -96,10 +96,13 @@ export default function GPSSatelliteMapper({
           cursor: crosshair;
           background-image: 
             url('https://mt0.google.com/vt/lyrs=s&hl=en&x=${tileX}&y=${tileY}&z=${zoom}'),
-            linear-gradient(135deg, #10b981 0%, #34d399 25%, #059669 50%, #047857 75%, #065f46 100%);
+            url('https://mt1.google.com/vt/lyrs=s&hl=en&x=${tileX}&y=${tileY}&z=${zoom}'),
+            url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}'),
+            url('https://tiles.stadiamaps.com/tiles/alidade_satellite/${zoom}/${tileX}/${tileY}@2x.png');
           background-position: center;
           background-size: cover;
           background-repeat: no-repeat;
+          background-color: #10b981;
         " id="gps-satellite-map">
           <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;">
             <defs>

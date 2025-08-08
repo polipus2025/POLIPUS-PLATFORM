@@ -3057,6 +3057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Received request body:", JSON.stringify(req.body, null, 2));
       console.log("Content-Type header:", req.headers['content-type']);
+      console.log("All headers:", JSON.stringify(req.headers, null, 2));
       
       // Check if body is empty
       if (!req.body || Object.keys(req.body).length === 0) {

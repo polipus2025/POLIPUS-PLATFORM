@@ -120,13 +120,20 @@ export default function FieldAgentDashboard() {
       
       console.log("Sending farmer request:", farmerRequest);
       
-      return await apiRequest('/api/farmers', {
+      const response = await fetch('/api/farmers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(farmerRequest)
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });

@@ -462,7 +462,10 @@ export default function FieldAgentDashboard() {
                           </div>
                         </div>
                         <Button 
-                          onClick={() => newFarmerMutation.mutate(newFarmerForm)} 
+                          onClick={() => {
+                            console.log("Current form state:", newFarmerForm);
+                            newFarmerMutation.mutate(newFarmerForm);
+                          }} 
                           className="w-full bg-lacra-green hover:bg-green-700"
                           disabled={!newFarmerForm.firstName || !newFarmerForm.lastName || !newFarmerForm.phoneNumber || newFarmerMutation.isPending}
                         >

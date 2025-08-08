@@ -34,7 +34,7 @@ const addLACRALetterhead = (pdf: jsPDF, title: string, subtitle: string, headerC
   const pageWidth = pdf.internal.pageSize.getWidth();
   
   // Header background with gradient effect
-  pdf.setFillColor(...headerColor);
+  pdf.setFillColor(headerColor[0], headerColor[1], headerColor[2]);
   pdf.rect(0, 0, pageWidth, 40, 'F');
   pdf.setFillColor(headerColor[0] - 20, headerColor[1] - 20, headerColor[2] - 20);
   pdf.rect(0, 30, pageWidth, 10, 'F');
@@ -94,7 +94,7 @@ const drawPieChart = (pdf: jsPDF, centerX: number, centerY: number, radius: numb
   
   // Progress sector (approximated)
   if (percentage > 0) {
-    pdf.setFillColor(...colors[0]);
+    pdf.setFillColor(colors[0][0], colors[0][1], colors[0][2]);
     const progressRadius = radius * 0.8;
     pdf.circle(centerX, centerY, progressRadius * (percentage / 100), 'F');
   }
@@ -134,7 +134,8 @@ const drawBarChart = (pdf: jsPDF, x: number, y: number, width: number, height: n
     const barY = y + height - barHeight - 5;
     
     // Draw bar with gradient effect
-    pdf.setFillColor(...colors[index % colors.length]);
+    const color = colors[index % colors.length];
+    pdf.setFillColor(color[0], color[1], color[2]);
     pdf.rect(barX, barY, barWidth, barHeight, 'F');
     
     // Lighter top section
@@ -178,12 +179,12 @@ export const generateEUDRCompliancePDF = async (data: EUDRComplianceData): Promi
   
   // Report metadata with official styling
   let yPos = 50;
-  pdf.setFillColor(...colors.background);
+  pdf.setFillColor(colors.background[0], colors.background[1], colors.background[2]);
   pdf.setDrawColor(200, 200, 200);
   pdf.rect(10, yPos, pageWidth - 20, 35, 'FD');
   
   // Report header
-  pdf.setFillColor(...colors.info);
+  pdf.setFillColor(colors.info[0], colors.info[1], colors.info[2]);
   pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(10);

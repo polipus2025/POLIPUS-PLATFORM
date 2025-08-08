@@ -26,6 +26,7 @@ import {
   TreePine,
   Smartphone
 } from "lucide-react";
+import ExactBoundaryMapper from "@/components/maps/exact-boundary-mapper";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -684,30 +685,19 @@ Registration: ${farmer.registeredBy || 'Unknown'}`;
             </Card>
           </TabsContent>
 
-          {/* Territory Tab */}
+          {/* Territory Tab - GPS Boundary Mapping */}
           <TabsContent value="territory" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Territory Mapping - {jurisdiction}</CardTitle>
-                <div className="text-sm text-gray-600">
-                  GPS mapping and geospatial data for your assigned territory
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Map className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">Interactive territory map and GPS tools</p>
-                  <Button
-                    onClick={() => {
-                      window.location.href = '/field-agent-farm-mapping';
-                    }}
-                  >
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Launch Farm Land Mapping
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="max-w-2xl mx-auto">
+              <ExactBoundaryMapper
+                onBoundaryComplete={(boundary) => {
+                  console.log('Farm boundary completed:', boundary);
+                  toast({
+                    title: "Farm Boundary Mapped Successfully",
+                    description: `Mapped ${boundary.points.length} GPS points covering ${boundary.area.toFixed(2)} hectares with connected boundary lines`,
+                  });
+                }}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

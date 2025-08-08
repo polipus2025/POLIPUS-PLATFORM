@@ -322,35 +322,41 @@ export default function RealMapBoundaryMapper({
       marker.className = `map-marker ${isFirst ? 'marker-start' : isLast ? 'marker-end' : 'marker-middle'} risk-${pointRisk.level}`;
       marker.style.left = `${x}px`;
       marker.style.top = `${y}px`;
-      marker.title = `Point ${index + 1}${isFirst ? ' (Start)' : isLast ? ' (End)' : ''}\nEUDR Risk: ${pointRisk.level.toUpperCase()}\nDeforestation Risk: ${pointRisk.deforestationRisk}%\nCompliance Score: ${pointRisk.complianceScore}%`;
+      marker.style.width = '24px';
+      marker.style.height = '24px';
+      marker.style.display = 'flex';
+      marker.style.alignItems = 'center';
+      marker.style.justifyContent = 'center';
+      marker.style.fontSize = '12px';
+      marker.style.fontWeight = 'bold';
+      marker.style.color = 'white';
+      marker.style.textShadow = '1px 1px 2px rgba(0,0,0,0.8)';
+      marker.title = `Point ${String.fromCharCode(65 + index)}${isFirst ? ' (Start)' : isLast ? ' (End)' : ''}\nEUDR Risk: ${pointRisk.level.toUpperCase()}\nDeforestation Risk: ${pointRisk.deforestationRisk}%\nCompliance Score: ${pointRisk.complianceScore}%`;
       
-      // Add risk indicator circle
-      const riskIndicator = document.createElement('div');
-      riskIndicator.className = `risk-indicator risk-${pointRisk.level}`;
-      riskIndicator.style.position = 'absolute';
-      riskIndicator.style.top = '-8px';
-      riskIndicator.style.right = '-8px';
-      riskIndicator.style.width = '16px';
-      riskIndicator.style.height = '16px';
-      riskIndicator.style.borderRadius = '50%';
-      riskIndicator.style.border = '2px solid white';
-      riskIndicator.style.fontSize = '10px';
-      riskIndicator.style.fontWeight = 'bold';
-      riskIndicator.style.display = 'flex';
-      riskIndicator.style.alignItems = 'center';
-      riskIndicator.style.justifyContent = 'center';
-      riskIndicator.style.color = 'white';
-      riskIndicator.textContent = pointRisk.level === 'high' ? '!' : pointRisk.level === 'standard' ? '?' : '✓';
+      // Add alphabetical label (A, B, C, D, etc.)
+      marker.textContent = String.fromCharCode(65 + index);
+      
+      // Add risk indicator ring
+      const riskRing = document.createElement('div');
+      riskRing.style.position = 'absolute';
+      riskRing.style.top = '-3px';
+      riskRing.style.left = '-3px';
+      riskRing.style.right = '-3px';
+      riskRing.style.bottom = '-3px';
+      riskRing.style.borderRadius = '50%';
+      riskRing.style.border = '3px solid';
+      riskRing.style.pointerEvents = 'none';
       
       if (pointRisk.level === 'high') {
-        riskIndicator.style.backgroundColor = '#dc2626'; // red
+        riskRing.style.borderColor = '#dc2626';
+        riskRing.style.animation = 'pulse 2s infinite';
       } else if (pointRisk.level === 'standard') {
-        riskIndicator.style.backgroundColor = '#f59e0b'; // yellow
+        riskRing.style.borderColor = '#f59e0b';
       } else {
-        riskIndicator.style.backgroundColor = '#10b981'; // green
+        riskRing.style.borderColor = '#10b981';
       }
       
-      marker.appendChild(riskIndicator);
+      marker.appendChild(riskRing);
       mapElement.appendChild(marker);
     });
 
@@ -369,36 +375,104 @@ export default function RealMapBoundaryMapper({
       polygon.setAttribute('points', pointsStr);
       polygon.setAttribute('class', `farm-boundary risk-${areaRisk.level}`);
       
-      // Set polygon color based on risk level
+      // Set polygon color based on risk level with cross-hatch pattern
       if (areaRisk.level === 'high') {
-        polygon.setAttribute('fill', 'rgba(220, 38, 38, 0.2)');
+        polygon.setAttribute('fill', 'url(#crosshatch-red)');
         polygon.setAttribute('stroke', '#dc2626');
       } else if (areaRisk.level === 'standard') {
-        polygon.setAttribute('fill', 'rgba(245, 158, 11, 0.2)');
+        polygon.setAttribute('fill', 'url(#crosshatch-yellow)');
         polygon.setAttribute('stroke', '#f59e0b');
       } else {
-        polygon.setAttribute('fill', 'rgba(16, 185, 129, 0.2)');
+        polygon.setAttribute('fill', 'url(#crosshatch-green)');
         polygon.setAttribute('stroke', '#10b981');
       }
       
-      polygon.setAttribute('stroke-width', '3');
-      polygon.setAttribute('stroke-dasharray', '5,5');
+      polygon.setAttribute('stroke-width', '4');
+      polygon.setAttribute('stroke-dasharray', '8,4');
+      
+      // Add crosshatch patterns if not already present
+      if (!svg.querySelector('#crosshatch-red')) {
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        
+        // Red pattern for high risk
+        const redPattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+        redPattern.setAttribute('id', 'crosshatch-red');
+        redPattern.setAttribute('patternUnits', 'userSpaceOnUse');
+        redPattern.setAttribute('width', '8');
+        redPattern.setAttribute('height', '8');
+        const redPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        redPath.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
+        redPath.setAttribute('stroke', '#dc2626');
+        redPath.setAttribute('stroke-width', '1');
+        redPath.setAttribute('opacity', '0.4');
+        redPattern.appendChild(redPath);
+        
+        // Yellow pattern for standard risk
+        const yellowPattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+        yellowPattern.setAttribute('id', 'crosshatch-yellow');
+        yellowPattern.setAttribute('patternUnits', 'userSpaceOnUse');
+        yellowPattern.setAttribute('width', '8');
+        yellowPattern.setAttribute('height', '8');
+        const yellowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        yellowPath.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
+        yellowPath.setAttribute('stroke', '#f59e0b');
+        yellowPath.setAttribute('stroke-width', '1');
+        yellowPath.setAttribute('opacity', '0.4');
+        yellowPattern.appendChild(yellowPath);
+        
+        // Green pattern for low risk
+        const greenPattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+        greenPattern.setAttribute('id', 'crosshatch-green');
+        greenPattern.setAttribute('patternUnits', 'userSpaceOnUse');
+        greenPattern.setAttribute('width', '8');
+        greenPattern.setAttribute('height', '8');
+        const greenPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        greenPath.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
+        greenPath.setAttribute('stroke', '#10b981');
+        greenPath.setAttribute('stroke-width', '1');
+        greenPath.setAttribute('opacity', '0.4');
+        greenPattern.appendChild(greenPath);
+        
+        defs.appendChild(redPattern);
+        defs.appendChild(yellowPattern);
+        defs.appendChild(greenPattern);
+        svg.appendChild(defs);
+      }
       
       svg.appendChild(polygon);
       
-      // Add area risk label
+      // Add area measurement and risk label
       const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 5000 + 200, 0) / points.length;
       const centerY = points.reduce((sum, p) => sum + (200 - (p.latitude - 6.4281) * 5000), 0) / points.length;
+      const area = calculateArea(points);
       
+      // Area measurement label
+      const areaLabel = document.createElement('div');
+      areaLabel.style.position = 'absolute';
+      areaLabel.style.left = `${centerX - 35}px`;
+      areaLabel.style.top = `${centerY - 25}px`;
+      areaLabel.style.width = '70px';
+      areaLabel.style.padding = '6px 8px';
+      areaLabel.style.borderRadius = '6px';
+      areaLabel.style.fontSize = '11px';
+      areaLabel.style.fontWeight = 'bold';
+      areaLabel.style.textAlign = 'center';
+      areaLabel.style.color = 'white';
+      areaLabel.style.backgroundColor = 'rgba(0,0,0,0.8)';
+      areaLabel.style.border = '2px solid white';
+      areaLabel.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
+      areaLabel.textContent = `${area.toFixed(1)}Ha`;
+      
+      // Risk level label  
       const riskLabel = document.createElement('div');
       riskLabel.className = `area-risk-label risk-${areaRisk.level}`;
       riskLabel.style.position = 'absolute';
-      riskLabel.style.left = `${centerX - 50}px`;
-      riskLabel.style.top = `${centerY - 15}px`;
-      riskLabel.style.width = '100px';
-      riskLabel.style.padding = '4px 8px';
-      riskLabel.style.borderRadius = '12px';
-      riskLabel.style.fontSize = '10px';
+      riskLabel.style.left = `${centerX - 45}px`;
+      riskLabel.style.top = `${centerY + 5}px`;
+      riskLabel.style.width = '90px';
+      riskLabel.style.padding = '3px 6px';
+      riskLabel.style.borderRadius = '8px';
+      riskLabel.style.fontSize = '9px';
       riskLabel.style.fontWeight = 'bold';
       riskLabel.style.textAlign = 'center';
       riskLabel.style.color = 'white';
@@ -416,6 +490,7 @@ export default function RealMapBoundaryMapper({
         riskLabel.textContent = 'LOW RISK';
       }
       
+      mapElement.appendChild(areaLabel);
       mapElement.appendChild(riskLabel);
     }
   }, [points, mapReady]);

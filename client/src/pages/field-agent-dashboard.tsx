@@ -122,6 +122,9 @@ export default function FieldAgentDashboard() {
       
       return await apiRequest('/api/farmers', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(farmerRequest)
       });
     },

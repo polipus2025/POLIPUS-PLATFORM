@@ -3055,11 +3055,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/farmers", async (req, res) => {
     try {
+      console.log("Received request body:", JSON.stringify(req.body, null, 2));
+      console.log("Content-Type header:", req.headers['content-type']);
+      
+      // Check if body is empty
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({
+          error: "Request body is empty",
+          message: "Please provide farmer data in JSON format"
+        });
+      }
+      
       // Auto-generate farmerId if not provided
       const requestData = {
         ...req.body,
         farmerId: req.body.farmerId || `FARM-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
       };
+      
+      console.log("Processing request data:", JSON.stringify(requestData, null, 2));
       
       // Validate with our schema (camelCase)
       const validatedData = insertFarmerSchema.parse(requestData);

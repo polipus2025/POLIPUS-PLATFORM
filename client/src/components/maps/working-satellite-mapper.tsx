@@ -55,7 +55,7 @@ export default function WorkingSatelliteMapper({
 
     const mapContainer = mapRef.current;
     
-    // Create map with satellite background
+    // Create map with multiple satellite imagery sources and reliable fallback
     mapContainer.innerHTML = `
       <div style="
         position: relative;
@@ -65,9 +65,15 @@ export default function WorkingSatelliteMapper({
         border-radius: 8px;
         overflow: hidden;
         cursor: crosshair;
-        background: url('https://mt1.google.com/vt/lyrs=s&x=1024&y=1024&z=10') center/cover,
-                    url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/1024/1024') center/cover,
-                    linear-gradient(45deg, #10b981 0%, #059669 50%, #047857 100%);
+        background-image: 
+          url('https://mt0.google.com/vt/lyrs=s&hl=en&x=7&y=7&z=4'),
+          url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/4/7/7'),
+          url('https://tiles.stadiamaps.com/tiles/alidade_satellite/4/7/7@2x.png'),
+          url('https://c.tile.openstreetmap.org/4/7/7.png'),
+          linear-gradient(135deg, #10b981 0%, #34d399 25%, #059669 50%, #047857 75%, #065f46 100%);
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
       " id="satellite-map">
         <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;">
           <defs>
@@ -94,9 +100,9 @@ export default function WorkingSatelliteMapper({
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      // Convert pixel coordinates to lat/lng (Liberia region)
-      const lat = 6.4281 + (200 - y) / 800; // Scaled for Liberia
-      const lng = -9.4295 + (x - 200) / 800;
+      // Convert pixel coordinates to lat/lng (Liberia region) - improved scaling
+      const lat = 6.4281 + (200 - y) / 400; // Better scaling for Liberia
+      const lng = -9.4295 + (x - 200) / 400;
       
       console.log(`Adding point at ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       
@@ -128,9 +134,9 @@ export default function WorkingSatelliteMapper({
 
     // Add persistent markers for each point
     points.forEach((point, index) => {
-      // Convert lat/lng back to pixels
-      const x = (point.longitude + 9.4295) * 800 + 200;
-      const y = 200 - (point.latitude - 6.4281) * 800;
+      // Convert lat/lng back to pixels with improved scaling
+      const x = (point.longitude + 9.4295) * 400 + 200;
+      const y = 200 - (point.latitude - 6.4281) * 400;
       
       // Ensure marker stays within bounds
       const clampedX = Math.max(20, Math.min(380, x));
@@ -173,8 +179,8 @@ export default function WorkingSatelliteMapper({
     // Draw connecting lines when 2+ points
     if (points.length >= 2) {
       const pointsStr = points.map(point => {
-        const x = Math.max(20, Math.min(380, (point.longitude + 9.4295) * 800 + 200));
-        const y = Math.max(20, Math.min(380, 200 - (point.latitude - 6.4281) * 800));
+        const x = Math.max(20, Math.min(380, (point.longitude + 9.4295) * 400 + 200));
+        const y = Math.max(20, Math.min(380, 200 - (point.latitude - 6.4281) * 400));
         return `${x},${y}`;
       }).join(' ');
 
@@ -190,8 +196,8 @@ export default function WorkingSatelliteMapper({
     // Create risk polygon when 3+ points
     if (points.length >= 3) {
       const pointsStr = points.map(point => {
-        const x = Math.max(20, Math.min(380, (point.longitude + 9.4295) * 800 + 200));
-        const y = Math.max(20, Math.min(380, 200 - (point.latitude - 6.4281) * 800));
+        const x = Math.max(20, Math.min(380, (point.longitude + 9.4295) * 400 + 200));
+        const y = Math.max(20, Math.min(380, 200 - (point.latitude - 6.4281) * 400));
         return `${x},${y}`;
       }).join(' ');
 
@@ -216,8 +222,8 @@ export default function WorkingSatelliteMapper({
       const area = calculateArea(points);
       
       // Add area label
-      const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 800 + 200, 0) / points.length;
-      const centerY = points.reduce((sum, p) => sum + (200 - (p.latitude - 6.4281) * 800), 0) / points.length;
+      const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 400 + 200, 0) / points.length;
+      const centerY = points.reduce((sum, p) => sum + (200 - (p.latitude - 6.4281) * 400), 0) / points.length;
       
       const areaLabel = document.createElement('div');
       areaLabel.className = 'boundary-marker';

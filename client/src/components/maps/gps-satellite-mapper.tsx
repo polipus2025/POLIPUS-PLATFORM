@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Satellite, RotateCcw, Check, MapPin } from 'lucide-react';
+import { Satellite, RotateCcw, Check, MapPin, FileText, Download } from 'lucide-react';
+import { ProfessionalPDFGenerator } from '@/lib/professional-pdf-generator';
 
 interface BoundaryPoint {
   latitude: number;
@@ -492,6 +493,31 @@ export default function GPSSatelliteMapper({
     return perimeter;
   };
 
+  // Calculate center point of boundary
+  const calculateCenterPoint = (mapPoints: BoundaryPoint[]) => {
+    if (mapPoints.length === 0) return { latitude: 0, longitude: 0 };
+    
+    const avgLat = mapPoints.reduce((sum, p) => sum + p.latitude, 0) / mapPoints.length;
+    const avgLng = mapPoints.reduce((sum, p) => sum + p.longitude, 0) / mapPoints.length;
+    
+    return { latitude: avgLat, longitude: avgLng };
+  };
+
+  // Calculate bounding box of all points
+  const calculateBoundingBox = (mapPoints: BoundaryPoint[]) => {
+    if (mapPoints.length === 0) return { north: 0, south: 0, east: 0, west: 0 };
+    
+    const lats = mapPoints.map(p => p.latitude);
+    const lngs = mapPoints.map(p => p.longitude);
+    
+    return {
+      north: Math.max(...lats),
+      south: Math.min(...lats),
+      east: Math.max(...lngs),
+      west: Math.min(...lngs)
+    };
+  };
+
   // Calculate distance between two GPS points using Haversine formula
   const calculateDistance = (point1: BoundaryPoint, point2: BoundaryPoint) => {
     const R = 6371000; // Earth's radius in meters
@@ -508,66 +534,109 @@ export default function GPSSatelliteMapper({
     return R * c; // Distance in meters
   };
 
-  // Calculate center point of the boundary
-  const calculateCenterPoint = (mapPoints: BoundaryPoint[]) => {
-    const totalLat = mapPoints.reduce((sum, p) => sum + p.latitude, 0);
-    const totalLng = mapPoints.reduce((sum, p) => sum + p.longitude, 0);
-    return {
-      latitude: totalLat / mapPoints.length,
-      longitude: totalLng / mapPoints.length
-    };
-  };
 
-  // Calculate bounding box
-  const calculateBoundingBox = (mapPoints: BoundaryPoint[]) => {
-    const lats = mapPoints.map(p => p.latitude);
-    const lngs = mapPoints.map(p => p.longitude);
-    return {
-      north: Math.max(...lats),
-      south: Math.min(...lats),
-      east: Math.max(...lngs),
-      west: Math.min(...lngs)
-    };
-  };
 
   // PDF Report Generation Functions
-  const generatePDFReport = () => {
+  const generateProfessionalEUDRReport = () => {
     if (points.length < 3) return;
     
+    const pdfGenerator = new ProfessionalPDFGenerator();
     const area = calculateArea(points);
+    const perimeter = calculatePerimeter(points);
+    const centerPoint = calculateCenterPoint(points);
+    const boundingBox = calculateBoundingBox(points);
+    
     const deforestationRisk = area > 10 ? 'HIGH' : area > 5 ? 'MEDIUM' : 'LOW';
+    const riskLevel = area > 10 ? 'high' : area > 5 ? 'standard' : 'low';
     const complianceStatus = area > 10 ? 'NON-COMPLIANT' : 'COMPLIANT';
     
-    // Create PDF content
-    const reportContent = `
-      EUDR & DEFORESTATION ANALYSIS REPORT
-      
-      Farm Boundary Analysis:
-      - Total Area: ${area.toFixed(2)} hectares
-      - Boundary Points: ${points.length}
-      - Coordinates: ${points.map((p, i) => `${String.fromCharCode(65 + i)}: ${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)}`).join('\n  ')}
-      
-      EUDR Compliance Assessment:
-      - Risk Level: ${area > 10 ? 'HIGH RISK' : area > 5 ? 'MEDIUM RISK' : 'LOW RISK'}
-      - Deforestation Risk: ${deforestationRisk}
-      - Compliance Status: ${complianceStatus}
-      
-      Generated: ${new Date().toLocaleString()}
-      Report ID: EUDR-${Date.now()}
-    `;
+    const reportData = {
+      farmBoundary: {
+        area: area,
+        points: points,
+        coordinates: points.map((p, i) => ({
+          point: String.fromCharCode(65 + i),
+          latitude: p.latitude,
+          longitude: p.longitude
+        })),
+        centerPoint: centerPoint,
+        boundingBox: boundingBox
+      },
+      eudrAnalysis: {
+        riskLevel: riskLevel,
+        complianceStatus: complianceStatus,
+        deforestationRisk: deforestationRisk,
+        recommendations: [
+          'Implement satellite monitoring system for continuous forest coverage tracking',
+          'Establish buffer zones of minimum 50 meters around forest boundaries',
+          'Conduct quarterly compliance assessments with GPS verification',
+          'Implement sustainable agricultural practices to prevent soil degradation',
+          'Maintain detailed records of all farming activities and land use changes',
+          'Participate in LACRA environmental training programs',
+          'Install early warning systems for deforestation risk detection'
+        ]
+      },
+      farmer: {
+        name: 'John Doe Farmer',
+        id: 'F-' + Date.now(),
+        county: 'Montserrado County',
+        district: 'Greater Monrovia District'
+      }
+    };
     
-    // Download as text file (simplified PDF alternative)
-    const blob = new Blob([reportContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `EUDR_Report_${Date.now()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    pdfGenerator.generateEUDRReport(reportData);
+    console.log('📄 Professional EUDR Compliance Report generated with LACRA letterhead');
+  };
+
+  const generateDeforestationReport = () => {
+    if (points.length < 3) return;
     
-    console.log('📄 EUDR PDF Report generated and downloaded');
+    const pdfGenerator = new ProfessionalPDFGenerator();
+    const area = calculateArea(points);
+    const perimeter = calculatePerimeter(points);
+    const centerPoint = calculateCenterPoint(points);
+    const boundingBox = calculateBoundingBox(points);
+    
+    const deforestationRisk = area > 10 ? 'HIGH' : area > 5 ? 'MEDIUM' : 'LOW';
+    const riskLevel = area > 10 ? 'high' : area > 5 ? 'standard' : 'low';
+    const complianceStatus = area > 10 ? 'NON-COMPLIANT' : 'COMPLIANT';
+    
+    const reportData = {
+      farmBoundary: {
+        area: area,
+        points: points,
+        coordinates: points.map((p, i) => ({
+          point: String.fromCharCode(65 + i),
+          latitude: p.latitude,
+          longitude: p.longitude
+        })),
+        centerPoint: centerPoint,
+        boundingBox: boundingBox
+      },
+      eudrAnalysis: {
+        riskLevel: riskLevel,
+        complianceStatus: complianceStatus,
+        deforestationRisk: deforestationRisk,
+        recommendations: [
+          'Establish real-time satellite monitoring for forest coverage changes',
+          'Implement precision agriculture techniques to minimize land impact',
+          'Create wildlife corridors to maintain ecosystem connectivity',
+          'Develop carbon sequestration initiatives through reforestation',
+          'Install IoT sensors for environmental monitoring',
+          'Conduct biodiversity assessments every six months',
+          'Participate in LACRA carbon credit programs'
+        ]
+      },
+      farmer: {
+        name: 'John Doe Farmer',
+        id: 'F-' + Date.now(),
+        county: 'Montserrado County',
+        district: 'Greater Monrovia District'
+      }
+    };
+    
+    pdfGenerator.generateDeforestationReport(reportData);
+    console.log('🌳 Professional Deforestation Risk Report generated with colorful charts');
   };
 
   const downloadEUDRReport = () => {
@@ -713,18 +782,22 @@ export default function GPSSatelliteMapper({
               </div>
               <div className="mt-3 flex gap-2">
                 <Button
-                  onClick={generatePDFReport}
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  📄 Generate PDF Report
-                </Button>
-                <Button
-                  onClick={downloadEUDRReport}
+                  onClick={generateProfessionalEUDRReport}
                   size="sm"
                   className="bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={points.length < 3}
                 >
-                  🌍 Download EUDR Report
+                  <FileText className="w-4 h-4 mr-1" />
+                  EUDR Compliance Report (PDF)
+                </Button>
+                <Button
+                  onClick={generateDeforestationReport}
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  disabled={points.length < 3}
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  Deforestation Analysis (PDF)
                 </Button>
               </div>
             </div>

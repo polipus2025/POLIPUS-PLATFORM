@@ -39,6 +39,73 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
     return { x, y };
   };
 
+  // Load real satellite imagery
+  const [satelliteLoaded, setSatelliteLoaded] = useState(false);
+  const [satelliteImage, setSatelliteImage] = useState<HTMLImageElement | null>(null);
+
+  // Load real-time satellite imagery
+  useEffect(() => {
+    const loadSatelliteImage = () => {
+      const zoom = 16;
+      const x = Math.floor((mapCenter.lng + 180) / 360 * Math.pow(2, zoom));
+      const y = Math.floor((1 - Math.log(Math.tan(mapCenter.lat * Math.PI / 180) + 1 / Math.cos(mapCenter.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
+      
+      // Create composite image from multiple satellite tiles
+      const canvas = document.createElement('canvas');
+      canvas.width = 768; // 3x3 tiles of 256px each
+      canvas.height = 768;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) return;
+
+      let tilesLoaded = 0;
+      const totalTiles = 9;
+
+      const tileOffsets = [
+        [-1, -1], [0, -1], [1, -1],
+        [-1, 0], [0, 0], [1, 0],
+        [-1, 1], [0, 1], [1, 1]
+      ];
+
+      tileOffsets.forEach(([dx, dy], index) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        // Primary: Esri World Imagery (high-resolution satellite)
+        img.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y + dy}/${x + dx}`;
+        
+        img.onload = () => {
+          const tileX = (dx + 1) * 256;
+          const tileY = (dy + 1) * 256;
+          ctx.drawImage(img, tileX, tileY, 256, 256);
+          
+          tilesLoaded++;
+          if (tilesLoaded === totalTiles) {
+            const compositeImg = new Image();
+            compositeImg.onload = () => {
+              setSatelliteImage(compositeImg);
+              setSatelliteLoaded(true);
+              console.log(`🛰️ Real satellite imagery loaded for coordinates ${mapCenter.lat.toFixed(6)}, ${mapCenter.lng.toFixed(6)}`);
+            };
+            compositeImg.src = canvas.toDataURL();
+          }
+        };
+        
+        // Fallback to Google Satellite if Esri fails
+        img.onerror = () => {
+          img.src = `https://mt1.google.com/vt/lyrs=s&x=${x + dx}&y=${y + dy}&z=${zoom}`;
+          
+          // Final fallback to OpenStreetMap satellite
+          img.onerror = () => {
+            img.src = `https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}@2x.jpg?api_key=YOUR_STADIA_KEY`.replace('{z}', zoom.toString()).replace('{x}', (x + dx).toString()).replace('{y}', (y + dy).toString());
+          };
+        };
+      });
+    };
+
+    loadSatelliteImage();
+  }, [mapCenter]);
+
   // Draw the map and points
   const drawMap = () => {
     const canvas = canvasRef.current;
@@ -50,37 +117,55 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw satellite-style background
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#4a5a3a');
-    gradient.addColorStop(0.3, '#3d5a3d');
-    gradient.addColorStop(0.6, '#2d4a2d');
-    gradient.addColorStop(1, '#5a6b4a');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Draw real satellite imagery if loaded
+    if (satelliteLoaded && satelliteImage) {
+      // Scale and center the satellite image
+      const scale = Math.min(canvas.width / satelliteImage.width, canvas.height / satelliteImage.height);
+      const scaledWidth = satelliteImage.width * scale;
+      const scaledHeight = satelliteImage.height * scale;
+      const x = (canvas.width - scaledWidth) / 2;
+      const y = (canvas.height - scaledHeight) / 2;
+      
+      ctx.drawImage(satelliteImage, x, y, scaledWidth, scaledHeight);
+      
+      // Add subtle overlay for better contrast
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      // Loading placeholder with satellite-style background
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#4a5a3a');
+      gradient.addColorStop(0.3, '#3d5a3d');
+      gradient.addColorStop(0.6, '#2d4a2d');
+      gradient.addColorStop(1, '#5a6b4a');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw grid pattern
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < canvas.width; i += 20) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, canvas.height);
-      ctx.stroke();
-    }
-    for (let i = 0; i < canvas.height; i += 20) {
-      ctx.beginPath();
-      ctx.moveTo(0, i);
-      ctx.lineTo(canvas.width, i);
-      ctx.stroke();
+      // Loading indicator
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillRect(canvas.width/2 - 60, canvas.height/2 - 15, 120, 30);
+      ctx.fillStyle = '#333';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Loading satellite...', canvas.width/2, canvas.height/2 + 5);
     }
 
-    // Draw GPS coordinates overlay
+    // Draw GPS coordinates and satellite status overlay
+    const overlayWidth = satelliteLoaded ? 280 : 200;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.fillRect(10, 10, 200, 30);
+    ctx.fillRect(10, 10, overlayWidth, 35);
     ctx.fillStyle = 'white';
-    ctx.font = '12px monospace';
-    ctx.fillText(`GPS: ${mapCenter.lat.toFixed(6)}, ${mapCenter.lng.toFixed(6)}`, 15, 30);
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`GPS: ${mapCenter.lat.toFixed(6)}, ${mapCenter.lng.toFixed(6)}`, 15, 25);
+    
+    if (satelliteLoaded) {
+      ctx.fillStyle = '#00ff00';
+      ctx.fillText('🛰️ Real-time Satellite View Active', 15, 40);
+    } else {
+      ctx.fillStyle = '#ffaa00';
+      ctx.fillText('📡 Loading satellite imagery...', 15, 40);
+    }
 
     // Draw connecting lines first
     if (points.length >= 2) {
@@ -138,10 +223,10 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
     console.log(`🎨 Drew map with ${points.length} points and ${Math.max(0, points.length - 1)} connecting lines`);
   };
 
-  // Redraw when points change
+  // Redraw when points or satellite imagery changes
   useEffect(() => {
     drawMap();
-  }, [points]);
+  }, [points, satelliteLoaded, satelliteImage]);
 
   // Start GPS tracking
   const startTracking = () => {
@@ -222,6 +307,11 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
             : '⚫ GPS Inactive - Start tracking to begin mapping'
           }
         </p>
+        {satelliteLoaded && (
+          <p className="text-xs text-green-600 mt-1">
+            🛰️ Real-time satellite imagery loaded for current location
+          </p>
+        )}
       </div>
 
       {/* Controls */}
@@ -296,12 +386,17 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
         {points.length > 0 && (
           <div className="mt-3 p-3 bg-blue-50 rounded-lg">
             <div className="text-sm font-medium text-blue-800 mb-1">
-              {points.length} boundary points mapped with persistent connected lines
+              {points.length} boundary points mapped on real satellite imagery
             </div>
             <div className="text-xs text-blue-600">
               Points: {points.map(p => p.label).join(' → ')}
               {points.length >= 3 && ` • Area: ${calculateArea(points).toFixed(2)} hectares`}
             </div>
+            {satelliteLoaded && (
+              <div className="text-xs text-green-600 mt-1">
+                🛰️ Mapping on current satellite view with real terrain features
+              </div>
+            )}
           </div>
         )}
       </div>

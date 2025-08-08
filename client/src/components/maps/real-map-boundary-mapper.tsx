@@ -238,34 +238,54 @@ export default function RealMapBoundaryMapper({
           }
           .map-marker {
             position: absolute;
-            width: 14px;
-            height: 14px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             border: 3px solid white;
             box-shadow: 0 3px 8px rgba(0,0,0,0.6);
             transform: translate(-50%, -50%);
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
           }
-          .marker-start { background-color: #fbbf24; }
+          .marker-start { background-color: #10b981; }
           .marker-middle { background-color: #3b82f6; }
           .marker-end { background-color: #ef4444; }
           .risk-low { background-color: #10b981 !important; border-color: #065f46 !important; }
           .risk-standard { background-color: #f59e0b !important; border-color: #92400e !important; }
           .risk-high { background-color: #dc2626 !important; border-color: #7f1d1d !important; animation: pulse 2s infinite; }
-          @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
-          .area-risk-label { pointer-events: none; z-index: 15; }
+          @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.15); } }
+          .area-risk-label { pointer-events: none; z-index: 15; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
           .map-polygon {
             position: absolute;
             pointer-events: none;
-            fill: rgba(251, 191, 36, 0.3);
-            stroke: #fbbf24;
-            stroke-width: 3;
+            fill: rgba(16, 185, 129, 0.25);
+            stroke: #10b981;
+            stroke-width: 4;
+            stroke-dasharray: 8,4;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
             z-index: 5;
           }
         </style>
         <div class="fallback-map" id="fallback-map">
           <div class="terrain-overlay"></div>
           <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+            <defs>
+              <pattern id="crosshatch-red" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+              </pattern>
+              <pattern id="crosshatch-yellow" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#f59e0b" stroke-width="1" opacity="0.4"/>
+              </pattern>
+              <pattern id="crosshatch-green" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#10b981" stroke-width="1" opacity="0.4"/>
+              </pattern>
+            </defs>
           </svg>
         </div>
       `;
@@ -335,6 +355,7 @@ export default function RealMapBoundaryMapper({
       
       // Add alphabetical label (A, B, C, D, etc.)
       marker.textContent = String.fromCharCode(65 + index);
+      console.log(`Creating marker ${String.fromCharCode(65 + index)} with risk ${pointRisk.level}`);
       
       // Add risk indicator ring
       const riskRing = document.createElement('div');

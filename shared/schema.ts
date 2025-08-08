@@ -887,6 +887,31 @@ export const farmers = pgTable("farmers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Custom farmer insert schema to handle frontend camelCase to database snake_case conversion
+export const insertFarmerSchema = z.object({
+  farmerId: z.string().optional(),
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  phoneNumber: z.string().optional(),
+  idNumber: z.string().optional(),
+  county: z.string().min(1, "County is required"),
+  district: z.string().optional(),
+  village: z.string().optional(),
+  gpsCoordinates: z.string().optional(),
+  farmSize: z.string().optional(),
+  farmSizeUnit: z.string().default("hectares"),
+  status: z.string().default("active"),
+  agreementSigned: z.boolean().default(false),
+  agreementDate: z.string().optional(),
+  profilePicture: z.string().optional(),
+  farmBoundaries: z.array(z.object({
+    lat: z.number(),
+    lng: z.number(),
+    point: z.number()
+  })).optional(),
+  landMapData: z.any().optional()
+});
+
 export const farmPlots = pgTable("farm_plots", {
   id: serial("id").primaryKey(),
   plotId: text("plot_id").notNull().unique(),
@@ -1011,10 +1036,7 @@ export const economicIndicators = pgTable("economic_indicators", {
 });
 
 // Insert schemas
-export const insertFarmerSchema = createInsertSchema(farmers).omit({
-  id: true,
-  createdAt: true,
-});
+// Remove the old insertFarmerSchema since we defined it above with the table
 
 export const insertFarmPlotSchema = createInsertSchema(farmPlots).omit({
   id: true,

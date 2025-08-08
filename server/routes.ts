@@ -3056,20 +3056,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/farmers", async (req, res) => {
     try {
       // Auto-generate farmerId if not provided
-      const farmerData = {
+      const requestData = {
         ...req.body,
         farmerId: req.body.farmerId || `FARM-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
       };
       
-      const validatedData = insertFarmerSchema.parse(farmerData);
-      const farmer = await storage.createFarmer(validatedData);
+      // Validate with our schema (camelCase)
+      const validatedData = insertFarmerSchema.parse(requestData);
+      
+      // Convert to database format (snake_case)
+      const dbData = {
+        farmerId: validatedData.farmerId,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        phoneNumber: validatedData.phoneNumber,
+        idNumber: validatedData.idNumber,
+        county: validatedData.county,
+        district: validatedData.district,
+        village: validatedData.village,
+        gpsCoordinates: validatedData.gpsCoordinates,
+        farmSize: validatedData.farmSize ? parseFloat(validatedData.farmSize) : undefined,
+        farmSizeUnit: validatedData.farmSizeUnit,
+        status: validatedData.status,
+        agreementSigned: validatedData.agreementSigned,
+        profilePicture: validatedData.profilePicture,
+        farmBoundaries: validatedData.farmBoundaries,
+        landMapData: validatedData.landMapData
+      };
+
+      // Remove undefined values
+      Object.keys(dbData).forEach(key => {
+        if (dbData[key] === undefined) {
+          delete dbData[key];
+        }
+      });
+      
+      const farmer = await storage.createFarmer(dbData);
       res.status(201).json(farmer);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        console.error("Farmer validation errors:", error.errors);
+        return res.status(400).json({ 
+          message: "Invalid farmer data", 
+          errors: error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message,
+            received: err.received,
+            expected: err.expected
+          }))
+        });
       }
       console.error("Failed to create farmer:", error);
-      res.status(500).json({ message: "Failed to create farmer" });
+      res.status(500).json({ message: "Failed to create farmer due to server error" });
     }
   });
 

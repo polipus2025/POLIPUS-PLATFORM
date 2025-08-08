@@ -19,6 +19,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
 import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
 import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
+import SimpleRealTimeMapper from "@/components/maps/simple-real-time-mapper";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
@@ -1632,7 +1633,7 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <RealMapBoundaryMapper
+              <SimpleRealTimeMapper
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({
@@ -1706,7 +1707,7 @@ export default function FarmersPage() {
                 }}
                 minPoints={8}
                 maxPoints={20}
-                enableRealTimeGPS={true}
+
               />
             </div>
           </DialogContent>

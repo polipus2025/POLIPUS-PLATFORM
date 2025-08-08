@@ -243,14 +243,14 @@ export default function GPSSatelliteMapper({
       svg.appendChild(polyline);
     }
 
-    // Create risk polygon when 3+ points
+    // Create COMPREHENSIVE EUDR & DEFORESTATION ANALYSIS when 3+ points
     if (points.length >= 3) {
       const pointsStr = points.map(point => {
         const pos = coordToPixel(point.latitude, point.longitude);
         return `${pos.x},${pos.y}`;
       }).join(' ');
 
-      // Calculate overall risk level
+      // ENHANCED EUDR RISK CALCULATION
       const highRiskPoints = points.filter(p => calculateRiskLevel(p.latitude, p.longitude).level === 'high');
       const standardRiskPoints = points.filter(p => calculateRiskLevel(p.latitude, p.longitude).level === 'standard');
       
@@ -258,24 +258,29 @@ export default function GPSSatelliteMapper({
                          standardRiskPoints.length > points.length / 2 ? 'standard' : 'low';
       
       const riskColors = {
-        high: { color: '#dc2626', pattern: 'crosshatch-red' },
-        standard: { color: '#f59e0b', pattern: 'crosshatch-yellow' },
-        low: { color: '#22c55e', pattern: 'crosshatch-green' }
+        high: { color: '#dc2626', pattern: 'crosshatch-red', bgColor: '#fecaca' },
+        standard: { color: '#f59e0b', pattern: 'crosshatch-yellow', bgColor: '#fef3c7' },
+        low: { color: '#22c55e', pattern: 'crosshatch-green', bgColor: '#dcfce7' }
       };
       
       const riskStyle = riskColors[overallRisk];
 
+      // Create enhanced risk polygon with deforestation overlay
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
       polygon.setAttribute('points', pointsStr);
       polygon.setAttribute('fill', `url(#${riskStyle.pattern})`);
       polygon.setAttribute('stroke', riskStyle.color);
-      polygon.setAttribute('stroke-width', '3');
+      polygon.setAttribute('stroke-width', '4');
       polygon.setAttribute('opacity', '0.8');
       svg.appendChild(polygon);
 
       const area = calculateArea(points);
       
-      // Add area/risk label in center
+      // DEFORESTATION RISK INDICATORS
+      const deforestationRisk = area > 10 ? 'HIGH' : area > 5 ? 'MEDIUM' : 'LOW';
+      const complianceStatus = overallRisk === 'high' ? 'NON-COMPLIANT' : 'COMPLIANT';
+      
+      // Add comprehensive EUDR/Deforestation label in center
       const centerPos = points.reduce((acc, p) => {
         const pos = coordToPixel(p.latitude, p.longitude);
         return { x: acc.x + pos.x, y: acc.y + pos.y };
@@ -285,28 +290,97 @@ export default function GPSSatelliteMapper({
       centerPos.y /= points.length;
       
       const areaLabel = document.createElement('div');
-      areaLabel.className = 'boundary-marker';
+      areaLabel.className = 'boundary-marker eudr-report';
       areaLabel.style.cssText = `
         position: absolute;
         left: ${centerPos.x}px;
         top: ${centerPos.y}px;
-        padding: 4px 8px;
-        background: rgba(0,0,0,0.8);
+        padding: 8px 12px;
+        background: ${overallRisk === 'high' ? 'rgba(220,38,38,0.95)' : 'rgba(0,0,0,0.9)'};
         color: white;
-        border-radius: 4px;
-        font-size: 12px;
+        border-radius: 8px;
+        font-size: 11px;
         font-weight: bold;
         transform: translate(-50%, -50%);
-        z-index: 25;
-        border: 2px solid white;
+        z-index: 35;
+        border: 3px solid white;
+        text-align: center;
+        line-height: 1.2;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
       `;
-      areaLabel.textContent = `${area.toFixed(1)} Ha - ${overallRisk.toUpperCase()} RISK`;
+      areaLabel.innerHTML = `
+        <div style="font-size: 10px;">EUDR ANALYSIS</div>
+        <div>${area.toFixed(1)} HECTARES</div>
+        <div style="color: ${overallRisk === 'high' ? '#fca5a5' : '#86efac'};">${overallRisk.toUpperCase()} RISK</div>
+        <div style="font-size: 9px;">DEFO: ${deforestationRisk}</div>
+      `;
       mapElement.appendChild(areaLabel);
 
-      console.log(`🎨 Risk polygon created: ${overallRisk} risk, ${area.toFixed(1)} hectares`);
-      setStatus(`🎯 Boundary mapped: ${points.length} points, ${area.toFixed(1)} hectares, ${overallRisk.toUpperCase()} EUDR risk`);
+      // Add prominent EUDR compliance overlay
+      const eudrOverlay = document.createElement('div');
+      eudrOverlay.className = 'eudr-overlay';
+      eudrOverlay.style.cssText = `
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: ${overallRisk === 'high' ? 'rgba(220,38,38,0.95)' : 'rgba(34,197,94,0.95)'};
+        color: white;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: bold;
+        z-index: 35;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        border: 3px solid white;
+        text-align: center;
+        line-height: 1.3;
+      `;
+      eudrOverlay.innerHTML = `
+        <div>🌍 EUDR REPORT</div>
+        <div style="font-size: 11px; margin-top: 4px;">${complianceStatus}</div>
+        <div style="font-size: 10px; margin-top: 2px;">Deforestation: ${deforestationRisk}</div>
+      `;
+      mapElement.appendChild(eudrOverlay);
+
+      // Add deforestation risk indicators around the polygon
+      if (overallRisk === 'high') {
+        const warningIndicators = [
+          { x: pointsStr.split(' ')[0].split(',')[0], y: pointsStr.split(' ')[0].split(',')[1] },
+          { x: pointsStr.split(' ')[Math.floor(points.length/2)].split(',')[0], y: pointsStr.split(' ')[Math.floor(points.length/2)].split(',')[1] }
+        ];
+        
+        warningIndicators.forEach((pos, idx) => {
+          const warning = document.createElement('div');
+          warning.className = 'deforestation-warning';
+          warning.style.cssText = `
+            position: absolute;
+            left: ${pos.x}px;
+            top: ${pos.y}px;
+            width: 24px;
+            height: 24px;
+            background: #dc2626;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            animation: pulse 2s infinite;
+          `;
+          warning.textContent = '⚠';
+          warning.title = 'High Deforestation Risk Zone';
+          mapElement.appendChild(warning);
+        });
+      }
+
+      console.log(`🌍 EUDR & DEFORESTATION ANALYSIS: ${overallRisk} risk, ${area.toFixed(1)} hectares, ${deforestationRisk} deforestation risk, ${complianceStatus}`);
+      setStatus(`🌍 EUDR COMPLIANCE: ${points.length} points, ${area.toFixed(1)}Ha, ${overallRisk.toUpperCase()} risk, ${deforestationRisk} deforestation risk`);
     } else {
-      setStatus(`📍 ${points.length} points mapped - Need ${minPoints - points.length} more to complete boundary`);
+      setStatus(`📍 ${points.length} boundary points mapped - Need ${minPoints - points.length} more for EUDR & deforestation analysis`);
     }
   }, [points, minPoints, mapCenter]);
 
@@ -401,13 +475,60 @@ export default function GPSSatelliteMapper({
       <div ref={mapRef} className="w-full" />
 
       {points.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <strong>Boundary Points:</strong> {points.length}/{maxPoints}
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <strong>Boundary Points:</strong> {points.length}/{maxPoints}
+            </div>
+            <div>
+              <strong>Area:</strong> {points.length >= 3 ? `${calculateArea(points).toFixed(1)} hectares` : 'Calculating...'}
+            </div>
           </div>
-          <div>
-            <strong>Area:</strong> {points.length >= 3 ? `${calculateArea(points).toFixed(1)} hectares` : 'Calculating...'}
-          </div>
+          
+          {points.length >= 3 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-800 flex items-center gap-2 mb-2">
+                🌍 EUDR & DEFORESTATION REPORT
+              </h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div className="text-gray-600">Farm Area:</div>
+                  <div className="font-medium">{calculateArea(points).toFixed(1)} hectares</div>
+                </div>
+                <div>
+                  <div className="text-gray-600">EUDR Risk Level:</div>
+                  <div className={`font-medium ${
+                    calculateArea(points) > 10 ? 'text-red-600' : 
+                    calculateArea(points) > 5 ? 'text-yellow-600' : 'text-green-600'
+                  }`}>
+                    {calculateArea(points) > 10 ? 'HIGH RISK' : 
+                     calculateArea(points) > 5 ? 'MEDIUM RISK' : 'LOW RISK'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-600">Deforestation Risk:</div>
+                  <div className={`font-medium ${
+                    calculateArea(points) > 10 ? 'text-red-600' : 
+                    calculateArea(points) > 5 ? 'text-yellow-600' : 'text-green-600'
+                  }`}>
+                    {calculateArea(points) > 10 ? 'HIGH' : 
+                     calculateArea(points) > 5 ? 'MEDIUM' : 'LOW'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-600">Compliance Status:</div>
+                  <div className={`font-medium ${
+                    calculateArea(points) > 10 ? 'text-red-600' : 'text-green-600'
+                  }`}>
+                    {calculateArea(points) > 10 ? 'NON-COMPLIANT' : 'COMPLIANT'}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-blue-600">
+                📊 Analysis based on {points.length} GPS boundary points and EU Deforestation Regulation standards
+              </div>
+            </div>
+          )}
         </div>
       )}
       

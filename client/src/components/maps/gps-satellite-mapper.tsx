@@ -185,43 +185,46 @@ export default function GPSSatelliteMapper({
     svg.innerHTML = '';
     if (defs) svg.appendChild(defs);
 
-    console.log(`Rendering ${points.length} boundary markers`);
+    console.log(`🎯 Rendering ${points.length} persistent boundary markers`);
 
-    // Add persistent markers for each point
+    // Add persistent markers for each point that STAY ON THE MAP
     points.forEach((point, index) => {
       const pixelPos = coordToPixel(point.latitude, point.longitude);
       const risk = calculateRiskLevel(point.latitude, point.longitude);
       
-      // Create persistent marker
+      // Create highly visible persistent marker
       const marker = document.createElement('div');
       marker.className = 'boundary-marker';
+      marker.setAttribute('data-point-index', index.toString());
       marker.style.cssText = `
         position: absolute;
         left: ${pixelPos.x}px;
         top: ${pixelPos.y}px;
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        background-color: ${risk.color};
-        border: 3px solid white;
+        background-color: #22c55e;
+        border: 4px solid white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: bold;
         color: white;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.6);
         transform: translate(-50%, -50%);
-        z-index: 20;
+        z-index: 30;
         cursor: pointer;
+        pointer-events: auto;
       `;
       
-      marker.textContent = String.fromCharCode(65 + index); // A, B, C, D...
-      marker.title = `Point ${String.fromCharCode(65 + index)} - Risk: ${risk.level.toUpperCase()}`;
+      const letter = String.fromCharCode(65 + index);
+      marker.textContent = letter; // A, B, C, D...
+      marker.title = `Boundary Point ${letter} - GPS: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
       
       mapElement.appendChild(marker);
-      console.log(`✅ Added marker ${String.fromCharCode(65 + index)} at pixel ${pixelPos.x}, ${pixelPos.y}`);
+      console.log(`✅ PERSISTENT marker ${letter} added at pixel ${pixelPos.x}, ${pixelPos.y} for GPS ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
     });
 
     // Draw connecting lines when 2+ points

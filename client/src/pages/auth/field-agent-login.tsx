@@ -120,21 +120,10 @@ export default function FieldAgentLogin() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Helmet>
 
-      {/* Force reload indicator for debugging */}
-      <div style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '8px 16px', fontSize: '14px', zIndex: 9999, fontWeight: 'bold' }}>
-        🚨 CACHE BUSTER v{Date.now()} 🚨
-      </div>
+
       
       {/* Mobile-optimized container */}
       <div className="flex flex-col min-h-screen">
-        
-
-
-        {/* FORCE UPDATE TEST - BRIGHT RED BACKGROUND */}
-        <div className="bg-yellow-400 p-4 text-black text-center font-bold text-2xl">
-          🚨 THIS IS THE NEW VERSION WITH GPS BUTTON 🚨
-        </div>
-
         {/* Login Form Container - Mobile Centered */}
         <div className="flex-1 flex items-center justify-center px-4 pb-4">
           <div className="w-full max-w-sm">
@@ -153,7 +142,7 @@ export default function FieldAgentLogin() {
                   </div>
                 </div>
                 <CardTitle className="text-lg sm:text-xl font-bold text-red-900 leading-tight">
-                  🚨 UPDATED VERSION - GPS BUTTON ACTIVE 🚨
+                  Field Agent Portal
                 </CardTitle>
                 <p className="text-gray-600 text-sm mt-1">
                   Liberia Agriculture Commodity Regulatory Authority

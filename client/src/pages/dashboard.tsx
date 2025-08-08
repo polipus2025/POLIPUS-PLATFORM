@@ -485,14 +485,14 @@ export default function Dashboard() {
           onPermissionGranted={(position) => {
             console.log('GPS enabled for dashboard operations:', position.coords);
             toast({
-              title: "Location Services Active",
-              description: "GPS tracking enabled for field operations and compliance monitoring",
+              title: "Geolocation Services Enabled",
+              description: "Precision mapping and compliance monitoring activated",
             });
           }}
           onPermissionDenied={() => {
             toast({
-              title: "GPS Access Required",
-              description: "Location services are needed for farming and field operations",
+              title: "Geolocation Access Required",
+              description: "Location services required for agricultural compliance operations",
               variant: "destructive",
             });
           }}

@@ -313,7 +313,7 @@ export default function RealMapBoundaryMapper({
     // Map initialization handled by initMapWithCoordinates function
   }, []);
 
-  // Update visual markers when points change
+  // Update visual markers when points change - IMMEDIATE REAL-TIME DISPLAY
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
 
@@ -322,70 +322,109 @@ export default function RealMapBoundaryMapper({
     
     if (!mapElement || !svg) return;
 
-    // Clear existing markers
-    mapElement.querySelectorAll('.map-marker').forEach(marker => marker.remove());
+    // Clear existing markers and boundary
+    mapElement.querySelectorAll('.map-marker, .area-label, .risk-label').forEach(el => el.remove());
     svg.innerHTML = '';
+    
+    // Re-add crosshatch patterns
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const patterns = ['red', 'yellow', 'green'];
+    const colors = ['#dc2626', '#f59e0b', '#10b981'];
+    
+    patterns.forEach((pattern, idx) => {
+      const patternEl = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+      patternEl.setAttribute('id', `crosshatch-${pattern}`);
+      patternEl.setAttribute('patternUnits', 'userSpaceOnUse');
+      patternEl.setAttribute('width', '8');
+      patternEl.setAttribute('height', '8');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
+      path.setAttribute('stroke', colors[idx]);
+      path.setAttribute('stroke-width', '1');
+      path.setAttribute('opacity', '0.4');
+      patternEl.appendChild(path);
+      defs.appendChild(patternEl);
+    });
+    svg.appendChild(defs);
 
-    // Add markers for each point with risk-based coloring
+    // REAL-TIME MARKERS: Display immediately as points are added
     points.forEach((point, index) => {
       const isFirst = index === 0;
       const isLast = index === points.length - 1 && points.length > 1;
       
-      // Convert lat/lng back to pixels
-      const x = (point.longitude + 9.4295) * 5000 + 200;
-      const y = 200 - (point.latitude - 6.4281) * 5000;
+      // Convert lat/lng to pixels - ensure visible positioning
+      const x = Math.max(12, Math.min(388, (point.longitude + 9.4295) * 5000 + 200));
+      const y = Math.max(12, Math.min(388, 200 - (point.latitude - 6.4281) * 5000));
       
-      // Calculate risk level for this specific point
+      // Calculate EUDR risk for professional analysis
       const pointRisk = calculatePointRisk(point.latitude, point.longitude);
       
       const marker = document.createElement('div');
-      marker.className = `map-marker ${isFirst ? 'marker-start' : isLast ? 'marker-end' : 'marker-middle'} risk-${pointRisk.level}`;
+      marker.className = `map-marker risk-${pointRisk.level}`;
+      marker.style.position = 'absolute';
       marker.style.left = `${x}px`;
       marker.style.top = `${y}px`;
-      marker.style.width = '24px';
-      marker.style.height = '24px';
+      marker.style.width = '28px';
+      marker.style.height = '28px';
+      marker.style.borderRadius = '50%';
       marker.style.display = 'flex';
       marker.style.alignItems = 'center';
       marker.style.justifyContent = 'center';
-      marker.style.fontSize = '12px';
+      marker.style.fontSize = '14px';
       marker.style.fontWeight = 'bold';
       marker.style.color = 'white';
-      marker.style.textShadow = '1px 1px 2px rgba(0,0,0,0.8)';
-      marker.title = `Point ${String.fromCharCode(65 + index)}${isFirst ? ' (Start)' : isLast ? ' (End)' : ''}\nEUDR Risk: ${pointRisk.level.toUpperCase()}\nDeforestation Risk: ${pointRisk.deforestationRisk}%\nCompliance Score: ${pointRisk.complianceScore}%`;
+      marker.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+      marker.style.border = '3px solid white';
+      marker.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+      marker.style.zIndex = '15';
+      marker.style.transform = 'translate(-50%, -50%)';
+      marker.style.cursor = 'pointer';
       
-      // Add alphabetical label (A, B, C, D, etc.)
-      marker.textContent = String.fromCharCode(65 + index);
-      console.log(`Creating marker ${String.fromCharCode(65 + index)} with risk ${pointRisk.level}`);
-      
-      // Add risk indicator ring
-      const riskRing = document.createElement('div');
-      riskRing.style.position = 'absolute';
-      riskRing.style.top = '-3px';
-      riskRing.style.left = '-3px';
-      riskRing.style.right = '-3px';
-      riskRing.style.bottom = '-3px';
-      riskRing.style.borderRadius = '50%';
-      riskRing.style.border = '3px solid';
-      riskRing.style.pointerEvents = 'none';
-      
+      // Risk-based background colors
       if (pointRisk.level === 'high') {
-        riskRing.style.borderColor = '#dc2626';
-        riskRing.style.animation = 'pulse 2s infinite';
+        marker.style.backgroundColor = '#dc2626';
+        marker.style.animation = 'pulse 2s infinite';
       } else if (pointRisk.level === 'standard') {
-        riskRing.style.borderColor = '#f59e0b';
+        marker.style.backgroundColor = '#f59e0b';
       } else {
-        riskRing.style.borderColor = '#10b981';
+        marker.style.backgroundColor = '#22c55e';
       }
       
-      marker.appendChild(riskRing);
+      // Professional alphabetical labeling (A, B, C, D...)
+      marker.textContent = String.fromCharCode(65 + index);
+      marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}\nDeforestation Risk: ${pointRisk.deforestationRisk}%\nCompliance Score: ${pointRisk.complianceScore}%`;
+      
       mapElement.appendChild(marker);
+      
+      console.log(`✓ Real-time marker ${String.fromCharCode(65 + index)} displayed at ${x},${y} with ${pointRisk.level} risk`);
     });
 
-    // Draw polygon if we have enough points with risk-based coloring
+    // REAL-TIME BOUNDARY: Draw polygon immediately when 3+ points exist
+    if (points.length >= 2) {
+      // Draw connecting lines for all points
+      const pointsStr = points.map(point => {
+        const x = Math.max(12, Math.min(388, (point.longitude + 9.4295) * 5000 + 200));
+        const y = Math.max(12, Math.min(388, 200 - (point.latitude - 6.4281) * 5000));
+        return `${x},${y}`;
+      }).join(' ');
+
+      // Create polyline for connecting lines
+      const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polyline.setAttribute('points', pointsStr);
+      polyline.setAttribute('fill', 'none');
+      polyline.setAttribute('stroke', '#fbbf24');
+      polyline.setAttribute('stroke-width', '3');
+      polyline.setAttribute('stroke-dasharray', '8,4');
+      polyline.setAttribute('stroke-linejoin', 'round');
+      polyline.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(polyline);
+    }
+
+    // Create filled polygon when we have 3+ points
     if (points.length >= 3) {
       const pointsStr = points.map(point => {
-        const x = (point.longitude + 9.4295) * 5000 + 200;
-        const y = 200 - (point.latitude - 6.4281) * 5000;
+        const x = Math.max(12, Math.min(388, (point.longitude + 9.4295) * 5000 + 200));
+        const y = Math.max(12, Math.min(388, 200 - (point.latitude - 6.4281) * 5000));
         return `${x},${y}`;
       }).join(' ');
       
@@ -411,54 +450,7 @@ export default function RealMapBoundaryMapper({
       polygon.setAttribute('stroke-width', '4');
       polygon.setAttribute('stroke-dasharray', '8,4');
       
-      // Add crosshatch patterns if not already present
-      if (!svg.querySelector('#crosshatch-red')) {
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        
-        // Red pattern for high risk
-        const redPattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-        redPattern.setAttribute('id', 'crosshatch-red');
-        redPattern.setAttribute('patternUnits', 'userSpaceOnUse');
-        redPattern.setAttribute('width', '8');
-        redPattern.setAttribute('height', '8');
-        const redPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        redPath.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
-        redPath.setAttribute('stroke', '#dc2626');
-        redPath.setAttribute('stroke-width', '1');
-        redPath.setAttribute('opacity', '0.4');
-        redPattern.appendChild(redPath);
-        
-        // Yellow pattern for standard risk
-        const yellowPattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-        yellowPattern.setAttribute('id', 'crosshatch-yellow');
-        yellowPattern.setAttribute('patternUnits', 'userSpaceOnUse');
-        yellowPattern.setAttribute('width', '8');
-        yellowPattern.setAttribute('height', '8');
-        const yellowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        yellowPath.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
-        yellowPath.setAttribute('stroke', '#f59e0b');
-        yellowPath.setAttribute('stroke-width', '1');
-        yellowPath.setAttribute('opacity', '0.4');
-        yellowPattern.appendChild(yellowPath);
-        
-        // Green pattern for low risk
-        const greenPattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-        greenPattern.setAttribute('id', 'crosshatch-green');
-        greenPattern.setAttribute('patternUnits', 'userSpaceOnUse');
-        greenPattern.setAttribute('width', '8');
-        greenPattern.setAttribute('height', '8');
-        const greenPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        greenPath.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
-        greenPath.setAttribute('stroke', '#10b981');
-        greenPath.setAttribute('stroke-width', '1');
-        greenPath.setAttribute('opacity', '0.4');
-        greenPattern.appendChild(greenPath);
-        
-        defs.appendChild(redPattern);
-        defs.appendChild(yellowPattern);
-        defs.appendChild(greenPattern);
-        svg.appendChild(defs);
-      }
+
       
       svg.appendChild(polygon);
       

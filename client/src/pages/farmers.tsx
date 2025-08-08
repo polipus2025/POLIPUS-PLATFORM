@@ -1633,7 +1633,7 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <SimpleRealTimeMapper
+              <RealMapBoundaryMapper
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({
@@ -1705,8 +1705,9 @@ export default function FarmersPage() {
                   
                   setIsInteractiveMappingOpen(false);
                 }}
-                minPoints={8}
+                minPoints={3}
                 maxPoints={20}
+                enableRealTimeGPS={true}
 
               />
             </div>

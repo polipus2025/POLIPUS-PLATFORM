@@ -505,50 +505,50 @@ export default function Dashboard() {
           User Type: {userType || 'none'} | User Role: {userRole || 'none'}
         </div>
 
-      {/* Dashboard Header - Modern ISMS Style */}
-      <div className="mb-12 text-center">
-        <div className="inline-flex items-center gap-4 mb-6">
-          <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
-            <Activity className="h-10 w-10 text-white" />
+      {/* Dashboard Header - Mobile Responsive ISMS Style */}
+      <div className="mb-6 sm:mb-8 lg:mb-12 text-center">
+        <div className="flex flex-col sm:inline-flex sm:flex-row items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div className="p-2 sm:p-3 lg:p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl sm:rounded-2xl shadow-lg flex-shrink-0">
+            <Activity className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-white" />
           </div>
-          <div className="text-left">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+          <div className="text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mobile-menu-item">
               Compliance Dashboard
             </h1>
-            <p className="text-slate-600 text-lg mt-1">
-              Real-time agricultural commodity compliance monitoring
+            <p className="text-sm sm:text-base lg:text-lg text-slate-600 mt-1 mobile-menu-item">
+              Real-time agricultural commodity monitoring
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full md:w-auto">
+      <div className="mb-4 sm:mb-6 lg:mb-8">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-2 sm:gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
             {/* Messages Button - Mobile Responsive */}
             <Dialog open={isMessagesDialogOpen} onOpenChange={setIsMessagesDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="relative mobile-button">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Messages</span>
-                  <span className="sm:hidden">Alerts</span>
+                <Button variant="outline" className="relative mobile-button w-full sm:w-auto">
+                  <MessageSquare className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="hidden sm:inline mobile-menu-item">Messages</span>
+                  <span className="sm:hidden mobile-menu-item">Alerts</span>
                   {unreadAlerts.length > 0 && (
                     <Badge 
-                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white px-1.5 py-0.5 text-xs rounded-full min-w-[20px] h-5"
+                      className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 hover:bg-red-600 text-white px-1 sm:px-1.5 py-0.5 text-xs rounded-full min-w-[16px] sm:min-w-[20px] h-4 sm:h-5"
                     >
-                      {unreadAlerts.length}
+                      {unreadAlerts.length > 9 ? '9+' : unreadAlerts.length}
                     </Badge>
                   )}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="mobile-dialog-safe">
+              <DialogContent className="mobile-dialog-safe w-full max-w-4xl">
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5" />
-                    System Messages & Alerts
+                  <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Bell className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                    <span className="mobile-menu-item">System Messages & Alerts</span>
                   </DialogTitle>
-                  <DialogDescription>
-                    View and manage your system notifications and compliance alerts
+                  <DialogDescription className="text-xs sm:text-sm mobile-menu-item">
+                    View and manage system notifications and compliance alerts
                   </DialogDescription>
                 </DialogHeader>
                 
@@ -643,10 +643,10 @@ export default function Dashboard() {
               </DialogContent>
             </Dialog>
             <Select value={selectedCounty} onValueChange={setSelectedCounty}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48 mobile-safe-form">
                 <SelectValue placeholder="Select County" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="mobile-safe-dialog">
                 <SelectItem value="all">All Counties</SelectItem>
                 <SelectItem value="Bomi County">Bomi County</SelectItem>
                 <SelectItem value="Bong County">Bong County</SelectItem>
@@ -669,33 +669,33 @@ export default function Dashboard() {
             {/* EUDR Compliance Button */}
             <Dialog open={isEudrDialogOpen} onOpenChange={setIsEudrDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
-                  <Shield className="h-4 w-4 mr-2" />
-                  EUDR Compliance
+                <Button className="bg-green-600 hover:bg-green-700 text-white mobile-safe-button w-full sm:w-auto">
+                  <Shield className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="mobile-responsive-text">EUDR Compliance</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="mobile-safe-dialog max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-green-600" />
-                    EU Deforestation Regulation (EUDR) Compliance Dashboard
+                  <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
+                    <span className="mobile-responsive-text">EU Deforestation Regulation (EUDR) Compliance Dashboard</span>
                   </DialogTitle>
                 </DialogHeader>
                 
                 <div className="space-y-6">
-                  {/* EUDR Overview Cards - ISMS Style */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="isms-card">
+                  {/* EUDR Overview Cards - Mobile Responsive ISMS Style */}
+                  <div className="mobile-responsive-grid gap-3 sm:gap-6">
+                    <div className="isms-card mobile-responsive-card">
                       <div className="flex flex-col">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
-                            <TreePine className="h-6 w-6 text-white" />
+                        <div className="flex items-center justify-between mb-2 sm:mb-4">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl isms-icon-bg-green flex items-center justify-center flex-shrink-0">
+                            <TreePine className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-600 mb-2">Deforestation-Free</p>
-                          <p className="text-3xl font-bold text-slate-900">{eudrMetrics.deforestationFree}</p>
-                          <p className="text-sm text-slate-500 mt-2">Verified commodities</p>
+                          <p className="text-xs sm:text-sm font-medium text-slate-600 mb-1 sm:mb-2 mobile-responsive-text">Deforestation-Free</p>
+                          <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">{eudrMetrics.deforestationFree}</p>
+                          <p className="text-xs sm:text-sm text-slate-500 mt-1 sm:mt-2 mobile-responsive-text">Verified commodities</p>
                         </div>
                       </div>
                     </div>
@@ -1281,10 +1281,14 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Charts and Regional Data */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <ComplianceChart selectedCounty={selectedCounty} />
-        <RegionalMap selectedCounty={selectedCounty} />
+      {/* Charts and Regional Data - Mobile Responsive */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6">
+        <div className="mobile-responsive-card">
+          <ComplianceChart selectedCounty={selectedCounty} />
+        </div>
+        <div className="mobile-responsive-card">
+          <RegionalMap selectedCounty={selectedCounty} />
+        </div>
       </div>
 
       {/* Commodity Details Table */}
@@ -1292,10 +1296,14 @@ export default function Dashboard() {
         <InspectionsTable />
       </div>
 
-      {/* Quick Actions and Mobile Device Monitoring */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <QuickActions />
-        <SystemAlerts />
+      {/* Quick Actions and Mobile Device Monitoring - Mobile Responsive */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
+        <div className="mobile-responsive-card">
+          <QuickActions />
+        </div>
+        <div className="mobile-responsive-card">
+          <SystemAlerts />
+        </div>
       </div>
 
       {/* Export Report Dialog */}

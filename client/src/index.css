@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Simplified Mobile Styles */
+/* Enhanced Mobile-First Responsive Design */
 @media (max-width: 768px) {
   .mobile-hidden {
     display: none !important;
@@ -18,6 +18,129 @@
   
   .mobile-grid-1 {
     grid-template-columns: 1fr !important;
+  }
+  
+  /* Mobile menu text overflow fixes */
+  .mobile-menu-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  /* Mobile card content */
+  .mobile-card {
+    padding: 12px !important;
+    margin: 8px !important;
+  }
+  
+  /* Mobile dialog safe zone */
+  .mobile-dialog-safe {
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 64px) !important;
+    margin: 8px !important;
+  }
+  
+  /* Mobile button improvements */
+  .mobile-button {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  /* Mobile form fields */
+  .mobile-form-field {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Extra small screens - phone portrait */
+@media (max-width: 480px) {
+  .xs-hidden {
+    display: none !important;
+  }
+  
+  .xs-text-xs {
+    font-size: 0.75rem !important;
+  }
+  
+  .xs-p-2 {
+    padding: 8px !important;
+  }
+  
+  /* Ultra compact for small screens */
+  .xs-compact {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Universal Mobile-Friendly Classes */
+.mobile-responsive-card {
+  padding: 12px;
+  margin: 8px;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.mobile-responsive-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.mobile-responsive-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
+}
+
+.mobile-safe-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-safe-dialog {
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 64px);
+  margin: 8px;
+  overflow-y: auto;
+}
+
+.mobile-safe-table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-safe-form {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Screen size specific responsive grid */
+@media (min-width: 640px) {
+  .mobile-responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-responsive-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  
+  .mobile-responsive-card {
+    padding: 24px;
+    margin: 16px;
   }
 }
 

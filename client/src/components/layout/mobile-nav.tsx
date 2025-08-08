@@ -118,8 +118,8 @@ export default function MobileNav() {
                   : "text-gray-600 hover:bg-gray-50"
               )}
             >
-              <item.icon className="h-5 w-5" />
-              <span className="text-xs font-medium">{item.name}</span>
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <span className="text-xs font-medium mobile-responsive-text">{item.name}</span>
               
               {/* Show notification badge for messaging */}
               {isMessaging && unreadCount > 0 && (

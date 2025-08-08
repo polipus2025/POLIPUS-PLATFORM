@@ -143,7 +143,7 @@ export default function Sidebar() {
               return (
                 <li key={item.name}>
                   <Link href={item.href} className={cn(
-                    "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base",
+                    "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base mobile-menu-item",
                     isActive
                       ? userType === 'farmer' 
                         ? "text-green-700 bg-green-50"
@@ -154,8 +154,8 @@ export default function Sidebar() {
                         : "text-lacra-blue bg-blue-50"
                       : "text-gray-600 hover:bg-gray-50"
                   )}>
-                    <item.icon className="h-4 w-4 lg:h-5 lg:w-5" />
-                    <span className="truncate">{item.name}</span>
+                    <item.icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                    <span className="truncate mobile-menu-item">{item.name}</span>
                     {/* Show blinking red notification for Internal Messaging */}
                     {item.name === "Internal Messaging" && unreadCount > 0 && (
                       <div className="ml-auto flex items-center space-x-1">

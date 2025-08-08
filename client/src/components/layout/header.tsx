@@ -162,8 +162,8 @@ export default function Header() {
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
       <div className="px-2 sm:px-4 md:px-6 py-2 md:py-4 w-full max-w-full">
         <div className="flex justify-between items-center w-full max-w-full">
-          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-1 min-w-0 max-w-[70%]">
-            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0 max-w-full">
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-1 min-w-0 max-w-[60%] sm:max-w-[70%]">
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
               <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 rounded overflow-hidden flex-shrink-0">
                 <img 
                   src={lacraLogo} 
@@ -178,9 +178,9 @@ export default function Header() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="min-w-0 flex-1 overflow-hidden">
-                <h1 className="text-xs sm:text-sm md:text-xl font-bold text-neutral truncate">AgriTrace360™</h1>
-                <p className="text-xs text-gray-500 truncate">LACRA Dashboard</p>
+              <div className="min-w-0 flex-1 overflow-hidden hidden xs:block">
+                <h1 className="text-xs sm:text-sm md:text-xl font-bold text-neutral truncate mobile-menu-item">AgriTrace360™</h1>
+                <p className="text-xs text-gray-500 truncate mobile-menu-item hidden sm:block">LACRA Dashboard</p>
               </div>
             </div>
             
@@ -226,43 +226,43 @@ export default function Header() {
             </div>
             
             {/* Mobile compact view */}
-            <div className="lg:hidden flex items-center space-x-1 bg-gradient-to-r from-blue-50 to-green-50 px-1 sm:px-2 py-1 rounded border border-blue-100 flex-shrink-0">
-              <Clock className="h-3 w-3 text-green-600" />
-              <span className="text-xs font-medium text-gray-900">
+            <div className="lg:hidden flex items-center space-x-1 bg-gradient-to-r from-blue-50 to-green-50 px-1 sm:px-2 py-1 rounded border border-blue-100 flex-shrink-0 mobile-responsive-text">
+              <Clock className="h-3 w-3 text-green-600 flex-shrink-0" />
+              <span className="text-xs font-medium text-gray-900 mobile-responsive-text">
                 {currentTime.toLocaleTimeString('en-US', { 
                   hour: '2-digit',
                   minute: '2-digit',
                   hour12: true
                 })}
               </span>
-              <WeatherIcon className="h-3 w-3 text-orange-600" />
-              <span className="text-xs font-medium text-gray-900">{weather.temperature}</span>
+              <WeatherIcon className="h-3 w-3 text-orange-600 flex-shrink-0" />
+              <span className="text-xs font-medium text-gray-900 mobile-responsive-text">{weather.temperature}</span>
             </div>
           </div>
           
-          <div className="flex items-center space-x-6">            
-            <div className="flex items-center space-x-2">
-              <Bell className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6 flex-shrink-0">            
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               {unreadCount > 0 && (
-                <Badge variant="destructive" className="text-xs px-2 py-1">
-                  {unreadCount}
+                <Badge variant="destructive" className="text-xs px-1 sm:px-2 py-0.5 sm:py-1 min-w-[16px] h-4 sm:h-5">
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </Badge>
               )}
             </div>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-3 hover:bg-gray-50">
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-neutral">{userDisplay.name}</p>
-                    <p className="text-xs text-gray-500">{userDisplay.role}</p>
+                <Button variant="ghost" className="flex items-center space-x-1 sm:space-x-3 hover:bg-gray-50 p-1 sm:p-2">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-xs sm:text-sm font-medium text-neutral truncate mobile-menu-item">{userDisplay.name}</p>
+                    <p className="text-xs text-gray-500 truncate mobile-menu-item">{userDisplay.role}</p>
                   </div>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     userType === 'farmer' ? 'bg-green-600' :
                     userType === 'field_agent' ? 'bg-orange-600' :
                     'bg-lacra-blue'
                   }`}>
-                    <span className="text-white text-sm font-medium">{userDisplay.initials}</span>
+                    <span className="text-white text-xs sm:text-sm font-medium">{userDisplay.initials}</span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>

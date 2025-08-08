@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
 import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
-import SimpleWorkingMapper from "@/components/maps/simple-working-mapper";
+import WorkingSatelliteMapper from "@/components/maps/working-satellite-mapper";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
@@ -1632,7 +1632,7 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <SimpleWorkingMapper
+              <WorkingSatelliteMapper
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({

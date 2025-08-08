@@ -136,8 +136,10 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
     const mapElement = mapRef.current;
     if (!mapElement) return;
 
-    // Clear existing content
-    mapElement.innerHTML = '';
+    // Clear existing content safely
+    while (mapElement.firstChild) {
+      mapElement.removeChild(mapElement.firstChild);
+    }
 
     // Load REAL satellite imagery using OpenStreetMap satellite tiles
     const zoom = 16;
@@ -230,10 +232,24 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
     function renderPointsAndLines() {
       if (!mapElement) return;
       
-      // Clear existing points and lines
-      const existingMarkers = mapElement.querySelectorAll('.boundary-marker');
-      existingMarkers.forEach(marker => marker.remove());
-      svg.innerHTML = '';
+      // Safely clear existing points and lines
+      const existingMarkers = mapElement.querySelectorAll('.boundary-marker, .boundary-marker-persistent');
+      existingMarkers.forEach(marker => {
+        try {
+          if (marker.parentNode === mapElement) {
+            mapElement.removeChild(marker);
+          }
+        } catch (e) {
+          console.log('Marker already removed');
+        }
+      });
+      
+      // Clear SVG lines safely
+      try {
+        svg.innerHTML = '';
+      } catch (e) {
+        console.log('SVG already cleared');
+      }
 
       if (points.length === 0) return;
 

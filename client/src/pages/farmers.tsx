@@ -1633,7 +1633,6 @@ export default function FarmersPage() {
             
             <div className="mt-6">
               <GPSSatelliteMapper
-                enableRealTimeGPS={true}
                 onBoundaryComplete={(boundary) => {
                   // Convert boundary data to match our farm boundaries format
                   const newBoundaries = boundary.points.map((point, index) => ({
@@ -1708,7 +1707,6 @@ export default function FarmersPage() {
                 minPoints={3}
                 maxPoints={20}
                 enableRealTimeGPS={true}
-
               />
             </div>
           </DialogContent>

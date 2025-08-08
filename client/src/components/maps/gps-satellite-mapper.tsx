@@ -76,8 +76,8 @@ export default function GPSSatelliteMapper({
     const initializeMap = (centerLat: number, centerLng: number) => {
       setMapCenter({ lat: centerLat, lng: centerLng });
       
-      // Calculate tile coordinates for high-resolution satellite imagery
-      const zoom = 16;
+      // Calculate tile coordinates for optimized satellite imagery
+      const zoom = 14; // Reduced zoom for faster loading while maintaining quality
       const tileX = Math.floor((centerLng + 180) / 360 * Math.pow(2, zoom));
       const tileY = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
       
@@ -96,8 +96,6 @@ export default function GPSSatelliteMapper({
           cursor: crosshair;
           background-image: 
             url('https://mt0.google.com/vt/lyrs=s&hl=en&x=${tileX}&y=${tileY}&z=${zoom}'),
-            url('https://mt1.google.com/vt/lyrs=s&hl=en&x=${tileX}&y=${tileY}&z=${zoom}'),
-            url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}'),
             linear-gradient(135deg, #10b981 0%, #34d399 25%, #059669 50%, #047857 75%, #065f46 100%);
           background-position: center;
           background-size: cover;
@@ -116,25 +114,56 @@ export default function GPSSatelliteMapper({
               </pattern>
             </defs>
           </svg>
+          <style>
+            @keyframes pulse {
+              0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+              50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+              100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+            }
+          </style>
         </div>
       `;
 
       const mapElement = mapContainer.querySelector('#gps-satellite-map') as HTMLElement;
       
-      // Add click handler for boundary marking
+      // Add click handler for boundary marking with immediate visual feedback
       mapElement.addEventListener('click', (e) => {
         const rect = mapElement.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
+        // Show immediate click feedback
+        const clickIndicator = document.createElement('div');
+        clickIndicator.style.cssText = `
+          position: absolute;
+          left: ${x}px;
+          top: ${y}px;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: rgba(34, 197, 94, 0.8);
+          border: 2px solid white;
+          transform: translate(-50%, -50%);
+          z-index: 30;
+          animation: pulse 0.6s ease-out;
+        `;
+        mapElement.appendChild(clickIndicator);
+        
+        // Remove click indicator after animation
+        setTimeout(() => {
+          if (clickIndicator.parentNode) {
+            clickIndicator.parentNode.removeChild(clickIndicator);
+          }
+        }, 600);
+        
         const coords = pixelToCoord(x, y);
-        console.log(`➕ Adding boundary point: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
+        console.log(`Adding boundary point: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
         
         const newPoint: BoundaryPoint = { latitude: coords.lat, longitude: coords.lng };
         setPoints(prev => [...prev, newPoint]);
       });
 
-      setStatus(`🛰️ GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark boundary`);
+      setStatus(`GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark boundary`);
     };
 
     // Try to get current GPS location
@@ -170,7 +199,7 @@ export default function GPSSatelliteMapper({
     svg.innerHTML = '';
     if (defs) svg.appendChild(defs);
 
-    console.log(`🎯 Rendering ${points.length} boundary markers`);
+    console.log(`Rendering ${points.length} boundary markers`);
 
     // Add persistent markers for each point
     points.forEach((point, index) => {
@@ -314,10 +343,10 @@ export default function GPSSatelliteMapper({
           </h3>
           <p className="text-sm text-gray-600">{status}</p>
           <div className="text-xs text-blue-600 font-medium mt-1">
-            {points.length === 0 && "Click anywhere on satellite map to start mapping"}
-            {points.length === 1 && "Point A added! Click to add point B"}
-            {points.length === 2 && "Points A-B connected! Click for point C to activate risk overlay"}
-            {points.length >= 3 && `${points.length} points mapped - EUDR risk overlay active`}
+            {points.length === 0 && "TAP anywhere on satellite map to start boundary mapping"}
+            {points.length === 1 && "Point A added! TAP to add point B"}
+            {points.length === 2 && "Points A-B connected! TAP for point C to show risk overlay"}
+            {points.length >= 3 && `${points.length} boundary points mapped - EUDR risk overlay active`}
           </div>
         </div>
         <div className="flex gap-2">

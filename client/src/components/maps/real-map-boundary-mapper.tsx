@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { MapPin, RotateCcw, Check, Satellite, Download, Shield, AlertTriangle } from "lucide-react";
-import { ProfessionalPDFGenerator } from "@/lib/professional-pdf-generator";
+import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
 
 interface BoundaryPoint {
   latitude: number;
@@ -783,6 +783,43 @@ export default function RealMapBoundaryMapper({
     };
   };
 
+  // Helper calculation functions
+  const calculatePerimeter = (mapPoints: BoundaryPoint[]) => {
+    if (mapPoints.length < 2) return 0;
+    let perimeter = 0;
+    for (let i = 0; i < mapPoints.length; i++) {
+      const j = (i + 1) % mapPoints.length;
+      const R = 6371000; // Earth's radius in meters
+      const lat1Rad = mapPoints[i].latitude * Math.PI / 180;
+      const lat2Rad = mapPoints[j].latitude * Math.PI / 180;
+      const deltaLat = (mapPoints[j].latitude - mapPoints[i].latitude) * Math.PI / 180;
+      const deltaLng = (mapPoints[j].longitude - mapPoints[i].longitude) * Math.PI / 180;
+      const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      perimeter += R * c;
+    }
+    return perimeter;
+  };
+
+  const calculateCenterPoint = (mapPoints: BoundaryPoint[]) => {
+    if (mapPoints.length === 0) return { latitude: 0, longitude: 0 };
+    const avgLat = mapPoints.reduce((sum, p) => sum + p.latitude, 0) / mapPoints.length;
+    const avgLng = mapPoints.reduce((sum, p) => sum + p.longitude, 0) / mapPoints.length;
+    return { latitude: avgLat, longitude: avgLng };
+  };
+
+  const calculateBoundingBox = (mapPoints: BoundaryPoint[]) => {
+    if (mapPoints.length === 0) return { north: 0, south: 0, east: 0, west: 0 };
+    const lats = mapPoints.map(p => p.latitude);
+    const lngs = mapPoints.map(p => p.longitude);
+    return {
+      north: Math.max(...lats),
+      south: Math.min(...lats),
+      east: Math.max(...lngs),
+      west: Math.min(...lngs)
+    };
+  };
+
   const handleReset = () => {
     setPoints([]);
     setEudrReport(null);
@@ -793,99 +830,51 @@ export default function RealMapBoundaryMapper({
   const generateProfessionalEUDRReport = () => {
     if (points.length < 3 || !eudrReport) return;
     
-    const pdfGenerator = new ProfessionalPDFGenerator();
     const area = calculateArea(points);
-    const perimeter = calculatePerimeter(points);
-    const centerPoint = calculateCenterPoint(points);
-    const boundingBox = calculateBoundingBox(points);
+    const coordinatesString = points.map((p, i) => 
+      `Point ${String.fromCharCode(65 + i)}: ${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)}`
+    ).join('; ');
     
     const reportData = {
-      farmBoundary: {
-        area: area,
-        perimeter: perimeter,
-        coordinates: points.map((p, i) => ({
-          point: String.fromCharCode(65 + i),
-          latitude: p.latitude.toFixed(6),
-          longitude: p.longitude.toFixed(6)
-        })),
-        centerPoint: centerPoint,
-        boundingBox: boundingBox
-      },
-      riskAssessment: {
-        overallRisk: eudrReport.riskLevel,
-        complianceScore: eudrReport.complianceScore,
-        deforestationRisk: eudrReport.deforestationRisk,
-        lastForestDate: eudrReport.lastForestDate,
-        riskFactors: ['GPS boundary analysis', 'Satellite imagery review', 'Historical data assessment']
-      },
-      compliance: {
-        status: eudrReport.complianceScore > 70 ? 'COMPLIANT' : 'NON-COMPLIANT',
-        requirements: eudrReport.documentationRequired,
-        recommendations: eudrReport.recommendations
-      },
-      eudrSpecific: {
-        regulation: 'EU Deforestation Regulation (EUDR)',
-        assessmentDate: new Date().toLocaleDateString(),
-        validityPeriod: '12 months',
-        certificationRequired: eudrReport.riskLevel === 'high'
-      }
+      farmerId: 'FARMER-001',
+      farmerName: 'GPS Mapped Farm',
+      coordinates: coordinatesString,
+      riskLevel: eudrReport.riskLevel,
+      complianceScore: eudrReport.complianceScore,
+      deforestationRisk: eudrReport.deforestationRisk,
+      lastForestDate: eudrReport.lastForestDate,
+      documentationRequired: eudrReport.documentationRequired,
+      recommendations: eudrReport.recommendations,
+      reportId: `EUDR-${Date.now()}`,
+      generatedAt: new Date().toISOString()
     };
     
-    pdfGenerator.generateEUDRComplianceReport(reportData);
+    generateEUDRCompliancePDF(reportData);
   };
 
   const generateProfessionalDeforestationReport = () => {
     if (points.length < 3 || !deforestationReport) return;
     
-    const pdfGenerator = new ProfessionalPDFGenerator();
-    const area = calculateArea(points);
-    const perimeter = calculatePerimeter(points);
-    const centerPoint = calculateCenterPoint(points);
-    const boundingBox = calculateBoundingBox(points);
+    const coordinatesString = points.map((p, i) => 
+      `Point ${String.fromCharCode(65 + i)}: ${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)}`
+    ).join('; ');
     
     const reportData = {
-      farmBoundary: {
-        area: area,
-        perimeter: perimeter,
-        coordinates: points.map((p, i) => ({
-          point: String.fromCharCode(65 + i),
-          latitude: p.latitude.toFixed(6),
-          longitude: p.longitude.toFixed(6)
-        })),
-        centerPoint: centerPoint,
-        boundingBox: boundingBox
-      },
-      environmentalMetrics: {
-        forestCoverage: 75,
-        agricultureArea: 20,
-        clearedLand: 5,
-        forestLossDetected: deforestationReport.forestLossDetected,
-        forestLossDate: deforestationReport.forestLossDate,
-        forestCoverChange: deforestationReport.forestCoverChange,
-        biodiversityImpact: deforestationReport.biodiversityImpact,
-        carbonStockLoss: deforestationReport.carbonStockLoss
-      },
-      satelliteMonitoring: {
-        lastUpdateDate: new Date().toLocaleDateString(),
-        monitoringFrequency: 'Monthly',
-        alertsActive: deforestationReport.forestLossDetected,
-        dataSource: 'Sentinel-2, Landsat-8',
-        timelineData: [
-          { date: '2023-01', forestCover: 78.2, cleared: 3.1 },
-          { date: '2023-06', forestCover: 76.8, cleared: 4.2 },
-          { date: '2024-01', forestCover: 75.0, cleared: 5.0 },
-          { date: '2024-08', forestCover: 75.0, cleared: 5.0 }
-        ]
-      },
-      mitigationMeasures: {
-        required: deforestationReport.mitigationRequired,
-        recommendations: deforestationReport.recommendations,
-        timeline: '6-12 months',
-        monitoringPlan: 'Quarterly satellite monitoring with ground verification'
-      }
+      farmerId: 'FARMER-001',
+      farmerName: 'GPS Mapped Farm',
+      coordinates: coordinatesString,
+      forestLossDetected: deforestationReport.forestLossDetected,
+      forestLossDate: deforestationReport.forestLossDate,
+      forestCoverChange: deforestationReport.forestCoverChange,
+      biodiversityImpact: deforestationReport.biodiversityImpact,
+      carbonStockLoss: deforestationReport.carbonStockLoss,
+      mitigationRequired: deforestationReport.mitigationRequired,
+      recommendations: deforestationReport.recommendations,
+      reportId: `DEFO-${Date.now()}`,
+      generatedAt: new Date().toISOString()
     };
     
-    pdfGenerator.generateDeforestationAnalysisReport(reportData);
+    generateDeforestationPDF(reportData);
   };
 
   const downloadReport = async (type: 'eudr' | 'deforestation') => {

@@ -3055,14 +3055,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/farmers", async (req, res) => {
     try {
+      console.log("Raw request body received:", req.body);
+      
       // Auto-generate farmerId if not provided
       const requestData = {
         ...req.body,
         farmerId: req.body.farmerId || `FARM-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
       };
       
+      console.log("Request data after processing:", requestData);
+      
       // Validate with our schema (camelCase)
       const validatedData = insertFarmerSchema.parse(requestData);
+      
+      console.log("Validated data:", validatedData);
       
       // Convert to database format (snake_case)
       const dbData = {
@@ -3091,6 +3097,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
+      console.log("Final DB data:", dbData);
+      
       const farmer = await storage.createFarmer(dbData);
       res.status(201).json(farmer);
     } catch (error) {
@@ -3101,8 +3109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-            received: err.received,
-            expected: err.expected
+            code: err.code
           }))
         });
       }

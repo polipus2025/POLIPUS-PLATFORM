@@ -101,36 +101,32 @@ export default function FieldAgentDashboard() {
 
   const newFarmerMutation = useMutation({
     mutationFn: async (farmerData: any) => {
+      console.log("Field agent farmer data:", farmerData);
+      
+      // Create farmer directly using the /api/farmers endpoint
       const farmerRequest = {
-        requestId: `FARM-REQ-${Date.now()}`,
-        requestType: 'farmer_registration',
-        requestedBy: agentId,
-        agentName: 'Sarah Konneh',
-        jurisdiction: jurisdiction,
-        requestedDate: new Date().toISOString(),
-        status: 'pending_approval',
-        priority: 'low',
-        farmerData: {
-          ...farmerData,
-          farmerId: `FRM-${Date.now()}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
-          county: jurisdiction,
-          district: farmerData.farmLocation,
-          village: farmerData.farmLocation,
-          gpsCoordinates: `${8.4 + Math.random() * 0.1},${-9.8 + Math.random() * 0.1}`,
-          farmSizeUnit: 'hectares',
-          registeredBy: agentId
-        },
-        requiresDirectorApproval: true,
-        messageToDirector: `Field Agent ${agentId} requests approval to register new farmer: ${farmerData.firstName} ${farmerData.lastName} for ${farmerData.primaryCrop} farming in ${jurisdiction}.`
+        firstName: farmerData.firstName,
+        lastName: farmerData.lastName,
+        phoneNumber: farmerData.phoneNumber,
+        county: jurisdiction || 'Montserrado County',
+        district: farmerData.farmLocation,
+        village: farmerData.farmLocation,
+        gpsCoordinates: `${8.4 + Math.random() * 0.1},${-9.8 + Math.random() * 0.1}`,
+        farmSize: farmerData.farmSize,
+        farmSizeUnit: 'hectares',
+        agreementSigned: true, // Field agents can approve agreements
+        status: 'active'
       };
       
-      return await apiRequest('/api/farmer-registration-requests', {
+      console.log("Sending farmer request:", farmerRequest);
+      
+      return await apiRequest('/api/farmers', {
         method: 'POST',
         body: JSON.stringify(farmerRequest)
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/farmer-registration-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });
       setIsNewFarmerOpen(false);
       setNewFarmerForm({
         firstName: '',
@@ -141,14 +137,15 @@ export default function FieldAgentDashboard() {
         primaryCrop: ''
       });
       toast({
-        title: 'Registration Request Submitted',
-        description: 'Farmer registration request has been submitted to LACRA Director for approval.',
+        title: 'Farmer Registered Successfully',
+        description: 'New farmer has been successfully registered and activated.',
       });
     },
     onError: (error: any) => {
+      console.error("Farmer registration error:", error);
       toast({
-        title: 'Request Failed',
-        description: error.message || 'Failed to submit registration request',
+        title: 'Registration Failed',
+        description: error.message || 'Failed to register farmer',
         variant: 'destructive',
       });
     },
@@ -466,8 +463,8 @@ export default function FieldAgentDashboard() {
                         </div>
                         <Button 
                           onClick={() => newFarmerMutation.mutate(newFarmerForm)} 
-                          className="w-full"
-                          disabled={!newFarmerForm.firstName || !newFarmerForm.lastName || newFarmerMutation.isPending}
+                          className="w-full bg-lacra-green hover:bg-green-700"
+                          disabled={!newFarmerForm.firstName || !newFarmerForm.lastName || !newFarmerForm.phoneNumber || newFarmerMutation.isPending}
                         >
                           {newFarmerMutation.isPending ? 'Registering...' : 'Register Farmer'}
                         </Button>

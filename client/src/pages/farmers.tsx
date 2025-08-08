@@ -544,6 +544,8 @@ export default function FarmersPage() {
 
   const createFarmerMutation = useMutation({
     mutationFn: async (data: FarmerFormData) => {
+      console.log("Form data received:", data);
+      
       const farmerData = {
         ...data,
         profilePicture: profileImage,
@@ -551,6 +553,7 @@ export default function FarmersPage() {
         landMapData: landMapData,
       };
       
+      console.log("Final farmer data being sent to API:", farmerData);
       
       // Create farmer record
       const farmer = await apiRequest("/api/farmers", {

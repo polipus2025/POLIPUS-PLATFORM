@@ -23,6 +23,7 @@ export default function GPSSatelliteMapper({
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Initializing GPS satellite imagery...');
   const [mapCenter, setMapCenter] = useState({ lat: 6.4281, lng: -9.4295 });
+  const [mappingActive, setMappingActive] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Calculate area using shoelace formula
@@ -131,6 +132,8 @@ export default function GPSSatelliteMapper({
       
       // Add click handler for boundary marking with immediate visual feedback
       mapElement.addEventListener('click', (e) => {
+        if (!mappingActive) return; // Only allow clicking when mapping is active
+        
         const rect = mapElement.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -166,7 +169,7 @@ export default function GPSSatelliteMapper({
         setPoints(prev => [...prev, newPoint]);
       });
 
-      setStatus(`GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark boundary`);
+      setStatus(`GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click START MAPPING to begin`);
     };
 
     // Try to get current GPS location
@@ -326,7 +329,13 @@ export default function GPSSatelliteMapper({
 
   const clearBoundary = () => {
     setPoints([]);
-    setStatus('🛰️ GPS satellite imagery loaded - Click to mark boundary points');
+    setMappingActive(false);
+    setStatus('GPS satellite imagery loaded - Click START MAPPING to begin');
+  };
+
+  const startMapping = () => {
+    setMappingActive(true);
+    setStatus(`Mapping ACTIVE! Tap anywhere on satellite map to add boundary points`);
   };
 
   const completeBoundary = () => {
@@ -346,16 +355,23 @@ export default function GPSSatelliteMapper({
           </h3>
           <p className="text-sm text-gray-600">{status}</p>
           <div className="text-xs text-blue-600 font-medium mt-1">
-            {points.length === 0 && "TAP anywhere on satellite map to start boundary mapping"}
+            {!mappingActive && points.length === 0 && "Click START MAPPING button to begin boundary creation"}
+            {mappingActive && points.length === 0 && "TAP anywhere on satellite map to add boundary points"}
             {points.length === 1 && "Point A added! TAP to add point B"}
             {points.length === 2 && "Points A-B connected! TAP for point C to show risk overlay"}
             {points.length >= 3 && `${points.length} boundary points mapped - EUDR risk overlay active`}
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={clearBoundary} variant="outline" size="sm" disabled={points.length === 0}>
+        <div className="flex gap-2 flex-wrap">
+          {!mappingActive && points.length === 0 && (
+            <Button onClick={startMapping} size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <MapPin className="w-4 h-4 mr-1" />
+              Start Mapping
+            </Button>
+          )}
+          <Button onClick={clearBoundary} variant="outline" size="sm" disabled={points.length === 0 && !mappingActive}>
             <RotateCcw className="w-4 h-4 mr-1" />
-            Clear
+            {mappingActive && points.length === 0 ? 'Stop' : 'Clear'}
           </Button>
           <Button 
             onClick={completeBoundary} 

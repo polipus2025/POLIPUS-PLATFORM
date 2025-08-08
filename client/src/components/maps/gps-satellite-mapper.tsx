@@ -7,21 +7,22 @@ interface BoundaryPoint {
   longitude: number;
 }
 
-interface WorkingSatelliteMapperProps {
+interface GPSSatelliteMapperProps {
   onBoundaryComplete: (boundary: { points: BoundaryPoint[]; area: number; }) => void;
   minPoints?: number;
   maxPoints?: number;
   enableRealTimeGPS?: boolean;
 }
 
-export default function WorkingSatelliteMapper({ 
+export default function GPSSatelliteMapper({ 
   onBoundaryComplete, 
   minPoints = 3, 
   maxPoints = 20,
   enableRealTimeGPS = false 
-}: WorkingSatelliteMapperProps) {
+}: GPSSatelliteMapperProps) {
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
-  const [status, setStatus] = useState('Loading satellite imagery...');
+  const [status, setStatus] = useState('Initializing GPS satellite imagery...');
+  const [mapCenter, setMapCenter] = useState({ lat: 6.4281, lng: -9.4295 });
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Calculate area using shoelace formula
@@ -39,7 +40,7 @@ export default function WorkingSatelliteMapper({
 
   // Calculate EUDR risk based on coordinates
   const calculateRiskLevel = (lat: number, lng: number) => {
-    // Simulate forest risk areas
+    // Simulate forest risk areas based on Liberian coordinates
     if ((lat > 6.5 && lat < 7.0) || (lng > -10.0 && lng < -9.5)) {
       return { level: 'high', color: '#dc2626', pattern: 'crosshatch-red' };
     } else if ((lat > 6.3 && lat < 6.5) || (lng > -9.5 && lng < -9.2)) {
@@ -49,40 +50,39 @@ export default function WorkingSatelliteMapper({
     }
   };
 
-  // Initialize map with GPS-based satellite imagery
+  // Convert lat/lng to pixel coordinates
+  const coordToPixel = (lat: number, lng: number) => {
+    const pixelScale = 800; // Scale factor for coordinate conversion
+    const x = (lng - mapCenter.lng) * pixelScale + 200;
+    const y = 200 - (lat - mapCenter.lat) * pixelScale;
+    return { x: Math.max(20, Math.min(380, x)), y: Math.max(20, Math.min(380, y)) };
+  };
+
+  // Convert pixel coordinates to lat/lng
+  const pixelToCoord = (x: number, y: number) => {
+    const coordScale = 0.00125; // Inverse scale factor
+    const lat = mapCenter.lat + (200 - y) * coordScale;
+    const lng = mapCenter.lng + (x - 200) * coordScale;
+    return { lat, lng };
+  };
+
+  // Initialize GPS satellite map
   useEffect(() => {
     if (!mapRef.current) return;
 
     const mapContainer = mapRef.current;
     
     // Get current GPS coordinates or use Liberia default
-    const getCurrentLocation = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            loadSatelliteForCoordinates(lat, lng);
-          },
-          () => {
-            // Fallback to Liberia coordinates
-            loadSatelliteForCoordinates(6.4281, -9.4295);
-          }
-        );
-      } else {
-        // No GPS support, use Liberia default
-        loadSatelliteForCoordinates(6.4281, -9.4295);
-      }
-    };
-
-    const loadSatelliteForCoordinates = (centerLat: number, centerLng: number) => {
-      // Calculate tile coordinates for current location
-      const zoom = 16; // High zoom for detailed satellite imagery
+    const initializeMap = (centerLat: number, centerLng: number) => {
+      setMapCenter({ lat: centerLat, lng: centerLng });
+      
+      // Calculate tile coordinates for high-resolution satellite imagery
+      const zoom = 16;
       const tileX = Math.floor((centerLng + 180) / 360 * Math.pow(2, zoom));
       const tileY = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
       
-      console.log(`Loading satellite imagery for coordinates: ${centerLat}, ${centerLng}`);
-      console.log(`Tile coordinates: x=${tileX}, y=${tileY}, zoom=${zoom}`);
+      console.log(`📍 GPS Location: ${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}`);
+      console.log(`🛰️ Loading satellite tile: x=${tileX}, y=${tileY}, zoom=${zoom}`);
       
       // Create map with location-specific satellite imagery
       mapContainer.innerHTML = `
@@ -98,67 +98,66 @@ export default function WorkingSatelliteMapper({
             url('https://mt0.google.com/vt/lyrs=s&hl=en&x=${tileX}&y=${tileY}&z=${zoom}'),
             url('https://mt1.google.com/vt/lyrs=s&hl=en&x=${tileX}&y=${tileY}&z=${zoom}'),
             url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}'),
-            url('https://tiles.stadiamaps.com/tiles/alidade_satellite/${zoom}/${tileX}/${tileY}@2x.png'),
             linear-gradient(135deg, #10b981 0%, #34d399 25%, #059669 50%, #047857 75%, #065f46 100%);
           background-position: center;
           background-size: cover;
           background-repeat: no-repeat;
-        " id="satellite-map">
-        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;">
-          <defs>
-            <pattern id="crosshatch-red" patternUnits="userSpaceOnUse" width="8" height="8">
-              <path d="M0,0 L8,8 M0,8 L8,0" stroke="#dc2626" stroke-width="1.5" opacity="0.7"/>
-            </pattern>
-            <pattern id="crosshatch-yellow" patternUnits="userSpaceOnUse" width="8" height="8">
-              <path d="M0,0 L8,8 M0,8 L8,0" stroke="#f59e0b" stroke-width="1.5" opacity="0.7"/>
-            </pattern>
-            <pattern id="crosshatch-green" patternUnits="userSpaceOnUse" width="8" height="8">
-              <path d="M0,0 L8,8 M0,8 L8,0" stroke="#22c55e" stroke-width="1.5" opacity="0.7"/>
-            </pattern>
-          </defs>
-        </svg>
-      </div>
-    `;
+        " id="gps-satellite-map">
+          <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;">
+            <defs>
+              <pattern id="crosshatch-red" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#dc2626" stroke-width="1.5" opacity="0.7"/>
+              </pattern>
+              <pattern id="crosshatch-yellow" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#f59e0b" stroke-width="1.5" opacity="0.7"/>
+              </pattern>
+              <pattern id="crosshatch-green" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#22c55e" stroke-width="1.5" opacity="0.7"/>
+              </pattern>
+            </defs>
+          </svg>
+        </div>
+      `;
 
-    const mapElement = mapContainer.querySelector('#satellite-map') as HTMLElement;
-    const svg = mapContainer.querySelector('svg') as SVGSVGElement;
-
-    // Add click handler for adding points
-    mapElement.addEventListener('click', (e) => {
-      const rect = mapElement.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const mapElement = mapContainer.querySelector('#gps-satellite-map') as HTMLElement;
       
-      // Get map center coordinates for accurate conversion
-      const centerLat = parseFloat(mapElement.dataset.centerLat || '6.4281');
-      const centerLng = parseFloat(mapElement.dataset.centerLng || '-9.4295');
-      
-      // Convert pixel coordinates to lat/lng based on actual map center
-      const pixelToCoord = 0.001; // Conversion factor for high zoom satellite imagery
-      const lat = centerLat + (200 - y) * pixelToCoord;
-      const lng = centerLng + (x - 200) * pixelToCoord;
-      
-      console.log(`Adding point at ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-      
-      const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
-      setPoints(prev => [...prev, newPoint]);
-    });
+      // Add click handler for boundary marking
+      mapElement.addEventListener('click', (e) => {
+        const rect = mapElement.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const coords = pixelToCoord(x, y);
+        console.log(`➕ Adding boundary point: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
+        
+        const newPoint: BoundaryPoint = { latitude: coords.lat, longitude: coords.lng };
+        setPoints(prev => [...prev, newPoint]);
+      });
 
-    setStatus(`GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark boundary points`);
-    
-    // Store center coordinates for coordinate conversion
-    mapContainer.dataset.centerLat = centerLat.toString();
-    mapContainer.dataset.centerLng = centerLng.toString();
-  };
+      setStatus(`🛰️ GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark boundary`);
+    };
 
-    getCurrentLocation();
-  }, []);
+    // Try to get current GPS location
+    if (navigator.geolocation && enableRealTimeGPS) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          initializeMap(position.coords.latitude, position.coords.longitude);
+        },
+        () => {
+          console.log('📍 GPS unavailable, using Liberia default coordinates');
+          initializeMap(6.4281, -9.4295);
+        }
+      );
+    } else {
+      initializeMap(6.4281, -9.4295);
+    }
+  }, [enableRealTimeGPS]);
 
-  // Update markers and boundaries when points change
+  // Update markers and overlays when points change
   useEffect(() => {
     if (!mapRef.current || points.length === 0) return;
 
-    const mapElement = mapRef.current.querySelector('#satellite-map') as HTMLElement;
+    const mapElement = mapRef.current.querySelector('#gps-satellite-map') as HTMLElement;
     const svg = mapRef.current.querySelector('svg') as SVGSVGElement;
     
     if (!mapElement || !svg) return;
@@ -171,23 +170,11 @@ export default function WorkingSatelliteMapper({
     svg.innerHTML = '';
     if (defs) svg.appendChild(defs);
 
-    console.log(`Rendering ${points.length} markers`);
+    console.log(`🎯 Rendering ${points.length} boundary markers`);
 
     // Add persistent markers for each point
     points.forEach((point, index) => {
-      // Get map center for accurate coordinate conversion
-      const centerLat = parseFloat(mapElement.dataset?.centerLat || '6.4281');
-      const centerLng = parseFloat(mapElement.dataset?.centerLng || '-9.4295');
-      const coordToPixel = 1000; // Inverse of pixelToCoord
-      
-      // Convert lat/lng back to pixels based on actual map center
-      const x = (point.longitude - centerLng) * coordToPixel + 200;
-      const y = 200 - (point.latitude - centerLat) * coordToPixel;
-      
-      // Ensure marker stays within bounds
-      const clampedX = Math.max(20, Math.min(380, x));
-      const clampedY = Math.max(20, Math.min(380, y));
-
+      const pixelPos = coordToPixel(point.latitude, point.longitude);
       const risk = calculateRiskLevel(point.latitude, point.longitude);
       
       // Create persistent marker
@@ -195,8 +182,8 @@ export default function WorkingSatelliteMapper({
       marker.className = 'boundary-marker';
       marker.style.cssText = `
         position: absolute;
-        left: ${clampedX}px;
-        top: ${clampedY}px;
+        left: ${pixelPos.x}px;
+        top: ${pixelPos.y}px;
         width: 32px;
         height: 32px;
         border-radius: 50%;
@@ -219,19 +206,14 @@ export default function WorkingSatelliteMapper({
       marker.title = `Point ${String.fromCharCode(65 + index)} - Risk: ${risk.level.toUpperCase()}`;
       
       mapElement.appendChild(marker);
-      console.log(`✓ Added marker ${String.fromCharCode(65 + index)} at ${clampedX}, ${clampedY}`);
+      console.log(`✅ Added marker ${String.fromCharCode(65 + index)} at pixel ${pixelPos.x}, ${pixelPos.y}`);
     });
 
-    // Draw connecting lines when 2+ points  
+    // Draw connecting lines when 2+ points
     if (points.length >= 2) {
-      const centerLat2 = parseFloat(mapElement.dataset?.centerLat || '6.4281');
-      const centerLng2 = parseFloat(mapElement.dataset?.centerLng || '-9.4295');
-      const coordToPixel2 = 1000;
-      
       const pointsStr = points.map(point => {
-        const x = Math.max(20, Math.min(380, (point.longitude - centerLng) * coordToPixel + 200));
-        const y = Math.max(20, Math.min(380, 200 - (point.latitude - centerLat) * coordToPixel));
-        return `${x},${y}`;
+        const pos = coordToPixel(point.latitude, point.longitude);
+        return `${pos.x},${pos.y}`;
       }).join(' ');
 
       const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
@@ -245,50 +227,51 @@ export default function WorkingSatelliteMapper({
 
     // Create risk polygon when 3+ points
     if (points.length >= 3) {
-      const centerLat3 = parseFloat(mapElement.dataset?.centerLat || '6.4281');
-      const centerLng3 = parseFloat(mapElement.dataset?.centerLng || '-9.4295');
-      const coordToPixel3 = 1000;
-      
       const pointsStr = points.map(point => {
-        const x = Math.max(20, Math.min(380, (point.longitude - centerLng3) * coordToPixel3 + 200));
-        const y = Math.max(20, Math.min(380, 200 - (point.latitude - centerLat3) * coordToPixel3));
-        return `${x},${y}`;
+        const pos = coordToPixel(point.latitude, point.longitude);
+        return `${pos.x},${pos.y}`;
       }).join(' ');
 
-      // Calculate overall risk
+      // Calculate overall risk level
       const highRiskPoints = points.filter(p => calculateRiskLevel(p.latitude, p.longitude).level === 'high');
-      const overallRisk = highRiskPoints.length > 0 ? 'high' : 
-                         points.filter(p => calculateRiskLevel(p.latitude, p.longitude).level === 'standard').length > points.length / 2 ? 'standard' : 'low';
+      const standardRiskPoints = points.filter(p => calculateRiskLevel(p.latitude, p.longitude).level === 'standard');
       
-      const riskStyle = calculateRiskLevel(points[0].latitude, points[0].longitude);
-      const actualRisk = overallRisk === 'high' ? calculateRiskLevel(7.0, -9.8) : 
-                        overallRisk === 'standard' ? calculateRiskLevel(6.4, -9.3) : 
-                        calculateRiskLevel(6.2, -9.1);
+      const overallRisk = highRiskPoints.length > 0 ? 'high' : 
+                         standardRiskPoints.length > points.length / 2 ? 'standard' : 'low';
+      
+      const riskColors = {
+        high: { color: '#dc2626', pattern: 'crosshatch-red' },
+        standard: { color: '#f59e0b', pattern: 'crosshatch-yellow' },
+        low: { color: '#22c55e', pattern: 'crosshatch-green' }
+      };
+      
+      const riskStyle = riskColors[overallRisk];
 
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
       polygon.setAttribute('points', pointsStr);
-      polygon.setAttribute('fill', `url(#${actualRisk.pattern})`);
-      polygon.setAttribute('stroke', actualRisk.color);
+      polygon.setAttribute('fill', `url(#${riskStyle.pattern})`);
+      polygon.setAttribute('stroke', riskStyle.color);
       polygon.setAttribute('stroke-width', '3');
       polygon.setAttribute('opacity', '0.8');
       svg.appendChild(polygon);
 
       const area = calculateArea(points);
       
-      // Add area label
-      const mapCenterLat4 = parseFloat(mapElement.dataset?.centerLat || '6.4281');
-      const mapCenterLng4 = parseFloat(mapElement.dataset?.centerLng || '-9.4295');
-      const coordToPixel4 = 1000;
+      // Add area/risk label in center
+      const centerPos = points.reduce((acc, p) => {
+        const pos = coordToPixel(p.latitude, p.longitude);
+        return { x: acc.x + pos.x, y: acc.y + pos.y };
+      }, { x: 0, y: 0 });
       
-      const centerX = points.reduce((sum, p) => sum + (p.longitude - mapCenterLng4) * coordToPixel4 + 200, 0) / points.length;
-      const centerY = points.reduce((sum, p) => sum + (200 - (p.latitude - mapCenterLat4) * coordToPixel4), 0) / points.length;
+      centerPos.x /= points.length;
+      centerPos.y /= points.length;
       
       const areaLabel = document.createElement('div');
       areaLabel.className = 'boundary-marker';
       areaLabel.style.cssText = `
         position: absolute;
-        left: ${centerX}px;
-        top: ${centerY}px;
+        left: ${centerPos.x}px;
+        top: ${centerPos.y}px;
         padding: 4px 8px;
         background: rgba(0,0,0,0.8);
         color: white;
@@ -302,16 +285,16 @@ export default function WorkingSatelliteMapper({
       areaLabel.textContent = `${area.toFixed(1)} Ha - ${overallRisk.toUpperCase()} RISK`;
       mapElement.appendChild(areaLabel);
 
-      console.log(`✓ Risk polygon created: ${overallRisk} risk, ${area.toFixed(1)} hectares`);
-      setStatus(`Boundary mapped: ${points.length} points, ${area.toFixed(1)} hectares, ${overallRisk.toUpperCase()} EUDR risk`);
+      console.log(`🎨 Risk polygon created: ${overallRisk} risk, ${area.toFixed(1)} hectares`);
+      setStatus(`🎯 Boundary mapped: ${points.length} points, ${area.toFixed(1)} hectares, ${overallRisk.toUpperCase()} EUDR risk`);
     } else {
-      setStatus(`${points.length} points mapped - Need ${minPoints - points.length} more to complete boundary`);
+      setStatus(`📍 ${points.length} points mapped - Need ${minPoints - points.length} more to complete boundary`);
     }
-  }, [points, minPoints]);
+  }, [points, minPoints, mapCenter]);
 
   const clearBoundary = () => {
     setPoints([]);
-    setStatus('Satellite imagery loaded - Click to mark boundary points');
+    setStatus('🛰️ GPS satellite imagery loaded - Click to mark boundary points');
   };
 
   const completeBoundary = () => {
@@ -327,14 +310,14 @@ export default function WorkingSatelliteMapper({
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Satellite className="w-5 h-5 text-blue-600" />
-            Working Satellite Mapper
+            GPS Satellite Mapper
           </h3>
           <p className="text-sm text-gray-600">{status}</p>
           <div className="text-xs text-blue-600 font-medium mt-1">
-            {points.length === 0 && "Click anywhere on satellite map to start"}
+            {points.length === 0 && "Click anywhere on satellite map to start mapping"}
             {points.length === 1 && "Point A added! Click to add point B"}
-            {points.length === 2 && "Points A-B connected! Click for point C"}
-            {points.length >= 3 && `${points.length} points - Risk overlay active`}
+            {points.length === 2 && "Points A-B connected! Click for point C to activate risk overlay"}
+            {points.length >= 3 && `${points.length} points mapped - EUDR risk overlay active`}
           </div>
         </div>
         <div className="flex gap-2">

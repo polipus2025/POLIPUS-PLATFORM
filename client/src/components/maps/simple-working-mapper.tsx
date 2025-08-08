@@ -45,62 +45,68 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
 
   // Load real-time satellite imagery
   useEffect(() => {
-    const loadSatelliteImage = () => {
+    const loadSatelliteImage = async () => {
+      console.log(`🛰️ Loading satellite imagery for ${mapCenter.lat.toFixed(6)}, ${mapCenter.lng.toFixed(6)}`);
+      
       const zoom = 16;
       const x = Math.floor((mapCenter.lng + 180) / 360 * Math.pow(2, zoom));
       const y = Math.floor((1 - Math.log(Math.tan(mapCenter.lat * Math.PI / 180) + 1 / Math.cos(mapCenter.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
       
-      // Create composite image from multiple satellite tiles
-      const canvas = document.createElement('canvas');
-      canvas.width = 768; // 3x3 tiles of 256px each
-      canvas.height = 768;
-      const ctx = canvas.getContext('2d');
+      // Start with center tile only for faster loading
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
       
-      if (!ctx) return;
-
-      let tilesLoaded = 0;
-      const totalTiles = 9;
-
-      const tileOffsets = [
-        [-1, -1], [0, -1], [1, -1],
-        [-1, 0], [0, 0], [1, 0],
-        [-1, 1], [0, 1], [1, 1]
+      // Try multiple satellite sources in order of preference
+      const satelliteSources = [
+        `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
+        `https://mt1.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
+        `https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/${zoom}/${y}/${x}`,
+        `https://wxs.ign.fr/choisirgeoportail/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX=${zoom}&TILEROW=${y}&TILECOL=${x}`
       ];
-
-      tileOffsets.forEach(([dx, dy], index) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
+      
+      let sourceIndex = 0;
+      
+      const tryNextSource = () => {
+        if (sourceIndex >= satelliteSources.length) {
+          console.log('⚠️ All satellite sources failed, using fallback');
+          setSatelliteLoaded(false);
+          return;
+        }
         
-        // Primary: Esri World Imagery (high-resolution satellite)
-        img.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y + dy}/${x + dx}`;
+        img.src = satelliteSources[sourceIndex];
+        console.log(`📡 Trying satellite source ${sourceIndex + 1}/${satelliteSources.length}`);
+        sourceIndex++;
+      };
+      
+      img.onload = () => {
+        // Create canvas with single high-resolution tile
+        const canvas = document.createElement('canvas');
+        canvas.width = 512; // Double size for better quality
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
         
-        img.onload = () => {
-          const tileX = (dx + 1) * 256;
-          const tileY = (dy + 1) * 256;
-          ctx.drawImage(img, tileX, tileY, 256, 256);
+        if (ctx) {
+          // Draw the satellite tile scaled up
+          ctx.drawImage(img, 0, 0, 512, 512);
           
-          tilesLoaded++;
-          if (tilesLoaded === totalTiles) {
-            const compositeImg = new Image();
-            compositeImg.onload = () => {
-              setSatelliteImage(compositeImg);
-              setSatelliteLoaded(true);
-              console.log(`🛰️ Real satellite imagery loaded for coordinates ${mapCenter.lat.toFixed(6)}, ${mapCenter.lng.toFixed(6)}`);
-            };
-            compositeImg.src = canvas.toDataURL();
-          }
-        };
-        
-        // Fallback to Google Satellite if Esri fails
-        img.onerror = () => {
-          img.src = `https://mt1.google.com/vt/lyrs=s&x=${x + dx}&y=${y + dy}&z=${zoom}`;
-          
-          // Final fallback to OpenStreetMap satellite
-          img.onerror = () => {
-            img.src = `https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}@2x.jpg?api_key=YOUR_STADIA_KEY`.replace('{z}', zoom.toString()).replace('{x}', (x + dx).toString()).replace('{y}', (y + dy).toString());
+          // Create final image
+          const compositeImg = new Image();
+          compositeImg.onload = () => {
+            setSatelliteImage(compositeImg);
+            setSatelliteLoaded(true);
+            console.log(`✅ Real satellite imagery loaded from source ${sourceIndex}`);
           };
-        };
-      });
+          compositeImg.src = canvas.toDataURL();
+        }
+      };
+      
+      img.onerror = () => {
+        console.log(`❌ Satellite source ${sourceIndex} failed, trying next...`);
+        tryNextSource();
+      };
+      
+      // Start loading
+      tryNextSource();
     };
 
     loadSatelliteImage();
@@ -141,13 +147,19 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Loading indicator
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.fillRect(canvas.width/2 - 60, canvas.height/2 - 15, 120, 30);
+      // Loading indicator with animation
+      const time = Date.now() / 1000;
+      const pulse = Math.sin(time * 3) * 0.3 + 0.7;
+      
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.8 * pulse})`;
+      ctx.fillRect(canvas.width/2 - 80, canvas.height/2 - 20, 160, 40);
       ctx.fillStyle = '#333';
-      ctx.font = '12px Arial';
+      ctx.font = '14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('Loading satellite...', canvas.width/2, canvas.height/2 + 5);
+      ctx.fillText('📡 Loading Real Satellite View...', canvas.width/2, canvas.height/2 - 2);
+      ctx.font = '11px Arial';
+      ctx.fillStyle = '#666';
+      ctx.fillText('Fetching current imagery from space', canvas.width/2, canvas.height/2 + 12);
     }
 
     // Draw GPS coordinates and satellite status overlay
@@ -161,10 +173,11 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
     
     if (satelliteLoaded) {
       ctx.fillStyle = '#00ff00';
-      ctx.fillText('🛰️ Real-time Satellite View Active', 15, 40);
+      ctx.fillText('🛰️ Live Satellite View • Ready for Mapping', 15, 40);
     } else {
       ctx.fillStyle = '#ffaa00';
-      ctx.fillText('📡 Loading satellite imagery...', 15, 40);
+      const dots = '.'.repeat(Math.floor(Date.now() / 500) % 4);
+      ctx.fillText(`📡 Fetching satellite data${dots}`, 15, 40);
     }
 
     // Draw connecting lines first

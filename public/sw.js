@@ -26,15 +26,21 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  console.log('🚨 Bypassing cache for:', event.request.url);
+  console.log('🚨 Request intercepted:', event.request.url);
   
-  // NO CACHING - Always fetch from network
+  // COMPLETELY SKIP API REQUESTS - Let them go through normally
+  if (event.request.url.includes('/api/')) {
+    console.log('🚨 SKIPPING service worker for API request:', event.request.url);
+    return; // Don't use event.respondWith() - let browser handle normally
+  }
+  
+  // NO CACHING - Always fetch from network for non-API requests
   event.respondWith(
     fetch(event.request, { 
       cache: 'no-cache',
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
+        'Pragma': 'no-cache', 
         'Expires': '0'
       }
     }).catch((error) => {

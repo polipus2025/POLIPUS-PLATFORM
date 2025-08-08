@@ -249,62 +249,49 @@ export default function GPSSatelliteMapper({
       console.log(`🟢 PERMANENT marker ${letter} LOCKED at pixel ${pixelPos.x}, ${pixelPos.y} for GPS ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
     });
 
-    // Draw PERSISTENT connecting lines between consecutive points
+    // Draw VISIBLE connecting lines between consecutive points - FIXED VERSION
     if (points.length >= 2) {
+      console.log(`🔗 Drawing ${points.length - 1} connecting lines between points`);
+      
       for (let i = 0; i < points.length - 1; i++) {
         const start = coordToPixel(points[i].latitude, points[i].longitude);
         const end = coordToPixel(points[i + 1].latitude, points[i + 1].longitude);
         
-        // Create HTML line element for better visibility and persistence
-        const line = document.createElement('div');
-        line.className = 'boundary-line';
-        const length = Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
-        const angle = Math.atan2(end.y - start.y, end.x - start.x) * (180 / Math.PI);
+        console.log(`Drawing line from ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
         
-        line.style.cssText = `
-          position: absolute;
-          left: ${start.x}px;
-          top: ${start.y}px;
-          width: ${length}px;
-          height: 4px;
-          background: linear-gradient(90deg, #22c55e, #16a34a);
-          transform-origin: 0 50%;
-          transform: translate(0, -50%) rotate(${angle}deg);
-          z-index: 25;
-          opacity: 0.9;
-          border-radius: 2px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          pointer-events: none;
-        `;
-        mapElement.appendChild(line);
+        // Create SVG line for better visibility and precision
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x.toString());
+        line.setAttribute('y1', start.y.toString());
+        line.setAttribute('x2', end.x.toString());
+        line.setAttribute('y2', end.y.toString());
+        line.setAttribute('stroke', '#22c55e');
+        line.setAttribute('stroke-width', '5');
+        line.setAttribute('stroke-linecap', 'round');
+        line.setAttribute('opacity', '1');
+        line.className = 'boundary-line';
+        svg.appendChild(line);
       }
       
-      // Add closing line for polygon when 3+ points
+      // Add closing line for complete polygon when 3+ points
       if (points.length >= 3) {
         const start = coordToPixel(points[points.length - 1].latitude, points[points.length - 1].longitude);
         const end = coordToPixel(points[0].latitude, points[0].longitude);
         
-        const closingLine = document.createElement('div');
-        closingLine.className = 'boundary-line';
-        const length = Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
-        const angle = Math.atan2(end.y - start.y, end.x - start.x) * (180 / Math.PI);
+        console.log(`Drawing closing line from ${String.fromCharCode(65 + points.length - 1)} to A: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
         
-        closingLine.style.cssText = `
-          position: absolute;
-          left: ${start.x}px;
-          top: ${start.y}px;
-          width: ${length}px;
-          height: 4px;
-          background: linear-gradient(90deg, #22c55e, #16a34a);
-          transform-origin: 0 50%;
-          transform: translate(0, -50%) rotate(${angle}deg);
-          z-index: 25;
-          opacity: 0.9;
-          border-radius: 2px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          pointer-events: none;
-        `;
-        mapElement.appendChild(closingLine);
+        const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        closingLine.setAttribute('x1', start.x.toString());
+        closingLine.setAttribute('y1', start.y.toString());
+        closingLine.setAttribute('x2', end.x.toString());
+        closingLine.setAttribute('y2', end.y.toString());
+        closingLine.setAttribute('stroke', '#16a34a');
+        closingLine.setAttribute('stroke-width', '5');
+        closingLine.setAttribute('stroke-linecap', 'round');
+        closingLine.setAttribute('stroke-dasharray', '10,5');
+        closingLine.setAttribute('opacity', '1');
+        closingLine.className = 'boundary-line';
+        svg.appendChild(closingLine);
       }
     }
 
@@ -443,9 +430,11 @@ export default function GPSSatelliteMapper({
       }
 
       console.log(`🌍 EUDR & DEFORESTATION ANALYSIS: ${overallRisk} risk, ${area.toFixed(1)} hectares, ${deforestationRisk} deforestation risk, ${complianceStatus}`);
-      setStatus(`🌍 EUDR COMPLIANCE: ${points.length} points, ${area.toFixed(1)}Ha, ${overallRisk.toUpperCase()} risk, ${deforestationRisk} deforestation risk`);
+      setStatus(`🌍 EUDR COMPLIANCE: ${points.length} connected points, ${area.toFixed(1)}Ha boundary, ${overallRisk.toUpperCase()} risk`);
+    } else if (points.length >= 2) {
+      setStatus(`🔗 ${points.length} points mapped and connected - Need ${minPoints - points.length} more for EUDR analysis`);
     } else {
-      setStatus(`📍 ${points.length} boundary points mapped - Need ${minPoints - points.length} more for EUDR & deforestation analysis`);
+      setStatus(`📍 ${points.length} boundary point mapped - Add more points to create connected boundary`);
     }
   }, [points, minPoints, mapCenter]);
 

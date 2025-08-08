@@ -24,9 +24,7 @@ export default function GPSSatelliteMapper({
   const [status, setStatus] = useState('Initializing GPS satellite imagery...');
   const [mapCenter, setMapCenter] = useState({ lat: 6.4281, lng: -9.4295 });
   const [mappingActive, setMappingActive] = useState(false);
-  const [gpsTracking, setGpsTracking] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
-  const trackingInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate area using shoelace formula
   const calculateArea = (mapPoints: BoundaryPoint[]) => {
@@ -132,9 +130,26 @@ export default function GPSSatelliteMapper({
 
       const mapElement = mapContainer.querySelector('#gps-satellite-map') as HTMLElement;
       
-      // Removed manual click handler - now using automatic GPS tracking
+      // Add click handler for manual boundary point addition
+      mapElement.addEventListener('click', (e) => {
+        if (!mappingActive) return;
+        
+        const rect = mapElement.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Convert click to GPS coordinates
+        const coords = pixelToCoord(x, y);
+        const newPoint: BoundaryPoint = { latitude: coords.lat, longitude: coords.lng };
+        
+        setPoints(prev => {
+          const nextLetter = String.fromCharCode(65 + prev.length);
+          console.log(`Added point ${nextLetter} by click: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
+          return [...prev, newPoint];
+        });
+      });
 
-      setStatus(`GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click START MAPPING to begin GPS tracking`);
+      setStatus(`GPS satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click START MAPPING to begin`);
     };
 
     // Try to get current GPS location
@@ -295,62 +310,36 @@ export default function GPSSatelliteMapper({
   const clearBoundary = () => {
     setPoints([]);
     setMappingActive(false);
-    setGpsTracking(false);
-    if (trackingInterval.current) {
-      clearInterval(trackingInterval.current);
-      trackingInterval.current = null;
-    }
     setStatus('GPS satellite imagery loaded - Click START MAPPING to begin');
   };
 
   const startMapping = () => {
     setMappingActive(true);
-    setGpsTracking(true);
-    setStatus(`GPS Tracking ACTIVE! Walking to add boundary points automatically...`);
-    
-    // Start GPS tracking every 3 seconds
-    trackingInterval.current = setInterval(() => {
-      if (navigator.geolocation && gpsTracking) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const newPoint: BoundaryPoint = {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            };
-            
-            setPoints(prev => {
-              // Don't add duplicate points if user hasn't moved much
-              if (prev.length > 0) {
-                const lastPoint = prev[prev.length - 1];
-                const distance = Math.sqrt(
-                  Math.pow(newPoint.latitude - lastPoint.latitude, 2) + 
-                  Math.pow(newPoint.longitude - lastPoint.longitude, 2)
-                );
-                if (distance < 0.00001) return prev; // Skip if too close (about 1 meter)
-              }
-              
-              console.log(`Auto-added GPS point ${prev.length + 1}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
-              return [...prev, newPoint];
-            });
-          },
-          (error) => {
-            console.log('GPS tracking error:', error);
-            setStatus('GPS tracking failed - Check location permissions');
-          },
-          { enableHighAccuracy: true, timeout: 5000, maximumAge: 1000 }
-        );
-      }
-    }, 3000); // Add point every 3 seconds while walking
+    setStatus(`Mapping ACTIVE! Click on satellite map to add boundary points A, B, C, D...`);
   };
 
-  const stopMapping = () => {
-    setMappingActive(false);
-    setGpsTracking(false);
-    if (trackingInterval.current) {
-      clearInterval(trackingInterval.current);
-      trackingInterval.current = null;
+  const addPoint = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const newPoint: BoundaryPoint = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+          
+          setPoints(prev => {
+            const nextLetter = String.fromCharCode(65 + prev.length);
+            console.log(`Added GPS point ${nextLetter}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
+            return [...prev, newPoint];
+          });
+        },
+        (error) => {
+          console.log('GPS error:', error);
+          setStatus('GPS failed - Check location permissions');
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 1000 }
+      );
     }
-    setStatus(`GPS tracking stopped. ${points.length} boundary points collected.`);
   };
 
   const completeBoundary = () => {
@@ -370,29 +359,29 @@ export default function GPSSatelliteMapper({
           </h3>
           <p className="text-sm text-gray-600">{status}</p>
           <div className="text-xs text-blue-600 font-medium mt-1">
-            {!gpsTracking && points.length === 0 && "Click START GPS TRACKING to begin automatic boundary mapping"}
-            {gpsTracking && points.length === 0 && "GPS tracking active - Walk around your boundary, points added automatically"}
-            {gpsTracking && points.length === 1 && "Point A tracked! Continue walking for automatic point B"}
-            {gpsTracking && points.length === 2 && "Points A-B connected! Walking for point C to show risk overlay"}
-            {gpsTracking && points.length >= 3 && `${points.length} GPS points tracked - EUDR risk overlay active`}
-            {!gpsTracking && points.length > 0 && `Tracking stopped - ${points.length} boundary points collected`}
+            {!mappingActive && points.length === 0 && "Click START MAPPING to begin manual boundary creation"}
+            {mappingActive && points.length === 0 && "Walk to first boundary corner, then click ADD POINT (A)"}
+            {mappingActive && points.length === 1 && "Point A captured! Walk to next corner and click ADD POINT (B)"}
+            {mappingActive && points.length === 2 && "Points A-B connected! Walk to corner 3 and ADD POINT (C) for EUDR analysis"}
+            {mappingActive && points.length >= 3 && `${points.length} boundary points mapped - EUDR risk overlay active`}
+            {!mappingActive && points.length > 0 && `Mapping complete - ${points.length} boundary points created`}
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {!gpsTracking ? (
+          {!mappingActive ? (
             <Button onClick={startMapping} size="sm" className="bg-blue-600 hover:bg-blue-700">
               <MapPin className="w-4 h-4 mr-1" />
-              Start GPS Tracking
+              Start Mapping
             </Button>
           ) : (
-            <Button onClick={stopMapping} size="sm" className="bg-red-600 hover:bg-red-700">
+            <Button onClick={addPoint} size="sm" className="bg-green-600 hover:bg-green-700">
               <MapPin className="w-4 h-4 mr-1" />
-              Stop Tracking
+              Add Point ({String.fromCharCode(65 + points.length)})
             </Button>
           )}
-          <Button onClick={clearBoundary} variant="outline" size="sm" disabled={points.length === 0 && !gpsTracking}>
+          <Button onClick={clearBoundary} variant="outline" size="sm" disabled={points.length === 0 && !mappingActive}>
             <RotateCcw className="w-4 h-4 mr-1" />
-            Clear All
+            Clear
           </Button>
           <Button 
             onClick={completeBoundary} 
@@ -411,22 +400,22 @@ export default function GPSSatelliteMapper({
       {points.length > 0 && (
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <strong>GPS Points Tracked:</strong> {points.length}/{maxPoints}
+            <strong>Boundary Points:</strong> {points.length}/{maxPoints}
           </div>
           <div>
-            <strong>Area:</strong> {points.length >= 3 ? `${calculateArea(points).toFixed(1)} hectares` : 'Tracking...'}
+            <strong>Area:</strong> {points.length >= 3 ? `${calculateArea(points).toFixed(1)} hectares` : 'Calculating...'}
           </div>
         </div>
       )}
       
-      {gpsTracking && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-blue-700">
-            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium">GPS Tracking Active</span>
+      {mappingActive && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-green-700">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium">Mapping Active</span>
           </div>
-          <p className="text-xs text-blue-600 mt-1">
-            Walk around your farm boundary. New GPS points added automatically every 3 seconds as you move.
+          <p className="text-xs text-green-600 mt-1">
+            Walk to each boundary corner. Click "Add Point" button to capture your current GPS location.
           </p>
         </div>
       )}

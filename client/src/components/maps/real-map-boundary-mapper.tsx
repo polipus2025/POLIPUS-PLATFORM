@@ -193,18 +193,28 @@ export default function RealMapBoundaryMapper({
       const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
 
-      // Add click handler
+      // Add click handler with debugging
       mapElement.addEventListener('click', (e) => {
         const rect = mapElement.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
+        console.log(`Map clicked at pixel: ${x}, ${y}`);
+        
         // Convert pixel coordinates to lat/lng based on current map center
-        const lat = centerLat + (200 - y) / 5000; // More realistic conversion
+        const lat = centerLat + (200 - y) / 5000;
         const lng = centerLng + (x - 200) / 5000;
         
+        console.log(`Converted to GPS: ${lat}, ${lng}`);
+        
         const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
-        setPoints(prev => [...prev, newPoint]);
+        console.log(`Adding point:`, newPoint);
+        
+        setPoints(prev => {
+          const updated = [...prev, newPoint];
+          console.log(`Total points: ${updated.length}`);
+          return updated;
+        });
       });
 
       setStatus(`Real-time satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark farm boundaries`);
@@ -293,17 +303,27 @@ export default function RealMapBoundaryMapper({
       const mapElement = mapRef.current!.querySelector('#fallback-map') as HTMLElement;
       if (!mapElement) return;
 
-      // Add click handler
+      // Add click handler with debugging for fallback map
       mapElement.addEventListener('click', (e) => {
         const rect = mapElement.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
+        console.log(`Fallback map clicked at pixel: ${x}, ${y}`);
+        
         const lat = 6.4281 + (200 - y) / 5000;
         const lng = -9.4295 + (x - 200) / 5000;
         
+        console.log(`Fallback converted to GPS: ${lat}, ${lng}`);
+        
         const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
-        setPoints(prev => [...prev, newPoint]);
+        console.log(`Adding fallback point:`, newPoint);
+        
+        setPoints(prev => {
+          const updated = [...prev, newPoint];
+          console.log(`Fallback total points: ${updated.length}`);
+          return updated;
+        });
       });
 
       setStatus('Terrain map ready - Click to mark farm boundaries');
@@ -347,56 +367,65 @@ export default function RealMapBoundaryMapper({
     });
     svg.appendChild(defs);
 
-    // REAL-TIME MARKERS: Display immediately as points are added
+    // FORCE IMMEDIATE MARKER DISPLAY
+    console.log(`Rendering ${points.length} markers on map`);
+    
     points.forEach((point, index) => {
-      const isFirst = index === 0;
-      const isLast = index === points.length - 1 && points.length > 1;
+      // Convert lat/lng to pixels with proper coordinate system
+      let x, y;
       
-      // Convert lat/lng to pixels - ensure visible positioning
-      const x = Math.max(12, Math.min(388, (point.longitude + 9.4295) * 5000 + 200));
-      const y = Math.max(12, Math.min(388, 200 - (point.latitude - 6.4281) * 5000));
-      
-      // Calculate EUDR risk for professional analysis
-      const pointRisk = calculatePointRisk(point.latitude, point.longitude);
-      
-      const marker = document.createElement('div');
-      marker.className = `map-marker risk-${pointRisk.level}`;
-      marker.style.position = 'absolute';
-      marker.style.left = `${x}px`;
-      marker.style.top = `${y}px`;
-      marker.style.width = '28px';
-      marker.style.height = '28px';
-      marker.style.borderRadius = '50%';
-      marker.style.display = 'flex';
-      marker.style.alignItems = 'center';
-      marker.style.justifyContent = 'center';
-      marker.style.fontSize = '14px';
-      marker.style.fontWeight = 'bold';
-      marker.style.color = 'white';
-      marker.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
-      marker.style.border = '3px solid white';
-      marker.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-      marker.style.zIndex = '15';
-      marker.style.transform = 'translate(-50%, -50%)';
-      marker.style.cursor = 'pointer';
-      
-      // Risk-based background colors
-      if (pointRisk.level === 'high') {
-        marker.style.backgroundColor = '#dc2626';
-        marker.style.animation = 'pulse 2s infinite';
-      } else if (pointRisk.level === 'standard') {
-        marker.style.backgroundColor = '#f59e0b';
+      // Check if we're using satellite imagery or fallback
+      if (mapElement.id === 'real-map') {
+        // For satellite imagery - use map center coordinates
+        x = (point.longitude - mapCenter.lng) * 5000 + 200;
+        y = 200 - (point.latitude - mapCenter.lat) * 5000;
       } else {
-        marker.style.backgroundColor = '#22c55e';
+        // For fallback terrain map
+        x = (point.longitude + 9.4295) * 5000 + 200;
+        y = 200 - (point.latitude - 6.4281) * 5000;
       }
       
-      // Professional alphabetical labeling (A, B, C, D...)
+      // Ensure markers stay within map bounds
+      x = Math.max(15, Math.min(385, x));
+      y = Math.max(15, Math.min(385, y));
+      
+      console.log(`Creating marker ${String.fromCharCode(65 + index)} at pixel ${x}, ${y}`);
+      
+      // Calculate EUDR risk
+      const pointRisk = calculatePointRisk(point.latitude, point.longitude);
+      
+      // Create highly visible marker
+      const marker = document.createElement('div');
+      marker.className = `map-marker marker-${index}`;
+      marker.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+        border: 4px solid white;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+        z-index: 20;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        background-color: ${pointRisk.level === 'high' ? '#dc2626' : pointRisk.level === 'standard' ? '#f59e0b' : '#22c55e'};
+        ${pointRisk.level === 'high' ? 'animation: pulse 2s infinite;' : ''}
+      `;
+      
+      // Add alphabetical label
       marker.textContent = String.fromCharCode(65 + index);
-      marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}\nDeforestation Risk: ${pointRisk.deforestationRisk}%\nCompliance Score: ${pointRisk.complianceScore}%`;
+      marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}`;
       
       mapElement.appendChild(marker);
-      
-      console.log(`✓ Real-time marker ${String.fromCharCode(65 + index)} displayed at ${x},${y} with ${pointRisk.level} risk`);
+      console.log(`✓ Marker ${String.fromCharCode(65 + index)} added to DOM`);
     });
 
     // REAL-TIME BOUNDARY: Draw polygon immediately when 3+ points exist

@@ -461,16 +461,41 @@ export default function FieldAgentDashboard() {
                             </Select>
                           </div>
                         </div>
-                        <Button 
-                          onClick={() => {
-                            console.log("Current form state:", newFarmerForm);
-                            newFarmerMutation.mutate(newFarmerForm);
-                          }} 
-                          className="w-full bg-lacra-green hover:bg-green-700"
-                          disabled={!newFarmerForm.firstName || !newFarmerForm.lastName || !newFarmerForm.phoneNumber || newFarmerMutation.isPending}
-                        >
-                          {newFarmerMutation.isPending ? 'Registering...' : 'Register Farmer'}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={() => {
+                              console.log("Current form state:", newFarmerForm);
+                              // Test with sample data first
+                              const testData = {
+                                firstName: 'Test',
+                                lastName: 'Farmer',
+                                phoneNumber: '0888123456',
+                                farmLocation: 'Test Village',
+                                farmSize: '2.5',
+                                primaryCrop: 'Coffee'
+                              };
+                              console.log("Sending test data:", testData);
+                              newFarmerMutation.mutate(testData);
+                            }} 
+                            className="flex-1 bg-blue-600 hover:bg-blue-700"
+                          >
+                            Test Register
+                          </Button>
+                          <Button 
+                            onClick={() => {
+                              console.log("Current form state:", newFarmerForm);
+                              if (!newFarmerForm.firstName || !newFarmerForm.lastName) {
+                                alert("Please fill in first name and last name");
+                                return;
+                              }
+                              newFarmerMutation.mutate(newFarmerForm);
+                            }} 
+                            className="flex-1 bg-lacra-green hover:bg-green-700"
+                            disabled={newFarmerMutation.isPending}
+                          >
+                            {newFarmerMutation.isPending ? 'Registering...' : 'Register Farmer'}
+                          </Button>
+                        </div>
                       </div>
                     </DialogContent>
                   </Dialog>

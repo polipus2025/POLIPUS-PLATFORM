@@ -473,7 +473,7 @@ export default function FieldAgentDashboard() {
                         </div>
                         <div className="flex gap-2">
                           <Button 
-                            onClick={() => {
+                            onClick={async () => {
                               console.log("Current form state:", newFarmerForm);
                               // Test with sample data first
                               const testData = {
@@ -485,11 +485,39 @@ export default function FieldAgentDashboard() {
                                 primaryCrop: 'Coffee'
                               };
                               console.log("Sending test data:", testData);
-                              newFarmerMutation.mutate(testData);
+                              
+                              try {
+                                // Direct test without mutation wrapper
+                                const directResponse = await fetch('/api/farmers', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                    firstName: 'DirectTest',
+                                    lastName: 'Success', 
+                                    phoneNumber: '0888999888',
+                                    county: 'Montserrado County'
+                                  })
+                                });
+                                
+                                if (directResponse.ok) {
+                                  const result = await directResponse.json();
+                                  console.log("Direct test success:", result);
+                                  alert(`Success! Farmer created: ${result.farmerId}`);
+                                } else {
+                                  const error = await directResponse.text();
+                                  console.log("Direct test failed:", error);
+                                  alert(`Direct test failed: ${error}`);
+                                }
+                              } catch (error) {
+                                console.error("Direct fetch error:", error);
+                                alert(`Error: ${error.message}`);
+                              }
                             }} 
                             className="flex-1 bg-blue-600 hover:bg-blue-700"
                           >
-                            Test Register
+                            Direct Test
                           </Button>
                           <Button 
                             onClick={() => {

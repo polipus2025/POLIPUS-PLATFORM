@@ -176,7 +176,7 @@ export default function GPSSatelliteMapper({
     }
   }, [enableRealTimeGPS]);
 
-  // Update markers and overlays when points change - TRULY PERSISTENT VERSION
+  // Update markers and overlays when points change
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -185,117 +185,74 @@ export default function GPSSatelliteMapper({
     
     if (!mapElement || !svg) return;
 
-    console.log(`🎯 Adding/updating ${points.length} PERSISTENT boundary markers`);
+    // Clear existing markers and lines to redraw
+    mapElement.querySelectorAll('.boundary-marker, .boundary-line, .eudr-overlay, .deforestation-warning').forEach(el => el.remove());
+    
+    // Clear SVG elements except defs
+    const defs = svg.querySelector('defs');
+    svg.innerHTML = '';
+    if (defs) svg.appendChild(defs);
 
-    // Exit early if no points to draw
-    if (points.length === 0) {
-      // Only clear when there are no points at all
-      mapElement.querySelectorAll('.boundary-marker, .boundary-line, .eudr-overlay, .deforestation-warning').forEach(el => el.remove());
-      const defs = svg.querySelector('defs');
-      svg.innerHTML = '';
-      if (defs) svg.appendChild(defs);
-      return;
-    }
+    if (points.length === 0) return;
 
-    // SMART UPDATE: Only add NEW markers, don't remove existing ones
-    const existingMarkers = mapElement.querySelectorAll('.persistent-point');
-    const existingCount = existingMarkers.length;
+    console.log(`Rendering ${points.length} boundary markers on satellite view`);
 
-    // Add pulsing animation CSS ONCE
-    if (!document.querySelector('#persistent-marker-styles')) {
-      const style = document.createElement('style');
-      style.id = 'persistent-marker-styles';
-      style.textContent = `
-        @keyframes pulse-glow {
-          0% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 0 rgba(34, 197, 94, 0.7); }
-          100% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 8px rgba(34, 197, 94, 0); }
-        }
-        .persistent-point {
-          will-change: transform, box-shadow !important;
-          backface-visibility: hidden !important;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    // Add ONLY NEW markers (don't recreate existing ones)
-    for (let index = existingCount; index < points.length; index++) {
-      const point = points[index];
+    // Add markers for each point
+    points.forEach((point, index) => {
       const pixelPos = coordToPixel(point.latitude, point.longitude);
+      const risk = calculateRiskLevel(point.latitude, point.longitude);
       
-      // Create HIGHLY VISIBLE PERMANENT marker
       const marker = document.createElement('div');
-      marker.className = 'boundary-marker persistent-point';
-      marker.setAttribute('data-point-index', index.toString());
-      marker.setAttribute('data-persistent', 'true');
+      marker.className = 'boundary-marker';
       marker.style.cssText = `
-        position: absolute !important;
-        left: ${pixelPos.x}px !important;
-        top: ${pixelPos.y}px !important;
-        width: 40px !important;
-        height: 40px !important;
-        border-radius: 50% !important;
-        background: radial-gradient(circle, #22c55e 0%, #16a34a 100%) !important;
-        border: 4px solid white !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 18px !important;
-        font-weight: bold !important;
-        color: white !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9) !important;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,255,255,0.3) !important;
-        transform: translate(-50%, -50%) !important;
-        z-index: 50 !important;
-        cursor: pointer !important;
-        pointer-events: auto !important;
-        animation: pulse-glow 2s infinite alternate !important;
+        position: absolute;
+        left: ${pixelPos.x}px;
+        top: ${pixelPos.y}px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #22c55e;
+        border: 3px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       `;
       
       const letter = String.fromCharCode(65 + index);
-      marker.textContent = letter; // A, B, C, D...
-      marker.title = `PERSISTENT Boundary Point ${letter} - GPS: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
+      marker.textContent = letter;
+      marker.title = `Point ${letter}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
       
       mapElement.appendChild(marker);
-      console.log(`🟢 NEW PERMANENT marker ${letter} ADDED at pixel ${pixelPos.x}, ${pixelPos.y} for GPS ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
-    }
+    });
 
-    // ALWAYS REDRAW connecting lines (they don't persist like markers)
-    // Clear only lines and overlays, NOT markers
-    mapElement.querySelectorAll('.boundary-line, .eudr-overlay, .deforestation-warning').forEach(el => el.remove());
-    const existingLines = svg.querySelectorAll('.boundary-line');
-    existingLines.forEach(line => line.remove());
-
-    // Draw VISIBLE connecting lines between consecutive points
+    // Draw connecting lines
     if (points.length >= 2) {
-      console.log(`🔗 Drawing ${points.length - 1} connecting lines between ALL points`);
-      
       for (let i = 0; i < points.length - 1; i++) {
         const start = coordToPixel(points[i].latitude, points[i].longitude);
         const end = coordToPixel(points[i + 1].latitude, points[i + 1].longitude);
         
-        console.log(`🔗 Line ${String.fromCharCode(65 + i)} → ${String.fromCharCode(65 + i + 1)}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
-        
-        // Create THICK, VISIBLE SVG line
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', start.x.toString());
         line.setAttribute('y1', start.y.toString());
         line.setAttribute('x2', end.x.toString());
         line.setAttribute('y2', end.y.toString());
         line.setAttribute('stroke', '#22c55e');
-        line.setAttribute('stroke-width', '6');
+        line.setAttribute('stroke-width', '3');
         line.setAttribute('stroke-linecap', 'round');
-        line.setAttribute('opacity', '1');
         line.setAttribute('class', 'boundary-line');
         svg.appendChild(line);
       }
       
-      // Add closing line for complete polygon when 3+ points
+      // Closing line for polygon
       if (points.length >= 3) {
         const start = coordToPixel(points[points.length - 1].latitude, points[points.length - 1].longitude);
         const end = coordToPixel(points[0].latitude, points[0].longitude);
-        
-        console.log(`🔗 Closing line ${String.fromCharCode(65 + points.length - 1)} → A: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
         
         const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         closingLine.setAttribute('x1', start.x.toString());
@@ -303,11 +260,9 @@ export default function GPSSatelliteMapper({
         closingLine.setAttribute('x2', end.x.toString());
         closingLine.setAttribute('y2', end.y.toString());
         closingLine.setAttribute('stroke', '#16a34a');
-        closingLine.setAttribute('stroke-width', '6');
-        closingLine.setAttribute('stroke-linecap', 'round');
-        closingLine.setAttribute('stroke-dasharray', '10,5');
-        closingLine.setAttribute('opacity', '1');
-        closingLine.setAttribute('class', 'boundary-line closing-line');
+        closingLine.setAttribute('stroke-width', '3');
+        closingLine.setAttribute('stroke-dasharray', '8,4');
+        closingLine.setAttribute('class', 'boundary-line');
         svg.appendChild(closingLine);
       }
     }

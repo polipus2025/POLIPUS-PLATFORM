@@ -139,59 +139,77 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
     // Clear existing content
     mapElement.innerHTML = '';
 
-    // Create satellite-style background without external API
-    const backgroundDiv = document.createElement('div');
-    backgroundDiv.style.cssText = `
+    // Load REAL satellite imagery using OpenStreetMap satellite tiles
+    const zoom = 16;
+    const tileSize = 256;
+    const mapWidth = mapElement.getBoundingClientRect().width || 400;
+    const mapHeight = mapElement.getBoundingClientRect().height || 600;
+    
+    // Calculate tile coordinates
+    const x = Math.floor((mapCenter.lng + 180) / 360 * Math.pow(2, zoom));
+    const y = Math.floor((1 - Math.log(Math.tan(mapCenter.lat * Math.PI / 180) + 1 / Math.cos(mapCenter.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
+    
+    // Create container for satellite tiles
+    const tilesContainer = document.createElement('div');
+    tilesContainer.style.cssText = `
       width: 100%;
       height: 100%;
       position: absolute;
       top: 0;
       left: 0;
       z-index: 1;
-      background: linear-gradient(135deg, 
-        #3d5a3d 0%, 
-        #2d4a2d 25%, 
-        #5a6b4a 50%, 
-        #4a5b3a 75%, 
-        #3d5a3d 100%
-      );
-      opacity: 0.9;
+      background: #2d4a2d;
     `;
-    mapElement.appendChild(backgroundDiv);
+    mapElement.appendChild(tilesContainer);
 
-    // Add grid pattern to simulate satellite imagery
-    const gridOverlay = document.createElement('div');
-    gridOverlay.style.cssText = `
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 2;
-      background-image: 
-        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
-      pointer-events: none;
-    `;
-    mapElement.appendChild(gridOverlay);
+    // Load multiple satellite tiles for better coverage
+    const tileOffsets = [
+      [-1, -1], [0, -1], [1, -1],
+      [-1, 0], [0, 0], [1, 0],
+      [-1, 1], [0, 1], [1, 1]
+    ];
 
-    // Add location info overlay
-    const infoOverlay = document.createElement('div');
-    infoOverlay.style.cssText = `
+    tileOffsets.forEach(([dx, dy]) => {
+      const tileX = x + dx;
+      const tileY = y + dy;
+      
+      const img = document.createElement('img');
+      // Using Esri World Imagery (satellite) - free and reliable
+      img.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}`;
+      img.crossOrigin = 'anonymous';
+      img.style.cssText = `
+        position: absolute;
+        left: ${(dx + 1) * tileSize - tileSize/2}px;
+        top: ${(dy + 1) * tileSize - tileSize/2}px;
+        width: ${tileSize}px;
+        height: ${tileSize}px;
+        opacity: 1;
+      `;
+      
+      // Fallback to OpenStreetMap if Esri fails
+      img.onerror = () => {
+        img.src = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
+      };
+      
+      tilesContainer.appendChild(img);
+    });
+
+    // Add GPS coordinate overlay
+    const coordOverlay = document.createElement('div');
+    coordOverlay.style.cssText = `
       position: absolute;
       top: 10px;
       left: 10px;
       background: rgba(0,0,0,0.8);
       color: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      z-index: 3;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      z-index: 15;
       font-family: monospace;
     `;
-    infoOverlay.textContent = `GPS: ${mapCenter.lat.toFixed(4)}, ${mapCenter.lng.toFixed(4)}`;
-    mapElement.appendChild(infoOverlay);
+    coordOverlay.textContent = `GPS: ${mapCenter.lat.toFixed(6)}, ${mapCenter.lng.toFixed(6)}`;
+    mapElement.appendChild(coordOverlay);
 
     // Create SVG overlay for lines and points
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -206,8 +224,8 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
     `;
     mapElement.appendChild(svg);
 
-    // Render points and lines immediately since we're not waiting for external image
-    setTimeout(renderPointsAndLines, 100);
+    // Wait for satellite tiles to load, then render points and lines
+    setTimeout(renderPointsAndLines, 2000);
 
     function renderPointsAndLines() {
       if (!mapElement) return;
@@ -221,64 +239,74 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
 
       console.log(`🎯 Rendering ${points.length} boundary points with connecting lines`);
 
-      // Add markers for each point
+      // Add PERSISTENT markers for each point that STAY on the map
       points.forEach((point, index) => {
         const pixelPos = coordToPixel(point.latitude, point.longitude);
         
-        // Create visible marker
+        // Create PERMANENT marker that stays visible
         const marker = document.createElement('div');
-        marker.className = 'boundary-marker';
+        marker.className = 'boundary-marker-persistent';
+        marker.setAttribute('data-point-id', `point-${index}`);
+        marker.setAttribute('data-persistent', 'true');
         marker.style.cssText = `
-          position: absolute;
-          left: ${pixelPos.x}px;
-          top: ${pixelPos.y}px;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background: #ef4444;
-          border: 3px solid white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 16px;
-          font-weight: bold;
-          color: white;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-          transform: translate(-50%, -50%);
-          z-index: 20;
-          cursor: pointer;
+          position: absolute !important;
+          left: ${pixelPos.x}px !important;
+          top: ${pixelPos.y}px !important;
+          width: 40px !important;
+          height: 40px !important;
+          border-radius: 50% !important;
+          background: #ef4444 !important;
+          border: 4px solid white !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-size: 18px !important;
+          font-weight: bold !important;
+          color: white !important;
+          text-shadow: 2px 2px 4px rgba(0,0,0,1) !important;
+          box-shadow: 0 6px 15px rgba(0,0,0,0.7) !important;
+          transform: translate(-50%, -50%) !important;
+          z-index: 50 !important;
+          cursor: pointer !important;
+          pointer-events: auto !important;
         `;
         
         marker.textContent = point.label;
-        marker.title = `Boundary Point ${point.label} - GPS: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
+        marker.title = `PERSISTENT Point ${point.label} - GPS: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
+        
         if (mapElement) {
           mapElement.appendChild(marker);
         }
 
-        console.log(`🔴 Point ${point.label} rendered at pixel ${pixelPos.x}, ${pixelPos.y}`);
+        console.log(`🔴 PERSISTENT Point ${point.label} LOCKED at pixel ${pixelPos.x}, ${pixelPos.y}`);
       });
 
-      // Draw connecting lines between consecutive points
+      // Draw PERSISTENT connecting lines that STAY VISIBLE
       if (points.length >= 2) {
+        console.log(`🔗 Drawing ${points.length - 1} PERSISTENT connecting lines`);
+        
         for (let i = 0; i < points.length - 1; i++) {
           const start = coordToPixel(points[i].latitude, points[i].longitude);
           const end = coordToPixel(points[i + 1].latitude, points[i + 1].longitude);
           
+          // Create PERSISTENT SVG line
           const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
           line.setAttribute('x1', start.x.toString());
           line.setAttribute('y1', start.y.toString());
           line.setAttribute('x2', end.x.toString());
           line.setAttribute('y2', end.y.toString());
           line.setAttribute('stroke', '#ef4444');
-          line.setAttribute('stroke-width', '4');
+          line.setAttribute('stroke-width', '5');
           line.setAttribute('stroke-linecap', 'round');
+          line.setAttribute('opacity', '1');
+          line.setAttribute('class', 'persistent-boundary-line');
+          line.setAttribute('data-line-id', `line-${i}`);
           svg.appendChild(line);
 
-          console.log(`🔗 Line from ${points[i].label} to ${points[i + 1].label}`);
+          console.log(`🔗 PERSISTENT Line ${i + 1}: ${points[i].label} → ${points[i + 1].label}`);
         }
 
-        // Add closing line for complete polygon
+        // Add PERSISTENT closing line for complete polygon
         if (points.length >= 3) {
           const start = coordToPixel(points[points.length - 1].latitude, points[points.length - 1].longitude);
           const end = coordToPixel(points[0].latitude, points[0].longitude);
@@ -289,12 +317,15 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
           closingLine.setAttribute('x2', end.x.toString());
           closingLine.setAttribute('y2', end.y.toString());
           closingLine.setAttribute('stroke', '#ef4444');
-          closingLine.setAttribute('stroke-width', '4');
+          closingLine.setAttribute('stroke-width', '5');
           closingLine.setAttribute('stroke-linecap', 'round');
-          closingLine.setAttribute('stroke-dasharray', '8,4');
+          closingLine.setAttribute('stroke-dasharray', '10,5');
+          closingLine.setAttribute('opacity', '1');
+          closingLine.setAttribute('class', 'persistent-boundary-line closing-line');
+          closingLine.setAttribute('data-line-id', 'closing-line');
           svg.appendChild(closingLine);
 
-          console.log(`🔗 Closing line from ${points[points.length - 1].label} to ${points[0].label}`);
+          console.log(`🔗 PERSISTENT Closing Line: ${points[points.length - 1].label} → ${points[0].label}`);
         }
       }
 
@@ -411,13 +442,15 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
         className="relative w-full h-96 bg-gray-200 overflow-hidden"
         data-testid="satellite-map"
       >
-        <div className="absolute inset-0 flex items-center justify-center text-white text-sm bg-black/20 backdrop-blur-sm rounded">
-          <div className="text-center p-4">
-            <div className="mb-2 text-green-300 font-semibold">🛰️ Real-Time Field View</div>
-            <div>GPS Location: {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}</div>
-            <div className="text-xs mt-1 text-green-200">Walk to each boundary corner and add GPS points</div>
+        {points.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-white text-sm bg-black/30 backdrop-blur-sm rounded z-10">
+            <div className="text-center p-4">
+              <div className="mb-2 text-green-300 font-semibold">🛰️ Real Satellite Imagery</div>
+              <div>GPS: {mapCenter.lat.toFixed(6)}, {mapCenter.lng.toFixed(6)}</div>
+              <div className="text-xs mt-1 text-green-200">Start GPS tracking to add boundary points</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Bottom Controls */}

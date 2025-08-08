@@ -342,33 +342,38 @@ export default function RealMapBoundaryMapper({
     
     if (!mapElement || !svg) return;
 
-    // Clear existing markers and boundary
+    // Clear existing markers and boundary but keep SVG defs
     mapElement.querySelectorAll('.map-marker, .area-label, .risk-label').forEach(el => el.remove());
+    
+    // Clear SVG content but preserve defs for patterns
+    const existingDefs = svg.querySelector('defs');
     svg.innerHTML = '';
     
-    // Re-add crosshatch patterns
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    const patterns = ['red', 'yellow', 'green'];
-    const colors = ['#dc2626', '#f59e0b', '#10b981'];
-    
-    patterns.forEach((pattern, idx) => {
-      const patternEl = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-      patternEl.setAttribute('id', `crosshatch-${pattern}`);
-      patternEl.setAttribute('patternUnits', 'userSpaceOnUse');
-      patternEl.setAttribute('width', '8');
-      patternEl.setAttribute('height', '8');
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
-      path.setAttribute('stroke', colors[idx]);
-      path.setAttribute('stroke-width', '1');
-      path.setAttribute('opacity', '0.4');
-      patternEl.appendChild(path);
-      defs.appendChild(patternEl);
-    });
-    svg.appendChild(defs);
+    // Re-add or create crosshatch patterns
+    const defs = existingDefs || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    if (!existingDefs) {
+      const patterns = ['red', 'yellow', 'green'];
+      const colors = ['#dc2626', '#f59e0b', '#22c55e'];
+      
+      patterns.forEach((pattern, idx) => {
+        const patternEl = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+        patternEl.setAttribute('id', `crosshatch-${pattern}`);
+        patternEl.setAttribute('patternUnits', 'userSpaceOnUse');
+        patternEl.setAttribute('width', '8');
+        patternEl.setAttribute('height', '8');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
+        path.setAttribute('stroke', colors[idx]);
+        path.setAttribute('stroke-width', '1.5');
+        path.setAttribute('opacity', '0.6');
+        patternEl.appendChild(path);
+        defs.appendChild(patternEl);
+      });
+      svg.appendChild(defs);
+    }
 
-    // FORCE IMMEDIATE MARKER DISPLAY
-    console.log(`Rendering ${points.length} markers on map`);
+    // PERSISTENT MARKERS: All points stay visible as you walk and map
+    console.log(`Rendering ${points.length} persistent markers on map`);
     
     points.forEach((point, index) => {
       // Convert lat/lng to pixels with proper coordinate system
@@ -389,43 +394,45 @@ export default function RealMapBoundaryMapper({
       x = Math.max(15, Math.min(385, x));
       y = Math.max(15, Math.min(385, y));
       
-      console.log(`Creating marker ${String.fromCharCode(65 + index)} at pixel ${x}, ${y}`);
+      console.log(`Creating persistent marker ${String.fromCharCode(65 + index)} at pixel ${x}, ${y}`);
       
-      // Calculate EUDR risk
+      // Calculate EUDR risk for each point
       const pointRisk = calculatePointRisk(point.latitude, point.longitude);
       
-      // Create highly visible marker
+      // Create highly visible persistent marker that stays on map
       const marker = document.createElement('div');
-      marker.className = `map-marker marker-${index}`;
+      marker.className = `map-marker persistent-marker marker-${index}`;
+      marker.id = `marker-${index}`;
       marker.style.cssText = `
         position: absolute;
         left: ${x}px;
         top: ${y}px;
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        font-size: 18px;
         font-weight: bold;
         color: white;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
         border: 4px solid white;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.6);
-        z-index: 20;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+        z-index: 25;
         transform: translate(-50%, -50%);
         cursor: pointer;
+        transition: all 0.2s ease;
         background-color: ${pointRisk.level === 'high' ? '#dc2626' : pointRisk.level === 'standard' ? '#f59e0b' : '#22c55e'};
         ${pointRisk.level === 'high' ? 'animation: pulse 2s infinite;' : ''}
       `;
       
-      // Add alphabetical label
+      // Add alphabetical label (A, B, C, D, etc.)
       marker.textContent = String.fromCharCode(65 + index);
-      marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}`;
+      marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
       
       mapElement.appendChild(marker);
-      console.log(`✓ Marker ${String.fromCharCode(65 + index)} added to DOM`);
+      console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
     });
 
     // REAL-TIME BOUNDARY: Draw polygon immediately when 3+ points exist
@@ -490,11 +497,15 @@ export default function RealMapBoundaryMapper({
       polygon.setAttribute('stroke-dasharray', '8,4');
       polygon.setAttribute('opacity', '0.9');
       
-      console.log(`✓ Polygon created with ${areaRisk.level} risk styling and crosshatch pattern`);
-      
-
+      console.log(`✓ EUDR Risk polygon created with ${areaRisk.level} risk level and crosshatch pattern overlay`);
       
       svg.appendChild(polygon);
+      
+      // Force immediate display of risk overlay
+      polygon.style.display = 'block';
+      polygon.style.visibility = 'visible';
+      
+      console.log(`✓ Risk overlay now visible on map with ${areaRisk.level} risk styling`);
       
       // Add area measurement and risk label
       const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 5000 + 200, 0) / points.length;

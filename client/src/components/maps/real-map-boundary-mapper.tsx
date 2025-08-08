@@ -168,6 +168,11 @@ export default function RealMapBoundaryMapper({
           .marker-high-risk { background-color: #dc2626; box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.4); }
           .marker-standard-risk { background-color: #f59e0b; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.4); }
           .marker-low-risk { background-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4); }
+          .risk-low { background-color: #10b981 !important; border-color: #065f46 !important; }
+          .risk-standard { background-color: #f59e0b !important; border-color: #92400e !important; }
+          .risk-high { background-color: #dc2626 !important; border-color: #7f1d1d !important; animation: pulse 2s infinite; }
+          @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+          .area-risk-label { pointer-events: none; z-index: 15; }
           .map-polygon {
             position: absolute;
             pointer-events: none;
@@ -244,6 +249,11 @@ export default function RealMapBoundaryMapper({
           .marker-start { background-color: #fbbf24; }
           .marker-middle { background-color: #3b82f6; }
           .marker-end { background-color: #ef4444; }
+          .risk-low { background-color: #10b981 !important; border-color: #065f46 !important; }
+          .risk-standard { background-color: #f59e0b !important; border-color: #92400e !important; }
+          .risk-high { background-color: #dc2626 !important; border-color: #7f1d1d !important; animation: pulse 2s infinite; }
+          @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+          .area-risk-label { pointer-events: none; z-index: 15; }
           .map-polygon {
             position: absolute;
             pointer-events: none;
@@ -296,7 +306,7 @@ export default function RealMapBoundaryMapper({
     mapElement.querySelectorAll('.map-marker').forEach(marker => marker.remove());
     svg.innerHTML = '';
 
-    // Add markers for each point
+    // Add markers for each point with risk-based coloring
     points.forEach((point, index) => {
       const isFirst = index === 0;
       const isLast = index === points.length - 1 && points.length > 1;
@@ -305,16 +315,46 @@ export default function RealMapBoundaryMapper({
       const x = (point.longitude + 9.4295) * 5000 + 200;
       const y = 200 - (point.latitude - 6.4281) * 5000;
       
+      // Calculate risk level for this specific point
+      const pointRisk = calculatePointRisk(point.latitude, point.longitude);
+      
       const marker = document.createElement('div');
-      marker.className = `map-marker ${isFirst ? 'marker-start' : isLast ? 'marker-end' : 'marker-middle'}`;
+      marker.className = `map-marker ${isFirst ? 'marker-start' : isLast ? 'marker-end' : 'marker-middle'} risk-${pointRisk.level}`;
       marker.style.left = `${x}px`;
       marker.style.top = `${y}px`;
-      marker.title = `Point ${index + 1}${isFirst ? ' (Start)' : isLast ? ' (End)' : ''}`;
+      marker.title = `Point ${index + 1}${isFirst ? ' (Start)' : isLast ? ' (End)' : ''}\nEUDR Risk: ${pointRisk.level.toUpperCase()}\nDeforestation Risk: ${pointRisk.deforestationRisk}%\nCompliance Score: ${pointRisk.complianceScore}%`;
       
+      // Add risk indicator circle
+      const riskIndicator = document.createElement('div');
+      riskIndicator.className = `risk-indicator risk-${pointRisk.level}`;
+      riskIndicator.style.position = 'absolute';
+      riskIndicator.style.top = '-8px';
+      riskIndicator.style.right = '-8px';
+      riskIndicator.style.width = '16px';
+      riskIndicator.style.height = '16px';
+      riskIndicator.style.borderRadius = '50%';
+      riskIndicator.style.border = '2px solid white';
+      riskIndicator.style.fontSize = '10px';
+      riskIndicator.style.fontWeight = 'bold';
+      riskIndicator.style.display = 'flex';
+      riskIndicator.style.alignItems = 'center';
+      riskIndicator.style.justifyContent = 'center';
+      riskIndicator.style.color = 'white';
+      riskIndicator.textContent = pointRisk.level === 'high' ? '!' : pointRisk.level === 'standard' ? '?' : '✓';
+      
+      if (pointRisk.level === 'high') {
+        riskIndicator.style.backgroundColor = '#dc2626'; // red
+      } else if (pointRisk.level === 'standard') {
+        riskIndicator.style.backgroundColor = '#f59e0b'; // yellow
+      } else {
+        riskIndicator.style.backgroundColor = '#10b981'; // green
+      }
+      
+      marker.appendChild(riskIndicator);
       mapElement.appendChild(marker);
     });
 
-    // Draw polygon if we have enough points
+    // Draw polygon if we have enough points with risk-based coloring
     if (points.length >= 3) {
       const pointsStr = points.map(point => {
         const x = (point.longitude + 9.4295) * 5000 + 200;
@@ -322,10 +362,61 @@ export default function RealMapBoundaryMapper({
         return `${x},${y}`;
       }).join(' ');
       
+      // Calculate overall area risk
+      const areaRisk = calculateAreaRisk(points);
+      
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
       polygon.setAttribute('points', pointsStr);
+      polygon.setAttribute('class', `farm-boundary risk-${areaRisk.level}`);
+      
+      // Set polygon color based on risk level
+      if (areaRisk.level === 'high') {
+        polygon.setAttribute('fill', 'rgba(220, 38, 38, 0.2)');
+        polygon.setAttribute('stroke', '#dc2626');
+      } else if (areaRisk.level === 'standard') {
+        polygon.setAttribute('fill', 'rgba(245, 158, 11, 0.2)');
+        polygon.setAttribute('stroke', '#f59e0b');
+      } else {
+        polygon.setAttribute('fill', 'rgba(16, 185, 129, 0.2)');
+        polygon.setAttribute('stroke', '#10b981');
+      }
+      
+      polygon.setAttribute('stroke-width', '3');
+      polygon.setAttribute('stroke-dasharray', '5,5');
       
       svg.appendChild(polygon);
+      
+      // Add area risk label
+      const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 5000 + 200, 0) / points.length;
+      const centerY = points.reduce((sum, p) => sum + (200 - (p.latitude - 6.4281) * 5000), 0) / points.length;
+      
+      const riskLabel = document.createElement('div');
+      riskLabel.className = `area-risk-label risk-${areaRisk.level}`;
+      riskLabel.style.position = 'absolute';
+      riskLabel.style.left = `${centerX - 50}px`;
+      riskLabel.style.top = `${centerY - 15}px`;
+      riskLabel.style.width = '100px';
+      riskLabel.style.padding = '4px 8px';
+      riskLabel.style.borderRadius = '12px';
+      riskLabel.style.fontSize = '10px';
+      riskLabel.style.fontWeight = 'bold';
+      riskLabel.style.textAlign = 'center';
+      riskLabel.style.color = 'white';
+      riskLabel.style.border = '1px solid white';
+      riskLabel.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+      
+      if (areaRisk.level === 'high') {
+        riskLabel.style.backgroundColor = '#dc2626';
+        riskLabel.textContent = 'HIGH RISK';
+      } else if (areaRisk.level === 'standard') {
+        riskLabel.style.backgroundColor = '#f59e0b';
+        riskLabel.textContent = 'STANDARD RISK';
+      } else {
+        riskLabel.style.backgroundColor = '#10b981';
+        riskLabel.textContent = 'LOW RISK';
+      }
+      
+      mapElement.appendChild(riskLabel);
     }
   }, [points, mapReady]);
 
@@ -461,7 +552,42 @@ export default function RealMapBoundaryMapper({
     setStatus(`EUDR analysis complete - Risk: ${riskAnalysis.riskLevel.toUpperCase()}, Score: ${riskAnalysis.complianceScore}%`);
   };
 
-  // Risk calculation based on GPS coordinates
+  // Individual point risk calculation
+  const calculatePointRisk = (lat: number, lng: number) => {
+    let riskLevel: 'low' | 'standard' | 'high' = 'low';
+    let complianceScore = 85;
+    let deforestationRisk = 15;
+    
+    // Higher risk in certain coordinate ranges (simulating forest areas)
+    if ((lat > 6.5 && lat < 7.0) || (lng > -10.0 && lng < -9.5)) {
+      riskLevel = 'high';
+      complianceScore = 45;
+      deforestationRisk = 78;
+    } else if ((lat > 6.3 && lat < 6.5) || (lng > -9.5 && lng < -9.2)) {
+      riskLevel = 'standard';
+      complianceScore = 67;
+      deforestationRisk = 35;
+    }
+    
+    return { level: riskLevel, complianceScore, deforestationRisk };
+  };
+  
+  // Area-wide risk calculation
+  const calculateAreaRisk = (analysisPoints: BoundaryPoint[]) => {
+    const pointRisks = analysisPoints.map(point => calculatePointRisk(point.latitude, point.longitude));
+    const highRiskCount = pointRisks.filter(r => r.level === 'high').length;
+    const standardRiskCount = pointRisks.filter(r => r.level === 'standard').length;
+    
+    if (highRiskCount > 0) {
+      return { level: 'high' as const };
+    } else if (standardRiskCount > analysisPoints.length / 2) {
+      return { level: 'standard' as const };
+    } else {
+      return { level: 'low' as const };
+    }
+  };
+
+  // Risk calculation based on GPS coordinates for detailed analysis
   const calculateRiskLevel = (analysisPoints: BoundaryPoint[]) => {
     const centerLat = analysisPoints.reduce((sum, p) => sum + p.latitude, 0) / analysisPoints.length;
     const centerLng = analysisPoints.reduce((sum, p) => sum + p.longitude, 0) / analysisPoints.length;
@@ -645,6 +771,31 @@ export default function RealMapBoundaryMapper({
           </div>
         </div>
       </div>
+
+      {/* EUDR Risk Legend */}
+      {points.length > 0 && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Shield className="h-4 w-4 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">EUDR Risk Indicators</span>
+          </div>
+          <div className="flex flex-wrap gap-3 text-xs">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-green-600 border border-green-800"></div>
+              <span>Low Risk</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-yellow-600 border border-yellow-800"></div>
+              <span>Standard Risk</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-red-600 border border-red-800 animate-pulse"></div>
+              <span>High Risk</span>
+            </div>
+            <span className="text-gray-500 ml-2">• Hover over points for detailed risk information</span>
+          </div>
+        </div>
+      )}
 
       {/* EUDR Compliance & Deforestation Analysis */}
       {(eudrReport || deforestationReport || isAnalyzing) && (

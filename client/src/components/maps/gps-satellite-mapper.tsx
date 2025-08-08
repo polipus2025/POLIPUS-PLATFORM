@@ -269,7 +269,7 @@ export default function GPSSatelliteMapper({
         line.setAttribute('stroke-width', '5');
         line.setAttribute('stroke-linecap', 'round');
         line.setAttribute('opacity', '1');
-        line.className = 'boundary-line';
+        line.setAttribute('class', 'boundary-line');
         svg.appendChild(line);
       }
       
@@ -290,7 +290,7 @@ export default function GPSSatelliteMapper({
         closingLine.setAttribute('stroke-linecap', 'round');
         closingLine.setAttribute('stroke-dasharray', '10,5');
         closingLine.setAttribute('opacity', '1');
-        closingLine.className = 'boundary-line';
+        closingLine.setAttribute('class', 'boundary-line');
         svg.appendChild(closingLine);
       }
     }

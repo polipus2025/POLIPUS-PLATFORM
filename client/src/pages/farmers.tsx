@@ -622,6 +622,7 @@ export default function FarmersPage() {
       <Helmet>
         <title>Farmer Management - AgriTrace360™</title>
         <meta name="description" content="Manage farmer onboarding, agreements, and profile information in the LACRA agricultural compliance system." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Helmet>
       
       {/* GPS Permission Handler for farmer registration and mapping */}
@@ -640,20 +641,21 @@ export default function FarmersPage() {
         autoRequest={true}
       />
 
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-neutral">Farmer Management</h1>
-            <p className="text-gray-600 mt-2">Manage farmer onboarding, agreements, and profile information</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral">Farmer Management</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Manage farmer onboarding, agreements, and profile information</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-lacra-green hover:bg-green-700">
+              <Button className="bg-lacra-green hover:bg-green-700 w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
-                Onboard New Farmer
+                <span className="hidden sm:inline">Onboard New Farmer</span>
+                <span className="sm:hidden">Add Farmer</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <User className="h-5 w-5 text-lacra-green" />
@@ -719,7 +721,7 @@ export default function FarmersPage() {
                       <CardTitle className="text-lg">Personal Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
                           name="firstName"
@@ -785,7 +787,7 @@ export default function FarmersPage() {
                       <CardTitle className="text-lg">Location Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <FormField
                           control={form.control}
                           name="county"
@@ -855,10 +857,11 @@ export default function FarmersPage() {
                                 variant="outline" 
                                 onClick={getCurrentLocation}
                                 data-testid="button-get-location"
-                                className="shrink-0"
+                                className="shrink-0 text-xs sm:text-sm"
                               >
-                                <MapPin className="w-4 h-4 mr-1" />
-                                Get Location
+                                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                <span className="hidden sm:inline">Get Location</span>
+                                <span className="sm:hidden">GPS</span>
                               </Button>
                             </div>
                             <p className="text-sm text-muted-foreground">Click "Get Location" to auto-detect your GPS coordinates</p>
@@ -875,7 +878,7 @@ export default function FarmersPage() {
                       <CardTitle className="text-lg">Farm Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
                           name="farmSize"
@@ -1078,28 +1081,31 @@ export default function FarmersPage() {
                     </CardContent>
                   </Card>
                   
-                  <div className="flex justify-end gap-3 pt-4">
+                  <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
                     <Button 
                       type="button"
                       variant="outline" 
                       onClick={() => setIsDialogOpen(false)}
+                      className="w-full sm:w-auto"
                     >
                       Cancel
                     </Button>
                     <Button 
                       type="submit" 
-                      className="bg-lacra-green hover:bg-green-700"
+                      className="bg-lacra-green hover:bg-green-700 w-full sm:w-auto"
                       disabled={createFarmerMutation.isPending}
                     >
                       {createFarmerMutation.isPending ? (
                         <>
                           <Clock className="h-4 w-4 mr-2 animate-spin" />
-                          Onboarding...
+                          <span className="hidden sm:inline">Onboarding...</span>
+                          <span className="sm:hidden">Processing...</span>
                         </>
                       ) : (
                         <>
                           <Plus className="h-4 w-4 mr-2" />
-                          Complete Onboarding
+                          <span className="hidden sm:inline">Complete Onboarding</span>
+                          <span className="sm:hidden">Complete</span>
                         </>
                       )}
                     </Button>
@@ -1111,49 +1117,49 @@ export default function FarmersPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Users className="h-8 w-8 text-lacra-blue" />
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-neutral">{(farmers as any[])?.length || 0}</div>
-                  <p className="text-sm text-gray-500">Total Farmers</p>
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-lacra-blue" />
+                <div className="ml-3 sm:ml-4">
+                  <div className="text-xl sm:text-2xl font-bold text-neutral">{(farmers as any[])?.length || 0}</div>
+                  <p className="text-xs sm:text-sm text-gray-500">Total Farmers</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <TrendingUp className="h-8 w-8 text-success" />
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-success">{activeCanidates}</div>
-                  <p className="text-sm text-gray-500">Active Farmers</p>
+                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-success" />
+                <div className="ml-3 sm:ml-4">
+                  <div className="text-xl sm:text-2xl font-bold text-success">{activeCanidates}</div>
+                  <p className="text-xs sm:text-sm text-gray-500">Active Farmers</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <FileText className="h-8 w-8 text-lacra-green" />
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-lacra-green">{signedAgreements}</div>
-                  <p className="text-sm text-gray-500">Signed Agreements</p>
+                <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-lacra-green" />
+                <div className="ml-3 sm:ml-4">
+                  <div className="text-xl sm:text-2xl font-bold text-lacra-green">{signedAgreements}</div>
+                  <p className="text-xs sm:text-sm text-gray-500">Signed Agreements</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <MapPin className="h-8 w-8 text-warning" />
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-warning">
+                <MapPin className="h-6 w-6 sm:h-8 sm:w-8 text-warning" />
+                <div className="ml-3 sm:ml-4">
+                  <div className="text-xl sm:text-2xl font-bold text-warning">
                     {new Set((farmers as any[])?.map((f: any) => f.county)).size || 0}
                   </div>
-                  <p className="text-sm text-gray-500">Counties Covered</p>
+                  <p className="text-xs sm:text-sm text-gray-500">Counties Covered</p>
                 </div>
               </div>
             </CardContent>
@@ -1162,17 +1168,26 @@ export default function FarmersPage() {
 
         {/* Search and Filters */}
         <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex gap-4">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search farmers by name, ID, or county..."
+                  placeholder="Search farmers..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
+              <Button
+                onClick={() => setIsInteractiveMappingOpen(true)}
+                variant="outline"
+                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 w-full sm:w-auto"
+              >
+                <Satellite className="h-4 w-4" />
+                <span className="hidden sm:inline">Interactive Farm Mapping</span>
+                <span className="sm:hidden">GPS Mapping</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -1191,51 +1206,52 @@ export default function FarmersPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[700px]">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Farmer ID</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">County</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Farm Size</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Agreement</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                      <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">Farmer ID</th>
+                      <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">Name</th>
+                      <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">County</th>
+                      <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">Farm Size</th>
+                      <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">Agreement</th>
+                      <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">Status</th>
+                      <th className="text-left py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredFarmers.map((farmer: any) => (
                       <tr key={farmer.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-mono text-sm">{farmer.farmerId}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 font-mono text-xs sm:text-sm">{farmer.farmerId}</td>
+                        <td className="py-2 sm:py-3 px-2 sm:px-4">
                           <div>
-                            <div className="font-medium">{farmer.firstName} {farmer.lastName}</div>
+                            <div className="font-medium text-xs sm:text-sm">{farmer.firstName} {farmer.lastName}</div>
                             {farmer.phoneNumber && (
-                              <div className="text-sm text-gray-500">{farmer.phoneNumber}</div>
+                              <div className="text-xs text-gray-500 hidden sm:block">{farmer.phoneNumber}</div>
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4">{farmer.county}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{farmer.county}</td>
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
                           {farmer.farmSize ? `${farmer.farmSize} ${farmer.farmSizeUnit}` : "Not specified"}
                         </td>
-                        <td className="py-3 px-4">
-                          <Badge variant={farmer.agreementSigned ? "default" : "secondary"}>
+                        <td className="py-2 sm:py-3 px-2 sm:px-4">
+                          <Badge variant={farmer.agreementSigned ? "default" : "secondary"} className="text-xs">
                             {farmer.agreementSigned ? "Signed" : "Pending"}
                           </Badge>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4">
                           <Badge 
                             variant={
                               farmer.status === 'active' ? "default" : 
                               farmer.status === 'inactive' ? "secondary" : "destructive"
                             }
+                            className="text-xs"
                           >
                             {farmer.status.charAt(0).toUpperCase() + farmer.status.slice(1)}
                           </Badge>
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="flex gap-1">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4">
+                          <div className="flex flex-col sm:flex-row gap-1">
                             <Button 
                               variant="outline" 
                               size="sm"
@@ -1243,28 +1259,32 @@ export default function FarmersPage() {
                                 setSelectedFarmer(farmer);
                                 setIsViewDialogOpen(true);
                               }}
+                              className="flex-1 sm:flex-none"
                             >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="hidden sm:inline">View</span>
+                              <span className="sm:hidden text-xs">View</span>
                             </Button>
                             <Button 
                               variant="outline" 
                               size="sm"
                               onClick={() => downloadFarmerReport(farmer, 'comprehensive')}
-                              className="text-blue-600 hover:text-blue-700"
+                              className="text-blue-600 hover:text-blue-700 flex-1 sm:flex-none"
                             >
-                              <FileDown className="h-4 w-4 mr-1" />
-                              Report
+                              <FileDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="hidden sm:inline">Report</span>
+                              <span className="sm:hidden text-xs">PDF</span>
                             </Button>
                             {farmer.landMapData && (
                               <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => downloadFarmerReport(farmer, 'eudr')}
-                                className="text-green-600 hover:text-green-700"
+                                className="text-green-600 hover:text-green-700 flex-1 sm:flex-none"
                               >
-                                <Shield className="h-4 w-4 mr-1" />
-                                EUDR
+                                <Shield className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                                <span className="hidden sm:inline">EUDR</span>
+                                <span className="sm:hidden text-xs">EUDR</span>
                               </Button>
                             )}
                           </div>
@@ -1280,7 +1300,7 @@ export default function FarmersPage() {
 
         {/* View Farmer Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Farmer Details</DialogTitle>
             </DialogHeader>
@@ -1292,7 +1312,7 @@ export default function FarmersPage() {
                     <User className="h-5 w-5 text-lacra-blue" />
                     Basic Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700">Farmer ID</label>
                       <p className="text-gray-900 font-mono">{selectedFarmer.farmerId}</p>
@@ -1492,18 +1512,18 @@ export default function FarmersPage() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-white p-3 rounded-lg border">
-                          <div className="text-sm font-medium text-gray-900">Total Farm Area</div>
-                          <div className="text-lg font-bold text-blue-600">{landMapData.totalArea} hectares</div>
+                          <div className="text-xs sm:text-sm font-medium text-gray-900">Total Farm Area</div>
+                          <div className="text-base sm:text-lg font-bold text-blue-600">{landMapData.totalArea} hectares</div>
                         </div>
                         <div className="bg-white p-3 rounded-lg border">
-                          <div className="text-sm font-medium text-gray-900">Cultivated Area</div>
-                          <div className="text-lg font-bold text-green-600">{landMapData.cultivatedArea} hectares</div>
+                          <div className="text-xs sm:text-sm font-medium text-gray-900">Cultivated Area</div>
+                          <div className="text-base sm:text-lg font-bold text-green-600">{landMapData.cultivatedArea} hectares</div>
                         </div>
                         <div className="bg-white p-3 rounded-lg border">
-                          <div className="text-sm font-medium text-gray-900">Efficiency</div>
-                          <div className="text-lg font-bold text-purple-600">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900">Efficiency</div>
+                          <div className="text-base sm:text-lg font-bold text-purple-600">
                             {landMapData.totalArea > 0 ? Math.round((landMapData.cultivatedArea / landMapData.totalArea) * 100) : 0}%
                           </div>
                         </div>
@@ -1519,7 +1539,7 @@ export default function FarmersPage() {
                   <CardTitle className="text-lg">Land Analysis Report</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div className="bg-blue-50 p-3 rounded-lg">
                         <div className="font-medium text-blue-900">Soil Composition</div>
@@ -1570,7 +1590,7 @@ export default function FarmersPage() {
                   {/* Boundary Points Table */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="font-medium text-gray-900 mb-3">GPS Boundary Coordinates</div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
                       {farmBoundaries.map((point, index) => (
                         <div key={index} className="bg-white p-2 rounded border">
                           <div className="font-medium">Point {point.point}</div>

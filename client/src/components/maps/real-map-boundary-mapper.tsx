@@ -603,12 +603,13 @@ export default function RealMapBoundaryMapper({
               Current Position: {currentGPSPosition.lat.toFixed(6)}, {currentGPSPosition.lng.toFixed(6)}
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               onClick={startGPSTracking}
               disabled={isTrackingGPS}
               size="sm"
               variant={isTrackingGPS ? "secondary" : "default"}
+              className="flex-1 sm:flex-none"
             >
               {isTrackingGPS ? 'Tracking...' : 'Start GPS Tracking'}
             </Button>
@@ -617,6 +618,7 @@ export default function RealMapBoundaryMapper({
               disabled={!isTrackingGPS}
               size="sm"
               variant="outline"
+              className="flex-1 sm:flex-none"
             >
               Stop Tracking
             </Button>
@@ -625,8 +627,10 @@ export default function RealMapBoundaryMapper({
               disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
               size="sm"
               variant="default"
+              className="flex-1 sm:flex-none"
             >
-              Add GPS Point ({points.length}/{maxPoints})
+              <span className="hidden sm:inline">Add GPS Point ({points.length}/{maxPoints})</span>
+              <span className="sm:hidden">Add Point ({points.length}/{maxPoints})</span>
             </Button>
           </div>
         </div>

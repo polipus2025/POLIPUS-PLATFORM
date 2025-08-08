@@ -136,9 +136,17 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
     const mapElement = mapRef.current;
     if (!mapElement) return;
 
+    console.log('🗺️ Initializing map element');
+
     // Clear existing content safely
-    while (mapElement.firstChild) {
-      mapElement.removeChild(mapElement.firstChild);
+    try {
+      while (mapElement.firstChild) {
+        mapElement.removeChild(mapElement.firstChild);
+      }
+    } catch (error) {
+      console.log('Map clearing error (non-critical):', error);
+      // Fallback: set innerHTML if removeChild fails
+      mapElement.innerHTML = '';
     }
 
     // Load REAL satellite imagery using OpenStreetMap satellite tiles
@@ -230,25 +238,34 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
     setTimeout(renderPointsAndLines, 2000);
 
     function renderPointsAndLines() {
-      if (!mapElement) return;
+      if (!mapElement) {
+        console.log('❌ No map element for rendering');
+        return;
+      }
       
-      // Safely clear existing points and lines
+      console.log('🎯 Starting renderPointsAndLines with', points.length, 'points');
+      
+      // Safely clear existing points and lines using modern remove() method
       const existingMarkers = mapElement.querySelectorAll('.boundary-marker, .boundary-marker-persistent');
-      existingMarkers.forEach(marker => {
+      console.log('🧹 Found', existingMarkers.length, 'existing markers to remove');
+      
+      existingMarkers.forEach((marker, index) => {
         try {
-          if (marker.parentNode === mapElement) {
-            mapElement.removeChild(marker);
-          }
+          marker.remove(); // Modern approach - safer than removeChild
+          console.log(`🗑️ Removed marker ${index + 1}`);
         } catch (e) {
-          console.log('Marker already removed');
+          console.log('Marker removal error (non-critical):', e);
         }
       });
       
       // Clear SVG lines safely
       try {
-        svg.innerHTML = '';
+        if (svg && svg.parentNode) {
+          svg.innerHTML = '';
+          console.log('🧹 SVG cleared');
+        }
       } catch (e) {
-        console.log('SVG already cleared');
+        console.log('SVG clearing error (non-critical):', e);
       }
 
       if (points.length === 0) return;

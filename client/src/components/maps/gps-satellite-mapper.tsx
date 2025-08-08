@@ -176,7 +176,7 @@ export default function GPSSatelliteMapper({
     }
   }, [enableRealTimeGPS]);
 
-  // Update markers and overlays when points change - PERSISTENT VERSION
+  // Update markers and overlays when points change - TRULY PERSISTENT VERSION
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -185,23 +185,43 @@ export default function GPSSatelliteMapper({
     
     if (!mapElement || !svg) return;
 
-    // Clear existing markers and lines ONLY to redraw with all points
-    mapElement.querySelectorAll('.boundary-marker, .boundary-line, .eudr-overlay, .deforestation-warning').forEach(el => el.remove());
-    
-    // Clear existing SVG elements except defs
-    const defs = svg.querySelector('defs');
-    svg.innerHTML = '';
-    if (defs) svg.appendChild(defs);
+    console.log(`🎯 Adding/updating ${points.length} PERSISTENT boundary markers`);
 
     // Exit early if no points to draw
-    if (points.length === 0) return;
+    if (points.length === 0) {
+      // Only clear when there are no points at all
+      mapElement.querySelectorAll('.boundary-marker, .boundary-line, .eudr-overlay, .deforestation-warning').forEach(el => el.remove());
+      const defs = svg.querySelector('defs');
+      svg.innerHTML = '';
+      if (defs) svg.appendChild(defs);
+      return;
+    }
 
-    console.log(`🎯 Rendering ${points.length} PERSISTENT boundary markers on real-time satellite view`);
+    // SMART UPDATE: Only add NEW markers, don't remove existing ones
+    const existingMarkers = mapElement.querySelectorAll('.persistent-point');
+    const existingCount = existingMarkers.length;
 
-    // Add PERMANENT markers for each point that STAY VISIBLE ON MAP
-    points.forEach((point, index) => {
+    // Add pulsing animation CSS ONCE
+    if (!document.querySelector('#persistent-marker-styles')) {
+      const style = document.createElement('style');
+      style.id = 'persistent-marker-styles';
+      style.textContent = `
+        @keyframes pulse-glow {
+          0% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 0 rgba(34, 197, 94, 0.7); }
+          100% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 8px rgba(34, 197, 94, 0); }
+        }
+        .persistent-point {
+          will-change: transform, box-shadow !important;
+          backface-visibility: hidden !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Add ONLY NEW markers (don't recreate existing ones)
+    for (let index = existingCount; index < points.length; index++) {
+      const point = points[index];
       const pixelPos = coordToPixel(point.latitude, point.longitude);
-      const risk = calculateRiskLevel(point.latitude, point.longitude);
       
       // Create HIGHLY VISIBLE PERMANENT marker
       const marker = document.createElement('div');
@@ -236,45 +256,34 @@ export default function GPSSatelliteMapper({
       marker.textContent = letter; // A, B, C, D...
       marker.title = `PERSISTENT Boundary Point ${letter} - GPS: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
       
-      // Add pulsing animation CSS
-      if (!document.querySelector('#persistent-marker-styles')) {
-        const style = document.createElement('style');
-        style.id = 'persistent-marker-styles';
-        style.textContent = `
-          @keyframes pulse-glow {
-            0% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            100% { box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 0 8px rgba(34, 197, 94, 0); }
-          }
-          .persistent-point {
-            will-change: transform, box-shadow !important;
-            backface-visibility: hidden !important;
-          }
-        `;
-        document.head.appendChild(style);
-      }
-      
       mapElement.appendChild(marker);
-      console.log(`🟢 PERMANENT marker ${letter} LOCKED at pixel ${pixelPos.x}, ${pixelPos.y} for GPS ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
-    });
+      console.log(`🟢 NEW PERMANENT marker ${letter} ADDED at pixel ${pixelPos.x}, ${pixelPos.y} for GPS ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
+    }
 
-    // Draw VISIBLE connecting lines between consecutive points - FIXED VERSION
+    // ALWAYS REDRAW connecting lines (they don't persist like markers)
+    // Clear only lines and overlays, NOT markers
+    mapElement.querySelectorAll('.boundary-line, .eudr-overlay, .deforestation-warning').forEach(el => el.remove());
+    const existingLines = svg.querySelectorAll('.boundary-line');
+    existingLines.forEach(line => line.remove());
+
+    // Draw VISIBLE connecting lines between consecutive points
     if (points.length >= 2) {
-      console.log(`🔗 Drawing ${points.length - 1} connecting lines between points`);
+      console.log(`🔗 Drawing ${points.length - 1} connecting lines between ALL points`);
       
       for (let i = 0; i < points.length - 1; i++) {
         const start = coordToPixel(points[i].latitude, points[i].longitude);
         const end = coordToPixel(points[i + 1].latitude, points[i + 1].longitude);
         
-        console.log(`Drawing line from ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
+        console.log(`🔗 Line ${String.fromCharCode(65 + i)} → ${String.fromCharCode(65 + i + 1)}: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
         
-        // Create SVG line for better visibility and precision
+        // Create THICK, VISIBLE SVG line
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', start.x.toString());
         line.setAttribute('y1', start.y.toString());
         line.setAttribute('x2', end.x.toString());
         line.setAttribute('y2', end.y.toString());
         line.setAttribute('stroke', '#22c55e');
-        line.setAttribute('stroke-width', '5');
+        line.setAttribute('stroke-width', '6');
         line.setAttribute('stroke-linecap', 'round');
         line.setAttribute('opacity', '1');
         line.setAttribute('class', 'boundary-line');
@@ -286,7 +295,7 @@ export default function GPSSatelliteMapper({
         const start = coordToPixel(points[points.length - 1].latitude, points[points.length - 1].longitude);
         const end = coordToPixel(points[0].latitude, points[0].longitude);
         
-        console.log(`Drawing closing line from ${String.fromCharCode(65 + points.length - 1)} to A: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
+        console.log(`🔗 Closing line ${String.fromCharCode(65 + points.length - 1)} → A: (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
         
         const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         closingLine.setAttribute('x1', start.x.toString());
@@ -294,11 +303,11 @@ export default function GPSSatelliteMapper({
         closingLine.setAttribute('x2', end.x.toString());
         closingLine.setAttribute('y2', end.y.toString());
         closingLine.setAttribute('stroke', '#16a34a');
-        closingLine.setAttribute('stroke-width', '5');
+        closingLine.setAttribute('stroke-width', '6');
         closingLine.setAttribute('stroke-linecap', 'round');
         closingLine.setAttribute('stroke-dasharray', '10,5');
         closingLine.setAttribute('opacity', '1');
-        closingLine.setAttribute('class', 'boundary-line');
+        closingLine.setAttribute('class', 'boundary-line closing-line');
         svg.appendChild(closingLine);
       }
     }

@@ -454,9 +454,40 @@ export default function EnhancedSatelliteMapper({
     if (!mapRef.current) return null;
 
     try {
-      // Using html2canvas to capture the satellite map
+      // Using html2canvas with enhanced options to capture satellite imagery
       const html2canvas = await import('html2canvas');
-      const canvas = await html2canvas.default(mapRef.current);
+      
+      const options = {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1,
+        logging: false,
+        width: mapRef.current.offsetWidth,
+        height: mapRef.current.offsetHeight,
+        backgroundColor: '#1e293b',
+        foreignObjectRendering: true,
+        imageTimeout: 30000, // Extended timeout for satellite imagery
+        onclone: (clonedDoc: Document) => {
+          // Ensure all images are loaded in the cloned document
+          const images = clonedDoc.querySelectorAll('img');
+          images.forEach(img => {
+            if (!img.complete) {
+              img.crossOrigin = 'anonymous';
+            }
+          });
+        }
+      };
+      
+      console.log('Capturing map with satellite background...');
+      const canvas = await html2canvas.default(mapRef.current, options);
+      
+      // Verify canvas has content
+      if (canvas.width === 0 || canvas.height === 0) {
+        console.error('Canvas capture failed - empty canvas');
+        return null;
+      }
+      
+      console.log(`✓ Map captured successfully: ${canvas.width}x${canvas.height}`);
       return canvas.toDataURL('image/jpeg', 0.9);
     } catch (error) {
       console.error('Screenshot capture error:', error);

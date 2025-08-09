@@ -395,13 +395,25 @@ export default function RealMapBoundaryMapper({
             z-index: 1;
           `;
           
+          // Enable CORS for proper image capture in map downloads
+          img.crossOrigin = 'anonymous';
+          
           // Primary: Esri World Imagery for highest quality
           img.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}`;
           
-          // Fallback to Google satellite
+          // Fallback to Google satellite with CORS
           img.onerror = () => {
+            img.crossOrigin = 'anonymous';
             img.src = `https://mt1.google.com/vt/lyrs=s&x=${tileX}&y=${tileY}&z=${zoom}`;
+            
+            // Final fallback to OpenStreetMap
+            img.onerror = () => {
+              img.crossOrigin = 'anonymous';
+              img.src = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
+            };
           };
+          
+          console.log(`Loading enhanced satellite tile with CORS: ${zoom}/${tileY}/${tileX}`);
           
           tilesContainer.appendChild(img);
         }
@@ -1103,9 +1115,70 @@ export default function RealMapBoundaryMapper({
     }
   };
 
-  const handleComplete = () => {
+  // Enhanced map screenshot capture for proper satellite background rendering
+  const captureEnhancedMapScreenshot = async (): Promise<string | null> => {
+    if (!mapRef.current) return null;
+
+    try {
+      // Wait for all satellite images to load completely
+      const images = mapRef.current.querySelectorAll('img');
+      await Promise.all(
+        Array.from(images).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve, reject) => {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(true); // Continue even if some images fail
+            setTimeout(() => resolve(true), 5000); // Timeout after 5 seconds
+          });
+        })
+      );
+
+      console.log('All satellite images loaded, capturing map...');
+      
+      // Import html2canvas dynamically
+      const html2canvas = await import('html2canvas');
+      
+      const options = {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1,
+        logging: false,
+        width: mapRef.current.offsetWidth,
+        height: mapRef.current.offsetHeight,
+        backgroundColor: '#1e293b',
+        foreignObjectRendering: true,
+        imageTimeout: 15000,
+        onclone: (clonedDoc: Document) => {
+          // Ensure all cloned images have proper CORS settings
+          const clonedImages = clonedDoc.querySelectorAll('img');
+          clonedImages.forEach(img => {
+            img.crossOrigin = 'anonymous';
+          });
+        }
+      };
+      
+      const canvas = await html2canvas.default(mapRef.current, options);
+      
+      if (canvas.width === 0 || canvas.height === 0) {
+        console.error('Map capture failed - empty canvas');
+        return null;
+      }
+      
+      console.log(`✓ Enhanced map captured with satellite background: ${canvas.width}x${canvas.height}`);
+      return canvas.toDataURL('image/jpeg', 0.9);
+    } catch (error) {
+      console.error('Enhanced map capture error:', error);
+      return null;
+    }
+  };
+
+  const handleComplete = async () => {
     if (points.length >= minPoints) {
       const area = calculateArea(points);
+      
+      // Capture enhanced map screenshot with satellite background
+      setStatus('Capturing satellite map for download...');
+      const mapScreenshot = await captureEnhancedMapScreenshot();
       
       // Create comprehensive compliance reports
       const complianceReports = {
@@ -1118,7 +1191,8 @@ export default function RealMapBoundaryMapper({
         area, 
         eudrCompliance: eudrReport || undefined,
         deforestationReport: deforestationReport || undefined,
-        complianceReports
+        complianceReports,
+        mapScreenshot // Include captured satellite map
       });
     }
   };

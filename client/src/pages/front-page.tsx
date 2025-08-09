@@ -118,10 +118,16 @@ export default function FrontPage() {
             {/* Registered trademark symbol positioned over the 's' */}
             <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center relative gap-4">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
-            <div className="sm:absolute sm:right-0 flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col items-center justify-center gap-4">
+            {/* GPS Active Button - Now at the top */}
+            <div className="flex justify-center">
               <GlobalGPSDetector />
+            </div>
+            
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
+            
+            {/* Login Portals Button - Now below the title */}
+            <div className="flex justify-center">
               <Link href="#login-portals">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />

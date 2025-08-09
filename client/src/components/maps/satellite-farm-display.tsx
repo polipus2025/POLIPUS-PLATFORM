@@ -86,7 +86,9 @@ export default function SatelliteFarmDisplay({
       const zoom = 18;
 
       // Create sophisticated satellite map display
-      mapRef.current!.innerHTML = `
+      if (!mapRef.current) return;
+      
+      mapRef.current.innerHTML = `
         <div class="satellite-farm-display" style="
           width: 100%; 
           height: ${height}; 
@@ -235,9 +237,11 @@ export default function SatelliteFarmDisplay({
       renderFarmBoundaries();
       
       // Hide loading indicator
-      const loadingIndicator = mapRef.current!.querySelector('#loading-indicator') as HTMLElement;
-      if (loadingIndicator) {
-        loadingIndicator.style.display = 'none';
+      if (mapRef.current) {
+        const loadingIndicator = mapRef.current.querySelector('#loading-indicator') as HTMLElement;
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
       }
 
       setIsLoading(false);

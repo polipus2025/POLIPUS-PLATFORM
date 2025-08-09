@@ -245,11 +245,9 @@ export default function RealMapBoundaryMapper({
         
         setPoints(prev => {
           const updated = [...prev, newPoint];
-          console.log(`Persistent points total: ${updated.length}`);
+          console.log(`✓ Persistent points total: ${updated.length} - Point will remain visible on map`);
           
-          // Immediately update visual display
-          updatePersistentBoundaryDisplay(updated, centerLat, centerLng);
-          
+          // Points will be rendered persistently by the useEffect hook
           return updated;
         });
       });
@@ -512,7 +510,7 @@ export default function RealMapBoundaryMapper({
     // Map initialization handled by initMapWithCoordinates function
   }, []);
 
-  // Update visual markers when points change - IMMEDIATE REAL-TIME DISPLAY
+  // Update visual markers when points change - IMMEDIATE PERSISTENT DISPLAY
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
 
@@ -521,8 +519,13 @@ export default function RealMapBoundaryMapper({
     
     if (!mapElement || !svg) return;
 
-    // Clear existing markers and boundary but keep SVG defs
+    // Clear existing markers but preserve points
     mapElement.querySelectorAll('.map-marker, .area-label, .risk-label').forEach(el => el.remove());
+    
+    // Force immediate persistent display for all points
+    console.log(`Rendering persistent boundary display for ${points.length} points`);
+    
+    // The persistent boundary display logic is handled in the main render loop below
     
     // Clear SVG content but preserve defs for patterns
     const existingDefs = svg.querySelector('defs');

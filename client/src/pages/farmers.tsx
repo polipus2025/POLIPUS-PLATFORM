@@ -20,7 +20,6 @@ import { z } from "zod";
 import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
 import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
 import SatelliteFarmDisplay from "@/components/maps/satellite-farm-display";
-import SimplePersistentMapper from "@/components/maps/simple-persistent-mapper";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
@@ -1643,8 +1642,10 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <SimplePersistentMapper
-                onBoundaryComplete={(points, area) => {
+              <RealMapBoundaryMapper
+                onBoundaryComplete={(boundary) => {
+                  const points = boundary.points;
+                  const area = boundary.area;
                   // Convert points data to match our farm boundaries format
                   const newBoundaries = points.map((point, index) => ({
                     lat: point.latitude,

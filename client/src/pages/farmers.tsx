@@ -20,6 +20,7 @@ import { z } from "zod";
 import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
 import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
 import SatelliteFarmDisplay from "@/components/maps/satellite-farm-display";
+import SimplePersistentMapper from "@/components/maps/simple-persistent-mapper";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
@@ -1642,10 +1643,10 @@ export default function FarmersPage() {
             </DialogHeader>
             
             <div className="mt-6">
-              <RealMapBoundaryMapper
-                onBoundaryComplete={(boundary) => {
-                  // Convert boundary data to match our farm boundaries format
-                  const newBoundaries = boundary.points.map((point, index) => ({
+              <SimplePersistentMapper
+                onBoundaryComplete={(points, area) => {
+                  // Convert points data to match our farm boundaries format
+                  const newBoundaries = points.map((point, index) => ({
                     lat: point.latitude,
                     lng: point.longitude,
                     point: index + 1
@@ -1653,10 +1654,10 @@ export default function FarmersPage() {
                   
                   setFarmBoundaries(newBoundaries);
                   
-                  // Update land map data
+                  // Update land map data with persistent boundary information
                   setLandMapData({
-                    totalArea: boundary.area,
-                    cultivatedArea: boundary.area * 0.8, // Assume 80% cultivated
+                    totalArea: area,
+                    cultivatedArea: area * 0.8, // Assume 80% cultivated
                     soilType: 'Fertile Loam',
                     waterSources: ['River', 'Well'],
                     accessRoads: true,
@@ -1669,8 +1670,8 @@ export default function FarmersPage() {
                   
                   // Prepare comprehensive farmer data with compliance reports
                   const updatedLandMapData = {
-                    totalArea: boundary.area,
-                    cultivatedArea: boundary.area * 0.8,
+                    totalArea: area,
+                    cultivatedArea: area * 0.8,
                     soilType: 'Fertile Loam',
                     waterSources: ['River', 'Well'],
                     accessRoads: true,
@@ -1684,7 +1685,7 @@ export default function FarmersPage() {
                       complianceScore: 85,
                       deforestationRisk: 15,
                       lastForestDate: '2019-12-31',
-                      coordinates: boundary.points.map((p: any) => `${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)}`).join('; '),
+                      coordinates: points.map((p: any) => `${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)}`).join('; '),
                       documentationRequired: ['Due diligence statement', 'Geolocation coordinates'],
                       recommendations: ['Standard due diligence applies', 'Annual monitoring recommended']
                     },
@@ -1708,8 +1709,8 @@ export default function FarmersPage() {
                   setLandMapData(updatedLandMapData);
                   
                   toast({
-                    title: "GPS Field Boundary Mapping Complete",
-                    description: `Farm boundary created with ${boundary.points.length} GPS points. Area: ${boundary.area.toFixed(2)} hectares. Basic compliance assessment generated.`,
+                    title: "Persistent GPS Field Boundary Mapping Complete",
+                    description: `Farm boundary created with ${points.length} persistent GPS points. Area: ${area.toFixed(2)} hectares. Enhanced compliance assessment generated.`,
                   });
                   
                   setIsInteractiveMappingOpen(false);

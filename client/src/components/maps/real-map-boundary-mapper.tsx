@@ -218,7 +218,7 @@ export default function RealMapBoundaryMapper({
       const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
 
-      // Enhanced click handler for persistent boundary points
+      // Enhanced click handler for persistent boundary points with storage
       mapElement.addEventListener('click', (e) => {
         const rect = mapElement.getBoundingClientRect();
         const x = e.clientX - rect.left;

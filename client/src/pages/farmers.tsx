@@ -19,6 +19,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { z } from "zod";
 import EUDRComplianceMapper from "@/components/maps/eudr-compliance-mapper";
 import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
+import SatelliteFarmDisplay from "@/components/maps/satellite-farm-display";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
 
@@ -73,6 +74,22 @@ export default function FarmersPage() {
     accessRoads: false,
     elevationData: { min: 0, max: 0, average: 0 }
   });
+
+  // Calculate farm area from boundary points using shoelace formula
+  const calculateFarmArea = (boundaries: Array<{lat: number, lng: number}>) => {
+    if (boundaries.length < 3) return 0;
+    
+    let area = 0;
+    for (let i = 0; i < boundaries.length; i++) {
+      const j = (i + 1) % boundaries.length;
+      area += boundaries[i].lat * boundaries[j].lng;
+      area -= boundaries[j].lat * boundaries[i].lng;
+    }
+    
+    area = Math.abs(area) / 2;
+    // Convert to approximate hectares (rough conversion)
+    return parseFloat((area * 111.32 * 111.32 / 10000).toFixed(2));
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -1491,47 +1508,37 @@ export default function FarmersPage() {
                   <CardTitle className="text-lg">Farm Boundary Map</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-green-50 border-2 border-dashed border-green-200 rounded-lg p-8 text-center">
-                    <div className="relative">
-                      <div className="w-full h-64 bg-gradient-to-br from-green-100 to-green-200 rounded-lg mb-4 relative overflow-hidden">
-                        {/* Simulated map with boundary points */}
-                        <div className="absolute inset-4 border-2 border-green-600 rounded-lg bg-green-50">
-                          {farmBoundaries.map((point, index) => (
-                            <div
-                              key={index}
-                              className="absolute w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-lg"
-                              style={{
-                                left: `${20 + (index % 4) * 20}%`,
-                                top: `${20 + Math.floor(index / 4) * 20}%`
-                              }}
-                              title={`Point ${point.point}: ${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`}
-                            />
-                          ))}
-                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                            <div className="bg-yellow-400 p-2 rounded-full">
-                              <MapPin className="w-4 h-4 text-yellow-800" />
-                            </div>
-                          </div>
-                        </div>
+                  <div className="space-y-4">
+                    {farmBoundaries.length > 0 ? (
+                      <SatelliteFarmDisplay
+                        farmData={{
+                          id: selectedFarmer?.id || 'demo-farm',
+                          name: `${selectedFarmer?.firstName || 'Demo'} ${selectedFarmer?.lastName || 'Farmer'}'s Farm`,
+                          ownerName: `${selectedFarmer?.firstName || 'Demo'} ${selectedFarmer?.lastName || 'Farmer'}`,
+                          boundaries: farmBoundaries.map((boundary, index) => ({
+                            latitude: boundary.lat,
+                            longitude: boundary.lng,
+                            order: index + 1
+                          })),
+                          area: calculateFarmArea(farmBoundaries),
+                          centerPoint: {
+                            latitude: farmBoundaries.reduce((sum, b) => sum + b.lat, 0) / farmBoundaries.length,
+                            longitude: farmBoundaries.reduce((sum, b) => sum + b.lng, 0) / farmBoundaries.length
+                          },
+                          county: selectedFarmer?.county || 'Demo County',
+                          cropType: selectedFarmer?.cropType || 'Mixed Crops'
+                        }}
+                        showControls={true}
+                        height="350px"
+                      />
+                    ) : (
+                      <div className="bg-green-50 border-2 border-dashed border-green-200 rounded-lg p-8 text-center">
+                        <MapPin className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">
+                          No farm boundaries mapped yet. Use the interactive mapping tool above to create boundaries.
+                        </p>
                       </div>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-white p-3 rounded-lg border">
-                          <div className="text-xs sm:text-sm font-medium text-gray-900">Total Farm Area</div>
-                          <div className="text-base sm:text-lg font-bold text-blue-600">{landMapData.totalArea} hectares</div>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg border">
-                          <div className="text-xs sm:text-sm font-medium text-gray-900">Cultivated Area</div>
-                          <div className="text-base sm:text-lg font-bold text-green-600">{landMapData.cultivatedArea} hectares</div>
-                        </div>
-                        <div className="bg-white p-3 rounded-lg border">
-                          <div className="text-xs sm:text-sm font-medium text-gray-900">Efficiency</div>
-                          <div className="text-base sm:text-lg font-bold text-purple-600">
-                            {landMapData.totalArea > 0 ? Math.round((landMapData.cultivatedArea / landMapData.totalArea) * 100) : 0}%
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

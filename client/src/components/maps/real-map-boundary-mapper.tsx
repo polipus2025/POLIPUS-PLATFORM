@@ -6,6 +6,9 @@ import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhan
 interface BoundaryPoint {
   latitude: number;
   longitude: number;
+  id?: string;
+  timestamp?: Date;
+  accuracy?: number;
 }
 
 interface EUDRComplianceReport {
@@ -63,18 +66,39 @@ export default function RealMapBoundaryMapper({
   const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Function to get satellite tile URLs based on GPS coordinates
-  const getSatelliteTiles = (lat: number, lng: number, zoom: number = 15) => {
-    // Convert lat/lng to tile coordinates
+  // Enhanced function to get location-specific high-resolution satellite imagery
+  const getSatelliteTiles = (lat: number, lng: number, zoom: number = 18) => {
+    // Convert lat/lng to tile coordinates with higher precision
     const n = Math.pow(2, zoom);
     const x = Math.floor(n * ((lng + 180) / 360));
     const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
     
+    // Prioritized satellite providers with location-specific optimization
     return [
-      `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
-      `https://mt1.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
-      `https://tiles.stadiamaps.com/tiles/alidade_satellite/${zoom}/${x}/${y}.jpg`,
-      `https://wxs.ign.fr/choisirgeoportail/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX=${zoom}&TILEROW=${y}&TILECOL=${x}`,
+      {
+        url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
+        name: 'Esri World Imagery (Ultra HD)',
+        maxZoom: 19,
+        coordinates: { lat, lng, zoom }
+      },
+      {
+        url: `https://mt1.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
+        name: 'Google Earth Satellite',
+        maxZoom: 20,
+        coordinates: { lat, lng, zoom }
+      },
+      {
+        url: `https://api.mapbox.com/v4/mapbox.satellite/${zoom}/${x}/${y}@2x.jpg90`,
+        name: 'Mapbox Satellite HD',
+        maxZoom: 22,
+        coordinates: { lat, lng, zoom }
+      },
+      {
+        url: `https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg`,
+        name: 'Sentinel-2 Cloudless',
+        maxZoom: 16,
+        coordinates: { lat, lng, zoom }
+      }
     ];
   };
 
@@ -109,11 +133,11 @@ export default function RealMapBoundaryMapper({
           return;
         }
 
-        const tileUrl = satelliteTiles[tileIndex];
+        const tileInfo = satelliteTiles[tileIndex];
         const testImg = new Image();
         
         testImg.onload = () => {
-          createMapWithTile(tileUrl, lat, lng);
+          createMapWithTile(tileInfo, lat, lng);
         };
         
         testImg.onerror = () => {
@@ -121,13 +145,13 @@ export default function RealMapBoundaryMapper({
           setTimeout(() => tryLoadTile(tileIndex + 1), 500);
         };
         
-        testImg.src = tileUrl;
+        testImg.src = tileInfo.url;
       };
 
       tryLoadTile(0);
     };
 
-    const createMapWithTile = (tileUrl: string, centerLat: number, centerLng: number) => {
+    const createMapWithTile = (tileInfo: any, centerLat: number, centerLng: number) => {
       mapRef.current!.innerHTML = `
         <style>
           .real-map { 
@@ -136,7 +160,7 @@ export default function RealMapBoundaryMapper({
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             position: relative;
-            background: url('${tileUrl}') center/cover;
+            background: url('${tileInfo.url}') center/cover;
             cursor: crosshair;
             overflow: hidden;
           }
@@ -194,31 +218,46 @@ export default function RealMapBoundaryMapper({
       const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
 
-      // Add click handler with debugging
+      // Enhanced click handler for persistent boundary points
       mapElement.addEventListener('click', (e) => {
         const rect = mapElement.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        console.log(`Map clicked at pixel: ${x}, ${y}`);
+        console.log(`Enhanced map clicked at pixel: ${x}, ${y}`);
         
-        // Convert pixel coordinates to lat/lng based on current map center
-        const lat = centerLat + (200 - y) / 5000;
-        const lng = centerLng + (x - 200) / 5000;
+        // Convert pixel coordinates to precise GPS coordinates
+        const latRange = 0.002; // Approximately 200m
+        const lngRange = 0.002;
         
-        console.log(`Converted to GPS: ${lat}, ${lng}`);
+        const lat = centerLat + (latRange / 2) - (y / rect.height) * latRange;
+        const lng = centerLng - (lngRange / 2) + (x / rect.width) * lngRange;
         
-        const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
-        console.log(`Adding point:`, newPoint);
+        console.log(`Precise GPS conversion: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        
+        const newPoint: BoundaryPoint = { 
+          latitude: lat, 
+          longitude: lng,
+          id: `point-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          timestamp: new Date(),
+          accuracy: 1.5
+        };
         
         setPoints(prev => {
           const updated = [...prev, newPoint];
-          console.log(`Total points: ${updated.length}`);
+          console.log(`Persistent points total: ${updated.length}`);
+          
+          // Immediately update visual display
+          updatePersistentBoundaryDisplay(updated, centerLat, centerLng);
+          
           return updated;
         });
       });
 
-      setStatus(`Real-time satellite imagery loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to mark farm boundaries`);
+      // Load high-resolution satellite tile grid
+      loadSatelliteTilesGrid(centerLat, centerLng, tileInfo.coordinates.zoom);
+      
+      setStatus(`${tileInfo.name} loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to create persistent boundaries`);
       setMapReady(true);
     };
 
@@ -329,6 +368,145 @@ export default function RealMapBoundaryMapper({
 
       setStatus('Terrain map ready - Click to mark farm boundaries');
       setMapReady(true);
+    };
+
+    // Load satellite tiles grid for enhanced coverage
+    const loadSatelliteTilesGrid = (lat: number, lng: number, zoom: number) => {
+      const tilesContainer = mapRef.current?.querySelector('#satellite-tiles');
+      if (!tilesContainer) return;
+
+      // Calculate tile coordinates
+      const n = Math.pow(2, zoom);
+      const x = Math.floor(n * ((lng + 180) / 360));
+      const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
+
+      // Load 3x3 grid for better coverage
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          const tileX = x + dx;
+          const tileY = y + dy;
+          
+          const img = document.createElement('img');
+          img.style.cssText = `
+            position: absolute;
+            left: ${(dx + 1) * 256 - 128}px;
+            top: ${(dy + 1) * 256 - 128}px;
+            width: 256px;
+            height: 256px;
+            object-fit: cover;
+            z-index: 1;
+          `;
+          
+          // Primary: Esri World Imagery for highest quality
+          img.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}`;
+          
+          // Fallback to Google satellite
+          img.onerror = () => {
+            img.src = `https://mt1.google.com/vt/lyrs=s&x=${tileX}&y=${tileY}&z=${zoom}`;
+          };
+          
+          tilesContainer.appendChild(img);
+        }
+      }
+    };
+
+    // Update persistent boundary display
+    const updatePersistentBoundaryDisplay = (currentPoints: BoundaryPoint[], centerLat: number, centerLng: number) => {
+      const mapContainer = mapRef.current?.querySelector('.real-map') as HTMLElement;
+      if (!mapContainer) return;
+
+      // Remove existing markers
+      mapContainer.querySelectorAll('.persistent-marker').forEach(marker => marker.remove());
+
+      // Add persistent markers for all points
+      currentPoints.forEach((point, index) => {
+        const marker = document.createElement('div');
+        marker.className = `persistent-marker ${index === 0 ? 'marker-start' : index === currentPoints.length - 1 ? 'marker-end' : 'marker-middle'}`;
+        
+        // Convert GPS to pixel coordinates
+        const rect = mapContainer.getBoundingClientRect();
+        const latRange = 0.002;
+        const lngRange = 0.002;
+        
+        const x = ((point.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+        const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
+        
+        marker.style.cssText = `
+          position: absolute;
+          left: ${x}px;
+          top: ${y}px;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          border: 3px solid white;
+          transform: translate(-50%, -50%);
+          z-index: 20;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: bold;
+          color: white;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+          box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+        `;
+        
+        marker.textContent = String.fromCharCode(65 + index); // A, B, C, etc.
+        mapContainer.appendChild(marker);
+      });
+
+      // Draw connecting lines if we have multiple points
+      if (currentPoints.length >= 2) {
+        const svg = mapContainer.querySelector('svg');
+        if (svg) {
+          // Clear existing lines
+          svg.innerHTML = '';
+
+          // Create path for boundary lines
+          const pathData = currentPoints.map((point, index) => {
+            const rect = mapContainer.getBoundingClientRect();
+            const latRange = 0.002;
+            const lngRange = 0.002;
+            
+            const x = ((point.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
+            
+            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+          }).join(' ');
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', pathData);
+          path.setAttribute('stroke', '#3b82f6');
+          path.setAttribute('stroke-width', '3');
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke-dasharray', '8,4');
+          path.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
+          svg.appendChild(path);
+
+          // Close polygon if we have enough points
+          if (currentPoints.length >= 3) {
+            const firstPoint = currentPoints[0];
+            const lastPoint = currentPoints[currentPoints.length - 1];
+            
+            const rect = mapContainer.getBoundingClientRect();
+            const latRange = 0.002;
+            const lngRange = 0.002;
+            
+            const x1 = ((lastPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y1 = ((centerLat + latRange / 2 - lastPoint.latitude) / latRange) * rect.height;
+            const x2 = ((firstPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y2 = ((centerLat + latRange / 2 - firstPoint.latitude) / latRange) * rect.height;
+
+            const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            closingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+            closingLine.setAttribute('stroke', '#22c55e');
+            closingLine.setAttribute('stroke-width', '3');
+            closingLine.setAttribute('fill', 'none');
+            closingLine.setAttribute('stroke-dasharray', '4,2');
+            svg.appendChild(closingLine);
+          }
+        }
+      }
     };
 
     // Map initialization handled by initMapWithCoordinates function

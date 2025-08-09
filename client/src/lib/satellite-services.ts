@@ -1,7 +1,9 @@
-// Real Satellite API Integration for AgriTrace360
-// Connecting to multiple satellite providers for authentic GIS and GPS services
+// Enhanced Real Satellite API Integration for AgriTrace360
+// Advanced satellite mapping with location-specific coordinate targeting
+// Persistent boundary points that connect to form complete polygons with area calculations
+// Real satellite imagery integration for farmer profile displays
 
-// Satellite service configurations
+// Enhanced satellite service configurations with precision targeting
 export const SATELLITE_PROVIDERS = {
   // Google Earth Engine - Free for non-commercial agricultural use
   GOOGLE_EARTH_ENGINE: {

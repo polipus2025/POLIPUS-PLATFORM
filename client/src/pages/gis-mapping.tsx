@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import GPSDiagnosticSystem from '@/components/gps/gps-diagnostic-system';
 import InteractiveBoundaryMapper from '@/components/maps/interactive-boundary-mapper';
+import EnhancedSatelliteMapper from '@/components/maps/enhanced-satellite-mapper';
 import EUDRComplianceReportComponent from "@/components/reports/eudr-compliance-report";
 import DeforestationReportComponent from "@/components/reports/deforestation-report";
 import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
@@ -496,14 +497,16 @@ export default function GISMapping() {
                     <p className="text-slate-600">Create precise farm boundaries using real map interaction and GPS positioning</p>
                   </div>
                 </div>
-                <InteractiveBoundaryMapper 
+                <EnhancedSatelliteMapper 
                   onBoundaryComplete={(boundary) => {
                     toast({
-                      title: "Farm Boundary Created",
-                      description: `${boundary.name} mapped successfully with ${boundary.points.length} points covering ${boundary.area.toFixed(2)} hectares`,
+                      title: "Enhanced Satellite Farm Boundary Created",
+                      description: `Farm boundary mapped with precision satellite imagery: ${boundary.points.length} points covering ${boundary.area.toFixed(2)} hectares`,
                     });
                   }}
                   minPoints={3}
+                  maxPoints={20}
+                  enableRealTimeGPS={true}
                 />
               </div>
             </TabsContent>

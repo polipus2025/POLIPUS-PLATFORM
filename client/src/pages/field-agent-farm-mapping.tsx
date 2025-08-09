@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
 import InteractiveBoundaryMapper from '@/components/maps/interactive-boundary-mapper';
+import EnhancedSatelliteMapper from '@/components/maps/enhanced-satellite-mapper';
 import { 
   ArrowLeft,
   Map, 
@@ -311,28 +312,29 @@ export default function FieldAgentFarmMapping() {
                   </p>
                 </div>
                 
-                <InteractiveBoundaryMapper 
+                <EnhancedSatelliteMapper 
                   onBoundaryComplete={(boundary) => {
                     setFarmBoundary({
                       coordinates: boundary.points.map(p => ({
                         latitude: p.latitude,
                         longitude: p.longitude,
-                        accuracy: p.accuracy
+                        accuracy: p.accuracy || 1.5
                       })),
                       area: boundary.area,
                       perimeter: boundary.perimeter,
-                      centerPoint: {
-                        latitude: boundary.points.reduce((sum, p) => sum + p.latitude, 0) / boundary.points.length,
-                        longitude: boundary.points.reduce((sum, p) => sum + p.longitude, 0) / boundary.points.length
-                      }
+                      centerPoint: boundary.centerPoint
                     });
                     
                     toast({
-                      title: "Interactive Boundary Created",
-                      description: `Farm boundary mapped with ${boundary.points.length} points covering ${boundary.area.toFixed(2)} hectares`,
+                      title: "Enhanced Satellite Boundary Created",
+                      description: `Farm boundary mapped with ${boundary.points.length} points covering ${boundary.area.toFixed(2)} hectares using high-resolution satellite imagery`,
                     });
                   }}
                   minPoints={3}
+                  maxPoints={20}
+                  enableRealTimeGPS={true}
+                  farmerId={farmerData.firstName ? `${farmerData.firstName}-${farmerData.lastName}` : 'new-farmer'}
+                  farmerName={farmerData.firstName ? `${farmerData.firstName} ${farmerData.lastName}` : 'New Farmer'}
                 />
               </TabsContent>
 

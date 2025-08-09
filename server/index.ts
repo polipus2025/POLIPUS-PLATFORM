@@ -4,8 +4,8 @@ import { log } from "./vite";
 
 const app = express();
 
-// MAINTENANCE MODE - ENABLED - Empty page deployment to block all access
-const MAINTENANCE_MODE = true;
+// MAINTENANCE MODE - DISABLED - Full platform accessible
+const MAINTENANCE_MODE = false;
 
 if (MAINTENANCE_MODE) {
   console.log('🔧 MAINTENANCE MODE: Generic maintenance page active');

@@ -581,7 +581,7 @@ export default function RealMapBoundaryMapper({
       // Calculate EUDR risk for each point
       const pointRisk = calculatePointRisk(point.latitude, point.longitude);
       
-      // Create highly visible persistent marker that stays on map
+      // Create highly visible persistent marker that stays on map (like in your image)
       const marker = document.createElement('div');
       marker.className = `map-marker persistent-marker marker-${index}`;
       marker.id = `marker-${index}`;
@@ -589,24 +589,24 @@ export default function RealMapBoundaryMapper({
         position: absolute;
         left: ${x}px;
         top: ${y}px;
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: bold;
         color: white;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-        border: 4px solid white;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+        border: 3px solid white;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.6);
         z-index: 25;
         transform: translate(-50%, -50%);
         cursor: pointer;
         transition: all 0.2s ease;
-        background-color: ${pointRisk.level === 'high' ? '#dc2626' : pointRisk.level === 'standard' ? '#f59e0b' : '#22c55e'};
-        ${pointRisk.level === 'high' ? 'animation: pulse 2s infinite;' : ''}
+        background-color: ${index === 0 ? '#22c55e' : index === points.length - 1 && points.length >= 3 ? '#ef4444' : '#3b82f6'};
+        ${index === points.length - 1 && points.length >= 3 ? 'animation: pulse 2s infinite;' : ''}
       `;
       
       // Add alphabetical label (A, B, C, D, etc.)
@@ -617,25 +617,62 @@ export default function RealMapBoundaryMapper({
       console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
     });
 
-    // REAL-TIME BOUNDARY: Draw polygon immediately when 3+ points exist
+    // ENHANCED BOUNDARY CONNECTIONS: Draw connecting lines immediately when 2+ points exist
     if (points.length >= 2) {
-      // Draw connecting lines for all points
-      const pointsStr = points.map(point => {
-        const x = Math.max(12, Math.min(388, (point.longitude + 9.4295) * 5000 + 200));
-        const y = Math.max(12, Math.min(388, 200 - (point.latitude - 6.4281) * 5000));
-        return `${x},${y}`;
-      }).join(' ');
-
-      // Create polyline for connecting lines
-      const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-      polyline.setAttribute('points', pointsStr);
-      polyline.setAttribute('fill', 'none');
-      polyline.setAttribute('stroke', '#fbbf24');
-      polyline.setAttribute('stroke-width', '3');
-      polyline.setAttribute('stroke-dasharray', '8,4');
-      polyline.setAttribute('stroke-linejoin', 'round');
-      polyline.setAttribute('stroke-linecap', 'round');
-      svg.appendChild(polyline);
+      console.log(`Drawing boundary connections for ${points.length} points`);
+      
+      // Draw connecting lines between consecutive points (like in the image you showed)
+      for (let i = 0; i < points.length - 1; i++) {
+        const currentPoint = points[i];
+        const nextPoint = points[i + 1];
+        
+        // Calculate pixel coordinates for both points
+        const x1 = Math.max(12, Math.min(388, (currentPoint.longitude + 9.4295) * 5000 + 200));
+        const y1 = Math.max(12, Math.min(388, 200 - (currentPoint.latitude - 6.4281) * 5000));
+        const x2 = Math.max(12, Math.min(388, (nextPoint.longitude + 9.4295) * 5000 + 200));
+        const y2 = Math.max(12, Math.min(388, 200 - (nextPoint.latitude - 6.4281) * 5000));
+        
+        // Create solid connecting line (like the red/orange lines in your image)
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1.toString());
+        line.setAttribute('y1', y1.toString());
+        line.setAttribute('x2', x2.toString());
+        line.setAttribute('y2', y2.toString());
+        line.setAttribute('stroke', '#ef4444'); // Red color like in your image
+        line.setAttribute('stroke-width', '4');
+        line.setAttribute('stroke-linecap', 'round');
+        line.setAttribute('opacity', '0.9');
+        line.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
+        svg.appendChild(line);
+        
+        console.log(`✓ Connected point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
+      }
+      
+      // If we have 3+ points, close the polygon with a line back to the first point
+      if (points.length >= 3) {
+        const firstPoint = points[0];
+        const lastPoint = points[points.length - 1];
+        
+        const x1 = Math.max(12, Math.min(388, (lastPoint.longitude + 9.4295) * 5000 + 200));
+        const y1 = Math.max(12, Math.min(388, 200 - (lastPoint.latitude - 6.4281) * 5000));
+        const x2 = Math.max(12, Math.min(388, (firstPoint.longitude + 9.4295) * 5000 + 200));
+        const y2 = Math.max(12, Math.min(388, 200 - (firstPoint.latitude - 6.4281) * 5000));
+        
+        // Closing line to complete the polygon (green color for completion)
+        const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        closingLine.setAttribute('x1', x1.toString());
+        closingLine.setAttribute('y1', y1.toString());
+        closingLine.setAttribute('x2', x2.toString());
+        closingLine.setAttribute('y2', y2.toString());
+        closingLine.setAttribute('stroke', '#22c55e'); // Green for completed polygon
+        closingLine.setAttribute('stroke-width', '4');
+        closingLine.setAttribute('stroke-dasharray', '8,4'); // Dashed to show it's the closing line
+        closingLine.setAttribute('stroke-linecap', 'round');
+        closingLine.setAttribute('opacity', '0.9');
+        svg.appendChild(closingLine);
+        
+        console.log(`✓ Polygon completed - closing line from ${String.fromCharCode(65 + points.length - 1)} back to A`);
+      }
     }
 
     // CRITICAL: Create filled polygon with EUDR risk visualization when 3+ points exist

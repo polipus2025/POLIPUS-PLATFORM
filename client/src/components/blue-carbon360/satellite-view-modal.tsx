@@ -256,50 +256,46 @@ export default function SatelliteViewModal({ isOpen, onClose, selectedSite }: Sa
             {/* Map Placeholder with Realistic Satellite View */}
             <div className="w-full h-full relative overflow-hidden">
               
-              {/* High-Resolution Satellite Map Background */}
+              {/* Clear Satellite Base Layer */}
               <div 
-                className="absolute inset-0"
+                className="absolute inset-0 bg-blue-900"
                 style={{
                   backgroundImage: `
-                    radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.8) 0%, rgba(21, 128, 61, 0.6) 25%, transparent 45%),
-                    radial-gradient(circle at 80% 25%, rgba(6, 182, 212, 0.7) 0%, rgba(3, 105, 161, 0.5) 30%, transparent 50%),
-                    radial-gradient(circle at 25% 80%, rgba(34, 197, 94, 0.9) 0%, rgba(16, 185, 129, 0.7) 20%, transparent 40%),
-                    radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.6) 0%, rgba(5, 150, 105, 0.4) 35%, transparent 60%),
-                    radial-gradient(circle at 60% 40%, rgba(21, 128, 61, 0.5) 0%, transparent 30%),
-                    linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(21, 128, 61, 0.2) 25%, rgba(6, 182, 212, 0.3) 50%, rgba(3, 105, 161, 0.2) 75%, transparent 100%),
-                    repeating-linear-gradient(45deg, rgba(21, 128, 61, 0.1) 0px, rgba(21, 128, 61, 0.1) 2px, transparent 2px, transparent 12px),
-                    repeating-linear-gradient(-45deg, rgba(5, 150, 105, 0.08) 0px, rgba(5, 150, 105, 0.08) 1px, transparent 1px, transparent 8px),
-                    conic-gradient(from 0deg at 40% 30%, rgba(34, 197, 94, 0.2) 0deg, rgba(21, 128, 61, 0.3) 90deg, rgba(6, 182, 212, 0.2) 180deg, rgba(16, 185, 129, 0.3) 270deg, rgba(34, 197, 94, 0.2) 360deg)
-                  `,
-                  backgroundSize: '300px 300px, 250px 250px, 400px 400px, 350px 350px, 200px 200px, 800px 800px, 30px 30px, 20px 20px, 600px 600px',
-                  backgroundColor: '#1e40af'
+                    linear-gradient(180deg, #0369a1 0%, #0c4a6e 50%, #164e63 100%)
+                  `
                 }}
               ></div>
 
-              {/* Detailed Terrain Features */}
-              <div className="absolute inset-0 opacity-60">
-                {/* Coastline simulation */}
-                <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-blue-600 via-blue-500 to-transparent"></div>
+              {/* Visible Terrain and Mangrove Features */}
+              <div className="absolute inset-0">
+                {/* Ocean/Water areas - clearly visible */}
+                <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-blue-700 via-blue-600 to-blue-500 opacity-90"></div>
                 
-                {/* Mangrove patches - realistic clusters */}
-                <div className="absolute top-1/4 left-1/5 w-20 h-24 bg-green-800 rounded-full opacity-90 transform rotate-12"></div>
-                <div className="absolute top-1/3 left-1/4 w-16 h-20 bg-green-700 rounded-full opacity-85 transform -rotate-6"></div>
-                <div className="absolute top-2/5 left-1/6 w-24 h-18 bg-green-900 rounded-lg opacity-95 transform rotate-3"></div>
+                {/* Large mangrove forest areas - bright and clear */}
+                <div className="absolute top-10 left-16 w-32 h-40 bg-green-700 rounded-2xl shadow-lg"></div>
+                <div className="absolute top-16 left-20 w-28 h-36 bg-green-800 rounded-2xl shadow-lg"></div>
+                <div className="absolute top-20 left-12 w-36 h-32 bg-green-600 rounded-xl shadow-lg"></div>
                 
-                <div className="absolute top-1/2 right-1/3 w-28 h-32 bg-green-800 rounded-full opacity-90 transform -rotate-15"></div>
-                <div className="absolute top-3/5 right-1/4 w-22 h-26 bg-green-700 rounded-lg opacity-85 transform rotate-8"></div>
+                <div className="absolute top-20 right-20 w-40 h-48 bg-green-800 rounded-2xl shadow-lg"></div>
+                <div className="absolute top-24 right-16 w-36 h-44 bg-green-700 rounded-2xl shadow-lg"></div>
+                <div className="absolute top-28 right-24 w-32 h-40 bg-green-900 rounded-xl shadow-lg"></div>
                 
-                <div className="absolute bottom-1/3 left-2/5 w-32 h-28 bg-green-900 rounded-full opacity-95 transform rotate-22"></div>
-                <div className="absolute bottom-1/4 right-2/5 w-26 h-24 bg-green-800 rounded-lg opacity-88 transform -rotate-10"></div>
+                <div className="absolute bottom-32 left-32 w-44 h-36 bg-green-800 rounded-2xl shadow-lg"></div>
+                <div className="absolute bottom-28 left-28 w-40 h-32 bg-green-700 rounded-xl shadow-lg"></div>
+                <div className="absolute bottom-36 left-36 w-36 h-40 bg-green-900 rounded-2xl shadow-lg"></div>
                 
-                {/* Water channels and rivers */}
-                <div className="absolute top-3/4 left-1/4 w-48 h-3 bg-blue-500 opacity-80 transform rotate-25 rounded-full"></div>
-                <div className="absolute top-2/3 right-1/3 w-36 h-2 bg-blue-600 opacity-75 transform -rotate-12 rounded-full"></div>
-                <div className="absolute bottom-1/2 left-1/3 w-40 h-2 bg-blue-400 opacity-70 transform rotate-35 rounded-full"></div>
+                <div className="absolute bottom-40 right-32 w-38 h-34 bg-green-700 rounded-xl shadow-lg"></div>
+                <div className="absolute bottom-36 right-28 w-42 h-38 bg-green-800 rounded-2xl shadow-lg"></div>
                 
-                {/* Sand and mudflat areas */}
-                <div className="absolute bottom-1/5 left-1/6 w-36 h-20 bg-yellow-600 opacity-40 rounded-lg transform rotate-18"></div>
-                <div className="absolute bottom-1/6 right-1/4 w-28 h-16 bg-yellow-500 opacity-35 rounded-full transform -rotate-25"></div>
+                {/* Coastal areas and mudflats - clearly defined */}
+                <div className="absolute bottom-20 left-12 w-48 h-12 bg-yellow-700 rounded-lg shadow-md"></div>
+                <div className="absolute bottom-16 right-16 w-40 h-8 bg-yellow-600 rounded-lg shadow-md"></div>
+                <div className="absolute bottom-24 left-40 w-36 h-10 bg-yellow-800 rounded-lg shadow-md"></div>
+                
+                {/* River channels - clearly visible */}
+                <div className="absolute top-32 left-24 w-60 h-4 bg-blue-400 rounded-full shadow-lg transform rotate-12"></div>
+                <div className="absolute top-48 right-36 w-48 h-3 bg-blue-500 rounded-full shadow-lg transform -rotate-6"></div>
+                <div className="absolute bottom-48 left-44 w-52 h-4 bg-blue-400 rounded-full shadow-lg transform rotate-18"></div>
               </div>
 
               {/* Mangrove Site Markers */}
@@ -348,31 +344,32 @@ export default function SatelliteViewModal({ isOpen, onClose, selectedSite }: Sa
 
 
 
-              {/* Fine-detail Vegetation and Infrastructure */}
-              <div className="absolute inset-0 opacity-40">
-                {/* Dense mangrove canopy textures */}
-                <div className="absolute top-1/4 left-1/5 w-12 h-16 bg-green-900 rounded-full"></div>
-                <div className="absolute top-1/4 left-1/4 w-8 h-12 bg-green-800 rounded-full"></div>
-                <div className="absolute top-3/10 left-1/5 w-10 h-14 bg-green-700 rounded-full"></div>
-                <div className="absolute top-2/7 left-1/6 w-14 h-10 bg-green-900 rounded-lg"></div>
+              {/* Detailed Features Layer */}
+              <div className="absolute inset-0">
+                {/* Small mangrove clusters within larger areas */}
+                <div className="absolute top-16 left-20 w-8 h-12 bg-green-900 rounded-lg shadow-sm"></div>
+                <div className="absolute top-24 left-24 w-6 h-10 bg-green-800 rounded-lg shadow-sm"></div>
+                <div className="absolute top-32 left-18 w-10 h-8 bg-green-700 rounded-lg shadow-sm"></div>
                 
-                <div className="absolute top-1/2 right-1/3 w-16 h-20 bg-green-800 rounded-full transform -rotate-5"></div>
-                <div className="absolute top-3/5 right-1/4 w-12 h-18 bg-green-900 rounded-lg transform rotate-8"></div>
-                <div className="absolute top-1/2 right-3/10 w-14 h-16 bg-green-700 rounded-full"></div>
+                <div className="absolute top-28 right-24 w-12 h-14 bg-green-900 rounded-lg shadow-sm"></div>
+                <div className="absolute top-36 right-20 w-8 h-12 bg-green-800 rounded-lg shadow-sm"></div>
+                <div className="absolute top-44 right-28 w-10 h-10 bg-green-700 rounded-lg shadow-sm"></div>
                 
-                <div className="absolute bottom-1/3 left-2/5 w-18 h-22 bg-green-900 rounded-full"></div>
-                <div className="absolute bottom-1/4 left-1/3 w-16 h-20 bg-green-800 rounded-lg transform rotate-15"></div>
-                <div className="absolute bottom-2/7 left-2/5 w-12 h-16 bg-green-700 rounded-full"></div>
+                <div className="absolute bottom-44 left-36 w-14 h-16 bg-green-900 rounded-lg shadow-sm"></div>
+                <div className="absolute bottom-52 left-32 w-10 h-12 bg-green-800 rounded-lg shadow-sm"></div>
+                <div className="absolute bottom-48 left-40 w-8 h-14 bg-green-700 rounded-lg shadow-sm"></div>
                 
-                {/* Sparse vegetation and regenerating areas */}
-                <div className="absolute top-1/6 right-1/5 w-6 h-8 bg-yellow-600 rounded-full opacity-60"></div>
-                <div className="absolute top-1/5 right-1/6 w-8 h-6 bg-yellow-500 rounded-lg opacity-50"></div>
-                <div className="absolute bottom-3/5 right-1/8 w-10 h-12 bg-green-600 opacity-70 rounded-full"></div>
+                {/* Restoration areas - clearly visible */}
+                <div className="absolute top-60 right-40 w-16 h-12 bg-yellow-600 rounded-lg shadow-md opacity-80"></div>
+                <div className="absolute top-52 right-60 w-12 h-10 bg-yellow-500 rounded-lg shadow-md opacity-75"></div>
+                <div className="absolute bottom-60 right-24 w-14 h-14 bg-green-500 rounded-lg shadow-md opacity-80"></div>
                 
-                {/* Small infrastructure - monitoring stations */}
-                <div className="absolute top-1/3 left-1/3 w-2 h-2 bg-red-600 rounded-full shadow-lg"></div>
-                <div className="absolute top-3/5 right-2/5 w-2 h-2 bg-red-600 rounded-full shadow-lg"></div>
-                <div className="absolute bottom-2/5 left-1/2 w-2 h-2 bg-red-600 rounded-full shadow-lg"></div>
+                {/* Monitoring stations - highly visible */}
+                <div className="absolute top-40 left-32 w-4 h-4 bg-red-600 rounded-full shadow-lg border-2 border-white"></div>
+                <div className="absolute top-56 right-48 w-4 h-4 bg-red-600 rounded-full shadow-lg border-2 border-white"></div>
+                <div className="absolute bottom-56 left-48 w-4 h-4 bg-red-600 rounded-full shadow-lg border-2 border-white"></div>
+                <div className="absolute bottom-44 right-36 w-4 h-4 bg-red-600 rounded-full shadow-lg border-2 border-white"></div>
+                <div className="absolute top-72 left-60 w-4 h-4 bg-red-600 rounded-full shadow-lg border-2 border-white"></div>
               </div>
 
               {/* Legend and Status */}

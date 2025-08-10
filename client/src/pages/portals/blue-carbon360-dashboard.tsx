@@ -25,9 +25,8 @@ import {
   Globe,
   MessageSquare
 } from "lucide-react";
-import Header from "@/components/layout/header";
-import Sidebar from "@/components/layout/sidebar";
-import MobileNav from "@/components/layout/mobile-nav";
+import BlueCarbon360Header from "@/components/layout/blue-carbon360-header";
+import BlueCarbon360Sidebar from "@/components/layout/blue-carbon360-sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EcosystemMonitoring from "@/components/blue-carbon360/ecosystem-monitoring";
 import CarbonMarketplace from "@/components/blue-carbon360/carbon-marketplace";
@@ -118,10 +117,9 @@ export default function BlueCarbon360Dashboard() {
         <meta name="description" content="Conservation economics and real economic benefits dashboard" />
       </Helmet>
 
-      <Header />
+      <BlueCarbon360Header />
       <div className="flex">
-        <Sidebar />
-        <MobileNav />
+        <BlueCarbon360Sidebar />
         
         <main className="flex-1 lg:ml-64">
           <ScrollArea className="h-screen">

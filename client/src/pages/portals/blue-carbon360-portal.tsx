@@ -36,7 +36,10 @@ export default function BlueCarbon360Portal() {
         const data = await response.json();
         localStorage.setItem('blue_carbon_360_user', JSON.stringify(data.user));
         localStorage.setItem('blue_carbon_360_token', data.token);
-        setLocation('/portals/blue-carbon360-dashboard');
+        // Set proper auth storage for Blue Carbon 360
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userType', 'blue_carbon_360');
+        setLocation('/blue-carbon360-dashboard');
       } else {
         console.error('Auto login failed');
       }

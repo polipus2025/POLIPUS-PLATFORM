@@ -47,7 +47,7 @@ const blueCarbon360Navigation = [
   { name: "Conservation Metrics", href: "/blue-carbon360/metrics", icon: Target },
   { name: "Carbon Trading", href: "/blue-carbon360/trading", icon: TrendingUp },
   { name: "Mangrove Management", href: "/blue-carbon360/mangroves", icon: Leaf },
-  { name: "Marine Protected Areas", href: "/blue-carbon360/marine-areas", icon: MapPin },
+  { name: "Marine Protection Areas", href: "/blue-carbon360/protection", icon: MapPin },
   { name: "Conservation Economics", href: "/blue-carbon360/economics", icon: PiggyBank },
   { name: "Impact Reports", href: "/blue-carbon360/reports", icon: FileText },
   { name: "Conservation Network", href: "/blue-carbon360/network", icon: Users },

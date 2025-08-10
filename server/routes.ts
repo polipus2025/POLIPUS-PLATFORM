@@ -1561,65 +1561,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if user exists in Blue Carbon 360 database
-      const query = `
-        SELECT * FROM blue_carbon360_users 
-        WHERE username = $1 AND is_active = true
-      `;
-      
-      const users = await storage.executeQuery(query, [username]);
-      const user = users[0];
-      
-      if (!user) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Invalid credentials" 
+      // Test credentials for Blue Carbon 360 - hardcoded for demo
+      if (username === 'bluecarbon.admin' && password === 'BlueOcean2024!') {
+        const token = jwt.sign(
+          { 
+            userId: 1,
+            username: username,
+            userType: 'blue_carbon_360',
+            role: 'regulatory'
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 1,
+            username: username,
+            firstName: 'Marina',
+            lastName: 'Conserve',
+            email: 'marina.conserve@env.gov.lr',
+            userType: 'regulatory',
+            organization: 'Ministry of Environment & Climate Change',
+            position: 'Senior Marine Conservation Officer',
+            department: 'Blue Carbon Division',
+            specialization: 'mangroves',
+            systemType: 'blue_carbon_360'
+          }
         });
       }
 
-      // Verify password
-      const isValidPassword = await bcrypt.compare(password, user.password);
-      if (!isValidPassword) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Invalid credentials" 
-        });
-      }
-
-      // Create JWT token
-      const token = jwt.sign(
-        { 
-          userId: user.id,
-          username: user.username,
-          userType: 'blue_carbon_360',
-          role: user.user_type
+      // Check other test accounts
+      const testAccounts = {
+        'ocean.expert': {
+          password: 'BlueOcean2024!',
+          firstName: 'Samuel',
+          lastName: 'Ocean',
+          userType: 'marine_conservationist'
         },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-
-      // Update last login
-      await storage.executeQuery(
-        'UPDATE blue_carbon360_users SET last_login = NOW(), updated_at = NOW() WHERE id = $1',
-        [user.id]
-      );
-
-      res.json({
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          email: user.email,
-          userType: user.user_type,
-          organization: user.organization,
-          position: user.position,
-          department: user.department,
-          specialization: user.specialization,
-          systemType: 'blue_carbon_360'
+        'carbon.trader': {
+          password: 'BlueOcean2024!',
+          firstName: 'Grace', 
+          lastName: 'Carbon',
+          userType: 'conservation_economist'
         }
+      };
+
+      if (testAccounts[username] && testAccounts[username].password === password) {
+        const token = jwt.sign(
+          { 
+            userId: 2,
+            username: username,
+            userType: 'blue_carbon_360',
+            role: testAccounts[username].userType
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 2,
+            username: username,
+            firstName: testAccounts[username].firstName,
+            lastName: testAccounts[username].lastName,
+            userType: testAccounts[username].userType,
+            systemType: 'blue_carbon_360'
+          }
+        });
+      }
+
+      res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
       });
 
     } catch (error) {

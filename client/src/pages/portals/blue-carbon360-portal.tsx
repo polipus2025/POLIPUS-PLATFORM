@@ -430,33 +430,35 @@ export default function BlueCarbon360Portal() {
             </div>
           </div>
 
-          {/* Auto Login Testing Button */}
-          <div className="mt-8">
-            <div className="isms-card bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-200">
-              <div className="flex items-center justify-between">
+          {/* CRITICAL FIX: Auto Login Testing Button - Make it highly visible */}
+          <div className="mt-8 relative">
+            <div className="bg-gradient-to-r from-green-100 to-blue-100 border-4 border-green-300 rounded-2xl p-6 shadow-2xl">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
-                    <Zap className="h-6 w-6 text-white" />
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center animate-pulse">
+                    <div className="text-2xl">⚡</div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-1">
-                      🧪 Instant Testing Access
+                  <div className="text-center sm:text-left">
+                    <h3 className="text-xl font-black text-slate-900 mb-2">
+                      🧪 INSTANT TESTING ACCESS
                     </h3>
-                    <p className="text-slate-600 text-sm">
-                      Automatic login to regulatory dashboard - no credentials needed
+                    <p className="text-slate-700 text-base font-semibold">
+                      Click to automatically login - NO credentials needed!
                     </p>
                   </div>
                 </div>
                 <Button 
                   onClick={handleAutoLogin}
-                  className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-8 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 border-2 border-white"
                   data-testid="auto-login-test-button"
                 >
-                  <Zap className="mr-2 h-4 w-4" />
-                  Auto Login Test
+                  ⚡ AUTO LOGIN TEST ⚡
                 </Button>
               </div>
             </div>
+            {/* Attention-grabbing animation */}
+            <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full"></div>
           </div>
         </div>
 

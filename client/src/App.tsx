@@ -139,6 +139,7 @@ import ForestGuardDashboard from "@/pages/portals/forest-guard-dashboard";
 import AquaTraceDashboard from "@/pages/portals/aqua-trace-dashboard";
 import BlueCarbon360Dashboard from "@/pages/portals/blue-carbon360-dashboard";
 import EcosystemMonitoringPage from "@/pages/blue-carbon360/ecosystem-monitoring-page";
+import ConservationProjectsPage from "@/pages/blue-carbon360/conservation-projects-page";
 import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
 import IntegratedDashboard from "@/pages/integrated-dashboard";
 
@@ -508,6 +509,7 @@ function Router() {
       <Route path="/aqua-trace-dashboard" component={AquaTraceDashboard} />
       <Route path="/blue-carbon360-dashboard" component={BlueCarbon360Dashboard} />
       <Route path="/blue-carbon360/ecosystem-monitoring" component={EcosystemMonitoringPage} />
+      <Route path="/blue-carbon360/projects" component={ConservationProjectsPage} />
       <Route path="/carbon-trace-dashboard" component={CarbonTraceDashboard} />
       <Route path="/integrated-dashboard" component={IntegratedDashboard} />
       

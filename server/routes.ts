@@ -1548,6 +1548,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Blue Carbon 360 Login endpoint
+  app.post("/api/auth/blue-carbon360-login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Validate input
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Check if user exists in Blue Carbon 360 database
+      const query = `
+        SELECT * FROM blue_carbon360_users 
+        WHERE username = $1 AND is_active = true
+      `;
+      
+      const users = await storage.executeQuery(query, [username]);
+      const user = users[0];
+      
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      // Create JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id,
+          username: user.username,
+          userType: 'blue_carbon_360',
+          role: user.user_type
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      await storage.executeQuery(
+        'UPDATE blue_carbon360_users SET last_login = NOW(), updated_at = NOW() WHERE id = $1',
+        [user.id]
+      );
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          email: user.email,
+          userType: user.user_type,
+          organization: user.organization,
+          position: user.position,
+          department: user.department,
+          specialization: user.specialization,
+          systemType: 'blue_carbon_360'
+        }
+      });
+
+    } catch (error) {
+      console.error('Blue Carbon 360 login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Logout endpoint
   app.post("/api/auth/logout", async (req, res) => {
     try {

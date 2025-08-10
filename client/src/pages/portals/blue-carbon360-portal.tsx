@@ -1,12 +1,15 @@
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Waves, Heart, DollarSign, TrendingUp } from "lucide-react";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Waves, Heart, DollarSign, TrendingUp, Zap } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 
 export default function BlueCarbon360Portal() {
+  const [, setLocation] = useLocation();
+  
   // Time, Date, and Weather State
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState({
@@ -14,6 +17,33 @@ export default function BlueCarbon360Portal() {
     temperature: '28°C',
     location: 'Monrovia, Liberia'
   });
+
+  // Auto login function
+  const handleAutoLogin = async () => {
+    try {
+      const response = await fetch('/api/auth/blue-carbon360-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'bluecarbon.admin',
+          password: 'BlueOcean2024!'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('blue_carbon_360_user', JSON.stringify(data.user));
+        localStorage.setItem('blue_carbon_360_token', data.token);
+        setLocation('/portals/blue-carbon360-dashboard');
+      } else {
+        console.error('Auto login failed');
+      }
+    } catch (error) {
+      console.error('Auto login error:', error);
+    }
+  };
 
   // Update time every second
   useEffect(() => {
@@ -397,6 +427,35 @@ export default function BlueCarbon360Portal() {
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>
               </Button>
+            </div>
+          </div>
+
+          {/* Auto Login Testing Button */}
+          <div className="mt-8">
+            <div className="isms-card bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <Zap className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">
+                      🧪 Instant Testing Access
+                    </h3>
+                    <p className="text-slate-600 text-sm">
+                      Automatic login to regulatory dashboard - no credentials needed
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleAutoLogin}
+                  className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  data-testid="auto-login-test-button"
+                >
+                  <Zap className="mr-2 h-4 w-4" />
+                  Auto Login Test
+                </Button>
+              </div>
             </div>
           </div>
         </div>

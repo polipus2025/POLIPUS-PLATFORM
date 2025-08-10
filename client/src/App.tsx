@@ -141,6 +141,7 @@ import BlueCarbon360Dashboard from "@/pages/portals/blue-carbon360-dashboard";
 import EcosystemMonitoringPage from "@/pages/blue-carbon360/ecosystem-monitoring-page";
 import ConservationProjectsPage from "@/pages/blue-carbon360/conservation-projects-page";
 import CarbonMarketplacePage from "@/pages/blue-carbon360/carbon-marketplace-page";
+import EconomicImpactPage from "@/pages/blue-carbon360/economic-impact-page";
 import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
 import IntegratedDashboard from "@/pages/integrated-dashboard";
 
@@ -512,6 +513,7 @@ function Router() {
       <Route path="/blue-carbon360/ecosystem-monitoring" component={EcosystemMonitoringPage} />
       <Route path="/blue-carbon360/projects" component={ConservationProjectsPage} />
       <Route path="/blue-carbon360/marketplace" component={CarbonMarketplacePage} />
+      <Route path="/blue-carbon360/economic-impact" component={EconomicImpactPage} />
       <Route path="/carbon-trace-dashboard" component={CarbonTraceDashboard} />
       <Route path="/integrated-dashboard" component={IntegratedDashboard} />
       

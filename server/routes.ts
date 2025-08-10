@@ -43,12 +43,29 @@ import {
   insertCertificateVerificationSchema,
   insertUserVerificationSchema,
   insertTrackingEventSchema,
-  insertVerificationLogSchema
+  insertVerificationLogSchema,
+  
+  // Blue Carbon 360 Schemas
+  insertBlueCarbon360ProjectSchema,
+  insertCarbonMarketplaceListingSchema,
+  insertEconomicImpactRecordSchema,
+  insertConservationMonitoringSchema,
+  insertCarbonTransactionSchema,
+  insertBlueCarbon360UserSchema,
+  
+  // Blue Carbon 360 Tables
+  blueCarbon360Projects,
+  carbonMarketplaceListings,
+  economicImpactRecords,
+  conservationMonitoring,
+  carbonTransactions,
+  blueCarbon360Users
 } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { db } from './db';
+import { eq } from "drizzle-orm";
 
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
@@ -5527,6 +5544,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(healthAlerts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch health alerts" });
+    }
+  });
+
+  // ========================================
+  // BLUE CARBON 360 - Ocean Conservation Economics API Routes
+  // ========================================
+  
+  // Blue Carbon 360 Dashboard Statistics
+  app.get("/api/blue-carbon360/stats", async (req, res) => {
+    try {
+      const totalProjects = Math.floor(Math.random() * 50) + 25;
+      const activeProjects = Math.floor(Math.random() * 30) + 15;
+      const marketplaceListings = Math.floor(Math.random() * 100) + 50;
+      const economicImpactRecords = Math.floor(Math.random() * 200) + 100;
+
+      res.json({
+        totalProjects,
+        activeProjects,
+        marketplaceListings,
+        economicImpactRecords
+      });
+    } catch (error) {
+      console.error("Error fetching Blue Carbon 360 stats:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard statistics" });
+    }
+  });
+
+  // Conservation Projects API
+  app.get("/api/conservation-projects", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const projects = [
+        {
+          id: 1,
+          projectName: "Robertsport Mangrove Restoration",
+          projectType: "mangrove_restoration",
+          status: "active",
+          location: "Grand Cape Mount County",
+          coordinates: "6.7667, -11.3667",
+          totalArea: 150.5,
+          ecosystemType: "mangrove",
+          carbonSequestrationRate: 12.5,
+          estimatedCarbonCredits: 1880,
+          actualCarbonCredits: 450,
+          projectManager: "Dr. Sarah Williams",
+          leadOrganization: "Conservation International Liberia",
+          fundingSource: "Green Climate Fund",
+          totalBudget: 875000,
+          spentBudget: 245000,
+          startDate: "2024-03-01",
+          endDate: "2027-02-28",
+          verificationStatus: "verified"
+        },
+        {
+          id: 2,
+          projectName: "Buchanan Bay Seagrass Conservation",
+          projectType: "seagrass_conservation",
+          status: "monitoring",
+          location: "Grand Bassa County",
+          coordinates: "5.8808, -10.0464",
+          totalArea: 95.2,
+          ecosystemType: "seagrass",
+          carbonSequestrationRate: 8.3,
+          estimatedCarbonCredits: 790,
+          actualCarbonCredits: 320,
+          projectManager: "James Koffa",
+          leadOrganization: "EPA Liberia Marine Division",
+          fundingSource: "World Bank Blue Economy",
+          totalBudget: 520000,
+          spentBudget: 180000,
+          startDate: "2024-01-15",
+          endDate: "2026-12-31",
+          verificationStatus: "pending"
+        }
+      ].slice(offset, offset + limit);
+      
+      res.json({ data: projects, totalCount: 25 });
+    } catch (error) {
+      console.error("Error fetching conservation projects:", error);
+      res.status(500).json({ error: "Failed to fetch conservation projects" });
+    }
+  });
+
+  // Carbon Marketplace API
+  app.get("/api/carbon-marketplace", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const listings = [
+        {
+          id: 1,
+          listingTitle: "Verified Blue Carbon Credits - Mangrove Project",
+          projectId: 1,
+          creditType: "blue_carbon",
+          creditsAvailable: 450,
+          pricePerCredit: 18.50,
+          totalValue: 8325,
+          vintage: 2024,
+          listingStatus: "active",
+          sellerOrganization: "Conservation International Liberia",
+          ecosystemType: "mangrove",
+          location: "Grand Cape Mount County",
+          verificationStandard: "Verra VCS",
+          marketplaceRating: 4.8,
+          listingDate: "2024-06-15"
+        },
+        {
+          id: 2,
+          listingTitle: "Premium Seagrass Carbon Offsets - Buchanan Bay",
+          projectId: 2,
+          creditType: "verified_carbon_standard",
+          creditsAvailable: 320,
+          pricePerCredit: 22.00,
+          totalValue: 7040,
+          vintage: 2024,
+          listingStatus: "active",
+          sellerOrganization: "EPA Liberia Marine Division",
+          ecosystemType: "seagrass",
+          location: "Grand Bassa County",
+          verificationStandard: "Gold Standard",
+          marketplaceRating: 4.6,
+          listingDate: "2024-07-20"
+        }
+      ].slice(offset, offset + limit);
+      
+      res.json({ data: listings, totalCount: 15 });
+    } catch (error) {
+      console.error("Error fetching carbon marketplace:", error);
+      res.status(500).json({ error: "Failed to fetch marketplace listings" });
     }
   });
 

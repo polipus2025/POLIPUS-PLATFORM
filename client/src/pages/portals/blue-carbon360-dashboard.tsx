@@ -17,6 +17,9 @@ import {
   Briefcase,
   Users
 } from "lucide-react";
+import EcosystemMonitoring from "@/components/blue-carbon360/ecosystem-monitoring";
+import CarbonMarketplace from "@/components/blue-carbon360/carbon-marketplace";
+import EconomicImpactTracker from "@/components/blue-carbon360/economic-impact-tracker";
 
 export default function BlueCarbon360Dashboard() {
   // Fetch dashboard statistics
@@ -25,12 +28,12 @@ export default function BlueCarbon360Dashboard() {
   });
 
   // Fetch recent conservation projects
-  const { data: projects, isLoading: projectsLoading } = useQuery({
+  const { data: projects = { data: [] }, isLoading: projectsLoading } = useQuery({
     queryKey: ["/api/conservation-projects"],
   });
 
   // Fetch marketplace listings
-  const { data: marketplace, isLoading: marketplaceLoading } = useQuery({
+  const { data: marketplace = { data: [] }, isLoading: marketplaceLoading } = useQuery({
     queryKey: ["/api/carbon-marketplace"],
   });
 
@@ -204,11 +207,11 @@ export default function BlueCarbon360Dashboard() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {projects?.slice(0, 5).map((project: any, index: number) => (
+                  {projects?.data?.slice(0, 5).map((project: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                       <div>
-                        <p className="font-medium text-slate-900">{project.projectId}</p>
-                        <p className="text-sm text-slate-600">{project.projectType} - {project.county} ({project.area} ha)</p>
+                        <p className="font-medium text-slate-900">{project.projectName}</p>
+                        <p className="text-sm text-slate-600">{project.projectType} - {project.location} ({project.totalArea} ha)</p>
                       </div>
                       <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
                         {project.status}
@@ -244,13 +247,13 @@ export default function BlueCarbon360Dashboard() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {marketplace?.slice(0, 5).map((listing: any, index: number) => (
+                  {marketplace?.data?.slice(0, 5).map((listing: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
                       <div>
-                        <p className="font-medium text-slate-900">{listing.listingId}</p>
-                        <p className="text-sm text-slate-600">{listing.creditType} - {listing.quantity} tonnes CO2</p>
+                        <p className="font-medium text-slate-900">{listing.listingTitle}</p>
+                        <p className="text-sm text-slate-600">{listing.creditType} - {listing.creditsAvailable} tonnes CO2</p>
                       </div>
-                      <Badge variant={listing.status === 'available' ? 'default' : 'secondary'}>
+                      <Badge variant={listing.listingStatus === 'active' ? 'default' : 'secondary'}>
                         ${listing.pricePerCredit}
                       </Badge>
                     </div>
@@ -265,6 +268,21 @@ export default function BlueCarbon360Dashboard() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Ecosystem Monitoring Component */}
+        <div className="mb-8">
+          <EcosystemMonitoring isLoading={projectsLoading} />
+        </div>
+
+        {/* Carbon Marketplace Component */}
+        <div className="mb-8">
+          <CarbonMarketplace isLoading={marketplaceLoading} />
+        </div>
+
+        {/* Economic Impact Tracker Component */}
+        <div className="mb-8">
+          <EconomicImpactTracker />
         </div>
       </div>
     </div>

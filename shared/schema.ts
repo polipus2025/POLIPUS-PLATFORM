@@ -807,13 +807,213 @@ export type InsertFishingPermit = typeof fishingPermits.$inferInsert;
 export type PollutionReport = typeof pollutionReports.$inferSelect;
 export type InsertPollutionReport = typeof pollutionReports.$inferInsert;
 
+// === BLUE CARBON 360 - Ocean Conservation Economics ===
+
+export const blueCarbon360Projects = pgTable("blue_carbon360_projects", {
+  id: serial("id").primaryKey(),
+  projectName: text("project_name").notNull(),
+  projectType: text("project_type").notNull(), // mangrove_restoration, seagrass_conservation, salt_marsh_protection, coral_reef_restoration
+  status: text("status").notNull().default("planning"), // planning, active, monitoring, completed, suspended
+  location: text("location").notNull(), // County/District location
+  coordinates: text("coordinates"), // GPS coordinates
+  totalArea: decimal("total_area", { precision: 10, scale: 2 }), // hectares
+  ecosystemType: text("ecosystem_type").notNull(), // mangrove, seagrass, salt_marsh, coral_reef
+  carbonSequestrationRate: decimal("carbon_sequestration_rate", { precision: 8, scale: 2 }), // tonnes CO2 per hectare per year
+  estimatedCarbonCredits: decimal("estimated_carbon_credits", { precision: 10, scale: 2 }), // total credits expected
+  actualCarbonCredits: decimal("actual_carbon_credits", { precision: 10, scale: 2 }).default("0"), // credits earned
+  projectManager: text("project_manager"),
+  leadOrganization: text("lead_organization"),
+  partnerOrganizations: text("partner_organizations"), // JSON array of partners
+  fundingSource: text("funding_source"),
+  totalBudget: decimal("total_budget", { precision: 12, scale: 2 }),
+  spentBudget: decimal("spent_budget", { precision: 12, scale: 2 }).default("0"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  monitoringFrequency: text("monitoring_frequency").default("monthly"), // weekly, monthly, quarterly, annually
+  lastMonitored: timestamp("last_monitored"),
+  biodiversityImpact: text("biodiversity_impact"), // JSON data about species protected
+  communityBenefits: text("community_benefits"), // JSON data about local community impact
+  riskAssessment: text("risk_assessment"), // JSON data about risks and mitigation
+  certificationStandard: text("certification_standard"), // Verra, Gold Standard, CAR, etc.
+  verificationStatus: text("verification_status").default("pending"), // pending, verified, rejected
+  verifiedBy: text("verified_by"),
+  verificationDate: timestamp("verification_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const carbonMarketplaceListings = pgTable("carbon_marketplace_listings", {
+  id: serial("id").primaryKey(),
+  listingTitle: text("listing_title").notNull(),
+  projectId: integer("project_id").references(() => blueCarbon360Projects.id),
+  creditType: text("credit_type").notNull(), // blue_carbon, verified_carbon_standard, gold_standard
+  creditsAvailable: decimal("credits_available", { precision: 10, scale: 2 }).notNull(),
+  pricePerCredit: decimal("price_per_credit", { precision: 8, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
+  vintage: integer("vintage"), // year credits were generated
+  listingStatus: text("listing_status").notNull().default("active"), // active, sold, expired, suspended
+  sellerOrganization: text("seller_organization").notNull(),
+  sellerContact: text("seller_contact"),
+  ecosystemType: text("ecosystem_type").notNull(),
+  location: text("location").notNull(),
+  verificationStandard: text("verification_standard"),
+  additionalityProof: text("additionality_proof"), // proof that credits are additional
+  permanenceGuarantee: text("permanence_guarantee"), // guarantee period
+  cobenefits: text("cobenefits"), // JSON array of additional benefits
+  listingDate: timestamp("listing_date").defaultNow(),
+  expirationDate: timestamp("expiration_date"),
+  soldCredits: decimal("sold_credits", { precision: 10, scale: 2 }).default("0"),
+  remainingCredits: decimal("remaining_credits", { precision: 10, scale: 2 }),
+  marketplaceRating: decimal("marketplace_rating", { precision: 2, scale: 1 }).default("0"), // 0-5 stars
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const economicImpactRecords = pgTable("economic_impact_records", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => blueCarbon360Projects.id),
+  recordType: text("record_type").notNull(), // ecosystem_valuation, job_creation, tourism_impact, fisheries_impact
+  impactCategory: text("impact_category").notNull(), // direct, indirect, induced
+  economicValue: decimal("economic_value", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").default("USD"),
+  valuationMethod: text("valuation_method"), // market_pricing, cost_benefit, replacement_cost, travel_cost
+  beneficiaryGroup: text("beneficiary_group"), // local_community, government, private_sector, international
+  temporalScope: text("temporal_scope"), // one_time, annual, project_lifetime
+  jobsCreated: integer("jobs_created").default(0),
+  jobsSupported: integer("jobs_supported").default(0),
+  householdsBenefited: integer("households_benefited").default(0),
+  tourismRevenue: decimal("tourism_revenue", { precision: 10, scale: 2 }).default("0"),
+  fishingRevenue: decimal("fishing_revenue", { precision: 10, scale: 2 }).default("0"),
+  propertyValueIncrease: decimal("property_value_increase", { precision: 10, scale: 2 }).default("0"),
+  dataSource: text("data_source"),
+  verificationStatus: text("verification_status").default("draft"), // draft, verified, published
+  verifiedBy: text("verified_by"),
+  recordDate: timestamp("record_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const conservationMonitoring = pgTable("conservation_monitoring", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => blueCarbon360Projects.id).notNull(),
+  monitoringDate: timestamp("monitoring_date").notNull(),
+  monitoringType: text("monitoring_type").notNull(), // field_survey, satellite_monitoring, drone_survey, water_quality
+  monitoredBy: text("monitored_by").notNull(),
+  ecosystemHealth: text("ecosystem_health").notNull(), // excellent, good, fair, poor, critical
+  vegetationCover: decimal("vegetation_cover", { precision: 5, scale: 2 }), // percentage
+  speciesDiversity: integer("species_diversity"), // number of species observed
+  carbonStock: decimal("carbon_stock", { precision: 10, scale: 2 }), // tonnes CO2
+  waterQuality: text("water_quality"), // JSON data about water parameters
+  threatLevel: text("threat_level").default("low"), // low, moderate, high, severe
+  threatsIdentified: text("threats_identified"), // JSON array of threats
+  mitigationActions: text("mitigation_actions"), // JSON array of actions taken
+  recommendedActions: text("recommended_actions"), // JSON array of recommendations
+  photosUrls: text("photos_urls"), // JSON array of photo URLs
+  gpsCoordinates: text("gps_coordinates"),
+  weatherConditions: text("weather_conditions"), // JSON data about weather
+  monitoringNotes: text("monitoring_notes"),
+  nextMonitoringDate: timestamp("next_monitoring_date"),
+  alertGenerated: boolean("alert_generated").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const carbonTransactions = pgTable("carbon_transactions", {
+  id: serial("id").primaryKey(),
+  marketplaceListingId: integer("marketplace_listing_id").references(() => carbonMarketplaceListings.id).notNull(),
+  transactionType: text("transaction_type").notNull(), // purchase, sale, transfer, retirement
+  buyerOrganization: text("buyer_organization"),
+  buyerContact: text("buyer_contact"),
+  sellerOrganization: text("seller_organization"),
+  creditsPurchased: decimal("credits_purchased", { precision: 10, scale: 2 }).notNull(),
+  pricePerCredit: decimal("price_per_credit", { precision: 8, scale: 2 }).notNull(),
+  totalTransactionValue: decimal("total_transaction_value", { precision: 12, scale: 2 }).notNull(),
+  transactionFees: decimal("transaction_fees", { precision: 8, scale: 2 }).default("0"),
+  netAmount: decimal("net_amount", { precision: 12, scale: 2 }),
+  transactionStatus: text("transaction_status").notNull().default("pending"), // pending, completed, cancelled, disputed
+  paymentMethod: text("payment_method"), // bank_transfer, cryptocurrency, escrow
+  paymentStatus: text("payment_status").default("pending"), // pending, paid, failed, refunded
+  retirementCertificate: text("retirement_certificate"), // certificate number if retired
+  retiredFor: text("retired_for"), // organization/purpose for retirement
+  transactionHash: text("transaction_hash"), // blockchain hash if applicable
+  verificationDocuments: text("verification_documents"), // JSON array of document URLs
+  transactionDate: timestamp("transaction_date").defaultNow(),
+  completionDate: timestamp("completion_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const blueCarbon360Users = pgTable("blue_carbon360_users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  userType: text("user_type").notNull(), // regulatory, conservation_economist, marine_conservationist, policy_advisor
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  organization: text("organization"),
+  position: text("position"),
+  department: text("department"),
+  phoneNumber: text("phone_number"),
+  address: text("address"),
+  county: text("county"),
+  district: text("district"),
+  specialization: text("specialization"), // mangroves, coral_reefs, seagrass, economic_valuation, carbon_markets
+  certifications: text("certifications"), // JSON array of certifications
+  experienceLevel: text("experience_level").default("intermediate"), // beginner, intermediate, expert
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  permissions: text("permissions"), // JSON array of permissions
+  projectsAssigned: text("projects_assigned"), // JSON array of project IDs
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Blue Carbon 360 Insert Schemas
+export const insertBlueCarbon360ProjectSchema = createInsertSchema(blueCarbon360Projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertCarbonMarketplaceListingSchema = createInsertSchema(carbonMarketplaceListings).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertEconomicImpactRecordSchema = createInsertSchema(economicImpactRecords).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertConservationMonitoringSchema = createInsertSchema(conservationMonitoring).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertCarbonTransactionSchema = createInsertSchema(carbonTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertBlueCarbon360UserSchema = createInsertSchema(blueCarbon360Users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Blue Carbon 360 Types
-export type ConservationProject = typeof conservationProjects.$inferSelect;
-export type InsertConservationProject = typeof conservationProjects.$inferInsert;
-export type CarbonMarketplace = typeof carbonMarketplace.$inferSelect;
-export type InsertCarbonMarketplace = typeof carbonMarketplace.$inferInsert;
-export type EconomicImpactTracking = typeof economicImpactTracking.$inferSelect;
-export type InsertEconomicImpactTracking = typeof economicImpactTracking.$inferInsert;
+export type InsertBlueCarbon360Project = z.infer<typeof insertBlueCarbon360ProjectSchema>;
+export type SelectBlueCarbon360Project = typeof blueCarbon360Projects.$inferSelect;
+export type InsertCarbonMarketplaceListing = z.infer<typeof insertCarbonMarketplaceListingSchema>;
+export type SelectCarbonMarketplaceListing = typeof carbonMarketplaceListings.$inferSelect;
+export type InsertEconomicImpactRecord = z.infer<typeof insertEconomicImpactRecordSchema>;
+export type SelectEconomicImpactRecord = typeof economicImpactRecords.$inferSelect;
+export type InsertConservationMonitoring = z.infer<typeof insertConservationMonitoringSchema>;
+export type SelectConservationMonitoring = typeof conservationMonitoring.$inferSelect;
+export type InsertCarbonTransaction = z.infer<typeof insertCarbonTransactionSchema>;
+export type SelectCarbonTransaction = typeof carbonTransactions.$inferSelect;
+export type InsertBlueCarbon360User = z.infer<typeof insertBlueCarbon360UserSchema>;
+export type SelectBlueCarbon360User = typeof blueCarbon360Users.$inferSelect;
+
+// Blue Carbon 360 Types (Legacy support)
+export type ConservationProject = typeof blueCarbon360Projects.$inferSelect;
+export type InsertConservationProject = typeof blueCarbon360Projects.$inferInsert;
+export type CarbonMarketplace = typeof carbonMarketplaceListings.$inferSelect;
+export type InsertCarbonMarketplace = typeof carbonMarketplaceListings.$inferInsert;
+export type EconomicImpactTracking = typeof economicImpactRecords.$inferSelect;
+export type InsertEconomicImpactTracking = typeof economicImpactRecords.$inferInsert;
 
 // Carbon Trace Types
 export type EmissionSource = typeof emissionSources.$inferSelect;

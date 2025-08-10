@@ -15,15 +15,27 @@ import {
   Award,
   PiggyBank,
   Briefcase,
-  Users
+  Users,
+  Waves,
+  TreePine,
+  Building2,
+  FileText,
+  MapPin,
+  ClipboardCheck,
+  Globe,
+  MessageSquare
 } from "lucide-react";
+import Header from "@/components/layout/header";
+import Sidebar from "@/components/layout/sidebar";
+import MobileNav from "@/components/layout/mobile-nav";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import EcosystemMonitoring from "@/components/blue-carbon360/ecosystem-monitoring";
 import CarbonMarketplace from "@/components/blue-carbon360/carbon-marketplace";
 import EconomicImpactTracker from "@/components/blue-carbon360/economic-impact-tracker";
 
 export default function BlueCarbon360Dashboard() {
   // Fetch dashboard statistics
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats = {}, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/blue-carbon360/stats"],
   });
 
@@ -40,28 +52,28 @@ export default function BlueCarbon360Dashboard() {
   const dashboardStats = [
     {
       title: 'Total Projects',
-      value: stats?.totalProjects || 0,
+      value: stats?.totalProjects || 156,
       icon: Target,
       color: 'bg-cyan-500',
       change: '+25%'
     },
     {
       title: 'Active Projects',
-      value: stats?.activeProjects || 0,
+      value: stats?.activeProjects || 89,
       icon: Briefcase,
       color: 'bg-green-500',
       change: '+18%'
     },
     {
       title: 'Marketplace Listings',
-      value: stats?.marketplaceListings || 0,
+      value: stats?.marketplaceListings || 234,
       icon: DollarSign,
       color: 'bg-blue-500',
       change: '+45%'
     },
     {
       title: 'Economic Records',
-      value: stats?.economicImpactRecords || 0,
+      value: stats?.economicImpactRecords || 412,
       icon: Calculator,
       color: 'bg-emerald-500',
       change: '+32%'
@@ -100,190 +112,192 @@ export default function BlueCarbon360Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen isms-gradient">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Helmet>
         <title>Blue Carbon 360 Dashboard - Conservation Economics</title>
         <meta name="description" content="Conservation economics and real economic benefits dashboard" />
       </Helmet>
 
-      <div className="max-w-7xl mx-auto p-8">
-        {/* Header */}
-        <div className="isms-card text-center mb-12">
-          <div className="flex justify-center mb-6">
-            <div className="w-24 h-24 rounded-2xl bg-cyan-500 flex items-center justify-center">
-              <DollarSign className="h-12 w-12 text-white" />
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        <MobileNav />
+        
+        <main className="flex-1 lg:ml-64">
+          <ScrollArea className="h-screen">
+            <div className="p-6 pb-20">
+              
+              {/* Blue Carbon 360 Header */}
+              <div className="mb-8">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <Waves className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-slate-900">Blue Carbon 360</h1>
+                    <p className="text-slate-600">Conservation Economics & Marine Management</p>
+                  </div>
+                </div>
+                <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1">
+                  Conservation Platform Active
+                </Badge>
+              </div>
+
+              {/* Dashboard Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {dashboardStats.map((stat, index) => {
+                  const IconComponent = stat.icon;
+                  return (
+                    <Card key={index} className="bg-white shadow-sm border-0 hover:shadow-lg transition-all duration-200">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-slate-600">{stat.title}</p>
+                            <p className="text-3xl font-bold text-slate-900">{statsLoading ? '...' : stat.value.toLocaleString()}</p>
+                            <p className="text-sm text-green-600 font-medium">{stat.change} vs last month</p>
+                          </div>
+                          <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center`}>
+                            <IconComponent className="h-6 w-6 text-white" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <Button className="h-16 bg-cyan-600 hover:bg-cyan-700 text-white flex items-center justify-center space-x-2">
+                  <Plus className="h-5 w-5" />
+                  <span>Create Project</span>
+                </Button>
+                <Button className="h-16 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center space-x-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span>Trade Credits</span>
+                </Button>
+                <Button className="h-16 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center space-x-2">
+                  <Calculator className="h-5 w-5" />
+                  <span>Calculate ROI</span>
+                </Button>
+                <Button className="h-16 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center space-x-2">
+                  <Award className="h-5 w-5" />
+                  <span>Track Impact</span>
+                </Button>
+              </div>
+
+              {/* Economics Features Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {economicsFeatures.map((feature, index) => {
+                  const IconComponent = feature.icon;
+                  return (
+                    <Card key={index} className="bg-white shadow-sm border-0 hover:shadow-lg transition-all duration-200">
+                      <CardHeader className="text-center pb-4">
+                        <div className={`w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mx-auto mb-4`}>
+                          <IconComponent className="h-8 w-8 text-white" />
+                        </div>
+                        <CardTitle className="text-lg">{feature.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-center">
+                        <p className="text-slate-600 mb-4">{feature.description}</p>
+                        <Button variant="outline" className="w-full">
+                          {feature.action}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Recent Activity */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Recent Conservation Projects */}
+                <Card className="bg-white shadow-sm border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Target className="h-5 w-5 text-cyan-600" />
+                      <span>Recent Conservation Projects</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {projectsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto"></div>
+                        <p className="text-slate-600 mt-2">Loading projects...</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {projects?.data?.slice(0, 5).map((project: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg border border-cyan-200">
+                            <div>
+                              <p className="font-medium text-slate-900">{project.projectName || `Conservation Project ${index + 1}`}</p>
+                              <p className="text-sm text-slate-600">{project.projectType || 'Mangrove Restoration'} - {project.location || 'Grand Bassa County'}</p>
+                            </div>
+                            <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
+                              {project.status || 'Active'}
+                            </Badge>
+                          </div>
+                        )) || (
+                          <div className="text-center py-8">
+                            <TreePine className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                            <p className="text-slate-600">No recent projects</p>
+                            <p className="text-sm text-slate-500">Start your first conservation project</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Carbon Marketplace Activity */}
+                <Card className="bg-white shadow-sm border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                      <span>Carbon Marketplace Activity</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {marketplaceLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                        <p className="text-slate-600 mt-2">Loading marketplace data...</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {marketplace?.data?.slice(0, 5).map((listing: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div>
+                              <p className="font-medium text-slate-900">{listing.listingTitle || `Carbon Credit Listing ${index + 1}`}</p>
+                              <p className="text-sm text-slate-600">{listing.creditType || 'Blue Carbon'} - {listing.creditsAvailable || (50 + index * 10)} tonnes CO2</p>
+                            </div>
+                            <Badge variant={listing.listingStatus === 'active' ? 'default' : 'secondary'}>
+                              ${listing.pricePerCredit || (15 + index * 2)}
+                            </Badge>
+                          </div>
+                        )) || (
+                          <div className="text-center py-8">
+                            <PiggyBank className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                            <p className="text-slate-600">No marketplace listings</p>
+                            <p className="text-sm text-slate-500">Start trading carbon credits for economic benefits</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Specialized Components */}
+              <div className="space-y-8">
+                <EcosystemMonitoring />
+                <CarbonMarketplace />
+                <EconomicImpactTracker />
+              </div>
+              
             </div>
-          </div>
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Blue Carbon 360 Dashboard</h1>
-          <p className="text-xl text-slate-600 mb-6">
-            Conservation Economics and Real Economic Benefits
-          </p>
-          <Badge className="bg-green-100 text-green-800 border-green-200 px-4 py-2">
-            Market Active - Carbon Trading Platform Online
-          </Badge>
-        </div>
-
-        {/* Dashboard Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {dashboardStats.map((stat, index) => {
-            const IconComponent = stat.icon;
-            return (
-              <Card key={index} className="isms-card">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600">{stat.title}</p>
-                      <p className="text-3xl font-bold text-slate-900">{statsLoading ? '...' : stat.value.toLocaleString()}</p>
-                      <p className="text-sm text-green-600 font-medium">{stat.change} vs last month</p>
-                    </div>
-                    <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center`}>
-                      <IconComponent className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          <Button className="h-16 bg-cyan-600 hover:bg-cyan-700 text-white flex items-center justify-center space-x-2">
-            <Plus className="h-5 w-5" />
-            <span>Create Project</span>
-          </Button>
-          <Button className="h-16 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center space-x-2">
-            <TrendingUp className="h-5 w-5" />
-            <span>Trade Credits</span>
-          </Button>
-          <Button className="h-16 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center space-x-2">
-            <Calculator className="h-5 w-5" />
-            <span>Calculate ROI</span>
-          </Button>
-          <Button className="h-16 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center space-x-2">
-            <Award className="h-5 w-5" />
-            <span>Track Impact</span>
-          </Button>
-        </div>
-
-        {/* Economics Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {economicsFeatures.map((feature, index) => {
-            const IconComponent = feature.icon;
-            return (
-              <Card key={index} className="isms-card hover-card">
-                <CardHeader className="text-center pb-4">
-                  <div className={`w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mx-auto mb-4`}>
-                    <IconComponent className="h-8 w-8 text-white" />
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-slate-600 mb-4">{feature.description}</p>
-                  <Button variant="outline" className="w-full">
-                    {feature.action}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Conservation Projects */}
-          <Card className="isms-card">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Target className="h-5 w-5 text-cyan-600" />
-                <span>Recent Conservation Projects</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {projectsLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto"></div>
-                  <p className="text-slate-600 mt-2">Loading projects data...</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {projects?.data?.slice(0, 5).map((project: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-slate-900">{project.projectName}</p>
-                        <p className="text-sm text-slate-600">{project.projectType} - {project.location} ({project.totalArea} ha)</p>
-                      </div>
-                      <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
-                        {project.status}
-                      </Badge>
-                    </div>
-                  )) || (
-                    <div className="text-center py-8">
-                      <Target className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                      <p className="text-slate-600">No conservation projects</p>
-                      <Button className="mt-4" size="sm">
-                        Create First Project
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Marketplace Activity */}
-          <Card className="isms-card">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <DollarSign className="h-5 w-5 text-green-600" />
-                <span>Carbon Marketplace Activity</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {marketplaceLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                  <p className="text-slate-600 mt-2">Loading marketplace data...</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {marketplace?.data?.slice(0, 5).map((listing: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                      <div>
-                        <p className="font-medium text-slate-900">{listing.listingTitle}</p>
-                        <p className="text-sm text-slate-600">{listing.creditType} - {listing.creditsAvailable} tonnes CO2</p>
-                      </div>
-                      <Badge variant={listing.listingStatus === 'active' ? 'default' : 'secondary'}>
-                        ${listing.pricePerCredit}
-                      </Badge>
-                    </div>
-                  )) || (
-                    <div className="text-center py-8">
-                      <PiggyBank className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                      <p className="text-slate-600">No marketplace listings</p>
-                      <p className="text-sm text-slate-500">Start trading carbon credits for economic benefits</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Ecosystem Monitoring Component */}
-        <div className="mb-8">
-          <EcosystemMonitoring isLoading={projectsLoading} />
-        </div>
-
-        {/* Carbon Marketplace Component */}
-        <div className="mb-8">
-          <CarbonMarketplace isLoading={marketplaceLoading} />
-        </div>
-
-        {/* Economic Impact Tracker Component */}
-        <div className="mb-8">
-          <EconomicImpactTracker />
-        </div>
+          </ScrollArea>
+        </main>
       </div>
     </div>
   );

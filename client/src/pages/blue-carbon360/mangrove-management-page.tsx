@@ -27,15 +27,21 @@ import {
   Shield,
   Target
 } from "lucide-react";
+import { useState } from "react";
 import BlueCarbon360Header from "@/components/layout/blue-carbon360-header";
 import BlueCarbon360Sidebar from "@/components/layout/blue-carbon360-sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import SatelliteViewModal from "@/components/blue-carbon360/satellite-view-modal";
 
 export default function MangroveManagementPage() {
   // Fetch mangrove data
   const { data: mangroveData = [], isLoading: mangroveLoading } = useQuery({
     queryKey: ["/api/blue-carbon360/mangrove-management"],
   });
+
+  // State for satellite view modal
+  const [isSatelliteViewOpen, setIsSatelliteViewOpen] = useState(false);
+  const [selectedSite, setSelectedSite] = useState<string | undefined>(undefined);
 
   // Mangrove site overview metrics
   const mangroveMetrics = [
@@ -284,7 +290,10 @@ export default function MangroveManagementPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setIsSatelliteViewOpen(true)}
+                    >
                       <Satellite className="h-4 w-4 mr-2" />
                       Satellite View
                     </Button>
@@ -582,6 +591,13 @@ export default function MangroveManagementPage() {
           </ScrollArea>
         </main>
       </div>
+
+      {/* Satellite View Modal */}
+      <SatelliteViewModal 
+        isOpen={isSatelliteViewOpen}
+        onClose={() => setIsSatelliteViewOpen(false)}
+        selectedSite={selectedSite}
+      />
     </div>
   );
 }

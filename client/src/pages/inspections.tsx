@@ -688,6 +688,12 @@ export default function Inspections() {
           <TabsContent value="mobile-monitoring">
             {/* Inspector Mobile Monitoring Content */}
             <div className="space-y-8">
+              
+              {/* Header Section */}
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">Inspector Mobile Monitoring System</h2>
+                <p className="text-slate-600">Real-time tracking and monitoring of field inspector mobile devices</p>
+              </div>
               {/* Stats Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
@@ -756,12 +762,48 @@ export default function Inspections() {
                 </Card>
               </div>
 
+              {/* Real-time GPS Tracking Section */}
+              <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-indigo-600" />
+                    Real-time GPS Location Tracking
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {inspectorDevices.map((device) => (
+                      <div key={device.deviceId} className="bg-white p-4 rounded-lg border border-indigo-200">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className={`w-3 h-3 rounded-full ${device.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                          <h4 className="font-medium text-slate-900">{device.inspectorName}</h4>
+                        </div>
+                        <div className="space-y-2 text-sm text-slate-600">
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="h-4 w-4" />
+                            <span>{device.deviceModel}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            <span>GPS: {device.gpsEnabled ? 'Enabled' : 'Disabled'}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>Last seen: {device.lastSeen ? new Date(device.lastSeen).toLocaleTimeString() : 'Never'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Device Status Table */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Smartphone className="h-5 w-5" />
-                    Inspector Device Status
+                    Inspector Device Status & Battery Monitoring
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -897,6 +939,67 @@ export default function Inspections() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Location History Section */}
+              <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-purple-600" />
+                    Location History & Movement Tracking
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <MapPin className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-purple-900 mb-2">GPS Tracking Active</h3>
+                    <p className="text-purple-700">Inspector movement history and location tracking is being monitored in real-time</p>
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-white p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">{inspectorDevices.filter(d => d.gpsEnabled).length}</div>
+                        <div className="text-sm text-purple-700">GPS Enabled</div>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">{inspectorDevices.filter(d => d.locationPermission).length}</div>
+                        <div className="text-sm text-purple-700">Location Permitted</div>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">{todayCheckIns.length}</div>
+                        <div className="text-sm text-purple-700">Check-ins Today</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Quick Actions & Controls
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Button className="h-auto p-4 flex-col bg-blue-600 hover:bg-blue-700">
+                      <Smartphone className="h-6 w-6 mb-2" />
+                      <span className="text-sm">Refresh Devices</span>
+                    </Button>
+                    <Button className="h-auto p-4 flex-col bg-green-600 hover:bg-green-700">
+                      <MapPin className="h-6 w-6 mb-2" />
+                      <span className="text-sm">View GPS Map</span>
+                    </Button>
+                    <Button className="h-auto p-4 flex-col bg-yellow-600 hover:bg-yellow-700">
+                      <AlertTriangle className="h-6 w-6 mb-2" />
+                      <span className="text-sm">View All Alerts</span>
+                    </Button>
+                    <Button className="h-auto p-4 flex-col bg-purple-600 hover:bg-purple-700">
+                      <CheckCircle className="h-6 w-6 mb-2" />
+                      <span className="text-sm">Check-in Report</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>

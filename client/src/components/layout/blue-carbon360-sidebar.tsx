@@ -60,11 +60,21 @@ export default function BlueCarbon360Sidebar() {
   const { role, userType } = getUserInfo();
   
   // Get current user ID for messaging notifications
-  const [currentUserId] = useState(() => 
-    localStorage.getItem("username") || 
-    localStorage.getItem("blue_carbon_360_user")?.id ||
-    "marina.conserve"
-  );
+  const [currentUserId] = useState(() => {
+    const username = localStorage.getItem("username");
+    const blueCarbon360User = localStorage.getItem("blue_carbon_360_user");
+    
+    if (username) return username;
+    if (blueCarbon360User) {
+      try {
+        const user = JSON.parse(blueCarbon360User);
+        return user.id || "marina.conserve";
+      } catch {
+        return "marina.conserve";
+      }
+    }
+    return "marina.conserve";
+  });
 
   // Fetch unread message count for Blue Carbon 360
   const { data: unreadData } = useQuery({
@@ -77,7 +87,7 @@ export default function BlueCarbon360Sidebar() {
   const unreadCount = unreadData?.count || 0;
 
   return (
-    <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
+    <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col bg-white">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-slate-200 px-6 pb-4">
         {/* Blue Carbon 360 Logo/Header */}
         <div className="flex h-16 shrink-0 items-center">

@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Blue Carbon 360 Specific Styles - Prevent Background Bleed */
+.blue-carbon-360-layout {
+  background: linear-gradient(to bottom right, rgb(248, 250, 252), rgb(241, 245, 249)) !important;
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+}
+
+.blue-carbon-360-layout::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom right, rgb(248, 250, 252), rgb(241, 245, 249));
+  z-index: -1;
+}
+
 /* Enhanced Mobile-First Responsive Design */
 @media (max-width: 768px) {
   .mobile-hidden {

@@ -306,7 +306,7 @@ export default function EconomicImpactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="blue-carbon-360-layout">
       <Helmet>
         <title>Economic Impact - Blue Carbon 360</title>
         <meta name="description" content="Comprehensive economic impact analysis for marine conservation initiatives" />

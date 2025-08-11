@@ -190,6 +190,79 @@ export const performanceMetrics = pgTable("performance_metrics", {
   aggregationPeriod: text("aggregation_period").notNull(), // minute, hour, day
 });
 
+// Inspector Mobile Device Tracking System
+export const inspectorDevices = pgTable("inspector_devices", {
+  id: serial("id").primaryKey(),
+  deviceId: text("device_id").notNull().unique(),
+  inspectorId: text("inspector_id").notNull(),
+  inspectorName: text("inspector_name").notNull(),
+  deviceModel: text("device_model"),
+  deviceBrand: text("device_brand"),
+  osVersion: text("os_version"),
+  appVersion: text("app_version"),
+  phoneNumber: text("phone_number"),
+  imei: text("imei"),
+  isActive: boolean("is_active").default(true),
+  lastSeen: timestamp("last_seen").defaultNow(),
+  registeredAt: timestamp("registered_at").defaultNow(),
+  batteryLevel: integer("battery_level"), // 0-100 percentage
+  networkStatus: text("network_status").default("unknown"), // online, offline, poor, good, excellent
+  gpsEnabled: boolean("gps_enabled").default(false),
+  locationPermission: boolean("location_permission").default(false),
+  notificationsEnabled: boolean("notifications_enabled").default(true),
+});
+
+export const inspectorLocationHistory = pgTable("inspector_location_history", {
+  id: serial("id").primaryKey(),
+  deviceId: text("device_id").references(() => inspectorDevices.deviceId).notNull(),
+  inspectorId: text("inspector_id").notNull(),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }).notNull(),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }).notNull(),
+  accuracy: decimal("accuracy", { precision: 8, scale: 2 }), // GPS accuracy in meters
+  altitude: decimal("altitude", { precision: 8, scale: 2 }),
+  speed: decimal("speed", { precision: 6, scale: 2 }), // km/h
+  heading: decimal("heading", { precision: 6, scale: 2 }), // degrees
+  timestamp: timestamp("timestamp").defaultNow(),
+  activity: text("activity"), // inspection, travel, break, offline
+  batteryLevel: integer("battery_level"),
+  signalStrength: integer("signal_strength"), // 0-5 bars
+  inspectionId: integer("inspection_id"), // linked to specific inspection if applicable
+});
+
+export const inspectorDeviceAlerts = pgTable("inspector_device_alerts", {
+  id: serial("id").primaryKey(),
+  deviceId: text("device_id").references(() => inspectorDevices.deviceId).notNull(),
+  inspectorId: text("inspector_id").notNull(),
+  alertType: text("alert_type").notNull(), // low_battery, offline, location_disabled, emergency, sos
+  severity: text("severity").notNull().default("medium"), // low, medium, high, critical
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
+  isResolved: boolean("is_resolved").default(false),
+  resolvedBy: text("resolved_by"),
+  resolvedAt: timestamp("resolved_at"),
+  triggeredAt: timestamp("triggered_at").defaultNow(),
+  metadata: jsonb("metadata"), // additional alert data
+});
+
+export const inspectorCheckIns = pgTable("inspector_check_ins", {
+  id: serial("id").primaryKey(),
+  deviceId: text("device_id").references(() => inspectorDevices.deviceId).notNull(),
+  inspectorId: text("inspector_id").notNull(),
+  checkInType: text("check_in_type").notNull(), // start_shift, end_shift, inspection_start, inspection_complete, break, emergency
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  accuracy: decimal("accuracy", { precision: 8, scale: 2 }),
+  notes: text("notes"),
+  inspectionId: integer("inspection_id"),
+  commodityId: integer("commodity_id"),
+  timestamp: timestamp("timestamp").defaultNow(),
+  batteryLevel: integer("battery_level"),
+  photoEvidence: text("photo_evidence"), // base64 or URL
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: text("verified_by"),
+});
+
 export const backendLogs = pgTable("backend_logs", {
   id: serial("id").primaryKey(),
   logLevel: text("log_level").notNull(), // debug, info, warn, error, critical
@@ -232,6 +305,41 @@ export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
 
 export type BackendLog = typeof backendLogs.$inferSelect;
 export type InsertBackendLog = typeof backendLogs.$inferInsert;
+
+// Inspector Mobile Device Tracking Types
+export type InspectorDevice = typeof inspectorDevices.$inferSelect;
+export type InsertInspectorDevice = typeof inspectorDevices.$inferInsert;
+
+export type InspectorLocationHistory = typeof inspectorLocationHistory.$inferSelect;
+export type InsertInspectorLocationHistory = typeof inspectorLocationHistory.$inferInsert;
+
+export type InspectorDeviceAlert = typeof inspectorDeviceAlerts.$inferSelect;
+export type InsertInspectorDeviceAlert = typeof inspectorDeviceAlerts.$inferInsert;
+
+export type InspectorCheckIn = typeof inspectorCheckIns.$inferSelect;
+export type InsertInspectorCheckIn = typeof inspectorCheckIns.$inferInsert;
+
+// Inspector Mobile Device Schemas
+export const insertInspectorDeviceSchema = createInsertSchema(inspectorDevices).omit({
+  id: true,
+  lastSeen: true,
+  registeredAt: true,
+});
+
+export const insertInspectorLocationHistorySchema = createInsertSchema(inspectorLocationHistory).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertInspectorDeviceAlertSchema = createInsertSchema(inspectorDeviceAlerts).omit({
+  id: true,
+  triggeredAt: true,
+});
+
+export const insertInspectorCheckInSchema = createInsertSchema(inspectorCheckIns).omit({
+  id: true,
+  timestamp: true,
+});
 
 // ========================================
 // POLIPUS 7 MODULES DATABASE SCHEMAS

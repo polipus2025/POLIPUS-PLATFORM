@@ -45,6 +45,12 @@ import {
   insertTrackingEventSchema,
   insertVerificationLogSchema,
   
+  // Inspector Mobile Device Schemas
+  insertInspectorDeviceSchema,
+  insertInspectorLocationHistorySchema,
+  insertInspectorDeviceAlertSchema,
+  insertInspectorCheckInSchema,
+  
   // Blue Carbon 360 Schemas
   insertBlueCarbon360ProjectSchema,
   insertCarbonMarketplaceListingSchema,
@@ -5777,6 +5783,238 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching carbon marketplace:", error);
       res.status(500).json({ error: "Failed to fetch marketplace listings" });
+    }
+  });
+
+  // Inspector Mobile Device Tracking Routes
+  
+  // Inspector Devices
+  app.get("/api/inspector-devices", async (req, res) => {
+    try {
+      const devices = await storage.getInspectorDevices();
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching inspector devices:", error);
+      res.status(500).json({ message: "Failed to fetch inspector devices" });
+    }
+  });
+
+  app.get("/api/inspector-devices/:deviceId", async (req, res) => {
+    try {
+      const device = await storage.getInspectorDevice(req.params.deviceId);
+      if (!device) {
+        return res.status(404).json({ message: "Device not found" });
+      }
+      res.json(device);
+    } catch (error) {
+      console.error("Error fetching inspector device:", error);
+      res.status(500).json({ message: "Failed to fetch inspector device" });
+    }
+  });
+
+  app.get("/api/inspector-devices/inspector/:inspectorId", async (req, res) => {
+    try {
+      const devices = await storage.getInspectorDevicesByInspector(req.params.inspectorId);
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching inspector devices:", error);
+      res.status(500).json({ message: "Failed to fetch inspector devices" });
+    }
+  });
+
+  app.get("/api/inspector-devices/active", async (req, res) => {
+    try {
+      const devices = await storage.getActiveInspectorDevices();
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching active inspector devices:", error);
+      res.status(500).json({ message: "Failed to fetch active inspector devices" });
+    }
+  });
+
+  app.post("/api/inspector-devices", async (req, res) => {
+    try {
+      const deviceData = insertInspectorDeviceSchema.parse(req.body);
+      const newDevice = await storage.createInspectorDevice(deviceData);
+      res.status(201).json(newDevice);
+    } catch (error) {
+      console.error("Error creating inspector device:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid device data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inspector device" });
+    }
+  });
+
+  app.put("/api/inspector-devices/:deviceId", async (req, res) => {
+    try {
+      const updatedDevice = await storage.updateInspectorDevice(req.params.deviceId, req.body);
+      if (!updatedDevice) {
+        return res.status(404).json({ message: "Device not found" });
+      }
+      res.json(updatedDevice);
+    } catch (error) {
+      console.error("Error updating inspector device:", error);
+      res.status(500).json({ message: "Failed to update inspector device" });
+    }
+  });
+
+  // Inspector Location History
+  app.get("/api/inspector-location/:deviceId", async (req, res) => {
+    try {
+      const locations = await storage.getInspectorLocationHistory(req.params.deviceId);
+      res.json(locations);
+    } catch (error) {
+      console.error("Error fetching location history:", error);
+      res.status(500).json({ message: "Failed to fetch location history" });
+    }
+  });
+
+  app.get("/api/inspector-location/:deviceId/current", async (req, res) => {
+    try {
+      const location = await storage.getInspectorCurrentLocation(req.params.deviceId);
+      if (!location) {
+        return res.status(404).json({ message: "No location found" });
+      }
+      res.json(location);
+    } catch (error) {
+      console.error("Error fetching current location:", error);
+      res.status(500).json({ message: "Failed to fetch current location" });
+    }
+  });
+
+  app.post("/api/inspector-location", async (req, res) => {
+    try {
+      const locationData = insertInspectorLocationHistorySchema.parse(req.body);
+      const newLocation = await storage.createInspectorLocationEntry(locationData);
+      res.status(201).json(newLocation);
+    } catch (error) {
+      console.error("Error creating location entry:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid location data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create location entry" });
+    }
+  });
+
+  // Inspector Device Alerts
+  app.get("/api/inspector-alerts", async (req, res) => {
+    try {
+      const alerts = await storage.getInspectorDeviceAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching inspector alerts:", error);
+      res.status(500).json({ message: "Failed to fetch inspector alerts" });
+    }
+  });
+
+  app.get("/api/inspector-alerts/unread", async (req, res) => {
+    try {
+      const alerts = await storage.getUnreadInspectorDeviceAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching unread alerts:", error);
+      res.status(500).json({ message: "Failed to fetch unread alerts" });
+    }
+  });
+
+  app.get("/api/inspector-alerts/device/:deviceId", async (req, res) => {
+    try {
+      const alerts = await storage.getInspectorDeviceAlertsByDevice(req.params.deviceId);
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching device alerts:", error);
+      res.status(500).json({ message: "Failed to fetch device alerts" });
+    }
+  });
+
+  app.post("/api/inspector-alerts", async (req, res) => {
+    try {
+      const alertData = insertInspectorDeviceAlertSchema.parse(req.body);
+      const newAlert = await storage.createInspectorDeviceAlert(alertData);
+      res.status(201).json(newAlert);
+    } catch (error) {
+      console.error("Error creating inspector alert:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid alert data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inspector alert" });
+    }
+  });
+
+  app.put("/api/inspector-alerts/:id/read", async (req, res) => {
+    try {
+      await storage.markInspectorDeviceAlertAsRead(parseInt(req.params.id));
+      res.json({ message: "Alert marked as read" });
+    } catch (error) {
+      console.error("Error marking alert as read:", error);
+      res.status(500).json({ message: "Failed to mark alert as read" });
+    }
+  });
+
+  app.put("/api/inspector-alerts/:id/resolve", async (req, res) => {
+    try {
+      const { resolvedBy, resolution } = req.body;
+      await storage.resolveInspectorDeviceAlert(parseInt(req.params.id), resolvedBy, resolution);
+      res.json({ message: "Alert resolved successfully" });
+    } catch (error) {
+      console.error("Error resolving alert:", error);
+      res.status(500).json({ message: "Failed to resolve alert" });
+    }
+  });
+
+  // Inspector Check-ins
+  app.get("/api/inspector-checkins", async (req, res) => {
+    try {
+      const checkIns = await storage.getInspectorCheckIns();
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error fetching inspector check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch inspector check-ins" });
+    }
+  });
+
+  app.get("/api/inspector-checkins/today", async (req, res) => {
+    try {
+      const checkIns = await storage.getTodayInspectorCheckIns();
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error fetching today's check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch today's check-ins" });
+    }
+  });
+
+  app.get("/api/inspector-checkins/device/:deviceId", async (req, res) => {
+    try {
+      const checkIns = await storage.getInspectorCheckInsByDevice(req.params.deviceId);
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error fetching device check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch device check-ins" });
+    }
+  });
+
+  app.get("/api/inspector-checkins/inspector/:inspectorId", async (req, res) => {
+    try {
+      const checkIns = await storage.getInspectorCheckInsByInspector(req.params.inspectorId);
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error fetching inspector check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch inspector check-ins" });
+    }
+  });
+
+  app.post("/api/inspector-checkins", async (req, res) => {
+    try {
+      const checkInData = insertInspectorCheckInSchema.parse(req.body);
+      const newCheckIn = await storage.createInspectorCheckIn(checkInData);
+      res.status(201).json(newCheckIn);
+    } catch (error) {
+      console.error("Error creating inspector check-in:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid check-in data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inspector check-in" });
     }
   });
 

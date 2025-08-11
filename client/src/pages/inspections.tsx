@@ -21,9 +21,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Calendar, FileText } from "lucide-react";
+import { Search, Plus, Calendar, FileText, Smartphone, MapPin, Shield, CheckCircle, AlertTriangle, Clock } from "lucide-react";
 import { getStatusColor } from "@/lib/types";
-import type { Inspection, Commodity } from "@shared/schema";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Inspection, Commodity, InspectorDevice, InspectorLocationHistory, InspectorDeviceAlert, InspectorCheckIn } from "@shared/schema";
 
 export default function Inspections() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +42,20 @@ export default function Inspections() {
     queryKey: ["/api/commodities"],
   });
 
-  const isLoading = inspectionsLoading || commoditiesLoading;
+  // Inspector Mobile Device Queries
+  const { data: inspectorDevices = [], isLoading: devicesLoading } = useQuery<InspectorDevice[]>({
+    queryKey: ["/api/inspector-devices"],
+  });
+
+  const { data: inspectorAlerts = [], isLoading: alertsLoading } = useQuery<InspectorDeviceAlert[]>({
+    queryKey: ["/api/inspector-alerts/unread"],
+  });
+
+  const { data: todayCheckIns = [], isLoading: checkInsLoading } = useQuery<InspectorCheckIn[]>({
+    queryKey: ["/api/inspector-checkins/today"],
+  });
+
+  const isLoading = inspectionsLoading || commoditiesLoading || devicesLoading || alertsLoading || checkInsLoading;
 
   if (isLoading) {
     return (
@@ -122,7 +136,21 @@ export default function Inspections() {
           </div>
         </div>
 
-        {/* Controls */}
+        {/* Main Content with Tabs */}
+        <Tabs defaultValue="inspections" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="inspections" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Quality Inspections
+            </TabsTrigger>
+            <TabsTrigger value="mobile-monitoring" className="flex items-center gap-2">
+              <Smartphone className="h-4 w-4" />
+              Inspector Mobile Monitoring
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="inspections">
+            {/* Inspection Controls */}
         <div className="mb-8">
           <div className="flex justify-between items-start">
             <div></div>
@@ -655,7 +683,226 @@ export default function Inspections() {
           </div>
         </DialogContent>
       </Dialog>
-      
+          </TabsContent>
+
+          <TabsContent value="mobile-monitoring">
+            {/* Inspector Mobile Monitoring Content */}
+            <div className="space-y-8">
+              {/* Stats Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">Active Devices</p>
+                        <p className="text-3xl font-bold text-blue-900">
+                          {inspectorDevices.filter(d => d.isActive).length}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-blue-100 rounded-full">
+                        <Smartphone className="h-6 w-6 text-blue-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-600">Today's Check-ins</p>
+                        <p className="text-3xl font-bold text-green-900">{todayCheckIns.length}</p>
+                      </div>
+                      <div className="p-3 bg-green-100 rounded-full">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-yellow-600">Unread Alerts</p>
+                        <p className="text-3xl font-bold text-yellow-900">{inspectorAlerts.length}</p>
+                      </div>
+                      <div className="p-3 bg-yellow-100 rounded-full">
+                        <AlertTriangle className="h-6 w-6 text-yellow-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-purple-600">Online Now</p>
+                        <p className="text-3xl font-bold text-purple-900">
+                          {inspectorDevices.filter(d => {
+                            const lastSeen = new Date(d.lastSeen);
+                            const now = new Date();
+                            const diffMinutes = (now.getTime() - lastSeen.getTime()) / (1000 * 60);
+                            return diffMinutes < 5; // Online if last seen within 5 minutes
+                          }).length}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-purple-100 rounded-full">
+                        <Shield className="h-6 w-6 text-purple-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Device Status Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Smartphone className="h-5 w-5" />
+                    Inspector Device Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Inspector</TableHead>
+                        <TableHead>Device</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Location</TableHead>
+                        <TableHead>Last Seen</TableHead>
+                        <TableHead>Battery</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {inspectorDevices.map((device) => {
+                        const lastSeen = new Date(device.lastSeen);
+                        const now = new Date();
+                        const diffMinutes = (now.getTime() - lastSeen.getTime()) / (1000 * 60);
+                        const isOnline = diffMinutes < 5;
+                        
+                        return (
+                          <TableRow key={device.deviceId}>
+                            <TableCell className="font-medium">
+                              {device.inspectorName || device.inspectorId}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Smartphone className="h-4 w-4 text-gray-500" />
+                                <div>
+                                  <p className="text-sm font-medium">{device.deviceModel}</p>
+                                  <p className="text-xs text-gray-500">{device.deviceId}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={isOnline ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                                {isOnline ? "Online" : "Offline"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3 text-gray-400" />
+                                <span className="text-xs text-gray-600">
+                                  {device.currentLatitude && device.currentLongitude 
+                                    ? `${device.currentLatitude.toFixed(4)}, ${device.currentLongitude.toFixed(4)}`
+                                    : "No location"
+                                  }
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3 text-gray-400" />
+                                <span className="text-xs text-gray-600">
+                                  {lastSeen.toLocaleString()}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className={`h-2 w-8 rounded-full ${
+                                  device.batteryLevel > 50 ? 'bg-green-500' :
+                                  device.batteryLevel > 20 ? 'bg-yellow-500' : 'bg-red-500'
+                                }`} />
+                                <span className="text-xs text-gray-600">{device.batteryLevel}%</span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+
+              {/* Recent Alerts */}
+              {inspectorAlerts.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                      Recent Alerts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {inspectorAlerts.slice(0, 5).map((alert) => (
+                        <div key={alert.id} className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                          <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-yellow-800">{alert.alertType}</p>
+                            <p className="text-xs text-yellow-700 mt-1">{alert.message}</p>
+                            <p className="text-xs text-yellow-600 mt-2">
+                              Device: {alert.deviceId} • {new Date(alert.triggeredAt).toLocaleString()}
+                            </p>
+                          </div>
+                          <Badge className="bg-yellow-100 text-yellow-800">
+                            {alert.severity}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Today's Check-ins */}
+              {todayCheckIns.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      Today's Check-ins
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {todayCheckIns.map((checkIn) => (
+                        <div key={checkIn.id} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-800">
+                              {checkIn.inspectorName || checkIn.inspectorId}
+                            </p>
+                            <p className="text-xs text-green-700">
+                              {checkIn.location} • {new Date(checkIn.timestamp).toLocaleTimeString()}
+                            </p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">
+                            {checkIn.checkInType}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

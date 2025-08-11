@@ -43,6 +43,10 @@ import {
   economicActivities,
   countyEconomicSummary,
   economicIndicators,
+  inspectorDevices,
+  inspectorLocationHistory,
+  inspectorDeviceAlerts,
+  inspectorCheckIns,
   type Commodity,
   type Inspection,
   type Certification,
@@ -130,7 +134,15 @@ import {
   type EconomicIndicator,
   type InsertEconomicActivity,
   type InsertCountyEconomicSummary,
-  type InsertEconomicIndicator
+  type InsertEconomicIndicator,
+  type InspectorDevice,
+  type InspectorLocationHistory,
+  type InspectorDeviceAlert,
+  type InspectorCheckIn,
+  type InsertInspectorDevice,
+  type InsertInspectorLocationHistory,
+  type InsertInspectorDeviceAlert,
+  type InsertInspectorCheckIn
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -494,6 +506,34 @@ export interface IStorage {
   createMessageTemplate(template: InsertMessageTemplate): Promise<MessageTemplate>;
   deleteMessage(messageId: string): Promise<boolean>;
   replyToMessage(parentMessageId: string, reply: InsertInternalMessage): Promise<InternalMessage>;
+
+  // Inspector Mobile Device Tracking methods
+  getInspectorDevices(): Promise<InspectorDevice[]>;
+  getInspectorDevice(deviceId: string): Promise<InspectorDevice | undefined>;
+  getInspectorDevicesByInspector(inspectorId: string): Promise<InspectorDevice[]>;
+  createInspectorDevice(device: InsertInspectorDevice): Promise<InspectorDevice>;
+  updateInspectorDevice(deviceId: string, device: Partial<InspectorDevice>): Promise<InspectorDevice | undefined>;
+  getActiveInspectorDevices(): Promise<InspectorDevice[]>;
+  
+  getInspectorLocationHistory(deviceId: string): Promise<InspectorLocationHistory[]>;
+  getInspectorCurrentLocation(deviceId: string): Promise<InspectorLocationHistory | undefined>;
+  createInspectorLocationEntry(location: InsertInspectorLocationHistory): Promise<InspectorLocationHistory>;
+  getInspectorLocationsByTimeRange(deviceId: string, startTime: Date, endTime: Date): Promise<InspectorLocationHistory[]>;
+  
+  getInspectorDeviceAlerts(): Promise<InspectorDeviceAlert[]>;
+  getInspectorDeviceAlert(id: number): Promise<InspectorDeviceAlert | undefined>;
+  getInspectorDeviceAlertsByDevice(deviceId: string): Promise<InspectorDeviceAlert[]>;
+  getUnreadInspectorDeviceAlerts(): Promise<InspectorDeviceAlert[]>;
+  createInspectorDeviceAlert(alert: InsertInspectorDeviceAlert): Promise<InspectorDeviceAlert>;
+  markInspectorDeviceAlertAsRead(id: number): Promise<void>;
+  resolveInspectorDeviceAlert(id: number, resolvedBy: string, resolution?: string): Promise<void>;
+  
+  getInspectorCheckIns(): Promise<InspectorCheckIn[]>;
+  getInspectorCheckIn(id: number): Promise<InspectorCheckIn | undefined>;
+  getInspectorCheckInsByDevice(deviceId: string): Promise<InspectorCheckIn[]>;
+  getInspectorCheckInsByInspector(inspectorId: string): Promise<InspectorCheckIn[]>;
+  createInspectorCheckIn(checkIn: InsertInspectorCheckIn): Promise<InspectorCheckIn>;
+  getTodayInspectorCheckIns(): Promise<InspectorCheckIn[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1624,6 +1664,153 @@ export class DatabaseStorage implements IStorage {
   async createVerificationLog(log: InsertVerificationLog): Promise<VerificationLog> {
     const [newLog] = await db.insert(verificationLogs).values(log).returning();
     return newLog;
+  }
+
+  // Inspector Mobile Device Tracking implementation
+  async getInspectorDevices(): Promise<InspectorDevice[]> {
+    return await db.select().from(inspectorDevices).orderBy(desc(inspectorDevices.lastSeen));
+  }
+
+  async getInspectorDevice(deviceId: string): Promise<InspectorDevice | undefined> {
+    const [device] = await db.select().from(inspectorDevices).where(eq(inspectorDevices.deviceId, deviceId));
+    return device || undefined;
+  }
+
+  async getInspectorDevicesByInspector(inspectorId: string): Promise<InspectorDevice[]> {
+    return await db.select().from(inspectorDevices).where(eq(inspectorDevices.inspectorId, inspectorId));
+  }
+
+  async createInspectorDevice(device: InsertInspectorDevice): Promise<InspectorDevice> {
+    const [newDevice] = await db.insert(inspectorDevices).values(device).returning();
+    return newDevice;
+  }
+
+  async updateInspectorDevice(deviceId: string, device: Partial<InspectorDevice>): Promise<InspectorDevice | undefined> {
+    const [updatedDevice] = await db.update(inspectorDevices)
+      .set(device)
+      .where(eq(inspectorDevices.deviceId, deviceId))
+      .returning();
+    return updatedDevice || undefined;
+  }
+
+  async getActiveInspectorDevices(): Promise<InspectorDevice[]> {
+    return await db.select().from(inspectorDevices).where(eq(inspectorDevices.isActive, true));
+  }
+
+  async getInspectorLocationHistory(deviceId: string): Promise<InspectorLocationHistory[]> {
+    return await db.select().from(inspectorLocationHistory)
+      .where(eq(inspectorLocationHistory.deviceId, deviceId))
+      .orderBy(desc(inspectorLocationHistory.timestamp));
+  }
+
+  async getInspectorCurrentLocation(deviceId: string): Promise<InspectorLocationHistory | undefined> {
+    const [location] = await db.select().from(inspectorLocationHistory)
+      .where(eq(inspectorLocationHistory.deviceId, deviceId))
+      .orderBy(desc(inspectorLocationHistory.timestamp))
+      .limit(1);
+    return location || undefined;
+  }
+
+  async createInspectorLocationEntry(location: InsertInspectorLocationHistory): Promise<InspectorLocationHistory> {
+    const [newLocation] = await db.insert(inspectorLocationHistory).values(location).returning();
+    return newLocation;
+  }
+
+  async getInspectorLocationsByTimeRange(deviceId: string, startTime: Date, endTime: Date): Promise<InspectorLocationHistory[]> {
+    return await db.select().from(inspectorLocationHistory)
+      .where(
+        and(
+          eq(inspectorLocationHistory.deviceId, deviceId),
+          sql`${inspectorLocationHistory.timestamp} >= ${startTime}`,
+          sql`${inspectorLocationHistory.timestamp} <= ${endTime}`
+        )
+      )
+      .orderBy(desc(inspectorLocationHistory.timestamp));
+  }
+
+  async getInspectorDeviceAlerts(): Promise<InspectorDeviceAlert[]> {
+    return await db.select().from(inspectorDeviceAlerts).orderBy(desc(inspectorDeviceAlerts.triggeredAt));
+  }
+
+  async getInspectorDeviceAlert(id: number): Promise<InspectorDeviceAlert | undefined> {
+    const [alert] = await db.select().from(inspectorDeviceAlerts).where(eq(inspectorDeviceAlerts.id, id));
+    return alert || undefined;
+  }
+
+  async getInspectorDeviceAlertsByDevice(deviceId: string): Promise<InspectorDeviceAlert[]> {
+    return await db.select().from(inspectorDeviceAlerts)
+      .where(eq(inspectorDeviceAlerts.deviceId, deviceId))
+      .orderBy(desc(inspectorDeviceAlerts.triggeredAt));
+  }
+
+  async getUnreadInspectorDeviceAlerts(): Promise<InspectorDeviceAlert[]> {
+    return await db.select().from(inspectorDeviceAlerts)
+      .where(eq(inspectorDeviceAlerts.isRead, false))
+      .orderBy(desc(inspectorDeviceAlerts.triggeredAt));
+  }
+
+  async createInspectorDeviceAlert(alert: InsertInspectorDeviceAlert): Promise<InspectorDeviceAlert> {
+    const [newAlert] = await db.insert(inspectorDeviceAlerts).values(alert).returning();
+    return newAlert;
+  }
+
+  async markInspectorDeviceAlertAsRead(id: number): Promise<void> {
+    await db.update(inspectorDeviceAlerts)
+      .set({ isRead: true })
+      .where(eq(inspectorDeviceAlerts.id, id));
+  }
+
+  async resolveInspectorDeviceAlert(id: number, resolvedBy: string, resolution?: string): Promise<void> {
+    await db.update(inspectorDeviceAlerts)
+      .set({ 
+        isResolved: true, 
+        resolvedBy, 
+        resolvedAt: new Date(),
+        ...(resolution && { message: resolution })
+      })
+      .where(eq(inspectorDeviceAlerts.id, id));
+  }
+
+  async getInspectorCheckIns(): Promise<InspectorCheckIn[]> {
+    return await db.select().from(inspectorCheckIns).orderBy(desc(inspectorCheckIns.timestamp));
+  }
+
+  async getInspectorCheckIn(id: number): Promise<InspectorCheckIn | undefined> {
+    const [checkIn] = await db.select().from(inspectorCheckIns).where(eq(inspectorCheckIns.id, id));
+    return checkIn || undefined;
+  }
+
+  async getInspectorCheckInsByDevice(deviceId: string): Promise<InspectorCheckIn[]> {
+    return await db.select().from(inspectorCheckIns)
+      .where(eq(inspectorCheckIns.deviceId, deviceId))
+      .orderBy(desc(inspectorCheckIns.timestamp));
+  }
+
+  async getInspectorCheckInsByInspector(inspectorId: string): Promise<InspectorCheckIn[]> {
+    return await db.select().from(inspectorCheckIns)
+      .where(eq(inspectorCheckIns.inspectorId, inspectorId))
+      .orderBy(desc(inspectorCheckIns.timestamp));
+  }
+
+  async createInspectorCheckIn(checkIn: InsertInspectorCheckIn): Promise<InspectorCheckIn> {
+    const [newCheckIn] = await db.insert(inspectorCheckIns).values(checkIn).returning();
+    return newCheckIn;
+  }
+
+  async getTodayInspectorCheckIns(): Promise<InspectorCheckIn[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return await db.select().from(inspectorCheckIns)
+      .where(
+        and(
+          sql`${inspectorCheckIns.timestamp} >= ${today}`,
+          sql`${inspectorCheckIns.timestamp} < ${tomorrow}`
+        )
+      )
+      .orderBy(desc(inspectorCheckIns.timestamp));
   }
 }
 

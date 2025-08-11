@@ -226,8 +226,6 @@ export default function FieldAgentDashboard() {
         <meta name="description" content="Field operations dashboard for LACRA field agents" />
       </Helmet>
 
-
-
       <div className="p-3 sm:p-6">
         {/* Mobile-Responsive Header */}
         <div className="mb-6 sm:mb-8">
@@ -515,7 +513,7 @@ export default function FieldAgentDashboard() {
                                 }
                               } catch (error) {
                                 console.error("Direct fetch error:", error);
-                                alert(`Error: ${error.message}`);
+                                alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
                               }
                             }} 
                             className="flex-1 bg-blue-600 hover:bg-blue-700"

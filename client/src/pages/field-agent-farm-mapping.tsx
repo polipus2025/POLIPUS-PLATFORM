@@ -333,8 +333,8 @@ export default function FieldAgentFarmMapping() {
                   minPoints={3}
                   maxPoints={20}
                   enableRealTimeGPS={true}
-                  farmerId={farmerData.firstName ? `${farmerData.firstName}-${farmerData.lastName}` : 'new-farmer'}
-                  farmerName={farmerData.firstName ? `${farmerData.firstName} ${farmerData.lastName}` : 'New Farmer'}
+                  farmerId={selectedFarmerId || 'new-farmer'}
+                  farmerName={farmers.find(f => f.id === selectedFarmerId)?.name || 'New Farmer'}
                 />
               </TabsContent>
 

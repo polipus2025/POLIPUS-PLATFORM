@@ -434,6 +434,22 @@ export default function EnhancedSatelliteMapper({
   };
 
   // Calculate polygon area using shoelace formula
+  // Convert area to appropriate unit and format
+  const formatArea = (areaInSquareMeters: number) => {
+    if (areaInSquareMeters >= 10000) {
+      // Use hectares for areas >= 1 hectare
+      const hectares = areaInSquareMeters / 10000;
+      return `${hectares.toFixed(4)} hectares`;
+    } else if (areaInSquareMeters >= 4047) {
+      // Use acres for areas >= 1 acre
+      const acres = areaInSquareMeters / 4047;
+      return `${acres.toFixed(4)} acres`;
+    } else {
+      // Use square meters for small areas
+      return `${areaInSquareMeters.toFixed(2)} sq meters`;
+    }
+  };
+
   const calculatePolygonArea = (polygonPoints: BoundaryPoint[]) => {
     if (polygonPoints.length < 3) return 0;
 
@@ -452,8 +468,7 @@ export default function EnhancedSatelliteMapper({
     }
     
     area = Math.abs(area * earthRadius * earthRadius / 2);
-    // Convert from square meters to hectares
-    return parseFloat((area / 10000).toFixed(4));
+    return area; // Return area in square meters for unit conversion
   };
 
   // Capture map screenshot for farmer profile

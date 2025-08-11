@@ -219,7 +219,18 @@ export default function TrulyPersistentMapper({
     // Update status
     if (points.length >= 3) {
       const area = calculateArea(points);
-      setStatus(`🌍 ${points.length} points connected, ${area.toFixed(3)} hectares mapped`);
+      const formatArea = (areaInSquareMeters: number) => {
+        if (areaInSquareMeters >= 10000) {
+          const hectares = areaInSquareMeters / 10000;
+          return `${hectares.toFixed(4)} hectares`;
+        } else if (areaInSquareMeters >= 4047) {
+          const acres = areaInSquareMeters / 4047;
+          return `${acres.toFixed(4)} acres`;
+        } else {
+          return `${areaInSquareMeters.toFixed(2)} sq meters`;
+        }
+      };
+      setStatus(`🌍 ${points.length} points connected, ${formatArea(area)} mapped`);
     } else if (points.length >= 2) {
       setStatus(`🔗 ${points.length} points connected - Add ${minPoints - points.length} more to complete`);
     } else {

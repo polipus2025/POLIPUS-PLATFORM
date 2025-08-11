@@ -35,6 +35,22 @@ export default function PersistentBoundaryMapper({
   const { toast } = useToast();
 
   // Calculate area using shoelace formula
+  // Convert area to appropriate unit and format
+  const formatArea = useCallback((areaInSquareMeters: number) => {
+    if (areaInSquareMeters >= 10000) {
+      // Use hectares for areas >= 1 hectare
+      const hectares = areaInSquareMeters / 10000;
+      return `${hectares.toFixed(4)} hectares`;
+    } else if (areaInSquareMeters >= 4047) {
+      // Use acres for areas >= 1 acre
+      const acres = areaInSquareMeters / 4047;
+      return `${acres.toFixed(4)} acres`;
+    } else {
+      // Use square meters for small areas
+      return `${areaInSquareMeters.toFixed(2)} sq meters`;
+    }
+  }, []);
+
   const calculateArea = useCallback((boundaryPoints: BoundaryPoint[]) => {
     if (boundaryPoints.length < 3) return 0;
     
@@ -53,8 +69,7 @@ export default function PersistentBoundaryMapper({
     }
     
     area = Math.abs(area * earthRadius * earthRadius / 2);
-    // Convert from square meters to hectares (1 hectare = 10,000 m²)
-    return parseFloat((area / 10000).toFixed(4));
+    return area; // Return area in square meters for unit conversion
   }, []);
 
   // Draw boundary points and connections on canvas
@@ -194,7 +209,7 @@ export default function PersistentBoundaryMapper({
     
     toast({
       title: "Boundary Completed",
-      description: `Farm boundary with ${points.length} points covering ${area} hectares`,
+      description: `Farm boundary with ${points.length} points covering ${formatArea(area)}`,
     });
   }, [points, minPoints, calculateArea, onBoundaryComplete, toast]);
 
@@ -340,7 +355,7 @@ export default function PersistentBoundaryMapper({
               <span className="font-medium">Points Added: {points.length}</span>
               {points.length >= minPoints && (
                 <span className="ml-3 text-green-600">
-                  Area: {calculateArea(points)} hectares
+                  Area: {formatArea(calculateArea(points))}
                 </span>
               )}
             </div>

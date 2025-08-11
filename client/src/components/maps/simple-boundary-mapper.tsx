@@ -170,6 +170,22 @@ export default function SimpleBoundaryMapper({
     }
   }, [points, mapReady]);
 
+  // Convert area to appropriate unit and format
+  const formatArea = (areaInSquareMeters: number) => {
+    if (areaInSquareMeters >= 10000) {
+      // Use hectares for areas >= 1 hectare
+      const hectares = areaInSquareMeters / 10000;
+      return `${hectares.toFixed(4)} hectares`;
+    } else if (areaInSquareMeters >= 4047) {
+      // Use acres for areas >= 1 acre
+      const acres = areaInSquareMeters / 4047;
+      return `${acres.toFixed(4)} acres`;
+    } else {
+      // Use square meters for small areas
+      return `${areaInSquareMeters.toFixed(2)} sq meters`;
+    }
+  };
+
   const calculateArea = (points: BoundaryPoint[]): number => {
     if (points.length < 3) return 0;
     
@@ -188,8 +204,7 @@ export default function SimpleBoundaryMapper({
     }
     
     area = Math.abs(area * earthRadius * earthRadius / 2);
-    // Convert from square meters to hectares (1 hectare = 10,000 m²)
-    return parseFloat((area / 10000).toFixed(4));
+    return area; // Return area in square meters for unit conversion
   };
 
   const handleReset = () => {
@@ -224,7 +239,7 @@ export default function SimpleBoundaryMapper({
         <div className="text-sm">
           <span className="font-medium">Status: {status}</span>
           <div className="text-gray-600">
-            Points: {points.length} | {area > 0 && `Area: ~${area.toFixed(2)} hectares`}
+            Points: {points.length} | {area > 0 && `Area: ~${formatArea(area)}`}
           </div>
         </div>
         <div className="space-x-2">

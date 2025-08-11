@@ -226,15 +226,7 @@ export default function FieldAgentDashboard() {
         <meta name="description" content="Field operations dashboard for LACRA field agents" />
       </Helmet>
 
-      {/* Back to Polipus Button */}
-      <div className="p-4 pb-0">
-        <Link href="/polipus" className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Polipus Platform
-        </Link>
-      </div>
+
 
       <div className="p-3 sm:p-6">
         {/* Mobile-Responsive Header */}

@@ -315,20 +315,19 @@ export default function ConservationMessagingPage() {
   };
 
   return (
-    <div className="blue-carbon-360-layout">
+    <div className="min-h-screen bg-slate-50">
       <Helmet>
         <title>Conservation Messaging - Blue Carbon 360</title>
         <meta name="description" content="Conservation team communication and collaboration platform" />
       </Helmet>
 
       <BlueCarbon360Header />
-      <div className="flex">
+      <div className="flex h-[calc(100vh-4rem)]">
         <BlueCarbon360Sidebar />
         
-        <main className="flex-1 lg:ml-64 flex justify-center">
-          <div className="w-full max-w-7xl">
-            <ScrollArea className="h-screen">
-              <div className="p-6 pb-20">
+        <main className="flex-1 lg:ml-64 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="p-6 pb-20">
                 
                 {/* Page Header */}
                 <div className="mb-8">
@@ -646,7 +645,6 @@ export default function ConservationMessagingPage() {
                 
               </div>
             </ScrollArea>
-          </div>
         </main>
       </div>
     </div>

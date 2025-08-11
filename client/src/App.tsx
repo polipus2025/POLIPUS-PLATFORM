@@ -342,12 +342,7 @@ function Router() {
               allowedUserTypes={['regulatory', 'field_agent']} 
             />
           </Route>
-          <Route path="/inspections">
-            <ProtectedRoute 
-              component={Inspections} 
-              allowedUserTypes={['regulatory', 'field_agent']} 
-            />
-          </Route>
+          <Route path="/inspections" component={Inspections} />
           <Route path="/certifications">
             <ProtectedRoute 
               component={Certifications} 

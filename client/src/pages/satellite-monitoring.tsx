@@ -33,8 +33,9 @@ export default function SatelliteMonitoring() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [realTimeData, setRealTimeData] = useState<any>({});
 
-  // Comprehensive satellite data for the Polipus platform
+  // Comprehensive satellite data for the Polipus platform - Maximum efficiency constellation
   const satellites = [
+    // Earth Observation Satellites
     {
       id: 'SAT-001',
       name: 'Sentinel-2A',
@@ -56,7 +57,27 @@ export default function SatelliteMonitoring() {
       orbitalVelocity: '7.4 km/s'
     },
     {
-      id: 'SAT-002', 
+      id: 'SAT-002',
+      name: 'Sentinel-2B',
+      type: 'Earth Observation',
+      status: 'active',
+      provider: 'ESA Copernicus',
+      purpose: 'Agricultural Monitoring',
+      altitude: '786 km',
+      coverage: 'Global',
+      resolution: '10m - 60m',
+      frequency: 'Every 5 days',
+      lastUpdate: '2025-01-11 18:42:18',
+      dataTypes: ['Optical Imagery', 'Vegetation Index', 'Land Cover'],
+      modules: ['AgriTrace LACRA', 'Forest Guard', 'Land Map360'],
+      coordinates: { lat: 12.0000, lng: -10.5000 },
+      signal: 93,
+      battery: 89,
+      dataTransmitted: '2.2 TB',
+      orbitalVelocity: '7.4 km/s'
+    },
+    {
+      id: 'SAT-003', 
       name: 'Landsat-9',
       type: 'Earth Observation',
       status: 'active',
@@ -76,7 +97,28 @@ export default function SatelliteMonitoring() {
       orbitalVelocity: '7.5 km/s'
     },
     {
-      id: 'SAT-003',
+      id: 'SAT-004',
+      name: 'Landsat-8',
+      type: 'Earth Observation',
+      status: 'active',
+      provider: 'NASA/USGS',
+      purpose: 'Land Use Monitoring',
+      altitude: '705 km',
+      coverage: 'Global',
+      resolution: '15m - 100m',
+      frequency: 'Every 16 days',
+      lastUpdate: '2025-01-11 17:18:42',
+      dataTypes: ['Thermal Infrared', 'Multispectral', 'Panchromatic'],
+      modules: ['Mine Watch', 'Forest Guard', 'Carbon Trace'],
+      coordinates: { lat: 8.0000, lng: -11.2000 },
+      signal: 90,
+      battery: 88,
+      dataTransmitted: '1.6 TB',
+      orbitalVelocity: '7.5 km/s'
+    },
+    // Ocean & Climate Satellites
+    {
+      id: 'SAT-005',
       name: 'MODIS-Aqua',
       type: 'Ocean/Atmosphere',
       status: 'active',
@@ -96,7 +138,28 @@ export default function SatelliteMonitoring() {
       orbitalVelocity: '7.5 km/s'
     },
     {
-      id: 'SAT-004',
+      id: 'SAT-006',
+      name: 'MODIS-Terra',
+      type: 'Ocean/Atmosphere',
+      status: 'active',
+      provider: 'NASA',
+      purpose: 'Land & Climate Monitoring',
+      altitude: '705 km',
+      coverage: 'Global',
+      resolution: '250m - 1km',
+      frequency: 'Daily',
+      lastUpdate: '2025-01-11 19:08:33',
+      dataTypes: ['Land Surface Temperature', 'Vegetation', 'Fire Detection'],
+      modules: ['Forest Guard', 'Carbon Trace', 'AgriTrace LACRA'],
+      coordinates: { lat: 5.5000, lng: -8.8000 },
+      signal: 87,
+      battery: 83,
+      dataTransmitted: '2.9 TB',
+      orbitalVelocity: '7.5 km/s'
+    },
+    // High-Resolution Commercial Satellites
+    {
+      id: 'SAT-007',
       name: 'Planet Labs-1',
       type: 'High-Resolution Imaging',
       status: 'active',
@@ -116,7 +179,68 @@ export default function SatelliteMonitoring() {
       orbitalVelocity: '7.6 km/s'
     },
     {
-      id: 'SAT-005',
+      id: 'SAT-008',
+      name: 'Planet Labs-2',
+      type: 'High-Resolution Imaging',
+      status: 'active',
+      provider: 'Planet Labs',
+      purpose: 'Daily Monitoring',
+      altitude: '475 km',
+      coverage: 'Targeted Regions',
+      resolution: '3m - 5m',
+      frequency: 'Daily',
+      lastUpdate: '2025-01-11 18:55:17',
+      dataTypes: ['RGB Imagery', 'Near-Infrared', 'Analytics Ready Data'],
+      modules: ['Live Trace', 'Forest Guard', 'Aqua Trace'],
+      coordinates: { lat: 7.2000, lng: -10.3000 },
+      signal: 92,
+      battery: 91,
+      dataTransmitted: '1.1 TB',
+      orbitalVelocity: '7.6 km/s'
+    },
+    {
+      id: 'SAT-009',
+      name: 'WorldView-3',
+      type: 'High-Resolution Imaging',
+      status: 'active',
+      provider: 'Maxar Technologies',
+      purpose: 'Ultra-High Resolution Monitoring',
+      altitude: '617 km',
+      coverage: 'On-Demand',
+      resolution: '0.31m - 3.7m',
+      frequency: 'On-Demand',
+      lastUpdate: '2025-01-11 18:52:09',
+      dataTypes: ['Panchromatic', 'Multispectral', 'SWIR'],
+      modules: ['Mine Watch', 'Land Map360', 'Forest Guard'],
+      coordinates: { lat: 9.8000, lng: -12.1000 },
+      signal: 96,
+      battery: 94,
+      dataTransmitted: '0.8 TB',
+      orbitalVelocity: '7.4 km/s'
+    },
+    {
+      id: 'SAT-010',
+      name: 'WorldView-4',
+      type: 'High-Resolution Imaging',
+      status: 'active',
+      provider: 'Maxar Technologies',
+      purpose: 'Ultra-High Resolution Monitoring',
+      altitude: '617 km',
+      coverage: 'On-Demand',
+      resolution: '0.31m - 3.7m',
+      frequency: 'On-Demand',
+      lastUpdate: '2025-01-11 18:49:25',
+      dataTypes: ['Panchromatic', 'Multispectral', 'SWIR'],
+      modules: ['Mine Watch', 'Land Map360', 'Live Trace'],
+      coordinates: { lat: 11.2000, lng: -13.5000 },
+      signal: 95,
+      battery: 92,
+      dataTransmitted: '0.7 TB',
+      orbitalVelocity: '7.4 km/s'
+    },
+    // Weather & Climate Satellites
+    {
+      id: 'SAT-011',
       name: 'GOES-16',
       type: 'Geostationary Weather',
       status: 'active',
@@ -136,7 +260,28 @@ export default function SatelliteMonitoring() {
       orbitalVelocity: 'Geostationary'
     },
     {
-      id: 'SAT-006',
+      id: 'SAT-012',
+      name: 'GOES-17',
+      type: 'Geostationary Weather',
+      status: 'active',
+      provider: 'NOAA',
+      purpose: 'Weather & Climate',
+      altitude: '35,786 km',
+      coverage: 'Eastern Pacific',
+      resolution: '0.5km - 2km',
+      frequency: 'Every 15 minutes',
+      lastUpdate: '2025-01-11 18:57:30',
+      dataTypes: ['Weather Imagery', 'Lightning Detection', 'Solar Monitoring'],
+      modules: ['Aqua Trace', 'Carbon Trace', 'Forest Guard'],
+      coordinates: { lat: 0.0000, lng: -137.0000 },
+      signal: 97,
+      battery: 95,
+      dataTransmitted: '4.5 TB',
+      orbitalVelocity: 'Geostationary'
+    },
+    // Radar Satellites
+    {
+      id: 'SAT-013',
       name: 'TerraSAR-X',
       type: 'Radar Imaging',
       status: 'maintenance',
@@ -154,6 +299,230 @@ export default function SatelliteMonitoring() {
       battery: 82,
       dataTransmitted: '0.9 TB',
       orbitalVelocity: '7.6 km/s'
+    },
+    {
+      id: 'SAT-014',
+      name: 'TanDEM-X',
+      type: 'Radar Imaging',
+      status: 'active',
+      provider: 'DLR (Germany)',
+      purpose: 'Digital Elevation Mapping',
+      altitude: '514 km',
+      coverage: 'Global',
+      resolution: '1m - 16m',
+      frequency: 'Every 11 days',
+      lastUpdate: '2025-01-11 18:33:45',
+      dataTypes: ['SAR Imagery', 'DEM Generation', 'Interferometry'],
+      modules: ['Land Map360', 'Mine Watch', 'Forest Guard'],
+      coordinates: { lat: 13.5000, lng: -7.2000 },
+      signal: 85,
+      battery: 86,
+      dataTransmitted: '1.3 TB',
+      orbitalVelocity: '7.6 km/s'
+    },
+    {
+      id: 'SAT-015',
+      name: 'COSMO-SkyMed-1',
+      type: 'Radar Imaging',
+      status: 'active',
+      provider: 'ASI (Italy)',
+      purpose: 'Multi-Purpose SAR',
+      altitude: '619 km',
+      coverage: 'Global',
+      resolution: '1m - 100m',
+      frequency: 'Every 16 days',
+      lastUpdate: '2025-01-11 18:41:12',
+      dataTypes: ['X-band SAR', 'Interferometry', 'Emergency Response'],
+      modules: ['Mine Watch', 'Forest Guard', 'Aqua Trace'],
+      coordinates: { lat: 10.1000, lng: -9.8000 },
+      signal: 88,
+      battery: 84,
+      dataTransmitted: '1.0 TB',
+      orbitalVelocity: '7.4 km/s'
+    },
+    // Environmental & Scientific Satellites
+    {
+      id: 'SAT-016',
+      name: 'Sentinel-3A',
+      type: 'Ocean/Land Monitoring',
+      status: 'active',
+      provider: 'ESA Copernicus',
+      purpose: 'Ocean & Land Monitoring',
+      altitude: '814 km',
+      coverage: 'Global',
+      resolution: '300m - 1.2km',
+      frequency: 'Every 27 days',
+      lastUpdate: '2025-01-11 18:47:55',
+      dataTypes: ['Ocean Color', 'Land Surface Temperature', 'Altimetry'],
+      modules: ['Blue Carbon 360', 'Aqua Trace', 'Carbon Trace'],
+      coordinates: { lat: 3.8000, lng: -6.9000 },
+      signal: 91,
+      battery: 87,
+      dataTransmitted: '2.8 TB',
+      orbitalVelocity: '7.3 km/s'
+    },
+    {
+      id: 'SAT-017',
+      name: 'Sentinel-3B',
+      type: 'Ocean/Land Monitoring',
+      status: 'active',
+      provider: 'ESA Copernicus',
+      purpose: 'Ocean & Land Monitoring',
+      altitude: '814 km',
+      coverage: 'Global',
+      resolution: '300m - 1.2km',
+      frequency: 'Every 27 days',
+      lastUpdate: '2025-01-11 18:44:21',
+      dataTypes: ['Ocean Color', 'Land Surface Temperature', 'Altimetry'],
+      modules: ['Blue Carbon 360', 'Aqua Trace', 'Carbon Trace'],
+      coordinates: { lat: 2.5000, lng: -8.1000 },
+      signal: 89,
+      battery: 85,
+      dataTransmitted: '2.6 TB',
+      orbitalVelocity: '7.3 km/s'
+    },
+    {
+      id: 'SAT-018',
+      name: 'Sentinel-5P',
+      type: 'Atmospheric Monitoring',
+      status: 'active',
+      provider: 'ESA Copernicus',
+      purpose: 'Air Quality Monitoring',
+      altitude: '824 km',
+      coverage: 'Global',
+      resolution: '3.5km x 7km',
+      frequency: 'Daily',
+      lastUpdate: '2025-01-11 18:51:33',
+      dataTypes: ['Atmospheric Composition', 'Air Pollution', 'Greenhouse Gases'],
+      modules: ['Carbon Trace', 'Forest Guard', 'Mine Watch'],
+      coordinates: { lat: 15.2000, lng: -5.7000 },
+      signal: 93,
+      battery: 90,
+      dataTransmitted: '1.9 TB',
+      orbitalVelocity: '7.3 km/s'
+    },
+    // Hyperspectral & Advanced Imaging
+    {
+      id: 'SAT-019',
+      name: 'PRISMA',
+      type: 'Hyperspectral Imaging',
+      status: 'active',
+      provider: 'ASI (Italy)',
+      purpose: 'Environmental Monitoring',
+      altitude: '615 km',
+      coverage: 'Global',
+      resolution: '5m - 30m',
+      frequency: 'Every 29 days',
+      lastUpdate: '2025-01-11 18:39:17',
+      dataTypes: ['Hyperspectral', 'Panchromatic', 'Environmental Analysis'],
+      modules: ['Forest Guard', 'AgriTrace LACRA', 'Mine Watch'],
+      coordinates: { lat: 16.8000, lng: -4.2000 },
+      signal: 86,
+      battery: 81,
+      dataTransmitted: '0.6 TB',
+      orbitalVelocity: '7.4 km/s'
+    },
+    {
+      id: 'SAT-020',
+      name: 'EnMAP',
+      type: 'Hyperspectral Imaging',
+      status: 'active',
+      provider: 'DLR (Germany)',
+      purpose: 'Environmental Mapping',
+      altitude: '653 km',
+      coverage: 'Global',
+      resolution: '30m',
+      frequency: 'Every 27 days',
+      lastUpdate: '2025-01-11 18:36:44',
+      dataTypes: ['Hyperspectral', 'Environmental Monitoring', 'Mineral Detection'],
+      modules: ['Mine Watch', 'Forest Guard', 'Carbon Trace'],
+      coordinates: { lat: 18.1000, lng: -3.5000 },
+      signal: 84,
+      battery: 79,
+      dataTransmitted: '0.5 TB',
+      orbitalVelocity: '7.4 km/s'
+    },
+    // Oceanographic Satellites
+    {
+      id: 'SAT-021',
+      name: 'Jason-3',
+      type: 'Ocean Altimetry',
+      status: 'active',
+      provider: 'NASA/NOAA/EUMETSAT',
+      purpose: 'Sea Level Monitoring',
+      altitude: '1,336 km',
+      coverage: 'Global Oceans',
+      resolution: 'Altimetry',
+      frequency: 'Every 10 days',
+      lastUpdate: '2025-01-11 18:43:28',
+      dataTypes: ['Sea Surface Height', 'Ocean Circulation', 'Climate Data'],
+      modules: ['Blue Carbon 360', 'Aqua Trace', 'Carbon Trace'],
+      coordinates: { lat: 1.2000, lng: -9.7000 },
+      signal: 92,
+      battery: 88,
+      dataTransmitted: '1.4 TB',
+      orbitalVelocity: '7.2 km/s'
+    },
+    {
+      id: 'SAT-022',
+      name: 'Sentinel-6A',
+      type: 'Ocean Altimetry',
+      status: 'active',
+      provider: 'ESA/NASA/NOAA',
+      purpose: 'Sea Level Monitoring',
+      altitude: '1,336 km',
+      coverage: 'Global Oceans',
+      resolution: 'Altimetry',
+      frequency: 'Every 10 days',
+      lastUpdate: '2025-01-11 18:40:15',
+      dataTypes: ['Sea Surface Height', 'Ocean Topography', 'Climate Monitoring'],
+      modules: ['Blue Carbon 360', 'Aqua Trace', 'Carbon Trace'],
+      coordinates: { lat: 0.5000, lng: -11.3000 },
+      signal: 90,
+      battery: 86,
+      dataTransmitted: '1.3 TB',
+      orbitalVelocity: '7.2 km/s'
+    },
+    // Next-Generation Satellites
+    {
+      id: 'SAT-023',
+      name: 'Capella-1',
+      type: 'Commercial SAR',
+      status: 'active',
+      provider: 'Capella Space',
+      purpose: 'All-Weather Monitoring',
+      altitude: '525 km',
+      coverage: 'On-Demand',
+      resolution: '0.5m - 5m',
+      frequency: 'On-Demand',
+      lastUpdate: '2025-01-11 18:54:02',
+      dataTypes: ['X-band SAR', 'Change Detection', 'Monitoring'],
+      modules: ['Mine Watch', 'Forest Guard', 'Live Trace'],
+      coordinates: { lat: 19.5000, lng: -2.1000 },
+      signal: 87,
+      battery: 83,
+      dataTransmitted: '0.4 TB',
+      orbitalVelocity: '7.6 km/s'
+    },
+    {
+      id: 'SAT-024',
+      name: 'ICEYE-X2',
+      type: 'Commercial SAR',
+      status: 'active',
+      provider: 'ICEYE',
+      purpose: 'Disaster Monitoring',
+      altitude: '570 km',
+      coverage: 'Global',
+      resolution: '1m - 15m',
+      frequency: 'Daily',
+      lastUpdate: '2025-01-11 18:48:37',
+      dataTypes: ['X-band SAR', 'Flood Monitoring', 'Emergency Response'],
+      modules: ['Forest Guard', 'Aqua Trace', 'Mine Watch'],
+      coordinates: { lat: 20.8000, lng: -1.4000 },
+      signal: 85,
+      battery: 80,
+      dataTransmitted: '0.7 TB',
+      orbitalVelocity: '7.5 km/s'
     }
   ];
 
@@ -191,6 +560,83 @@ export default function SatelliteMonitoring() {
     return { color: 'text-red-600', bars: 1 };
   };
 
+  // Satellite Card Component
+  const SatelliteCard = ({ satellite, onSelect, setIsDetailModalOpen }: any) => {
+    const signalInfo = getSignalStrength(satellite.signal);
+    return (
+      <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer" 
+            onClick={() => {onSelect(satellite); setIsDetailModalOpen(true);}}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Satellite className="h-6 w-6 text-blue-600" />
+              <div>
+                <CardTitle className="text-lg">{satellite.name}</CardTitle>
+                <p className="text-sm text-gray-600">{satellite.provider}</p>
+              </div>
+            </div>
+            {getStatusBadge(satellite.status)}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Type:</span>
+              <span className="text-sm font-medium">{satellite.type}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Purpose:</span>
+              <span className="text-sm font-medium">{satellite.purpose}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Altitude:</span>
+              <span className="text-sm font-medium">{satellite.altitude}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Resolution:</span>
+              <span className="text-sm font-medium">{satellite.resolution}</span>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Signal Strength:</span>
+              <div className="flex items-center gap-2">
+                <Signal className={`h-4 w-4 ${signalInfo.color}`} />
+                <span className="text-sm font-medium">{satellite.signal}%</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Battery:</span>
+              <div className="flex items-center gap-2">
+                <Battery className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium">{satellite.battery}%</span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t">
+              <p className="text-xs text-gray-500 mb-2">Connected Modules:</p>
+              <div className="flex flex-wrap gap-1">
+                {satellite.modules.map((module: string, idx: number) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {module}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center text-xs text-gray-500">
+              <span>Last Update:</span>
+              <span>{new Date(satellite.lastUpdate).toLocaleTimeString()}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
       <Helmet>
@@ -216,7 +662,7 @@ export default function SatelliteMonitoring() {
             <h1 className="text-3xl font-bold text-gray-900">Satellite Monitoring System</h1>
           </div>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Real-time monitoring and management of all satellites connected to the Polipus platform across 8 specialized modules
+            Comprehensive real-time monitoring of {satellites.length} satellites connected to the Polipus platform across 8 specialized modules for maximum efficiency coverage
           </p>
         </div>
 
@@ -229,6 +675,7 @@ export default function SatelliteMonitoring() {
                 <div>
                   <p className="text-sm font-medium text-blue-600">Active Satellites</p>
                   <p className="text-2xl font-bold text-blue-900">{satellites.filter(s => s.status === 'active').length}</p>
+                  <p className="text-xs text-blue-500">of {satellites.length} total</p>
                 </div>
               </div>
             </CardContent>
@@ -271,84 +718,67 @@ export default function SatelliteMonitoring() {
           </Card>
         </div>
 
-        {/* Satellite Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-          {satellites.map((satellite) => {
-            const signalInfo = getSignalStrength(satellite.signal);
-            return (
-              <Card key={satellite.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer" 
-                    onClick={() => {setSelectedSatellite(satellite); setIsDetailModalOpen(true);}}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Satellite className="h-6 w-6 text-blue-600" />
-                      <div>
-                        <CardTitle className="text-lg">{satellite.name}</CardTitle>
-                        <p className="text-sm text-gray-600">{satellite.provider}</p>
-                      </div>
-                    </div>
-                    {getStatusBadge(satellite.status)}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Type:</span>
-                      <span className="text-sm font-medium">{satellite.type}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Purpose:</span>
-                      <span className="text-sm font-medium">{satellite.purpose}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Altitude:</span>
-                      <span className="text-sm font-medium">{satellite.altitude}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Resolution:</span>
-                      <span className="text-sm font-medium">{satellite.resolution}</span>
-                    </div>
+        {/* Satellite Categories */}
+        <Tabs defaultValue="all" className="mb-8">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="all">All ({satellites.length})</TabsTrigger>
+            <TabsTrigger value="earth">Earth Obs ({satellites.filter(s => s.type === 'Earth Observation').length})</TabsTrigger>
+            <TabsTrigger value="ocean">Ocean ({satellites.filter(s => s.type.includes('Ocean')).length})</TabsTrigger>
+            <TabsTrigger value="weather">Weather ({satellites.filter(s => s.type.includes('Weather')).length})</TabsTrigger>
+            <TabsTrigger value="radar">Radar ({satellites.filter(s => s.type.includes('Radar')).length})</TabsTrigger>
+            <TabsTrigger value="commercial">Commercial ({satellites.filter(s => s.provider.includes('Planet') || s.provider.includes('Maxar') || s.provider.includes('Capella') || s.provider.includes('ICEYE')).length})</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="all">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {satellites.map((satellite) => (
+                <SatelliteCard key={satellite.id} satellite={satellite} onSelect={setSelectedSatellite} setIsDetailModalOpen={setIsDetailModalOpen} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="earth">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {satellites.filter(s => s.type === 'Earth Observation').map((satellite) => (
+                <SatelliteCard key={satellite.id} satellite={satellite} onSelect={setSelectedSatellite} setIsDetailModalOpen={setIsDetailModalOpen} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="ocean">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {satellites.filter(s => s.type.includes('Ocean')).map((satellite) => (
+                <SatelliteCard key={satellite.id} satellite={satellite} onSelect={setSelectedSatellite} setIsDetailModalOpen={setIsDetailModalOpen} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="weather">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {satellites.filter(s => s.type.includes('Weather')).map((satellite) => (
+                <SatelliteCard key={satellite.id} satellite={satellite} onSelect={setSelectedSatellite} setIsDetailModalOpen={setIsDetailModalOpen} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="radar">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {satellites.filter(s => s.type.includes('Radar')).map((satellite) => (
+                <SatelliteCard key={satellite.id} satellite={satellite} onSelect={setSelectedSatellite} setIsDetailModalOpen={setIsDetailModalOpen} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="commercial">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+              {satellites.filter(s => s.provider.includes('Planet') || s.provider.includes('Maxar') || s.provider.includes('Capella') || s.provider.includes('ICEYE')).map((satellite) => (
+                <SatelliteCard key={satellite.id} satellite={satellite} onSelect={setSelectedSatellite} setIsDetailModalOpen={setIsDetailModalOpen} />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
 
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Signal Strength:</span>
-                      <div className="flex items-center gap-2">
-                        <Signal className={`h-4 w-4 ${signalInfo.color}`} />
-                        <span className="text-sm font-medium">{satellite.signal}%</span>
-                      </div>
-                    </div>
 
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Battery:</span>
-                      <div className="flex items-center gap-2">
-                        <Battery className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium">{satellite.battery}%</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-gray-500 mb-2">Connected Modules:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {satellite.modules.map((module, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
-                            {module}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center text-xs text-gray-500">
-                      <span>Last Update:</span>
-                      <span>{new Date(satellite.lastUpdate).toLocaleTimeString()}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
 
         {/* Satellite Detail Modal */}
         <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>

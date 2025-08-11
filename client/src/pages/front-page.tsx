@@ -242,20 +242,12 @@ export default function FrontPage() {
               Access the comprehensive integrated dashboard showing real-time connectivity and data exchange 
               between all 7 modules. Monitor cross-module integration status and system-wide performance.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
-              <Link href="/integrated-dashboard">
-                <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white flex items-center gap-2">
-                  <Zap className="h-4 w-4" />
-                  View Integrated Dashboard
-                </Button>
-              </Link>
-              <Link href="/satellite-monitoring">
-                <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white flex items-center gap-2">
-                  <Satellite className="h-4 w-4" />
-                  Satellite Monitoring
-                </Button>
-              </Link>
-            </div>
+            <Link href="/integrated-dashboard">
+              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white flex items-center gap-2 mx-auto">
+                <Zap className="h-4 w-4" />
+                View Integrated Dashboard
+              </Button>
+            </Link>
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm text-slate-600">
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />

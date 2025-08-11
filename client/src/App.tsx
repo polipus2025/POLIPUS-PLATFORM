@@ -566,15 +566,16 @@ function App() {
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   const isMonitoringDashboard = window.location.pathname === "/monitoring-dashboard" && authToken && userType === 'monitoring';
   
-  // LiveTrace and LandMap360 pages should use their own independent layout
+  // Special modules that should use their own independent layout
   const isLiveTracePage = window.location.pathname.startsWith("/livetrace");
   const isLandMap360Page = window.location.pathname.startsWith("/landmap360") || window.location.pathname === "/land-map360";
+  const isBlueCarbon360Page = window.location.pathname.startsWith("/blue-carbon360");
   
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page) ? (
-          // Render auth/landing pages, special dashboards, LiveTrace, or LandMap360 pages without AgriTrace layout
+        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
+          // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
           <div className="min-h-screen">
             <Router />
           </div>

@@ -42,6 +42,16 @@ export default function FarmerDashboard() {
 
   return (
     <div className="space-y-4 sm:space-y-6 p-3 sm:p-0">
+      {/* Back to Polipus Button */}
+      <div className="mb-4">
+        <Link href="/polipus" className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Polipus Platform
+        </Link>
+      </div>
+
       {/* Mobile-Responsive Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

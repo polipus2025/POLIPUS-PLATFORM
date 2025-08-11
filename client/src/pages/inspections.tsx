@@ -741,7 +741,7 @@ export default function Inspections() {
                         <p className="text-sm font-medium text-purple-600">Online Now</p>
                         <p className="text-3xl font-bold text-purple-900">
                           {inspectorDevices.filter(d => {
-                            const lastSeen = new Date(d.lastSeen);
+                            const lastSeen = d.lastSeen ? new Date(d.lastSeen) : new Date();
                             const now = new Date();
                             const diffMinutes = (now.getTime() - lastSeen.getTime()) / (1000 * 60);
                             return diffMinutes < 5; // Online if last seen within 5 minutes
@@ -778,7 +778,7 @@ export default function Inspections() {
                     </TableHeader>
                     <TableBody>
                       {inspectorDevices.map((device) => {
-                        const lastSeen = new Date(device.lastSeen);
+                        const lastSeen = device.lastSeen ? new Date(device.lastSeen) : new Date();
                         const now = new Date();
                         const diffMinutes = (now.getTime() - lastSeen.getTime()) / (1000 * 60);
                         const isOnline = diffMinutes < 5;
@@ -806,10 +806,7 @@ export default function Inspections() {
                               <div className="flex items-center gap-1">
                                 <MapPin className="h-3 w-3 text-gray-400" />
                                 <span className="text-xs text-gray-600">
-                                  {device.currentLatitude && device.currentLongitude 
-                                    ? `${device.currentLatitude.toFixed(4)}, ${device.currentLongitude.toFixed(4)}`
-                                    : "No location"
-                                  }
+                                  No location
                                 </span>
                               </div>
                             </TableCell>
@@ -824,10 +821,10 @@ export default function Inspections() {
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <div className={`h-2 w-8 rounded-full ${
-                                  device.batteryLevel > 50 ? 'bg-green-500' :
-                                  device.batteryLevel > 20 ? 'bg-yellow-500' : 'bg-red-500'
+                                  (device.batteryLevel || 0) > 50 ? 'bg-green-500' :
+                                  (device.batteryLevel || 0) > 20 ? 'bg-yellow-500' : 'bg-red-500'
                                 }`} />
-                                <span className="text-xs text-gray-600">{device.batteryLevel}%</span>
+                                <span className="text-xs text-gray-600">{device.batteryLevel || 0}%</span>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -856,7 +853,7 @@ export default function Inspections() {
                             <p className="text-sm font-medium text-yellow-800">{alert.alertType}</p>
                             <p className="text-xs text-yellow-700 mt-1">{alert.message}</p>
                             <p className="text-xs text-yellow-600 mt-2">
-                              Device: {alert.deviceId} • {new Date(alert.triggeredAt).toLocaleString()}
+                              Device: {alert.deviceId} • {alert.triggeredAt ? new Date(alert.triggeredAt).toLocaleString() : 'Unknown time'}
                             </p>
                           </div>
                           <Badge className="bg-yellow-100 text-yellow-800">
@@ -885,10 +882,10 @@ export default function Inspections() {
                           <CheckCircle className="h-4 w-4 text-green-600" />
                           <div className="flex-1">
                             <p className="text-sm font-medium text-green-800">
-                              {checkIn.inspectorName || checkIn.inspectorId}
+                              {checkIn.inspectorId}
                             </p>
                             <p className="text-xs text-green-700">
-                              {checkIn.location} • {new Date(checkIn.timestamp).toLocaleTimeString()}
+                              Check-in • {checkIn.timestamp ? new Date(checkIn.timestamp).toLocaleTimeString() : 'Unknown time'}
                             </p>
                           </div>
                           <Badge className="bg-green-100 text-green-800">

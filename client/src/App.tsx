@@ -130,6 +130,7 @@ import ForestGuardPortal from "@/pages/portals/forest-guard-portal";
 import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
 import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
 import SatelliteMonitoring from "@/pages/satellite-monitoring";
+import AdvancedEnvironmentalDashboard from "@/pages/advanced-environmental-dashboard";
 import CarbonTracePortal from "@/pages/portals/carbon-trace-portal";
 
 // New Module Dashboards
@@ -517,6 +518,7 @@ function Router() {
       <Route path="/aqua-trace-dashboard" component={AquaTraceDashboard} />
       <Route path="/blue-carbon360-dashboard" component={BlueCarbon360Dashboard} />
       <Route path="/satellite-monitoring" component={SatelliteMonitoring} />
+      <Route path="/advanced-environmental-dashboard" component={AdvancedEnvironmentalDashboard} />
       <Route path="/blue-carbon360/ecosystem-monitoring" component={EcosystemMonitoringPage} />
       <Route path="/blue-carbon360/projects" component={ConservationProjectsPage} />
       <Route path="/blue-carbon360/marketplace" component={CarbonMarketplacePage} />

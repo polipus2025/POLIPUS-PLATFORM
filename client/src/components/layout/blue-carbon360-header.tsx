@@ -1,4 +1,4 @@
-import { Bell, LogOut, User, Clock, Calendar, Waves, Sun, CloudRain, Cloud } from "lucide-react";
+import { Bell, LogOut, User, Clock, Calendar, Waves, Sun, CloudRain, Cloud, Home, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -42,7 +42,7 @@ export default function BlueCarbon360Header() {
     queryKey: ["/api/blue-carbon360/alerts"],
   });
 
-  const unreadCount = alerts.length;
+  const unreadCount = (alerts as any[]).length;
   const { username, firstName, lastName, organization, position } = getUserInfo();
 
   // Time, Date, and Weather State
@@ -111,6 +111,15 @@ export default function BlueCarbon360Header() {
     <div className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       {/* Blue Carbon 360 Platform Indicator */}
       <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setLocation('/')}
+          className="flex items-center gap-2 hover:bg-slate-100"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Back to Polipus</span>
+        </Button>
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
           <Waves className="h-5 w-5 text-white" />
         </div>

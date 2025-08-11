@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Waves, Heart, DollarSign, TrendingUp, Zap } from "lucide-react";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Waves, Heart, DollarSign, TrendingUp, Zap, ArrowLeft, Home } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { useState, useEffect } from "react";
@@ -99,6 +99,16 @@ export default function BlueCarbon360Portal() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-8">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation('/')}
+                className="flex items-center gap-2 hover:bg-slate-100 text-slate-700"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Polipus</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
               <div className="flex items-center gap-2 sm:gap-4">
                 <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg overflow-hidden">
                   <img 

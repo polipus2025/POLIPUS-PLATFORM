@@ -252,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const configurations = await superBackend.getSystemConfigurations(category as string);
       res.json({ success: true, data: configurations });
     } catch (error) {
-      await superBackend.logError('config_api', 'Failed to get configurations', error as Error, req.user?.id);
+      await superBackend.logError('config_api', 'Failed to get configurations', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve configurations" });
     }
   });
@@ -260,10 +260,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/super-backend/configurations", authenticateSuperBackend, async (req, res) => {
     try {
       const { configKey, configValue } = req.body;
-      await superBackend.updateSystemConfiguration(configKey, configValue, req.user?.id || 'system');
+      await superBackend.updateSystemConfiguration(configKey, configValue, String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Configuration updated successfully" });
     } catch (error) {
-      await superBackend.logError('config_api', 'Failed to update configuration', error as Error, req.user?.id);
+      await superBackend.logError('config_api', 'Failed to update configuration', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to update configuration" });
     }
   });
@@ -275,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const controls = await superBackend.getRealTimeControls(active !== 'false');
       res.json({ success: true, data: controls });
     } catch (error) {
-      await superBackend.logError('control_api', 'Failed to get controls', error as Error, req.user?.id);
+      await superBackend.logError('control_api', 'Failed to get controls', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve controls" });
     }
   });
@@ -284,12 +284,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const control = {
         ...req.body,
-        appliedBy: req.user?.id || 'system'
+        appliedBy: String(req.user?.userId || 'system')
       };
       const newControl = await superBackend.applyRealTimeControl(control);
       res.json({ success: true, data: newControl, message: "Control applied successfully" });
     } catch (error) {
-      await superBackend.logError('control_api', 'Failed to apply control', error as Error, req.user?.id);
+      await superBackend.logError('control_api', 'Failed to apply control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to apply control" });
     }
   });
@@ -297,10 +297,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/super-backend/controls/:id", authenticateSuperBackend, async (req, res) => {
     try {
       const { id } = req.params;
-      await superBackend.deactivateControl(parseInt(id), req.user?.id || 'system');
+      await superBackend.deactivateControl(parseInt(id), String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Control deactivated successfully" });
     } catch (error) {
-      await superBackend.logError('control_api', 'Failed to deactivate control', error as Error, req.user?.id);
+      await superBackend.logError('control_api', 'Failed to deactivate control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to deactivate control" });
     }
   });
@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const healthCheck = await superBackend.performHealthCheck();
       res.json({ success: true, data: healthCheck });
     } catch (error) {
-      await superBackend.logError('health_api', 'Health check failed', error as Error, req.user?.id);
+      await superBackend.logError('health_api', 'Health check failed', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Health check failed" });
     }
   });
@@ -322,7 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const healthData = await superBackend.getSystemHealth(parseInt(hours as string) || 24);
       res.json({ success: true, data: healthData });
     } catch (error) {
-      await superBackend.logError('health_api', 'Failed to get system health', error as Error, req.user?.id);
+      await superBackend.logError('health_api', 'Failed to get system health', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve system health" });
     }
   });
@@ -337,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json({ success: true, data: metrics });
     } catch (error) {
-      await superBackend.logError('performance_api', 'Failed to get performance metrics', error as Error, req.user?.id);
+      await superBackend.logError('performance_api', 'Failed to get performance metrics', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve performance metrics" });
     }
   });
@@ -348,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await superBackend.recordPerformanceMetric(metricType, metricName, value, unit, tags);
       res.json({ success: true, message: "Performance metric recorded" });
     } catch (error) {
-      await superBackend.logError('performance_api', 'Failed to record metric', error as Error, req.user?.id);
+      await superBackend.logError('performance_api', 'Failed to record metric', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to record metric" });
     }
   });
@@ -359,7 +359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const flags = await superBackend.getFeatureFlags();
       res.json({ success: true, data: flags });
     } catch (error) {
-      await superBackend.logError('feature_flag_api', 'Failed to get feature flags', error as Error, req.user?.id);
+      await superBackend.logError('feature_flag_api', 'Failed to get feature flags', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve feature flags" });
     }
   });
@@ -368,12 +368,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const flag = {
         ...req.body,
-        modifiedBy: req.user?.id || 'system'
+        modifiedBy: String(req.user?.userId || 'system')
       };
       const newFlag = await superBackend.createFeatureFlag(flag);
       res.json({ success: true, data: newFlag, message: "Feature flag created successfully" });
     } catch (error) {
-      await superBackend.logError('feature_flag_api', 'Failed to create feature flag', error as Error, req.user?.id);
+      await superBackend.logError('feature_flag_api', 'Failed to create feature flag', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to create feature flag" });
     }
   });
@@ -382,10 +382,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { flagName } = req.params;
       const { isEnabled } = req.body;
-      await superBackend.toggleFeatureFlag(flagName, isEnabled, req.user?.id || 'system');
+      await superBackend.toggleFeatureFlag(flagName, isEnabled, String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Feature flag updated successfully" });
     } catch (error) {
-      await superBackend.logError('feature_flag_api', 'Failed to toggle feature flag', error as Error, req.user?.id);
+      await superBackend.logError('feature_flag_api', 'Failed to toggle feature flag', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to update feature flag" });
     }
   });
@@ -396,7 +396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const accessControls = await superBackend.getAccessControlMatrix();
       res.json({ success: true, data: accessControls });
     } catch (error) {
-      await superBackend.logError('access_control_api', 'Failed to get access controls', error as Error, req.user?.id);
+      await superBackend.logError('access_control_api', 'Failed to get access controls', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve access controls" });
     }
   });
@@ -405,12 +405,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const control = {
         ...req.body,
-        appliedBy: req.user?.id || 'system'
+        appliedBy: String(req.user?.userId || 'system')
       };
       const newControl = await superBackend.addAccessControl(control);
       res.json({ success: true, data: newControl, message: "Access control added successfully" });
     } catch (error) {
-      await superBackend.logError('access_control_api', 'Failed to add access control', error as Error, req.user?.id);
+      await superBackend.logError('access_control_api', 'Failed to add access control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to add access control" });
     }
   });
@@ -421,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const controls = await superBackend.getEmergencyControls();
       res.json({ success: true, data: controls });
     } catch (error) {
-      await superBackend.logError('emergency_api', 'Failed to get emergency controls', error as Error, req.user?.id);
+      await superBackend.logError('emergency_api', 'Failed to get emergency controls', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve emergency controls" });
     }
   });
@@ -429,10 +429,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/super-backend/emergency-controls/:controlName/trigger", authenticateSuperBackend, async (req, res) => {
     try {
       const { controlName } = req.params;
-      await superBackend.triggerEmergencyControl(controlName, req.user?.id || 'system');
+      await superBackend.triggerEmergencyControl(controlName, String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Emergency control triggered successfully" });
     } catch (error) {
-      await superBackend.logError('emergency_api', 'Failed to trigger emergency control', error as Error, req.user?.id);
+      await superBackend.logError('emergency_api', 'Failed to trigger emergency control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to trigger emergency control" });
     }
   });
@@ -444,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const operations = await superBackend.getSystemOperations(parseInt(limit as string) || 50);
       res.json({ success: true, data: operations });
     } catch (error) {
-      await superBackend.logError('operations_api', 'Failed to get operations', error as Error, req.user?.id);
+      await superBackend.logError('operations_api', 'Failed to get operations', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve operations" });
     }
   });
@@ -453,12 +453,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const operation = {
         ...req.body,
-        initiatedBy: req.user?.id || 'system'
+        initiatedBy: String(req.user?.userId || 'system')
       };
       const newOperation = await superBackend.createSystemOperation(operation);
       res.json({ success: true, data: newOperation, message: "Operation created successfully" });
     } catch (error) {
-      await superBackend.logError('operations_api', 'Failed to create operation', error as Error, req.user?.id);
+      await superBackend.logError('operations_api', 'Failed to create operation', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to create operation" });
     }
   });
@@ -470,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await superBackend.updateOperationStatus(parseInt(id), status, progress, logs);
       res.json({ success: true, message: "Operation updated successfully" });
     } catch (error) {
-      await superBackend.logError('operations_api', 'Failed to update operation', error as Error, req.user?.id);
+      await superBackend.logError('operations_api', 'Failed to update operation', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to update operation" });
     }
   });
@@ -486,7 +486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json({ success: true, data: logs });
     } catch (error) {
-      await superBackend.logError('logs_api', 'Failed to get logs', error as Error, req.user?.id);
+      await superBackend.logError('logs_api', 'Failed to get logs', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve logs" });
     }
   });
@@ -497,7 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await superBackend.getSystemStats();
       res.json({ success: true, data: stats });
     } catch (error) {
-      await superBackend.logError('stats_api', 'Failed to get stats', error as Error, req.user?.id);
+      await superBackend.logError('stats_api', 'Failed to get stats', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve system stats" });
     }
   });
@@ -509,14 +509,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await superBackend.updateSystemConfiguration(
         'maintenance_mode', 
         enabled.toString(), 
-        req.user?.id || 'system'
+        String(req.user?.userId || 'system')
       );
       
       if (message) {
         await superBackend.updateSystemConfiguration(
           'maintenance_message', 
           message, 
-          req.user?.id || 'system'
+          String(req.user?.userId || 'system')
         );
       }
 
@@ -525,7 +525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Maintenance mode ${enabled ? 'enabled' : 'disabled'} successfully` 
       });
     } catch (error) {
-      await superBackend.logError('maintenance_api', 'Failed to toggle maintenance mode', error as Error, req.user?.id);
+      await superBackend.logError('maintenance_api', 'Failed to toggle maintenance mode', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to toggle maintenance mode" });
     }
   });
@@ -538,7 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         operationType: 'restart',
         operationName: `Restart ${serviceName}`,
         targetEnvironment: process.env.NODE_ENV || 'development',
-        initiatedBy: req.user?.id || 'system',
+        initiatedBy: String(req.user?.userId || 'system'),
         parameters: { serviceName }
       });
 
@@ -547,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true, message: `${serviceName} restart initiated`, operationId: operation.id });
     } catch (error) {
-      await superBackend.logError('restart_api', 'Failed to restart service', error as Error, req.user?.id);
+      await superBackend.logError('restart_api', 'Failed to restart service', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to restart service" });
     }
   });
@@ -560,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         operationType: 'update',
         operationName: `Clear ${cacheType} cache`,
         targetEnvironment: process.env.NODE_ENV || 'development',
-        initiatedBy: req.user?.id || 'system',
+        initiatedBy: String(req.user?.userId || 'system'),
         parameters: { cacheType }
       });
 
@@ -569,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true, message: `${cacheType} cache cleared successfully`, operationId: operation.id });
     } catch (error) {
-      await superBackend.logError('cache_api', 'Failed to clear cache', error as Error, req.user?.id);
+      await superBackend.logError('cache_api', 'Failed to clear cache', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to clear cache" });
     }
   });
@@ -1714,7 +1714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/user", authenticateToken, async (req, res) => {
     try {
       // Extract user info from JWT token (set by authenticateToken middleware)
-      const userId = req.user?.userId;
+      const userId = String(req.user?.userId);
       const user = await storage.getAuthUser(userId);
       
       if (!user) {

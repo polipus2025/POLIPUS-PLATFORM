@@ -316,9 +316,10 @@ export default function EconomicImpactPage() {
       <div className="flex">
         <BlueCarbon360Sidebar />
         
-        <main className="flex-1 lg:ml-64">
-          <ScrollArea className="h-screen">
-            <div className="p-6 pb-20">
+        <main className="flex-1 lg:ml-64 flex justify-center">
+          <div className="w-full max-w-7xl">
+            <ScrollArea className="h-screen">
+              <div className="p-6 pb-20">
               
               {/* Page Header */}
               <div className="mb-8">
@@ -590,8 +591,9 @@ export default function EconomicImpactPage() {
                 </CardContent>
               </Card>
               
-            </div>
-          </ScrollArea>
+              </div>
+            </ScrollArea>
+          </div>
         </main>
       </div>
     </div>

@@ -103,8 +103,8 @@ export default function BlueCarbon360Header() {
       description: "You have been logged out of Blue Carbon 360",
     });
     
-    // Redirect to Blue Carbon 360 portal
-    setLocation('/portals/blue-carbon360');
+    // Redirect to main portals page
+    setLocation('/blue-carbon360');
   };
 
   return (

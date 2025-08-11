@@ -51,28 +51,28 @@ export default function BlueCarbon360Dashboard() {
   const dashboardStats = [
     {
       title: 'Total Projects',
-      value: stats?.totalProjects || 156,
+      value: (stats as any)?.totalProjects || 156,
       icon: Target,
       color: 'bg-cyan-500',
       change: '+25%'
     },
     {
       title: 'Active Projects',
-      value: stats?.activeProjects || 89,
+      value: (stats as any)?.activeProjects || 89,
       icon: Briefcase,
       color: 'bg-green-500',
       change: '+18%'
     },
     {
       title: 'Marketplace Listings',
-      value: stats?.marketplaceListings || 234,
+      value: (stats as any)?.marketplaceListings || 234,
       icon: DollarSign,
       color: 'bg-blue-500',
       change: '+45%'
     },
     {
       title: 'Economic Records',
-      value: stats?.economicImpactRecords || 412,
+      value: (stats as any)?.economicImpactRecords || 412,
       icon: Calculator,
       color: 'bg-emerald-500',
       change: '+32%'
@@ -225,7 +225,7 @@ export default function BlueCarbon360Dashboard() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {projects?.data?.slice(0, 5).map((project: any, index: number) => (
+                        {(projects as any)?.data?.slice(0, 5).map((project: any, index: number) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg border border-cyan-200">
                             <div>
                               <p className="font-medium text-slate-900">{project.projectName || `Conservation Project ${index + 1}`}</p>
@@ -263,7 +263,7 @@ export default function BlueCarbon360Dashboard() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {marketplace?.data?.slice(0, 5).map((listing: any, index: number) => (
+                        {(marketplace as any)?.data?.slice(0, 5).map((listing: any, index: number) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
                             <div>
                               <p className="font-medium text-slate-900">{listing.listingTitle || `Carbon Credit Listing ${index + 1}`}</p>

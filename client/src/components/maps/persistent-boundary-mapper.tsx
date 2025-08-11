@@ -38,16 +38,23 @@ export default function PersistentBoundaryMapper({
   const calculateArea = useCallback((boundaryPoints: BoundaryPoint[]) => {
     if (boundaryPoints.length < 3) return 0;
     
+    // Use proper spherical area calculation for GPS coordinates
     let area = 0;
+    const earthRadius = 6371000; // Earth's radius in meters
+    
     for (let i = 0; i < boundaryPoints.length; i++) {
       const j = (i + 1) % boundaryPoints.length;
-      area += boundaryPoints[i].latitude * boundaryPoints[j].longitude;
-      area -= boundaryPoints[j].latitude * boundaryPoints[i].longitude;
+      const lat1 = boundaryPoints[i].latitude * Math.PI / 180;
+      const lat2 = boundaryPoints[j].latitude * Math.PI / 180;
+      const lon1 = boundaryPoints[i].longitude * Math.PI / 180;
+      const lon2 = boundaryPoints[j].longitude * Math.PI / 180;
+      
+      area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
     
-    area = Math.abs(area) / 2;
-    // Convert to hectares (approximate)
-    return parseFloat((area * 111.32 * 111.32 / 10000).toFixed(2));
+    area = Math.abs(area * earthRadius * earthRadius / 2);
+    // Convert from square meters to hectares (1 hectare = 10,000 m²)
+    return parseFloat((area / 10000).toFixed(4));
   }, []);
 
   // Draw boundary points and connections on canvas
@@ -263,7 +270,7 @@ export default function PersistentBoundaryMapper({
     };
 
     createSatelliteMap();
-  }, [mapCenter]);
+  }, []);
 
   // Set up canvas reference when map is ready
   useEffect(() => {

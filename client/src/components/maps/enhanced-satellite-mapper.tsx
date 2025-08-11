@@ -437,16 +437,23 @@ export default function EnhancedSatelliteMapper({
   const calculatePolygonArea = (polygonPoints: BoundaryPoint[]) => {
     if (polygonPoints.length < 3) return 0;
 
+    // Use the proper spherical area calculation for more accuracy
     let area = 0;
+    const earthRadius = 6371000; // Earth's radius in meters
+    
     for (let i = 0; i < polygonPoints.length; i++) {
       const j = (i + 1) % polygonPoints.length;
-      area += polygonPoints[i].latitude * polygonPoints[j].longitude;
-      area -= polygonPoints[j].latitude * polygonPoints[i].longitude;
+      const lat1 = polygonPoints[i].latitude * Math.PI / 180;
+      const lat2 = polygonPoints[j].latitude * Math.PI / 180;
+      const lon1 = polygonPoints[i].longitude * Math.PI / 180;
+      const lon2 = polygonPoints[j].longitude * Math.PI / 180;
+      
+      area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
     
-    area = Math.abs(area) / 2;
-    // Convert to hectares (approximate)
-    return area * 111.32 * 111.32 / 10000;
+    area = Math.abs(area * earthRadius * earthRadius / 2);
+    // Convert from square meters to hectares
+    return parseFloat((area / 10000).toFixed(4));
   };
 
   // Capture map screenshot for farmer profile

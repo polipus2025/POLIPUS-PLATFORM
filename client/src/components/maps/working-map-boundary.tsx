@@ -274,17 +274,23 @@ export default function WorkingMapBoundary({
   const calculateArea = (points: BoundaryPoint[]): number => {
     if (points.length < 3) return 0;
     
-    // Use proper geographic area calculation
+    // Use proper spherical area calculation for GPS coordinates
     let area = 0;
+    const earthRadius = 6371000; // Earth's radius in meters
+    
     for (let i = 0; i < points.length; i++) {
       const j = (i + 1) % points.length;
-      area += (points[j].longitude - points[i].longitude) * (points[j].latitude + points[i].latitude);
+      const lat1 = points[i].latitude * Math.PI / 180;
+      const lat2 = points[j].latitude * Math.PI / 180;
+      const lon1 = points[i].longitude * Math.PI / 180;
+      const lon2 = points[j].longitude * Math.PI / 180;
+      
+      area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
-    area = Math.abs(area) / 2;
     
-    // Convert to hectares (approximate for small areas)
-    const hectares = area * 111320 * 111320 / 10000; // m² to hectares
-    return hectares;
+    area = Math.abs(area * earthRadius * earthRadius / 2);
+    // Convert from square meters to hectares (1 hectare = 10,000 m²)
+    return parseFloat((area / 10000).toFixed(4));
   };
 
   const handleReset = () => {

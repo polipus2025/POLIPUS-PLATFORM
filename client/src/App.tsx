@@ -147,6 +147,7 @@ import ImpactReportsPage from "@/pages/blue-carbon360/impact-reports-page";
 import ConservationNetworkPage from "@/pages/blue-carbon360/conservation-network-page";
 import GlobalStandardsPage from "@/pages/blue-carbon360/global-standards-page";
 import ConservationMessagingPage from "@/pages/blue-carbon360/conservation-messaging-page";
+import EPAInspectorPage from "@/pages/blue-carbon360/epa-inspector-page";
 import ConservationMetricsPage from "@/pages/blue-carbon360/conservation-metrics-page";
 import CarbonTradingPage from "@/pages/blue-carbon360/carbon-trading-page";
 import MangroveManagementPage from "@/pages/blue-carbon360/mangrove-management-page";
@@ -528,6 +529,7 @@ function Router() {
       <Route path="/blue-carbon360/network" component={ConservationNetworkPage} />
       <Route path="/blue-carbon360/standards" component={GlobalStandardsPage} />
       <Route path="/blue-carbon360/messaging" component={ConservationMessagingPage} />
+      <Route path="/blue-carbon360/epa-inspector" component={EPAInspectorPage} />
       <Route path="/blue-carbon360/metrics" component={ConservationMetricsPage} />
       <Route path="/blue-carbon360/trading" component={CarbonTradingPage} />
       <Route path="/blue-carbon360/mangroves" component={MangroveManagementPage} />

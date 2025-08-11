@@ -15,7 +15,8 @@ import {
   MapPin,
   Users,
   PiggyBank,
-  Globe
+  Globe,
+  Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -51,6 +52,7 @@ const blueCarbon360Navigation = [
   { name: "Conservation Economics", href: "/blue-carbon360/economics", icon: PiggyBank },
   { name: "Impact Reports", href: "/blue-carbon360/reports", icon: FileText },
   { name: "Conservation Network", href: "/blue-carbon360/network", icon: Users },
+  { name: "EPA Inspector Request", href: "/blue-carbon360/epa-inspector", icon: Shield },
   { name: "Global Standards", href: "/blue-carbon360/standards", icon: Globe },
   { name: "Conservation Messaging", href: "/blue-carbon360/messaging", icon: MessageSquare },
 ];

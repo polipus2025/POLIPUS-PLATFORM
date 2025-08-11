@@ -590,7 +590,7 @@ export class DatabaseStorage implements IStorage {
 
   // Sync operations
   async getGovernmentSyncLogsByEntity(entity: string): Promise<GovernmentSyncLog[]> {
-    return await db.select().from(governmentSyncLog).where(eq(governmentSyncLog.entityType, entity));
+    return await db.select().from(governmentSyncLog).where(eq(governmentSyncLog.syncType, entity));
   }
 
   async getGovernmentSyncLogsByType(type: string): Promise<GovernmentSyncLog[]> {

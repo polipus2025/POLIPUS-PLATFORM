@@ -16,9 +16,13 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Award, Download, Eye, FileText, PrinterIcon } from "lucide-react";
+import { Search, Plus, Award, Download, Eye, FileText, PrinterIcon, TreePine, Shield, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Certification, Commodity } from "@shared/schema";
+import ComprehensiveDeforestationReportComponent from "@/components/reports/comprehensive-deforestation-report";
+import ComprehensiveEUDRReportComponent from "@/components/reports/comprehensive-eudr-report";
+import ComprehensiveFarmerInfoPageComponent from "@/components/reports/comprehensive-farmer-info-page";
+import { downloadComprehensiveDeforestationReport, downloadComprehensiveEUDRReport, downloadComprehensiveFarmerProfile } from "@/lib/simple-pdf-generator";
 
 export default function Certifications() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,7 +30,177 @@ export default function Certifications() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedCertificate, setSelectedCertificate] = useState<Certification | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [reportType, setReportType] = useState<'deforestation' | 'eudr' | 'farmer-info' | null>(null);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const { toast } = useToast();
+
+  // Mock data for comprehensive reports
+  const mockDeforestationData = {
+    farmerId: "F001",
+    farmerName: "Demo Farmer",
+    county: "Montserrado",
+    farmSize: 12.5,
+    farmSizeUnit: "hectares",
+    gpsCoordinates: "6.3156° N, 10.7074° W",
+    analysisDate: "2025-08-12",
+    reportId: "DFR-001-2025",
+    forestLossDetected: false,
+    forestLossDate: null,
+    forestCoverChange: 2.3,
+    baselineForestCover: 35.2,
+    currentForestCover: 37.5,
+    deforestationRate: 0.05,
+    biodiversityImpact: 'minimal' as const,
+    speciesAtRisk: [],
+    habitatFragmentation: 5.2,
+    carbonStockLoss: 0.8,
+    carbonEmissions: 1.2,
+    carbonSequestrationPotential: 15.6,
+    soilErosionRisk: 'low' as const,
+    waterResourceImpact: 'minimal' as const,
+    climateChangeContribution: 2.1,
+    legalComplianceStatus: 'compliant' as const,
+    permitsRequired: ['Environmental Impact Assessment', 'Land Use Permit'],
+    violationsDetected: [],
+    mitigationRequired: false,
+    recommendedActions: [
+      'Continue sustainable farming practices',
+      'Monitor forest boundaries quarterly',
+      'Implement additional carbon sequestration methods'
+    ],
+    reforestationPlan: 'Maintain current forest cover and implement agroforestry practices in designated areas to enhance carbon sequestration and biodiversity conservation.',
+    timelineForCompliance: 'N/A - Currently compliant',
+    satelliteImageryDate: '2025-08-10',
+    monitoringFrequency: 'Quarterly',
+    nextAssessmentDate: '2025-11-12'
+  };
+
+  const mockEUDRData = {
+    farmerId: "F001",
+    farmerName: "Demo Farmer", 
+    county: "Montserrado",
+    farmSize: 12.5,
+    farmSizeUnit: "hectares",
+    gpsCoordinates: "6.3156° N, 10.7074° W",
+    assessmentDate: "2025-08-12",
+    reportId: "EUDR-001-2025",
+    riskLevel: 'low' as const,
+    complianceScore: 92,
+    complianceStatus: 'compliant' as const,
+    dueDiligenceScore: 95,
+    informationGathered: true,
+    riskAssessmentCompleted: true,
+    mitigationMeasuresImplemented: true,
+    deforestationRisk: 3,
+    lastForestDate: "2025-08-10",
+    forestCoverBaseline: 35.2,
+    currentForestCover: 37.5,
+    deforestationAfter2020: false,
+    legalHarvesting: true,
+    relevantLegislationCompliance: [
+      'Liberian Forestry Development Authority Act',
+      'Environmental Protection Agency Act', 
+      'Community Rights Law'
+    ],
+    humanRightsCompliance: true,
+    indigenousRightsRespected: true,
+    supplyChainTransparency: 88,
+    traceabilityScore: 91,
+    documentationComplete: true,
+    thirdPartyVerification: true,
+    mitigationPlan: [
+      'Continue quarterly forest monitoring',
+      'Maintain documentation standards',
+      'Regular stakeholder engagement'
+    ],
+    monitoringSystem: 'Satellite-based monitoring with quarterly ground-truth validation and continuous stakeholder engagement protocols',
+    correctiveActions: [],
+    geolocationVerified: true,
+    satelliteMonitoringActive: true,
+    stakeholderConsultation: true
+  };
+
+  const mockFarmerData = {
+    farmerId: "F001",
+    firstName: "Demo",
+    lastName: "Farmer",
+    phoneNumber: "+231-XXX-XXXX",
+    email: "demo.farmer@example.com",
+    idNumber: "LIB123456789",
+    county: "Montserrado",
+    district: "Greater Monrovia",
+    village: "Paynesville",
+    gpsCoordinates: "6.3156° N, 10.7074° W",
+    farmSize: 12.5,
+    farmSizeUnit: "hectares",
+    totalPlots: 3,
+    cultivatedArea: 9.2,
+    fallowArea: 3.3,
+    registrationDate: "2024-03-15",
+    lastUpdated: "2025-08-12",
+    agreementSigned: true,
+    registrationStatus: 'active' as const,
+    complianceScore: 92,
+    certifications: ['EUDR Compliant', 'Sustainable Agriculture', 'Organic Transition'],
+    inspectionHistory: [
+      {
+        date: "2025-07-15",
+        type: "Environmental Compliance",
+        result: 'passed' as const,
+        notes: "Excellent forest conservation practices"
+      },
+      {
+        date: "2025-06-10", 
+        type: "Quality Assurance",
+        result: 'passed' as const,
+        notes: "High quality cocoa production standards maintained"
+      }
+    ],
+    annualProduction: 850,
+    productionUnit: "kg",
+    yieldPerHectare: 92.4,
+    qualityRating: 4.2,
+    estimatedFarmValue: 45000,
+    annualIncome: 12500,
+    cooperativeMembership: "Montserrado Farmers Cooperative",
+    environmentalScore: 88,
+    sustainablePractices: [
+      'Agroforestry implementation',
+      'Water conservation techniques',
+      'Organic pest management',
+      'Soil erosion prevention',
+      'Carbon sequestration practices'
+    ],
+    forestCoverPercent: 37.5,
+    carbonFootprint: 1.2,
+    waterUsage: 2400,
+    primaryCrops: ['Cocoa', 'Coffee'],
+    secondaryCrops: ['Plantain', 'Cassava'],
+    farmingMethods: ['Sustainable Agriculture', 'Agroforestry', 'Organic Practices'],
+    irrigationSystems: ['Drip Irrigation', 'Rainwater Harvesting'],
+    soilType: 'Clay Loam',
+    technologyAdoption: ['GPS Mapping', 'Soil Testing', 'Weather Monitoring'],
+    equipmentOwned: ['Hand Tools', 'Solar Dryer', 'Processing Equipment'],
+    internetAccess: true,
+    smartphoneOwner: true,
+    employeesHired: 3,
+    communityInvolvement: ['Farmers Association', 'Youth Training Program'],
+    trainingCompleted: ['Sustainable Agriculture', 'EUDR Compliance', 'Financial Literacy'],
+    reportsGenerated: [
+      {
+        type: 'deforestation' as const,
+        date: "2025-08-12",
+        status: 'completed' as const,
+        id: "DFR-001-2025"
+      },
+      {
+        type: 'eudr' as const, 
+        date: "2025-08-12",
+        status: 'completed' as const,
+        id: "EUDR-001-2025"
+      }
+    ]
+  };
 
   const { data: certifications = [], isLoading: certificationsLoading } = useQuery<Certification[]>({
     queryKey: ["/api/certifications"],
@@ -509,7 +683,7 @@ export default function Certifications() {
                       </TableCell>
                       <TableCell>{getStatusBadge(certification.status)}</TableCell>
                       <TableCell>
-                        <div className="flex space-x-1">
+                        <div className="flex flex-wrap gap-1">
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -518,6 +692,7 @@ export default function Certifications() {
                               setSelectedCertificate(certification);
                               setIsPreviewOpen(true);
                             }}
+                            data-testid={`button-preview-${certification.id}`}
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             Preview
@@ -525,20 +700,51 @@ export default function Certifications() {
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="text-lacra-green hover:text-green-700"
-                            onClick={() => handleExportCertificatePdf(certification)}
+                            className="text-green-600 hover:text-green-700"
+                            onClick={() => {
+                              setReportType('deforestation');
+                              setIsReportOpen(true);
+                            }}
+                            data-testid={`button-deforestation-${certification.id}`}
                           >
-                            <Download className="h-4 w-4 mr-1" />
-                            PDF
+                            <TreePine className="h-4 w-4 mr-1" />
+                            Deforestation
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="text-lacra-orange hover:text-orange-700"
-                            onClick={() => handleExportCsv(certification)}
+                            className="text-blue-600 hover:text-blue-700"
+                            onClick={() => {
+                              setReportType('eudr');
+                              setIsReportOpen(true);
+                            }}
+                            data-testid={`button-eudr-${certification.id}`}
                           >
-                            <FileText className="h-4 w-4 mr-1" />
-                            CSV
+                            <Shield className="h-4 w-4 mr-1" />
+                            EUDR
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-purple-600 hover:text-purple-700"
+                            onClick={() => {
+                              setReportType('farmer-info');
+                              setIsReportOpen(true);
+                            }}
+                            data-testid={`button-farmer-${certification.id}`}
+                          >
+                            <User className="h-4 w-4 mr-1" />
+                            Farmer
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-lacra-green hover:text-green-700"
+                            onClick={() => handleExportCertificatePdf(certification)}
+                            data-testid={`button-pdf-${certification.id}`}
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            PDF
                           </Button>
                         </div>
                       </TableCell>
@@ -667,6 +873,77 @@ export default function Certifications() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Comprehensive Reports Dialog */}
+      <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {reportType === 'deforestation' && (
+                <>
+                  <TreePine className="h-5 w-5 text-green-600" />
+                  Comprehensive Deforestation Analysis Report
+                </>
+              )}
+              {reportType === 'eudr' && (
+                <>
+                  <Shield className="h-5 w-5 text-blue-600" />
+                  Comprehensive EUDR Compliance Report
+                </>
+              )}
+              {reportType === 'farmer-info' && (
+                <>
+                  <User className="h-5 w-5 text-purple-600" />
+                  Comprehensive Farmer Information Page
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+            {reportType === 'deforestation' && (
+              <ComprehensiveDeforestationReportComponent data={mockDeforestationData} />
+            )}
+            {reportType === 'eudr' && (
+              <ComprehensiveEUDRReportComponent data={mockEUDRData} />
+            )}
+            {reportType === 'farmer-info' && (
+              <ComprehensiveFarmerInfoPageComponent data={mockFarmerData} />
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                if (reportType === 'deforestation') {
+                  downloadComprehensiveDeforestationReport(mockDeforestationData.farmerId);
+                } else if (reportType === 'eudr') {
+                  downloadComprehensiveEUDRReport(mockEUDRData.farmerId);
+                } else if (reportType === 'farmer-info') {
+                  downloadComprehensiveFarmerProfile(mockFarmerData.farmerId);
+                }
+                toast({
+                  title: "Report Downloaded",
+                  description: `${reportType === 'deforestation' ? 'Deforestation Analysis' : reportType === 'eudr' ? 'EUDR Compliance' : 'Farmer Information'} report has been downloaded as PDF.`,
+                });
+              }}
+              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              data-testid="button-download-report"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download PDF
+            </Button>
+            <Button 
+              onClick={() => setIsReportOpen(false)}
+              className="bg-slate-600 hover:bg-slate-700"
+              data-testid="button-close-report"
+            >
+              Close Report
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       

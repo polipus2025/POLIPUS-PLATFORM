@@ -27,12 +27,23 @@ import {
   Zap,
   Leaf
 } from 'lucide-react';
-import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
-import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
-import GlobalGPSDetector from '@/components/global-gps-detector';
+// Temporarily comment out asset imports that might be causing loading issues
+// import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
+// import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+// import GlobalGPSDetector from '@/components/global-gps-detector';
 
 export default function FrontPage() {
   console.log('🚀 FrontPage component loading...');
+  
+  // Early return test to see if component renders
+  if (window.location.search.includes('debug')) {
+    return (
+      <div style={{ padding: '20px', background: '#0f172a', color: 'white', minHeight: '100vh' }}>
+        <h1>🚀 DEBUG: FrontPage Component Active</h1>
+        <p>React is working! The issue was component loading.</p>
+      </div>
+    );
+  }
   
   const modules = [
     {
@@ -112,20 +123,19 @@ export default function FrontPage() {
         {/* Mobile-Responsive Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-8 sm:mb-12">
           <div className="flex justify-center py-4 sm:py-6 relative">
-            <img 
-              src={poliposLogo} 
-              alt="Polipos - Brightening the Future" 
-              className="h-32 sm:h-48 md:h-64 w-auto object-contain"
-            />
-            {/* Registered trademark symbol positioned over the 's' */}
-            <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
+            <div className="text-center">
+              <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                POLIPUS
+              </h1>
+              <span className="text-sm sm:text-lg md:text-xl font-black text-slate-800">®</span>
+              <p className="text-lg sm:text-xl text-slate-600 mt-2">Brightening the Future</p>
+            </div>
           </div>
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            {/* GPS Active and Login Portals Buttons - Positioned to the left */}
+            {/* Login Portals Button - Positioned to the left */}
             <div className="absolute left-0 top-0 flex flex-col gap-2">
-              <GlobalGPSDetector />
               <Link href="#login-portals">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />

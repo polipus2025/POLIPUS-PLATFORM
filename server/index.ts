@@ -5,7 +5,7 @@ import { log } from "./vite";
 const app = express();
 
 // MAINTENANCE MODE - ENABLED - Application unavailable
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 if (MAINTENANCE_MODE) {
   console.log('🔧 MAINTENANCE MODE: Generic maintenance page active');

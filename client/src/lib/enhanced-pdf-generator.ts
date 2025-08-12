@@ -39,20 +39,49 @@ const addLACRALetterhead = (pdf: jsPDF, title: string, subtitle: string, headerC
   pdf.setFillColor(headerColor[0] - 20, headerColor[1] - 20, headerColor[2] - 20);
   pdf.rect(0, 35, pageWidth, 10, 'F');
   
-  // LACRA Logo area (left)
+  // LACRA Logo area (left) - Circular logo design
   pdf.setFillColor(255, 255, 255);
   pdf.rect(10, 5, 35, 25, 'F');
-  pdf.setDrawColor(200, 200, 200);
+  pdf.setDrawColor(139, 69, 19);
+  pdf.setLineWidth(1);
   pdf.rect(10, 5, 35, 25, 'S');
   
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('LACRA', 20, 15);
+  // LACRA logo elements - circular design
+  const centerX = 27.5;
+  const centerY = 17.5;
+  
+  // Outer brown circle
+  pdf.setDrawColor(139, 69, 19);
+  pdf.setLineWidth(1.5);
+  pdf.circle(centerX, centerY, 10, 'S');
+  
+  // Agricultural commodities representation
+  // Palm fruit (left side)
+  pdf.setFillColor(255, 165, 0); // Orange for palm fruit
+  pdf.circle(centerX - 4, centerY - 2, 2, 'F');
+  pdf.setFillColor(220, 20, 60); // Red for palm fruit
+  pdf.circle(centerX - 4, centerY - 2, 1.5, 'F');
+  
+  // Green leaf
+  pdf.setFillColor(34, 197, 94); // Green
+  pdf.ellipse(centerX - 2, centerY - 4, 3, 1.5, 'F');
+  
+  // Yellow/golden commodity (right side)
+  pdf.setFillColor(255, 215, 0); // Golden
+  pdf.circle(centerX + 3, centerY + 1, 2.5, 'F');
+  
+  // Cocoa beans (bottom)
+  pdf.setFillColor(139, 69, 19); // Brown
+  pdf.circle(centerX - 1, centerY + 3, 1.2, 'F');
+  pdf.circle(centerX + 1, centerY + 3, 1.2, 'F');
+  
+  // LACRA text
+  pdf.setTextColor(139, 69, 19);
   pdf.setFontSize(6);
-  pdf.text('Liberia Agriculture', 12, 20);
-  pdf.text('Commodity Regulatory', 12, 23);
-  pdf.text('Authority', 12, 26);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('LACRA', 19, 26);
+  pdf.setFontSize(4);
+  pdf.text('Excellence', 20, 28);
   
   // ECOENVIRO Certification Logo (center-left)
   pdf.setFillColor(255, 255, 255);

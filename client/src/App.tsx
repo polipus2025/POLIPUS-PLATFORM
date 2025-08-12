@@ -170,12 +170,18 @@ function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: an
 }
 
 function Router() {
+  console.log('🔄 Router rendering, current path:', window.location.pathname);
   // Check if user is logged in and has valid role
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
   return (
     <Switch>
+      {/* Root routes for front page */}
+      <Route path="/" component={FrontPage} />
+      <Route path="/front-page" component={FrontPage} />
+      <Route path="/landing" component={Landing} />
+      
       {/* GPS Testing - Public Access */}
       <Route path="/gps-test" component={GPSTest} />
       

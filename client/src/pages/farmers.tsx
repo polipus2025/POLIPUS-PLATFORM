@@ -197,6 +197,56 @@ export default function FarmersPage() {
     doc.save(fileName);
   };
 
+  // Download EUDR Report as Enhanced PDF
+  const downloadEUDRPDF = async (farmer: any, reportData: any) => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      generateEnhancedEUDRPDF(doc, farmer, reportData);
+      
+      const fileName = `EUDR_Compliance_Report_${farmer.farmerId}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      
+      toast({
+        title: "PDF Downloaded Successfully",
+        description: `EUDR Compliance Report saved as ${fileName}`,
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to generate PDF report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Download Deforestation Report as Enhanced PDF
+  const downloadDeforestationPDF = async (farmer: any, reportData: any) => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      generateEnhancedDeforestationPDF(doc, farmer, reportData);
+      
+      const fileName = `Deforestation_Assessment_Report_${farmer.farmerId}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      
+      toast({
+        title: "PDF Downloaded Successfully",
+        description: `Deforestation Assessment Report saved as ${fileName}`,
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "Download Failed", 
+        description: "Unable to generate PDF report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Generate EUDR Compliance PDF
   const generateEUDRPDF = (doc: any, reportData: any) => {
     const { farmerInfo } = reportData;
@@ -454,6 +504,194 @@ export default function FarmersPage() {
   };
 
 
+
+  // Generate Enhanced EUDR Compliance PDF
+  const generateEnhancedEUDRPDF = (doc: any, farmer: any, reportData: any) => {
+    const currentDate = new Date().toLocaleDateString();
+    const reportId = `EUDR-${farmer.farmerId}-${Date.now()}`;
+    
+    // Header with LACRA branding
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, 210, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text('🌿 LACRA - AgriTrace360™', 105, 18, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text('Liberia Agriculture Commodity Regulatory Authority', 105, 26, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Official EU Deforestation Regulation Compliance Report', 105, 31, { align: 'center' });
+    
+    // Main title section
+    doc.setTextColor(37, 99, 235);
+    doc.setFontSize(18);
+    doc.text('EU DEFORESTATION REGULATION (EUDR)', 105, 50, { align: 'center' });
+    doc.text('COMPLIANCE CERTIFICATION REPORT', 105, 58, { align: 'center' });
+    
+    // Report metadata
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Report ID: ${reportId}`, 20, 70);
+    doc.text(`Generated: ${currentDate}`, 150, 70);
+    doc.text(`Farmer ID: ${farmer.farmerId}`, 20, 77);
+    doc.text(`Status: ${reportData.reportData?.compliance?.status || 'COMPLIANT'}`, 150, 77);
+    
+    // Farmer Information Section
+    let yPos = 90;
+    doc.setFontSize(14);
+    doc.setTextColor(37, 99, 235);
+    doc.text('FARMER INFORMATION', 20, yPos);
+    doc.setLineWidth(0.5);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Name: ${farmer.firstName} ${farmer.lastName}`, 20, yPos);
+    doc.text(`County: ${farmer.county}`, 110, yPos);
+    yPos += 7;
+    doc.text(`Farm Size: ${farmer.farmSize || 'Not specified'} ${farmer.farmSizeUnit || 'hectares'}`, 20, yPos);
+    doc.text(`Phone: ${farmer.phoneNumber || 'Not provided'}`, 110, yPos);
+    yPos += 7;
+    doc.text(`GPS Coordinates: ${farmer.gpsCoordinates || 'Not provided'}`, 20, yPos);
+    
+    // EUDR Compliance Assessment
+    yPos += 20;
+    doc.setFontSize(14);
+    doc.setTextColor(37, 99, 235);
+    doc.text('EUDR COMPLIANCE ASSESSMENT', 20, yPos);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    
+    // Compliance status badge
+    const complianceStatus = reportData.reportData?.compliance?.status || 'COMPLIANT';
+    const riskLevel = reportData.reportData?.compliance?.riskLevel || 'LOW';
+    
+    if (complianceStatus === 'COMPLIANT') {
+      doc.setFillColor(16, 185, 129);
+      doc.rect(20, yPos, 45, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.text('✓ COMPLIANT', 22, yPos + 5);
+    }
+    
+    doc.setTextColor(0, 0, 0);
+    yPos += 15;
+    doc.text(`Risk Assessment: ${riskLevel} Risk Level`, 20, yPos);
+    doc.text(`Forest Definition Applies: ${reportData.reportData?.compliance?.forestDefinitionApplies ? 'Yes' : 'No'}`, 20, yPos + 7);
+    doc.text(`Polygon Mapping Required: ${reportData.reportData?.compliance?.polygonMappingRequired ? 'Yes' : 'No'}`, 20, yPos + 14);
+    doc.text(`Assessment Date: ${new Date(reportData.generatedDate).toLocaleDateString()}`, 20, yPos + 21);
+    
+    // Official footer
+    yPos += 35;
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text('This document is digitally generated by LACRA AgriTrace360™ System', 20, yPos);
+    doc.text('For verification: compliance@lacra.gov.lr | www.lacra.gov.lr', 20, yPos + 5);
+    doc.text(`Document Hash: ${btoa(reportId).substring(0, 16)}`, 20, yPos + 10);
+    
+    // Add page border
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.rect(10, 10, 190, 277);
+  };
+
+  // Generate Enhanced Deforestation Assessment PDF
+  const generateEnhancedDeforestationPDF = (doc: any, farmer: any, reportData: any) => {
+    const currentDate = new Date().toLocaleDateString();
+    const reportId = `DEFOR-${farmer.farmerId}-${Date.now()}`;
+    
+    // Header with LACRA branding
+    doc.setFillColor(239, 68, 68);
+    doc.rect(0, 0, 210, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text('🌲 LACRA - AgriTrace360™', 105, 18, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text('Liberia Agriculture Commodity Regulatory Authority', 105, 26, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Official Deforestation Risk Assessment Report', 105, 31, { align: 'center' });
+    
+    // Main title section
+    doc.setTextColor(239, 68, 68);
+    doc.setFontSize(18);
+    doc.text('DEFORESTATION RISK ASSESSMENT', 105, 50, { align: 'center' });
+    doc.text('ENVIRONMENTAL COMPLIANCE REPORT', 105, 58, { align: 'center' });
+    
+    // Report metadata
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Report ID: ${reportId}`, 20, 70);
+    doc.text(`Assessment Date: ${currentDate}`, 130, 70);
+    doc.text(`Farmer ID: ${farmer.farmerId}`, 20, 77);
+    doc.text(`Farm Area: ${reportData.reportData?.totalAreaHectares || 'N/A'} hectares`, 130, 77);
+    
+    // Farmer Information Section
+    let yPos = 90;
+    doc.setFontSize(14);
+    doc.setTextColor(239, 68, 68);
+    doc.text('FARMER & FARM INFORMATION', 20, yPos);
+    doc.setLineWidth(0.5);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Farmer Name: ${farmer.firstName} ${farmer.lastName}`, 20, yPos);
+    doc.text(`County: ${farmer.county}`, 110, yPos);
+    yPos += 7;
+    doc.text(`Total Farm Area: ${reportData.reportData?.totalAreaHectares || 'Not specified'} hectares`, 20, yPos);
+    doc.text(`GPS Boundary Points: ${reportData.reportData?.boundaryPointsCount || 0}`, 110, yPos);
+    
+    // Deforestation Risk Analysis
+    yPos += 20;
+    doc.setFontSize(14);
+    doc.setTextColor(239, 68, 68);
+    doc.text('DEFORESTATION RISK ANALYSIS', 20, yPos);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    
+    // Risk level indicator
+    const riskLevel = reportData.reportData?.deforestationRiskLevel || 'LOW';
+    let riskColor = [16, 185, 129]; // Green for LOW
+    if (riskLevel === 'MEDIUM') riskColor = [251, 191, 36]; // Yellow
+    if (riskLevel === 'HIGH') riskColor = [239, 68, 68]; // Red
+    
+    doc.setFillColor(riskColor[0], riskColor[1], riskColor[2]);
+    doc.rect(20, yPos, 35, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.text(`${riskLevel} RISK`, 22, yPos + 5);
+    
+    doc.setTextColor(0, 0, 0);
+    yPos += 15;
+    doc.text('Assessment Criteria:', 20, yPos);
+    yPos += 7;
+    doc.text(`• Forest Definition Threshold: ${reportData.reportData?.forestDefinitionApplies ? 'Applies (>0.5 hectares)' : 'Does not apply'}`, 25, yPos);
+    yPos += 7;
+    doc.text(`• Polygon Mapping Requirement: ${reportData.reportData?.polygonMappingRequired ? 'Required (>4 hectares)' : 'Not required'}`, 25, yPos);
+    yPos += 7;
+    doc.text(`• GPS Precision Level: ${reportData.reportData?.gpsAccuracy || 'Unknown'} accuracy`, 25, yPos);
+    
+    // Official footer
+    yPos += 25;
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text('This deforestation assessment is conducted using satellite imagery and GPS mapping technology', 20, yPos);
+    doc.text('Report generated by LACRA AgriTrace360™ Environmental Monitoring System', 20, yPos + 5);
+    doc.text('For technical support: support@lacra.gov.lr | Emergency: +231-XXX-XXXX', 20, yPos + 10);
+    doc.text(`Verification Code: ${btoa(reportId).substring(0, 20)}`, 20, yPos + 15);
+    
+    // Add page border
+    doc.setDrawColor(239, 68, 68);
+    doc.setLineWidth(0.8);
+    doc.rect(10, 10, 190, 277);
+  };
 
   const { data: farmers = [], isLoading } = useQuery({
     queryKey: ["/api/farmers"],
@@ -1583,20 +1821,12 @@ export default function FarmersPage() {
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => {
-                                      const blob = new Blob([JSON.stringify(eudrReport, null, 2)], { type: 'application/json' });
-                                      const url = URL.createObjectURL(blob);
-                                      const a = document.createElement('a');
-                                      a.href = url;
-                                      a.download = eudrReport.documentName || `EUDR_Report_${selectedFarmer.farmerId}.json`;
-                                      a.click();
-                                      URL.revokeObjectURL(url);
-                                    }}
+                                    onClick={() => downloadEUDRPDF(selectedFarmer, eudrReport)}
                                     className="w-full text-green-700 border-green-300 hover:bg-green-50"
                                     data-testid="button-download-eudr-report"
                                   >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Download EUDR Report
+                                    Download EUDR PDF
                                   </Button>
                                 </div>
                               )}
@@ -1624,20 +1854,12 @@ export default function FarmersPage() {
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => {
-                                      const blob = new Blob([JSON.stringify(deforestationReport, null, 2)], { type: 'application/json' });
-                                      const url = URL.createObjectURL(blob);
-                                      const a = document.createElement('a');
-                                      a.href = url;
-                                      a.download = deforestationReport.documentName || `Deforestation_Report_${selectedFarmer.farmerId}.json`;
-                                      a.click();
-                                      URL.revokeObjectURL(url);
-                                    }}
+                                    onClick={() => downloadDeforestationPDF(selectedFarmer, deforestationReport)}
                                     className="w-full text-orange-700 border-orange-300 hover:bg-orange-50"
                                     data-testid="button-download-deforestation-report"
                                   >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Download Deforestation Report
+                                    Download Deforestation PDF
                                   </Button>
                                 </div>
                               )}

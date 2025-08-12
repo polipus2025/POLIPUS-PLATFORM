@@ -1,8 +1,9 @@
 import { Helmet } from "react-helmet";
 import { useState, useRef } from "react";
+import * as React from "react";
 import { GPSPermissionHandler } from "@/components/gps-permission-handler";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download } from "lucide-react";
+import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,7 @@ export default function FarmersPage() {
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [isInteractiveMappingOpen, setIsInteractiveMappingOpen] = useState(false);
   const [farmBoundaries, setFarmBoundaries] = useState<Array<{lat: number, lng: number, point: number}>>([]);
+  const [syncNotification, setSyncNotification] = useState<string>("");
   const [landMapData, setLandMapData] = useState<any>({
     totalArea: 0,
     cultivatedArea: 0,
@@ -92,6 +94,52 @@ export default function FarmersPage() {
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Listen for sync events
+  React.useEffect(() => {
+    const handleSyncComplete = (event: CustomEvent) => {
+      const { success, failed, message } = event.detail;
+      setSyncNotification(message);
+      toast({
+        title: "Offline Data Synced",
+        description: message,
+        duration: 5000,
+      });
+      
+      // Clear notification after 10 seconds
+      setTimeout(() => setSyncNotification(""), 10000);
+    };
+
+    window.addEventListener('farmer-sync-complete', handleSyncComplete as EventListener);
+    
+    return () => {
+      window.removeEventListener('farmer-sync-complete', handleSyncComplete as EventListener);
+    };
+  }, [toast]);
+
+  // Manual sync function
+  const manualSync = async () => {
+    const offlineFarmers = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
+    const pendingFarmers = offlineFarmers.filter((f: any) => f.status !== 'synced');
+    
+    if (pendingFarmers.length === 0) {
+      toast({
+        title: "No Data to Sync",
+        description: "All offline farmer data has already been synced.",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Starting Sync",
+      description: `Syncing ${pendingFarmers.length} offline farmers...`,
+    });
+    
+    // Trigger the sync function from queryClient
+    if ((window as any).syncOfflineFarmers) {
+      (window as any).syncOfflineFarmers();
+    }
+  };
 
   // Download farmer report function
   const downloadFarmerReport = async (farmer: any, reportType: 'comprehensive' | 'eudr') => {
@@ -679,6 +727,24 @@ export default function FarmersPage() {
       />
 
       <div className="p-4 sm:p-6">
+        {/* Sync Notification Banner */}
+        {syncNotification && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <span className="text-green-800 font-medium">{syncNotification}</span>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setSyncNotification("")}
+              className="text-green-600 hover:text-green-800"
+            >
+              ✕
+            </Button>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-neutral">Farmer Management</h1>
@@ -1151,6 +1217,26 @@ export default function FarmersPage() {
               </Form>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* Quick Actions Bar */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {navigator.onLine && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={manualSync}
+              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Sync Offline Data
+            </Button>
+          )}
+          {!navigator.onLine && (
+            <div className="text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
+              📱 Offline Mode - Data will sync when connection returns
+            </div>
+          )}
         </div>
 
         {/* Summary Cards */}

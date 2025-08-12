@@ -190,51 +190,104 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Auto-sync offline data when connection is restored
-function setupOfflineSync() {
-  window.addEventListener('online', async () => {
-    console.log('🌐 Connection restored - syncing offline data');
+// Enhanced auto-sync offline data when connection is restored
+let syncInProgress = false;
+
+async function syncOfflineFarmers() {
+  if (syncInProgress) return;
+  syncInProgress = true;
+  
+  try {
+    const offlineFarmers = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
+    const pendingFarmers = offlineFarmers.filter((f: any) => f.status !== 'synced');
     
-    try {
-      const offlineFarmers = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
-      
-      if (offlineFarmers.length > 0) {
-        console.log(`📤 Syncing ${offlineFarmers.length} offline farmers`);
-        
-        for (const farmer of offlineFarmers) {
-          try {
-            // Remove offline fields before syncing
-            const { isOffline, timestamp, status, ...cleanFarmer } = farmer;
-            
-            const response = await apiRequest('/api/farmers', {
-              method: 'POST',
-              body: JSON.stringify(cleanFarmer)
-            });
-            
-            if (response.success) {
-              console.log('✅ Farmer synced successfully:', farmer.id);
-            }
-          } catch (error) {
-            console.error('❌ Failed to sync farmer:', farmer.id, error);
-          }
-        }
-        
-        // Clear synced data
-        localStorage.removeItem('offlineFarmers');
-        console.log('🧹 Offline farmers data cleared after sync');
-        
-        // Show success notification
-        if (window.location.pathname.includes('farmer') || window.location.pathname.includes('registration')) {
-          alert('✅ Offline farmer data has been successfully synced to the server!');
-        }
-      }
-    } catch (error) {
-      console.error('Sync error:', error);
+    if (pendingFarmers.length === 0) {
+      console.log('📝 No pending farmers to sync');
+      return;
     }
+    
+    console.log(`🔄 Syncing ${pendingFarmers.length} offline farmers...`);
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const farmer of pendingFarmers) {
+      try {
+        // Remove offline-specific fields before syncing
+        const { id, isOffline, timestamp, status, ...cleanFarmer } = farmer;
+        
+        const response = await apiRequest('/api/farmers', {
+          method: 'POST',
+          body: JSON.stringify(cleanFarmer)
+        });
+        
+        if (response.success || response.data) {
+          // Mark as synced
+          farmer.status = 'synced';
+          farmer.syncedAt = Date.now();
+          farmer.serverId = response.data?.id || response.id;
+          successCount++;
+          console.log(`✅ Synced: ${farmer.firstName} ${farmer.lastName}`);
+        } else {
+          farmer.status = 'failed';
+          failCount++;
+          console.log(`❌ Failed: ${farmer.firstName} ${farmer.lastName}`);
+        }
+      } catch (error: any) {
+        farmer.status = 'failed';
+        farmer.syncError = error?.message || 'Unknown error';
+        failCount++;
+        console.error(`❌ Error syncing ${farmer.firstName} ${farmer.lastName}:`, error);
+      }
+    }
+    
+    // Update localStorage with sync results
+    localStorage.setItem('offlineFarmers', JSON.stringify(offlineFarmers));
+    
+    // Refresh farmers list
+    queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });
+    
+    // Show notification
+    if (successCount > 0) {
+      const message = `✅ Successfully synced ${successCount} farmer${successCount > 1 ? 's' : ''} to the server!${failCount > 0 ? ` (${failCount} failed)` : ''}`;
+      console.log(message);
+      
+      // Dispatch custom event for UI components to handle
+      window.dispatchEvent(new CustomEvent('farmer-sync-complete', {
+        detail: { success: successCount, failed: failCount, message }
+      }));
+    }
+    
+    // Clean up successfully synced farmers after some time
+    setTimeout(() => {
+      const current = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
+      const remaining = current.filter((f: any) => f.status !== 'synced');
+      localStorage.setItem('offlineFarmers', JSON.stringify(remaining));
+      console.log('🧹 Cleaned up synced farmers from offline storage');
+    }, 5000);
+    
+  } catch (error) {
+    console.error('❌ Sync operation failed:', error);
+  } finally {
+    syncInProgress = false;
+  }
+}
+
+function setupOfflineSync() {
+  // Sync when coming back online
+  window.addEventListener('online', async () => {
+    console.log('🌐 Connection restored - starting sync...');
+    setTimeout(syncOfflineFarmers, 1000); // Small delay for connection stability
   });
+  
+  // Also sync on page load if online (handles browser refresh case)
+  if (navigator.onLine) {
+    setTimeout(syncOfflineFarmers, 3000); // Wait for app initialization
+  }
 }
 
 // Initialize offline sync when the module loads
 if (typeof window !== 'undefined') {
   setupOfflineSync();
+  // Make sync function available globally for manual triggering
+  (window as any).syncOfflineFarmers = syncOfflineFarmers;
 }

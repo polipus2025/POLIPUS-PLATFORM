@@ -32,6 +32,8 @@ import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
 import GlobalGPSDetector from '@/components/global-gps-detector';
 
 export default function FrontPage() {
+  console.log('🚀 FrontPage component loading...');
+  
   const modules = [
     {
       id: 1,

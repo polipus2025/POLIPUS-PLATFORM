@@ -4,15 +4,15 @@ import { log } from "./vite";
 
 const app = express();
 
-// MAINTENANCE MODE - DISABLED - Full platform accessible
-const MAINTENANCE_MODE = false;
+// MAINTENANCE MODE - ENABLED - Application unavailable
+const MAINTENANCE_MODE = true;
 
 if (MAINTENANCE_MODE) {
   console.log('🔧 MAINTENANCE MODE: Generic maintenance page active');
   
-  // Serve completely empty page for all routes
+  // Serve completely blank page for all routes
   app.use('*', (req, res) => {
-    res.send('');
+    res.status(503).send('');
   });
   
   // Start server

@@ -4,25 +4,15 @@ import { log } from "./vite";
 
 const app = express();
 
-// MAINTENANCE MODE - ENABLED - Application unavailable
+// MAINTENANCE MODE - DISABLED - Full platform accessible
 const MAINTENANCE_MODE = false;
 
 if (MAINTENANCE_MODE) {
   console.log('🔧 MAINTENANCE MODE: Generic maintenance page active');
   
-  // Health check endpoint for deployment (must return 200)
-  app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'maintenance', message: 'Server is running in maintenance mode' });
-  });
-  
-  // Root path health check (Replit often uses '/' for health checks)
-  app.get('/', (req, res) => {
-    res.status(200).json({ status: 'maintenance', message: 'Server is running in maintenance mode' });
-  });
-  
-  // Serve completely blank page for all other routes
-  app.get('*', (req, res) => {
-    res.status(503).send('');
+  // Serve completely empty page for all routes
+  app.use('*', (req, res) => {
+    res.send('');
   });
   
   // Start server
@@ -206,8 +196,6 @@ Longitude: \${longitude.toFixed(6)}
 </body>
 </html>`);
       });
-
-
 
       // Register API routes and database connections
       console.log('📊 Initializing database connections...');

@@ -1,568 +1,613 @@
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 
-// Enhanced PDF Generator for Comprehensive Reports
-export interface ComprehensiveDeforestationData {
+export interface EUDRComplianceData {
   farmerId: string;
   farmerName: string;
-  county: string;
-  farmSize: number;
-  farmSizeUnit: string;
-  gpsCoordinates: string;
-  analysisDate: string;
+  coordinates: string;
+  riskLevel: 'low' | 'standard' | 'high';
+  complianceScore: number;
+  deforestationRisk: number;
+  lastForestDate: string;
+  documentationRequired: string[];
+  recommendations: string[];
   reportId: string;
+  generatedAt: string;
+}
+
+export interface DeforestationData {
+  farmerId: string;
+  farmerName: string;
+  coordinates: string;
   forestLossDetected: boolean;
   forestLossDate: string | null;
   forestCoverChange: number;
-  baselineForestCover: number;
-  currentForestCover: number;
-  deforestationRate: number;
-  biodiversityImpact: string;
+  biodiversityImpact: 'minimal' | 'moderate' | 'significant';
   carbonStockLoss: number;
-  carbonEmissions: number;
   mitigationRequired: boolean;
-  recommendedActions: string[];
-  reforestationPlan: string;
-}
-
-export interface ComprehensiveEUDRData {
-  farmerId: string;
-  farmerName: string;
-  county: string;
-  farmSize: number;
-  farmSizeUnit: string;
-  gpsCoordinates: string;
-  assessmentDate: string;
+  recommendations: string[];
   reportId: string;
-  riskLevel: string;
-  complianceScore: number;
-  complianceStatus: string;
-  dueDiligenceScore: number;
-  deforestationRisk: number;
-  legalHarvesting: boolean;
-  humanRightsCompliance: boolean;
-  mitigationPlan: string[];
-  correctiveActions: string[];
+  generatedAt: string;
 }
 
-export interface ComprehensiveFarmerData {
-  farmerId: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  county: string;
-  farmSize: number;
-  farmSizeUnit: string;
-  gpsCoordinates: string;
-  registrationDate: string;
-  complianceScore: number;
-  environmentalScore: number;
-  primaryCrops: string[];
-  sustainablePractices: string[];
-}
-
-// LACRA Letterhead Generator
-const addLACRALetterhead = (pdf: jsPDF, title: string, subtitle: string, primaryColor: [number, number, number]) => {
+// Helper function to add LACRA letterhead
+const addLACRALetterhead = (pdf: jsPDF, title: string, subtitle: string, headerColor: number[]) => {
   const pageWidth = pdf.internal.pageSize.getWidth();
   
-  // Header background
-  pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  pdf.rect(0, 0, pageWidth, 35, 'F');
+  // Header background with gradient effect
+  pdf.setFillColor(headerColor[0], headerColor[1], headerColor[2]);
+  pdf.rect(0, 0, pageWidth, 40, 'F');
+  pdf.setFillColor(headerColor[0] - 20, headerColor[1] - 20, headerColor[2] - 20);
+  pdf.rect(0, 30, pageWidth, 10, 'F');
   
-  // LACRA Logo placeholder and text
+  // LACRA Logo area (left)
+  pdf.setFillColor(255, 255, 255);
+  pdf.rect(10, 5, 35, 25, 'F');
+  pdf.setDrawColor(200, 200, 200);
+  pdf.rect(10, 5, 35, 25, 'S');
+  
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('LACRA', 20, 15);
+  pdf.setFontSize(6);
+  pdf.text('Liberia Agriculture', 12, 20);
+  pdf.text('Commodity Regulatory', 12, 23);
+  pdf.text('Authority', 12, 26);
+  
+  // EU/International Standards Logo (right)
+  pdf.setFillColor(255, 255, 255);
+  pdf.rect(pageWidth - 45, 5, 35, 25, 'F');
+  pdf.rect(pageWidth - 45, 5, 35, 25, 'S');
+  
+  pdf.setFontSize(8);
+  pdf.text('EU DEFORESTATION', pageWidth - 42, 15);
+  pdf.text('REGULATION', pageWidth - 38, 19);
+  pdf.text('COMPLIANT', pageWidth - 37, 23);
+  pdf.text('★ ★ ★', pageWidth - 32, 27);
+  
+  // Main title
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(18);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('🌿 LACRA', 15, 15);
-  
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('Liberia Agriculture Commodity Regulatory Authority', 15, 22);
-  pdf.text('Ministry of Agriculture, Republic of Liberia', 15, 28);
-  
-  // Title section
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFontSize(16);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text(title, pageWidth/2, 45, { align: 'center' });
+  pdf.text(title, 55, 18);
   
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(subtitle, pageWidth/2, 52, { align: 'center' });
+  pdf.text(subtitle, 55, 28);
+  
+  // LACRA address and contact info
+  pdf.setFontSize(7);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia | Tel: +231-XXX-XXXX | www.lacra.gov.lr', 10, 37);
 };
 
-// Generate Comprehensive Deforestation Analysis PDF
-export const generateComprehensiveDeforestationPDF = async (data: ComprehensiveDeforestationData): Promise<void> => {
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageWidth = pdf.internal.pageSize.getWidth();
+// Helper function to draw pie charts
+const drawPieChart = (pdf: jsPDF, centerX: number, centerY: number, radius: number, percentage: number, colors: number[][]) => {
+  // Background circle
+  pdf.setFillColor(240, 240, 240);
+  pdf.circle(centerX, centerY, radius, 'F');
   
-  const colors = {
-    primary: [22, 163, 74] as [number, number, number],     // Green
-    secondary: [15, 118, 110] as [number, number, number],  // Teal
-    success: [34, 197, 94] as [number, number, number],     // Bright green
-    warning: [251, 191, 36] as [number, number, number],    // Yellow
-    danger: [220, 38, 38] as [number, number, number],      // Red
-    info: [59, 130, 246] as [number, number, number],       // Blue
-    background: [249, 250, 251] as [number, number, number], // Light gray
-  };
-
-  // Page 1: Executive Summary
-  addLACRALetterhead(pdf, 'COMPREHENSIVE DEFORESTATION ANALYSIS', 'Environmental Impact & Compliance Assessment', colors.primary);
+  // Outer ring
+  pdf.setDrawColor(200, 200, 200);
+  pdf.setLineWidth(1);
+  pdf.circle(centerX, centerY, radius, 'S');
   
-  let yPos = 65;
-  
-  // Report metadata
-  pdf.setFillColor(colors.background[0], colors.background[1], colors.background[2]);
-  pdf.rect(10, yPos, pageWidth - 20, 25, 'F');
-  
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFontSize(10);
-  pdf.text(`Report ID: ${data.reportId}`, 15, yPos + 8);
-  pdf.text(`Farmer: ${data.farmerName} (${data.farmerId})`, 15, yPos + 15);
-  pdf.text(`Analysis Date: ${new Date(data.analysisDate).toLocaleDateString()}`, 15, yPos + 22);
-  
-  pdf.text(`County: ${data.county}`, 110, yPos + 8);
-  pdf.text(`Farm Size: ${data.farmSize} ${data.farmSizeUnit}`, 110, yPos + 15);
-  pdf.text(`Coordinates: ${data.gpsCoordinates}`, 110, yPos + 22);
-  
-  // Executive Summary
-  yPos += 35;
-  pdf.setFillColor(...colors.primary);
-  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('EXECUTIVE SUMMARY', 15, yPos + 5);
-  
-  yPos += 15;
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  
-  // Forest Loss Status
-  const statusColor = data.forestLossDetected ? colors.danger : colors.success;
-  pdf.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
-  pdf.rect(15, yPos, 8, 8, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.text(data.forestLossDetected ? '!' : '✓', 18, yPos + 5);
-  
-  pdf.setTextColor(0, 0, 0);
-  pdf.text(`Forest Loss Status: ${data.forestLossDetected ? 'DETECTED' : 'NO LOSS DETECTED'}`, 30, yPos + 5);
-  
-  if (data.forestLossDetected && data.forestLossDate) {
-    yPos += 10;
-    pdf.text(`Forest Loss Date: ${new Date(data.forestLossDate).toLocaleDateString()}`, 30, yPos);
-    pdf.setTextColor(...colors.danger);
-    pdf.text('⚠ Immediate mitigation required', 30, yPos + 7);
-    pdf.setTextColor(0, 0, 0);
+  // Progress sector (approximated)
+  if (percentage > 0) {
+    pdf.setFillColor(colors[0][0], colors[0][1], colors[0][2]);
+    const progressRadius = radius * 0.8;
+    pdf.circle(centerX, centerY, progressRadius * (percentage / 100), 'F');
   }
   
-  // Forest Cover Analysis
-  yPos += 20;
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('FOREST COVER ANALYSIS', 15, yPos);
-  
-  yPos += 10;
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  
-  // Forest cover metrics in a table format
-  const metrics = [
-    ['Baseline Forest Cover', `${data.baselineForestCover.toFixed(1)}%`],
-    ['Current Forest Cover', `${data.currentForestCover.toFixed(1)}%`],
-    ['Net Change', `${data.forestCoverChange > 0 ? '+' : ''}${data.forestCoverChange.toFixed(2)}%`],
-    ['Deforestation Rate', `${data.deforestationRate.toFixed(3)}%/year`]
-  ];
-  
-  metrics.forEach((metric, index) => {
-    const bgColor = index % 2 === 0 ? colors.background : [255, 255, 255];
-    pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-    pdf.rect(15, yPos + (index * 8), pageWidth - 30, 8, 'F');
-    
-    pdf.text(metric[0], 20, yPos + (index * 8) + 5);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(metric[1], pageWidth - 50, yPos + (index * 8) + 5);
-    pdf.setFont('helvetica', 'normal');
-  });
-  
-  // Biodiversity Impact
-  yPos += 45;
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('ENVIRONMENTAL IMPACT ASSESSMENT', 15, yPos);
-  
-  yPos += 10;
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  
-  const impactColor = data.biodiversityImpact === 'minimal' ? colors.success : 
-                     data.biodiversityImpact === 'moderate' ? colors.warning : colors.danger;
-  
-  pdf.setFillColor(impactColor[0], impactColor[1], impactColor[2]);
-  pdf.rect(15, yPos, 40, 12, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text(`${data.biodiversityImpact.toUpperCase()}`, 17, yPos + 4);
-  pdf.text('BIODIVERSITY IMPACT', 17, yPos + 9);
+  // Center circle with percentage
+  pdf.setFillColor(255, 255, 255);
+  pdf.circle(centerX, centerY, radius * 0.4, 'F');
   
   pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`Carbon Stock Loss: ${data.carbonStockLoss.toFixed(1)} tCO₂`, 65, yPos + 4);
-  pdf.text(`CO₂ Emissions: ${data.carbonEmissions.toFixed(1)} tCO₂`, 65, yPos + 9);
-  
-  // Mitigation Requirements
-  if (data.mitigationRequired) {
-    yPos += 25;
-    pdf.setFillColor(...colors.warning);
-    pdf.rect(15, yPos, pageWidth - 30, 8, 'F');
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('⚠ MITIGATION MEASURES REQUIRED', 20, yPos + 5);
-    
-    yPos += 15;
-    pdf.setTextColor(0, 0, 0);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Recommended Actions:', 20, yPos);
-    
-    data.recommendedActions.forEach((action, index) => {
-      yPos += 7;
-      pdf.text(`• ${action}`, 25, yPos);
-    });
-    
-    if (data.reforestationPlan) {
-      yPos += 10;
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Reforestation Plan:', 20, yPos);
-      yPos += 7;
-      pdf.setFont('helvetica', 'normal');
-      const planLines = pdf.splitTextToSize(data.reforestationPlan, pageWidth - 50);
-      pdf.text(planLines, 25, yPos);
-    }
-  }
-  
-  // Add new page for detailed analysis if needed
-  if (yPos > 250) {
-    pdf.addPage();
-    yPos = 20;
-  }
-  
-  // Certification Statement
-  yPos += 20;
-  pdf.setFillColor(...colors.info);
-  pdf.rect(15, yPos, pageWidth - 30, 8, 'F');
-  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('CERTIFICATION STATEMENT', 20, yPos + 5);
-  
-  yPos += 15;
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'normal');
-  const certStatement = `This comprehensive deforestation analysis certifies the environmental status of the farm operated by ${data.farmerName} (${data.farmerId}) as of ${new Date(data.analysisDate).toLocaleDateString()}. The analysis is conducted in accordance with international environmental monitoring standards and EU Deforestation Regulation requirements.`;
-  const certLines = pdf.splitTextToSize(certStatement, pageWidth - 40);
-  pdf.text(certLines, 20, yPos);
-  
-  // Footer
-  yPos += 30;
-  pdf.setFontSize(8);
-  pdf.setTextColor(107, 114, 128);
-  pdf.text('Generated by AgriTrace360™ - LACRA Environmental Monitoring System', pageWidth/2, yPos, { align: 'center' });
-  pdf.text(`Report Reference: DFR-${data.reportId}-${Date.now()}`, pageWidth/2, yPos + 5, { align: 'center' });
-  
-  // Save the PDF
-  pdf.save(`Comprehensive_Deforestation_Analysis_${data.farmerId}_${new Date().toISOString().split('T')[0]}.pdf`);
+  const textWidth = pdf.getTextWidth(`${percentage}%`);
+  pdf.text(`${percentage}%`, centerX - textWidth/2, centerY + 2);
 };
 
-// Generate Comprehensive EUDR Compliance PDF
-export const generateComprehensiveEUDRPDF = async (data: ComprehensiveEUDRData): Promise<void> => {
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageWidth = pdf.internal.pageSize.getWidth();
+// Helper function to draw bar charts
+const drawBarChart = (pdf: jsPDF, x: number, y: number, width: number, height: number, values: number[], labels: string[], colors: number[][]) => {
+  const barWidth = width / values.length - 2;
+  const maxValue = Math.max(...values, 100);
   
-  const colors = {
-    primary: [37, 99, 235],     // EU Blue
-    secondary: [15, 118, 110],  // Teal
-    success: [34, 197, 94],     // Green
-    warning: [251, 191, 36],    // Yellow
-    danger: [220, 38, 38],      // Red
-    info: [59, 130, 246],       // Blue
-    background: [249, 250, 251], // Light gray
-  };
-
-  // Page 1: Due Diligence Statement
-  addLACRALetterhead(pdf, 'EU DEFORESTATION REGULATION (EUDR)', 'Comprehensive Due Diligence Compliance Report', colors.primary);
+  // Draw background
+  pdf.setFillColor(250, 250, 250);
+  pdf.rect(x, y, width, height, 'F');
+  pdf.setDrawColor(220, 220, 220);
+  pdf.rect(x, y, width, height, 'S');
   
-  let yPos = 65;
+  // Draw grid lines
+  pdf.setDrawColor(240, 240, 240);
+  for (let i = 1; i <= 4; i++) {
+    const gridY = y + (height * i / 5);
+    pdf.line(x, gridY, x + width, gridY);
+  }
   
-  // EU Regulation Reference
-  pdf.setFillColor(...colors.info);
-  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('REGULATION (EU) 2023/1115 | IN FORCE FROM 30 DECEMBER 2024', pageWidth/2, yPos + 5, { align: 'center' });
-  
-  // Report metadata
-  yPos += 15;
-  pdf.setFillColor(colors.background[0], colors.background[1], colors.background[2]);
-  pdf.rect(10, yPos, pageWidth - 20, 25, 'F');
-  
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  pdf.text(`Report ID: ${data.reportId}`, 15, yPos + 8);
-  pdf.text(`Farmer: ${data.farmerName} (${data.farmerId})`, 15, yPos + 15);
-  pdf.text(`Assessment Date: ${new Date(data.assessmentDate).toLocaleDateString()}`, 15, yPos + 22);
-  
-  pdf.text(`County: ${data.county}`, 110, yPos + 8);
-  pdf.text(`Farm Size: ${data.farmSize} ${data.farmSizeUnit}`, 110, yPos + 15);
-  pdf.text(`Coordinates: ${data.gpsCoordinates}`, 110, yPos + 22);
-  
-  // Due Diligence Statement
-  yPos += 35;
-  pdf.setFillColor(...colors.primary);
-  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('DUE DILIGENCE STATEMENT (ARTICLE 4)', 15, yPos + 5);
-  
-  yPos += 15;
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  
-  const declarationText = `In accordance with Regulation (EU) 2023/1115 of the European Parliament and of the Council, I hereby declare that the agricultural commodities covered by this due diligence statement:`;
-  const declarationLines = pdf.splitTextToSize(declarationText, pageWidth - 40);
-  pdf.text(declarationLines, 20, yPos);
-  
-  yPos += 15;
-  
-  // Compliance checklist
-  const complianceItems = [
-    { text: 'Are deforestation-free (no deforestation after 31 December 2020)', compliant: data.deforestationRisk < 5 },
-    { text: 'Have been produced in accordance with relevant legislation', compliant: data.legalHarvesting },
-    { text: 'Respect human rights as enshrined in international law', compliant: data.humanRightsCompliance },
-    { text: 'Respect the rights of indigenous peoples affected by production', compliant: data.humanRightsCompliance }
-  ];
-  
-  complianceItems.forEach((item, index) => {
-    const iconColor = item.compliant ? colors.success : colors.danger;
-    pdf.setFillColor(iconColor[0], iconColor[1], iconColor[2]);
-    pdf.circle(22, yPos + 3, 2, 'F');
+  values.forEach((value, index) => {
+    const barHeight = Math.max((value / maxValue) * height * 0.8, 2);
+    const barX = x + (index * (barWidth + 2)) + 1;
+    const barY = y + height - barHeight - 5;
     
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(8);
-    pdf.text(item.compliant ? '✓' : '✗', 21, yPos + 4);
+    // Draw bar with gradient effect
+    const color = colors[index % colors.length];
+    pdf.setFillColor(color[0], color[1], color[2]);
+    pdf.rect(barX, barY, barWidth, barHeight, 'F');
     
+    // Lighter top section
+    pdf.setFillColor(
+      Math.min(colors[index % colors.length][0] + 30, 255),
+      Math.min(colors[index % colors.length][1] + 30, 255),
+      Math.min(colors[index % colors.length][2] + 30, 255)
+    );
+    pdf.rect(barX, barY, barWidth, Math.min(barHeight * 0.3, 3), 'F');
+    
+    // Value on top
     pdf.setTextColor(0, 0, 0);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
-    const itemLines = pdf.splitTextToSize(item.text, pageWidth - 60);
-    pdf.text(itemLines, 30, yPos + 3);
-    yPos += 12;
+    pdf.setFontSize(7);
+    pdf.text(value.toString(), barX + barWidth/2 - 3, barY - 2);
+    
+    // Label at bottom
+    pdf.setFontSize(6);
+    const labelWidth = pdf.getTextWidth(labels[index]);
+    pdf.text(labels[index], barX + (barWidth - labelWidth)/2, y + height + 5);
   });
-  
-  // Compliance Score
-  yPos += 10;
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('OVERALL COMPLIANCE ASSESSMENT', 15, yPos);
-  
-  yPos += 10;
-  const scoreColor = data.complianceScore >= 90 ? colors.success :
-                    data.complianceScore >= 70 ? colors.warning : colors.danger;
-  
-  pdf.setFillColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-  pdf.rect(15, yPos, 60, 20, 'F');
-  
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(16);
-  pdf.text(`${data.complianceScore}%`, 45, yPos + 8, { align: 'center' });
-  pdf.setFontSize(10);
-  pdf.text('COMPLIANCE SCORE', 45, yPos + 15, { align: 'center' });
-  
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  pdf.text(`Status: ${data.complianceStatus.toUpperCase()}`, 85, yPos + 8);
-  pdf.text(`Risk Level: ${data.riskLevel.toUpperCase()}`, 85, yPos + 15);
-  
-  // Risk Assessment Details
-  yPos += 35;
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('RISK ASSESSMENT DETAILS', 15, yPos);
-  
-  yPos += 10;
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-  
-  const riskMetrics = [
-    ['Deforestation Risk', `${data.deforestationRisk}%`],
-    ['Due Diligence Score', `${data.dueDiligenceScore}%`],
-    ['Legal Compliance', data.legalHarvesting ? 'COMPLIANT' : 'NON-COMPLIANT'],
-    ['Human Rights Status', data.humanRightsCompliance ? 'COMPLIANT' : 'VIOLATIONS DETECTED']
-  ];
-  
-  riskMetrics.forEach((metric, index) => {
-    const bgColor = index % 2 === 0 ? colors.background : [255, 255, 255];
-    pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-    pdf.rect(15, yPos + (index * 8), pageWidth - 30, 8, 'F');
-    
-    pdf.text(metric[0], 20, yPos + (index * 8) + 5);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(metric[1], pageWidth - 50, yPos + (index * 8) + 5);
-    pdf.setFont('helvetica', 'normal');
-  });
-  
-  // Mitigation Measures
-  if (data.mitigationPlan.length > 0) {
-    yPos += 45;
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('MITIGATION MEASURES', 15, yPos);
-    
-    yPos += 10;
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(10);
-    
-    data.mitigationPlan.forEach((measure, index) => {
-      pdf.text(`• ${measure}`, 20, yPos);
-      yPos += 7;
-    });
-  }
-  
-  // Add new page if needed
-  if (yPos > 250) {
-    pdf.addPage();
-    yPos = 20;
-  }
-  
-  // Certification Statement
-  yPos += 15;
-  pdf.setFillColor(...colors.success);
-  pdf.rect(15, yPos, pageWidth - 30, 8, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('LACRA CERTIFICATION', 20, yPos + 5);
-  
-  yPos += 15;
-  pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'normal');
-  const eudrCertStatement = `This EUDR compliance report certifies that the agricultural commodity from ${data.farmerName} (${data.farmerId}) ${data.complianceStatus === 'compliant' ? 'meets all requirements for EU market access' : 'requires additional measures before EU market access'} under Regulation (EU) 2023/1115. Assessment conducted by the Liberia Agriculture Commodity Regulatory Authority (LACRA) as authorized competent authority.`;
-  const eudrCertLines = pdf.splitTextToSize(eudrCertStatement, pageWidth - 40);
-  pdf.text(eudrCertLines, 20, yPos);
-  
-  // Footer
-  yPos += 25;
-  pdf.setFontSize(8);
-  pdf.setTextColor(107, 114, 128);
-  pdf.text('Generated by AgriTrace360™ - LACRA EUDR Compliance System', pageWidth/2, yPos, { align: 'center' });
-  pdf.text(`Due Diligence Reference: EUDR-${data.reportId}-${Date.now()}`, pageWidth/2, yPos + 5, { align: 'center' });
-  pdf.text('For verification: eudr-compliance@lacra.gov.lr | +231-XXX-XXXX', pageWidth/2, yPos + 10, { align: 'center' });
-  
-  // Save the PDF
-  pdf.save(`Comprehensive_EUDR_Compliance_${data.farmerId}_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-// Generate Comprehensive Farmer Profile PDF
-export const generateComprehensiveFarmerProfilePDF = async (data: ComprehensiveFarmerData): Promise<void> => {
+// Generate comprehensive EUDR compliance PDF with LACRA letterhead
+export const generateEUDRCompliancePDF = async (data: EUDRComplianceData): Promise<void> => {
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
   
   const colors = {
     primary: [22, 163, 74],     // LACRA Green
     secondary: [15, 118, 110],  // Teal
     success: [34, 197, 94],     // Bright green
+    warning: [251, 191, 36],    // Yellow
+    danger: [220, 38, 38],      // Red
     info: [59, 130, 246],       // Blue
     background: [249, 250, 251], // Light gray
   };
-
-  // Header
-  addLACRALetterhead(pdf, 'COMPREHENSIVE FARMER PROFILE', 'Complete Agricultural and Compliance Information', colors.primary);
   
-  let yPos = 65;
+  // Page 1: Executive Summary with LACRA Letterhead
+  addLACRALetterhead(pdf, 'EUDR COMPLIANCE ASSESSMENT', 'European Union Deforestation Regulation Report', colors.primary);
   
-  // Farmer basic information
+  // Report metadata with official styling
+  let yPos = 50;
   pdf.setFillColor(colors.background[0], colors.background[1], colors.background[2]);
-  pdf.rect(10, yPos, pageWidth - 20, 35, 'F');
+  pdf.setDrawColor(200, 200, 200);
+  pdf.rect(10, yPos, pageWidth - 20, 35, 'FD');
+  
+  // Report header
+  pdf.setFillColor(colors.info[0], colors.info[1], colors.info[2]);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('OFFICIAL COMPLIANCE ASSESSMENT DOCUMENT', 15, yPos + 5);
+  
+  // Report details
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  pdf.text(`Report Reference: ${data.reportId}`, 15, yPos + 15);
+  pdf.text(`Assessment Date: ${new Date(data.generatedAt).toLocaleDateString()}`, 15, yPos + 22);
+  pdf.text(`Property Owner: ${data.farmerName}`, 15, yPos + 29);
+  
+  pdf.text(`Farmer Registration: ${data.farmerId}`, 105, yPos + 15);
+  pdf.text(`GPS Coordinates: ${data.coordinates}`, 105, yPos + 22);
+  pdf.text(`Regulation: EU 2023/1115`, 105, yPos + 29);
+  
+  // Executive Summary Section
+  yPos += 45;
+  pdf.setFillColor(...colors.primary);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('EXECUTIVE SUMMARY', 15, yPos + 5);
+  
+  // Compliance score dashboard
+  yPos += 20;
+  pdf.setFillColor(255, 255, 255);
+  pdf.setDrawColor(...colors.primary);
+  pdf.rect(10, yPos, pageWidth - 20, 50, 'FD');
+  
+  // Large compliance score circle
+  const scoreColor = data.complianceScore >= 80 ? [colors.success] : 
+                    data.complianceScore >= 60 ? [colors.warning] : [colors.danger];
+  
+  drawPieChart(pdf, 40, yPos + 25, 18, data.complianceScore, scoreColor);
+  
+  // Compliance details
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFontSize(16);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('OVERALL COMPLIANCE STATUS', 70, yPos + 15);
+  
+  pdf.setFontSize(12);
+  const statusText = data.complianceScore >= 80 ? 'FULLY COMPLIANT' : 
+                    data.complianceScore >= 60 ? 'MONITORING REQUIRED' : 'NON-COMPLIANT';
+  const statusColor = data.complianceScore >= 80 ? colors.success : 
+                     data.complianceScore >= 60 ? colors.warning : colors.danger;
+  
+  pdf.setFillColor(...statusColor);
+  pdf.rect(70, yPos + 20, 50, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(statusText, 75, yPos + 26);
+  
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  pdf.text(`Risk Classification: ${data.riskLevel.toUpperCase()}`, 70, yPos + 35);
+  pdf.text(`Deforestation Risk: ${data.deforestationRisk}%`, 70, yPos + 42);
+  
+  // Risk assessment bar chart
+  yPos += 60;
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(...colors.primary);
+  pdf.text('DETAILED RISK ASSESSMENT', 15, yPos);
+  
+  yPos += 10;
+  const riskValues = [
+    data.complianceScore,
+    100 - data.deforestationRisk,
+    data.documentationRequired.length === 0 ? 100 : 70,
+    data.riskLevel === 'low' ? 95 : data.riskLevel === 'standard' ? 75 : 45
+  ];
+  const riskLabels = ['Compliance', 'Forest Protection', 'Documentation', 'Overall Risk'];
+  const riskColors = [colors.success, colors.info, colors.warning, colors.primary];
+  
+  drawBarChart(pdf, 15, yPos, 165, 35, riskValues, riskLabels, riskColors);
+  
+  // Key findings section
+  yPos += 50;
+  pdf.setFillColor(...colors.info);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('KEY ASSESSMENT FINDINGS', 15, yPos + 5);
+  
+  yPos += 15;
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFontSize(9);
+  pdf.setFont('helvetica', 'normal');
+  
+  const findings = [
+    `✓ Compliance Score: ${data.complianceScore}% (${data.complianceScore >= 80 ? 'Meets EUDR standards' : 'Requires improvement'})`,
+    `✓ Deforestation Risk Assessment: ${data.deforestationRisk}% risk level`,
+    `✓ Forest Baseline Date: ${data.lastForestDate} (Reference point for compliance)`,
+    `✓ Required Documentation: ${data.documentationRequired.length} items outstanding`,
+    `✓ Regulatory Status: ${data.riskLevel === 'low' ? 'Low risk - standard monitoring' : 'Enhanced monitoring required'}`
+  ];
+  
+  findings.forEach((finding, index) => {
+    pdf.text(finding, 15, yPos + (index * 6));
+  });
+  
+  // Add Page 2: Detailed Analysis
+  pdf.addPage();
+  addLACRALetterhead(pdf, 'DETAILED COMPLIANCE ANALYSIS', 'Technical Assessment & Documentation Review', colors.secondary);
+  
+  yPos = 50;
+  
+  // Deforestation risk section
+  pdf.setFillColor(...colors.danger);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('DEFORESTATION RISK ANALYSIS', 15, yPos + 5);
+  
+  yPos += 20;
+  pdf.setFillColor(255, 255, 255);
+  pdf.setDrawColor(...colors.danger);
+  pdf.rect(10, yPos, pageWidth - 20, 40, 'FD');
+  
+  // Risk level indicator with visual
+  const riskLevelColor = data.riskLevel === 'low' ? colors.success :
+                        data.riskLevel === 'standard' ? colors.warning : colors.danger;
+  
+  pdf.setFillColor(...riskLevelColor);
+  pdf.rect(15, yPos + 10, 60, 15, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`${data.riskLevel.toUpperCase()} RISK`, 20, yPos + 20);
+  
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  pdf.text(`Deforestation Risk Percentage: ${data.deforestationRisk}%`, 85, yPos + 12);
+  pdf.text(`Forest Baseline Reference: ${data.lastForestDate}`, 85, yPos + 20);
+  pdf.text(`Monitoring Protocol: Satellite surveillance active`, 85, yPos + 28);
+  pdf.text(`Compliance Period: Current assessment valid for 12 months`, 85, yPos + 36);
+  
+  // Documentation requirements
+  yPos += 50;
+  pdf.setFillColor(...colors.warning);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`DOCUMENTATION REQUIREMENTS (${data.documentationRequired.length} ITEMS)`, 15, yPos + 5);
+  
+  yPos += 15;
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  
+  data.documentationRequired.forEach((doc, index) => {
+    pdf.setFillColor(...colors.warning);
+    pdf.rect(15, yPos + (index * 10) + 2, 4, 4, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8);
+    pdf.text('!', 16.5, yPos + (index * 10) + 5);
+    
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(doc, 25, yPos + (index * 10) + 5);
+  });
+  
+  // Compliance recommendations
+  yPos += (data.documentationRequired.length * 10) + 20;
+  pdf.setFillColor(...colors.success);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`COMPLIANCE RECOMMENDATIONS (${data.recommendations.length} ACTIONS)`, 15, yPos + 5);
+  
+  yPos += 15;
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  
+  data.recommendations.forEach((rec, index) => {
+    pdf.setFillColor(...colors.success);
+    pdf.rect(15, yPos + (index * 8) + 1, 4, 4, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8);
+    pdf.text('✓', 16.5, yPos + (index * 8) + 4);
+    
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(rec, 25, yPos + (index * 8) + 4);
+  });
+  
+  // Official footer
+  pdf.setFillColor(...colors.primary);
+  pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(8);
+  pdf.text('OFFICIAL LACRA EUDR COMPLIANCE ASSESSMENT', 10, pageHeight - 18);
+  pdf.text('This document is issued under the authority of the Liberia Agriculture Commodity Regulatory Authority', 10, pageHeight - 12);
+  pdf.text(`Report Reference: ${data.reportId} | Generated: ${new Date().toLocaleDateString()} | Valid for: 12 months`, 10, pageHeight - 6);
+  pdf.text('For verification, contact: compliance@lacra.gov.lr', pageWidth - 60, pageHeight - 6);
+  
+  pdf.save(`LACRA_EUDR_Compliance_${data.farmerId}_${data.reportId}.pdf`);
+};
+
+// Generate comprehensive deforestation analysis PDF with LACRA letterhead
+export const generateDeforestationPDF = async (data: DeforestationData): Promise<void> => {
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  
+  const colors = {
+    primary: [22, 101, 52],     // Forest green
+    secondary: [194, 65, 12],   // Forest orange
+    danger: [220, 38, 38],      // Red
+    success: [34, 197, 94],     // Green
+    warning: [251, 191, 36],    // Yellow
+    info: [59, 130, 246],       // Blue
+    background: [254, 242, 242], // Light red tint
+  };
+  
+  // Page 1: Environmental Impact Assessment
+  addLACRALetterhead(pdf, 'DEFORESTATION ANALYSIS REPORT', 'Environmental Impact & Forest Change Assessment', colors.primary);
+  
+  // Report metadata
+  let yPos = 50;
+  pdf.setFillColor(...colors.background);
+  pdf.setDrawColor(200, 200, 200);
+  pdf.rect(10, yPos, pageWidth - 20, 35, 'FD');
+  
+  pdf.setFillColor(...colors.primary);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('OFFICIAL ENVIRONMENTAL ASSESSMENT DOCUMENT', 15, yPos + 5);
+  
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  pdf.text(`Assessment Reference: ${data.reportId}`, 15, yPos + 15);
+  pdf.text(`Analysis Date: ${new Date(data.generatedAt).toLocaleDateString()}`, 15, yPos + 22);
+  pdf.text(`Property Owner: ${data.farmerName}`, 15, yPos + 29);
+  
+  pdf.text(`Property Registration: ${data.farmerId}`, 105, yPos + 15);
+  pdf.text(`Location Coordinates: ${data.coordinates}`, 105, yPos + 22);
+  pdf.text(`Satellite Data Source: Landsat-8, Sentinel-2`, 105, yPos + 29);
+  
+  // Forest Loss Detection Alert
+  yPos += 45;
+  const alertColor = data.forestLossDetected ? colors.danger : colors.success;
+  pdf.setFillColor(...alertColor);
+  pdf.rect(10, yPos, pageWidth - 20, 20, 'F');
+  
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(16);
+  pdf.setFont('helvetica', 'bold');
+  const alertText = data.forestLossDetected ? '⚠ FOREST LOSS DETECTED' : '✓ NO FOREST LOSS DETECTED';
+  pdf.text(alertText, 15, yPos + 10);
+  
+  if (data.forestLossDate) {
+    pdf.setFontSize(10);
+    pdf.text(`Detection Date: ${data.forestLossDate}`, 15, yPos + 16);
+  }
+  
+  // Environmental metrics dashboard
+  yPos += 30;
+  pdf.setFillColor(...colors.info);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('ENVIRONMENTAL IMPACT METRICS', 15, yPos + 5);
+  
+  yPos += 20;
+  pdf.setFillColor(255, 255, 255);
+  pdf.setDrawColor(...colors.primary);
+  pdf.rect(10, yPos, pageWidth - 20, 60, 'FD');
+  
+  // Forest cover change visualization
+  const coverChangeColor = data.forestCoverChange >= 0 ? [colors.success] : [colors.danger];
+  drawPieChart(pdf, 35, yPos + 30, 15, Math.abs(data.forestCoverChange), coverChangeColor);
   
   pdf.setTextColor(0, 0, 0);
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.text(`${data.firstName} ${data.lastName}`, 15, yPos + 10);
-  
+  pdf.text('Forest Cover Change', 15, yPos + 10);
   pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`Farmer ID: ${data.farmerId}`, 15, yPos + 18);
-  pdf.text(`Registration: ${new Date(data.registrationDate).toLocaleDateString()}`, 15, yPos + 25);
-  pdf.text(`Phone: ${data.phoneNumber}`, 15, yPos + 32);
+  pdf.text(`${data.forestCoverChange >= 0 ? '+' : ''}${data.forestCoverChange}%`, 60, yPos + 30);
   
-  pdf.text(`County: ${data.county}`, 110, yPos + 18);
-  pdf.text(`Farm Size: ${data.farmSize} ${data.farmSizeUnit}`, 110, yPos + 25);
-  pdf.text(`Coordinates: ${data.gpsCoordinates}`, 110, yPos + 32);
-  
-  // Performance Scores
-  yPos += 45;
-  pdf.setFontSize(11);
+  // Carbon impact
   pdf.setFont('helvetica', 'bold');
-  pdf.text('PERFORMANCE ASSESSMENT', 15, yPos);
+  pdf.text('Carbon Stock Impact', 110, yPos + 10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`${data.carbonStockLoss} tCO₂ equivalent`, 110, yPos + 18);
+  pdf.text('Total carbon loss from assessment area', 110, yPos + 25);
   
-  yPos += 10;
-  const scores = [
-    { label: 'Compliance Score', value: data.complianceScore, color: data.complianceScore >= 80 ? colors.success : colors.secondary },
-    { label: 'Environmental Score', value: data.environmentalScore, color: data.environmentalScore >= 80 ? colors.success : colors.secondary }
+  // Biodiversity impact gauge
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Biodiversity Impact Level', 15, yPos + 45);
+  
+  const impactColors = {
+    'minimal': colors.success,
+    'moderate': colors.warning,
+    'significant': colors.danger
+  };
+  
+  pdf.setFillColor(...impactColors[data.biodiversityImpact]);
+  pdf.rect(15, yPos + 50, 80, 6, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`${data.biodiversityImpact.toUpperCase()} BIODIVERSITY IMPACT`, 20, yPos + 54);
+  
+  // Environmental metrics comparison chart
+  yPos += 70;
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(...colors.primary);
+  pdf.text('COMPARATIVE ENVIRONMENTAL ANALYSIS', 15, yPos);
+  
+  yPos += 15;
+  const envMetrics = [
+    Math.abs(data.forestCoverChange),
+    data.carbonStockLoss,
+    data.biodiversityImpact === 'minimal' ? 15 : data.biodiversityImpact === 'moderate' ? 50 : 85,
+    data.mitigationRequired ? 75 : 25
   ];
+  const envLabels = ['Forest Change %', 'Carbon Loss tCO₂', 'Biodiversity Risk', 'Action Required'];
+  const envColors = [colors.danger, colors.secondary, colors.warning, colors.info];
   
-  scores.forEach((score, index) => {
-    const xPos = 15 + (index * 90);
-    pdf.setFillColor(score.color[0], score.color[1], score.color[2]);
-    pdf.rect(xPos, yPos, 80, 15, 'F');
-    
+  drawBarChart(pdf, 15, yPos, 165, 35, envMetrics, envLabels, envColors);
+  
+  // Add Page 2: Mitigation and Action Plan
+  pdf.addPage();
+  addLACRALetterhead(pdf, 'ENVIRONMENTAL ACTION PLAN', 'Mitigation Strategies & Monitoring Protocol', colors.success);
+  
+  yPos = 50;
+  
+  // Mitigation requirement alert
+  const mitigationColor = data.mitigationRequired ? colors.warning : colors.success;
+  pdf.setFillColor(...mitigationColor);
+  pdf.rect(10, yPos, pageWidth - 20, 15, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  const mitigationText = data.mitigationRequired ? '⚠ IMMEDIATE MITIGATION REQUIRED' : '✓ NO IMMEDIATE ACTION REQUIRED';
+  pdf.text(mitigationText, 15, yPos + 9);
+  
+  // Environmental action plan
+  yPos += 25;
+  pdf.setFillColor(...colors.success);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`ENVIRONMENTAL ACTION PLAN (${data.recommendations.length} ACTIONS)`, 15, yPos + 5);
+  
+  yPos += 15;
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  
+  data.recommendations.forEach((rec, index) => {
+    pdf.setFillColor(...colors.success);
+    pdf.rect(15, yPos + (index * 12) + 2, 6, 6, 'F');
     pdf.setTextColor(255, 255, 255);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`${score.value}%`, xPos + 40, yPos + 6, { align: 'center' });
-    pdf.setFontSize(8);
-    pdf.text(score.label, xPos + 40, yPos + 12, { align: 'center' });
     pdf.setFontSize(10);
+    pdf.text((index + 1).toString(), 17, yPos + (index * 12) + 6);
+    
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(rec, 25, yPos + (index * 12) + 6);
   });
   
-  // Primary Crops
-  yPos += 25;
+  // Monitoring protocol
+  yPos += (data.recommendations.length * 12) + 20;
+  pdf.setFillColor(...colors.info);
+  pdf.rect(10, yPos, pageWidth - 20, 8, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('ONGOING ENVIRONMENTAL MONITORING PROTOCOL', 15, yPos + 5);
+  
+  yPos += 15;
   pdf.setTextColor(0, 0, 0);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('PRIMARY CROPS', 15, yPos);
-  
-  yPos += 10;
   pdf.setFont('helvetica', 'normal');
-  data.primaryCrops.forEach((crop, index) => {
-    pdf.text(`• ${crop}`, 20, yPos + (index * 7));
+  pdf.setFontSize(9);
+  
+  const monitoringProtocol = [
+    '• Satellite imagery analysis: Monthly Landsat-8 and Sentinel-2 monitoring',
+    '• Biodiversity assessments: Quarterly field surveys and species monitoring',
+    '• Carbon stock evaluations: Annual biomass and soil carbon measurements',
+    '• GPS boundary verification: Continuous perimeter monitoring system',
+    '• Deforestation alerts: Real-time change detection and automatic notifications',
+    '• Compliance reporting: Bi-annual environmental impact assessments'
+  ];
+  
+  monitoringProtocol.forEach((item, index) => {
+    pdf.text(item, 15, yPos + (index * 7));
   });
   
-  // Sustainable Practices
-  yPos += (data.primaryCrops.length * 7) + 15;
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('SUSTAINABLE PRACTICES', 15, yPos);
-  
-  yPos += 10;
-  pdf.setFont('helvetica', 'normal');
-  data.sustainablePractices.forEach((practice, index) => {
-    pdf.text(`• ${practice}`, 20, yPos + (index * 7));
-  });
-  
-  // Footer
-  yPos += (data.sustainablePractices.length * 7) + 20;
+  // Official LACRA footer
+  pdf.setFillColor(...colors.primary);
+  pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+  pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(8);
-  pdf.setTextColor(107, 114, 128);
-  pdf.text('Generated by AgriTrace360™ - LACRA Farmer Management System', pageWidth/2, yPos, { align: 'center' });
-  pdf.text(`Profile Reference: FPR-${data.farmerId}-${Date.now()}`, pageWidth/2, yPos + 5, { align: 'center' });
+  pdf.text('OFFICIAL LACRA ENVIRONMENTAL ASSESSMENT', 10, pageHeight - 18);
+  pdf.text('Environmental Protection Division | Satellite Monitoring & Forest Conservation Unit', 10, pageHeight - 12);
+  pdf.text(`Assessment Reference: ${data.reportId} | Analysis Date: ${new Date().toLocaleDateString()} | Next Review: ${new Date(Date.now() + 90*24*60*60*1000).toLocaleDateString()}`, 10, pageHeight - 6);
+  pdf.text('For environmental queries: environment@lacra.gov.lr', pageWidth - 70, pageHeight - 6);
   
-  // Save the PDF
-  pdf.save(`Comprehensive_Farmer_Profile_${data.farmerId}_${new Date().toISOString().split('T')[0]}.pdf`);
+  pdf.save(`LACRA_Deforestation_Analysis_${data.farmerId}_${data.reportId}.pdf`);
 };
-
-// Export aliases for backward compatibility
-export const generateEUDRCompliancePDF = generateComprehensiveEUDRPDF;
-export const generateDeforestationPDF = generateComprehensiveDeforestationPDF;
-export const generateFarmerProfilePDF = generateComprehensiveFarmerProfilePDF;

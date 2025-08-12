@@ -10,7 +10,12 @@ const MAINTENANCE_MODE = true;
 if (MAINTENANCE_MODE) {
   console.log('🔧 MAINTENANCE MODE: Generic maintenance page active');
   
-  // Serve completely blank page for all routes
+  // Health check endpoint for deployment (must return 200)
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'maintenance', message: 'Server is running in maintenance mode' });
+  });
+  
+  // Serve completely blank page for all other routes
   app.use('*', (req, res) => {
     res.status(503).send('');
   });

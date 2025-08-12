@@ -105,15 +105,7 @@ export default function FrontPage() {
       </div>
     </div>
   );
-  
-  const modules = [
-    {
-      id: 1,
-      title: 'Agricultural Traceability & Compliance',
-      icon: Wheat,
-      color: 'bg-green-500',
-      route: '/portals',
-      isAgriTrace: true,
+}
       description: 'Complete agricultural commodity tracking & LACRA compliance system'
     },
     {

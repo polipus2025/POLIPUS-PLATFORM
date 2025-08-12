@@ -7,7 +7,7 @@ import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
-import FrontPage from "@/pages/front-page";
+import FrontPage from "@/pages/front-page-clean";
 import Landing from "@/pages/landing";
 import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";

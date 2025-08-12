@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Leaf, MapPin, AlertCircle, Eye, EyeOff, UserPlus } from "lucide-react";
+import { Leaf, MapPin, AlertCircle, Eye, EyeOff, UserPlus, WifiOff, Wifi } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
+import MobileFarmerRegistration from "@/components/mobile-farmer-registration";
 
 const LIBERIAN_COUNTIES = [
   "Bomi County", "Bong County", "Gbarpolu County", "Grand Bassa County",
@@ -35,7 +36,35 @@ export default function FarmerLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [showRegistration, setShowRegistration] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { toast } = useToast();
+
+  // Handle online/offline status
+  useEffect(() => {
+    const handleOnlineStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOnlineStatus);
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOnlineStatus);
+    };
+  }, []);
+
+  // Show registration component if requested
+  if (showRegistration) {
+    return (
+      <MobileFarmerRegistration
+        onSuccess={() => {
+          setShowRegistration(false);
+          toast({
+            title: "Registration Complete!",
+            description: "You can now log in with your new account.",
+          });
+        }}
+        onCancel={() => setShowRegistration(false)}
+      />
+    );
+  }
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -52,6 +81,39 @@ export default function FarmerLogin() {
     setError("");
 
     try {
+      // Check if we're offline
+      const isOffline = !navigator.onLine;
+      
+      if (isOffline) {
+        // Offline login with cached credentials
+        const cachedCredentials = localStorage.getItem("farmer-credentials");
+        
+        if (cachedCredentials) {
+          const parsed = JSON.parse(cachedCredentials);
+          
+          if (parsed.farmerId === data.farmerId && parsed.password === data.password) {
+            toast({
+              title: "Offline Login Successful",
+              description: "Welcome back! Working in offline mode.",
+            });
+            
+            // Set offline session
+            localStorage.setItem("authToken", `offline-${Date.now()}`);
+            localStorage.setItem("userRole", "farmer");
+            localStorage.setItem("userType", "farmer");
+            localStorage.setItem("farmerId", data.farmerId);
+            localStorage.setItem("farmerFirstName", parsed.firstName || "Farmer");
+            localStorage.setItem("isOfflineSession", "true");
+            
+            window.location.href = "/farmer-dashboard";
+            return;
+          }
+        }
+        
+        throw new Error("No cached credentials found for offline login. Please connect to internet for first-time login.");
+      }
+
+      // Online login
       const result = await apiRequest("/api/auth/farmer-login", {
         method: "POST",
         body: JSON.stringify({
@@ -73,6 +135,13 @@ export default function FarmerLogin() {
         localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "farmer");
+        
+        // Cache credentials for offline use
+        localStorage.setItem("farmer-credentials", JSON.stringify({
+          farmerId: data.farmerId,
+          password: data.password,
+          firstName: result.farmerName || "Farmer"
+        }));
         localStorage.setItem("farmerId", data.farmerId);
         
         // Redirect to dashboard (authenticated route)
@@ -125,6 +194,27 @@ export default function FarmerLogin() {
           </CardHeader>
 
           <CardContent>
+            {/* Online/Offline Status */}
+            <div className="mb-4">
+              <div className={`flex items-center justify-center gap-2 p-2 rounded-lg text-sm ${
+                isOnline 
+                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+              }`}>
+                {isOnline ? (
+                  <>
+                    <Wifi className="h-4 w-4" />
+                    <span>Online - Full access available</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-4 w-4" />
+                    <span>Offline - Limited functionality</span>
+                  </>
+                )}
+              </div>
+            </div>
+
             {error && (
               <Alert className="mb-6 border-red-200 bg-red-50">
                 <AlertCircle className="h-4 w-4 text-red-600" />
@@ -140,7 +230,7 @@ export default function FarmerLogin() {
                   id="farmerId"
                   type="text"
                   {...form.register("farmerId")}
-                  className="mt-1"
+                  className="mt-1 min-h-[44px] text-base"
                   placeholder="e.g., FRM-2024-001"
                 />
                 {form.formState.errors.farmerId && (
@@ -155,7 +245,7 @@ export default function FarmerLogin() {
                   value={form.watch("county")} 
                   onValueChange={(value) => form.setValue("county", value)}
                 >
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger className="mt-1 min-h-[44px]">
                     <SelectValue placeholder="Select your county (optional)" />
                   </SelectTrigger>
                   <SelectContent>
@@ -181,7 +271,7 @@ export default function FarmerLogin() {
                   id="phoneNumber"
                   type="tel"
                   {...form.register("phoneNumber")}
-                  className="mt-1"
+                  className="mt-1 min-h-[44px] text-base"
                   placeholder="e.g., +231 77 123 4567"
                 />
               </div>
@@ -194,7 +284,7 @@ export default function FarmerLogin() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     {...form.register("password")}
-                    className="pr-10"
+                    className="pr-10 min-h-[44px] text-base"
                     placeholder="Enter your password"
                   />
                   <button
@@ -217,7 +307,7 @@ export default function FarmerLogin() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-3"
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium py-3 min-h-[44px]"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -258,8 +348,8 @@ export default function FarmerLogin() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full border-green-300 text-green-700 hover:bg-green-50"
-                  onClick={() => setShowRegistration(!showRegistration)}
+                  className="w-full border-green-300 text-green-700 hover:bg-green-50 min-h-[44px]"
+                  onClick={() => setShowRegistration(true)}
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
                   New Farmer Registration
@@ -267,21 +357,7 @@ export default function FarmerLogin() {
               </div>
             </form>
 
-            {/* Registration Information */}
-            {showRegistration && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-semibold text-green-800 mb-2">New Farmer Registration</h4>
-                <p className="text-sm text-green-700 mb-3">
-                  To register as a new farmer in the AgriTrace360™ system:
-                </p>
-                <ul className="text-sm text-green-600 space-y-1">
-                  <li>• Contact your local LACRA field agent</li>
-                  <li>• Visit the nearest LACRA county office</li>
-                  <li>• Call LACRA hotline: +231 77 LACRA-1</li>
-                  <li>• Complete farmer onboarding process</li>
-                </ul>
-              </div>
-            )}
+
 
             {/* Footer */}
             <div className="mt-6 text-center">

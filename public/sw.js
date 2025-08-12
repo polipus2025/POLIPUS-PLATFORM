@@ -1,36 +1,52 @@
-// AgriTrace360 Minimal Service Worker
-// No interference with normal browsing - offline fallback only
+// AgriTrace360 Login-Friendly Service Worker
+// Allows login pages to work offline while providing fallback for main app
 
-const CACHE_NAME = 'agritrace360-minimal-v1';
+const CACHE_NAME = 'agritrace360-login-friendly-v1';
 
-// Minimal install
+// Simple install
 self.addEventListener('install', (event) => {
-  console.log('AgriTrace360 Service Worker installing - minimal version');
+  console.log('AgriTrace360 Service Worker installing - login-friendly version');
   self.skipWaiting();
 });
 
-// Minimal activate  
+// Simple activate  
 self.addEventListener('activate', (event) => {
-  console.log('AgriTrace360 Service Worker activated - minimal mode');
+  console.log('AgriTrace360 Service Worker activated - login-friendly mode');
   event.waitUntil(self.clients.claim());
 });
 
-// Only handle navigation requests that fail
+// Very selective fetch handling - avoid login interference
 self.addEventListener('fetch', (event) => {
-  // Only intercept document navigation requests
+  // Only handle main app navigation, never login pages
   if (event.request.mode === 'navigate' && event.request.destination === 'document') {
-    event.respondWith(handleNavigation(event.request));
+    const url = new URL(event.request.url);
+    
+    // Never intercept any auth/login related URLs
+    if (url.pathname.includes('login') || 
+        url.pathname.includes('auth') || 
+        url.pathname.includes('field-agent') ||
+        url.pathname.includes('farmer') ||
+        url.pathname.includes('regulatory') ||
+        url.pathname.includes('exporter')) {
+      // Let these pages load normally - no interference
+      return;
+    }
+    
+    // Only show offline page for root navigation failures
+    if (url.pathname === '/' || url.pathname === '') {
+      event.respondWith(handleMainNavigation(event.request));
+    }
   }
-  // Let all other requests pass through normally
+  // Let all other requests pass through completely untouched
 });
 
-async function handleNavigation(request) {
+async function handleMainNavigation(request) {
   try {
     // Always try network first
     const response = await fetch(request);
     return response;
   } catch (error) {
-    // Only return offline page if network completely fails
+    // Simple offline page only for main app
     return new Response(`
       <!DOCTYPE html>
       <html>
@@ -58,6 +74,16 @@ async function handleNavigation(request) {
             }
             h1 { font-size: 28px; margin-bottom: 20px; }
             p { font-size: 16px; line-height: 1.5; margin-bottom: 30px; }
+            .links { margin: 20px 0; }
+            .links a {
+              display: block;
+              color: white;
+              text-decoration: none;
+              padding: 10px;
+              margin: 10px 0;
+              background: rgba(255,255,255,0.2);
+              border-radius: 8px;
+            }
             button { 
               background: white; 
               color: #10b981; 
@@ -73,8 +99,15 @@ async function handleNavigation(request) {
         <body>
           <div class="container">
             <h1>🌱 AgriTrace360</h1>
-            <p>You're currently offline. Please check your internet connection and try again.</p>
-            <button onclick="window.location.reload()">Retry</button>
+            <p>You're currently offline, but you can still access login pages:</p>
+            
+            <div class="links">
+              <a href="/field-agent-login">Field Agent Login (Offline Ready)</a>
+              <a href="/farmer-login">Farmer Login (Offline Ready)</a>
+              <a href="/regulatory-login">Regulatory Login (Offline Ready)</a>
+            </div>
+            
+            <button onclick="window.location.reload()">Retry Connection</button>
           </div>
           <script>
             // Auto-reload when back online

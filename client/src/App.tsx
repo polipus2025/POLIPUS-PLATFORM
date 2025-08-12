@@ -155,6 +155,7 @@ import MangroveManagementPage from "@/pages/blue-carbon360/mangrove-management-p
 import MarineProtectionPage from "@/pages/blue-carbon360/marine-protection-page";
 import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
 import IntegratedDashboard from "@/pages/integrated-dashboard";
+import SimpleTest from "@/pages/simple-test";
 
 import NotFound from "@/pages/not-found";
 
@@ -479,8 +480,9 @@ function Router() {
       ) : (
         <>
           {/* MAIN LANDING PAGE - Polipus Logo + 8 Modules + Login Buttons */}
-          <Route path="/" component={FrontPage} />
-          <Route path="/dashboard" component={FrontPage} />
+          <Route path="/" component={SimpleTest} />
+          <Route path="/dashboard" component={SimpleTest} />
+          <Route path="/test" component={SimpleTest} />
         </>
       )}
       

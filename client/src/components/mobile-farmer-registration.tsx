@@ -235,7 +235,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                     <Input
                       id="firstName"
                       {...form.register("firstName")}
-                      className="mt-1 min-h-[44px] text-base"
+                      className="mt-1"
                       placeholder="Your first name"
                     />
                     {form.formState.errors.firstName && (
@@ -248,7 +248,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                     <Input
                       id="lastName"
                       {...form.register("lastName")}
-                      className="mt-1 min-h-[44px] text-base"
+                      className="mt-1"
                       placeholder="Your last name"
                     />
                     {form.formState.errors.lastName && (
@@ -262,7 +262,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                       id="phoneNumber"
                       type="tel"
                       {...form.register("phoneNumber")}
-                      className="mt-1 min-h-[44px] text-base"
+                      className="mt-1"
                       placeholder="+231 XXX XXXX"
                     />
                     {form.formState.errors.phoneNumber && (
@@ -274,7 +274,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                   <div>
                     <Label htmlFor="county">County *</Label>
                     <Select onValueChange={(value) => form.setValue("county", value)}>
-                      <SelectTrigger className="mt-1 min-h-[44px]">
+                      <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select your county" />
                       </SelectTrigger>
                       <SelectContent>

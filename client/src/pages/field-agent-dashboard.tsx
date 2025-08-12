@@ -242,40 +242,15 @@ export default function FieldAgentDashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <Dialog open={isNewFarmerOpen} onOpenChange={setIsNewFarmerOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-green-600 hover:bg-green-700">
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add Farmer
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Register New Farmer</DialogTitle>
-                    <DialogDescription>
-                      Add a new farmer to your territorial jurisdiction with GPS boundary mapping
-                    </DialogDescription>
-                  </DialogHeader>
-                  <MobileFarmerRegistration 
-                    onSuccess={() => {
-                      setIsNewFarmerOpen(false);
-                      queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });
-                      toast({
-                        title: "Farmer Registered",
-                        description: "New farmer has been successfully added to your jurisdiction."
-                      });
-                    }}
-                    onCancel={() => setIsNewFarmerOpen(false)}
-                  />
-                </DialogContent>
-              </Dialog>
+            <div className="text-right">
+              <p className="text-sm text-gray-600">Territory Coverage</p>
+              <Badge className="bg-orange-100 text-orange-800">{jurisdiction}</Badge>
             </div>
           </div>
         </div>
 
-        {/* Mobile Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Simple Stats Grid */}
+        <div className="grid grid-cols-4 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -325,11 +300,26 @@ export default function FieldAgentDashboard() {
           </Card>
         </div>
 
-        {/* Mobile Bottom Tabs - Main Content */}
-        <div className="pb-20">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            {/* Content above bottom tabs */}
-            {/* Hidden TabsList for desktop - content controlled by bottom tabs on mobile */}
+        {/* Clean Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="farmers" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Farmers
+            </TabsTrigger>
+            <TabsTrigger value="inspections" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Inspections
+            </TabsTrigger>
+            <TabsTrigger value="territory" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Territory
+            </TabsTrigger>
+          </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
@@ -646,50 +636,7 @@ Registration: ${farmer.registeredBy || 'Unknown'}`;
               />
             </div>
           </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Mobile Bottom Tab Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-          <div className="grid grid-cols-4 h-16">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`flex flex-col items-center justify-center gap-1 text-xs ${
-                activeTab === "overview" ? "text-blue-600 bg-blue-50" : "text-gray-500"
-              }`}
-            >
-              <ClipboardCheck className="h-5 w-5" />
-              <span>Overview</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("farmers")}
-              className={`flex flex-col items-center justify-center gap-1 text-xs ${
-                activeTab === "farmers" ? "text-blue-600 bg-blue-50" : "text-gray-500"
-              }`}
-            >
-              <Users className="h-5 w-5" />
-              <span>Farmers</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("inspections")}
-              className={`flex flex-col items-center justify-center gap-1 text-xs ${
-                activeTab === "inspections" ? "text-blue-600 bg-blue-50" : "text-gray-500"
-              }`}
-            >
-              <Eye className="h-5 w-5" />
-              <span>Inspections</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("territory")}
-              className={`flex flex-col items-center justify-center gap-1 text-xs ${
-                activeTab === "territory" ? "text-blue-600 bg-blue-50" : "text-gray-500"
-              }`}
-            >
-              <MapPin className="h-5 w-5" />
-              <span>Territory</span>
-            </button>
-          </div>
-        </div>
+        </Tabs>
       </div>
     </div>
   );

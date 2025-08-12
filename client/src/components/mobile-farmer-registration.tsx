@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Smartphone, User, Phone, Globe, WifiOff, CheckCircle, Map, Satellite, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import ExactBoundaryMapper from "@/components/maps/exact-boundary-mapper";
+import EnhancedSatelliteMapper from "@/components/maps/enhanced-satellite-mapper";
 
 const LIBERIAN_COUNTIES = [
   "Bomi County", "Bong County", "Gbarpolu County", "Grand Bassa County",
@@ -47,7 +47,7 @@ interface MobileFarmerRegistrationProps {
 
 export default function MobileFarmerRegistration({ onSuccess, onCancel }: MobileFarmerRegistrationProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [showMapping, setShowMapping] = useState(false);
   const [gpsCoordinates, setGpsCoordinates] = useState<string>("");
   const [farmBoundary, setFarmBoundary] = useState<any>(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -193,12 +193,8 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
     }
   };
 
-  const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 4));
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+  const toggleMapping = () => {
+    setShowMapping(prev => !prev);
   };
 
   return (
@@ -227,38 +223,13 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
           </Alert>
         )}
 
-        {/* Progress Indicator */}
-        <div className="flex justify-center mb-6">
-          <div className="flex space-x-2">
-            {[1, 2, 3, 4].map((step) => (
-              <div
-                key={step}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= step
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-200 text-gray-600'
-                }`}
-              >
-                {currentStep > step ? <CheckCircle className="h-4 w-4" /> : step}
-              </div>
-            ))}
-          </div>
-        </div>
-
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">
-                {currentStep === 1 && "Personal Information"}
-                {currentStep === 2 && "Location & Farm Details"}
-                {currentStep === 3 && "Account Security"}
-                {currentStep === 4 && "Land Mapping & Boundaries"}
-              </CardTitle>
+              <CardTitle className="text-lg">Farmer Registration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Step 1: Personal Information */}
-              {currentStep === 1 && (
-                <>
+              {/* Personal Information */}
                   <div>
                     <Label htmlFor="firstName">First Name *</Label>
                     <Input
@@ -298,12 +269,8 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                       <p className="text-red-600 text-sm mt-1">{form.formState.errors.phoneNumber.message}</p>
                     )}
                   </div>
-                </>
-              )}
 
-              {/* Step 2: Location & Farm Details */}
-              {currentStep === 2 && (
-                <>
+              {/* Location & Farm Details */}
                   <div>
                     <Label htmlFor="county">County *</Label>
                     <Select onValueChange={(value) => form.setValue("county", value)}>
@@ -373,12 +340,8 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                       )}
                     </div>
                   </div>
-                </>
-              )}
 
-              {/* Step 3: Account Security */}
-              {currentStep === 3 && (
-                <>
+              {/* Account Security */}
                   <div>
                     <Label htmlFor="password">Password *</Label>
                     <Input
@@ -414,92 +377,71 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                       You can access your dashboard even without internet connection.
                     </AlertDescription>
                   </Alert>
-                </>
-              )}
 
-              {/* Step 4: Land Mapping & Boundaries */}
-              {currentStep === 4 && (
-                <>
-                  <div className="text-center mb-6">
-                    <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <Map className="h-8 w-8 text-green-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Map Your Farm Boundaries
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Use GPS to create accurate boundaries for your farm land. This helps with compliance monitoring and certification.
-                    </p>
-                  </div>
+              {/* Farm Boundary Mapping */}
+              <div className="space-y-4">
+                <Button
+                  type="button"
+                  onClick={toggleMapping}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Satellite className="h-4 w-4 mr-2" />
+                  {showMapping ? "Hide" : "Show"} Satellite Farm Mapping
+                </Button>
 
-                  <Alert className="border-green-300 bg-green-50 mb-4">
-                    <Satellite className="h-4 w-4" />
-                    <AlertDescription className="text-green-800">
-                      <strong>GPS Boundary Mapping System</strong><br />
-                      Use Start/Stop controls and click "Add Point" to create boundary points A-B-C-D. System generates EUDR and Deforestation reports.
-                    </AlertDescription>
-                  </Alert>
-
-                  <div className="min-h-[400px] border rounded-lg overflow-hidden">
-                    <ExactBoundaryMapper
-                      onBoundaryComplete={(boundary) => {
-                        setFarmBoundary(boundary);
-                        form.setValue("farmBoundary", boundary);
-                        toast({
-                          title: "Farm Boundary Complete",
-                          description: `Boundary mapped with ${boundary.points?.length || 0} GPS points covering ${boundary.area?.toFixed(2) || 0} hectares. Reports generated.`,
-                        });
-                      }}
-                    />
-                  </div>
-
-                  {farmBoundary && (
-                    <Alert className="border-green-300 bg-green-50 mt-4">
-                      <CheckCircle className="h-4 w-4" />
+                {showMapping && (
+                  <div className="border rounded-lg p-4 space-y-4">
+                    <Alert className="border-green-300 bg-green-50">
+                      <Satellite className="h-4 w-4" />
                       <AlertDescription className="text-green-800">
-                        <strong>Boundary Mapping Complete!</strong><br />
-                        Area: {farmBoundary.area?.toFixed(2) || 0} hectares<br />
-                        GPS Points: {farmBoundary.points?.length || 0} ({farmBoundary.points?.map((_: any, i: number) => String.fromCharCode(65 + i)).join('-') || ''})<br />
-                        ✓ EUDR Compliance Report Generated<br />
-                        ✓ Deforestation Analysis Report Generated
+                        <strong>Satellite Mapping System</strong><br />
+                        Click on satellite imagery to create boundary points. Automatically generates EUDR Compliance and Deforestation reports.
                       </AlertDescription>
                     </Alert>
-                  )}
-                </>
-              )}
 
-              {/* Navigation Buttons */}
+                    <div className="min-h-[400px] border rounded-lg overflow-hidden">
+                      <EnhancedSatelliteMapper
+                        onBoundaryComplete={(boundary) => {
+                          setFarmBoundary(boundary);
+                          form.setValue("farmBoundary", boundary);
+                          toast({
+                            title: "Farm Boundary Mapped",
+                            description: `Successfully mapped ${boundary.points?.length || 0} GPS points covering ${boundary.area?.toFixed(2) || 0} hectares.`,
+                          });
+                        }}
+                        minPoints={3}
+                        enableRealTimeGPS={true}
+                        farmerId={form.watch("phoneNumber") || ""}
+                        farmerName={`${form.watch("firstName")} ${form.watch("lastName")}`}
+                      />
+                    </div>
+
+                    {farmBoundary && (
+                      <Alert className="border-green-300 bg-green-50">
+                        <CheckCircle className="h-4 w-4" />
+                        <AlertDescription className="text-green-800">
+                          <strong>Satellite Mapping Complete!</strong><br />
+                          Area: {farmBoundary.area?.toFixed(2) || 0} hectares<br />
+                          GPS Points: {farmBoundary.points?.length || 0}<br />
+                          ✓ EUDR Compliance Report Generated<br />
+                          ✓ Deforestation Analysis Report Generated
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
               <div className="flex gap-3 pt-4">
-                {currentStep > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={prevStep}
-                    className="flex-1 min-h-[44px]"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Previous
-                  </Button>
-                )}
-                
-                {currentStep < 4 ? (
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                    className="flex-1 min-h-[44px] bg-green-600 hover:bg-green-700"
-                  >
-                    <ArrowRight className="h-4 w-4 mr-2" />
-                    {currentStep === 3 ? "Map Farm Land" : "Next"}
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="flex-1 min-h-[44px] bg-green-600 hover:bg-green-700"
-                  >
-                    {isLoading ? "Creating Account..." : "Complete Registration"}
-                  </Button>
-                )}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 min-h-[44px] bg-green-600 hover:bg-green-700"
+                >
+                  {isLoading ? "Creating Account..." : "Complete Registration"}
+                </Button>
               </div>
 
               {/* Cancel Button */}

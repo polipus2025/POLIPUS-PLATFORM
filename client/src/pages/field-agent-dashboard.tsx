@@ -242,9 +242,34 @@ export default function FieldAgentDashboard() {
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Territory Coverage</p>
-              <Badge className="bg-orange-100 text-orange-800">{jurisdiction}</Badge>
+            <div className="flex gap-3">
+              <Dialog open={isNewFarmerOpen} onOpenChange={setIsNewFarmerOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add Farmer
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Register New Farmer</DialogTitle>
+                    <DialogDescription>
+                      Add a new farmer to your territorial jurisdiction with GPS boundary mapping
+                    </DialogDescription>
+                  </DialogHeader>
+                  <MobileFarmerRegistration 
+                    onSuccess={() => {
+                      setIsNewFarmerOpen(false);
+                      queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });
+                      toast({
+                        title: "Farmer Registered",
+                        description: "New farmer has been successfully added to your jurisdiction."
+                      });
+                    }}
+                    onCancel={() => setIsNewFarmerOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>

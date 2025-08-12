@@ -27,7 +27,7 @@ import {
   Smartphone
 } from "lucide-react";
 import { Link } from "wouter";
-import ExactBoundaryMapper from "@/components/maps/exact-boundary-mapper";
+import GPSSatelliteMapper from "@/components/maps/gps-satellite-mapper";
 import MobileFarmerRegistration from "@/components/mobile-farmer-registration";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -629,17 +629,20 @@ Registration: ${farmer.registeredBy || 'Unknown'}`;
             </Card>
           </TabsContent>
 
-          {/* Territory Tab - GPS Boundary Mapping */}
+          {/* Territory Tab - GPS Satellite Mapping */}
           <TabsContent value="territory" className="space-y-6">
             <div className="max-w-2xl mx-auto">
-              <ExactBoundaryMapper
+              <GPSSatelliteMapper
                 onBoundaryComplete={(boundary) => {
                   console.log('Farm boundary completed:', boundary);
                   toast({
-                    title: "Farm Boundary Mapped Successfully",
-                    description: `Mapped ${boundary.points.length} GPS points covering ${boundary.area.toFixed(2)} hectares with connected boundary lines`,
+                    title: "GPS Satellite Mapping Complete",
+                    description: `Mapped ${boundary.points.length} GPS points covering ${boundary.area.toFixed(2)} hectares. EUDR and Deforestation reports generated.`,
                   });
                 }}
+                minPoints={3}
+                maxPoints={20}
+                enableRealTimeGPS={true}
               />
             </div>
           </TabsContent>

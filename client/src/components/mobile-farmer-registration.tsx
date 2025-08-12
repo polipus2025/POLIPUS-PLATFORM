@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Smartphone, User, Phone, Globe, WifiOff, CheckCircle, Map, Satellite, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import EnhancedSatelliteMapper from "@/components/maps/enhanced-satellite-mapper";
+import GPSSatelliteMapper from "@/components/maps/gps-satellite-mapper";
 
 const LIBERIAN_COUNTIES = [
   "Bomi County", "Bong County", "Gbarpolu County", "Grand Bassa County",
@@ -401,19 +401,18 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                     </Alert>
 
                     <div className="min-h-[400px] border rounded-lg overflow-hidden">
-                      <EnhancedSatelliteMapper
+                      <GPSSatelliteMapper
                         onBoundaryComplete={(boundary) => {
                           setFarmBoundary(boundary);
                           form.setValue("farmBoundary", boundary);
                           toast({
                             title: "Farm Boundary Mapped",
-                            description: `Successfully mapped ${boundary.points?.length || 0} GPS points covering ${boundary.area?.toFixed(2) || 0} hectares.`,
+                            description: `Successfully mapped ${boundary.points?.length || 0} GPS points covering ${boundary.area?.toFixed(2) || 0} hectares. Reports generated automatically.`,
                           });
                         }}
                         minPoints={3}
+                        maxPoints={20}
                         enableRealTimeGPS={true}
-                        farmerId={form.watch("phoneNumber") || ""}
-                        farmerName={`${form.watch("firstName")} ${form.watch("lastName")}`}
                       />
                     </div>
 

@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import * as React from "react";
 import { GPSPermissionHandler } from "@/components/gps-permission-handler";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download, RefreshCw } from "lucide-react";
+import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download, RefreshCw, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
 import SatelliteFarmDisplay from "@/components/maps/satellite-farm-display";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
-import DeforestationReportUploader from "@/components/farmer/deforestation-report-uploader";
+// Removed manual uploader - reports are auto-generated during mapping
 
 // Farmer form schema - includes all fields used in the form
 const farmerFormSchema = z.object({
@@ -1522,25 +1522,138 @@ export default function FarmersPage() {
                   </div>
                 </div>
 
-                {/* Deforestation Report Uploader */}
-                <DeforestationReportUploader 
-                  farmerId={selectedFarmer.farmerId}
-                  farmerName={`${selectedFarmer.firstName} ${selectedFarmer.lastName}`}
-                  existingReports={(() => {
-                    try {
-                      const storedDocs = JSON.parse(localStorage.getItem('farmer_documents') || '[]');
-                      return storedDocs.filter((doc: any) => 
-                        doc.farmerId === selectedFarmer.farmerId && 
-                        doc.documentType === 'deforestation_report'
-                      );
-                    } catch (error) {
-                      return [];
-                    }
-                  })()}
-                  onReportUploaded={(report) => {
-                    console.log('Deforestation report uploaded:', report);
-                  }}
-                />
+                {/* EUDR & Deforestation Reports Section */}
+                <Card className="border-orange-200 bg-orange-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-orange-800">
+                      <Shield className="h-5 w-5" />
+                      EUDR Compliance & Deforestation Reports
+                    </CardTitle>
+                    <p className="text-sm text-orange-700 mt-1">
+                      System-generated reports from farmer registration and land mapping process
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {(() => {
+                        try {
+                          const storedDocs = JSON.parse(localStorage.getItem('farmer_documents') || '[]');
+                          const farmerReports = storedDocs.filter((doc: any) => 
+                            doc.farmerId === selectedFarmer.farmerId && 
+                            (doc.documentType === 'eudr_compliance_report' || doc.documentType === 'deforestation_report')
+                          );
+                          
+                          const eudrReport = farmerReports.find((r: any) => r.documentType === 'eudr_compliance_report');
+                          const deforestationReport = farmerReports.find((r: any) => r.documentType === 'deforestation_report');
+                          
+                          if (farmerReports.length === 0) {
+                            return (
+                              <div className="text-center py-6">
+                                <AlertTriangle className="h-12 w-12 mx-auto text-orange-400 mb-3" />
+                                <p className="text-orange-700 font-medium">No Reports Generated Yet</p>
+                                <p className="text-sm text-orange-600 mt-1">
+                                  Reports will be automatically generated during farmer registration and land mapping
+                                </p>
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* EUDR Compliance Report */}
+                              {eudrReport && (
+                                <div className="bg-white p-4 rounded-lg border border-green-200">
+                                  <div className="flex items-start gap-3 mb-3">
+                                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                                    <div className="flex-1">
+                                      <h4 className="font-medium text-green-800">EUDR Compliance Report</h4>
+                                      <p className="text-xs text-gray-600 mt-1">
+                                        Generated: {new Date(eudrReport.generatedDate || eudrReport.uploadDate).toLocaleDateString()}
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <Badge variant="default" className="text-xs">
+                                          {eudrReport.reportData?.compliance?.status || 'COMPLIANT'}
+                                        </Badge>
+                                        <Badge variant="secondary" className="text-xs">
+                                          Risk: {eudrReport.reportData?.compliance?.riskLevel || 'LOW'}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => {
+                                      const blob = new Blob([JSON.stringify(eudrReport, null, 2)], { type: 'application/json' });
+                                      const url = URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url;
+                                      a.download = eudrReport.documentName || `EUDR_Report_${selectedFarmer.farmerId}.json`;
+                                      a.click();
+                                      URL.revokeObjectURL(url);
+                                    }}
+                                    className="w-full text-green-700 border-green-300 hover:bg-green-50"
+                                    data-testid="button-download-eudr-report"
+                                  >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Download EUDR Report
+                                  </Button>
+                                </div>
+                              )}
+                              
+                              {/* Deforestation Assessment Report */}
+                              {deforestationReport && (
+                                <div className="bg-white p-4 rounded-lg border border-orange-200">
+                                  <div className="flex items-start gap-3 mb-3">
+                                    <FileText className="h-5 w-5 text-orange-600 mt-0.5" />
+                                    <div className="flex-1">
+                                      <h4 className="font-medium text-orange-800">Deforestation Assessment</h4>
+                                      <p className="text-xs text-gray-600 mt-1">
+                                        Generated: {new Date(deforestationReport.generatedDate || deforestationReport.uploadDate).toLocaleDateString()}
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <Badge variant="secondary" className="text-xs">
+                                          {deforestationReport.reportData?.totalAreaHectares || 'N/A'} hectares
+                                        </Badge>
+                                        <Badge variant="secondary" className="text-xs">
+                                          GPS: {deforestationReport.reportData?.gpsAccuracy || 'Unknown'}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => {
+                                      const blob = new Blob([JSON.stringify(deforestationReport, null, 2)], { type: 'application/json' });
+                                      const url = URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url;
+                                      a.download = deforestationReport.documentName || `Deforestation_Report_${selectedFarmer.farmerId}.json`;
+                                      a.click();
+                                      URL.revokeObjectURL(url);
+                                    }}
+                                    className="w-full text-orange-700 border-orange-300 hover:bg-orange-50"
+                                    data-testid="button-download-deforestation-report"
+                                  >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Download Deforestation Report
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        } catch (error) {
+                          return (
+                            <div className="text-center py-4">
+                              <p className="text-orange-700">Error loading reports</p>
+                            </div>
+                          );
+                        }
+                      })()}
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Additional Information */}
                 <div>

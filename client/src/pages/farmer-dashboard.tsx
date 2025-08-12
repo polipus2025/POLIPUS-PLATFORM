@@ -41,48 +41,33 @@ export default function FarmerDashboard() {
   ).length : 0;
 
   return (
-    <div className="space-y-4 lg:space-y-6 p-3 lg:p-6 max-w-7xl mx-auto">
-      {/* Offline Status Indicator */}
-      {!navigator.onLine && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-          <div className="flex">
-            <AlertTriangle className="h-5 w-5 text-yellow-400" />
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                You're working offline. Changes will sync when you reconnect.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Back to Polipus Button - Mobile Responsive */}
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-0">
+      {/* Back to Polipus Button */}
       <div className="mb-4">
-        <Link href="/polipus" className="inline-flex items-center px-3 py-2 lg:px-4 lg:py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md w-full sm:w-auto justify-center sm:justify-start">
+        <Link href="/polipus" className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          <span className="sm:hidden">Back to Platform</span>
-          <span className="hidden sm:inline">Back to Polipus Platform</span>
+          Back to Polipus Platform
         </Link>
       </div>
 
-      {/* Mobile-First Header */}
-      <div className="flex flex-col gap-4">
-        <div className="text-center sm:text-left">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+      {/* Mobile-Responsive Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Welcome back, {farmerName}!
           </h1>
-          <p className="text-sm lg:text-base text-gray-600 mt-1">
-            ID: {farmerId} | Farm Management Dashboard
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
+            Farmer ID: {farmerId} | Your farm management dashboard
           </p>
         </div>
-        <div className="w-full">
-          <Link href="/batch-code-generator" className="block">
-            <Button className="bg-green-600 hover:bg-green-700 w-full sm:w-auto min-h-[44px] text-sm lg:text-base">
+        <div className="flex gap-3 w-full sm:w-auto">
+          <Link href="/batch-code-generator" className="flex-1 sm:flex-none">
+            <Button className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
               <Package className="h-4 w-4 mr-2" />
-              <span className="sm:hidden">Generate Batch</span>
               <span className="hidden sm:inline">Generate Batch Code</span>
+              <span className="sm:hidden">New Batch</span>
             </Button>
           </Link>
         </div>

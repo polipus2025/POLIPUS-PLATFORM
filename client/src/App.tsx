@@ -7,7 +7,6 @@ import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
-import OfflineManager from "@/components/offline-manager";
 import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import GPSTest from "@/pages/gps-test";
@@ -574,30 +573,28 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <OfflineManager>
-          {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
-            // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
-            <div className="min-h-screen">
-              <Router />
+        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
+          // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
+          <div className="min-h-screen">
+            <Router />
+          </div>
+        ) : (
+          // Render authenticated pages with full layout
+          <div className="min-h-screen bg-gray-50">
+            <Header />
+            <div className="flex">
+              <Sidebar />
+              <main className="flex-1 min-w-0 overflow-hidden pb-16 lg:pb-0">
+                <Router />
+              </main>
             </div>
-          ) : (
-            // Render authenticated pages with full layout
-            <div className="min-h-screen bg-gray-50">
-              <Header />
-              <div className="flex flex-col lg:flex-row">
-                <Sidebar />
-                <main className="flex-1 min-w-0 overflow-hidden pb-16 lg:pb-0 px-3 lg:px-6">
-                  <Router />
-                </main>
-              </div>
-              <MobileNav />
-            </div>
-          )}
-          
-          {/* PWA Install Prompt - Show on all pages */}
-          <PWAInstallPrompt />
-          <Toaster />
-        </OfflineManager>
+            <MobileNav />
+          </div>
+        )}
+        
+        {/* PWA Install Prompt - Show on all pages */}
+        <PWAInstallPrompt />
+        <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
   );

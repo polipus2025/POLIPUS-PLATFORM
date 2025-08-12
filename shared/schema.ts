@@ -70,6 +70,29 @@ export const alerts = pgTable("alerts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+
+
+// Farmer document attachments including deforestation reports
+export const farmerDocuments = pgTable("farmer_documents", {
+  id: serial("id").primaryKey(),
+  farmerId: text("farmer_id").notNull(),
+  documentType: text("document_type").notNull(), // deforestation_report, land_certificate, compliance_certificate, etc.
+  documentName: text("document_name").notNull(),
+  documentUrl: text("document_url"), // File storage URL or path
+  documentSize: integer("document_size"), // File size in bytes
+  mimeType: text("mime_type"), // application/pdf, image/jpeg, etc.
+  uploadedBy: text("uploaded_by").notNull(), // user ID who uploaded
+  uploadDate: timestamp("upload_date").defaultNow(),
+  description: text("description"),
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: text("verified_by"),
+  verifiedAt: timestamp("verified_at"),
+  expiryDate: timestamp("expiry_date"), // For time-sensitive documents
+  status: text("status").notNull().default("active"), // active, expired, revoked
+  metadata: jsonb("metadata"), // Additional document metadata
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Super Backend Administrative Control System
 export const systemConfigurations = pgTable("system_configurations", {
   id: serial("id").primaryKey(),

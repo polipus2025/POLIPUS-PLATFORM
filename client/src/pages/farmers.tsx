@@ -23,6 +23,7 @@ import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
 import SatelliteFarmDisplay from "@/components/maps/satellite-farm-display";
 import { updateFarmerWithReports } from "@/components/reports/report-storage";
 import FarmerWithReportsDemo from "@/components/demo/farmer-with-reports-demo";
+import DeforestationReportUploader from "@/components/farmer/deforestation-report-uploader";
 
 // Farmer form schema - includes all fields used in the form
 const farmerFormSchema = z.object({
@@ -1520,6 +1521,26 @@ export default function FarmersPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Deforestation Report Uploader */}
+                <DeforestationReportUploader 
+                  farmerId={selectedFarmer.farmerId}
+                  farmerName={`${selectedFarmer.firstName} ${selectedFarmer.lastName}`}
+                  existingReports={(() => {
+                    try {
+                      const storedDocs = JSON.parse(localStorage.getItem('farmer_documents') || '[]');
+                      return storedDocs.filter((doc: any) => 
+                        doc.farmerId === selectedFarmer.farmerId && 
+                        doc.documentType === 'deforestation_report'
+                      );
+                    } catch (error) {
+                      return [];
+                    }
+                  })()}
+                  onReportUploaded={(report) => {
+                    console.log('Deforestation report uploaded:', report);
+                  }}
+                />
 
                 {/* Additional Information */}
                 <div>

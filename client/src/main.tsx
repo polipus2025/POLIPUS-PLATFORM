@@ -2,22 +2,51 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Register Service Worker for offline support only - no auto-reload
+// Register enhanced service worker for comprehensive offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      console.log('Registering minimal service worker for offline support');
+      // Unregister any existing service worker first
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let registration of registrations) {
+        await registration.unregister();
+        console.log('🗑️ Unregistered old service worker');
+      }
       
-      // Register service worker without any reload logic
-      await navigator.serviceWorker.register('/sw.js', {
+      // Register new enhanced service worker with cache busting
+      const registration = await navigator.serviceWorker.register(`/sw.js?v=${Date.now()}`, {
         scope: '/',
         updateViaCache: 'none'
       });
       
-      console.log('Service worker registered successfully');
+      console.log('✅ Enhanced Service Worker registered successfully', registration);
+      
+      // Handle service worker updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('🔄 New service worker available');
+              // Auto-reload to use new service worker
+              window.location.reload();
+            }
+          });
+        }
+      });
+      
+      // Listen for service worker messages
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'SYNC_FARMERS') {
+          console.log('🔄 Service worker requested farmer sync');
+          if ((window as any).syncOfflineFarmers) {
+            (window as any).syncOfflineFarmers();
+          }
+        }
+      });
       
     } catch (error) {
-      console.log('Service worker registration failed:', error);
+      console.error('❌ Service worker registration failed:', error);
     }
   });
 }

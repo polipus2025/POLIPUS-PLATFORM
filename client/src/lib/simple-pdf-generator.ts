@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import QRCode from 'qrcode';
 
 export interface EUDRComplianceData {
   farmerId: string;
@@ -29,108 +30,156 @@ export interface DeforestationData {
   generatedAt: string;
 }
 
+// Helper function to wrap text properly to prevent cutoff
+const addWrappedText = (pdf: jsPDF, text: string, x: number, y: number, maxWidth: number, lineHeight: number) => {
+  const words = text.split(' ');
+  let line = '';
+  let currentY = y;
+  
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = pdf.getStringUnitWidth(testLine) * pdf.getFontSize() / pdf.internal.scaleFactor;
+    
+    if (metrics > maxWidth && n > 0) {
+      pdf.text(line.trim(), x, currentY);
+      line = words[n] + ' ';
+      currentY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  pdf.text(line.trim(), x, currentY);
+  return currentY + lineHeight;
+};
+
 // Generate EUDR compliance PDF with LACRA & ECOENVIRO letterhead
-export const generateEUDRCompliancePDF = (data: EUDRComplianceData): void => {
+export const generateEUDRCompliancePDF = async (data: EUDRComplianceData): Promise<void> => {
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   
-  // LACRA & ECOENVIRO Letterhead - Green header
-  pdf.setFillColor(34, 197, 94); // Green
-  pdf.rect(0, 0, pageWidth, 45, 'F');
+  // Generate QR code URL for mobile access
+  const reportUrl = `${window.location.origin}/reports/eudr/${data.reportId}`;
   
-  // LACRA Logo area - Circular logo design
+  // LACRA & ECOENVIRO Letterhead - Original green header
+  pdf.setFillColor(34, 197, 94); // Original green
+  pdf.rect(0, 0, pageWidth, 50, 'F');
+  
+  // LACRA Logo area - Enhanced circular design with clear details
   pdf.setFillColor(255, 255, 255);
-  pdf.rect(10, 5, 35, 25, 'F');
-  pdf.setDrawColor(139, 69, 19);
-  pdf.setLineWidth(1);
-  pdf.rect(10, 5, 35, 25, 'S');
-  
-  // LACRA logo elements - circular design
-  const centerX = 27.5;
-  const centerY = 17.5;
-  
-  // Outer brown circle
+  pdf.rect(10, 8, 40, 30, 'F');
   pdf.setDrawColor(139, 69, 19);
   pdf.setLineWidth(1.5);
-  pdf.circle(centerX, centerY, 10, 'S');
+  pdf.rect(10, 8, 40, 30, 'S');
   
-  // Agricultural commodities representation
-  // Palm fruit (left side)
-  pdf.setFillColor(255, 165, 0); // Orange for palm fruit
-  pdf.circle(centerX - 4, centerY - 2, 2, 'F');
-  pdf.setFillColor(220, 20, 60); // Red for palm fruit
-  pdf.circle(centerX - 4, centerY - 2, 1.5, 'F');
+  // LACRA logo elements - larger and clearer circular design
+  const centerX = 30;
+  const centerY = 23;
   
-  // Green leaf
-  pdf.setFillColor(34, 197, 94); // Green
-  pdf.ellipse(centerX - 2, centerY - 4, 3, 1.5, 'F');
+  // Outer brown circle - larger and more defined
+  pdf.setDrawColor(139, 69, 19);
+  pdf.setLineWidth(2);
+  pdf.circle(centerX, centerY, 12, 'S');
   
-  // Yellow/golden commodity (right side)
-  pdf.setFillColor(255, 215, 0); // Golden
-  pdf.circle(centerX + 3, centerY + 1, 2.5, 'F');
+  // Agricultural commodities representation - enhanced
+  // Palm fruit cluster (left side) - larger and more detailed
+  pdf.setFillColor(255, 140, 0); // Orange for palm fruit
+  pdf.circle(centerX - 6, centerY - 3, 3, 'F');
+  pdf.setFillColor(255, 69, 0); // Red-orange palm fruit
+  pdf.circle(centerX - 6, centerY - 3, 2, 'F');
+  pdf.circle(centerX - 7, centerY - 1, 1.5, 'F');
+  pdf.circle(centerX - 5, centerY - 1, 1.5, 'F');
   
-  // Cocoa beans (bottom)
-  pdf.setFillColor(139, 69, 19); // Brown
-  pdf.circle(centerX - 1, centerY + 3, 1.2, 'F');
-  pdf.circle(centerX + 1, centerY + 3, 1.2, 'F');
+  // Green leaf - larger and more prominent
+  pdf.setFillColor(34, 197, 94); // Bright green
+  pdf.ellipse(centerX - 3, centerY - 7, 4, 2, 'F');
+  pdf.ellipse(centerX + 1, centerY - 6, 3, 1.5, 'F');
   
-  // LACRA text
+  // Cocoa beans cluster (right side) - enhanced
+  pdf.setFillColor(139, 69, 19); // Rich brown
+  pdf.circle(centerX + 4, centerY + 1, 2.5, 'F');
+  pdf.circle(centerX + 6, centerY + 3, 2, 'F');
+  pdf.circle(centerX + 3, centerY + 4, 1.8, 'F');
+  
+  // Golden commodity/grain (bottom)
+  pdf.setFillColor(255, 215, 0); // Golden yellow
+  pdf.circle(centerX - 2, centerY + 5, 2, 'F');
+  pdf.circle(centerX + 1, centerY + 6, 1.5, 'F');
+  
+  // LACRA text - larger and clearer
   pdf.setTextColor(139, 69, 19);
-  pdf.setFontSize(6);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('LACRA', 19, 26);
-  pdf.setFontSize(4);
-  pdf.text('Excellence', 20, 28);
+  pdf.text('LACRA', 22, 34);
+  pdf.setFontSize(6);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Liberia Agriculture Commodity', 12, 36);
+  pdf.text('Regulatory Authority', 20, 38);
+  pdf.setFontSize(5);
+  pdf.setFont('helvetica', 'italic');
+  pdf.text('Excellence in Agriculture', 22, 40);
   
   // ECOENVIRO Certification Logo (center)
   pdf.setFillColor(255, 255, 255);
-  pdf.rect(50, 5, 45, 25, 'F');
-  pdf.rect(50, 5, 45, 25, 'S');
+  pdf.rect(55, 8, 50, 30, 'F');
+  pdf.setDrawColor(59, 130, 246);
+  pdf.setLineWidth(1.5);
+  pdf.rect(55, 8, 50, 30, 'S');
   
-  // ECOENVIRO logo design (stylized diamond pattern)
+  // ECOENVIRO logo design - enhanced certification symbol
   pdf.setFillColor(59, 130, 246); // Blue
-  pdf.rect(65, 8, 4, 4, 'F');
-  pdf.rect(61, 12, 4, 4, 'F');
-  pdf.rect(65, 12, 4, 4, 'F');
-  pdf.rect(69, 12, 4, 4, 'F');
-  pdf.rect(65, 16, 4, 4, 'F');
+  pdf.circle(80, 20, 8, 'S');
+  pdf.setLineWidth(1);
   
-  pdf.setFillColor(255, 165, 0); // Orange
-  pdf.rect(57, 16, 4, 4, 'F');
-  pdf.rect(61, 16, 4, 4, 'F');
-  pdf.rect(69, 16, 4, 4, 'F');
-  pdf.rect(73, 16, 4, 4, 'F');
+  // Certification checkmark
+  pdf.setDrawColor(34, 197, 94); // Green
+  pdf.setLineWidth(2);
+  // Drawing checkmark path
+  pdf.line(75, 20, 78, 23);
+  pdf.line(78, 23, 85, 16);
+  
+  // Environmental symbols
+  pdf.setFillColor(34, 197, 94); // Green
+  pdf.circle(75, 25, 1.5, 'F'); // Leaf symbol
+  pdf.circle(85, 25, 1.5, 'F'); // Leaf symbol
   
   pdf.setTextColor(59, 130, 246);
   pdf.setFontSize(8);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('ECOENVIRO', 52, 24);
-  pdf.setFontSize(5);
+  pdf.text('ECOENVIRO', 62, 32);
+  pdf.setFontSize(6);
   pdf.setTextColor(255, 165, 0);
-  pdf.text('AUDIT & CERTIFICATION', 52, 27);
+  pdf.text('AUDIT & CERTIFICATION', 58, 35);
   
-  // EU Compliance Badge
-  pdf.setFillColor(59, 130, 246); // Blue
-  pdf.rect(pageWidth - 45, 5, 35, 25, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(8);
-  pdf.text('EU DEFORESTATION', pageWidth - 42, 15);
-  pdf.text('REGULATION', pageWidth - 38, 19);
-  pdf.text('COMPLIANT', pageWidth - 37, 23);
+  // QR Code area (right side)
+  const qrCodeData = await QRCode.toDataURL(reportUrl, {
+    width: 60,
+    margin: 1,
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF'
+    }
+  });
   
-  // Main title
+  pdf.addImage(qrCodeData, 'PNG', pageWidth - 35, 8, 25, 25);
   pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(14);
+  pdf.setFontSize(6);
+  pdf.text('Scan to Download', pageWidth - 32, 36, { align: 'center' });
+  pdf.text('Mobile Report', pageWidth - 32, 39, { align: 'center' });
+  
+  // Main title - properly centered
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('EUDR COMPLIANCE ASSESSMENT', pageWidth / 2, 16, { align: 'center' });
+  pdf.text('EUDR COMPLIANCE ASSESSMENT', pageWidth / 2, 18, { align: 'center' });
   
-  pdf.setFontSize(9);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
   pdf.text('European Union Deforestation Regulation Report', pageWidth / 2, 25, { align: 'center' });
   
-  // Contact information
+  // Contact information footer
   pdf.setFontSize(6);
-  pdf.text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia', 10, 39);
-  pdf.text('Certified by ECOENVIRO - Audit & Certification | Lab/Testing', 10, 42);
+  pdf.text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia | Tel: +231-XXX-XXXX', 10, 44);
+  pdf.text('Certified by ECOENVIRO | compliance@lacra.gov.lr | cert@ecoenviro.com', 10, 47);
   
   // Due Diligence Statement
   let yPos = 55;
@@ -204,17 +253,22 @@ export const generateEUDRCompliancePDF = (data: EUDRComplianceData): void => {
     pdf.text(coord.trim(), 15, yPos + (index * 5));
   });
   
-  // Recommendations
+  // Recommendations with proper text wrapping to prevent cutoff
   yPos += (coordLines.length * 5) + 15;
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Recommendations:', 15, yPos);
+  pdf.text('Key Assessment Findings & Recommendations:', 15, yPos);
   
-  yPos += 10;
+  yPos += 15;
   pdf.setFontSize(9);
   pdf.setFont('helvetica', 'normal');
+  
+  // Use proper text wrapping for recommendations
+  let recCurrentY = yPos;
   data.recommendations.forEach((rec, index) => {
-    pdf.text(`• ${rec}`, 15, yPos + (index * 7));
+    const bulletText = `• ${rec}`;
+    recCurrentY = addWrappedText(pdf, bulletText, 15, recCurrentY, pageWidth - 30, 7);
+    recCurrentY += 5; // Add spacing between recommendations
   });
   
   // Footer with dual certification
@@ -229,102 +283,128 @@ export const generateEUDRCompliancePDF = (data: EUDRComplianceData): void => {
   pdf.save(`LACRA_ECOENVIRO_EUDR_Compliance_${data.farmerName.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
 };
 
-// Generate deforestation analysis PDF with LACRA & ECOENVIRO letterhead
-export const generateDeforestationPDF = (data: DeforestationData): void => {
+// Generate deforestation analysis PDF with LACRA & ECOENVIRO letterhead  
+export const generateDeforestationPDF = async (data: DeforestationData): Promise<void> => {
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   
-  // LACRA & ECOENVIRO Letterhead - Red header for deforestation
-  pdf.setFillColor(220, 38, 38); // Red
-  pdf.rect(0, 0, pageWidth, 45, 'F');
+  // Generate QR code URL for mobile access
+  const deforestationReportUrl = `${window.location.origin}/reports/deforestation/${data.reportId}`;
   
-  // LACRA Logo area - Circular logo design
+  // LACRA & ECOENVIRO Letterhead - Original red header for deforestation
+  pdf.setFillColor(220, 38, 38); // Original red
+  pdf.rect(0, 0, pageWidth, 50, 'F');
+  
+  // LACRA Logo area - Enhanced circular design with clear details
   pdf.setFillColor(255, 255, 255);
-  pdf.rect(10, 5, 35, 25, 'F');
-  pdf.setDrawColor(139, 69, 19);
-  pdf.setLineWidth(1);
-  pdf.rect(10, 5, 35, 25, 'S');
-  
-  // LACRA logo elements - circular design
-  const centerX2 = 27.5;
-  const centerY2 = 17.5;
-  
-  // Outer brown circle
+  pdf.rect(10, 8, 40, 30, 'F');
   pdf.setDrawColor(139, 69, 19);
   pdf.setLineWidth(1.5);
-  pdf.circle(centerX2, centerY2, 10, 'S');
+  pdf.rect(10, 8, 40, 30, 'S');
   
-  // Agricultural commodities representation
-  // Palm fruit (left side)
-  pdf.setFillColor(255, 165, 0); // Orange for palm fruit
-  pdf.circle(centerX2 - 4, centerY2 - 2, 2, 'F');
-  pdf.setFillColor(220, 20, 60); // Red for palm fruit
-  pdf.circle(centerX2 - 4, centerY2 - 2, 1.5, 'F');
+  // LACRA logo elements - larger and clearer circular design
+  const centerX2 = 30;
+  const centerY2 = 23;
   
-  // Green leaf
-  pdf.setFillColor(34, 197, 94); // Green
-  pdf.ellipse(centerX2 - 2, centerY2 - 4, 3, 1.5, 'F');
+  // Outer brown circle - larger and more defined
+  pdf.setDrawColor(139, 69, 19);
+  pdf.setLineWidth(2);
+  pdf.circle(centerX2, centerY2, 12, 'S');
   
-  // Yellow/golden commodity (right side)
-  pdf.setFillColor(255, 215, 0); // Golden
-  pdf.circle(centerX2 + 3, centerY2 + 1, 2.5, 'F');
+  // Agricultural commodities representation - enhanced
+  // Palm fruit cluster (left side) - larger and more detailed
+  pdf.setFillColor(255, 140, 0); // Orange for palm fruit
+  pdf.circle(centerX2 - 6, centerY2 - 3, 3, 'F');
+  pdf.setFillColor(255, 69, 0); // Red-orange palm fruit
+  pdf.circle(centerX2 - 6, centerY2 - 3, 2, 'F');
+  pdf.circle(centerX2 - 7, centerY2 - 1, 1.5, 'F');
+  pdf.circle(centerX2 - 5, centerY2 - 1, 1.5, 'F');
   
-  // Cocoa beans (bottom)
-  pdf.setFillColor(139, 69, 19); // Brown
-  pdf.circle(centerX2 - 1, centerY2 + 3, 1.2, 'F');
-  pdf.circle(centerX2 + 1, centerY2 + 3, 1.2, 'F');
+  // Green leaf - larger and more prominent
+  pdf.setFillColor(34, 197, 94); // Bright green
+  pdf.ellipse(centerX2 - 3, centerY2 - 7, 4, 2, 'F');
+  pdf.ellipse(centerX2 + 1, centerY2 - 6, 3, 1.5, 'F');
   
-  // LACRA text
+  // Cocoa beans cluster (right side) - enhanced
+  pdf.setFillColor(139, 69, 19); // Rich brown
+  pdf.circle(centerX2 + 4, centerY2 + 1, 2.5, 'F');
+  pdf.circle(centerX2 + 6, centerY2 + 3, 2, 'F');
+  pdf.circle(centerX2 + 3, centerY2 + 4, 1.8, 'F');
+  
+  // Golden commodity/grain (bottom)
+  pdf.setFillColor(255, 215, 0); // Golden yellow
+  pdf.circle(centerX2 - 2, centerY2 + 5, 2, 'F');
+  pdf.circle(centerX2 + 1, centerY2 + 6, 1.5, 'F');
+  
+  // LACRA text - larger and clearer
   pdf.setTextColor(139, 69, 19);
-  pdf.setFontSize(6);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('LACRA', 19, 26);
-  pdf.setFontSize(4);
-  pdf.text('Excellence', 20, 28);
+  pdf.text('LACRA', 22, 34);
+  pdf.setFontSize(6);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Liberia Agriculture Commodity', 12, 36);
+  pdf.text('Regulatory Authority', 20, 38);
+  pdf.setFontSize(5);
+  pdf.setFont('helvetica', 'italic');
+  pdf.text('Excellence in Agriculture', 22, 40);
   
-  // ECOENVIRO Logo area (center)
+  // ECOENVIRO Certification Logo (center)
   pdf.setFillColor(255, 255, 255);
-  pdf.rect(50, 5, 45, 25, 'F');
-  pdf.rect(50, 5, 45, 25, 'S');
+  pdf.rect(55, 8, 50, 30, 'F');
+  pdf.setDrawColor(59, 130, 246);
+  pdf.setLineWidth(1.5);
+  pdf.rect(55, 8, 50, 30, 'S');
   
-  // ECOENVIRO logo design (stylized diamond pattern)
+  // ECOENVIRO logo design - enhanced certification symbol
   pdf.setFillColor(59, 130, 246); // Blue
-  pdf.rect(65, 8, 4, 4, 'F');
-  pdf.rect(61, 12, 4, 4, 'F');
-  pdf.rect(65, 12, 4, 4, 'F');
-  pdf.rect(69, 12, 4, 4, 'F');
-  pdf.rect(65, 16, 4, 4, 'F');
+  pdf.circle(80, 20, 8, 'S');
+  pdf.setLineWidth(1);
   
-  pdf.setFillColor(255, 165, 0); // Orange
-  pdf.rect(57, 16, 4, 4, 'F');
-  pdf.rect(61, 16, 4, 4, 'F');
-  pdf.rect(69, 16, 4, 4, 'F');
-  pdf.rect(73, 16, 4, 4, 'F');
+  // Certification checkmark
+  pdf.setDrawColor(34, 197, 94); // Green
+  pdf.setLineWidth(2);
+  // Drawing checkmark path
+  pdf.line(75, 20, 78, 23);
+  pdf.line(78, 23, 85, 16);
+  
+  // Environmental symbols
+  pdf.setFillColor(34, 197, 94); // Green
+  pdf.circle(75, 25, 1.5, 'F'); // Leaf symbol
+  pdf.circle(85, 25, 1.5, 'F'); // Leaf symbol
   
   pdf.setTextColor(59, 130, 246);
   pdf.setFontSize(8);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('ECOENVIRO', 52, 24);
-  pdf.setFontSize(5);
+  pdf.text('ECOENVIRO', 62, 32);
+  pdf.setFontSize(6);
   pdf.setTextColor(255, 165, 0);
-  pdf.text('AUDIT & CERTIFICATION', 52, 27);
+  pdf.text('AUDIT & CERTIFICATION', 58, 35);
   
-  // Environmental Badge
-  pdf.setFillColor(34, 197, 94); // Green
-  pdf.rect(pageWidth - 45, 5, 35, 25, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(8);
-  pdf.text('ENVIRONMENTAL', pageWidth - 42, 15);
-  pdf.text('MONITORING', pageWidth - 38, 19);
-  pdf.text('SYSTEM', pageWidth - 35, 23);
+  // QR Code area (right side)
+  const deforestationQRData = await QRCode.toDataURL(deforestationReportUrl, {
+    width: 60,
+    margin: 1,
+    color: {
+      dark: '#000000',
+      light: '#FFFFFF'
+    }
+  });
   
-  // Main title
+  pdf.addImage(deforestationQRData, 'PNG', pageWidth - 35, 8, 25, 25);
   pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(14);
+  pdf.setFontSize(6);
+  pdf.text('Scan to Download', pageWidth - 32, 36, { align: 'center' });
+  pdf.text('Mobile Report', pageWidth - 32, 39, { align: 'center' });
+  
+  // Main title - properly centered
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('DEFORESTATION ANALYSIS', pageWidth / 2, 16, { align: 'center' });
+  pdf.text('DEFORESTATION ANALYSIS', pageWidth / 2, 18, { align: 'center' });
   
-  pdf.setFontSize(9);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
   pdf.text('Environmental Impact Assessment Report', pageWidth / 2, 25, { align: 'center' });
   
   // Contact information

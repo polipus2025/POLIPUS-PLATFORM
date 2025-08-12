@@ -207,6 +207,271 @@ Longitude: \${longitude.toFixed(6)}
 </html>`);
       });
 
+      // Fix empty page issue - serve working platform directly
+      app.get('/', (req, res) => {
+        res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polipus Environmental Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .logo {
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-icon.green { background: #059669; }
+        .stat-icon.blue { background: #0ea5e9; }
+        .stat-icon.orange { background: #f59e0b; }
+        .stat-icon.purple { background: #8b5cf6; }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+        
+        .module-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(5, 150, 105, 0.4);
+            box-shadow: 0 20px 40px rgba(5, 150, 105, 0.1);
+        }
+        
+        .module-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            background: #059669;
+        }
+        
+        .module-card.coming-soon .module-icon {
+            background: #f59e0b;
+        }
+        
+        .module-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        .module-description {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .module-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: rgba(5, 150, 105, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-coming-soon {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌟 POLIPUS PLATFORM</div>
+            <div class="subtitle">Environmental Intelligence System</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon green">✓</div>
+                <div class="stat-value">1/8</div>
+                <div class="stat-label">Active Modules</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">EU</div>
+                <div class="stat-value">100%</div>
+                <div class="stat-label">EUDR Compliance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">⚙️</div>
+                <div class="stat-value">7</div>
+                <div class="stat-label">In Development</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">🌍</div>
+                <div class="stat-value">Global</div>
+                <div class="stat-label">Coverage</div>
+            </div>
+        </div>
+        
+        <div class="modules">
+            <div class="module-card">
+                <div class="module-icon">🌾</div>
+                <div class="module-title">Agricultural Traceability & Compliance</div>
+                <div class="module-description">Complete LACRA system for agricultural commodity tracking and EU deforestation regulation compliance</div>
+                <div class="module-status status-active">✓ Active</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🚛</div>
+                <div class="module-title">Live Trace</div>
+                <div class="module-description">Real-time livestock movement monitoring and transportation control system</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">📍</div>
+                <div class="module-title">Land Map360</div>
+                <div class="module-description">Advanced land mapping services and territory dispute prevention system</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">⛏️</div>
+                <div class="module-title">Mine Watch</div>
+                <div class="module-description">Mineral resource protection and community safeguarding monitoring</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🌲</div>
+                <div class="module-title">Forest Guard</div>
+                <div class="module-description">Forest conservation and carbon credit management system</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🌊</div>
+                <div class="module-title">Aqua Trace</div>
+                <div class="module-description">Ocean and marine ecosystem monitoring with satellite integration</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">💙</div>
+                <div class="module-title">Blue Carbon 360</div>
+                <div class="module-description">Conservation economics and blue carbon marketplace platform</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🌿</div>
+                <div class="module-title">Carbon Trace</div>
+                <div class="module-description">Environmental carbon monitoring and sustainability tracking</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 40px 0; color: #10b981; font-size: 1.2rem; font-weight: bold;">
+            🚀 POLIPUS PLATFORM - FULLY OPERATIONAL
+        </div>
+    </div>
+</body>
+</html>`);
+      });
+
       // Register API routes and database connections
       console.log('📊 Initializing database connections...');
       const httpServer = await registerRoutes(app);

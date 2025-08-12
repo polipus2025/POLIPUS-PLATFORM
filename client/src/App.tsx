@@ -7,7 +7,7 @@ import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
-import FrontPage from "@/pages/front-page";
+import SimpleFrontPage from "@/pages/simple-front-page";
 import Landing from "@/pages/landing";
 import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
@@ -178,8 +178,8 @@ function Router() {
   return (
     <Switch>
       {/* Root routes for front page */}
-      <Route path="/" component={FrontPage} />
-      <Route path="/front-page" component={FrontPage} />
+      <Route path="/" component={SimpleFrontPage} />
+      <Route path="/front-page" component={SimpleFrontPage} />
       <Route path="/landing" component={Landing} />
       
       {/* GPS Testing - Public Access */}
@@ -312,7 +312,7 @@ function Router() {
           </Route>
           
           {/* Root route */}
-          <Route path="/" component={FrontPage} />
+          <Route path="/" component={SimpleFrontPage} />
           
           {/* Field Agent Dashboard Route */}
           <Route path="/field-agent-dashboard">
@@ -485,17 +485,17 @@ function Router() {
       ) : (
         <>
           {/* MAIN LANDING PAGE - Polipus Logo + 8 Modules + Login Buttons */}
-          <Route path="/" component={FrontPage} />
-          <Route path="/dashboard" component={FrontPage} />
+          <Route path="/" component={SimpleFrontPage} />
+          <Route path="/dashboard" component={SimpleFrontPage} />
         </>
       )}
       
       {/* ALWAYS AVAILABLE - Primary Polipus Main Landing Page Routes */}
-      <Route path="/front-page" component={FrontPage} />
-      <Route path="/home" component={FrontPage} />
-      <Route path="/main" component={FrontPage} />
-      <Route path="/index" component={FrontPage} />
-      <Route path="/landing" component={FrontPage} />
+      <Route path="/front-page" component={SimpleFrontPage} />
+      <Route path="/home" component={SimpleFrontPage} />
+      <Route path="/main" component={SimpleFrontPage} />
+      <Route path="/index" component={SimpleFrontPage} />
+      <Route path="/landing" component={SimpleFrontPage} />
       
       {/* ALWAYS AVAILABLE - Monitoring Dashboard */}
       <Route path="/monitoring-dashboard" component={MonitoringDashboard} />

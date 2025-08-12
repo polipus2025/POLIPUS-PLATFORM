@@ -11,7 +11,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Smartphone, User, Phone, Globe, WifiOff, CheckCircle, Map, Satellite, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import InteractiveBoundaryMapper from "@/components/maps/interactive-boundary-mapper";
+import GPSSatelliteMapper from "@/components/maps/gps-satellite-mapper";
+import EnhancedSatelliteMapper from "@/components/maps/enhanced-satellite-mapper";
 
 const LIBERIAN_COUNTIES = [
   "Bomi County", "Bong County", "Gbarpolu County", "Grand Bassa County",
@@ -435,22 +436,25 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                   <Alert className="border-green-300 bg-green-50 mb-4">
                     <Satellite className="h-4 w-4" />
                     <AlertDescription className="text-green-800">
-                      <strong>Interactive Land Mapping Available</strong><br />
-                      Tap on the map to create boundary points. Walk around your farm to capture accurate GPS coordinates.
+                      <strong>GPS Satellite Mapping System</strong><br />
+                      Tap on satellite imagery to create boundary points. System automatically generates EUDR Compliance and Deforestation Analysis reports.
                     </AlertDescription>
                   </Alert>
 
                   <div className="min-h-[400px] border rounded-lg overflow-hidden">
-                    <InteractiveBoundaryMapper
+                    <EnhancedSatelliteMapper
                       onBoundaryComplete={(boundary) => {
                         setFarmBoundary(boundary);
                         form.setValue("farmBoundary", boundary);
                         toast({
-                          title: "Farm Boundary Mapped",
-                          description: `Successfully mapped ${boundary.points?.length || 0} GPS points covering ${boundary.area?.toFixed(2) || 0} hectares`,
+                          title: "Satellite Mapping Complete",
+                          description: `Farm mapped with ${boundary.points?.length || 0} GPS points covering ${boundary.area?.toFixed(2) || 0} hectares. EUDR & Deforestation reports generated.`,
                         });
                       }}
                       minPoints={3}
+                      enableRealTimeGPS={true}
+                      farmerId={form.watch("phoneNumber") || ""}
+                      farmerName={`${form.watch("firstName")} ${form.watch("lastName")}`}
                     />
                   </div>
 
@@ -458,10 +462,12 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                     <Alert className="border-green-300 bg-green-50 mt-4">
                       <CheckCircle className="h-4 w-4" />
                       <AlertDescription className="text-green-800">
-                        <strong>Boundary Mapping Complete!</strong><br />
+                        <strong>Satellite Mapping & Reports Complete!</strong><br />
                         Area: {farmBoundary.area?.toFixed(2) || 0} hectares<br />
                         GPS Points: {farmBoundary.points?.length || 0}<br />
-                        Accuracy Level: {farmBoundary.accuracyLevel || 'Unknown'}
+                        ✓ EUDR Compliance Report Generated<br />
+                        ✓ Deforestation Analysis Report Generated<br />
+                        Satellite Provider: {farmBoundary.satelliteProvider || 'Multi-source'}
                       </AlertDescription>
                     </Alert>
                   )}

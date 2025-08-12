@@ -7,7 +7,7 @@ import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
-import FrontPage from "@/pages/front-page-clean";
+import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
@@ -171,6 +171,9 @@ function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: an
 
 function Router() {
   console.log('🔄 Router rendering, current path:', window.location.pathname);
+  // Check if user is logged in and has valid role
+  const authToken = localStorage.getItem("authToken");
+  const userType = localStorage.getItem("userType");
   
   return (
     <Switch>
@@ -285,7 +288,7 @@ function Router() {
 
 
       {/* Protected Routes */}
-      {localStorage.getItem("authToken") ? (
+      {authToken ? (
         <>
           {/* Dashboard - Show correct component based on user type */}
           <Route path="/dashboard">

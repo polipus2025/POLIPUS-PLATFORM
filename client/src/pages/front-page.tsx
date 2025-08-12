@@ -27,85 +27,21 @@ import {
   Zap,
   Leaf
 } from 'lucide-react';
-// Temporarily comment out asset imports that might be causing loading issues
-// import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
-// import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
-// import GlobalGPSDetector from '@/components/global-gps-detector';
+import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
+import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import GlobalGPSDetector from '@/components/global-gps-detector';
 
 export default function FrontPage() {
   console.log('🚀 FrontPage component loading...');
   
-  // Simplified component for immediate loading
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12 bg-white/5 rounded-2xl p-8 border border-white/10">
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent mb-4">
-            POLIPUS PLATFORM
-          </h1>
-          <p className="text-xl text-gray-300 mb-4">Environmental Intelligence System</p>
-          <div className="inline-block bg-green-500/20 text-green-400 px-4 py-2 rounded-full border border-green-500/30">
-            ✅ SYSTEM OPERATIONAL
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-white/5 rounded-xl p-6 text-center border border-white/10">
-            <div className="text-3xl font-bold text-green-400">1/8</div>
-            <div className="text-gray-400">Active Modules</div>
-          </div>
-          <div className="bg-white/5 rounded-xl p-6 text-center border border-white/10">
-            <div className="text-3xl font-bold text-blue-400">100%</div>
-            <div className="text-gray-400">EUDR Compliance</div>
-          </div>
-          <div className="bg-white/5 rounded-xl p-6 text-center border border-white/10">
-            <div className="text-3xl font-bold text-orange-400">7</div>
-            <div className="text-gray-400">In Development</div>
-          </div>
-          <div className="bg-white/5 rounded-xl p-6 text-center border border-white/10">
-            <div className="text-3xl font-bold text-purple-400">Global</div>
-            <div className="text-gray-400">Coverage</div>
-          </div>
-        </div>
-
-        {/* Access Links */}
-        <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-2xl p-8 border border-green-500/20">
-          <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
-            Platform Access
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <a href="/regulatory-login" className="block bg-green-500 hover:bg-green-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              🏛️ Regulatory
-            </a>
-            <a href="/farmer-login" className="block bg-green-500 hover:bg-green-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              👨‍🌾 Farmer
-            </a>
-            <a href="/field-agent-login" className="block bg-green-500 hover:bg-green-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              📱 Field Agent
-            </a>
-            <a href="/exporter-login" className="block bg-green-500 hover:bg-green-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              🚢 Exporter
-            </a>
-            <a href="/dashboard" className="block bg-blue-500 hover:bg-blue-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              📊 Dashboard
-            </a>
-            <a href="/commodities" className="block bg-blue-500 hover:bg-blue-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              🌾 Commodities
-            </a>
-            <a href="/certifications" className="block bg-blue-500 hover:bg-blue-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              📜 Certifications
-            </a>
-            <a href="/reports" className="block bg-blue-500 hover:bg-blue-600 text-white text-center py-3 px-4 rounded-lg transition-colors">
-              📈 Reports
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+  const modules = [
+    {
+      id: 1,
+      title: 'Agricultural Traceability & Compliance',
+      icon: Wheat,
+      color: 'bg-green-500',
+      route: '/portals',
+      isAgriTrace: true,
       description: 'Complete agricultural commodity tracking & LACRA compliance system'
     },
     {
@@ -176,19 +112,20 @@ export default function FrontPage() {
         {/* Mobile-Responsive Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-8 sm:mb-12">
           <div className="flex justify-center py-4 sm:py-6 relative">
-            <div className="text-center">
-              <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                POLIPUS
-              </h1>
-              <span className="text-sm sm:text-lg md:text-xl font-black text-slate-800">®</span>
-              <p className="text-lg sm:text-xl text-slate-600 mt-2">Brightening the Future</p>
-            </div>
+            <img 
+              src={poliposLogo} 
+              alt="Polipos - Brightening the Future" 
+              className="h-32 sm:h-48 md:h-64 w-auto object-contain"
+            />
+            {/* Registered trademark symbol positioned over the 's' */}
+            <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            {/* Login Portals Button - Positioned to the left */}
+            {/* GPS Active and Login Portals Buttons - Positioned to the left */}
             <div className="absolute left-0 top-0 flex flex-col gap-2">
+              <GlobalGPSDetector />
               <Link href="#login-portals">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />

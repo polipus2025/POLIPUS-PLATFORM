@@ -551,8 +551,10 @@ function Router() {
 }
 
 function App() {
+  console.log('🚀 App component rendering...');
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
+  console.log('🔍 Auth state:', { authToken: !!authToken, userType });
   
   // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");
@@ -570,6 +572,11 @@ function App() {
   const isLandMap360Page = window.location.pathname.startsWith("/landmap360") || window.location.pathname === "/land-map360";
   const isBlueCarbon360Page = window.location.pathname.startsWith("/blue-carbon360");
   
+  console.log('🔍 Rendering App with layout conditions:', {
+    isAuthPage, isLandingPage, isFrontPage, isMonitoringDashboard, isDashboardPage,
+    isLiveTracePage, isLandMap360Page, isBlueCarbon360Page
+  });
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

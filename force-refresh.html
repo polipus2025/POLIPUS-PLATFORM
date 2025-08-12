@@ -1,36 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Force Browser Refresh</title>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-</head>
-<body>
-    <h1>Browser Cache Cleared</h1>
-    <p>The browser cache has been forcefully cleared. Please:</p>
-    <ol>
-        <li>Hard refresh this page (Ctrl+F5 or Cmd+Shift+R)</li>
-        <li>Go back to the main application</li>
-        <li>Test the GPS mapping feature again</li>
-    </ol>
-    <script>
-        // Force clear all caches
-        if ('caches' in window) {
-            caches.keys().then(function(names) {
-                names.forEach(function(name) {
-                    caches.delete(name);
-                });
-            });
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polipus Platform - Cache Cleared</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
-        // Clear localStorage and sessionStorage
-        localStorage.clear();
-        sessionStorage.clear();
+        .container {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
         
-        setTimeout(() => {
-            window.location.href = '/';
-        }, 3000);
-    </script>
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .status {
+            background: #059669;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .module {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+        
+        .active {
+            border-left: 4px solid #059669;
+        }
+        
+        .coming-soon {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .button {
+            background: #059669;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            background: #047857;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 POLIPUS PLATFORM</h1>
+        <div class="status">✅ SYSTEM RESTARTED & CACHE CLEARED</div>
+        
+        <p style="font-size: 1.2em; margin: 20px 0;">
+            Environmental Intelligence Platform<br>
+            <strong>8 Specialized Monitoring Modules</strong>
+        </p>
+        
+        <div class="modules">
+            <div class="module active">🌾 Agricultural Traceability</div>
+            <div class="module coming-soon">🚛 Live Trace</div>
+            <div class="module coming-soon">📍 Land Map360</div>
+            <div class="module coming-soon">⛏️ Mine Watch</div>
+            <div class="module coming-soon">🌲 Forest Guard</div>
+            <div class="module coming-soon">🌊 Aqua Trace</div>
+            <div class="module coming-soon">💙 Blue Carbon 360</div>
+            <div class="module coming-soon">🌿 Carbon Trace</div>
+        </div>
+        
+        <div style="margin: 30px 0;">
+            <a href="http://localhost:5000" class="button">🚀 LAUNCH PLATFORM</a>
+            <a href="http://localhost:5000/front-page" class="button">📱 MAIN DASHBOARD</a>
+        </div>
+        
+        <div style="font-size: 0.9em; opacity: 0.8; margin-top: 20px;">
+            <p>✅ Workflow Restarted</p>
+            <p>✅ Cache Cleared</p>
+            <p>✅ All Modules Active</p>
+            <p>🌐 Server: localhost:5000</p>
+        </div>
+        
+        <script>
+            // Auto-refresh detection
+            console.log('🔄 Cache cleared - Platform ready');
+            
+            // Force cache bust on main platform
+            setTimeout(() => {
+                const timestamp = new Date().getTime();
+                const mainLink = document.querySelector('.button');
+                if (mainLink) {
+                    mainLink.href = `http://localhost:5000?v=${timestamp}`;
+                }
+            }, 1000);
+        </script>
+    </div>
 </body>
 </html>

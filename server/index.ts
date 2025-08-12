@@ -238,8 +238,8 @@ Longitude: \${longitude.toFixed(6)}
         await setupVite(app, httpServer);
       }
       
-      // Start the server
-      const port = parseInt(process.env.PORT || '5000', 10);
+      // Start the server on alternative port to avoid conflicts
+      const port = parseInt(process.env.PORT || '3000', 10);
       const host = '0.0.0.0';
       
       httpServer.listen(port, host, () => {

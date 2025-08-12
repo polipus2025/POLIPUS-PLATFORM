@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polipus Environmental Intelligence Platform - Direct Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 0;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            font-size: 1.6rem;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        
+        .status-banner {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(5, 150, 105, 0.3);
+        }
+        
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .stat-icon.green { background: linear-gradient(135deg, #059669, #10b981); }
+        .stat-icon.blue { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+        .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #f97316); }
+        .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #a855f7); }
+        
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 28px;
+            margin-bottom: 60px;
+        }
+        
+        .module-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 35px;
+            text-align: center;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(5, 150, 105, 0.5), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .module-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .module-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(5, 150, 105, 0.4);
+            box-shadow: 0 25px 50px rgba(5, 150, 105, 0.15);
+        }
+        
+        .module-icon {
+            width: 90px;
+            height: 90px;
+            border-radius: 22px;
+            margin: 0 auto 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .module-card.coming-soon .module-icon {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+        }
+        
+        .module-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        
+        .module-description {
+            color: #94a3b8;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .module-status {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-active {
+            background: rgba(5, 150, 105, 0.2);
+            color: #10b981;
+            border: 2px solid rgba(16, 185, 129, 0.4);
+        }
+        
+        .status-coming-soon {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 2px solid rgba(245, 158, 11, 0.4);
+        }
+        
+        .access-section {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid rgba(5, 150, 105, 0.2);
+            border-radius: 28px;
+            padding: 45px;
+            text-align: center;
+            margin: 60px 0 40px;
+        }
+        
+        .access-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .access-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .access-btn {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 18px 25px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .access-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(5, 150, 105, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 50px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+        }
+        
+        .footer-title {
+            color: #10b981;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .footer-subtitle {
+            color: #64748b;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .modules {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🌟 POLIPUS PLATFORM</div>
+            <div class="subtitle">Environmental Intelligence System</div>
+            <div class="tagline">Comprehensive 8-Module Monitoring Platform</div>
+            <div class="status-banner">✅ SYSTEM OPERATIONAL - DIRECT ACCESS MODE</div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon green">✓</div>
+                <div class="stat-value">1/8</div>
+                <div class="stat-label">Active Modules</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">EU</div>
+                <div class="stat-value">100%</div>
+                <div class="stat-label">EUDR Compliance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">⚙️</div>
+                <div class="stat-value">7</div>
+                <div class="stat-label">In Development</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">🌍</div>
+                <div class="stat-value">Global</div>
+                <div class="stat-label">Coverage</div>
+            </div>
+        </div>
+        
+        <!-- Modules Grid -->
+        <div class="modules">
+            <div class="module-card" onclick="window.open('/regulatory-login', '_blank')">
+                <div class="module-icon">🌾</div>
+                <div class="module-title">Agricultural Traceability & Compliance</div>
+                <div class="module-description">Complete LACRA system for agricultural commodity tracking and EU deforestation regulation compliance with farmer certifications and reporting</div>
+                <div class="module-status status-active">✓ ACTIVE</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🚛</div>
+                <div class="module-title">Live Trace</div>
+                <div class="module-description">Real-time livestock movement monitoring and transportation control system with veterinary integration</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">📍</div>
+                <div class="module-title">Land Map360</div>
+                <div class="module-description">Advanced land mapping services and territory dispute prevention system with GPS integration</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">⛏️</div>
+                <div class="module-title">Mine Watch</div>
+                <div class="module-description">Mineral resource protection and community safeguarding monitoring with environmental compliance</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🌲</div>
+                <div class="module-title">Forest Guard</div>
+                <div class="module-description">Forest conservation and carbon credit management system with deforestation monitoring</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🌊</div>
+                <div class="module-title">Aqua Trace</div>
+                <div class="module-description">Ocean and marine ecosystem monitoring with satellite integration and coastal protection</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">💙</div>
+                <div class="module-title">Blue Carbon 360</div>
+                <div class="module-description">Conservation economics and blue carbon marketplace platform with impact measurement</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="module-card coming-soon">
+                <div class="module-icon">🌿</div>
+                <div class="module-title">Carbon Trace</div>
+                <div class="module-description">Environmental carbon monitoring and sustainability tracking with compliance reporting</div>
+                <div class="module-status status-coming-soon">Coming Soon</div>
+            </div>
+        </div>
+        
+        <!-- Direct Access Section -->
+        <div class="access-section">
+            <div class="access-title">🚀 Direct Platform Access</div>
+            <p style="font-size: 1.2rem; color: #94a3b8; margin: 20px 0;">
+                Access your agricultural compliance system and continue your important work immediately.
+            </p>
+            <div class="access-buttons">
+                <a href="/regulatory-login" class="access-btn">🏛️ Regulatory Portal</a>
+                <a href="/farmer-login" class="access-btn">👨‍🌾 Farmer Portal</a>
+                <a href="/field-agent-login" class="access-btn">📱 Field Agent Portal</a>
+                <a href="/exporter-login" class="access-btn">🚢 Exporter Portal</a>
+                <a href="/dashboard" class="access-btn">📊 Main Dashboard</a>
+                <a href="/commodities" class="access-btn">🌾 Commodities</a>
+                <a href="/certifications" class="access-btn">📜 Certifications</a>
+                <a href="/reports" class="access-btn">📈 Reports</a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-title">🚀 POLIPUS PLATFORM - FULLY OPERATIONAL</div>
+            <div class="footer-subtitle">Environmental Intelligence • Global Monitoring • Sustainable Development</div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('🌟 Polipus Platform - Direct Access Mode');
+        console.log('✅ All systems operational');
+        console.log('📊 8 modules configured');
+        console.log('🔗 Direct access links available');
+    </script>
+</body>
+</html>

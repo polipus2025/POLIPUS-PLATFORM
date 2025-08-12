@@ -50,4 +50,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+console.log('🚀 Main.tsx: Starting React app...');
+const root = document.getElementById("root");
+if (root) {
+  console.log('✅ Root element found, rendering App...');
+  createRoot(root).render(<App />);
+} else {
+  console.error('❌ Root element not found!');
+}

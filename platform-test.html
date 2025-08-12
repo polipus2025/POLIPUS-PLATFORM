@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polipus Platform - Quick Access Test</title>
+    <style>
+        body {
+            font-family: system-ui;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            margin: 0;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .status {
+            background: #059669;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .link {
+            background: #059669;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .link:hover {
+            background: #047857;
+            transform: translateY(-3px);
+            border-color: #10b981;
+        }
+        
+        .troubleshoot {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid #f59e0b;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 POLIPUS PLATFORM</h1>
+        <div class="status">✅ TESTING MULTIPLE SERVER PORTS</div>
+        
+        <p style="font-size: 1.2rem; margin: 20px 0;">
+            Testing platform accessibility on different ports to ensure you can access your work.
+        </p>
+        
+        <div class="links">
+            <a href="http://localhost:3000" class="link" target="_blank">
+                🚀 Port 3000<br>
+                <small>Primary Alternative</small>
+            </a>
+            <a href="http://localhost:5000" class="link" target="_blank">
+                🌐 Port 5000<br>
+                <small>Original Port</small>
+            </a>
+            <a href="http://localhost:8080" class="link" target="_blank">
+                ⚡ Port 8080<br>
+                <small>Backup Option</small>
+            </a>
+            <a href="http://localhost:4000" class="link" target="_blank">
+                🔧 Port 4000<br>
+                <small>Development Port</small>
+            </a>
+        </div>
+        
+        <div class="troubleshoot">
+            <h3>🔧 Quick Access Guide</h3>
+            <p>Click the links above to test which port shows your platform.</p>
+            <p>The working port will display the full Polipus platform with all 8 modules.</p>
+            
+            <div class="code">
+                ✅ Look for: "POLIPUS PLATFORM" header<br>
+                ✅ Look for: 8 module cards<br>
+                ✅ Look for: Agricultural Traceability module (active)
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; font-size: 0.9rem; opacity: 0.8;">
+            <p>🔄 Platform Status: Testing multiple ports</p>
+            <p>🎯 Goal: Restore full platform access</p>
+            <p>📞 Support: Testing server alternatives</p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-test ports
+        console.log('🔍 Testing platform accessibility...');
+        
+        // Test each port
+        const ports = [3000, 5000, 8080, 4000];
+        ports.forEach(port => {
+            fetch(`http://localhost:${port}`)
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`✅ Port ${port} is accessible`);
+                    }
+                })
+                .catch(error => {
+                    console.log(`❌ Port ${port} not accessible:`, error.message);
+                });
+        });
+    </script>
+</body>
+</html>

@@ -15,8 +15,13 @@ if (MAINTENANCE_MODE) {
     res.status(200).json({ status: 'maintenance', message: 'Server is running in maintenance mode' });
   });
   
+  // Root path health check (Replit often uses '/' for health checks)
+  app.get('/', (req, res) => {
+    res.status(200).json({ status: 'maintenance', message: 'Server is running in maintenance mode' });
+  });
+  
   // Serve completely blank page for all other routes
-  app.use('*', (req, res) => {
+  app.get('*', (req, res) => {
     res.status(503).send('');
   });
   

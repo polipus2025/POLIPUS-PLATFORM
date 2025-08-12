@@ -171,9 +171,6 @@ function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: an
 
 function Router() {
   console.log('🔄 Router rendering, current path:', window.location.pathname);
-  // Check if user is logged in and has valid role
-  const authToken = localStorage.getItem("authToken");
-  const userType = localStorage.getItem("userType");
   
   return (
     <Switch>
@@ -288,7 +285,7 @@ function Router() {
 
 
       {/* Protected Routes */}
-      {authToken ? (
+      {localStorage.getItem("authToken") ? (
         <>
           {/* Dashboard - Show correct component based on user type */}
           <Route path="/dashboard">

@@ -1,8 +1,17 @@
 import { createRoot } from "react-dom/client";
-import App from "./App-debug";
+import App from "./App";
 import "./index.css";
 
-// Service worker disabled during debugging
-console.log('🔧 Service worker disabled for debugging');
+// Register service worker for offline functionality
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      console.log('Enhanced Service Worker registered successfully');
+    } catch (error) {
+      console.error('Service worker registration failed:', error);
+    }
+  });
+}
 
 createRoot(document.getElementById("root")!).render(<App />);

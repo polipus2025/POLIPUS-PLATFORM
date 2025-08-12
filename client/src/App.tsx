@@ -551,7 +551,6 @@ function Router() {
 }
 
 function App() {
-  console.log('🔍 Full App component rendering...');
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
@@ -573,25 +572,29 @@ function App() {
   
   // Layout condition checks completed
 
-  console.log('🔍 App rendering with conditions:', { 
-    isFrontPage, isAuthPage, isLandingPage 
-  });
-
   return (
     <QueryClientProvider client={queryClient}>
-      {(isAuthPage || isLandingPage || isFrontPage) ? (
-        // Render simple pages without complex layout
+      {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
+        // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
         <div className="min-h-screen">
           <Router />
         </div>
       ) : (
-        // Render with full layout - temporarily simplified
+        // Render authenticated pages with full layout
         <div className="min-h-screen bg-gray-50">
-          <main className="flex-1">
-            <Router />
-          </main>
+          <Header />
+          <div className="flex">
+            <Sidebar />
+            <main className="flex-1 min-w-0 overflow-hidden pb-16 lg:pb-0">
+              <Router />
+            </main>
+          </div>
+          <MobileNav />
         </div>
       )}
+      
+      {/* PWA Install Prompt - Show on all pages */}
+      <PWAInstallPrompt />
       <Toaster />
     </QueryClientProvider>
   );

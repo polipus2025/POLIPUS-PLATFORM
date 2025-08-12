@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed - handled by Vite JSX transform
 import { Link } from 'wouter';
 import { Helmet } from 'react-helmet';
 import ModernBackground from '@/components/ui/modern-background';

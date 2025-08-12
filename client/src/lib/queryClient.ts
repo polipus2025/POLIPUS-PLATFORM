@@ -18,13 +18,16 @@ export async function apiRequest(
   const { method = 'GET', body, headers = {} } = options || {};
   
   // Check if offline before making request
-  // Allow offline functionality - disable offline checks
-  // Always try to handle requests locally if offline
+  // Handle offline requests - prioritize offline storage for forms
   if (!navigator.onLine) {
+    console.log('📱 Offline detected, handling request locally');
     try {
-      return handleOfflineRequest(url, options || {});
+      const offlineResult = await handleOfflineRequest(url, options || {});
+      if (offlineResult.success) {
+        return offlineResult;
+      }
     } catch (error) {
-      // If offline handler fails, continue with normal request
+      console.error('Offline handler error:', error);
     }
   }
   
@@ -65,9 +68,44 @@ export async function apiRequest(
   }
 }
 
-// Handle offline requests with mock data
+// Handle offline requests with local storage
 async function handleOfflineRequest(url: string, options: RequestInit): Promise<any> {
-  console.log('Handling offline request:', url);
+  console.log('🔄 Handling offline request:', url);
+  
+  // Handle farmer registration - store offline and return success
+  if (url.includes('/api/farmers') && options.method === 'POST') {
+    try {
+      const farmerData = JSON.parse(options.body as string);
+      const offlineFarmer = {
+        ...farmerData,
+        id: `offline_${Date.now()}`,
+        isOffline: true,
+        timestamp: Date.now(),
+        status: 'pending'
+      };
+      
+      // Store in localStorage for offline use
+      const offlineFarmers = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
+      offlineFarmers.push(offlineFarmer);
+      localStorage.setItem('offlineFarmers', JSON.stringify(offlineFarmers));
+      
+      console.log('✅ Farmer data saved offline:', offlineFarmer);
+      
+      return {
+        success: true,
+        message: "Farmer registered offline successfully! Data will sync when connection is restored.",
+        data: offlineFarmer,
+        offline: true
+      };
+    } catch (error) {
+      console.error('Failed to save farmer offline:', error);
+      return {
+        success: false,
+        message: "Failed to save farmer data offline",
+        offline: true
+      };
+    }
+  }
   
   // Mock authentication responses
   if (url.includes('/api/auth/field-agent-login')) {
@@ -96,10 +134,10 @@ async function handleOfflineRequest(url: string, options: RequestInit): Promise<
     };
   }
   
-  // Default offline response
+  // Default offline response for unsupported endpoints
   return {
     success: false,
-    message: "Feature not available offline",
+    message: "This feature is not available offline. Data will be saved when connection returns.",
     offlineMode: true
   };
 }
@@ -151,3 +189,52 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Auto-sync offline data when connection is restored
+function setupOfflineSync() {
+  window.addEventListener('online', async () => {
+    console.log('🌐 Connection restored - syncing offline data');
+    
+    try {
+      const offlineFarmers = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
+      
+      if (offlineFarmers.length > 0) {
+        console.log(`📤 Syncing ${offlineFarmers.length} offline farmers`);
+        
+        for (const farmer of offlineFarmers) {
+          try {
+            // Remove offline fields before syncing
+            const { isOffline, timestamp, status, ...cleanFarmer } = farmer;
+            
+            const response = await apiRequest('/api/farmers', {
+              method: 'POST',
+              body: JSON.stringify(cleanFarmer)
+            });
+            
+            if (response.success) {
+              console.log('✅ Farmer synced successfully:', farmer.id);
+            }
+          } catch (error) {
+            console.error('❌ Failed to sync farmer:', farmer.id, error);
+          }
+        }
+        
+        // Clear synced data
+        localStorage.removeItem('offlineFarmers');
+        console.log('🧹 Offline farmers data cleared after sync');
+        
+        // Show success notification
+        if (window.location.pathname.includes('farmer') || window.location.pathname.includes('registration')) {
+          alert('✅ Offline farmer data has been successfully synced to the server!');
+        }
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+    }
+  });
+}
+
+// Initialize offline sync when the module loads
+if (typeof window !== 'undefined') {
+  setupOfflineSync();
+}

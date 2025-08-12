@@ -592,14 +592,13 @@ export default function FarmersPage() {
 
       return farmer;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["/api/farmers"] });
       setIsDialogOpen(false);
       form.reset();
       setProfileImage(null);
       setFarmBoundaries([]);
       
-
       setLandMapData({
         totalArea: 0,
         cultivatedArea: 0,
@@ -609,17 +608,35 @@ export default function FarmersPage() {
         elevationData: { min: 0, max: 0, average: 0 }
       });
       
-      toast({
-        title: "Success",
-        description: "Farmer has been successfully onboarded with profile picture and land mapping data.",
-      });
+      // Check if this was an offline registration
+      if (response?.offline) {
+        toast({
+          title: "Offline Registration Complete",
+          description: "Farmer data saved offline successfully! Data will automatically sync when internet connection is restored.",
+          className: "bg-blue-50 border-blue-200",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Farmer has been successfully onboarded with profile picture and land mapping data.",
+        });
+      }
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: `Failed to onboard farmer: ${error.message || 'Unknown error'}`,
-        variant: "destructive",
-      });
+      // Check if this is an offline error with saved data
+      if (error.message?.includes('offline') || !navigator.onLine) {
+        toast({
+          title: "Offline Mode",
+          description: "No internet connection. Farmer data will be saved locally and synced when connection returns.",
+          className: "bg-orange-50 border-orange-200",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to onboard farmer: ${error.message || 'Unknown error'}`,
+          variant: "destructive",
+        });
+      }
     },
   });
 

@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import ExactBoundaryMapper from "@/components/maps/exact-boundary-mapper";
+import MobileFarmerRegistration from "@/components/mobile-farmer-registration";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -226,101 +227,97 @@ export default function FieldAgentDashboard() {
         <meta name="description" content="Field operations dashboard for LACRA field agents" />
       </Helmet>
 
-      <div className="p-3 sm:p-6">
-        {/* Mobile-Responsive Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-start sm:items-center gap-3">
-              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600 mt-1 sm:mt-0" />
+      <div className="p-6">
+        {/* Clean Header */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <Users className="h-8 w-8 text-orange-600" />
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
                   Field Agent Operations
                 </h1>
-                <p className="text-sm sm:text-base text-gray-600">
+                <p className="text-gray-600">
                   Agent {agentId} - {jurisdiction} Territory
                 </p>
               </div>
             </div>
-            <div className="text-left sm:text-right w-full sm:w-auto">
-              <p className="text-xs sm:text-sm text-gray-600">Territory Coverage</p>
-              <Badge className="bg-orange-100 text-orange-800 text-xs sm:text-sm">{jurisdiction}</Badge>
+            <div className="text-right">
+              <p className="text-sm text-gray-600">Territory Coverage</p>
+              <Badge className="bg-orange-100 text-orange-800">{jurisdiction}</Badge>
             </div>
           </div>
         </div>
 
-        {/* Mobile-Responsive Quick Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+        {/* Simple Stats Grid */}
+        <div className="grid grid-cols-4 gap-6 mb-8">
           <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
-                <div className="sm:ml-4">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Registered Farmers</p>
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{totalFarmers}</p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-blue-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Registered Farmers</p>
+                  <p className="text-2xl font-bold text-gray-900">{totalFarmers}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
-                <div className="sm:ml-4">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Pending Inspections</p>
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{pendingInspections}</p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Clock className="h-8 w-8 text-yellow-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Pending Inspections</p>
+                  <p className="text-2xl font-bold text-gray-900">{pendingInspections}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
-                <div className="sm:ml-4">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Completed Today</p>
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{completedToday}</p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <CheckCircle className="h-8 w-8 text-green-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Completed Today</p>
+                  <p className="text-2xl font-bold text-gray-900">{completedToday}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-                <TreePine className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
-                <div className="sm:ml-4">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Active Commodities</p>
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{commoditiesInJurisdiction}</p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <TreePine className="h-8 w-8 text-green-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Active Commodities</p>
+                  <p className="text-2xl font-bold text-gray-900">{commoditiesInJurisdiction}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Mobile-Responsive Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-0">
-            <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-              <ClipboardCheck className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Overview</span>
-              <span className="sm:hidden">Home</span>
+        {/* Clean Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              Overview
             </TabsTrigger>
-            <TabsTrigger value="farmers" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Farmer Management</span>
-              <span className="sm:hidden">Farmers</span>
+            <TabsTrigger value="farmers" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Farmer Management
             </TabsTrigger>
-            <TabsTrigger value="inspections" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Field Inspections</span>
-              <span className="sm:hidden">Inspect</span>
+            <TabsTrigger value="inspections" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Field Inspections
             </TabsTrigger>
-            <TabsTrigger value="territory" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4">
-              <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Territory Mapping</span>
-              <span className="sm:hidden">Map</span>
+            <TabsTrigger value="territory" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Territory Mapping
             </TabsTrigger>
           </TabsList>
 
@@ -401,141 +398,14 @@ export default function FieldAgentDashboard() {
                         Register Farmer
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Register New Farmer</DialogTitle>
-                        <DialogDescription>
-                          Add a new farmer to your territory registry
-                        </DialogDescription>
-                      </DialogHeader>
-                      {/* Farmer registration form would go here */}
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>First Name</Label>
-                            <Input 
-                              value={newFarmerForm.firstName}
-                              onChange={(e) => setNewFarmerForm({...newFarmerForm, firstName: e.target.value})}
-                              placeholder="Enter first name" 
-                            />
-                          </div>
-                          <div>
-                            <Label>Last Name</Label>
-                            <Input 
-                              value={newFarmerForm.lastName}
-                              onChange={(e) => setNewFarmerForm({...newFarmerForm, lastName: e.target.value})}
-                              placeholder="Enter last name" 
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Phone Number</Label>
-                          <Input 
-                            value={newFarmerForm.phoneNumber}
-                            onChange={(e) => setNewFarmerForm({...newFarmerForm, phoneNumber: e.target.value})}
-                            placeholder="+231 77 XXX XXXX" 
-                          />
-                        </div>
-                        <div>
-                          <Label>Farm Location (Village/District)</Label>
-                          <Input 
-                            value={newFarmerForm.farmLocation}
-                            onChange={(e) => setNewFarmerForm({...newFarmerForm, farmLocation: e.target.value})}
-                            placeholder={`Village or district in ${jurisdiction}`}
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Farm Size (hectares)</Label>
-                            <Input 
-                              value={newFarmerForm.farmSize}
-                              onChange={(e) => setNewFarmerForm({...newFarmerForm, farmSize: e.target.value})}
-                              placeholder="e.g., 2.5" 
-                              type="number"
-                              step="0.1"
-                            />
-                          </div>
-                          <div>
-                            <Label>Primary Crop</Label>
-                            <Select value={newFarmerForm.primaryCrop} onValueChange={(value) => setNewFarmerForm({...newFarmerForm, primaryCrop: value})}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select crop" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Coffee">Coffee</SelectItem>
-                                <SelectItem value="Cocoa">Cocoa</SelectItem>
-                                <SelectItem value="Rubber">Rubber</SelectItem>
-                                <SelectItem value="Rice">Rice</SelectItem>
-                                <SelectItem value="Cassava">Cassava</SelectItem>
-                                <SelectItem value="Oil Palm">Oil Palm</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            onClick={async () => {
-                              console.log("Current form state:", newFarmerForm);
-                              // Test with sample data first
-                              const testData = {
-                                firstName: 'Test',
-                                lastName: 'Farmer',
-                                phoneNumber: '0888123456',
-                                farmLocation: 'Test Village',
-                                farmSize: '2.5',
-                                primaryCrop: 'Coffee'
-                              };
-                              console.log("Sending test data:", testData);
-                              
-                              try {
-                                // Direct test without mutation wrapper
-                                const directResponse = await fetch('/api/farmers', {
-                                  method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                  },
-                                  body: JSON.stringify({
-                                    firstName: 'DirectTest',
-                                    lastName: 'Success', 
-                                    phoneNumber: '0888999888',
-                                    county: 'Montserrado County'
-                                  })
-                                });
-                                
-                                if (directResponse.ok) {
-                                  const result = await directResponse.json();
-                                  console.log("Direct test success:", result);
-                                  alert(`Success! Farmer created: ${result.farmerId}`);
-                                } else {
-                                  const error = await directResponse.text();
-                                  console.log("Direct test failed:", error);
-                                  alert(`Direct test failed: ${error}`);
-                                }
-                              } catch (error) {
-                                console.error("Direct fetch error:", error);
-                                alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                              }
-                            }} 
-                            className="flex-1 bg-blue-600 hover:bg-blue-700"
-                          >
-                            Direct Test
-                          </Button>
-                          <Button 
-                            onClick={() => {
-                              console.log("Current form state:", newFarmerForm);
-                              if (!newFarmerForm.firstName || !newFarmerForm.lastName) {
-                                alert("Please fill in first name and last name");
-                                return;
-                              }
-                              newFarmerMutation.mutate(newFarmerForm);
-                            }} 
-                            className="flex-1 bg-lacra-green hover:bg-green-700"
-                            disabled={newFarmerMutation.isPending}
-                          >
-                            {newFarmerMutation.isPending ? 'Registering...' : 'Register Farmer'}
-                          </Button>
-                        </div>
-                      </div>
+                    <DialogContent className="max-w-md max-h-[90vh] overflow-hidden p-0">
+                      <MobileFarmerRegistration
+                        onSuccess={() => {
+                          setIsNewFarmerOpen(false);
+                          queryClient.invalidateQueries({ queryKey: ['/api/farmers'] });
+                        }}
+                        onCancel={() => setIsNewFarmerOpen(false)}
+                      />
                     </DialogContent>
                   </Dialog>
 

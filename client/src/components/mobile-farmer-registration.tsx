@@ -196,8 +196,8 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 px-4">
-      <div className="max-w-md mx-auto">
+    <div className="mobile-farmer-form bg-gray-50 py-4 px-4">
+      <div className="max-w-md mx-auto pb-8">
         {/* Header */}
         <div className="text-center mb-6">
           <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">

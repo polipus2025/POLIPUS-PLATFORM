@@ -2,6 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile scrolling fixes */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Fix dialog content scrolling on mobile */
+  [data-radix-popper-content-wrapper] {
+    position: fixed !important;
+    transform: none !important;
+  }
+  
+  /* Mobile farmer registration form fixes */
+  .mobile-farmer-form {
+    height: 80vh;
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure mobile inputs are properly sized */
+  input[type="text"], 
+  input[type="tel"], 
+  input[type="password"], 
+  input[type="number"], 
+  select, 
+  textarea {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    -webkit-appearance: none;
+  }
+  
+  /* Fix for mobile viewport */
+  @media screen and (max-width: 768px) {
+    .min-h-screen {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+    
+    html {
+      height: -webkit-fill-available;
+    }
+  }
+}
+
 /* Blue Carbon 360 Specific Styles - Prevent Background Bleed */
 .blue-carbon-360-layout {
   background: linear-gradient(to bottom right, rgb(248, 250, 252), rgb(241, 245, 249)) !important;

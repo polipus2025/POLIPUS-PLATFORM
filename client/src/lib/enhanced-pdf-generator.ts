@@ -29,15 +29,15 @@ export interface DeforestationData {
   generatedAt: string;
 }
 
-// Helper function to add LACRA letterhead
+// Helper function to add LACRA & ECOENVIRO letterhead
 const addLACRALetterhead = (pdf: jsPDF, title: string, subtitle: string, headerColor: number[]) => {
   const pageWidth = pdf.internal.pageSize.getWidth();
   
   // Header background with gradient effect
   pdf.setFillColor(headerColor[0], headerColor[1], headerColor[2]);
-  pdf.rect(0, 0, pageWidth, 40, 'F');
+  pdf.rect(0, 0, pageWidth, 45, 'F');
   pdf.setFillColor(headerColor[0] - 20, headerColor[1] - 20, headerColor[2] - 20);
-  pdf.rect(0, 30, pageWidth, 10, 'F');
+  pdf.rect(0, 35, pageWidth, 10, 'F');
   
   // LACRA Logo area (left)
   pdf.setFillColor(255, 255, 255);
@@ -54,11 +54,39 @@ const addLACRALetterhead = (pdf: jsPDF, title: string, subtitle: string, headerC
   pdf.text('Commodity Regulatory', 12, 23);
   pdf.text('Authority', 12, 26);
   
+  // ECOENVIRO Certification Logo (center-left)
+  pdf.setFillColor(255, 255, 255);
+  pdf.rect(50, 5, 45, 25, 'F');
+  pdf.rect(50, 5, 45, 25, 'S');
+  
+  // ECOENVIRO logo design (stylized diamond pattern)
+  pdf.setFillColor(59, 130, 246); // Blue
+  pdf.rect(65, 8, 4, 4, 'F');
+  pdf.rect(61, 12, 4, 4, 'F');
+  pdf.rect(65, 12, 4, 4, 'F');
+  pdf.rect(69, 12, 4, 4, 'F');
+  pdf.rect(65, 16, 4, 4, 'F');
+  
+  pdf.setFillColor(255, 165, 0); // Orange
+  pdf.rect(57, 16, 4, 4, 'F');
+  pdf.rect(61, 16, 4, 4, 'F');
+  pdf.rect(69, 16, 4, 4, 'F');
+  pdf.rect(73, 16, 4, 4, 'F');
+  
+  pdf.setTextColor(59, 130, 246);
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('ECOENVIRO', 52, 24);
+  pdf.setFontSize(5);
+  pdf.setTextColor(255, 165, 0);
+  pdf.text('AUDIT & CERTIFICATION', 52, 27);
+  
   // EU/International Standards Logo (right)
   pdf.setFillColor(255, 255, 255);
   pdf.rect(pageWidth - 45, 5, 35, 25, 'F');
   pdf.rect(pageWidth - 45, 5, 35, 25, 'S');
   
+  pdf.setTextColor(0, 0, 0);
   pdf.setFontSize(8);
   pdf.text('EU DEFORESTATION', pageWidth - 42, 15);
   pdf.text('REGULATION', pageWidth - 38, 19);
@@ -67,18 +95,19 @@ const addLACRALetterhead = (pdf: jsPDF, title: string, subtitle: string, headerC
   
   // Main title
   pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(18);
+  pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  pdf.text(title, 55, 18);
+  pdf.text(title, 105, 16);
   
-  pdf.setFontSize(12);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(subtitle, 55, 28);
+  pdf.text(subtitle, 105, 25);
   
-  // LACRA address and contact info
-  pdf.setFontSize(7);
+  // Contact information
+  pdf.setFontSize(6);
   pdf.setTextColor(255, 255, 255);
-  pdf.text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia | Tel: +231-XXX-XXXX | www.lacra.gov.lr', 10, 37);
+  pdf.text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia | Tel: +231-XXX-XXXX', 10, 39);
+  pdf.text('Certified by ECOENVIRO - Audit & Certification | Lab/Testing Services', 10, 42);
 };
 
 // Helper function to draw pie charts
@@ -174,11 +203,31 @@ export const generateEUDRCompliancePDF = async (data: EUDRComplianceData): Promi
     background: [249, 250, 251], // Light gray
   };
   
-  // Page 1: Executive Summary with LACRA Letterhead
+  // Page 1: Executive Summary with LACRA & ECOENVIRO Letterhead
   addLACRALetterhead(pdf, 'EUDR COMPLIANCE ASSESSMENT', 'European Union Deforestation Regulation Report', colors.primary);
   
+  // Due Diligence Statement
+  let yPos = 55;
+  pdf.setFillColor(250, 245, 255);
+  pdf.setDrawColor(147, 51, 234);
+  pdf.rect(10, yPos, pageWidth - 20, 25, 'FD');
+  
+  pdf.setFillColor(147, 51, 234);
+  pdf.rect(10, yPos, pageWidth - 20, 6, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(9);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('DUE DILIGENCE STATEMENT', 15, yPos + 4);
+  
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  pdf.text('This assessment has been conducted in accordance with EU Regulation 2023/1115 on deforestation-free products.', 15, yPos + 12);
+  pdf.text('The evaluation includes satellite monitoring, on-ground verification, and compliance with international standards.', 15, yPos + 16);
+  pdf.text('Certified jointly by LACRA (Liberia Agriculture Commodity Regulatory Authority) and ECOENVIRO Audit & Certification.', 15, yPos + 20);
+  
   // Report metadata with official styling
-  let yPos = 50;
+  yPos += 35;
   pdf.setFillColor(colors.background[0], colors.background[1], colors.background[2]);
   pdf.setDrawColor(200, 200, 200);
   pdf.rect(10, yPos, pageWidth - 20, 35, 'FD');
@@ -297,7 +346,7 @@ export const generateEUDRCompliancePDF = async (data: EUDRComplianceData): Promi
   pdf.addPage();
   addLACRALetterhead(pdf, 'DETAILED COMPLIANCE ANALYSIS', 'Technical Assessment & Documentation Review', colors.secondary);
   
-  yPos = 50;
+  yPos = 55;
   
   // Deforestation risk section
   pdf.setFillColor(...colors.danger);
@@ -387,15 +436,18 @@ export const generateEUDRCompliancePDF = async (data: EUDRComplianceData): Promi
     pdf.text(rec, 25, yPos + (index * 8) + 4);
   });
   
-  // Official footer
+  // Official footer with dual certification
   pdf.setFillColor(...colors.primary);
-  pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+  pdf.rect(0, pageHeight - 30, pageWidth, 30, 'F');
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(8);
-  pdf.text('OFFICIAL LACRA EUDR COMPLIANCE ASSESSMENT', 10, pageHeight - 18);
-  pdf.text('This document is issued under the authority of the Liberia Agriculture Commodity Regulatory Authority', 10, pageHeight - 12);
-  pdf.text(`Report Reference: ${data.reportId} | Generated: ${new Date().toLocaleDateString()} | Valid for: 12 months`, 10, pageHeight - 6);
-  pdf.text('For verification, contact: compliance@lacra.gov.lr', pageWidth - 60, pageHeight - 6);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('OFFICIAL LACRA & ECOENVIRO EUDR COMPLIANCE ASSESSMENT', 10, pageHeight - 24);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('This document is issued jointly by LACRA (Liberia Agriculture Commodity Regulatory Authority)', 10, pageHeight - 18);
+  pdf.text('and ECOENVIRO Audit & Certification - Lab/Testing Services under EU Regulation 2023/1115', 10, pageHeight - 14);
+  pdf.text(`Report Reference: ${data.reportId} | Generated: ${new Date().toLocaleDateString()} | Valid for: 12 months`, 10, pageHeight - 8);
+  pdf.text('For verification: compliance@lacra.gov.lr | cert@ecoenviro.com', 10, pageHeight - 4);
   
   pdf.save(`LACRA_EUDR_Compliance_${data.farmerId}_${data.reportId}.pdf`);
 };
@@ -419,8 +471,28 @@ export const generateDeforestationPDF = async (data: DeforestationData): Promise
   // Page 1: Environmental Impact Assessment
   addLACRALetterhead(pdf, 'DEFORESTATION ANALYSIS REPORT', 'Environmental Impact & Forest Change Assessment', colors.primary);
   
+  // Due Diligence Statement for Deforestation Report
+  let yPos = 55;
+  pdf.setFillColor(254, 242, 242);
+  pdf.setDrawColor(220, 38, 38);
+  pdf.rect(10, yPos, pageWidth - 20, 25, 'FD');
+  
+  pdf.setFillColor(220, 38, 38);
+  pdf.rect(10, yPos, pageWidth - 20, 6, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(9);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('DUE DILIGENCE STATEMENT - ENVIRONMENTAL ASSESSMENT', 15, yPos + 4);
+  
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  pdf.text('This environmental assessment follows strict due diligence protocols using satellite imagery and field verification.', 15, yPos + 12);
+  pdf.text('Analysis conducted in compliance with international deforestation monitoring standards and best practices.', 15, yPos + 16);
+  pdf.text('Certified jointly by LACRA (Liberia Agriculture Commodity Regulatory Authority) and ECOENVIRO Audit & Certification.', 15, yPos + 20);
+  
   // Report metadata
-  let yPos = 50;
+  yPos += 35;
   pdf.setFillColor(...colors.background);
   pdf.setDrawColor(200, 200, 200);
   pdf.rect(10, yPos, pageWidth - 20, 35, 'FD');
@@ -599,15 +671,18 @@ export const generateDeforestationPDF = async (data: DeforestationData): Promise
     pdf.text(item, 15, yPos + (index * 7));
   });
   
-  // Official LACRA footer
+  // Official LACRA & ECOENVIRO footer
   pdf.setFillColor(...colors.primary);
-  pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+  pdf.rect(0, pageHeight - 30, pageWidth, 30, 'F');
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(8);
-  pdf.text('OFFICIAL LACRA ENVIRONMENTAL ASSESSMENT', 10, pageHeight - 18);
-  pdf.text('Environmental Protection Division | Satellite Monitoring & Forest Conservation Unit', 10, pageHeight - 12);
-  pdf.text(`Assessment Reference: ${data.reportId} | Analysis Date: ${new Date().toLocaleDateString()} | Next Review: ${new Date(Date.now() + 90*24*60*60*1000).toLocaleDateString()}`, 10, pageHeight - 6);
-  pdf.text('For environmental queries: environment@lacra.gov.lr', pageWidth - 70, pageHeight - 6);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('OFFICIAL LACRA & ECOENVIRO DEFORESTATION ANALYSIS REPORT', 10, pageHeight - 24);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('This document is issued jointly by LACRA (Liberia Agriculture Commodity Regulatory Authority)', 10, pageHeight - 18);
+  pdf.text('and ECOENVIRO Audit & Certification - Lab/Testing Services for Environmental Assessment', 10, pageHeight - 14);
+  pdf.text(`Report Reference: ${data.reportId} | Generated: ${new Date().toLocaleDateString()} | Environmental Due Diligence`, 10, pageHeight - 8);
+  pdf.text('For verification: environmental@lacra.gov.lr | cert@ecoenviro.com', 10, pageHeight - 4);
   
   pdf.save(`LACRA_Deforestation_Analysis_${data.farmerId}_${data.reportId}.pdf`);
 };

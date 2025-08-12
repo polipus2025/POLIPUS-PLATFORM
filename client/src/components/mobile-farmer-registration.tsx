@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MapPin, Smartphone, User, Phone, Globe, WifiOff, CheckCircle } from "lucide-react";
+import { MapPin, Smartphone, User, Phone, Globe, WifiOff, CheckCircle, Map, Satellite, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import InteractiveBoundaryMapper from "@/components/maps/interactive-boundary-mapper";
 
 const LIBERIAN_COUNTIES = [
   "Bomi County", "Bong County", "Gbarpolu County", "Grand Bassa County",
@@ -31,6 +32,7 @@ const registrationSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
   gpsCoordinates: z.string().optional(),
+  farmBoundary: z.any().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -47,6 +49,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [gpsCoordinates, setGpsCoordinates] = useState<string>("");
+  const [farmBoundary, setFarmBoundary] = useState<any>(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const { toast } = useToast();
 
@@ -130,6 +133,8 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
         const offlineRegistrations = JSON.parse(localStorage.getItem("offline-farmer-registrations") || "[]");
         const newRegistration = {
           ...data,
+          gpsCoordinates: gpsCoordinates || data.gpsCoordinates,
+          farmBoundary: farmBoundary || data.farmBoundary,
           id: Date.now().toString(),
           timestamp: new Date().toISOString(),
           status: "pending_sync"
@@ -153,6 +158,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
         body: JSON.stringify({
           ...data,
           gpsCoordinates: gpsCoordinates || data.gpsCoordinates,
+          farmBoundary: farmBoundary || data.farmBoundary,
           registrationDate: new Date().toISOString(),
           status: "active"
         })
@@ -188,7 +194,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 3));
+    setCurrentStep(prev => Math.min(prev + 1, 4));
   };
 
   const prevStep = () => {
@@ -224,7 +230,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
         {/* Progress Indicator */}
         <div className="flex justify-center mb-6">
           <div className="flex space-x-2">
-            {[1, 2, 3].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <div
                 key={step}
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -246,6 +252,7 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                 {currentStep === 1 && "Personal Information"}
                 {currentStep === 2 && "Location & Farm Details"}
                 {currentStep === 3 && "Account Security"}
+                {currentStep === 4 && "Land Mapping & Boundaries"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -410,6 +417,57 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                 </>
               )}
 
+              {/* Step 4: Land Mapping & Boundaries */}
+              {currentStep === 4 && (
+                <>
+                  <div className="text-center mb-6">
+                    <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <Map className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Map Your Farm Boundaries
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Use GPS to create accurate boundaries for your farm land. This helps with compliance monitoring and certification.
+                    </p>
+                  </div>
+
+                  <Alert className="border-green-300 bg-green-50 mb-4">
+                    <Satellite className="h-4 w-4" />
+                    <AlertDescription className="text-green-800">
+                      <strong>Interactive Land Mapping Available</strong><br />
+                      Tap on the map to create boundary points. Walk around your farm to capture accurate GPS coordinates.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="min-h-[400px] border rounded-lg overflow-hidden">
+                    <InteractiveBoundaryMapper
+                      onBoundaryComplete={(boundary) => {
+                        setFarmBoundary(boundary);
+                        form.setValue("farmBoundary", boundary);
+                        toast({
+                          title: "Farm Boundary Mapped",
+                          description: `Successfully mapped ${boundary.points?.length || 0} GPS points covering ${boundary.area?.toFixed(2) || 0} hectares`,
+                        });
+                      }}
+                      minPoints={3}
+                    />
+                  </div>
+
+                  {farmBoundary && (
+                    <Alert className="border-green-300 bg-green-50 mt-4">
+                      <CheckCircle className="h-4 w-4" />
+                      <AlertDescription className="text-green-800">
+                        <strong>Boundary Mapping Complete!</strong><br />
+                        Area: {farmBoundary.area?.toFixed(2) || 0} hectares<br />
+                        GPS Points: {farmBoundary.points?.length || 0}<br />
+                        Accuracy Level: {farmBoundary.accuracyLevel || 'Unknown'}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </>
+              )}
+
               {/* Navigation Buttons */}
               <div className="flex gap-3 pt-4">
                 {currentStep > 1 && (
@@ -419,17 +477,19 @@ export default function MobileFarmerRegistration({ onSuccess, onCancel }: Mobile
                     onClick={prevStep}
                     className="flex-1 min-h-[44px]"
                   >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
                     Previous
                   </Button>
                 )}
                 
-                {currentStep < 3 ? (
+                {currentStep < 4 ? (
                   <Button
                     type="button"
                     onClick={nextStep}
                     className="flex-1 min-h-[44px] bg-green-600 hover:bg-green-700"
                   >
-                    Next
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    {currentStep === 3 ? "Map Farm Land" : "Next"}
                   </Button>
                 ) : (
                   <Button

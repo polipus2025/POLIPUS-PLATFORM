@@ -1,154 +1,92 @@
-// AgriTrace360 Simple Offline Service Worker
-// Only activates when truly offline
+// AgriTrace360 Minimal Service Worker
+// No interference with normal browsing - offline fallback only
 
-const CACHE_NAME = 'agritrace360-offline-v3';
-const STATIC_CACHE = 'agritrace360-static-v3';
+const CACHE_NAME = 'agritrace360-minimal-v1';
 
-// Simple install - minimal caching
+// Minimal install
 self.addEventListener('install', (event) => {
-  console.log('🚀 AgriTrace360 Service Worker installing - V3 SIMPLE');
-  event.waitUntil(self.skipWaiting());
+  console.log('AgriTrace360 Service Worker installing - minimal version');
+  self.skipWaiting();
 });
 
-// Simple activate
+// Minimal activate  
 self.addEventListener('activate', (event) => {
-  console.log('🎯 Service Worker activated - V3 SIMPLE MODE');
+  console.log('AgriTrace360 Service Worker activated - minimal mode');
   event.waitUntil(self.clients.claim());
 });
 
-// Only intercept when truly offline
+// Only handle navigation requests that fail
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') {
-    return;
+  // Only intercept document navigation requests
+  if (event.request.mode === 'navigate' && event.request.destination === 'document') {
+    event.respondWith(handleNavigation(event.request));
   }
-
-  // Only intercept navigation requests when offline
-  if (event.request.mode === 'navigate') {
-    event.respondWith(handleNavigationRequest(event.request));
-    return;
-  }
-
-  // Let everything else pass through normally
+  // Let all other requests pass through normally
 });
 
-async function handleNavigationRequest(request) {
+async function handleNavigation(request) {
   try {
-    // Always try network first for navigation
-    const networkResponse = await fetch(request);
-    return networkResponse;
+    // Always try network first
+    const response = await fetch(request);
+    return response;
   } catch (error) {
-    // Only show offline page when network truly fails
-    console.log('🌐 Network failed, showing offline page');
-    return getOfflinePage();
-  }
-}
-
-function getOfflinePage() {
-  return new Response(`
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AgriTrace360 - Offline</title>
-        <style>
-          body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            margin: 0; 
-            padding: 20px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            text-align: center;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-          }
-          .container { 
-            background: rgba(255,255,255,0.1); 
-            padding: 40px; 
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            max-width: 500px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-          }
-          .icon { font-size: 64px; margin-bottom: 20px; }
-          h1 { margin: 0 0 20px 0; font-size: 32px; font-weight: 600; }
-          p { font-size: 18px; line-height: 1.6; margin-bottom: 30px; opacity: 0.9; }
-          .btn { 
-            background: #fff; 
-            color: #10b981; 
-            border: none; 
-            padding: 15px 30px; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            font-weight: 600;
-            cursor: pointer;
-            margin: 10px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-          }
-          .btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-          }
-          .features { 
-            text-align: left; 
-            margin: 30px 0; 
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 10px;
-          }
-          .feature { 
-            margin: 8px 0; 
-            padding: 5px 0;
-            font-size: 16px;
-          }
-          .feature::before { 
-            content: "✓ "; 
-            color: #34d399; 
-            font-weight: bold; 
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="icon">🌱</div>
-          <h1>AgriTrace360™</h1>
-          <p>You're currently offline, but our platform supports full offline functionality for essential agricultural operations.</p>
-          
-          <div class="features">
-            <div class="feature">Offline farmer authentication</div>
-            <div class="feature">GPS location recording</div>
-            <div class="feature">Farm registration and mapping</div>
-            <div class="feature">Commodity tracking data entry</div>
-            <div class="feature">Auto-sync when connection returns</div>
+    // Only return offline page if network completely fails
+    return new Response(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>AgriTrace360 - Offline</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { 
+              font-family: system-ui, sans-serif; 
+              text-align: center; 
+              padding: 40px;
+              background: linear-gradient(135deg, #10b981, #059669);
+              color: white;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 0;
+            }
+            .container { 
+              background: rgba(255,255,255,0.1); 
+              padding: 40px; 
+              border-radius: 20px;
+              max-width: 400px;
+            }
+            h1 { font-size: 28px; margin-bottom: 20px; }
+            p { font-size: 16px; line-height: 1.5; margin-bottom: 30px; }
+            button { 
+              background: white; 
+              color: #10b981; 
+              border: none; 
+              padding: 12px 24px; 
+              border-radius: 8px; 
+              font-size: 16px; 
+              cursor: pointer;
+              margin: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>🌱 AgriTrace360</h1>
+            <p>You're currently offline. Please check your internet connection and try again.</p>
+            <button onclick="window.location.reload()">Retry</button>
           </div>
-          
-          <button class="btn" onclick="window.location.reload()">Retry Connection</button>
-          <button class="btn" onclick="showOfflineLogin()">Continue Offline</button>
-        </div>
-        
-        <script>
-          function showOfflineLogin() {
-            alert('Offline login functionality available. Platform will sync data automatically when connection is restored.');
-            window.location.reload();
-          }
-          
-          // Auto-retry when back online
-          window.addEventListener('online', () => {
-            window.location.reload();
-          });
-        </script>
-      </body>
-    </html>
-  `, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/html',
-    },
-  });
+          <script>
+            // Auto-reload when back online
+            window.addEventListener('online', () => {
+              window.location.reload();
+            });
+          </script>
+        </body>
+      </html>
+    `, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html' }
+    });
+  }
 }

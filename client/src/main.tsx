@@ -2,29 +2,19 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Register Service Worker for offline-only functionality
+// Register Service Worker for offline support only - no auto-reload
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      // Unregister old service workers
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map(registration => registration.unregister()));
+      console.log('Registering minimal service worker for offline support');
       
-      // Clear old caches
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+      // Register service worker without any reload logic
+      await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+        updateViaCache: 'none'
+      });
       
-      console.log('🧹 Cleared old service workers - registering simple version');
-      
-      // Register simple service worker
-      const registration = await navigator.serviceWorker.register('/sw.js?v=simple-' + Date.now());
-      
-      console.log('✅ Simple service worker registered for offline-only support');
-      
-      // Force activation
-      if (registration.waiting) {
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
+      console.log('Service worker registered successfully');
       
     } catch (error) {
       console.log('Service worker registration failed:', error);

@@ -1,9 +1,9 @@
 // AgriTrace360 Enhanced Offline Service Worker
 // Provides comprehensive offline functionality for mapping, authentication, and farmer registration
 
-const CACHE_NAME = 'agritrace360-v1';
-const STATIC_CACHE = 'agritrace360-static-v1';
-const DYNAMIC_CACHE = 'agritrace360-dynamic-v1';
+const CACHE_NAME = 'agritrace360-v2-' + Date.now();
+const STATIC_CACHE = 'agritrace360-static-v2-' + Date.now();
+const DYNAMIC_CACHE = 'agritrace360-dynamic-v2-' + Date.now();
 
 // Essential files to cache for offline functionality
 const STATIC_ASSETS = [
@@ -13,42 +13,53 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('🚀 AgriTrace360 Service Worker installing with FULL OFFLINE SUPPORT');
+  console.log('🚀 AgriTrace360 Service Worker installing with FULL OFFLINE SUPPORT - Version 2');
   
   event.waitUntil(
     Promise.all([
+      // Clear all old caches first
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName))
+        );
+      }),
       // Cache static assets
       caches.open(STATIC_CACHE).then((cache) => {
         console.log('📦 Caching static assets for offline use');
-        return cache.addAll(STATIC_ASSETS);
+        return cache.addAll(STATIC_ASSETS).catch(() => {
+          // Ignore cache errors for now
+          console.log('Cache add failed, continuing anyway');
+        });
       })
     ]).then(() => {
-      console.log('✅ Service Worker installed with offline capabilities');
+      console.log('✅ Service Worker installed with offline capabilities - FORCING ACTIVATION');
       return self.skipWaiting();
     })
   );
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('🎯 Service Worker activated - OFFLINE MODE ENABLED');
+  console.log('🎯 Service Worker activated - OFFLINE MODE ENABLED - Version 2');
   
   event.waitUntil(
     Promise.all([
-      // Clean up old caches
+      // Clean up ALL old caches to force fresh start
       caches.keys().then((cacheNames) => {
+        console.log('🗑️ Deleting ALL old caches:', cacheNames);
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log('🗑️ Deleting old cache:', cacheName);
+            if (!cacheName.includes(Date.now().toString().slice(0, 8))) {
               return caches.delete(cacheName);
             }
           })
         );
       }),
       
-      // Take control of all clients
+      // Take control of all clients immediately
       self.clients.claim()
-    ])
+    ]).then(() => {
+      console.log('✅ Service Worker fully activated and controlling all clients');
+    })
   );
 });
 

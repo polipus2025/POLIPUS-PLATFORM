@@ -69,19 +69,25 @@ export async function apiRequest(
 }
 
 // Handle offline requests with local storage
-async function handleOfflineRequest(url: string, options: RequestInit): Promise<any> {
-  console.log('🔄 Handling offline request:', url);
+async function handleOfflineRequest(url: string, options: { method?: string; body?: string; headers?: Record<string, string> }): Promise<any> {
+  console.log('🔄 Handling offline request:', url, options.method);
   
   // Handle farmer registration - store offline and return success
   if (url.includes('/api/farmers') && options.method === 'POST') {
     try {
       const farmerData = JSON.parse(options.body as string);
+      
+      // Generate unique farmer ID
+      const farmerId = 'FARM-' + Date.now().toString().slice(-6);
       const offlineFarmer = {
         ...farmerData,
-        id: `offline_${Date.now()}`,
+        farmerId,
+        id: Date.now(),
+        registrationDate: new Date().toISOString(),
+        status: 'pending',
         isOffline: true,
         timestamp: Date.now(),
-        status: 'pending'
+        syncStatus: 'pending'
       };
       
       // Store in localStorage for offline use
@@ -89,13 +95,21 @@ async function handleOfflineRequest(url: string, options: RequestInit): Promise<
       offlineFarmers.push(offlineFarmer);
       localStorage.setItem('offlineFarmers', JSON.stringify(offlineFarmers));
       
-      console.log('✅ Farmer data saved offline:', offlineFarmer);
+      console.log('✅ Farmer data saved offline successfully:', farmerId, offlineFarmer);
+      
+      // Attempt sync in the background
+      setTimeout(() => {
+        if ((window as any).syncOfflineFarmers) {
+          (window as any).syncOfflineFarmers();
+        }
+      }, 1000);
       
       return {
         success: true,
         message: "Farmer registered offline successfully! Data will sync when connection is restored.",
         data: offlineFarmer,
-        offline: true
+        offline: true,
+        ...offlineFarmer
       };
     } catch (error) {
       console.error('Failed to save farmer offline:', error);
@@ -148,11 +162,53 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Add authorization header if token exists
+    const url = queryKey.join("/") as string;
+    
+    // Handle offline farmers query - merge online and offline data
+    if (url === '/api/farmers') {
+      try {
+        // Add authorization header if token exists
+        const token = localStorage.getItem('authToken');
+        const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+        
+        const res = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
+          },
+          credentials: "include",
+        });
+
+        let onlineFarmers: any[] = [];
+        
+        if (res.ok) {
+          const responseData = await res.json();
+          onlineFarmers = Array.isArray(responseData) ? responseData : responseData.data || [];
+        }
+        
+        // Get offline farmers from localStorage
+        const offlineFarmers = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
+        
+        // Combine online and offline farmers
+        const allFarmers = [...onlineFarmers, ...offlineFarmers];
+        
+        console.log(`📊 Farmers loaded: ${onlineFarmers.length} online, ${offlineFarmers.length} offline`);
+        
+        return allFarmers;
+        
+      } catch (error) {
+        console.log('📱 Loading offline farmers only');
+        // If online fetch fails, return offline farmers only
+        const offlineFarmers = JSON.parse(localStorage.getItem('offlineFarmers') || '[]');
+        return offlineFarmers;
+      }
+    }
+    
+    // Regular fetch for other endpoints
     const token = localStorage.getItem('authToken');
     const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
     
-    const res = await fetch(queryKey.join("/") as string, {
+    const res = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders,

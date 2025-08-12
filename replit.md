@@ -15,6 +15,7 @@ Module Development Strategy: Ready to simultaneously develop all 7 new modules (
 - **IMPROVED FARMER REGISTRATION**: Offline farmer registration with immediate display and automatic sync when connection returns
 - **ROBUST CACHE MANAGEMENT**: Service worker now properly caches all essential pages and serves them when offline instead of showing "No Internet" error
 - **ENHANCED SYNC SYSTEM**: Comprehensive sync mechanism with manual sync buttons, automatic sync on connection restore, and proper error handling
+- **DEFORESTATION REPORT REQUIREMENT CLARIFICATION**: System should automatically generate EUDR and Deforestation reports during farmer registration/mapping process, not manual upload. Only EUDR report should be visible in farmer profile after registration completion.
 
 ## Previous Changes (January 11, 2025)
 - **MAXIMUM EFFICIENCY SATELLITE CONSTELLATION**: Expanded to 24 real satellites for comprehensive global environmental monitoring coverage

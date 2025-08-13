@@ -26,7 +26,7 @@ export default function FrontPage() {
       icon: Wheat,
       color: 'bg-green-500',
       route: '/portals',
-      isActive: true,
+      isAgriTrace: true,
       description: 'Complete agricultural commodity tracking & LACRA compliance system'
     },
     {
@@ -35,7 +35,6 @@ export default function FrontPage() {
       icon: Truck,
       color: 'bg-blue-500',
       route: '/live-trace',
-      isActive: false,
       description: 'Livestock movement monitoring and control system'
     },
     {
@@ -44,7 +43,6 @@ export default function FrontPage() {
       icon: MapPin,
       color: 'bg-purple-500',
       route: '/landmap360-portal',
-      isActive: false,
       description: 'Land mapping and dispute prevention services'
     },
     {
@@ -53,7 +51,6 @@ export default function FrontPage() {
       icon: Shield,
       color: 'bg-orange-500',
       route: '/mine-watch',
-      isActive: false,
       description: 'Mineral resource protection and community safeguarding'
     },
     {
@@ -62,7 +59,6 @@ export default function FrontPage() {
       icon: TreePine,
       color: 'bg-teal-500',
       route: '/forest-guard',
-      isActive: false,
       description: 'Forest protection and carbon credit management'
     },
     {
@@ -71,7 +67,6 @@ export default function FrontPage() {
       icon: Waves,
       color: 'bg-cyan-500',
       route: '/aqua-trace',
-      isActive: false,
       description: 'Ocean ecosystem monitoring and protection'
     },
     {
@@ -80,7 +75,6 @@ export default function FrontPage() {
       icon: DollarSign,
       color: 'bg-blue-600',
       route: '/blue-carbon360',
-      isActive: false,
       description: 'Marine conservation economics and carbon marketplace'
     },
     {
@@ -89,7 +83,6 @@ export default function FrontPage() {
       icon: Leaf,
       color: 'bg-green-600',
       route: '/carbon-trace-dashboard',
-      isActive: false,
       description: 'Environmental monitoring and carbon footprint tracking'
     }
   ];
@@ -98,6 +91,7 @@ export default function FrontPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-7xl mx-auto p-6">
         
+        {/* Platform Header */}
         <div className="bg-white rounded-xl shadow-lg p-8 text-center mb-8">
           <h1 className="text-4xl font-bold text-slate-900 mb-2">
             🌟 Polipus® Environmental Intelligence Platform
@@ -111,6 +105,7 @@ export default function FrontPage() {
           </Link>
         </div>
 
+        {/* Platform Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-3">
@@ -149,6 +144,7 @@ export default function FrontPage() {
           </div>
         </div>
 
+        {/* Platform Modules */}
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center">
@@ -177,8 +173,8 @@ export default function FrontPage() {
                       {module.description}
                     </p>
                     <div className="mb-4">
-                      <Badge className={module.isActive ? "bg-green-100 text-green-800 border-green-200" : "bg-blue-100 text-blue-800 border-blue-200"}>
-                        {module.isActive ? (
+                      <Badge className={module.isAgriTrace ? "bg-green-100 text-green-800 border-green-200" : "bg-blue-100 text-blue-800 border-blue-200"}>
+                        {module.isAgriTrace ? (
                           <>
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Active
@@ -201,6 +197,7 @@ export default function FrontPage() {
           </div>
         </div>
 
+        {/* Footer */}
         <div className="text-center mt-12">
           <Badge variant="outline" className="px-6 py-3 text-base bg-white">
             All 8 Modules Active • Real-time Environmental Monitoring • EUDR Compliant

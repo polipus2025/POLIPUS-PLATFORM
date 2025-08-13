@@ -79,49 +79,37 @@ export default function FieldAgentLogin() {
     setIsLoading(true);
     setError("");
     
-    try {
-      // Offline authentication - works with test credentials
-      if ((data.agentId === "agent001" || data.agentId === "agent002" || data.agentId === "field001") && 
-          data.password === "password123") {
-        
-        // Store auth data
-        localStorage.setItem("authToken", "offline-token-" + Date.now());
-        localStorage.setItem("userType", "field_agent");
-        localStorage.setItem("userRole", "field_agent");
-        localStorage.setItem("agentId", data.agentId);
-        localStorage.setItem("jurisdiction", data.jurisdiction || "");
-        localStorage.setItem("offlineMode", "true");
-        
-        toast({
-          title: "Offline Login Successful",
-          description: "Welcome to your Field Agent Portal (Offline Mode)",
-        });
-        
-        // Immediate redirect without delay
-        setTimeout(() => {
-          window.location.href = "/field-agent-dashboard";
-        }, 100);
-        return;
-      }
+    // Simple offline check - works with test credentials
+    if ((data.agentId === "agent001" || data.agentId === "agent002" || data.agentId === "field001") && 
+        data.password === "password123") {
       
-      // Invalid credentials
-      setError("Invalid credentials. Use agent001/password123, agent002/password123, or field001/password123 for testing.");
+      // Store auth data
+      localStorage.setItem("authToken", "offline-token-" + Date.now());
+      localStorage.setItem("userType", "field_agent");
+      localStorage.setItem("userRole", "field_agent");
+      localStorage.setItem("agentId", data.agentId);
+      localStorage.setItem("jurisdiction", data.jurisdiction || "");
+      localStorage.setItem("offlineMode", "true");
+      
       toast({
-        title: "Login Failed", 
-        description: "Invalid credentials. Use test accounts: agent001, agent002, or field001 with password123",
-        variant: "destructive",
+        title: "Login Successful",
+        description: "Welcome to your Field Agent Portal",
       });
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Login failed. Please try again.");
-      toast({
-        title: "Login Error",
-        description: "An error occurred during login. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
+      
+      // Direct redirect
+      window.location.href = "/field-agent-dashboard";
       setIsLoading(false);
+      return;
     }
+    
+    // Invalid credentials
+    setError("Invalid credentials. Use agent001/password123 for testing.");
+    toast({
+      title: "Login Failed", 
+      description: "Invalid credentials. Use agent001/password123 for testing.",
+      variant: "destructive",
+    });
+    setIsLoading(false);
   };
 
   return (

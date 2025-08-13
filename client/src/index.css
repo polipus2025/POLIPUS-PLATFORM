@@ -547,10 +547,16 @@
     padding: 0;
     overflow-x: hidden;
     width: 100%;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   * {
     box-sizing: border-box;
+    border-color: hsl(var(--border));
   }
 }
 
@@ -647,19 +653,7 @@
   --radius: 0.5rem;
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
 
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-}
 
 @layer utilities {
   .lacra-blue {

@@ -1,5 +1,4 @@
 
-
 interface ModernBackgroundProps {
   children?: React.ReactNode;
   className?: string;

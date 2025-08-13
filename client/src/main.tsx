@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import App from "./test-simple";
 import "./index.css";
 
 // Ensure DOM is fully loaded

@@ -27,9 +27,9 @@ if ('serviceWorker' in navigator) {
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('🔄 New service worker available');
-              // Auto-reload to use new service worker
-              window.location.reload();
+              console.log('🔄 New service worker available - ready for next reload');
+              // Don't auto-reload to prevent infinite reload loop
+              // User can manually refresh if needed
             }
           });
         }

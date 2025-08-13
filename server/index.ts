@@ -63,6 +63,74 @@ if (MAINTENANCE_MODE) {
 
   (async () => {
     try {
+      // EMERGENCY: Serve working HTML page immediately
+      app.get('/', (req, res) => {
+        res.send(`<!DOCTYPE html>
+<html><head><title>Polipus Platform - WORKING</title></head>
+<body style="font-family: system-ui; padding: 40px; text-align: center; background: linear-gradient(135deg, #f8fafc, #e2e8f0); min-height: 100vh;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="background: white; padding: 40px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+      <h1 style="font-size: 48px; margin-bottom: 10px; color: #1e293b; font-weight: bold;">POLIPUS®</h1>
+      <h2 style="color: #475569; margin-bottom: 30px; font-size: 24px;">General Environmental Intelligence Platform</h2>
+      <a href="/portals" style="background: linear-gradient(135deg, #2563eb, #16a34a); color: white; padding: 15px 30px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block; transition: all 0.3s; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);">🚪 Login Portals</a>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+      <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <div style="font-size: 32px; font-weight: bold; color: #16a34a; margin-bottom: 5px;">1/8</div>
+        <div style="color: #64748b; font-size: 14px;">Active Modules</div>
+      </div>
+      <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <div style="font-size: 28px; font-weight: bold; color: #2563eb; margin-bottom: 5px;">EUDR 100%</div>
+        <div style="color: #64748b; font-size: 14px;">Compliance</div>
+      </div>
+      <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <div style="font-size: 32px; font-weight: bold; color: #f59e0b; margin-bottom: 5px;">7</div>
+        <div style="color: #64748b; font-size: 14px;">In Development</div>
+      </div>
+      <div style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <div style="font-size: 32px; font-weight: bold; color: #8b5cf6; margin-bottom: 5px;">Global</div>
+        <div style="color: #64748b; font-size: 14px;">Coverage</div>
+      </div>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+      <h3 style="font-size: 24px; font-weight: bold; color: #1e293b; margin-bottom: 20px; text-align: left;">⚙️ Platform Modules</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; transition: all 0.2s; background: white; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+          <div style="width: 60px; height: 60px; background: #16a34a; border-radius: 12px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌾</div>
+          <h4 style="font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Agricultural Traceability</h4>
+          <div style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: inline-block;">✅ ACTIVE</div><br>
+          <a href="/portals" style="background: linear-gradient(135deg, #2563eb, #16a34a); color: white; padding: 8px 16px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">Enter Platform →</a>
+        </div>
+        
+        <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; transition: all 0.2s; background: white; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+          <div style="width: 60px; height: 60px; background: #3b82f6; border-radius: 12px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🚚</div>
+          <h4 style="font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Live Trace</h4>
+          <div style="background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: inline-block;">Coming Soon</div><br>
+          <a href="/live-trace" style="background: linear-gradient(135deg, #2563eb, #16a34a); color: white; padding: 8px 16px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">Enter Platform →</a>
+        </div>
+        
+        <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; transition: all 0.2s; background: white; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+          <div style="width: 60px; height: 60px; background: #8b5cf6; border-radius: 12px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🗺️</div>
+          <h4 style="font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Land Map360</h4>
+          <div style="background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: inline-block;">Coming Soon</div><br>
+          <a href="/landmap360-portal" style="background: linear-gradient(135deg, #2563eb, #16a34a); color: white; padding: 8px 16px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">Enter Platform →</a>
+        </div>
+        
+        <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; transition: all 0.2s; background: white; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+          <div style="width: 60px; height: 60px; background: #f59e0b; border-radius: 12px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 24px;">⛏️</div>
+          <h4 style="font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Mine Watch</h4>
+          <div style="background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: inline-block;">Coming Soon</div><br>
+          <a href="/mine-watch" style="background: linear-gradient(135deg, #2563eb, #16a34a); color: white; padding: 8px 16px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">Enter Platform →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body></html>`);
+      });
+      
       // GPS Testing Route - Direct HTML Response (add before other routes)
       app.get('/gps-test-direct', (req, res) => {
         res.send(`<!DOCTYPE html>

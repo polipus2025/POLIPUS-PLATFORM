@@ -157,8 +157,6 @@ import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
 import IntegratedDashboard from "@/pages/integrated-dashboard";
 
 import NotFound from "@/pages/not-found";
-import SimpleTest from "@/pages/simple-test";
-import FrontPageSimple from "@/pages/front-page-simple";
 
 // Helper component to check user access to routes
 function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: any) {
@@ -307,8 +305,8 @@ function Router() {
             }}
           </Route>
           
-          {/* Root route - Using Simple Version */}
-          <Route path="/" component={FrontPageSimple} />
+          {/* Root route */}
+          <Route path="/" component={FrontPage} />
           
           {/* Field Agent Dashboard Route */}
           <Route path="/field-agent-dashboard">
@@ -536,8 +534,7 @@ function Router() {
       <Route path="/carbon-trace-dashboard" component={CarbonTraceDashboard} />
       <Route path="/integrated-dashboard" component={IntegratedDashboard} />
       
-      {/* Original Front Page and Login Portals */}
-      <Route path="/front-page-full" component={FrontPage} />
+      {/* Force Root Route to Always Show Polipus Main Page */}
       <Route path="/portals" component={Landing} />
       <Route path="/mobile-demo" component={MobileDemo} />
       <Route path="/mobile-app-simulator" component={MobileAppSimulator} />
@@ -546,9 +543,6 @@ function Router() {
       <Route path="/install-app" component={MobileAppDownload} />
       <Route path="/download-app" component={MobileAppDownload} />
       <Route path="/pwa-test" component={PWATest} />
-      
-      {/* Test Route */}
-      <Route path="/test" component={SimpleTest} />
       
       {/* Default fallback */}
       <Route component={NotFound} />

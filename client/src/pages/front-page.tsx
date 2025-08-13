@@ -27,11 +27,9 @@ import {
   Zap,
   Leaf
 } from 'lucide-react';
-// Temporarily comment out asset imports to test
-// import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
-// import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
-// Temporarily comment out GPS detector to test
-// import GlobalGPSDetector from '@/components/global-gps-detector';
+import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
+import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import GlobalGPSDetector from '@/components/global-gps-detector';
 
 export default function FrontPage() {
   const modules = [
@@ -112,18 +110,20 @@ export default function FrontPage() {
         {/* Mobile-Responsive Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-8 sm:mb-12">
           <div className="flex justify-center py-4 sm:py-6 relative">
-            <div className="h-32 sm:h-48 md:h-64 w-auto flex items-center justify-center bg-slate-100 rounded-lg border-2 border-slate-200">
-              <div className="text-center">
-                <h1 className="text-2xl sm:text-4xl font-bold text-slate-800">POLIPUS®</h1>
-                <p className="text-sm text-slate-600">Brightening the Future</p>
-              </div>
-            </div>
+            <img 
+              src={poliposLogo} 
+              alt="Polipos - Brightening the Future" 
+              className="h-32 sm:h-48 md:h-64 w-auto object-contain"
+            />
+            {/* Registered trademark symbol positioned over the 's' */}
+            <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            {/* Login Portals Button - Positioned to the left */}
+            {/* GPS Active and Login Portals Buttons - Positioned to the left */}
             <div className="absolute left-0 top-0 flex flex-col gap-2">
+              <GlobalGPSDetector />
               <Link href="#login-portals">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />

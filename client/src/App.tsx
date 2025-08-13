@@ -57,6 +57,16 @@ import CarbonTraceClimatePolicyAnalystLogin from "@/pages/auth/carbon-trace-clim
 
 // Other essential components
 import GPSTest from "@/pages/gps-test";
+import Landing from "@/pages/landing";
+
+// Portal Components
+import LiveTracePortal from "@/pages/portals/live-trace-portal";
+import LandMap360Portal from "@/pages/portals/land-map360-portal";
+import MineWatchPortal from "@/pages/portals/mine-watch-portal";
+import ForestGuardPortal from "@/pages/portals/forest-guard-portal";
+import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
+import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
+import CarbonTracePortal from "@/pages/portals/carbon-trace-portal";
 
 function Router() {
   return (
@@ -119,6 +129,20 @@ function Router() {
 
       {/* GPS TEST PAGE */}
       <Route path="/gps-test" component={GPSTest} />
+
+      {/* AGRITRACE PORTAL */}
+      <Route path="/portals" component={Landing} />
+      <Route path="/landing" component={Landing} />
+
+      {/* MODULE PORTALS */}
+      <Route path="/live-trace" component={LiveTracePortal} />
+      <Route path="/landmap360-portal" component={LandMap360Portal} />
+      <Route path="/land-map360" component={LandMap360Portal} />
+      <Route path="/mine-watch" component={MineWatchPortal} />
+      <Route path="/forest-guard" component={ForestGuardPortal} />
+      <Route path="/aqua-trace" component={AquaTracePortal} />
+      <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
+      <Route path="/carbon-trace" component={CarbonTracePortal} />
       
       {/* DEFAULT FALLBACK - SHOW FRONT PAGE */}
       <Route component={FrontPage} />

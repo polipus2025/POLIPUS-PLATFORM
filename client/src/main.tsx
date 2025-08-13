@@ -1,41 +1,54 @@
 import { createRoot } from "react-dom/client";
-import App from "./App-minimal";
+import App from "./App";
 import "./index.css";
 
-// Simplified service worker registration without auto-reload
+// Register enhanced service worker for comprehensive offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      // Unregister any existing service worker first
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let registration of registrations) {
+        await registration.unregister();
+        console.log('🗑️ Unregistered old service worker');
+      }
+      
+      // Register new enhanced service worker with cache busting
+      const registration = await navigator.serviceWorker.register(`/sw.js?v=${Date.now()}`, {
         scope: '/',
         updateViaCache: 'none'
       });
-      console.log('✅ Service Worker registered successfully', registration);
+      
+      console.log('✅ Enhanced Service Worker registered successfully', registration);
+      
+      // Handle service worker updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('🔄 New service worker available');
+              // Auto-reload to use new service worker
+              window.location.reload();
+            }
+          });
+        }
+      });
+      
+      // Listen for service worker messages
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'SYNC_FARMERS') {
+          console.log('🔄 Service worker requested farmer sync');
+          if ((window as any).syncOfflineFarmers) {
+            (window as any).syncOfflineFarmers();
+          }
+        }
+      });
+      
     } catch (error) {
       console.error('❌ Service worker registration failed:', error);
     }
   });
 }
 
-// Render the main React app
-const rootElement = document.getElementById("root");
-if (rootElement) {
-  try {
-    const root = createRoot(rootElement);
-    root.render(<App />);
-    console.log('✅ Polipus Platform rendered successfully');
-  } catch (error) {
-    console.error('❌ App render error:', error);
-    // Simple fallback without endless reload
-    rootElement.innerHTML = `
-      <div style="min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 20px; font-family: system-ui; text-align: center;">
-        <h1>🌿 Polipus Platform</h1>
-        <div style="background: #ef4444; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 600px;">
-          <h2>Application Error</h2>
-          <p>There was an issue loading the React app. Please refresh the page.</p>
-          <button onclick="window.location.reload()" style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Reload Page</button>
-        </div>
-      </div>
-    `;
-  }
-}
+createRoot(document.getElementById("root")!).render(<App />);

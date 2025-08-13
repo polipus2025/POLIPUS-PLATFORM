@@ -27,6 +27,15 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Fallback mount check
+      setTimeout(() => {
+        const root = document.getElementById('root');
+        if (root && root.innerHTML.includes('Emergency fallback')) {
+          console.error('React failed to mount after 3 seconds');
+        }
+      }, 3000);
+    </script>
     
     <!-- Service Worker Registration -->
     <script>

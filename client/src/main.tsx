@@ -2,53 +2,32 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Register enhanced service worker for comprehensive offline support
+// Enhanced service worker registration (simplified)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      // Unregister any existing service worker first
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (let registration of registrations) {
-        await registration.unregister();
-        console.log('🗑️ Unregistered old service worker');
-      }
-      
-      // Register new enhanced service worker with cache busting
-      const registration = await navigator.serviceWorker.register(`/sw.js?v=${Date.now()}`, {
-        scope: '/',
-        updateViaCache: 'none'
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
       });
-      
       console.log('✅ Enhanced Service Worker registered successfully', registration);
       
-      // Handle service worker updates
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('🔄 New service worker available');
-              // Auto-reload to use new service worker
-              window.location.reload();
-            }
-          });
-        }
-      });
-      
-      // Listen for service worker messages
-      navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data && event.data.type === 'SYNC_FARMERS') {
-          console.log('🔄 Service worker requested farmer sync');
-          if ((window as any).syncOfflineFarmers) {
-            (window as any).syncOfflineFarmers();
-          }
-        }
-      });
-      
+      // Check for pending farmers to sync
+      const pendingFarmers = localStorage.getItem('offlineFarmers');
+      if (!pendingFarmers || JSON.parse(pendingFarmers).length === 0) {
+        console.log('📝 No pending farmers to sync');
+      }
     } catch (error) {
       console.error('❌ Service worker registration failed:', error);
     }
   });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Mount the app
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  // Clear any existing content to avoid conflicts
+  rootElement.innerHTML = '';
+  createRoot(rootElement).render(<App />);
+} else {
+  console.error('Root element not found!');
+}

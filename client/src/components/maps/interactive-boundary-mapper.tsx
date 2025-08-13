@@ -180,6 +180,7 @@ const LeafletMap = ({
         setTimeout(resizeMap, 1000);
         
       } catch (error) {
+        console.error('Map initialization failed:', error);
       }
     };
 
@@ -265,11 +266,11 @@ const LeafletMap = ({
         }).addTo(mapInstanceRef.current);
 
         // Fit map bounds to show all points
-        const group = new L.featureGroup([...markersRef.current, polygonRef.current]);
+        const group = L.featureGroup([...markersRef.current, polygonRef.current] as any);
         mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
       } else if (points.length > 0) {
         // Fit bounds to markers only
-        const group = new L.featureGroup(markersRef.current);
+        const group = L.featureGroup(markersRef.current as any);
         mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
       }
     };
@@ -549,10 +550,11 @@ export default function InteractiveBoundaryMapper({
 
     try {
       // Create comprehensive compliance reports
-      const reportData: ComplianceReportData = {
+      const reportData = {
         farmerId,
         farmerName,
         coordinates,
+        farmArea: completedBoundary.area,
         boundaryData: {
           name: completedBoundary.name,
           area: completedBoundary.area,
@@ -560,9 +562,9 @@ export default function InteractiveBoundaryMapper({
           points: completedBoundary.points.length,
           accuracy: completedBoundary.accuracyLevel
         }
-      };
+      } as any;
 
-      const complianceReports = await createComplianceReports(reportData);
+      const complianceReports = await createComplianceReports(reportData, farmerName, completedBoundary.area.toString());
       
       // Add reports to boundary data
       const boundaryWithReports = {
@@ -585,7 +587,7 @@ export default function InteractiveBoundaryMapper({
     } catch (error) {
       
       setCurrentBoundary(completedBoundary);
-      onBoundaryComplete?.(completedBoundary);
+      onBoundaryComplete?.(completedBoundary as any);
 
       // Save to localStorage for demonstration
       const savedBoundaries = JSON.parse(localStorage.getItem('farmBoundaries') || '[]');
@@ -784,7 +786,10 @@ export default function InteractiveBoundaryMapper({
                 </div>
 
                 {/* EUDR Compliance and Deforestation Reports */}
-                {currentBoundary.complianceReports && (
+                {currentBoundary.complianceReports && (() => {
+                  const farmerId = localStorage.getItem("farmerId") || `FRM-${Date.now()}`;
+                  const farmerName = localStorage.getItem("farmerFirstName") || "Farm Owner";
+                  return (
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <h4 className="font-medium text-blue-800 text-sm mb-3 flex items-center gap-2">
                       <Shield className="h-4 w-4" />
@@ -812,7 +817,10 @@ export default function InteractiveBoundaryMapper({
                             </DialogTitle>
                           </DialogHeader>
                           <EUDRComplianceReportComponent 
-                            report={currentBoundary.complianceReports.eudrCompliance}
+                            report={currentBoundary.complianceReports?.eudrCompliance}
+                            farmArea={currentBoundary.area}
+                            farmerId={farmerId}
+                            farmerName={farmerName}
                           />
                         </DialogContent>
                       </Dialog>
@@ -838,7 +846,10 @@ export default function InteractiveBoundaryMapper({
                             </DialogTitle>
                           </DialogHeader>
                           <DeforestationReportComponent 
-                            report={currentBoundary.complianceReports.deforestationReport}
+                            report={currentBoundary.complianceReports?.deforestationReport}
+                            farmArea={currentBoundary.area}
+                            farmerId={farmerId}
+                            farmerName={farmerName}
                           />
                         </DialogContent>
                       </Dialog>
@@ -847,7 +858,7 @@ export default function InteractiveBoundaryMapper({
                     {/* PDF Download Buttons */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                       <Button 
-                        onClick={() => generateEUDRCompliancePDF(currentBoundary.complianceReports.eudrCompliance)}
+                        onClick={() => generateEUDRCompliancePDF(currentBoundary.complianceReports?.eudrCompliance)}
                         variant="outline" 
                         size="sm" 
                         className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100 w-full"
@@ -857,7 +868,7 @@ export default function InteractiveBoundaryMapper({
                       </Button>
 
                       <Button 
-                        onClick={() => generateDeforestationPDF(currentBoundary.complianceReports.deforestationReport)}
+                        onClick={() => generateDeforestationPDF(currentBoundary.complianceReports?.deforestationReport)}
                         variant="outline" 
                         size="sm" 
                         className="bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 w-full"
@@ -871,7 +882,8 @@ export default function InteractiveBoundaryMapper({
                       📋 Reports include LACRA letterhead and official compliance documentation
                     </div>
                   </div>
-                )}
+                  );
+                })()}
               </div>
             )}
           </CardContent>

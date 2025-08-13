@@ -44,6 +44,7 @@ export default function SimpleTestMap() {
 
 
       } catch (error) {
+        console.error('Map initialization failed:', error);
       }
     };
 

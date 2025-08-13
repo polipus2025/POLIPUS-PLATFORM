@@ -72,6 +72,7 @@ export default function PWAInstallPrompt() {
       setDeferredPrompt(null);
       setShowPrompt(false);
     } catch (error) {
+      console.error('PWA installation failed:', error);
     }
   };
 
@@ -80,47 +81,92 @@ export default function PWAInstallPrompt() {
     localStorage.setItem('pwa-prompt-dismissed', 'true');
   };
 
+  const [showIOSModal, setShowIOSModal] = useState(false);
+
   const handleIOSInstallInstructions = () => {
     setShowPrompt(false);
-    // Show iOS installation modal
-    const modal = document.createElement('div');
-    modal.innerHTML = `
-      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: white; border-radius: 12px; padding: 24px; max-width: 350px; text-align: center;">
-          <h3 style="margin: 0 0 16px 0; color: #059669; font-size: 20px;">Install Polipus App</h3>
-          <div style="margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-              <div style="width: 32px; height: 32px; background: #059669; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                <svg style="width: 20px; height: 20px; fill: white;" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              </div>
-              <span style="font-size: 16px; color: #333;">Share</span>
-            </div>
-            <p style="margin: 0 0 12px 0; color: #666; font-size: 14px;">1. Tap the Share button at the bottom</p>
-            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-              <div style="width: 32px; height: 32px; background: #059669; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                <svg style="width: 20px; height: 20px; fill: white;" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-              </div>
-              <span style="font-size: 16px; color: #333;">Add to Home Screen</span>
-            </div>
-            <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;">2. Select "Add to Home Screen"</p>
-          </div>
-          <button onclick="this.parentElement.parentElement.remove()" style="background: #059669; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer;">Got it!</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
+    setShowIOSModal(true);
   };
 
   // Don't show if already installed or in standalone mode
   if (isInstalled || isStandalone || !showPrompt) {
-    return null;
+    return showIOSModal ? (
+      <div className="fixed inset-0 bg-black/80 z-[10000] flex items-center justify-center p-5">
+        <div className="bg-white rounded-xl p-6 max-w-sm text-center">
+          <h3 className="text-xl font-semibold text-emerald-600 mb-4">Install Polipus App</h3>
+          <div className="space-y-4 mb-5">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-8 h-8 bg-emerald-600 rounded-md flex items-center justify-center">
+                <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <span className="text-gray-800">Share</span>
+            </div>
+            <p className="text-gray-600 text-sm">1. Tap the Share button at the bottom</p>
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-8 h-8 bg-emerald-600 rounded-md flex items-center justify-center">
+                <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+              </div>
+              <span className="text-gray-800">Add to Home Screen</span>
+            </div>
+            <p className="text-gray-600 text-sm">2. Select "Add to Home Screen"</p>
+          </div>
+          <button
+            onClick={() => setShowIOSModal(false)}
+            className="bg-emerald-600 text-white px-6 py-3 rounded-lg text-base font-medium hover:bg-emerald-700 transition-colors"
+            data-testid="button-close-ios-modal"
+          >
+            Got it!
+          </button>
+        </div>
+      </div>
+    ) : null;
   }
 
   return (
-    <div className="fixed top-4 left-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 md:max-w-md md:left-auto md:right-4">
+    <>
+      {showIOSModal && (
+        <div className="fixed inset-0 bg-black/80 z-[10000] flex items-center justify-center p-5">
+          <div className="bg-white rounded-xl p-6 max-w-sm text-center">
+            <h3 className="text-xl font-semibold text-emerald-600 mb-4">Install Polipus App</h3>
+            <div className="space-y-4 mb-5">
+              <div className="flex items-center justify-center space-x-3">
+                <div className="w-8 h-8 bg-emerald-600 rounded-md flex items-center justify-center">
+                  <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <span className="text-gray-800">Share</span>
+              </div>
+              <p className="text-gray-600 text-sm">1. Tap the Share button at the bottom</p>
+              <div className="flex items-center justify-center space-x-3">
+                <div className="w-8 h-8 bg-emerald-600 rounded-md flex items-center justify-center">
+                  <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                  </svg>
+                </div>
+                <span className="text-gray-800">Add to Home Screen</span>
+              </div>
+              <p className="text-gray-600 text-sm">2. Select "Add to Home Screen"</p>
+            </div>
+            <button
+              onClick={() => setShowIOSModal(false)}
+              className="bg-emerald-600 text-white px-6 py-3 rounded-lg text-base font-medium hover:bg-emerald-700 transition-colors"
+              data-testid="button-close-ios-modal"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="fixed top-4 left-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 md:max-w-md md:left-auto md:right-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-content-center">
+          <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
             <Smartphone className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
@@ -167,6 +213,7 @@ export default function PWAInstallPrompt() {
           Maybe Later
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

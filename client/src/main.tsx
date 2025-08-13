@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import SimpleApp from "./SimpleApp";
+import App from "./App-rebuilt";
 import "./index.css";
 
 // Enhanced service worker registration (simplified)
@@ -30,7 +30,7 @@ try {
     // Clear any existing content to avoid conflicts
     rootElement.innerHTML = '';
     const root = createRoot(rootElement);
-    root.render(<SimpleApp />);
+    root.render(<App />);
     console.log('✅ React app mounted successfully');
   } else {
     console.error('❌ Root element not found!');
@@ -40,7 +40,7 @@ try {
     newRoot.id = 'root';
     body.appendChild(newRoot);
     const root = createRoot(newRoot);
-    root.render(<SimpleApp />);
+    root.render(<App />);
     console.log('✅ Created new root and mounted React app');
   }
 } catch (error) {

@@ -1,210 +1,114 @@
-import { Link } from 'wouter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Wheat, 
-  Truck, 
-  Shield, 
-  MapPin, 
-  TreePine,
-  Waves,
-  DollarSign,
-  Leaf,
-  ArrowRight,
-  CheckCircle,
-  Globe,
-  Users,
-  Settings
-} from 'lucide-react';
-
-export default function FrontPage() {
-  const modules = [
-    {
-      id: 1,
-      title: 'Agricultural Traceability & Compliance',
-      icon: Wheat,
-      color: 'bg-green-500',
-      route: '/portals',
-      isActive: true,
-      description: 'Complete agricultural commodity tracking & LACRA compliance system'
-    },
-    {
-      id: 2,
-      title: 'Live Trace',
-      icon: Truck,
-      color: 'bg-blue-500',
-      route: '/live-trace',
-      isActive: false,
-      description: 'Livestock movement monitoring and control system'
-    },
-    {
-      id: 3,
-      title: 'Land Map360',
-      icon: MapPin,
-      color: 'bg-purple-500',
-      route: '/landmap360-portal',
-      isActive: false,
-      description: 'Land mapping and dispute prevention services'
-    },
-    {
-      id: 4,
-      title: 'Mine Watch',
-      icon: Shield,
-      color: 'bg-orange-500',
-      route: '/mine-watch',
-      isActive: false,
-      description: 'Mineral resource protection and community safeguarding'
-    },
-    {
-      id: 5,
-      title: 'Forest Guard',
-      icon: TreePine,
-      color: 'bg-teal-500',
-      route: '/forest-guard',
-      isActive: false,
-      description: 'Forest protection and carbon credit management'
-    },
-    {
-      id: 6,
-      title: 'Aqua Trace',
-      icon: Waves,
-      color: 'bg-cyan-500',
-      route: '/aqua-trace',
-      isActive: false,
-      description: 'Ocean ecosystem monitoring and protection'
-    },
-    {
-      id: 7,
-      title: 'Blue Carbon 360',
-      icon: DollarSign,
-      color: 'bg-blue-600',
-      route: '/blue-carbon360',
-      isActive: false,
-      description: 'Marine conservation economics and carbon marketplace'
-    },
-    {
-      id: 8,
-      title: 'Carbon Trace',
-      icon: Leaf,
-      color: 'bg-green-600',
-      route: '/carbon-trace-dashboard',
-      isActive: false,
-      description: 'Environmental monitoring and carbon footprint tracking'
-    }
-  ];
-
+export default function FrontPageBasic() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto p-6">
+    <div style={{
+      minHeight: '100vh',
+      padding: '20px',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      fontFamily: 'system-ui, sans-serif'
+    }}>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        textAlign: 'center'
+      }}>
+        <h1 style={{
+          fontSize: '3rem',
+          fontWeight: 'bold',
+          color: '#1e293b',
+          marginBottom: '2rem'
+        }}>
+          🌟 Polipus Environmental Intelligence Platform
+        </h1>
         
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            🌟 Polipus® Environmental Intelligence Platform
-          </h1>
-          <h2 className="text-2xl font-semibold text-slate-700 mb-6">General Environmental Intelligence Platform</h2>
-          <Link href="#login-portals">
-            <Button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 mx-auto">
-              <Users className="h-4 w-4" />
-              Login Portals
-            </Button>
-          </Link>
+        <p style={{
+          fontSize: '1.25rem',
+          color: '#64748b',
+          marginBottom: '3rem',
+          maxWidth: '600px',
+          margin: '0 auto 3rem'
+        }}>
+          Comprehensive 8-module environmental monitoring system for agricultural traceability, 
+          land mapping, livestock monitoring, forest protection, and carbon management.
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '24px',
+          marginTop: '2rem'
+        }}>
+          {[
+            { title: 'Agricultural Traceability & Compliance', desc: 'Complete agricultural commodity tracking & LACRA compliance system', color: '#10b981' },
+            { title: 'Live Trace', desc: 'Livestock movement monitoring and control system', color: '#3b82f6' },
+            { title: 'Land Map360', desc: 'Land mapping and dispute prevention services', color: '#8b5cf6' },
+            { title: 'Mine Watch', desc: 'Mineral resource protection and community safeguarding', color: '#f59e0b' },
+            { title: 'Forest Guard', desc: 'Forest protection and carbon credit management', color: '#14b8a6' },
+            { title: 'Aqua Trace', desc: 'Ocean ecosystem monitoring and protection', color: '#06b6d4' },
+            { title: 'Blue Carbon 360', desc: 'Marine conservation economics and carbon marketplace', color: '#3b82f6' },
+            { title: 'Carbon Trace', desc: 'Environmental monitoring and carbon footprint tracking', color: '#22c55e' }
+          ].map((module, index) => (
+            <div key={index} style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: module.color,
+                borderRadius: '12px',
+                margin: '0 auto 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px'
+              }}>
+                🔧
+              </div>
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: '#1e293b',
+                marginBottom: '8px'
+              }}>
+                {module.title}
+              </h3>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#64748b',
+                lineHeight: '1.5',
+                marginBottom: '16px'
+              }}>
+                {module.desc}
+              </p>
+              <button style={{
+                width: '100%',
+                padding: '8px 16px',
+                background: module.color,
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}>
+                Access Portal
+              </button>
+            </div>
+          ))}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <CheckCircle className="h-6 w-6 text-white" />
-            </div>
-            <p className="text-slate-600 text-sm mb-1">Active Modules</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">8/8</p>
-            <p className="text-slate-600 text-sm">Operational</p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-white font-bold text-lg">EU</span>
-            </div>
-            <p className="text-slate-600 text-sm mb-1">AgriTrace360</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">EUDR</p>
-            <p className="text-slate-600 text-sm">100% Compliant</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Settings className="h-6 w-6 text-white" />
-            </div>
-            <p className="text-slate-600 text-sm mb-1">Platform Status</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">Live</p>
-            <p className="text-slate-600 text-sm">All Systems</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Globe className="h-6 w-6 text-white" />
-            </div>
-            <p className="text-slate-600 text-sm mb-1">Platform Reach</p>
-            <p className="text-3xl font-bold text-slate-900 mb-2">Global</p>
-            <p className="text-slate-600 text-sm">Coverage</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center">
-              <Settings className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">Platform Modules</h2>
-              <p className="text-base text-slate-600">Integrated environmental intelligence solutions</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {modules.map((module) => {
-              const IconComponent = module.icon;
-              
-              return (
-                <Card key={module.id} className="hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:scale-105 cursor-pointer">
-                  <CardHeader className="text-center pb-4">
-                    <div className={`mx-auto w-16 h-16 ${module.color} rounded-2xl flex items-center justify-center mb-4`}>
-                      <IconComponent className="w-8 h-8 text-white" />
-                    </div>
-                    <CardTitle className="text-lg font-semibold text-slate-800">{module.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-                      {module.description}
-                    </p>
-                    <div className="mb-4">
-                      <Badge className={module.isActive ? "bg-green-100 text-green-800 border-green-200" : "bg-blue-100 text-blue-800 border-blue-200"}>
-                        {module.isActive ? (
-                          <>
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Active
-                          </>
-                        ) : (
-                          "Ready"
-                        )}
-                      </Badge>
-                    </div>
-                    <Link href={module.route}>
-                      <Button className="w-full bg-green-600 hover:bg-green-700 text-white" variant="default">
-                        <ArrowRight className="h-4 w-4 mr-2" />
-                        Access Portal
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="text-center mt-12">
-          <Badge variant="outline" className="px-6 py-3 text-base bg-white">
-            All 8 Modules Active • Real-time Environmental Monitoring • EUDR Compliant
-          </Badge>
+        <div style={{
+          marginTop: '3rem',
+          padding: '12px 24px',
+          background: 'rgba(255, 255, 255, 0.8)',
+          borderRadius: '24px',
+          display: 'inline-block',
+          border: '1px solid #e2e8f0'
+        }}>
+          All 8 Modules Active • Real-time Environmental Monitoring
         </div>
       </div>
     </div>

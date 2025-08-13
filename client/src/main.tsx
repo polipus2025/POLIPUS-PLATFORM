@@ -1,17 +1,18 @@
 import { createRoot } from "react-dom/client";
-import App from "./App-step1";
+import App from "./App-debug";
 import "./index.css";
 
-// Register service worker for offline functionality
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      console.log('Enhanced Service Worker registered successfully');
-    } catch (error) {
-      console.error('Service worker registration failed:', error);
-    }
-  });
-}
+console.log('🚀 Main.tsx: Starting React mount process...');
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootElement = document.getElementById("root");
+console.log('🔍 Root element found:', !!rootElement);
+
+if (rootElement) {
+  console.log('✅ Creating React root...');
+  const root = createRoot(rootElement);
+  console.log('✅ React root created, rendering App...');
+  root.render(<App />);
+  console.log('✅ App render completed');
+} else {
+  console.error('❌ Root element not found!');
+}

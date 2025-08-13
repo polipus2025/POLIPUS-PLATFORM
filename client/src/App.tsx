@@ -559,13 +559,24 @@ function App() {
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
   
-  // Check if user is on authentication pages, landing page, or front page
+  // Always show the original front page at root without any layout
+  if (window.location.pathname === "/" || 
+      window.location.pathname === "/home" || 
+      window.location.pathname === "/front-page") {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <div className="min-h-screen">
+          <FrontPage />
+        </div>
+        <PWAInstallPrompt />
+        <Toaster />
+      </QueryClientProvider>
+    );
+  }
+  
+  // Check if user is on authentication pages or special modules
   const isAuthPage = window.location.pathname.includes("-login");
   const isLandingPage = window.location.pathname === "/landing";
-  const isFrontPage = window.location.pathname === "/" || 
-                      window.location.pathname === "/front-page" || 
-                      window.location.pathname === "/home" ||
-                      window.location.pathname === "/main";
   const isDashboardPage = window.location.pathname === "/dashboard";
   const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
   const isMonitoringDashboard = window.location.pathname === "/monitoring-dashboard" && authToken && userType === 'monitoring';
@@ -574,12 +585,10 @@ function App() {
   const isLiveTracePage = window.location.pathname.startsWith("/livetrace");
   const isLandMap360Page = window.location.pathname.startsWith("/landmap360") || window.location.pathname === "/land-map360";
   const isBlueCarbon360Page = window.location.pathname.startsWith("/blue-carbon360");
-  
-  // Layout condition checks completed
 
   return (
     <QueryClientProvider client={queryClient}>
-      {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
+      {(isAuthPage || isLandingPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
         // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
         <div className="min-h-screen">
           <Router />

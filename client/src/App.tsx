@@ -176,6 +176,11 @@ function Router() {
   
   return (
     <Switch>
+      {/* Root Route - Original Website */}
+      <Route path="/" component={FrontPage} />
+      <Route path="/home" component={FrontPage} />
+      <Route path="/front-page" component={FrontPage} />
+      
       {/* GPS Testing - Public Access */}
       <Route path="/gps-test" component={GPSTest} />
       

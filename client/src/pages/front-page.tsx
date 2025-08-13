@@ -1,5 +1,8 @@
-import React from 'react';
+// React import removed - handled by Vite JSX transform
 import { Link } from 'wouter';
+import { Helmet } from 'react-helmet';
+import ModernBackground from '@/components/ui/modern-background';
+import ModernCard from '@/components/ui/modern-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +10,10 @@ import {
   Wheat, 
   Truck, 
   Shield, 
+  BarChart3, 
   MapPin, 
+  Users, 
+  FileText, 
   Settings,
   ArrowRight,
   CheckCircle,
@@ -15,262 +21,216 @@ import {
   Satellite,
   TreePine,
   Waves,
-  Heart,
-  Leaf,
+  DollarSign,
+  Download,
+  Smartphone,
   Zap,
-  Mountain
+  Leaf
 } from 'lucide-react';
+import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
+import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+// GPS detector removed to fix rendering issue
 
 export default function FrontPage() {
   const modules = [
     {
-      id: 'agritrace',
+      id: 1,
       title: 'Agricultural Traceability & Compliance',
-      description: 'Complete agricultural commodity tracking & LACRA compliance system',
       icon: Wheat,
       color: 'bg-green-500',
       route: '/portals',
-      isAgriTrace: true
+      isAgriTrace: true,
+      description: 'Complete agricultural commodity tracking & LACRA compliance system'
     },
     {
-      id: 'livetrace',
+      id: 2,
       title: 'Live Trace',
-      description: 'Livestock movement monitoring and control system',
       icon: Truck,
       color: 'bg-blue-500',
       route: '/live-trace',
-      isAgriTrace: false
+      description: 'Livestock movement monitoring and control system'
     },
     {
-      id: 'landmap360',
+      id: 3,
       title: 'Land Map360',
-      description: 'Land mapping and dispute prevention services',
       icon: MapPin,
       color: 'bg-purple-500',
-      route: '/land-map360',
-      isAgriTrace: false
+      route: '/landmap360-portal',
+      description: 'Land mapping and dispute prevention services'
     },
     {
-      id: 'minewatch',
+      id: 4,
       title: 'Mine Watch',
-      description: 'Mineral resource protection and community safeguarding',
-      icon: Mountain,
+      icon: Shield,
       color: 'bg-orange-500',
       route: '/mine-watch',
-      isAgriTrace: false
+      description: 'Mineral resource protection and community safeguarding'
     },
     {
-      id: 'forestguard',
+      id: 5,
       title: 'Forest Guard',
-      description: 'Forest protection and carbon credit management',
       icon: TreePine,
       color: 'bg-teal-500',
       route: '/forest-guard',
-      isAgriTrace: false
+      description: 'Forest protection and carbon credit management'
     },
     {
-      id: 'aquatrace',
+      id: 6,
       title: 'Aqua Trace',
-      description: 'Ocean ecosystem monitoring and protection',
       icon: Waves,
-      color: 'bg-cyan-500',
-      route: '/aqua-trace',
-      isAgriTrace: false
-    },
-    {
-      id: 'bluecarbon360',
-      title: 'Blue Carbon 360',
-      description: 'Marine conservation economics and carbon marketplace',
-      icon: Heart,
       color: 'bg-indigo-500',
-      route: '/blue-carbon-360',
-      isAgriTrace: false
+      route: '/aqua-trace',
+      description: 'Ocean & river monitoring with fishing rights protection'
     },
     {
-      id: 'carbontrace',
+      id: 7,
+      title: 'Blue Carbon 360',
+      icon: DollarSign,
+      color: 'bg-cyan-500',
+      route: '/blue-carbon360',
+      description: 'Conservation economics and real economic benefits'
+    },
+    {
+      id: 8,
       title: 'Carbon Trace',
-      description: 'Environmental monitoring and carbon footprint tracking',
-      icon: Leaf,
+      icon: Globe,
       color: 'bg-emerald-500',
       route: '/carbon-trace',
-      isAgriTrace: false
+      description: 'Environmental monitoring and carbon credit certification'
     }
   ];
 
+
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 sm:h-12 sm:w-12 rounded-lg bg-green-600 flex items-center justify-center border-2 border-white shadow-lg">
-                  <span className="text-white font-bold text-sm sm:text-lg">P</span>
-                </div>
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Polipus</h1>
-                <p className="text-xs sm:text-sm text-slate-600">Environmental Intelligence Platform</p>
-              </div>
-            </div>
+    <div className="min-h-screen isms-gradient" style={{ overflowY: 'auto', height: 'auto' }}>
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+
+        {/* Mobile-Responsive Polipos Logo - ISMS Style */}
+        <div className="isms-card text-center mb-8 sm:mb-12">
+          <div className="flex justify-center py-4 sm:py-6 relative">
+            <img 
+              src={poliposLogo} 
+              alt="Polipos - Brightening the Future" 
+              className="h-32 sm:h-48 md:h-64 w-auto object-contain"
+            />
+            {/* Registered trademark symbol positioned over the 's' */}
+            <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
+          </div>
+          <div className="relative">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Link href="/field-agent-login">
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg text-sm font-medium">
-                  Field Agent
+            {/* Login Portals Button - Positioned to the left */}
+            <div className="absolute left-0 top-0">
+              <Link href="#login-portals">
+                <Button className="isms-button flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Login Portals
                 </Button>
               </Link>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium">
-                Mobile App
-              </Button>
             </div>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
-        
-        {/* Hero Section */}
-        <div className="text-center mb-8 sm:mb-16">
-          <div className="mb-4 sm:mb-6">
-            <Badge className="bg-blue-100 text-blue-800 border border-blue-200 text-xs sm:text-sm px-3 py-1">
-              Environmental Intelligence Platform
-            </Badge>
+        {/* Mobile-Responsive Platform Statistics - ISMS Style */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
+          <div className="isms-card text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">Active Modules</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">1/8</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Operational</p>
           </div>
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-4 sm:mb-6">
-            Comprehensive <span className="text-blue-600">Environmental</span>
-            <br />
-            <span className="text-green-600">Monitoring Solutions</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto mb-6 sm:mb-8">
-            Advanced 8-module platform providing integrated solutions for agricultural traceability, 
-            environmental monitoring, and sustainable resource management across multiple ecosystems.
-          </p>
           
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
-            <Link href="/portals">
-              <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium text-lg w-full sm:w-auto">
-                <Wheat className="mr-2 h-5 w-5" />
-                Start with AgriTrace360
-              </Button>
-            </Link>
-            <Link href="/integrated-dashboard">
-              <Button variant="outline" className="border border-slate-300 text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-lg font-medium text-lg w-full sm:w-auto">
-                📊 View Dashboard
-              </Button>
-            </Link>
+          <div className="isms-card text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <span className="text-white font-bold text-sm sm:text-lg">EU</span>
+            </div>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">AgriTrace360</p>
+            <p className="text-lg sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">EUDR 100%</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Compliance</p>
+          </div>
+
+          <div className="isms-card text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <Settings className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">In Development</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">7</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Modules</p>
+          </div>
+
+          <div className="isms-card text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-2 sm:mb-3">
+              <Globe className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">Platform Reach</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">Global</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Coverage</p>
           </div>
         </div>
 
-        {/* Platform Statistics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-16">
-          <Card className="text-center p-4 sm:p-6">
-            <CardContent className="p-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
-              </div>
-              <p className="text-slate-600 text-xs sm:text-sm mb-1">Active</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">1</p>
-              <p className="text-slate-600 text-xs sm:text-sm">Module</p>
-            </CardContent>
-          </Card>
+        {/* Mobile-Responsive Platform Modules - ISMS Style */}
+        <div className="isms-card">
+          <div className="flex items-center gap-3 mb-6 sm:mb-8">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Platform Modules</h2>
+              <p className="text-sm sm:text-base text-slate-600">Integrated business solutions and enterprise applications</p>
+            </div>
+          </div>
 
-          <Card className="text-center p-4 sm:p-6">
-            <CardContent className="p-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-orange-100 flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
-              </div>
-              <p className="text-slate-600 text-xs sm:text-sm mb-1">In Development</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">7</p>
-              <p className="text-slate-600 text-xs sm:text-sm">Modules</p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center p-4 sm:p-6">
-            <CardContent className="p-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-100 flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                <Globe className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
-              </div>
-              <p className="text-slate-600 text-xs sm:text-sm mb-1">Platform Reach</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">Global</p>
-              <p className="text-slate-600 text-xs sm:text-sm">Coverage</p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center p-4 sm:p-6">
-            <CardContent className="p-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                <Satellite className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-              </div>
-              <p className="text-slate-600 text-xs sm:text-sm mb-1">Satellite Network</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">24</p>
-              <p className="text-slate-600 text-xs sm:text-sm">Satellites</p>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {modules.map((module) => {
+              const IconComponent = module.icon;
+              
+              return (
+                <div 
+                  key={module.id} 
+                  className="isms-card transition-all duration-300 h-64 sm:h-80 flex flex-col hover:shadow-lg hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
+                >
+                  <Link href={module.route} className="flex-1 relative block group">
+                    <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 h-full justify-center p-3 sm:p-4">
+                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'isms-icon-bg-green' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
+                        {module.description && (
+                          <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
+                            {module.description}
+                          </p>
+                        )}
+                        <Badge className={module.isAgriTrace ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
+                          {module.isAgriTrace ? (
+                            <>
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Active
+                            </>
+                          ) : (
+                            "Coming Soon"
+                          )}
+                        </Badge>
+                      </div>
+                      <Button className="w-full text-xs sm:text-sm isms-button">
+                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        Enter Platform
+                      </Button>
+                    </div>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Platform Modules */}
-        <Card className="p-6 sm:p-8 mb-8 sm:mb-12">
-          <CardHeader className="p-0 mb-6 sm:mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600" />
-              </div>
-              <div>
-                <CardTitle className="text-xl sm:text-2xl font-bold text-slate-900">Platform Modules</CardTitle>
-                <p className="text-sm sm:text-base text-slate-600">Integrated environmental monitoring solutions</p>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="p-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {modules.map((module) => {
-                const IconComponent = module.icon;
-                
-                return (
-                  <Card key={module.id} className="transition-all duration-300 h-64 sm:h-80 flex flex-col hover:shadow-lg hover:scale-105 cursor-pointer border-2 hover:border-slate-300">
-                    <CardContent className="p-0 flex-1">
-                      <Link href={module.route} className="flex-1 relative block group h-full">
-                        <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 h-full justify-center p-3 sm:p-4">
-                          <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                            <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
-                            <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
-                              {module.description}
-                            </p>
-                            <Badge className={module.isAgriTrace ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
-                              {module.isAgriTrace ? (
-                                <>
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Active
-                                </>
-                              ) : (
-                                "Coming Soon"
-                              )}
-                            </Badge>
-                          </div>
-                          <Button className="w-full text-xs sm:text-sm bg-slate-900 hover:bg-slate-800 text-white">
-                            <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                            Enter Platform
-                          </Button>
-                        </div>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Cross-Module Integration */}
-        <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200 p-6 sm:p-8">
-          <CardContent className="p-0 text-center">
+        {/* Cross-Module Integration Dashboard */}
+        <div className="isms-card mt-8 sm:mt-12 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+          <div className="text-center">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
@@ -279,16 +239,84 @@ export default function FrontPage() {
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
               Access the comprehensive integrated dashboard showing real-time connectivity and data exchange 
-              between all 8 modules. Monitor cross-module integration status and system-wide performance.
+              between all 7 modules. Monitor cross-module integration status and system-wide performance.
             </p>
             <Link href="/integrated-dashboard">
-              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white">
-                📊 View Integrated Dashboard
+              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white flex items-center gap-2 mx-auto">
+                <Zap className="h-4 w-4" />
+                View Integrated Dashboard
               </Button>
             </Link>
-          </CardContent>
-        </Card>
-      </main>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm text-slate-600">
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>7 Modules Connected</span>
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Real-time Data Exchange</span>
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Cross-Module Search</span>
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>System Health Monitoring</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile App Download Section */}
+        <div className="isms-card mt-8 sm:mt-12">
+          <div className="text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl isms-icon-bg-green flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Smartphone className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
+              Download Polipus Mobile App
+            </h3>
+            <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
+              Install our Progressive Web App for the complete mobile experience. Access all 8 modules offline, 
+              get push notifications, and enjoy native app-like performance on your mobile device.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <Link href="/mobile-app-download">
+                <Button className="isms-button flex items-center gap-2" data-testid="button-download-app">
+                  <Download className="h-4 w-4" />
+                  Download App
+                </Button>
+              </Link>
+              <Link href="/install-app">
+                <Button variant="outline" className="flex items-center gap-2 border-slate-200 hover:bg-slate-50" data-testid="button-install-instructions">
+                  <Smartphone className="h-4 w-4" />
+                  Installation Guide
+                </Button>
+              </Link>
+              <Link href="/pwa-test">
+                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-700">
+                  Debug PWA
+                </Button>
+              </Link>
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-6 text-xs sm:text-sm text-slate-500">
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Works Offline</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Push Notifications</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>Native Performance</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

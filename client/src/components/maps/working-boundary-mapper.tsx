@@ -98,8 +98,6 @@ export default function WorkingBoundaryMapper({
 
 
       } catch (error) {
-        console.error('Map initialization failed:', error);
-        setIsMapReady(false);
       }
     };
 

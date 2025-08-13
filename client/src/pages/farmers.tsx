@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet";
 import { useState, useRef } from "react";
-
+import * as React from "react";
 import { GPSPermissionHandler } from "@/components/gps-permission-handler";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download, RefreshCw, AlertTriangle } from "lucide-react";

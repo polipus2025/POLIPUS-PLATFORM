@@ -63,8 +63,6 @@ if (MAINTENANCE_MODE) {
 
   (async () => {
     try {
-
-      
       // GPS Testing Route - Direct HTML Response (add before other routes)
       app.get('/gps-test-direct', (req, res) => {
         res.send(`<!DOCTYPE html>

@@ -4,21 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
+  ArrowRight, 
+  CheckCircle, 
+  Settings, 
+  Globe, 
+  Satellite, 
   Wheat, 
   Truck, 
-  Shield, 
-  MapPin, 
-  Settings,
-  ArrowRight,
-  CheckCircle,
-  Globe,
-  Satellite,
-  TreePine,
-  Waves,
-  Heart,
+  Map, 
+  Mountain, 
+  Trees, 
+  Waves, 
+  Heart, 
   Leaf,
-  Zap,
-  Mountain
+  Zap
 } from 'lucide-react';
 
 export default function FrontPage() {
@@ -28,7 +27,7 @@ export default function FrontPage() {
       title: 'Agricultural Traceability & Compliance',
       description: 'Complete agricultural commodity tracking & LACRA compliance system',
       icon: Wheat,
-      color: 'bg-green-500',
+      color: 'isms-icon-bg-green',
       route: '/portals',
       isAgriTrace: true
     },
@@ -37,7 +36,7 @@ export default function FrontPage() {
       title: 'Live Trace',
       description: 'Livestock movement monitoring and control system',
       icon: Truck,
-      color: 'bg-blue-500',
+      color: 'isms-icon-bg-blue',
       route: '/live-trace',
       isAgriTrace: false
     },
@@ -45,8 +44,8 @@ export default function FrontPage() {
       id: 'landmap360',
       title: 'Land Map360',
       description: 'Land mapping and dispute prevention services',
-      icon: MapPin,
-      color: 'bg-purple-500',
+      icon: Map,
+      color: 'isms-icon-bg-purple',
       route: '/land-map360',
       isAgriTrace: false
     },
@@ -55,7 +54,7 @@ export default function FrontPage() {
       title: 'Mine Watch',
       description: 'Mineral resource protection and community safeguarding',
       icon: Mountain,
-      color: 'bg-orange-500',
+      color: 'isms-icon-bg-orange',
       route: '/mine-watch',
       isAgriTrace: false
     },
@@ -63,8 +62,8 @@ export default function FrontPage() {
       id: 'forestguard',
       title: 'Forest Guard',
       description: 'Forest protection and carbon credit management',
-      icon: TreePine,
-      color: 'bg-teal-500',
+      icon: Trees,
+      color: 'isms-icon-bg-teal',
       route: '/forest-guard',
       isAgriTrace: false
     },
@@ -73,7 +72,7 @@ export default function FrontPage() {
       title: 'Aqua Trace',
       description: 'Ocean ecosystem monitoring and protection',
       icon: Waves,
-      color: 'bg-cyan-500',
+      color: 'isms-icon-bg-cyan',
       route: '/aqua-trace',
       isAgriTrace: false
     },
@@ -82,7 +81,7 @@ export default function FrontPage() {
       title: 'Blue Carbon 360',
       description: 'Marine conservation economics and carbon marketplace',
       icon: Heart,
-      color: 'bg-indigo-500',
+      color: 'isms-icon-bg-indigo',
       route: '/blue-carbon-360',
       isAgriTrace: false
     },
@@ -91,7 +90,7 @@ export default function FrontPage() {
       title: 'Carbon Trace',
       description: 'Environmental monitoring and carbon footprint tracking',
       icon: Leaf,
-      color: 'bg-emerald-500',
+      color: 'isms-icon-bg-emerald',
       route: '/carbon-trace',
       isAgriTrace: false
     }
@@ -235,7 +234,7 @@ export default function FrontPage() {
                     <CardContent className="p-0 flex-1">
                       <Link href={module.route} className="flex-1 relative block group h-full">
                         <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 h-full justify-center p-3 sm:p-4">
-                          <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'bg-green-500' : 'bg-blue-500'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                             <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                           </div>
                           <div className="flex-1">

@@ -2,12 +2,12 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import FrontPageSimple from "@/pages/front-page-simple";
+import FrontPageBasic from "@/pages/front-page-basic";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={FrontPageSimple} />
+      <Route path="/" component={FrontPageBasic} />
       <Route>
         <div style={{ padding: '40px', textAlign: 'center' }}>
           <h1>Page Not Found</h1>

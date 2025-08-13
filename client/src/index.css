@@ -570,68 +570,71 @@
 }
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(37, 47%, 4%);
-  --muted: hsl(60, 5%, 96%);
-  --muted-foreground: hsl(25, 5%, 45%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(37, 47%, 4%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(37, 47%, 4%);
-  --border: hsl(20, 6%, 90%);
-  --input: hsl(20, 6%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 5%, 96%);
-  --secondary-foreground: hsl(24, 10%, 10%);
-  --accent: hsl(60, 5%, 96%);
-  --accent-foreground: hsl(24, 10%, 10%);
-  --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(60, 9%, 98%);
-  --ring: hsl(37, 47%, 4%);
+  --background: 0 0% 100%;
+  --foreground: 37 47% 4%;
+  --muted: 60 5% 96%;
+  --muted-foreground: 25 5% 45%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 37 47% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 37 47% 4%;
+  --border: 20 6% 90%;
+  --input: 20 6% 90%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 5% 96%;
+  --secondary-foreground: 24 10% 10%;
+  --accent: 60 5% 96%;
+  --accent-foreground: 24 10% 10%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 60 9% 98%;
+  --ring: 37 47% 4%;
   --radius: 0.5rem;
   
   /* LACRA Custom Colors */
-  --lacra-blue: hsl(207, 90%, 54%);
-  --lacra-green: hsl(122, 39%, 49%);
-  --lacra-orange: hsl(31, 100%, 48%);
-  --success: hsl(122, 53%, 41%);
-  --warning: hsl(35, 100%, 50%);
-  --error: hsl(0, 74%, 50%);
-  --neutral: hsl(210, 24%, 16%);
+  --lacra-blue: 207 90% 54%;
+  --lacra-green: 122 39% 49%;
+  --lacra-orange: 31 100% 48%;
+  --success: 122 53% 41%;
+  --warning: 35 100% 50%;
+  --error: 0 74% 50%;
+  --neutral: 210 24% 16%;
 }
 
 .dark {
-  --background: hsl(240, 10%, 4%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 4%, 16%);
-  --muted-foreground: hsl(240, 5%, 65%);
-  --popover: hsl(240, 10%, 4%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 4%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 4%, 16%);
-  --input: hsl(240, 4%, 16%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 4%, 16%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 4%, 16%);
-  --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 63%, 31%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 5%, 84%);
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 65%;
+  --popover: 240 10% 4%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 4%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 4% 16%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 4% 16%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 5% 84%;
   --radius: 0.5rem;
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 

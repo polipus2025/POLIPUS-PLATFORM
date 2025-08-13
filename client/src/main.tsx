@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import App from "./App-minimal";
+import App from "./App-step1";
 import "./index.css";
 
 // Register service worker for offline functionality

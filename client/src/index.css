@@ -555,17 +555,40 @@
 }
 
 @layer components {
-  /* Simplified Components */
+  /* Simplified Components - Using direct CSS instead of @apply */
   .mobile-container {
-    @apply w-full;
+    width: 100%;
   }
   
   .mobile-card {
-    @apply w-full p-3 md:p-6;
+    width: 100%;
+    padding: 0.75rem;
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-card {
+      padding: 1.5rem;
+    }
   }
   
   .mobile-button {
-    @apply w-full sm:w-auto min-h-[44px] text-sm md:text-base px-3 py-2 md:px-4 md:py-2;
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-button {
+      width: auto;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+    }
   }
 }
 

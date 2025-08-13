@@ -201,10 +201,32 @@ Longitude: \${longitude.toFixed(6)}
       console.log('📊 Initializing database connections...');
       const httpServer = await registerRoutes(app);
       
-      // TEMPORARY: Serve stable HTML instead of React app to fix reload cycle
-      console.log('🔧 TEMPORARY FIX: Serving stable HTML to resolve reload cycle...');
+      // Setup Vite for development or serve static files for production  
+      if (process.env.NODE_ENV === 'production') {
+        console.log('🏭 Production mode - serving static files...');
+        const express = await import('express');
+        const path = await import('path');
+        const fs = await import('fs');
+        
+        const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+        
+        if (fs.existsSync(distPath)) {
+          app.use(express.default.static(distPath));
+          app.use("*", (_req, res) => {
+            res.sendFile(path.resolve(distPath, "index.html"));
+          });
+        } else {
+          console.log('⚠️ Build files not found, falling back to development mode');
+          const { setupVite } = await import('./vite');
+          await setupVite(app, httpServer);
+        }
+      } else {
+        console.log('⚡ Development mode - setting up Vite server...');
+        const { setupVite } = await import('./vite');
+        await setupVite(app, httpServer);
+      }
       
-      // Catch-all route with stable platform interface
+      // Fallback catch-all for any unhandled routes (only if Vite setup fails)
       app.get('*', (req, res) => {
         const stableHtml = `<!DOCTYPE html>
 <html lang="en">

@@ -1,0 +1,280 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Helmet } from "react-helmet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Shield, Building2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.string().min(1, "Role selection is required"),
+  department: z.string().optional(),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
+
+export default function RegulatoryLogin() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const { toast } = useToast();
+
+  const form = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      role: "",
+      department: "",
+    },
+  });
+
+  const selectedRole = form.watch("role");
+
+  const onSubmit = async (data: LoginForm) => {
+    setIsLoading(true);
+    setError("");
+
+    // Enhanced offline check with connection test
+    if (!navigator.onLine) {
+      setError("You're currently offline. Login requires an internet connection. Please connect to the internet and try again.");
+      setIsLoading(false);
+      toast({
+        title: "Offline Mode",
+        description: "Internet connection required for login",
+        variant: "destructive",
+      });
+      return;
+    }
+
+
+
+    try {
+      const result = await apiRequest("/api/auth/regulatory-login", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          userType: "regulatory"
+        })
+      });
+      
+      if (result && result.success) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome to AgriTrace360™ Regulatory Portal",
+        });
+        
+        // Store session data
+        localStorage.setItem("authToken", result.token);
+        localStorage.setItem("userRole", data.role);
+        localStorage.setItem("userType", "regulatory");
+        
+        // Redirect to regulatory dashboard
+        window.location.href = "/dashboard";
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || "Login failed. Please check your credentials.";
+      setError(errorMessage);
+      toast({
+        title: "Login Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen isms-gradient flex items-center justify-center p-4">
+      <Helmet>
+        <title>Regulatory Portal Login - AgriTrace360™ LACRA</title>
+        <meta name="description" content="Secure login portal for LACRA regulatory staff and administrators" />
+      </Helmet>
+
+      <div className="w-full max-w-md">
+        <div className="isms-card">
+          <div className="text-center pb-6">
+            <div className="flex justify-center mb-6">
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                className="h-32 w-32 object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+              LACRA Regulatory Portal
+            </h1>
+            <p className="text-slate-600 text-sm mb-1">
+              Liberia Agriculture Commodity Regulatory Authority
+            </p>
+            <p className="text-slate-500 text-xs">
+              AgriTrace360™ | Authorized Personnel Only
+            </p>
+          </div>
+
+          <div className="pt-4">
+            {error && (
+              <Alert className="mb-6 border-red-200 bg-red-50">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Role Selection */}
+              <div>
+                <Label htmlFor="role">Access Level *</Label>
+                <Select 
+                  value={form.watch("role")} 
+                  onValueChange={(value) => form.setValue("role", value)}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select your access level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="regulatory_admin">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        System Administrator
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="regulatory_staff">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Regulatory Officer
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.role && (
+                  <p className="text-sm text-red-600 mt-1">{form.formState.errors.role.message}</p>
+                )}
+              </div>
+
+              {/* Department for Regulatory Staff */}
+              {selectedRole === "regulatory_staff" && (
+                <div>
+                  <Label htmlFor="department">Department</Label>
+                  <Select 
+                    value={form.watch("department") || ""} 
+                    onValueChange={(value) => form.setValue("department", value)}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="compliance">Compliance & Monitoring</SelectItem>
+                      <SelectItem value="certification">Certification & Quality</SelectItem>
+                      <SelectItem value="inspection">Inspection Services</SelectItem>
+                      <SelectItem value="analytics">Analytics & Reporting</SelectItem>
+                      <SelectItem value="government_relations">Government Relations</SelectItem>
+                      <SelectItem value="eudr_compliance">EUDR Compliance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Username */}
+              <div>
+                <Label htmlFor="username">Username *</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  {...form.register("username")}
+                  className="mt-1"
+                  placeholder="Enter your username"
+                />
+                {form.formState.errors.username && (
+                  <p className="text-sm text-red-600 mt-1">{form.formState.errors.username.message}</p>
+                )}
+              </div>
+
+              {/* Password */}
+              <div>
+                <Label htmlFor="password">Password *</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    {...form.register("password")}
+                    className="pr-10"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-400" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+                {form.formState.errors.password && (
+                  <p className="text-sm text-red-600 mt-1">{form.formState.errors.password.message}</p>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="isms-button w-full py-3"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Authenticating...
+                  </>
+                ) : (
+                  "Access Regulatory Portal"
+                )}
+              </Button>
+            </form>
+
+            {/* Footer */}
+            <div className="mt-6 text-center">
+              <p className="text-xs text-slate-500">
+                Liberia Agriculture Commodity Regulatory Authority
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Secure access portal for authorized personnel
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Access Information */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-slate-600 mb-2">Need different access?</p>
+          <div className="flex justify-center gap-4">
+            <a
+              href="/farmer-login"
+              className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
+            >
+              Farmer Portal
+            </a>
+            <a
+              href="/field-agent-login"
+              className="text-sm text-green-600 hover:text-green-800 underline transition-colors"
+            >
+              Field Agent Portal
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

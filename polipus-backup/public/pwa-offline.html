@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polipus Platform - Offline</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .offline-container {
+      text-align: center;
+      max-width: 500px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .offline-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    h1 {
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: #059669;
+    }
+    
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+      opacity: 0.9;
+    }
+    
+    .offline-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .features-list {
+      text-align: left;
+      margin: 24px 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border-left: 4px solid #059669;
+    }
+    
+    .features-list h3 {
+      color: #059669;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+    
+    .features-list ul {
+      list-style: none;
+    }
+    
+    .features-list li {
+      padding: 4px 0;
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    .features-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #10b981;
+      font-weight: bold;
+    }
+    
+    .connection-status {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .connection-status.offline {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+    
+    .connection-status.online {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: blink 2s infinite;
+    }
+    
+    .status-dot.offline {
+      background: #ef4444;
+    }
+    
+    .status-dot.online {
+      background: #10b981;
+    }
+    
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+    
+    @media (max-width: 768px) {
+      .offline-container {
+        padding: 30px 20px;
+        margin: 20px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .offline-actions {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">🌱</div>
+    
+    <h1>Polipus Platform</h1>
+    <p>You're currently offline, but don't worry! The Polipus Environmental Intelligence Platform is designed to work without an internet connection.</p>
+    
+    <div class="features-list">
+      <h3>Available Offline Features:</h3>
+      <ul>
+        <li>View cached dashboard data</li>
+        <li>Access farmer and livestock records</li>
+        <li>GPS mapping and location services</li>
+        <li>Submit data (will sync when online)</li>
+        <li>View compliance information</li>
+        <li>Use mobile app features</li>
+      </ul>
+    </div>
+    
+    <div class="offline-actions">
+      <button class="btn btn-primary" onclick="tryReconnect()">Try Again</button>
+      <a href="/" class="btn btn-secondary">Go to Home</a>
+      <a href="/field-agent-login" class="btn btn-secondary">Field Agent Login</a>
+      <a href="/mobile-app-download" class="btn btn-secondary">Get Mobile App</a>
+    </div>
+    
+    <div class="connection-status offline" id="connectionStatus">
+      <div class="status-dot offline"></div>
+      <span>Offline Mode - Data will sync when connected</span>
+    </div>
+  </div>
+
+  <script>
+    // Check connection status
+    function updateConnectionStatus() {
+      const status = document.getElementById('connectionStatus');
+      const dot = status.querySelector('.status-dot');
+      
+      if (navigator.onLine) {
+        status.className = 'connection-status online';
+        status.innerHTML = '<div class="status-dot online"></div><span>Connected - All features available</span>';
+        
+        // Auto-redirect to home when connection is restored
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      } else {
+        status.className = 'connection-status offline';
+        status.innerHTML = '<div class="status-dot offline"></div><span>Offline Mode - Data will sync when connected</span>';
+      }
+    }
+    
+    // Try to reconnect
+    function tryReconnect() {
+      if (navigator.onLine) {
+        window.location.href = '/';
+      } else {
+        // Attempt to fetch a lightweight resource
+        fetch('/', { 
+          method: 'HEAD',
+          cache: 'no-cache',
+          signal: AbortSignal.timeout(5000)
+        })
+        .then(() => {
+          window.location.href = '/';
+        })
+        .catch(() => {
+          alert('Still offline. Please check your internet connection.');
+        });
+      }
+    }
+    
+    // Listen for connection changes
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    
+    // Initial status check
+    updateConnectionStatus();
+    
+    // Auto-retry connection every 30 seconds
+    setInterval(() => {
+      if (!navigator.onLine) {
+        fetch('/', { 
+          method: 'HEAD',
+          cache: 'no-cache',
+          signal: AbortSignal.timeout(3000)
+        })
+        .then(() => {
+          updateConnectionStatus();
+        })
+        .catch(() => {
+          // Still offline
+        });
+      }
+    }, 30000);
+  </script>
+</body>
+</html>

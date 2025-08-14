@@ -1,0 +1,94 @@
+{
+  "name": "Polipus Environmental Intelligence Platform",
+  "short_name": "Polipus",
+  "description": "Complete 8-module environmental intelligence platform for agricultural traceability, land mapping, livestock monitoring, forest protection, and carbon management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#059669",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["agriculture", "business", "productivity", "environmental", "mapping"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzA1OTY2OTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwNDc4NTc7c3RvcC1vcGFjaXR5OjEiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iOTIiIGZpbGw9InVybCgjZ3JhZGllbnQpIiAvPjx0ZXh0IHg9Ijk2IiB5PSIxMjQuOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgLWFwcGxlLXN5c3RlbSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMTUuMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIj5QPC90ZXh0PjxjaXJjbGUgY3g9IjQ4IiBjeT0iNDgiIHI9IjkuNiIgZmlsbD0iIzEwYjk4MSIgb3BhY2l0eT0iMC44IiAvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjQ4IiByPSI3LjY4IiBmaWxsPSIjMTBiOTgxIiBvcGFjaXR5PSIwLjYiIC8+PGNpcmNsZSBjeD0iMTQ0IiBjeT0iMTQ0IiByPSIxMS41MiIgZmlsbD0iIzEwYjk4MSIgb3BhY2l0eT0iMC43IiAvPjxjaXJjbGUgY3g9IjQ4IiBjeT0iMTQ0IiByPSI1Ljc2IiBmaWxsPSIjMTBiOTgxIiBvcGFjaXR5PSIwLjkiIC8+PC9zdmc+",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzA1OTY2OTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwNDc4NTc7c3RvcC1vcGFjaXR5OjEiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyNTIiIGZpbGw9InVybCgjZ3JhZGllbnQpIiAvPjx0ZXh0IHg9IjI1NiIgeT0iMzMzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMwNyIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIj5QPC90ZXh0PjxjaXJjbGUgY3g9IjEyOCIgY3k9IjEyOCIgcj0iMjUuNiIgZmlsbD0iIzEwYjk4MSIgb3BhY2l0eT0iMC44IiAvPjxjaXJjbGUgY3g9IjM4NCIgY3k9IjEyOCIgcj0iMjAuNDgiIGZpbGw9IiMxMGI5ODEiIG9wYWNpdHk9IjAuNiIgLz48Y2lyY2xlIGN4PSIzODQiIGN5PSIzODQiIHI9IjMwLjcyIiBmaWxsPSIjMTBiOTgxIiBvcGFjaXR5PSIwLjciIC8+PGNpcmNsZSBjeD0iMTI4IiBjeT0iMzg0IiByPSIxNS4zNiIgZmlsbD0iIzEwYjk4MSIgb3BhY2l0eT0iMC45IiAvPjwvc3ZnPg==",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/pwa-screenshots/mobile-dashboard.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile Dashboard"
+    },
+    {
+      "src": "/pwa-screenshots/mobile-gps.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "GPS Mapping"
+    }
+  ],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Agricultural Traceability",
+      "short_name": "AgriTrace",
+      "description": "Access agricultural compliance system",
+      "url": "/portals?module=1",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Live Trace",
+      "short_name": "Livestock",
+      "description": "Livestock monitoring system",
+      "url": "/coming-soon/live-trace",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"  
+        }
+      ]
+    },
+    {
+      "name": "Land Map360",
+      "short_name": "LandMap",
+      "description": "Land mapping and disputes",
+      "url": "/coming-soon/land-map360",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Forest Guard",
+      "short_name": "Forest",
+      "description": "Forest protection system",
+      "url": "/coming-soon/forest-guard",
+      "icons": [
+        {
+          "src": "/pwa-icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriTrace360 - Maintenance Mode | LACRA</title>
+    <meta name="description" content="AgriTrace360 platform is temporarily under maintenance. We're upgrading our agricultural traceability system to serve you better.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .maintenance-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            padding: 3rem;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .maintenance-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #10B981, #3B82F6, #8B5CF6);
+        }
+
+        .logo-section {
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .logo::before {
+            content: '🌾';
+            font-size: 2rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .platform-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10B981, #3B82F6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .org-title {
+            font-size: 1.1rem;
+            color: #64748B;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .maintenance-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .maintenance-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 1rem;
+        }
+
+        .maintenance-subtitle {
+            font-size: 1.1rem;
+            color: #6B7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .features-list {
+            background: #F8FAFC;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .features-list h3 {
+            color: #1F2937;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .features-list ul {
+            list-style: none;
+            color: #4B5563;
+        }
+
+        .features-list li {
+            padding: 0.5rem 0;
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .features-list li::before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+        }
+
+        .status-bar {
+            background: #F3F4F6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 2rem 0;
+        }
+
+        .status-text {
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            background: #E5E7EB;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #10B981, #059669);
+            height: 100%;
+            width: 85%;
+            border-radius: 4px;
+            animation: progress 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes progress {
+            from { width: 80%; }
+            to { width: 90%; }
+        }
+
+        .contact-info {
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        .contact-info h4 {
+            color: #92400E;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-info p {
+            color: #A16207;
+            font-size: 0.9rem;
+        }
+
+        .footer-info {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #E5E7EB;
+            color: #9CA3AF;
+            font-size: 0.85rem;
+        }
+
+        .liberia-flag {
+            display: inline-block;
+            margin: 0 0.5rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .maintenance-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .platform-title {
+                font-size: 2rem;
+            }
+            
+            .maintenance-title {
+                font-size: 1.5rem;
+            }
+            
+            .maintenance-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        /* Animation for smooth entrance */
+        .maintenance-container {
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="maintenance-container">
+        <!-- Logo and Branding -->
+        <div class="logo-section">
+            <div class="logo"></div>
+            <h1 class="platform-title">AgriTrace360™</h1>
+            <p class="org-title">Liberia Agriculture Commodity Regulatory Authority (LACRA)</p>
+        </div>
+
+        <!-- Maintenance Content -->
+        <div class="maintenance-icon">⚙️</div>
+        <h2 class="maintenance-title">System Maintenance in Progress</h2>
+        <p class="maintenance-subtitle">
+            We're currently upgrading our agricultural traceability platform to enhance your experience. 
+            Our team is working to bring you improved features and performance.
+        </p>
+
+        <!-- Features Being Enhanced -->
+        <div class="features-list">
+            <h3>What's Being Enhanced:</h3>
+            <ul>
+                <li>GPS Farm Boundary Mapping System</li>
+                <li>EUDR Compliance Monitoring Dashboard</li>
+                <li>Real-time Satellite Deforestation Alerts</li>
+                <li>Mobile Progressive Web App (PWA)</li>
+                <li>Supply Chain Vehicle Tracking</li>
+                <li>Export Permit Management System</li>
+                <li>Multi-role Authentication Portals</li>
+                <li>Comprehensive PDF Reporting</li>
+            </ul>
+        </div>
+
+        <!-- Progress Status -->
+        <div class="status-bar">
+            <div class="status-text">Maintenance Progress: 85% Complete</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="contact-info">
+            <h4>Need Immediate Assistance?</h4>
+            <p>
+                Contact LACRA Technical Support<br>
+                📧 support@lacra.gov.lr<br>
+                📞 +231-XXX-XXXX<br>
+                🌍 Monrovia, Liberia
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-info">
+            <p>
+                🇱🇷 Proudly serving Liberian agriculture<br>
+                Expected completion: Within 24 hours<br>
+                © 2025 LACRA - All Rights Reserved
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh every 5 minutes to check if maintenance is complete
+        setTimeout(() => {
+            window.location.reload();
+        }, 300000); // 5 minutes
+
+        // Add some interactive feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌾 AgriTrace360 Maintenance Mode - System will be back online soon!');
+            
+            // Update time display
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Africa/Monrovia'
+            });
+            
+            // Optional: Add timestamp to footer
+            const footer = document.querySelector('.footer-info p');
+            if (footer) {
+                footer.innerHTML += `<br><small>Last updated: ${timeString} (GMT)</small>`;
+            }
+        });
+    </script>
+</body>
+</html>

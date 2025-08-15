@@ -17,6 +17,9 @@ export default function EudrAutoCompliancePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Clear any potential navigation issues
+  console.log("✅ EUDR AUTO COMPLIANCE SYSTEM LOADED - Automated Pack Generation Active");
+
   // Fetch farmers ready for EUDR compliance
   const { data: readyFarmers, isLoading: loadingFarmers } = useQuery({
     queryKey: ["/api/eudr/farmers-ready"],

@@ -206,9 +206,9 @@ Longitude: \${longitude.toFixed(6)}
       console.log('📋 EUDR COMPLIANCE PACK SYSTEM ACTIVE - Auto-generation from farmer data');
       registerEudrRoutes(app);
       
-      // Register Auto EUDR System
-      const { registerAutoEudrRoutes } = await import('./eudr-auto-system');
-      registerAutoEudrRoutes(app);
+      // Register Simple EUDR System (working version)
+      const { registerSimpleEudrRoutes } = await import('./eudr-simple-routes');
+      registerSimpleEudrRoutes(app);
       
       // Setup Vite for development or serve static files for production
       if (process.env.NODE_ENV === 'production') {

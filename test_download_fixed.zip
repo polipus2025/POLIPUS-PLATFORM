@@ -159,7 +159,7 @@ window.$RefreshSig$ = () => (type) => type;</script>
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
       </style>
     </div>
-    <script type="module" src="/src/main.tsx?v=kx3DJGgVThR7AgmP9dNsF"></script>
+    <script type="module" src="/src/main.tsx?v=b5itndieKL427KLoV4YdP"></script>
     
     <!-- Service Worker Registration -->
     <script>

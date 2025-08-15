@@ -376,7 +376,7 @@ export default function EudrAutoCompliancePage() {
                         data-testid={`button-download-${pack.packId}`}
                       >
                         <FileText className="h-4 w-4 mr-2" />
-                        {downloadDocumentsMutation.isPending ? "Downloading..." : "View Documents (6)"}
+                        {downloadDocumentsMutation.isPending ? "Downloading..." : "Download Pack Document"}
                       </Button>
                     </div>
                   ))}

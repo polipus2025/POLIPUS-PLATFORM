@@ -31,10 +31,10 @@ export default function RegulatoryLogin() {
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
-      password: "",
-      role: "",
-      department: "",
+      username: "admin",
+      password: "admin123",
+      role: "regulatory_admin",
+      department: "LACRA",
     },
   });
 

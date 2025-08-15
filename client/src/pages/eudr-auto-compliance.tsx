@@ -72,7 +72,10 @@ export default function EudrAutoCompliancePage() {
         title: "EUDR Pack Auto-Generated",
         description: `Pack for ${data.farmerName} is ready for admin approval`,
       });
+      // Invalidate all queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/eudr/farmers-ready"] });
       queryClient.invalidateQueries({ queryKey: ["/api/eudr/pending-approval"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/eudr/approved-packs"] });
       setSelectedFarmer(null);
     }
   });
@@ -93,8 +96,44 @@ export default function EudrAutoCompliancePage() {
         title: variables.action === 'approve' ? "Pack Approved" : "Pack Rejected",
         description: data.message,
       });
+      // Invalidate all queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/eudr/farmers-ready"] });
       queryClient.invalidateQueries({ queryKey: ["/api/eudr/pending-approval"] });
       queryClient.invalidateQueries({ queryKey: ["/api/eudr/approved-packs"] });
+    }
+  });
+
+  // Download EUDR documents mutation
+  const downloadDocumentsMutation = useMutation({
+    mutationFn: async (packId: string) => {
+      const response = await fetch(`/api/eudr/download-pack/${packId}`, {
+        method: "GET"
+      });
+      if (!response.ok) throw new Error("Failed to download pack");
+      return response.blob();
+    },
+    onSuccess: (blob, packId) => {
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `EUDR_Compliance_Pack_${packId}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Documents Downloaded",
+        description: `EUDR compliance pack ${packId} downloaded successfully`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Download Failed",
+        description: "Unable to download documents. Please try again.",
+        variant: "destructive"
+      });
     }
   });
 
@@ -332,10 +371,12 @@ export default function EudrAutoCompliancePage() {
                         size="sm" 
                         variant="outline"
                         className="w-full mt-2"
+                        onClick={() => downloadDocumentsMutation.mutate(pack.packId)}
+                        disabled={downloadDocumentsMutation.isPending}
                         data-testid={`button-download-${pack.packId}`}
                       >
                         <FileText className="h-4 w-4 mr-2" />
-                        View Documents (6)
+                        {downloadDocumentsMutation.isPending ? "Downloading..." : "View Documents (6)"}
                       </Button>
                     </div>
                   ))}

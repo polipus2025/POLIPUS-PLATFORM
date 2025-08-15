@@ -1,0 +1,107 @@
+# EUDR Compliance Pack Generation Guide
+
+## STEP-BY-STEP PROCESS
+
+### 1. LOGIN AS REGULATORY USER
+- Access: http://localhost:5000/regulatory-login
+- Use regulatory credentials
+- Navigate to: /eudr-compliance
+
+### 2. FILL OUT THE COMPLIANCE PACK FORM
+
+**Required Information:**
+- Shipment ID: SHIP-2024-001
+- Farmer ID: FARM-001
+- Farmer Name: John Farmer
+- Exporter ID: EXP-001
+- Exporter Name: Export Company Ltd
+- Exporter Registration: REG-2024-001
+- Commodity: Coffee Beans
+- HS Code: 0901.11
+- Total Weight: 1000 kg
+- Destination: European Union
+- Farm IDs: FARM-001, FARM-002, FARM-003
+- GPS Coordinates: 6.3106°N, 10.8047°W
+- Harvest Period: January 2024 - March 2024
+- Compliance Score: 95 (0-100)
+- Risk Score: 15 (0-100)
+
+### 3. GENERATED DOCUMENTS (6 TOTAL)
+
+**Document 1: Cover Sheet**
+- Document index and shipment overview
+- Cross-reference network mapping
+- Pack summary with all reference numbers
+
+**Document 2: LACRA Export Eligibility Certificate**
+- Official government certificate
+- Export authorization details
+- Compliance verification status
+- Reference: LACRA-CERT-[PACK-ID]-[TIMESTAMP]
+
+**Document 3: EUDR Compliance Assessment**
+- EU Regulation 2023/1115 compliance evaluation
+- Risk assessment with score cards
+- Documentation matrix
+- Reference: EUDR-ASSESS-[PACK-ID]-[TIMESTAMP]
+
+**Document 4: Deforestation Analysis Report**
+- Environmental impact analysis
+- Satellite data verification
+- Forest cover change metrics
+- Reference: DEFOREST-ANALYSIS-[PACK-ID]-[TIMESTAMP]
+
+**Document 5: Due Diligence Statement (DDS)**
+- EU regulation compliance declaration
+- Risk mitigation measures
+- Legal compliance verification
+- Reference: DDS-STATEMENT-[PACK-ID]-[TIMESTAMP]
+
+**Document 6: Supply Chain Traceability Report**
+- Complete farm-to-export documentation
+- GPS verification chain
+- Supply chain path mapping
+- Reference: TRACE-CHAIN-[PACK-ID]-[TIMESTAMP]
+
+### 4. DOWNLOAD PROCESS
+
+After generation:
+1. Click "View Documents" for any pack
+2. Individual download buttons for each PDF
+3. Complete reference tracking across all documents
+4. 5-year audit retention automatically enabled
+
+### 5. CROSS-REFERENCE SYSTEM
+
+Each document contains:
+- Unique reference numbers
+- Links to other documents in the pack
+- GPS coordinates verification
+- Satellite data cross-checks
+- Farm ID chain tracking
+- Export authorization links
+
+### 6. AUDIT TRAIL
+
+- All packs stored with 5-year retention
+- Complete digital footprint maintained
+- Real-time access for regulatory authorities
+- Tamper-proof reference linking
+- Export-ready documentation package
+
+## EXAMPLE GENERATION
+
+Input Data Example:
+```
+Shipment: SHIP-2024-001
+Farmer: John Farmer (FARM-001)
+Exporter: Export Company Ltd (REG-2024-001)
+Commodity: Coffee Beans (HS: 0901.11)
+Weight: 1000 kg → European Union
+GPS: 6.3106°N, 10.8047°W
+Compliance Score: 95/100
+```
+
+Generated Pack ID: EUDR-PACK-2024-001-[TIMESTAMP]
+
+All 6 documents will be linked with this Pack ID and cross-reference each other for complete audit traceability.

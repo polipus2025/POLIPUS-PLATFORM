@@ -92,6 +92,7 @@ import Inspections from "@/pages/inspections";
 import Certifications from "@/pages/certifications";
 import Reports from "@/pages/reports";
 import EudrCompliancePage from "@/pages/eudr-compliance";
+import EudrAutoCompliancePage from "@/pages/eudr-auto-compliance";
 import Analytics from "@/pages/analytics";
 import AuditSystem from "@/pages/audit-system";
 import DataEntry from "@/pages/data-entry";
@@ -359,7 +360,7 @@ function Router() {
           </Route>
           <Route path="/eudr-compliance">
             <ProtectedRoute 
-              component={EudrCompliancePage} 
+              component={EudrAutoCompliancePage} 
               allowedUserTypes={['regulatory']} 
             />
           </Route>

@@ -203,8 +203,12 @@ Longitude: \${longitude.toFixed(6)}
       const httpServer = await registerRoutes(app);
       
       // Register EUDR Compliance Pack routes
-      console.log('📋 EUDR COMPLIANCE PACK SYSTEM ACTIVE - Professional PDF generation ready');
+      console.log('📋 EUDR COMPLIANCE PACK SYSTEM ACTIVE - Auto-generation from farmer data');
       registerEudrRoutes(app);
+      
+      // Register Auto EUDR System
+      const { registerAutoEudrRoutes } = await import('./eudr-auto-system');
+      registerAutoEudrRoutes(app);
       
       // Setup Vite for development or serve static files for production
       if (process.env.NODE_ENV === 'production') {

@@ -677,12 +677,20 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
             
-            {/* EUDR Compliance Button */}
+            {/* EUDR Compliance Pack System Button */}
+            <Link href="/eudr-compliance">
+              <Button className="bg-green-600 hover:bg-green-700 text-white mobile-safe-button w-full sm:w-auto">
+                <Shield className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="mobile-responsive-text">EUDR Compliance Packs</span>
+              </Button>
+            </Link>
+            
+            {/* Old EUDR Status Dialog (kept for reference) */}
             <Dialog open={isEudrDialogOpen} onOpenChange={setIsEudrDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-green-600 hover:bg-green-700 text-white mobile-safe-button w-full sm:w-auto">
-                  <Shield className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span className="mobile-responsive-text">EUDR Compliance</span>
+                <Button variant="outline" className="mobile-safe-button w-full sm:w-auto">
+                  <BarChart3 className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="mobile-responsive-text">EUDR Status</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="mobile-safe-dialog max-w-4xl max-h-[90vh] overflow-y-auto">

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EUDR Quick Access</title>
+    <meta charset="utf-8">
+</head>
+<body style="font-family: Arial; padding: 20px; background: #f5f5f5;">
+    <h1 style="color: #059669;">🚀 EUDR Compliance Pack System - Quick Access</h1>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>System Status: ✅ OPERATIONAL</h2>
+        <p><strong>Backend:</strong> Running on http://localhost:5000</p>
+        <p><strong>Farmers Ready:</strong> <span id="farmers-count">Loading...</span></p>
+        <p><strong>Approved Packs:</strong> <span id="packs-count">Loading...</span></p>
+    </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3>Quick Access Links:</h3>
+        <div style="margin: 10px 0;">
+            <a href="http://localhost:5000/regulatory-login" 
+               style="display: inline-block; padding: 10px 20px; background: #059669; color: white; text-decoration: none; border-radius: 5px; margin: 5px;">
+               🔐 Admin Login
+            </a>
+        </div>
+        <div style="margin: 10px 0;">
+            <a href="http://localhost:5000/dashboard" 
+               style="display: inline-block; padding: 10px 20px; background: #0EA5E9; color: white; text-decoration: none; border-radius: 5px; margin: 5px;">
+               📊 Dashboard  
+            </a>
+        </div>
+        <div style="margin: 10px 0;">
+            <a href="http://localhost:5000/eudr-compliance" 
+               style="display: inline-block; padding: 10px 20px; background: #DC2626; color: white; text-decoration: none; border-radius: 5px; margin: 5px;">
+               🛡️ EUDR System (Direct)
+            </a>
+        </div>
+    </div>
+
+    <div style="background: #FEF3C7; padding: 15px; border-radius: 8px; border-left: 4px solid #F59E0B;">
+        <h4 style="color: #92400E; margin: 0;">Troubleshooting:</h4>
+        <p style="color: #92400E; margin: 5px 0;">If main app won't load, use these direct links or clear browser cache.</p>
+    </div>
+
+    <script>
+        // Load system status
+        fetch('/api/eudr/farmers-ready')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('farmers-count').textContent = data.length + ' farmers';
+            })
+            .catch(() => {
+                document.getElementById('farmers-count').textContent = 'Error loading';
+            });
+            
+        fetch('/api/eudr/approved-packs')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('packs-count').textContent = data.length + ' packs';
+            })
+            .catch(() => {
+                document.getElementById('packs-count').textContent = 'Error loading';
+            });
+    </script>
+</body>
+</html>

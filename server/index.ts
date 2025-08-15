@@ -1,5 +1,6 @@
 import express from "express";
 import { registerRoutes } from "./routes";
+import { registerEudrRoutes } from "./eudr-compliance";
 import { log } from "./vite";
 
 const app = express();
@@ -200,6 +201,10 @@ Longitude: \${longitude.toFixed(6)}
       // Register API routes and database connections
       console.log('📊 Initializing database connections...');
       const httpServer = await registerRoutes(app);
+      
+      // Register EUDR Compliance Pack routes
+      console.log('📋 EUDR COMPLIANCE PACK SYSTEM ACTIVE - Professional PDF generation ready');
+      registerEudrRoutes(app);
       
       // Setup Vite for development or serve static files for production
       if (process.env.NODE_ENV === 'production') {

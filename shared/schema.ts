@@ -2449,3 +2449,77 @@ export type MessageTemplate = typeof messageTemplates.$inferSelect;
 export type InsertInternalMessage = z.infer<typeof insertInternalMessageSchema>;
 export type InsertMessageRecipient = z.infer<typeof insertMessageRecipientSchema>;
 export type InsertMessageTemplate = z.infer<typeof insertMessageTemplateSchema>;
+
+// ========================================
+// EUDR COMPLIANCE PACK SYSTEM
+// ========================================
+
+export const eudrCompliancePacks = pgTable("eudr_compliance_packs", {
+  id: serial("id").primaryKey(),
+  packId: text("pack_id").notNull().unique(),
+  shipmentId: text("shipment_id").notNull(),
+  farmerId: text("farmer_id").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  exporterId: text("exporter_id").notNull(),
+  exporterName: text("exporter_name").notNull(),
+  exporterRegistration: text("exporter_registration").notNull(),
+  commodity: text("commodity").notNull(),
+  hsCode: text("hs_code").notNull(),
+  totalWeight: decimal("total_weight", { precision: 10, scale: 2 }).notNull(),
+  harvestPeriod: text("harvest_period").notNull(),
+  destination: text("destination").notNull(),
+  farmIds: jsonb("farm_ids").notNull(), // array of farm IDs
+  gpsCoordinates: text("gps_coordinates").notNull(),
+  complianceStatus: text("compliance_status").notNull(), // compliant, non_compliant, pending
+  riskClassification: text("risk_classification").notNull(), // low, medium, high
+  deforestationRisk: text("deforestation_risk").notNull(), // none, low, medium, high
+  complianceScore: integer("compliance_score").notNull(), // 0-100
+  forestProtectionScore: integer("forest_protection_score").notNull(), // 0-100
+  documentationScore: integer("documentation_score").notNull(), // 0-100
+  overallRiskScore: integer("overall_risk_score").notNull(), // 0-100
+  forestCoverChange: decimal("forest_cover_change", { precision: 5, scale: 2 }), // percentage
+  carbonStockImpact: decimal("carbon_stock_impact", { precision: 5, scale: 2 }), // percentage
+  biodiversityImpactLevel: text("biodiversity_impact_level"), // low, medium, high
+  satelliteDataSource: text("satellite_data_source").notNull(),
+  packGeneratedAt: timestamp("pack_generated_at").defaultNow(),
+  issuedBy: text("issued_by").notNull().default("LACRA"),
+  certifiedBy: text("certified_by").notNull().default("ECOENVIROS"),
+  storageExpiryDate: timestamp("storage_expiry_date").notNull(), // 5 years from generation
+  auditReadyStatus: boolean("audit_ready_status").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const eudrComplianceDocuments = pgTable("eudr_compliance_documents", {
+  id: serial("id").primaryKey(),
+  packId: text("pack_id").references(() => eudrCompliancePacks.packId).notNull(),
+  documentType: text("document_type").notNull(), // cover_sheet, export_certificate, compliance_assessment, deforestation_report, dds, traceability_report
+  documentNumber: text("document_number").notNull(),
+  title: text("title").notNull(),
+  referenceNumber: text("reference_number").notNull(),
+  issuedBy: text("issued_by").notNull(),
+  generatedAt: timestamp("generated_at").defaultNow(),
+  pdfContent: text("pdf_content"), // base64 encoded PDF or file path
+  documentStatus: text("document_status").default("active"), // active, archived, superseded
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// EUDR Compliance Pack schemas
+export const insertEudrCompliancePackSchema = createInsertSchema(eudrCompliancePacks).omit({
+  id: true,
+  packGeneratedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEudrComplianceDocumentSchema = createInsertSchema(eudrComplianceDocuments).omit({
+  id: true,
+  generatedAt: true,
+  createdAt: true,
+});
+
+// EUDR Compliance Pack types
+export type EudrCompliancePack = typeof eudrCompliancePacks.$inferSelect;
+export type EudrComplianceDocument = typeof eudrComplianceDocuments.$inferSelect;
+export type InsertEudrCompliancePack = z.infer<typeof insertEudrCompliancePackSchema>;
+export type InsertEudrComplianceDocument = z.infer<typeof insertEudrComplianceDocumentSchema>;

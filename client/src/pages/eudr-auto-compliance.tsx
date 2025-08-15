@@ -103,35 +103,69 @@ export default function EudrAutoCompliancePage() {
     }
   });
 
-  // Download EUDR documents mutation
+  // Download individual EUDR document mutation
   const downloadDocumentsMutation = useMutation({
-    mutationFn: async (packId: string) => {
-      const response = await fetch(`/api/eudr/download-pack/${packId}`, {
+    mutationFn: async (documentPath: string) => {
+      const response = await fetch(`/api/eudr/download-document/${documentPath}`, {
         method: "GET"
       });
-      if (!response.ok) throw new Error("Failed to download pack");
-      return response.blob();
+      if (!response.ok) throw new Error("Failed to download document");
+      return { blob: await response.blob(), documentPath };
     },
-    onSuccess: (blob, packId) => {
+    onSuccess: ({ blob, documentPath }) => {
       // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `EUDR_Compliance_Pack_${packId}.zip`;
+      link.download = `EUDR_Document_${documentPath.replace('/', '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
       toast({
-        title: "Documents Downloaded",
-        description: `EUDR compliance pack ${packId} downloaded successfully`,
+        title: "Document Downloaded",
+        description: `EUDR document downloaded successfully`,
       });
     },
     onError: () => {
       toast({
         title: "Download Failed",
-        description: "Unable to download documents. Please try again.",
+        description: "Unable to download document. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Download all documents as bundle mutation
+  const downloadAllMutation = useMutation({
+    mutationFn: async (packId: string) => {
+      const response = await fetch(`/api/eudr/download-all/${packId}`, {
+        method: "GET"
+      });
+      if (!response.ok) throw new Error("Failed to download bundle");
+      return { blob: await response.blob(), packId };
+    },
+    onSuccess: ({ blob, packId }) => {
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `EUDR_Compliance_Pack_${packId}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Bundle Downloaded",
+        description: `Complete EUDR compliance pack downloaded successfully`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Download Failed",
+        description: "Unable to download bundle. Please try again.",
         variant: "destructive"
       });
     }
@@ -367,17 +401,80 @@ export default function EudrAutoCompliancePage() {
                         <p>Approved: {new Date(pack.adminApprovedAt).toLocaleDateString()}</p>
                         <p>By: {pack.adminApprovedBy}</p>
                       </div>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="w-full mt-2"
-                        onClick={() => downloadDocumentsMutation.mutate(pack.packId)}
-                        disabled={downloadDocumentsMutation.isPending}
-                        data-testid={`button-download-${pack.packId}`}
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        {downloadDocumentsMutation.isPending ? "Downloading..." : "Download Pack Document"}
-                      </Button>
+                      <div className="mt-3 space-y-2">
+                        <div className="grid grid-cols-2 gap-1">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => downloadDocumentsMutation.mutate(`${pack.packId}/cover`)}
+                            disabled={downloadDocumentsMutation.isPending}
+                            data-testid={`button-download-cover-${pack.packId}`}
+                          >
+                            📄 Cover
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => downloadDocumentsMutation.mutate(`${pack.packId}/certificate`)}
+                            disabled={downloadDocumentsMutation.isPending}
+                            data-testid={`button-download-cert-${pack.packId}`}
+                          >
+                            🏛️ Certificate
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => downloadDocumentsMutation.mutate(`${pack.packId}/assessment`)}
+                            disabled={downloadDocumentsMutation.isPending}
+                            data-testid={`button-download-assessment-${pack.packId}`}
+                          >
+                            ✅ Assessment
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => downloadDocumentsMutation.mutate(`${pack.packId}/deforestation`)}
+                            disabled={downloadDocumentsMutation.isPending}
+                            data-testid={`button-download-deforest-${pack.packId}`}
+                          >
+                            🌲 Deforestation
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => downloadDocumentsMutation.mutate(`${pack.packId}/diligence`)}
+                            disabled={downloadDocumentsMutation.isPending}
+                            data-testid={`button-download-diligence-${pack.packId}`}
+                          >
+                            📋 Due Diligence
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => downloadDocumentsMutation.mutate(`${pack.packId}/traceability`)}
+                            disabled={downloadDocumentsMutation.isPending}
+                            data-testid={`button-download-trace-${pack.packId}`}
+                          >
+                            🔗 Traceability
+                          </Button>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          onClick={() => downloadAllMutation.mutate(pack.packId)}
+                          disabled={downloadAllMutation.isPending}
+                          data-testid={`button-download-all-${pack.packId}`}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          {downloadAllMutation.isPending ? "Downloading..." : "Download All (Bundle)"}
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>

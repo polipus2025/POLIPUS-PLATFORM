@@ -21,21 +21,39 @@ export default function EudrAutoCompliancePage() {
   console.log("✅ EUDR AUTO COMPLIANCE SYSTEM LOADED - Automated Pack Generation Active");
 
   // Fetch farmers ready for EUDR compliance
-  const { data: readyFarmers, isLoading: loadingFarmers } = useQuery({
+  const { data: readyFarmers, isLoading: loadingFarmers, error: farmersError } = useQuery({
     queryKey: ["/api/eudr/farmers-ready"],
-    queryFn: () => fetch("/api/eudr/farmers-ready").then(res => res.json())
+    queryFn: async () => {
+      const response = await fetch("/api/eudr/farmers-ready");
+      if (!response.ok) throw new Error("Failed to fetch farmers");
+      return response.json();
+    },
+    retry: 2,
+    refetchOnWindowFocus: false
   });
 
   // Fetch packs pending approval
-  const { data: pendingPacks, isLoading: loadingPending } = useQuery({
+  const { data: pendingPacks, isLoading: loadingPending, error: pendingError } = useQuery({
     queryKey: ["/api/eudr/pending-approval"],
-    queryFn: () => fetch("/api/eudr/pending-approval").then(res => res.json())
+    queryFn: async () => {
+      const response = await fetch("/api/eudr/pending-approval");
+      if (!response.ok) throw new Error("Failed to fetch pending packs");
+      return response.json();
+    },
+    retry: 2,
+    refetchOnWindowFocus: false
   });
 
   // Fetch approved packs
-  const { data: approvedPacks, isLoading: loadingApproved } = useQuery({
+  const { data: approvedPacks, isLoading: loadingApproved, error: approvedError } = useQuery({
     queryKey: ["/api/eudr/approved-packs"],
-    queryFn: () => fetch("/api/eudr/approved-packs").then(res => res.json())
+    queryFn: async () => {
+      const response = await fetch("/api/eudr/approved-packs");
+      if (!response.ok) throw new Error("Failed to fetch approved packs");
+      return response.json();
+    },
+    retry: 2,
+    refetchOnWindowFocus: false
   });
 
   // Auto-generate pack mutation
@@ -90,10 +108,28 @@ export default function EudrAutoCompliancePage() {
     }
   };
 
+  // Show error state if all queries fail
+  if (farmersError && pendingError && approvedError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">System Error</h2>
+          <p className="text-gray-600">Unable to connect to EUDR system. Please refresh the page.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Reload Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">EUDR Compliance Pack System</h1>
+        <h1 className="text-3xl font-bold mb-2 text-green-800">
+          ✅ EUDR Compliance Pack System
+        </h1>
         <p className="text-gray-600">Automated generation from existing farmer data with admin approval workflow</p>
         
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -124,8 +160,21 @@ export default function EudrAutoCompliancePage() {
             <CardContent>
               {loadingFarmers ? (
                 <div className="text-center py-4">
-                  <Clock className="h-6 w-6 animate-spin mx-auto mb-2" />
-                  <p className="text-sm">Loading farmers...</p>
+                  <Clock className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
+                  <p className="text-sm text-blue-600">Loading farmers...</p>
+                </div>
+              ) : farmersError ? (
+                <div className="text-center py-8 text-red-500">
+                  <XCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Error loading farmers</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2" 
+                    onClick={() => window.location.reload()}
+                  >
+                    Retry
+                  </Button>
                 </div>
               ) : !readyFarmers || readyFarmers.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">

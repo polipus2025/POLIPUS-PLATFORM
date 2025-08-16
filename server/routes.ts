@@ -6237,8 +6237,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🚢 Using export data:', exportData.company);
       
       // Generate enhanced professional EUDR report (clean and synchronized)
-      const { generateEnhancedProfessionalEUDRPack } = await import('./enhanced-professional-generator.js');
-      const doc = generateEnhancedProfessionalEUDRPack(farmerData, exportData, packId);
+      const { generateCleanEUDRPack } = await import('./clean-eudr-generator.js');
+      const doc = await generateCleanEUDRPack(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');
@@ -7139,7 +7139,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Complete EUDR Compliance Pack - All 6 documents in one PDF
+  // Complete EUDR Compliance Pack - DISABLED TO FIX 12-PAGE ISSUE
+  /*
   app.get('/api/eudr/complete-pack/:packId', async (req, res) => {
     try {
       const { packId } = req.params;
@@ -7302,6 +7303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to generate complete PDF' });
     }
   });
+  */
 
   // PROFESSIONAL EUDR PDF PACK - FSC-Style Complete Pack
   app.get('/api/eudr/final-pdf/:packId', async (req, res) => {
@@ -7309,6 +7311,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       console.log('🔥 ADMIN DOWNLOADING ENHANCED PROFESSIONAL PACK:', packId);
+      console.log('📍 Route: /api/eudr/final-pdf/:packId called');
+      console.log('🧪 Using final-working-test generator');
       
       // Get farmer and export data (simulate real data for now)
       const farmerData = {
@@ -7330,9 +7334,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate clean EUDR pack with exactly 6 pages (no blank pages)
-      const { generateCleanEUDRPack } = await import('./clean-eudr-generator.js');
-      const doc = await generateCleanEUDRPack(farmerData, exportData, packId);
+      // Generate direct success final - exactly 6 pages with detailed logging
+      const { generateDirectSuccessFinal } = await import('./direct-success-final.js');
+      const doc = generateDirectSuccessFinal(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');
@@ -7352,11 +7356,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
-  // Import working PDF generator
-  import('./working-pdf.js').then(module => {
-    module.addWorkingPdfRoute(app);
-    console.log('📄 Working PDF generator loaded');
-  }).catch(err => console.error('PDF generator error:', err));
+  // Import working PDF generator - DISABLED TO FIX 12-PAGE ISSUE
+  // import('./working-pdf.js').then(module => {
+  //   module.addWorkingPdfRoute(app);
+  //   console.log('📄 Working PDF generator loaded');
+  // }).catch(err => console.error('PDF generator error:', err));
 
   return httpServer;
 }

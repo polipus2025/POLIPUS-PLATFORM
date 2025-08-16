@@ -7334,9 +7334,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate direct success final - exactly 6 pages with detailed logging
-      const { generateDirectSuccessFinal } = await import('./direct-success-final.js');
-      const doc = generateDirectSuccessFinal(farmerData, exportData, packId);
+      // Generate professional complete working - UniDOC style with advanced charts
+      const { generateProfessionalCompleteWorking } = await import('./professional-complete-working.js');
+      const doc = await generateProfessionalCompleteWorking(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

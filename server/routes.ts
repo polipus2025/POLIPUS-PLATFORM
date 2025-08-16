@@ -6266,28 +6266,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
          .fill('#f8fafc').stroke('#e5e7eb', 1);
       
       try {
-        // LACRA Logo - Top position in logo panel
+        // NATURAL LOGO INTEGRATION - Seamlessly blended with header
         const lacraLogoPath = 'attached_assets/LACRA LOGO_1753406166355.jpg';
         if (fs.existsSync(lacraLogoPath)) {
-          doc.image(lacraLogoPath, logoSection.x + 10, logoSection.y + 10, { width: 50, height: 35 });
-          doc.fontSize(8).fillColor('#374151').text('LACRA', logoSection.x + 65, logoSection.y + 20);
-          doc.fontSize(7).fillColor('#6b7280').text('Regulatory Authority', logoSection.x + 65, logoSection.y + 30);
+          // Natural logo placement without harsh borders
+          doc.circle(logoSection.x + 35, logoSection.y + 28, 25).fill('#ffffff').opacity(0.9);
+          doc.image(lacraLogoPath, logoSection.x + 15, logoSection.y + 13, { width: 40, height: 30 });
+          doc.fontSize(9).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', logoSection.x + 60, logoSection.y + 22);
+          doc.fontSize(7).fillColor('#e2e8f0').text('Regulatory Authority', logoSection.x + 60, logoSection.y + 32);
         } else {
-          // Professional fallback
-          doc.rect(logoSection.x + 10, logoSection.y + 10, 50, 35).fill('#22c55e');
-          doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', logoSection.x + 25, logoSection.y + 25);
+          // Natural fallback design
+          doc.circle(logoSection.x + 35, logoSection.y + 28, 25).fill('#10b981').opacity(0.9);
+          doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', logoSection.x + 20, logoSection.y + 25);
         }
         
-        // ECOENVIRO/Polipus Logo - Bottom position in logo panel  
+        // ECOENVIRO Logo - Naturally integrated
         const ecoLogoPath = 'attached_assets/polipos logo 1_1753394173408.jpg';
         if (fs.existsSync(ecoLogoPath)) {
-          doc.image(ecoLogoPath, logoSection.x + 10, logoSection.y + 55, { width: 50, height: 35 });
-          doc.fontSize(8).fillColor('#374151').text('ECOENVIRO', logoSection.x + 65, logoSection.y + 65);
-          doc.fontSize(7).fillColor('#6b7280').text('Certification Partner', logoSection.x + 65, logoSection.y + 75);
+          // Natural logo placement without harsh borders
+          doc.circle(logoSection.x + 35, logoSection.y + 73, 25).fill('#ffffff').opacity(0.9);
+          doc.image(ecoLogoPath, logoSection.x + 15, logoSection.y + 58, { width: 40, height: 30 });
+          doc.fontSize(8).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', logoSection.x + 60, logoSection.y + 67);
+          doc.fontSize(7).fillColor('#e2e8f0').text('Certification Partner', logoSection.x + 60, logoSection.y + 77);
         } else {
-          // Professional fallback
-          doc.rect(logoSection.x + 10, logoSection.y + 55, 50, 35).fill('#ef4444');
-          doc.fontSize(9).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', logoSection.x + 15, logoSection.y + 70);
+          // Natural fallback design
+          doc.circle(logoSection.x + 35, logoSection.y + 73, 25).fill('#dc2626').opacity(0.9);
+          doc.fontSize(9).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', logoSection.x + 12, logoSection.y + 70);
         }
       } catch (error) {
         console.log('Logo loading error:', error);
@@ -6854,28 +6858,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.fontSize(9).fillColor('#93c5fd')
          .text('Certificate Document 5 of 6', eiaTitleSection.x, eiaTitleSection.y + 70);
       
-      // Environmental Impact Content
-      doc.rect(60, 150, 475, 400).fill('#f0fdf4').stroke('#22c55e', 2);
-      doc.fontSize(16).fillColor('#1e293b').font('Helvetica-Bold').text('ENVIRONMENTAL IMPACT ASSESSMENT', 80, 170);
+      // REDESIGNED ENVIRONMENTAL IMPACT WITH PROPER SPACING
+      doc.rect(60, 150, 475, 500).fill('#ecfdf5').stroke('#10b981', 4);
+      doc.rect(65, 155, 465, 30).fill('#10b981');
+      doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('ENVIRONMENTAL IMPACT ASSESSMENT', 180, 165);
       
-      // Environmental Metrics
+      // Environmental metrics with proper spacing to avoid overlap
       const envAssessments = [
-        { metric: 'Forest Coverage Impact', score: 'MINIMAL', status: 'APPROVED' },
-        { metric: 'Biodiversity Assessment', score: 'NO IMPACT', status: 'VERIFIED' },
-        { metric: 'Carbon Footprint Analysis', score: 'LOW EMISSION', status: 'COMPLIANT' },
-        { metric: 'Water Resource Impact', score: 'SUSTAINABLE', status: 'APPROVED' },
-        { metric: 'Soil Conservation Status', score: 'PROTECTED', status: 'VERIFIED' },
-        { metric: 'Wildlife Protection Level', score: 'MAINTAINED', status: 'COMPLIANT' }
+        { metric: 'Forest Coverage Impact', score: 'MINIMAL', status: 'APPROVED', color: '#10b981' },
+        { metric: 'Biodiversity Assessment', score: 'NO IMPACT', status: 'VERIFIED', color: '#3b82f6' },
+        { metric: 'Carbon Footprint Analysis', score: 'LOW EMISSION', status: 'COMPLIANT', color: '#f59e0b' },
+        { metric: 'Water Resource Impact', score: 'SUSTAINABLE', status: 'APPROVED', color: '#06b6d4' },
+        { metric: 'Soil Conservation Status', score: 'PROTECTED', status: 'VERIFIED', color: '#8b5cf6' },
+        { metric: 'Wildlife Protection Level', score: 'MAINTAINED', status: 'COMPLIANT', color: '#ef4444' }
       ];
       
+      // Environmental assessment cards with vibrant colors and proper spacing
       envAssessments.forEach((assessment, index) => {
-        const y = 220 + (index * 45);
-        doc.rect(80, y, 435, 35).fill('#ffffff').stroke('#e5e7eb', 1);
-        doc.fontSize(12).fillColor('#1e293b').font('Helvetica-Bold').text(assessment.metric, 90, y + 8);
-        doc.fontSize(10).fillColor('#059669').text(`Assessment: ${assessment.score}`, 90, y + 22);
-        doc.fontSize(9).fillColor('#22c55e').text(`Status: ${assessment.status}`, 380, y + 22);
-        doc.circle(490, y + 17, 6).fill('#22c55e');
-        doc.fontSize(8).fillColor('#ffffff').text('✓', 487, y + 14);
+        const y = 200 + (index * 70); // Increased spacing to 70px to prevent overlap
+        doc.rect(80, y, 435, 60).fill('#ffffff').stroke(assessment.color, 3);
+        doc.rect(85, y + 5, 425, 20).fill(assessment.color);
+        doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text(assessment.metric, 90, y + 12);
+        doc.fontSize(11).fillColor('#374151').font('Helvetica-Bold').text(`Assessment: ${assessment.score}`, 90, y + 35);
+        doc.fontSize(10).fillColor(assessment.color).font('Helvetica-Bold').text(`Status: ${assessment.status}`, 350, y + 35);
+        doc.circle(490, y + 35, 8).fill(assessment.color);
+        doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 486, y + 30);
       });
       
       // PAGE 6: FINAL CERTIFICATION
@@ -6921,44 +6928,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.fontSize(9).fillColor('#93c5fd')
          .text('Certificate Document 6 of 6 - FINAL APPROVAL', fcTitleSection.x, fcTitleSection.y + 70);
       
-      // Final Certification Content
-      doc.rect(60, 150, 475, 300).fill('#f0f9ff').stroke('#3b82f6', 3);
-      doc.fontSize(18).fillColor('#1e40af').font('Helvetica-Bold').text('OFFICIAL EUDR CERTIFICATION', 200, 180);
+      // COMPLETELY REDESIGNED FINAL CERTIFICATION WITH PROPER SPACING
       
-      // Official Certification Statement
-      doc.rect(80, 220, 435, 150).fill('#ffffff').stroke('#e5e7eb', 2);
-      doc.fontSize(14).fillColor('#1e293b').font('Helvetica-Bold').text('CERTIFICATE OF COMPLIANCE', 230, 240);
+      // Main certification panel with vibrant colors
+      doc.rect(60, 150, 475, 450).fill('#ecfdf5').stroke('#10b981', 4);
+      doc.rect(65, 155, 465, 30).fill('#10b981');
+      doc.fontSize(20).fillColor('#ffffff').font('Helvetica-Bold').text('OFFICIAL EUDR CERTIFICATION', 220, 165);
       
-      doc.fontSize(11).fillColor('#374151').text('This certifies that the agricultural commodity produced by:', 100, 270);
-      doc.fontSize(12).fillColor('#1e40af').font('Helvetica-Bold').text(`${name} (${county}, Liberia)`, 180, 290);
+      // Certification statement section with proper spacing
+      doc.rect(80, 200, 435, 120).fill('#ffffff').stroke('#e5e7eb', 3);
+      doc.fontSize(16).fillColor('#1e293b').font('Helvetica-Bold').text('CERTIFICATE OF COMPLIANCE', 200, 220);
       
-      doc.fontSize(11).fillColor('#374151').text('For export by:', 100, 310);
-      doc.fontSize(11).fillColor('#8b5cf6').font('Helvetica-Bold').text(`${exporterData.company}`, 200, 310);
-      doc.fontSize(10).fillColor('#6b7280').text(`Destination: ${exporterData.destination}`, 100, 325);
-      doc.fontSize(10).fillColor('#6b7280').text(`Shipment: ${exporterData.shipmentId} | Quantity: ${exporterData.quantity} | Value: ${exporterData.exportValue}`, 100, 340);
+      doc.fontSize(11).fillColor('#374151').text('This certifies that the agricultural commodity produced by:', 100, 245);
+      doc.fontSize(13).fillColor('#1e40af').font('Helvetica-Bold').text(`${name || 'Test Farmer'} (${county || 'Bomi County'}, Liberia)`, 100, 260);
       
-      doc.fontSize(11).fillColor('#374151').text('Has been thoroughly assessed and meets all requirements of:', 100, 360);
-      doc.fontSize(11).fillColor('#059669').font('Helvetica-Bold').text('EU Regulation 2023/1115 on Deforestation-Free Products', 130, 375);
+      doc.fontSize(11).fillColor('#374151').text('For export by:', 100, 280);
+      doc.fontSize(12).fillColor('#8b5cf6').font('Helvetica-Bold').text(`${exporterData.company}`, 200, 280);
+      doc.fontSize(10).fillColor('#6b7280').text(`Destination: ${exporterData.destination} | Quantity: ${exporterData.quantity}`, 100, 295);
       
-      // Certification Seals
-      doc.circle(150, 400, 25).fill('#22c55e').stroke('#ffffff', 3);
-      doc.fontSize(16).fillColor('#ffffff').text('✓', 142, 392);
-      doc.fontSize(10).fillColor('#059669').text('LACRA VERIFIED', 120, 435);
+      // Certification seals with proper spacing - NO OVERLAP
+      doc.rect(80, 340, 435, 100).fill('#f8fafc').stroke('#e5e7eb', 2);
       
-      doc.circle(300, 400, 25).fill('#3b82f6').stroke('#ffffff', 3);
-      doc.fontSize(16).fillColor('#ffffff').text('✓', 292, 392);
-      doc.fontSize(10).fillColor('#1d4ed8').text('EUDR COMPLIANT', 270, 435);
+      // Triple certification seals properly spaced
+      doc.circle(140, 380, 25).fill('#10b981').stroke('#ffffff', 4);
+      doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 132, 372);
+      doc.fontSize(10).fillColor('#059669').font('Helvetica-Bold').text('LACRA VERIFIED', 110, 415);
       
-      doc.circle(450, 400, 25).fill('#dc2626').stroke('#ffffff', 3);
-      doc.fontSize(16).fillColor('#ffffff').text('✓', 442, 392);
-      doc.fontSize(10).fillColor('#dc2626').text('ECOENVIRO CERTIFIED', 410, 435);
+      doc.circle(297, 380, 25).fill('#3b82f6').stroke('#ffffff', 4);
+      doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 289, 372);
+      doc.fontSize(10).fillColor('#1d4ed8').font('Helvetica-Bold').text('EUDR COMPLIANT', 267, 415);
       
-      // Final Certificate Footer
-      doc.rect(80, 470, 435, 80).fill('#1e293b').stroke('#64748b', 2);
-      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text('CERTIFICATE VALIDITY & AUTHENTICATION', 220, 490);
-      doc.fontSize(10).fillColor('#cbd5e0').text(`Certificate ID: LACRA-EUDR-${packId.slice(-8)} | Issue Date: ${currentDate}`, 150, 510);
-      doc.fontSize(10).fillColor('#cbd5e0').text('Valid for: 24 months | Next Review: ' + new Date(Date.now() + 24*30*24*60*60*1000).toLocaleDateString(), 170, 525);
-      doc.fontSize(9).fillColor('#9ca3af').text('Verification: compliance@lacra.gov.lr | certification@ecoenviro.com', 180, 540);
+      doc.circle(455, 380, 25).fill('#dc2626').stroke('#ffffff', 4);
+      doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 447, 372);
+      doc.fontSize(10).fillColor('#dc2626').font('Helvetica-Bold').text('ECOENVIRO CERTIFIED', 420, 415);
+      
+      // Authentication footer with proper spacing
+      doc.rect(80, 460, 435, 120).fill('#1f2937').stroke('#374151', 3);
+      doc.rect(85, 465, 425, 25).fill('#374151');
+      doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold').text('CERTIFICATE VALIDITY & AUTHENTICATION', 200, 473);
+      
+      doc.fontSize(11).fillColor('#d1d5db').text(`Certificate ID: LACRA-EUDR-${packId.slice(-8)}`, 100, 500);
+      doc.fontSize(11).fillColor('#d1d5db').text(`Issue Date: ${currentDate} | Valid: 24 months`, 100, 520);
+      doc.fontSize(10).fillColor('#9ca3af').text('Next Review: ' + new Date(Date.now() + 24*30*24*60*60*1000).toLocaleDateString(), 100, 540);
+      doc.fontSize(9).fillColor('#6b7280').text('Verification: compliance@lacra.gov.lr | certification@ecoenviro.com', 100, 560);
 
       // FARMER INFORMATION WITH VISUAL ELEMENTS
       doc.rect(60, 130, 475, 120).fill('#f7fafc').stroke('#cbd5e0', 2);

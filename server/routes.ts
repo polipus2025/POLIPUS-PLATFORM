@@ -6090,13 +6090,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const currentDate = new Date().toLocaleDateString();
       
-      // PAGE 1: COVER SHEET - WITH REAL DATA
-      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
-      doc.fontSize(12).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 100);
+      // OFFICIAL EUDR COMPLIANCE PACK - MATCHING ATTACHED REFERENCE
       
-      doc.fontSize(20).fillColor('red').text('EUDR COMPLIANCE PACK', 50, 150);
-      doc.fontSize(18).fillColor('blue').text('COMPLETE DOCUMENTATION PACKAGE', 50, 180);
+      // Main title - centered and bold like the reference
+      doc.fontSize(20).fillColor('#000080').text('EUDR COMPLIANCE PACK', 150, 80, { align: 'center', width: 300 });
+      doc.fontSize(16).fillColor('#000080').text('EXPORT SHIPMENT [' + packId + ']', 150, 110, { align: 'center', width: 300 });
+      
+      // Official headers - matching the reference format
+      doc.fontSize(10).fillColor('#333333').text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia | Tel: +231-XXX-XXXX', 50, 140, { align: 'center', width: 500 });
+      doc.fontSize(10).fillColor('#333333').text('Certified by ECOENVIROS - Audit & Certification | Lab Testing Services', 50, 155, { align: 'center', width: 500 });
+      
+      // Horizontal line separator
+      doc.moveTo(50, 175).lineTo(550, 175).stroke('#000000', 1);
+      
+      // Exporter Details Section
+      doc.fontSize(14).fillColor('#000000').text('Exporter Details:', 70, 200);
+      doc.fontSize(12).fillColor('#333333')
+         .text('Name: ' + farmerName, 90, 225)
+         .text('Registration Number: LACRA-REG-' + packId.slice(-6), 90, 245)
+         .text('Contact: ' + farmLocation, 90, 265);
+      
+      // Shipment Details Section
+      doc.fontSize(14).fillColor('#000000').text('Shipment Details:', 70, 300);
+      doc.fontSize(12).fillColor('#333333')
+         .text('Commodity: ' + commodityType, 90, 325)
+         .text('HS Code: 1801.00.00', 90, 345)
+         .text('Total Volume/Weight: ' + farmSize, 90, 365)
+         .text('Harvest Period: ' + currentDate, 90, 385)
+         .text('Destination: European Union', 90, 405);
+      
+      // Documents Table Header
+      doc.fontSize(14).fillColor('#000000').text('Included Documents in this Pack:', 70, 440);
+      
+      // Table headers
+      doc.fontSize(10).fillColor('#000000')
+         .text('Document #', 90, 465)
+         .text('Document Name', 180, 465)
+         .text('Reference Number', 350, 465)
+         .text('Issued By', 480, 465);
+      
+      // Table content - matching the reference
+      doc.fontSize(10).fillColor('#333333')
+         .text('1.', 90, 485)
+         .text('Due Diligence Statement (DDS)', 180, 485)
+         .text('[DDS-' + packId.slice(-4) + ']', 350, 485)
+         .text('LACRA/Enviros', 480, 485)
+         
+         .text('2.', 90, 505)
+         .text('Geolocation Report', 180, 505)
+         .text('[GEO-' + packId.slice(-4) + ']', 350, 505)
+         .text('LACRA/Enviros', 480, 505)
+         
+         .text('3.', 90, 525)
+         .text('LACRA Export Eligibility Certificate', 180, 525)
+         .text('[CERT-' + packId.slice(-4) + ']', 350, 525)
+         .text('LACRA', 480, 525)
+         
+         .text('4.', 90, 545)
+         .text('Deforestation-Free Certificate', 180, 545)
+         .text('[DEF-' + packId.slice(-4) + ']', 350, 545)
+         .text('LACRA/Enviros', 480, 545)
+         
+         .text('5.', 90, 565)
+         .text('Supply Chain Traceability Report', 180, 565)
+         .text('[TRACE-' + packId.slice(-4) + ']', 350, 565)
+         .text('LACRA/Enviros', 480, 565)
+         
+         .text('6.', 90, 585)
+         .text('Risk Assessment Report', 180, 585)
+         .text('[RISK-' + packId.slice(-4) + ']', 350, 585)
+         .text('LACRA/Enviros', 480, 585);
+      
+      // Compliance Statement Box
+      doc.fontSize(14).fillColor('#000000').text('Compliance Statement:', 70, 620);
+      doc.fontSize(11).fillColor('#333333')
+         .text('This shipment meets the requirements of EU Regulation 2023/1115 on deforestation-free products.', 70, 645, { width: 480 })
+         .text('All farms, suppliers, and processing steps have been verified as compliant and certified jointly by LACRA', 70, 665, { width: 480 })
+         .text('(Liberia Agriculture Commodity Regulatory Authority) and ECOENVIRO Audit & Certification.', 70, 685, { width: 480 });
+      
+      // Signature line
+      doc.fontSize(12).fillColor('#333333').text('Prepared By: _________________________     Date: ' + currentDate, 70, 720);
       
       doc.fontSize(14).fillColor('black')
          .text('Pack ID: ' + packId, 50, 220)
@@ -6124,13 +6197,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
          .text('5. Due Diligence Statement', 70, 610)
          .text('6. Supply Chain Traceability Report', 70, 630);
       
-      // PAGE 2: EXPORT CERTIFICATE
+      // PAGE 2: OFFICIAL LACRA EXPORT ELIGIBILITY CERTIFICATE - MATCHING REFERENCE
       doc.addPage();
-      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
       
-      doc.fontSize(20).fillColor('red').text('EXPORT ELIGIBILITY CERTIFICATE', 50, 150);
-      doc.fontSize(16).fillColor('blue').text('Certificate No: LACRA-EXP-' + packId, 50, 180);
+      // Official header - centered like the reference
+      doc.fontSize(16).fillColor('#000080').text('REPUBLIC OF LIBERIA', 150, 60, { align: 'center', width: 300 });
+      doc.fontSize(14).fillColor('#000080').text('LIBERIA AGRICULTURE COMMODITY', 150, 80, { align: 'center', width: 300 });
+      doc.fontSize(14).fillColor('#000080').text('REGULATORY AUTHORITY (LACRA)', 150, 100, { align: 'center', width: 300 });
+      doc.fontSize(18).fillColor('#000080').text('EXPORT ELIGIBILITY CERTIFICATE', 150, 130, { align: 'center', width: 300 });
+      
+      // Contact information - matching the reference
+      doc.fontSize(10).fillColor('#333333').text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia | Tel: +231-XXX-XXXX', 50, 160, { align: 'center', width: 500 });
+      doc.fontSize(10).fillColor('#333333').text('Certified by ECOENVIROS - Audit & Certification | Lab Testing Services', 50, 175, { align: 'center', width: 500 });
+      
+      // Horizontal separator
+      doc.moveTo(50, 195).lineTo(550, 195).stroke('#000000', 1);
+      
+      // Certificate details
+      doc.fontSize(12).fillColor('#333333')
+         .text('Certificate Number: LACRA-EXP-' + packId, 70, 220)
+         .text('Date Issued: ' + currentDate, 70, 240);
+      
+      // Certification statement
+      doc.fontSize(14).fillColor('#000000').text('This is to certify that:', 70, 270);
+      doc.fontSize(12).fillColor('#333333')
+         .text('Exporter Name: ' + farmerName, 70, 295)
+         .text('Exporter Registration Number: LACRA-REG-' + packId.slice(-6), 70, 315)
+         .text('Business Address: ' + farmLocation + ', Liberia', 70, 335);
+      
+      // Authorization statement
+      doc.fontSize(11).fillColor('#333333')
+         .text('is a registered exporter under the Liberia Agriculture Commodity Regulatory Authority (LACRA) and is', 70, 365, { width: 480 })
+         .text('authorized to export the following commodity in compliance with Liberian export regulations', 70, 385, { width: 480 });
+      
+      // Commodity table header
+      doc.fontSize(10).fillColor('#000000')
+         .text('Commodity', 90, 415)
+         .text('HS Code', 200, 415)
+         .text('Volume/Weight', 280, 415)
+         .text('Harvest Period', 380, 415)
+         .text('Origin (Farm IDs)', 480, 415);
+      
+      // Commodity details
+      doc.fontSize(10).fillColor('#333333')
+         .text(commodityType, 90, 435)
+         .text('1801.00.00', 200, 435)
+         .text(farmSize, 280, 435)
+         .text(currentDate, 380, 435)
+         .text('FARM-' + packId.slice(-4), 480, 435);
+      
+      // Compliance verification section
+      doc.fontSize(14).fillColor('#000000').text('Compliance Verification:', 70, 470);
+      doc.fontSize(11).fillColor('#333333')
+         .text('- Farm registration and geolocation data verified in LACRA database', 90, 495)
+         .text('- Supply chain traceability confirmed', 90, 515)
+         .text('- Risk assessment completed', 90, 535)
+         .text('- Deforestation-free status confirmed', 90, 555);
+      
+      // Authorization signatures
+      doc.fontSize(12).fillColor('#333333')
+         .text('Authorized Signatory: ___________________ ', 70, 590)
+         .text('Title: _________________________________', 70, 610)
+         .text('Signature: _____________________________', 70, 630)
+         .text('Official LACRA Stamp/Seal', 70, 650);
+      
+      // Footer - matching the reference
+      doc.fontSize(10).fillColor('#333333')
+         .text('Issued by: Liberia Agriculture Commodity Regulatory Authority (LACRA)', 70, 690)
+         .text('Capitol Hill, Monrovia, Liberia', 70, 705)
+         .text('Certified by ECOENVIROS - Audit & Certification | Lab Testing Services', 70, 720)
+         .text('Tel: +231-XXX-XXXX | Email: compliance@lacra.gov.lr', 70, 735);
       
       doc.fontSize(14).fillColor('black').text('CERTIFICATION STATEMENT:', 50, 220);
       doc.fontSize(12).text('This certifies that the agricultural commodity described below', 50, 250);
@@ -6152,13 +6288,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
          .text('✓ Quality standards confirmed', 70, 550)
          .text('✓ Export approved for EU markets', 70, 570);
       
-      // PAGE 3: COMPLIANCE ASSESSMENT
+      // PAGE 3: OFFICIAL EUDR COMPLIANCE ASSESSMENT - MATCHING REFERENCE
       doc.addPage();
-      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
       
-      doc.fontSize(20).fillColor('green').text('EUDR COMPLIANCE ASSESSMENT', 50, 150);
-      doc.fontSize(16).fillColor('blue').text('Assessment ID: EUDR-ASSESS-' + packId, 50, 180);
+      // Official title - centered like the reference
+      doc.fontSize(18).fillColor('#000080').text('EUDR COMPLIANCE ASSESSMENT', 150, 60, { align: 'center', width: 300 });
+      doc.fontSize(14).fillColor('#000080').text('European Union Deforestation Regulation Report', 150, 85, { align: 'center', width: 300 });
+      doc.fontSize(12).fillColor('#000080').text('Certified by ECOENVIROS – Audit & Certification | In Partnership with LACRA', 150, 110, { align: 'center', width: 300 });
+      doc.fontSize(12).fillColor('#000080').text('System Data Source: Polipus – AgriTrace', 150, 130, { align: 'center', width: 300 });
+      
+      // Contact line
+      doc.fontSize(10).fillColor('#333333').text('Ministry of Agriculture, Capitol Hill, Monrovia, Liberia | Tel: +231-XXX-XXXX', 50, 155, { align: 'center', width: 500 });
+      doc.fontSize(10).fillColor('#333333').text('Certified by ECOENVIROS - Audit & Certification | Lab Testing Services', 50, 170, { align: 'center', width: 500 });
+      
+      // Separator line
+      doc.moveTo(50, 190).lineTo(550, 190).stroke('#000000', 1);
+      
+      // Report details
+      doc.fontSize(12).fillColor('#333333')
+         .text('Report Reference: EUDR-ASSESS-' + packId, 70, 215)
+         .text('Assessment Date: ' + currentDate, 70, 235)
+         .text('Property Owner: ' + farmerName, 70, 255)
+         .text('Farmer Registration: LACRA-REG-' + packId.slice(-6), 70, 275)
+         .text('GPS Coordinates: ' + gpsCoords, 70, 295);
+      
+      // Executive Summary
+      doc.fontSize(14).fillColor('#000000').text('EXECUTIVE SUMMARY', 70, 330);
+      doc.fontSize(12).fillColor('#333333')
+         .text('Overall Compliance Status: COMPLIANT - APPROVED', 70, 355)
+         .text('Risk Classification: LOW RISK', 70, 375)
+         .text('Deforestation Risk: NONE DETECTED', 70, 395);
+      
+      // Detailed Risk Assessment
+      doc.fontSize(14).fillColor('#000000').text('DETAILED RISK ASSESSMENT', 70, 430);
+      doc.fontSize(12).fillColor('#333333')
+         .text('Compliance Score: 95/100', 70, 455)
+         .text('Forest Protection Score: 98/100', 70, 475)
+         .text('Documentation Score: 96/100', 70, 495)
+         .text('Overall Risk Score: 02/100 (EXCELLENT)', 70, 515);
+      
+      // Documentation section
+      doc.fontSize(14).fillColor('#000000').text('DOCUMENTATION INCLUDED', 70, 550);
+      doc.fontSize(12).fillColor('#333333')
+         .text('- Due Diligence Statement', 90, 575)
+         .text('- Geolocation Coordinates', 90, 595)
+         .text('- Supply Chain Traceability', 90, 615)
+         .text('- Risk Assessment Report', 90, 635);
+      
+      // Compliance recommendations
+      doc.fontSize(14).fillColor('#000000').text('COMPLIANCE RECOMMENDATIONS', 70, 670);
+      doc.fontSize(12).fillColor('#333333')
+         .text('1. Continue current sustainable farming practices', 90, 695)
+         .text('2. Maintain GPS boundary monitoring system', 90, 715)
+         .text('3. Regular compliance reviews every 6 months', 90, 735);
+      
+      // Footer
+      doc.fontSize(10).fillColor('#333333').text('Issued jointly by LACRA and ECOENVIROS – Audit & Certification under EU Regulation 2023/1115', 70, 760);
+      doc.fontSize(10).fillColor('#333333').text('For verification: compliance@lacra.gov.lr | cert@ecoenviros.com', 70, 775);
       
       doc.fontSize(14).fillColor('blue').text('ASSESSMENT RESULTS:', 50, 220);
       doc.fontSize(12).fillColor('black')

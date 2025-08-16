@@ -6247,110 +6247,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
         exportDate: new Date(Date.now() + 7*24*60*60*1000).toLocaleDateString()
       };
       
-      // COMPLETELY REDESIGNED VIBRANT PROFESSIONAL HEADER 
-      // Rich vibrant gradient background with enhanced depth
-      doc.rect(0, 0, 595, 130).fill('#1f2937'); // Dark professional base
-      doc.rect(0, 0, 595, 65).fill('#2563eb');   // Bright electric blue top
-      doc.rect(0, 65, 595, 65).fill('#3b82f6');  // Vibrant blue bottom
+      // PROFESSIONAL REPORT HEADER - UniDOC Style
+      // Clean white background with professional accents
+      doc.rect(0, 0, 595, 100).fill('#ffffff');
+      doc.rect(0, 0, 595, 5).fill('#dc2626'); // Red accent stripe like UniDOC
       
-      // Bold vibrant separator line
-      doc.rect(0, 65, 595, 4).fill('#fbbf24'); // Gold accent line
+      // Professional title section
+      doc.rect(0, 5, 595, 45).fill('#f8fafc');
       
-      // ENHANCED LOGO PLACEMENT - Professional positioning
-      const logoSection = { x: 425, y: 15, width: 155, height: 100 };
+      // PROFESSIONAL CERTIFICATION BADGES - Right aligned like UniDOC
+      const badgeSection = { x: 450, y: 15, width: 130, height: 80 };
       
-      // Vibrant logo background panel with gradient effect
-      doc.rect(logoSection.x, logoSection.y, logoSection.width, logoSection.height)
-         .fill('#ffffff').stroke('#2563eb', 4);
-      doc.rect(logoSection.x + 2, logoSection.y + 2, logoSection.width - 4, logoSection.height - 4)
-         .fill('#f8fafc').stroke('#e5e7eb', 1);
-      
-      // CLEAN HEADER DESIGN WITHOUT LOGOS
-      // Simple professional text-based certification marks
-      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold')
-         .text('LACRA', logoSection.x + 20, logoSection.y + 25);
-      doc.fontSize(9).fillColor('#e2e8f0')
-         .text('Regulatory Authority', logoSection.x + 20, logoSection.y + 40);
-      
+      // LACRA Badge
+      doc.rect(badgeSection.x, badgeSection.y, 125, 25).fill('#10b981').stroke('#059669', 1);
       doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold')
-         .text('ECOENVIRO', logoSection.x + 20, logoSection.y + 70);
-      doc.fontSize(9).fillColor('#e2e8f0')
-         .text('Certification Partner', logoSection.x + 20, logoSection.y + 85);
+         .text('LACRA CERTIFIED', badgeSection.x + 15, badgeSection.y + 8);
       
-      // ENHANCED VIBRANT TITLE SECTION - Professional spacing
-      const titleSection = { x: 35, y: 12, width: 380 };
+      // ECOENVIRO Badge  
+      doc.rect(badgeSection.x, badgeSection.y + 30, 125, 25).fill('#3b82f6').stroke('#2563eb', 1);
+      doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold')
+         .text('ECOENVIRO VERIFIED', badgeSection.x + 8, badgeSection.y + 38);
       
-      // Main certificate title with vibrant styling
-      doc.fontSize(26).fillColor('#ffffff').font('Helvetica-Bold')
-         .text('EUDR COMPLIANCE CERTIFICATE', titleSection.x, titleSection.y);
+      // Certificate number
+      doc.fontSize(8).fillColor('#6b7280')
+         .text(`Cert: LACRA-EUDR-${packId.slice(-6)}`, badgeSection.x + 5, badgeSection.y + 65);
       
-      // Enhanced subtitle with bright colors
-      doc.fontSize(15).fillColor('#fbbf24').font('Helvetica-Bold')
-         .text('European Union Deforestation Regulation', titleSection.x, titleSection.y + 28);
+      // PROFESSIONAL TITLE SECTION - Clean UniDOC style
+      const titleArea = { x: 30, y: 15, width: 400 };
       
-      // Official designation with vibrant accent
-      doc.fontSize(12).fillColor('#10b981')
-         .text('Official Agricultural Commodity Certification', titleSection.x, titleSection.y + 46);
+      // Main title - professional and clean
+      doc.fontSize(22).fillColor('#1f2937').font('Helvetica-Bold')
+         .text('EUDR COMPLIANCE PACK', titleArea.x, titleArea.y);
       
-      // Authority line with enhanced visibility
-      doc.fontSize(10).fillColor('#a7f3d0')
-         .text('Issued by Liberia Agriculture Commodity Regulatory Authority', titleSection.x, titleSection.y + 64);
+      // Professional subtitle
+      doc.fontSize(14).fillColor('#4b5563').font('Helvetica')
+         .text('European Union Deforestation Regulation Certificate', titleArea.x, titleArea.y + 25);
       
-      // Partnership line with gold accent
-      doc.fontSize(9).fillColor('#fde68a')
-         .text('In Partnership with ECOENVIRO Certification Services', titleSection.x, titleSection.y + 78);
+      // Document info
+      doc.fontSize(10).fillColor('#6b7280')
+         .text('Agricultural Commodity Compliance Report | Generated: ' + currentDate, titleArea.x, titleArea.y + 45);
+      
+      // Status indicator
+      doc.rect(titleArea.x, titleArea.y + 60, 80, 20).fill('#dcfce7').stroke('#16a34a', 1);
+      doc.fontSize(10).fillColor('#15803d').font('Helvetica-Bold')
+         .text('✓ COMPLIANT', titleArea.x + 15, titleArea.y + 68);
 
-      // ENHANCED INFORMATION CARDS WITH PROPER SPACING - NO OVERLAPPING
+      // PROFESSIONAL DATA CARDS - UniDOC Style
       
-      // Certificate ID Card with vibrant gold design
-      doc.rect(50, 155, 160, 90).fill('#fbbf24').stroke('#f59e0b', 4);
-      doc.rect(55, 160, 150, 20).fill('#f59e0b');
-      doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text('CERTIFICATE ID', 95, 168);
-      doc.fontSize(13).fillColor('#92400e').font('Helvetica-Bold').text(`LACRA-EUDR-${packId.slice(-8)}`, 55, 190);
-      doc.fontSize(10).fillColor('#78350f').text(`Issue: ${currentDate}`, 55, 210);
-      doc.fontSize(9).fillColor('#a16207').text('Valid: 24 months', 55, 225);
+      // Certificate Information Panel
+      doc.rect(40, 120, 170, 100).fill('#ffffff').stroke('#e5e7eb', 1);
+      doc.rect(40, 120, 170, 25).fill('#f1f5f9');
+      doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold').text('Certificate Information', 50, 133);
       
-      // Farmer Details Card with vibrant blue design
-      doc.rect(220, 155, 160, 90).fill('#3b82f6').stroke('#2563eb', 4);
-      doc.rect(225, 160, 150, 20).fill('#2563eb');
-      doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text('CERTIFICATE HOLDER', 260, 168);
-      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text(name || 'Test Farmer', 225, 190);
-      doc.fontSize(10).fillColor('#dbeafe').text(`${county || 'Bomi'}, Liberia`, 225, 210);
-      doc.fontSize(9).fillColor('#bfdbfe').text(`GPS: ${latitude || '6.7'}°N, ${longitude || '10.8'}°W`, 225, 225);
+      doc.fontSize(10).fillColor('#374151').text('ID:', 50, 155);
+      doc.fontSize(10).fillColor('#1f2937').font('Helvetica-Bold').text(`LACRA-EUDR-${packId.slice(-8)}`, 70, 155);
+      doc.fontSize(10).fillColor('#374151').text('Issue Date:', 50, 170);
+      doc.fontSize(10).fillColor('#1f2937').text(currentDate, 110, 170);
+      doc.fontSize(10).fillColor('#374151').text('Valid Until:', 50, 185);
+      doc.fontSize(10).fillColor('#1f2937').text(new Date(Date.now() + 24*30*24*60*60*1000).toLocaleDateString(), 110, 185);
       
-      // Exporter Information Card with vibrant purple design
-      doc.rect(390, 155, 160, 90).fill('#8b5cf6').stroke('#7c3aed', 4);
-      doc.rect(395, 160, 150, 20).fill('#7c3aed');
-      doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text('EXPORT PARTNER', 435, 168);
-      doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text('Liberia Premium', 395, 190);
-      doc.fontSize(9).fillColor('#e9d5ff').text(`License: ${exporterData.license}`, 395, 210);
-      doc.fontSize(9).fillColor('#ddd6fe').text(`Quantity: ${exporterData.quantity}`, 395, 225);
+      // Status indicator
+      doc.rect(50, 200, 80, 15).fill('#dcfce7');
+      doc.fontSize(9).fillColor('#15803d').font('Helvetica-Bold').text('✓ ACTIVE', 65, 208);
+      
+      // Farmer Profile Panel
+      doc.rect(220, 120, 170, 100).fill('#ffffff').stroke('#e5e7eb', 1);
+      doc.rect(220, 120, 170, 25).fill('#eff6ff');
+      doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold').text('Farmer Profile', 230, 133);
+      
+      doc.fontSize(10).fillColor('#374151').text('Name:', 230, 155);
+      doc.fontSize(10).fillColor('#1f2937').font('Helvetica-Bold').text(name || 'Test Farmer', 265, 155);
+      doc.fontSize(10).fillColor('#374151').text('County:', 230, 170);
+      doc.fontSize(10).fillColor('#1f2937').text(`${county || 'Bomi'}, Liberia`, 270, 170);
+      doc.fontSize(10).fillColor('#374151').text('GPS:', 230, 185);
+      doc.fontSize(9).fillColor('#1f2937').text(`${latitude || '6.7'}°N, ${longitude || '10.8'}°W`, 255, 185);
+      
+      // Risk level indicator
+      doc.rect(230, 200, 60, 15).fill('#dcfce7');
+      doc.fontSize(9).fillColor('#15803d').font('Helvetica-Bold').text('LOW RISK', 238, 208);
+      
+      // Export Details Panel
+      doc.rect(400, 120, 170, 100).fill('#ffffff').stroke('#e5e7eb', 1);
+      doc.rect(400, 120, 170, 25).fill('#fef3c7');
+      doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold').text('Export Information', 410, 133);
+      
+      doc.fontSize(9).fillColor('#374151').text('Company:', 410, 155);
+      doc.fontSize(9).fillColor('#1f2937').font('Helvetica-Bold').text('Liberia Premium Ltd', 410, 168);
+      doc.fontSize(9).fillColor('#374151').text('License:', 410, 180);
+      doc.fontSize(9).fillColor('#1f2937').text(exporterData.license, 450, 180);
+      doc.fontSize(9).fillColor('#374151').text('Quantity:', 410, 192);
+      doc.fontSize(9).fillColor('#1f2937').text(exporterData.quantity, 455, 192);
+      
+      // Destination indicator
+      doc.rect(410, 205, 50, 12).fill('#dbeafe');
+      doc.fontSize(8).fillColor('#1e40af').font('Helvetica-Bold').text('EU BOUND', 418, 210);
 
-      // ENHANCED STATUS CARDS WITH PROPER SPACING - ROW 2
+      // ADVANCED ANALYTICS DASHBOARD - UniDOC Style
       
-      // Compliance Status Card with vibrant green design
-      doc.rect(50, 260, 160, 90).fill('#10b981').stroke('#059669', 4);
-      doc.rect(55, 265, 150, 20).fill('#059669');
-      doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text('COMPLIANCE STATUS', 85, 273);
-      doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold').text('✓ APPROVED', 80, 295);
-      doc.fontSize(10).fillColor('#d1fae5').text('Status: COMPLIANT', 55, 315);
-      doc.fontSize(9).fillColor('#bbf7d0').text('Risk Level: LOW', 55, 330);
+      // Key Performance Indicators Row
+      const kpiY = 240;
+      const kpiMetrics = [
+        { label: 'Deforestation Risk', value: '0.2%', grade: 'A', color: '#10b981', bg: '#dcfce7' },
+        { label: 'Carbon Footprint', value: 'LOW', grade: 'A+', color: '#3b82f6', bg: '#dbeafe' },
+        { label: 'Biodiversity Impact', value: 'MINIMAL', grade: 'A', color: '#8b5cf6', bg: '#f3e8ff' },
+        { label: 'Water Usage', value: 'SUSTAIN', grade: 'B+', color: '#f59e0b', bg: '#fef3c7' }
+      ];
       
-      // Export Destination Card with vibrant blue design
-      doc.rect(220, 260, 160, 90).fill('#2563eb').stroke('#1e40af', 4);
-      doc.rect(225, 265, 150, 20).fill('#1e40af');
-      doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text('EXPORT DESTINATION', 250, 273);
-      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text('European Union', 235, 295);
-      doc.fontSize(9).fillColor('#dbeafe').text(`Value: ${exporterData.exportValue}`, 225, 315);
-      doc.fontSize(9).fillColor('#bfdbfe').text(`Ship: ${exporterData.vessel}`, 225, 330);
-      
-      // Export Timeline Card with vibrant orange design
-      doc.rect(390, 260, 160, 90).fill('#f59e0b').stroke('#d97706', 4);
-      doc.rect(395, 265, 150, 20).fill('#d97706');
-      doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text('EXPORT TIMELINE', 430, 273);
-      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text('SCHEDULED', 420, 295);
-      doc.fontSize(9).fillColor('#fef3c7').text(`Date: ${exporterData.exportDate}`, 395, 315);
-      doc.fontSize(9).fillColor('#fde68a').text(`ID: ${exporterData.shipmentId}`, 395, 330);
+      kpiMetrics.forEach((metric, index) => {
+        const x = 40 + (index * 135);
+        
+        // KPI Card - UniDOC style
+        doc.rect(x, kpiY, 125, 70).fill('#ffffff').stroke('#e5e7eb', 1);
+        doc.rect(x, kpiY, 125, 20).fill(metric.bg);
+        
+        // Grade badge
+        doc.circle(x + 105, kpiY + 10, 10).fill(metric.color);
+        doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text(metric.grade, x + 100, kpiY + 6);
+        
+        doc.fontSize(10).fillColor('#374151').font('Helvetica-Bold').text(metric.label, x + 8, kpiY + 8);
+        doc.fontSize(16).fillColor(metric.color).font('Helvetica-Bold').text(metric.value, x + 8, kpiY + 30);
+        doc.fontSize(8).fillColor('#6b7280').text('COMPLIANT', x + 8, kpiY + 55);
+      });
 
       // COMPREHENSIVE COMPLIANCE ANALYTICS SECTION
       doc.rect(50, 385, 500, 35).fill('#0f172a');

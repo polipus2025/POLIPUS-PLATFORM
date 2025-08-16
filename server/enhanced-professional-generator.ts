@@ -26,18 +26,28 @@ export function generateEnhancedProfessionalEUDRPack(
 ): PDFDocument {
   const doc = new PDFDocument({ 
     size: 'A4', 
-    margins: { top: 50, bottom: 50, left: 50, right: 50 },
-    autoFirstPage: false
+    margins: { top: 50, bottom: 50, left: 50, right: 50 }
   });
 
   const currentDate = new Date().toLocaleDateString();
 
-  // Generate all 6 certificates with enhanced professional design (no empty pages)
+  // Generate all 6 certificates with enhanced professional design - Certificate 1 uses existing first page
   generateCertificate1_CoverPage(doc, farmerData, exportData, packId, currentDate);
+  
+  // Add new pages only for certificates 2-6 to avoid empty pages
+  doc.addPage();
   generateCertificate2_ExportEligibility(doc, farmerData, exportData, packId, currentDate);
+  
+  doc.addPage();
   generateCertificate3_ComplianceAssessment(doc, farmerData, exportData, packId, currentDate);
+  
+  doc.addPage();
   generateCertificate4_DeforestationAnalysis(doc, farmerData, exportData, packId, currentDate);
+  
+  doc.addPage();
   generateCertificate5_DueDiligence(doc, farmerData, exportData, packId, currentDate);
+  
+  doc.addPage();
   generateCertificate6_SupplyTraceability(doc, farmerData, exportData, packId, currentDate);
 
   return doc;
@@ -45,8 +55,7 @@ export function generateEnhancedProfessionalEUDRPack(
 
 // Certificate 1: Enhanced Professional Cover Page
 function generateCertificate1_CoverPage(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
-  // Add first page (no automatic first page)
-  doc.addPage();
+  // Use the automatic first page (no manual addPage needed)
   // Professional header with gradient-like effect
   doc.rect(0, 0, 595, 120).fill('#1a365d');
   doc.rect(0, 120, 595, 10).fill('#2c5282');
@@ -127,7 +136,7 @@ function generateCertificate1_CoverPage(doc: PDFDocument, farmerData: FarmerData
 
 // Certificate 2: Export Eligibility with Advanced Charts
 function generateCertificate2_ExportEligibility(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
-  doc.addPage();
+  // Page already added in main function - no addPage() needed
   generateProfessionalHeader(doc, 'LACRA EXPORT ELIGIBILITY CERTIFICATE', packId, currentDate);
   
   // Enhanced eligibility assessment
@@ -196,7 +205,7 @@ function generateCertificate2_ExportEligibility(doc: PDFDocument, farmerData: Fa
 
 // Certificate 3: Enhanced Compliance Assessment with Advanced Charts
 function generateCertificate3_ComplianceAssessment(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
-  doc.addPage();
+  // Page already added in main function - no addPage() needed
   generateProfessionalHeader(doc, 'EUDR COMPLIANCE ASSESSMENT REPORT', packId, currentDate);
   
   // Enhanced KPI section
@@ -341,7 +350,7 @@ function generateCertificate3_ComplianceAssessment(doc: PDFDocument, farmerData:
 
 // Certificate 4: Enhanced Deforestation Analysis with Multiple Charts
 function generateCertificate4_DeforestationAnalysis(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
-  doc.addPage();
+  // Page already added in main function - no addPage() needed
   generateProfessionalHeader(doc, 'DEFORESTATION RISK ANALYSIS REPORT', packId, currentDate);
   
   // Risk analysis header
@@ -489,7 +498,7 @@ function generateCertificate4_DeforestationAnalysis(doc: PDFDocument, farmerData
 
 // Certificate 5: Enhanced Due Diligence Statement
 function generateCertificate5_DueDiligence(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
-  doc.addPage();
+  // Page already added in main function - no addPage() needed
   generateProfessionalHeader(doc, 'DUE DILIGENCE COMPLIANCE STATEMENT', packId, currentDate);
   
   // Due diligence header
@@ -536,7 +545,7 @@ function generateCertificate5_DueDiligence(doc: PDFDocument, farmerData: FarmerD
 
 // Certificate 6: Enhanced Supply Chain Traceability with Advanced Visualization
 function generateCertificate6_SupplyTraceability(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
-  doc.addPage();
+  // Page already added in main function - no addPage() needed
   generateProfessionalHeader(doc, 'SUPPLY CHAIN TRACEABILITY REPORT', packId, currentDate);
   
   // Traceability header

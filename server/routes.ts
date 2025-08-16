@@ -6203,6 +6203,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // NEW: Advanced Professional Certificate Generator - UniDOC Style
+  app.get('/api/download-professional-certificate/:id', async (req, res) => {
+    const { id: packId } = req.params;
+    
+    try {
+      console.log('🔥 GENERATING ADVANCED PROFESSIONAL CERTIFICATE...');
+      
+      // Get farmer data
+      const farmers = await storage.getFarmers();
+      const farmerData = farmers[0] || {
+        id: 'demo-farmer',
+        name: 'Demo Farmer',
+        county: 'Bomi County',
+        latitude: '6.7581',
+        longitude: '10.8065'
+      };
+      
+      // Get export data
+      const exportOrders = await storage.getExportOrders();
+      const exportData = exportOrders[0] || {
+        company: 'Liberia Premium Exports Ltd',
+        license: 'LEX-2024-' + Math.floor(Math.random() * 9999),
+        quantity: (Math.random() * 50 + 10).toFixed(1) + ' MT',
+        destination: 'European Union',
+        exportValue: '$' + (Math.random() * 100000 + 50000).toFixed(0),
+        vessel: 'Atlantic Cargo ' + Math.floor(Math.random() * 100),
+        exportDate: new Date(Date.now() + 7*24*60*60*1000).toLocaleDateString(),
+        shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
+      };
+      
+      console.log('📊 Using farmer data:', farmerData.name, 'from', farmerData.county);
+      console.log('🚢 Using export data:', exportData.company);
+      
+      // Generate advanced professional report
+      const { generateAdvancedProfessionalReport } = await import('./advanced-professional-generator.js');
+      const doc = generateAdvancedProfessionalReport(farmerData, exportData, packId);
+      
+      // Set headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="EUDR-Professional-Certificate-${packId}.pdf"`);
+      
+      console.log('✅ ADVANCED PROFESSIONAL CERTIFICATE GENERATED SUCCESSFULLY');
+      
+      // Pipe the PDF to response
+      doc.pipe(res);
+      doc.end();
+      
+    } catch (error) {
+      console.error('❌ Professional certificate generation error:', error);
+      res.status(500).json({ error: 'Failed to generate professional certificate: ' + error.message });
+    }
+  });
+
   // ENHANCED PROFESSIONAL EUDR CERTIFICATE - WITH REAL LOGOS & PREMIUM DESIGN
   app.get('/api/download-certificate/:packId', async (req, res) => {
     try {

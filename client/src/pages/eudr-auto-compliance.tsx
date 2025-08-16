@@ -137,13 +137,13 @@ export default function EudrAutoCompliancePage() {
     }
   });
 
-  // Download all documents as bundle mutation
-  const downloadAllMutation = useMutation({
+  // Download complete PDF pack mutation  
+  const downloadCompleteMutation = useMutation({
     mutationFn: async (packId: string) => {
-      const response = await fetch(`/api/eudr/download-all/${packId}`, {
+      const response = await fetch(`/api/eudr/final-pdf/${packId}`, {
         method: "GET"
       });
-      if (!response.ok) throw new Error("Failed to download bundle");
+      if (!response.ok) throw new Error("Failed to download complete pack");
       return { blob: await response.blob(), packId };
     },
     onSuccess: ({ blob, packId }) => {
@@ -151,21 +151,21 @@ export default function EudrAutoCompliancePage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `EUDR_Compliance_Pack_${packId}.txt`;
+      link.download = `EUDR_Complete_Pack_${packId}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
       toast({
-        title: "Bundle Downloaded",
-        description: `Complete EUDR compliance pack downloaded successfully`,
+        title: "Complete Pack Downloaded",
+        description: `All 6 EUDR documents downloaded in single PDF successfully`,
       });
     },
     onError: () => {
       toast({
         title: "Download Failed",
-        description: "Unable to download bundle. Please try again.",
+        description: "Unable to download complete pack. Please try again.",
         variant: "destructive"
       });
     }
@@ -467,12 +467,12 @@ export default function EudrAutoCompliancePage() {
                         <Button 
                           size="sm" 
                           className="w-full bg-green-600 hover:bg-green-700"
-                          onClick={() => downloadAllMutation.mutate(pack.packId)}
-                          disabled={downloadAllMutation.isPending}
-                          data-testid={`button-download-all-${pack.packId}`}
+                          onClick={() => downloadCompleteMutation.mutate(pack.packId)}
+                          disabled={downloadCompleteMutation.isPending}
+                          data-testid={`button-download-complete-${pack.packId}`}
                         >
                           <FileText className="h-4 w-4 mr-2" />
-                          {downloadAllMutation.isPending ? "Downloading..." : "Download All (Bundle)"}
+                          {downloadCompleteMutation.isPending ? "Downloading..." : "Download Complete Pack (PDF)"}
                         </Button>
                       </div>
                     </div>

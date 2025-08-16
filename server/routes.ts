@@ -6050,7 +6050,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // COMPLETE EUDR PDF PACK - All 6 documents in one PDF 
+  // COMPLETE EUDR PDF PACK - All 6 documents in one PDF - WORKING VERSION
   app.get('/api/eudr/final-pdf/:packId', async (req, res) => {
     try {
       const { packId } = req.params;
@@ -6070,238 +6070,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentDate = new Date().toLocaleDateString();
       
       // PAGE 1: COVER SHEET
-      doc.fontSize(20).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(14).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 75);
-      doc.fontSize(10).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 95);
+      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
+      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
+      doc.fontSize(12).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 100);
       
-      doc.fontSize(18).fillColor('red').text('EUDR COMPLIANCE PACK', 50, 140);
-      doc.fontSize(16).fillColor('blue').text('COMPLETE DOCUMENTATION PACKAGE', 50, 165);
+      doc.fontSize(20).fillColor('red').text('EUDR COMPLIANCE PACK', 50, 150);
+      doc.fontSize(18).fillColor('blue').text('COMPLETE DOCUMENTATION PACKAGE', 50, 180);
       
+      doc.fontSize(14).fillColor('black')
+         .text('Pack ID: ' + packId, 50, 220)
+         .text('Date: ' + currentDate, 350, 220)
+         .text('Farmer: Demo Farmer (John Smith)', 50, 250)
+         .text('Exporter: Global Trade Ltd.', 350, 250)
+         .text('Commodity: Premium Cocoa Beans', 50, 280)
+         .text('HS Code: 1801.00.00', 350, 280)
+         .text('Status: APPROVED', 50, 310);
+      
+      doc.fontSize(16).fillColor('green').text('COMPLIANCE SUMMARY:', 50, 350);
       doc.fontSize(12).fillColor('black')
-         .text(`Pack ID: ${packId}`, 50, 210)
-         .text(`Generation Date: ${currentDate}`, 300, 210)
-         .text('Farmer: Demo Farmer (John Smith)', 50, 235)
-         .text('Exporter: Global Trade Ltd.', 300, 235)
-         .text('Commodity: Premium Cocoa Beans', 50, 260)
-         .text('HS Code: 1801.00.00', 300, 260)
-         .text('Destination: European Union', 50, 285)
-         .text('Status: APPROVED', 300, 285);
+         .text('Overall Score: 95/100 (EXCELLENT)', 70, 380)
+         .text('Risk Level: LOW RISK', 70, 400)
+         .text('Deforestation Risk: NONE DETECTED', 70, 420)
+         .text('Forest Protection: 98/100', 70, 440)
+         .text('Documentation: 96/100', 70, 460);
       
-      doc.fontSize(14).fillColor('green').text('COMPLIANCE SUMMARY:', 50, 320);
-      doc.fontSize(10).fillColor('black')
-         .text('Overall Compliance Score: 95/100 (EXCELLENT)', 70, 345)
-         .text('Risk Classification: LOW RISK', 70, 365)
-         .text('Deforestation Risk: NONE DETECTED', 70, 385)
-         .text('Forest Protection Score: 98/100', 70, 405)
-         .text('Documentation Score: 96/100', 70, 425);
+      doc.fontSize(14).fillColor('blue').text('DOCUMENTS IN THIS PACK:', 50, 500);
+      doc.fontSize(12).fillColor('black')
+         .text('1. Cover Sheet (This Page)', 70, 530)
+         .text('2. Export Eligibility Certificate', 70, 550)
+         .text('3. EUDR Compliance Assessment', 70, 570)
+         .text('4. Deforestation Analysis Report', 70, 590)
+         .text('5. Due Diligence Statement', 70, 610)
+         .text('6. Supply Chain Traceability Report', 70, 630);
       
-      doc.fontSize(12).fillColor('blue').text('DOCUMENTS INCLUDED IN THIS PACK:', 50, 460);
-      doc.fontSize(10).fillColor('black')
-         .text('1. Cover Sheet (This Document)', 70, 485)
-         .text('2. LACRA Export Eligibility Certificate', 70, 505)
-         .text('3. EUDR Compliance Assessment', 70, 525)
-         .text('4. Deforestation Analysis Report', 70, 545)
-         .text('5. Due Diligence Statement', 70, 565)
-         .text('6. Supply Chain Traceability Report', 70, 585);
+      // PAGE 2: EXPORT CERTIFICATE
+      doc.addPage();
+      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
+      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
       
+      doc.fontSize(20).fillColor('red').text('EXPORT ELIGIBILITY CERTIFICATE', 50, 150);
+      doc.fontSize(16).fillColor('blue').text('Certificate No: LACRA-EXP-' + packId, 50, 180);
+      
+      doc.fontSize(14).fillColor('black').text('CERTIFICATION STATEMENT:', 50, 220);
+      doc.fontSize(12).text('This certifies that the agricultural commodity described below', 50, 250);
+      doc.fontSize(12).text('is eligible for export from Liberia to European Union markets.', 50, 270);
+      
+      doc.fontSize(14).fillColor('blue').text('COMMODITY DETAILS:', 50, 310);
+      doc.fontSize(12).fillColor('black')
+         .text('Farmer Name: Demo Farmer (John Smith)', 70, 340)
+         .text('Farm Location: Montserrado County, Liberia', 70, 360)
+         .text('Commodity Type: Premium Cocoa Beans', 70, 380)
+         .text('Quality Grade: Grade A Premium', 70, 400)
+         .text('HS Classification: 1801.00.00', 70, 420)
+         .text('Estimated Quantity: 2,500 kg', 70, 440);
+      
+      doc.fontSize(14).fillColor('green').text('CERTIFICATION CONFIRMED:', 50, 480);
+      doc.fontSize(12).fillColor('black')
+         .text('✓ All LACRA export requirements met', 70, 510)
+         .text('✓ EUDR compliance verified', 70, 530)
+         .text('✓ Quality standards confirmed', 70, 550)
+         .text('✓ Export approved for EU markets', 70, 570);
+      
+      // PAGE 3: COMPLIANCE ASSESSMENT
+      doc.addPage();
+      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
+      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
+      
+      doc.fontSize(20).fillColor('green').text('EUDR COMPLIANCE ASSESSMENT', 50, 150);
+      doc.fontSize(16).fillColor('blue').text('Assessment ID: EUDR-ASSESS-' + packId, 50, 180);
+      
+      doc.fontSize(14).fillColor('blue').text('ASSESSMENT RESULTS:', 50, 220);
+      doc.fontSize(12).fillColor('black')
+         .text('Assessment Date: ' + currentDate, 70, 250)
+         .text('Assessment Type: Full EUDR Review', 70, 270)
+         .text('Result: COMPLIANT - APPROVED', 70, 290);
+      
+      doc.fontSize(14).fillColor('blue').text('COMPLIANCE SCORES:', 50, 330);
+      doc.fontSize(12).fillColor('black')
+         .text('Overall Compliance: 95/100 (EXCELLENT)', 70, 360)
+         .text('Deforestation Risk: 98/100 (NO RISK)', 70, 380)
+         .text('Supply Chain: 94/100 (EXCELLENT)', 70, 400)
+         .text('Documentation: 96/100 (EXCELLENT)', 70, 420)
+         .text('Environmental: 97/100 (EXCELLENT)', 70, 440);
+      
+      doc.fontSize(14).fillColor('green').text('CONCLUSION:', 50, 480);
+      doc.fontSize(12).fillColor('black')
+         .text('This commodity fully complies with EU Deforestation', 70, 510)
+         .text('Regulation requirements and is approved for export.', 70, 530);
+      
+      // PAGE 4: DEFORESTATION ANALYSIS
+      doc.addPage();
+      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
+      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
+      
+      doc.fontSize(20).fillColor('red').text('DEFORESTATION ANALYSIS REPORT', 50, 150);
+      doc.fontSize(16).fillColor('blue').text('Analysis ID: DEFOR-' + packId, 50, 180);
+      
+      doc.fontSize(14).fillColor('blue').text('SATELLITE MONITORING:', 50, 220);
+      doc.fontSize(12).fillColor('black')
+         .text('Data Sources: Sentinel-2, Landsat-8, MODIS', 70, 250)
+         .text('Monitoring Period: Jan 2020 - ' + currentDate, 70, 270)
+         .text('Resolution: 10m pixel accuracy', 70, 290);
+      
+      doc.fontSize(14).fillColor('blue').text('ANALYSIS RESULTS:', 50, 330);
+      doc.fontSize(12).fillColor('black')
+         .text('Forest Cover Change: 0.0% (No deforestation)', 70, 360)
+         .text('Tree Cover Loss: 0 hectares', 70, 380)
+         .text('Net Change: +0.2 hectares (POSITIVE)', 70, 400);
+      
+      doc.fontSize(14).fillColor('green').text('CONCLUSION:', 50, 440);
+      doc.fontSize(12).fillColor('black')
+         .text('Satellite analysis confirms NO DEFORESTATION', 70, 470)
+         .text('associated with this commodity production.', 70, 490);
+      
+      // PAGE 5: DUE DILIGENCE
+      doc.addPage();
+      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
+      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
+      
+      doc.fontSize(20).fillColor('purple').text('DUE DILIGENCE STATEMENT', 50, 150);
+      doc.fontSize(16).fillColor('blue').text('Statement ID: DD-' + packId, 50, 180);
+      
+      doc.fontSize(14).fillColor('blue').text('DUE DILIGENCE CONFIRMATION:', 50, 220);
+      doc.fontSize(12).fillColor('black')
+         .text('Comprehensive due diligence procedures conducted', 50, 250)
+         .text('in accordance with EUDR requirements.', 50, 270);
+      
+      doc.fontSize(14).fillColor('blue').text('PROCEDURES COMPLETED:', 50, 310);
+      doc.fontSize(12).fillColor('black')
+         .text('✓ Farm boundary GPS verification', 70, 340)
+         .text('✓ Satellite deforestation monitoring', 70, 360)
+         .text('✓ Supply chain documentation', 70, 380)
+         .text('✓ Farmer identity verification', 70, 400)
+         .text('✓ Environmental assessment', 70, 420);
+      
+      doc.fontSize(14).fillColor('green').text('VERIFICATION COMPLETE:', 50, 460);
+      doc.fontSize(12).fillColor('black')
+         .text('All due diligence requirements satisfied.', 70, 490)
+         .text('Commodity meets EUDR standards.', 70, 510);
+      
+      // PAGE 6: TRACEABILITY
+      doc.addPage();
+      doc.fontSize(24).fillColor('blue').text('LACRA', 50, 50);
+      doc.fontSize(16).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 80);
+      
+      doc.fontSize(20).fillColor('orange').text('SUPPLY CHAIN TRACEABILITY', 50, 150);
+      doc.fontSize(16).fillColor('blue').text('Trace ID: TRACE-' + packId, 50, 180);
+      
+      doc.fontSize(14).fillColor('blue').text('ORIGIN DETAILS:', 50, 220);
+      doc.fontSize(12).fillColor('black')
+         .text('Producer: Demo Farmer (John Smith)', 70, 250)
+         .text('Location: Montserrado County, Liberia', 70, 270)
+         .text('GPS: 6.3156°N, 10.8074°W', 70, 290)
+         .text('Farm Size: 5.2 hectares', 70, 310);
+      
+      doc.fontSize(14).fillColor('blue').text('SUPPLY CHAIN PATH:', 50, 350);
+      doc.fontSize(12).fillColor('black')
+         .text('1. Farm Production → Quality control', 70, 380)
+         .text('2. Processing → Drying and sorting', 70, 400)
+         .text('3. Collection → Quality verification', 70, 420)
+         .text('4. Export → Monrovia Port to Hamburg', 70, 440);
+      
+      doc.fontSize(14).fillColor('blue').text('DESTINATION:', 50, 480);
+      doc.fontSize(12).fillColor('black')
+         .text('Country: Germany, European Union', 70, 510)
+         .text('Port: Hamburg Port', 70, 530)
+         .text('Buyer: European Cocoa Processors', 70, 550);
+      
+      // Add footer to final page
       doc.fontSize(10).fillColor('gray')
-         .text('This comprehensive pack contains all required EUDR compliance documentation.', 50, 620)
-         .text('All documents have been verified and approved by LACRA regulatory authorities.', 50, 640);
-      
-      // PAGE 2: EXPORT ELIGIBILITY CERTIFICATE
-      doc.addPage();
-      doc.fontSize(20).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(14).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 75);
-      doc.fontSize(10).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 95);
-      
-      doc.fontSize(18).fillColor('red').text('EXPORT ELIGIBILITY CERTIFICATE', 50, 140);
-      doc.fontSize(14).fillColor('blue').text(`Certificate No: LACRA-EXP-${packId}`, 50, 170);
-      
-      doc.fontSize(12).fillColor('black').text('CERTIFICATION STATEMENT:', 50, 210);
-      doc.fontSize(10).text('This certifies that the agricultural commodity described below is eligible', 50, 235);
-      doc.fontSize(10).text('for export from Liberia and meets all regulatory requirements.', 50, 250);
-      
-      doc.fontSize(12).fillColor('blue').text('COMMODITY DETAILS:', 50, 285);
-      doc.fontSize(10).fillColor('black')
-         .text('Farmer Name: Demo Farmer (John Smith)', 70, 310)
-         .text('Farm Location: Montserrado County, Liberia', 70, 330)
-         .text('Commodity Type: Premium Cocoa Beans', 70, 350)
-         .text('HS Classification: 1801.00.00', 70, 370)
-         .text('Estimated Quantity: 2,500 kg', 70, 390)
-         .text('Harvest Period: 2024 Main Season', 70, 410)
-         .text('Quality Grade: Grade A Premium', 70, 430);
-      
-      doc.fontSize(12).fillColor('blue').text('EXPORTER DETAILS:', 50, 465);
-      doc.fontSize(10).fillColor('black')
-         .text('Company Name: Global Trade Ltd.', 70, 490)
-         .text('Registration No: EXP-2024-0157', 70, 510)
-         .text('Export License: Valid until Dec 2025', 70, 530)
-         .text('Destination Port: Hamburg, Germany', 70, 550);
-      
-      doc.fontSize(12).fillColor('green').text('CERTIFICATION CONFIRMATION:', 50, 585);
-      doc.fontSize(10).fillColor('black')
-         .text('✓ All LACRA export requirements met', 70, 610)
-         .text('✓ EUDR compliance verified', 70, 630)
-         .text('✓ Quality standards confirmed', 70, 650)
-         .text('✓ Documentation complete and valid', 70, 670);
-      
-      // PAGE 3: EUDR COMPLIANCE ASSESSMENT
-      doc.addPage();
-      doc.fontSize(20).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(14).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 75);
-      doc.fontSize(10).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 95);
-      
-      doc.fontSize(18).fillColor('green').text('EUDR COMPLIANCE ASSESSMENT', 50, 140);
-      doc.fontSize(14).fillColor('blue').text(`Assessment ID: EUDR-ASSESS-${packId}`, 50, 170);
-      
-      doc.fontSize(12).fillColor('blue').text('ASSESSMENT SUMMARY:', 50, 210);
-      doc.fontSize(10).fillColor('black')
-         .text('Assessment Date: ' + currentDate, 70, 235)
-         .text('Assessment Type: Full EUDR Compliance Review', 70, 255)
-         .text('Assessor: LACRA Compliance Team', 70, 275)
-         .text('Status: COMPLIANT - APPROVED', 70, 295);
-      
-      doc.fontSize(12).fillColor('blue').text('COMPLIANCE SCORES:', 50, 330);
-      doc.fontSize(10).fillColor('black')
-         .text('Overall Compliance Score: 95/100 (EXCELLENT)', 70, 355)
-         .text('Deforestation Risk Assessment: 98/100 (NO RISK)', 70, 375)
-         .text('Supply Chain Traceability: 94/100 (EXCELLENT)', 70, 395)
-         .text('Documentation Completeness: 96/100 (EXCELLENT)', 70, 415)
-         .text('Environmental Compliance: 97/100 (EXCELLENT)', 70, 435)
-         .text('Social Compliance: 93/100 (GOOD)', 70, 455);
-      
-      doc.fontSize(12).fillColor('blue').text('RISK CLASSIFICATION:', 50, 490);
-      doc.fontSize(10).fillColor('black')
-         .text('Overall Risk Level: LOW RISK', 70, 515)
-         .text('Deforestation Risk: NEGLIGIBLE', 70, 535)
-         .text('Supply Chain Risk: LOW', 70, 555)
-         .text('Regulatory Risk: MINIMAL', 70, 575);
-      
-      doc.fontSize(12).fillColor('green').text('ASSESSMENT CONCLUSION:', 50, 610);
-      doc.fontSize(10).fillColor('black')
-         .text('This commodity fully complies with EU Deforestation Regulation', 70, 635)
-         .text('requirements and is approved for export to European markets.', 70, 655);
-      
-      // PAGE 4: DEFORESTATION ANALYSIS REPORT
-      doc.addPage();
-      doc.fontSize(20).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(14).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 75);
-      doc.fontSize(10).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 95);
-      
-      doc.fontSize(18).fillColor('red').text('DEFORESTATION ANALYSIS REPORT', 50, 140);
-      doc.fontSize(14).fillColor('blue').text(`Analysis ID: DEFOR-${packId}`, 50, 170);
-      
-      doc.fontSize(12).fillColor('blue').text('SATELLITE MONITORING DATA:', 50, 210);
-      doc.fontSize(10).fillColor('black')
-         .text('Data Source: Sentinel-2, Landsat-8, MODIS', 70, 235)
-         .text('Monitoring Period: January 2020 - ' + currentDate, 70, 255)
-         .text('Analysis Resolution: 10m pixel accuracy', 70, 275)
-         .text('Coverage Area: Complete farm boundaries verified', 70, 295);
-      
-      doc.fontSize(12).fillColor('blue').text('FOREST ANALYSIS RESULTS:', 50, 330);
-      doc.fontSize(10).fillColor('black')
-         .text('Forest Cover Change: 0.0% (No deforestation detected)', 70, 355)
-         .text('Tree Cover Loss: 0 hectares', 70, 375)
-         .text('Forest Gain: 0.2 hectares (Natural regeneration)', 70, 395)
-         .text('Net Forest Change: +0.2 hectares (POSITIVE)', 70, 415);
-      
-      doc.fontSize(12).fillColor('blue').text('ENVIRONMENTAL IMPACT ASSESSMENT:', 50, 450);
-      doc.fontSize(10).fillColor('black')
-         .text('Carbon Stock Impact: Minimal (+100 tCO2 estimated)', 70, 475)
-         .text('Biodiversity Impact: Low impact, protected areas maintained', 70, 495)
-         .text('Water Resource Impact: No negative impact detected', 70, 515)
-         .text('Soil Health: Maintained at sustainable levels', 70, 535);
-      
-      doc.fontSize(12).fillColor('green').text('CONCLUSION:', 50, 570);
-      doc.fontSize(10).fillColor('black')
-         .text('Comprehensive satellite analysis confirms NO DEFORESTATION', 70, 595)
-         .text('activity associated with this commodity production. Farm operations', 70, 615)
-         .text('are conducted within existing agricultural boundaries with no', 70, 635)
-         .text('expansion into forest areas.', 70, 655);
-      
-      // PAGE 5: DUE DILIGENCE STATEMENT
-      doc.addPage();
-      doc.fontSize(20).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(14).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 75);
-      doc.fontSize(10).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 95);
-      
-      doc.fontSize(18).fillColor('purple').text('DUE DILIGENCE STATEMENT', 50, 140);
-      doc.fontSize(14).fillColor('blue').text(`Statement ID: DD-${packId}`, 50, 170);
-      
-      doc.fontSize(12).fillColor('blue').text('DUE DILIGENCE DECLARATION:', 50, 210);
-      doc.fontSize(10).fillColor('black')
-         .text('This statement confirms that comprehensive due diligence procedures', 50, 235)
-         .text('have been conducted in full accordance with EU Deforestation', 50, 255)
-         .text('Regulation (EUDR) requirements and international best practices.', 50, 275);
-      
-      doc.fontSize(12).fillColor('blue').text('VERIFICATION PROCEDURES COMPLETED:', 50, 310);
-      doc.fontSize(10).fillColor('black')
-         .text('✓ Farm boundary GPS mapping and verification', 70, 335)
-         .text('✓ Satellite monitoring for deforestation detection', 70, 355)
-         .text('✓ Supply chain traceability documentation', 70, 375)
-         .text('✓ Farmer registration and identity verification', 70, 395)
-         .text('✓ Commodity origin and production method verification', 70, 415)
-         .text('✓ Environmental impact assessment completion', 70, 435)
-         .text('✓ Social compliance and labor standards review', 70, 455);
-      
-      doc.fontSize(12).fillColor('blue').text('DOCUMENTATION REVIEWED:', 50, 490);
-      doc.fontSize(10).fillColor('black')
-         .text('• Farmer registration certificates', 70, 515)
-         .text('• Land use permits and titles', 70, 535)
-         .text('• GPS coordinates and farm mapping data', 70, 555)
-         .text('• Production records and harvest documentation', 70, 575)
-         .text('• Quality control and testing results', 70, 595);
-      
-      doc.fontSize(12).fillColor('green').text('DUE DILIGENCE CONCLUSION:', 50, 630);
-      doc.fontSize(10).fillColor('black')
-         .text('All due diligence requirements have been successfully completed.', 70, 655)
-         .text('This commodity meets EUDR standards for European market entry.', 70, 675);
-      
-      // PAGE 6: SUPPLY CHAIN TRACEABILITY REPORT
-      doc.addPage();
-      doc.fontSize(20).fillColor('blue').text('LACRA', 50, 50);
-      doc.fontSize(14).fillColor('gray').text('Liberia Agriculture Commodity Regulatory Authority', 50, 75);
-      doc.fontSize(10).fillColor('gray').text('In partnership with ECOENVIRO Audit & Certification', 50, 95);
-      
-      doc.fontSize(18).fillColor('orange').text('SUPPLY CHAIN TRACEABILITY REPORT', 50, 140);
-      doc.fontSize(14).fillColor('blue').text(`Traceability ID: TRACE-${packId}`, 50, 170);
-      
-      doc.fontSize(12).fillColor('blue').text('SUPPLY CHAIN OVERVIEW:', 50, 210);
-      doc.fontSize(10).fillColor('black')
-         .text('Complete end-to-end traceability from farm to export point', 50, 235)
-         .text('with full documentation and verification at each stage.', 50, 255);
-      
-      doc.fontSize(12).fillColor('blue').text('ORIGIN DETAILS:', 50, 290);
-      doc.fontSize(10).fillColor('black')
-         .text('Primary Producer: Demo Farmer (John Smith)', 70, 315)
-         .text('Farm Location: Montserrado County, Liberia', 70, 335)
-         .text('GPS Coordinates: 6.3156°N, 10.8074°W', 70, 355)
-         .text('Farm Size: 5.2 hectares', 70, 375)
-         .text('Production Method: Sustainable agroforestry', 70, 395);
-      
-      doc.fontSize(12).fillColor('blue').text('SUPPLY CHAIN STAGES:', 50, 430);
-      doc.fontSize(10).fillColor('black')
-         .text('1. Farm Production → Quality control and harvest', 70, 455)
-         .text('2. Primary Processing → Initial drying and sorting', 70, 475)
-         .text('3. Collection Point → Aggregation and quality verification', 70, 495)
-         .text('4. Storage Facility → Proper storage conditions maintained', 70, 515)
-         .text('5. Export Preparation → Final quality control and packaging', 70, 535)
-         .text('6. Port of Departure → Monrovia Port, Liberia', 70, 555);
-      
-      doc.fontSize(12).fillColor('blue').text('DESTINATION INFORMATION:', 50, 590);
-      doc.fontSize(10).fillColor('black')
-         .text('Destination Country: Germany, European Union', 70, 615)
-         .text('Port of Entry: Hamburg Port', 70, 635)
-         .text('Final Buyer: European Cocoa Processors Ltd.', 70, 655);
-      
-      // Add footers to all pages
-      for (let i = 0; i < 6; i++) {
-        doc.switchToPage(i);
-        doc.fontSize(8).fillColor('gray')
-           .text(`Generated: ${currentDate}`, 50, 750)
-           .text(`Pack ID: ${packId}`, 200, 750)
-           .text('compliance@lacra.gov.lr | cert@ecoenviro.com', 350, 750);
-      }
+         .text('Generated: ' + currentDate + ' | Pack ID: ' + packId + ' | compliance@lacra.gov.lr | cert@ecoenviro.com', 50, 750);
       
       doc.end();
       
@@ -6551,10 +6489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
          .text('All due diligence requirements have been successfully completed.', 70, 655)
          .text('This commodity meets EUDR standards for European market entry.', 70, 675);
       
-      doc.fontSize(8).fillColor('#64748b')
-         .text(`Verified Date: ${currentDate}`, 50, 750)
-         .text(`Statement ID: DD-${packId}`, 200, 750)
-         .text('diligence@lacra.gov.lr', 400, 750);
+      // Remove old problematic footer
       
       // NEW PAGE: DOCUMENT 6 - TRACEABILITY REPORT
       doc.addPage();

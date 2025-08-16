@@ -6903,48 +6903,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.fontSize(9).fillColor('#93c5fd')
          .text('Certificate Document 6 of 6 - FINAL APPROVAL', fcTitleSection.x, fcTitleSection.y + 70);
       
-      // FINAL CERTIFICATION - COMPLETELY REDESIGNED WITHOUT OVERLAPPING
+      // COMPLETELY REDESIGNED FINAL CERTIFICATION - CLEAN PROFESSIONAL LAYOUT
       
-      // Main panel with vibrant professional design
-      doc.rect(50, 160, 495, 500).fill('#f0f9ff').stroke('#2563eb', 4);
-      doc.rect(55, 165, 485, 35).fill('#1e40af');
-      doc.fontSize(22).fillColor('#ffffff').font('Helvetica-Bold').text('OFFICIAL EUDR COMPLIANCE CERTIFICATION', 170, 177);
+      // Main certificate panel - clean and spacious
+      doc.rect(40, 170, 515, 480).fill('#ffffff').stroke('#1e40af', 4);
       
-      // Certificate statement section - properly spaced
-      doc.rect(70, 220, 455, 100).fill('#ffffff').stroke('#cbd5e1', 2);
-      doc.fontSize(18).fillColor('#1e293b').font('Helvetica-Bold').text('CERTIFICATE OF COMPLIANCE', 220, 240);
+      // Header section with clean design
+      doc.rect(50, 180, 495, 40).fill('#1e40af');
+      doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('OFFICIAL EUDR COMPLIANCE CERTIFICATE', 200, 195);
       
-      doc.fontSize(12).fillColor('#4b5563').text('This certifies that agricultural commodities produced by:', 85, 265);
-      doc.fontSize(14).fillColor('#1e40af').font('Helvetica-Bold').text(`${name || 'Test Farmer'} - ${county || 'Bomi County'}, Liberia`, 85, 285);
-      doc.fontSize(11).fillColor('#6b7280').text(`Export Partner: ${exporterData.company} | Destination: EU`, 85, 305);
+      // Farmer information section - clearly separated
+      doc.rect(60, 240, 475, 60).fill('#f8fafc').stroke('#e5e7eb', 2);
+      doc.fontSize(14).fillColor('#1e293b').font('Helvetica-Bold').text('CERTIFICATE HOLDER INFORMATION', 240, 255);
+      doc.fontSize(12).fillColor('#374151').text(`Farmer: ${name || 'Test Farmer'}`, 80, 275);
+      doc.fontSize(12).fillColor('#374151').text(`Location: ${county || 'Bomi County'}, Liberia`, 80, 290);
       
-      // Certification status section - NO OVERLAP
-      doc.rect(70, 340, 455, 120).fill('#f8fafc').stroke('#e5e7eb', 2);
-      doc.fontSize(16).fillColor('#059669').font('Helvetica-Bold').text('✓ FULLY COMPLIANT WITH EU REGULATION 2023/1115', 150, 365);
+      // Export information section - well spaced
+      doc.rect(60, 320, 475, 60).fill('#f0f9ff').stroke('#3b82f6', 2);
+      doc.fontSize(14).fillColor('#1e40af').font('Helvetica-Bold').text('EXPORT CERTIFICATION DETAILS', 250, 335);
+      doc.fontSize(12).fillColor('#374151').text(`Export Company: ${exporterData.company}`, 80, 355);
+      doc.fontSize(12).fillColor('#374151').text(`Destination: European Union | Quantity: ${exporterData.quantity}`, 80, 370);
       
-      // Triple seals with enhanced spacing - 150px apart
-      doc.circle(145, 420, 28).fill('#10b981').stroke('#ffffff', 5);
-      doc.fontSize(20).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 136, 410);
-      doc.fontSize(11).fillColor('#059669').font('Helvetica-Bold').text('LACRA VERIFIED', 115, 455);
+      // Compliance declaration - prominent section
+      doc.rect(60, 400, 475, 80).fill('#ecfdf5').stroke('#10b981', 3);
+      doc.fontSize(16).fillColor('#059669').font('Helvetica-Bold').text('✓ CERTIFIED COMPLIANT', 250, 420);
+      doc.fontSize(14).fillColor('#374151').text('Meets all requirements of EU Regulation 2023/1115', 180, 445);
+      doc.fontSize(12).fillColor('#6b7280').text('Deforestation-Free Products Regulation', 220, 465);
       
-      doc.circle(295, 420, 28).fill('#3b82f6').stroke('#ffffff', 5);
-      doc.fontSize(20).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 286, 410);
-      doc.fontSize(11).fillColor('#1d4ed8').font('Helvetica-Bold').text('EUDR COMPLIANT', 265, 455);
+      // Certification seals - properly spaced horizontally
+      doc.circle(150, 530, 25).fill('#10b981').stroke('#ffffff', 4);
+      doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 143, 523);
+      doc.fontSize(10).fillColor('#059669').font('Helvetica-Bold').text('LACRA', 140, 565);
+      doc.fontSize(9).fillColor('#059669').text('VERIFIED', 135, 575);
       
-      doc.circle(445, 420, 28).fill('#dc2626').stroke('#ffffff', 5);
-      doc.fontSize(20).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 436, 410);
-      doc.fontSize(11).fillColor('#dc2626').font('Helvetica-Bold').text('ECOENVIRO CERTIFIED', 410, 455);
+      doc.circle(297, 530, 25).fill('#3b82f6').stroke('#ffffff', 4);
+      doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 290, 523);
+      doc.fontSize(10).fillColor('#1d4ed8').font('Helvetica-Bold').text('EUDR', 290, 565);
+      doc.fontSize(9).fillColor('#1d4ed8').text('COMPLIANT', 280, 575);
       
-      // Authentication footer - properly positioned
-      doc.rect(70, 480, 455, 160).fill('#1f2937').stroke('#4b5563', 3);
-      doc.rect(75, 485, 445, 30).fill('#374151');
-      doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold').text('CERTIFICATE VALIDITY & AUTHENTICATION', 200, 495);
+      doc.circle(445, 530, 25).fill('#dc2626').stroke('#ffffff', 4);
+      doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 438, 523);
+      doc.fontSize(10).fillColor('#dc2626').font('Helvetica-Bold').text('ECOENVIRO', 425, 565);
+      doc.fontSize(9).fillColor('#dc2626').text('CERTIFIED', 430, 575);
       
-      doc.fontSize(13).fillColor('#e5e7eb').text(`Certificate ID: LACRA-EUDR-${packId.slice(-8)}`, 85, 530);
-      doc.fontSize(12).fillColor('#d1d5db').text(`Issue Date: ${currentDate}`, 85, 550);
-      doc.fontSize(12).fillColor('#d1d5db').text(`Valid Period: 24 months`, 85, 570);
-      doc.fontSize(11).fillColor('#9ca3af').text(`Next Review: ${new Date(Date.now() + 24*30*24*60*60*1000).toLocaleDateString()}`, 85, 590);
-      doc.fontSize(10).fillColor('#6b7280').text('Verification: compliance@lacra.gov.lr | certification@ecoenviro.com', 85, 615);
+      // Certificate validity footer - well positioned
+      doc.rect(60, 600, 475, 40).fill('#1f2937');
+      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text('CERTIFICATE VALIDITY', 80, 615);
+      doc.fontSize(10).fillColor('#d1d5db').text(`ID: LACRA-EUDR-${packId.slice(-8)} | Issue: ${currentDate} | Valid: 24 months`, 300, 615);
+      doc.fontSize(9).fillColor('#9ca3af').text('Verification: compliance@lacra.gov.lr | certification@ecoenviro.com', 80, 630);
 
       // FARMER INFORMATION WITH VISUAL ELEMENTS
       doc.rect(60, 130, 475, 120).fill('#f7fafc').stroke('#cbd5e0', 2);

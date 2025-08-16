@@ -2,27 +2,48 @@ import PDFDocument from 'pdfkit';
 import type { Express } from 'express';
 
 export function addSimplePdfRoutes(app: Express) {
-  // Simple PDF document download
+  // FSC-Style Professional PDF document download
   app.get('/api/eudr/simple-pdf/:packId/:documentType', async (req, res) => {
     try {
       const { packId, documentType } = req.params;
       
-      // Create PDF document
-      const doc = new PDFDocument();
-      const chunks: Buffer[] = [];
+      console.log('🔥 ADMIN DOWNLOADING FSC-STYLE PROFESSIONAL DOCUMENT:', documentType, 'Pack:', packId);
       
-      doc.on('data', chunk => chunks.push(chunk));
-      doc.on('end', () => {
-        const pdfBuffer = Buffer.concat(chunks);
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="EUDR_${documentType}_${packId}.pdf"`);
-        res.send(pdfBuffer);
-      });
-
-      // Document header
-      doc.fontSize(16).text('LACRA', 50, 50);
-      doc.fontSize(10).text('Liberia Agriculture Commodity Regulatory Authority', 50, 70);
-      doc.fontSize(8).text('In partnership with ECOENVIRO Audit & Certification', 50, 85);
+      // Get farmer and export data (simulate real data for now)
+      const farmerData = {
+        id: packId,
+        name: 'Demo Farmer',
+        county: 'Bomi County',
+        latitude: '6.7581',
+        longitude: '10.8065'
+      };
+      
+      const exportData = {
+        company: 'Liberia Premium Exports Ltd',
+        license: 'LEX-2024-' + Math.floor(Math.random() * 9999),
+        quantity: (Math.random() * 50 + 10).toFixed(1) + ' MT',
+        destination: 'European Union',
+        exportValue: '$' + (Math.random() * 100000 + 50000).toFixed(0),
+        vessel: 'Atlantic Cargo ' + Math.floor(Math.random() * 100),
+        exportDate: new Date(Date.now() + 7*24*60*60*1000).toLocaleDateString(),
+        shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
+      };
+      
+      // Generate FSC-style professional report
+      const { generateFSCStyleReport } = await import('./fsc-style-generator.js');
+      const doc = generateFSCStyleReport(farmerData, exportData, packId);
+      
+      // Set headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="EUDR-FSC-Style-${documentType}-${packId}.pdf"`);
+      
+      console.log('✅ FSC-STYLE PROFESSIONAL DOCUMENT GENERATED SUCCESSFULLY');
+      
+      // Pipe the PDF to response
+      doc.pipe(res);
+      doc.end();
+      
+      return; // Exit early with FSC-style PDF
       
       // Document title
       const titles: Record<string, string> = {

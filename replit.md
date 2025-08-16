@@ -7,6 +7,7 @@ AgriTrace360™ is a comprehensive web application for the Liberia Agriculture C
 Preferred communication style: Simple, everyday language.
 Maintenance Page Preference: Always use the generic maintenance page template (red gradient background, "Website Maintenance" title, no specific branding) for any maintenance page requests. This template is stored in server/index.ts as inline HTML.
 Module Development Strategy: Ready to simultaneously develop all 7 new modules (Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, Carbon Trace) with complete functionality, maintaining consistent ISMS.online-inspired design system and professional standards from AgriTrace360. Will create full database schemas, backend APIs, frontend interfaces, and cross-module integration for each portal.
+PDF Report Design Preference: User requires completely different format from current approach - awaiting reference design to implement proper professional reporting standards that match their specific requirements.
 
 ## Recent Changes (August 12, 2025)
 - **DUAL CERTIFICATION INTEGRATION**: Successfully integrated ECOENVIRO Audit & Certification logo alongside LACRA logo in all compliance and deforestation reports

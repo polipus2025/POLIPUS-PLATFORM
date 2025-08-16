@@ -27,120 +27,305 @@ export function generateAdvancedProfessionalReport(
 ): PDFDocument {
   const doc = new PDFDocument({ 
     size: 'A4', 
-    margins: { top: 30, bottom: 30, left: 30, right: 30 },
+    margins: { top: 40, bottom: 40, left: 40, right: 40 },
     info: {
-      Title: 'EUDR Compliance Report - Professional',
-      Author: 'LACRA & ECOENVIRO',
-      Subject: 'EU Deforestation Regulation Compliance Certificate'
+      Title: 'EUDR Compliance Certificate - Professional Edition',
+      Author: 'LACRA & ECOENVIRO Certification Services',
+      Subject: 'EU Deforestation Regulation Compliance Documentation'
     }
   });
 
   const currentDate = new Date().toLocaleDateString();
-  const pageWidth = 595;
-  const pageHeight = 842;
 
-  // PROFESSIONAL ENTERPRISE HEADER
-  generateProfessionalHeader(doc, packId, currentDate);
+  // MODERN CORPORATE HEADER - FSC Style
+  generateModernCorporateHeader(doc, packId, currentDate);
   
-  // EXECUTIVE SUMMARY SECTION
-  generateExecutiveSummary(doc, farmerData, exportData);
+  // COMPLIANCE JOURNEY INFOGRAPHIC
+  generateComplianceJourneyTimeline(doc, farmerData, exportData);
   
-  // ADVANCED KPI DASHBOARD
-  generateAdvancedKPIDashboard(doc);
+  // BENEFITS SECTION WITH ICONS
+  generateBenefitsSection(doc);
   
-  // PROFESSIONAL CHARTS SECTION
-  generateProfessionalCharts(doc);
+  // TIMELINE INFOGRAPHIC
+  generateTimelineInfographic(doc);
   
-  // COMPLIANCE MATRIX
-  generateComplianceMatrix(doc);
+  // CERTIFICATION DETAILS BOX
+  generateCertificationDetailsBox(doc, farmerData, exportData, packId);
   
-  // PROFESSIONAL FOOTER
-  generateProfessionalFooter(doc, packId, currentDate);
+  // MODERN FOOTER
+  generateModernFooter(doc, packId, currentDate);
 
   return doc;
 }
 
-function generateProfessionalHeader(doc: PDFDocument, packId: string, currentDate: string) {
-  // Clean white background with professional accent
-  doc.rect(0, 0, 595, 80).fill('#ffffff');
-  doc.rect(0, 0, 595, 4).fill('#dc2626'); // Professional red accent stripe
+function generateModernCorporateHeader(doc: PDFDocument, packId: string, currentDate: string) {
+  // Clean white background
+  doc.rect(0, 0, 595, 120).fill('#ffffff');
   
-  // Header background
-  doc.rect(0, 4, 595, 76).fill('#f8fafc');
+  // Top brand line - subtle
+  doc.rect(0, 0, 595, 3).fill('#2d3748');
   
-  // Company branding section - left aligned
-  doc.fontSize(24).fillColor('#1f2937').font('Helvetica-Bold')
-     .text('EUDR COMPLIANCE REPORT', 40, 20);
+  // Main header area with subtle background
+  doc.rect(0, 3, 595, 117).fill('#fafafa');
   
-  doc.fontSize(12).fillColor('#4b5563')
-     .text('European Union Deforestation Regulation | Professional Assessment', 40, 50);
+  // Large title section - FSC style
+  doc.fontSize(28).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('STREAMLINE YOUR', 60, 25);
+  doc.fontSize(28).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('EUDR COMPLIANCE JOURNEY', 60, 55);
   
-  // Status badge - professional design
-  doc.rect(40, 60, 100, 18).fill('#dcfce7').stroke('#16a34a', 1);
-  doc.fontSize(10).fillColor('#15803d').font('Helvetica-Bold')
-     .text('✓ CERTIFIED COMPLIANT', 50, 67);
+  // Subtitle with modern styling
+  doc.fontSize(12).fillColor('#4a5568')
+     .text('LACRA® is taking the guesswork and complexity out of EUDR requirements,', 60, 85);
+  doc.fontSize(12).fillColor('#4a5568')
+     .text('helping certificate holders become compliant on time.', 60, 100);
   
-  // Right side - certification badges
-  doc.rect(450, 15, 120, 20).fill('#1e40af');
-  doc.fontSize(9).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('LACRA CERTIFIED', 465, 22);
-  
-  doc.rect(450, 40, 120, 20).fill('#059669');
-  doc.fontSize(9).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('ECOENVIRO VERIFIED', 460, 47);
-  
-  // Document metadata
-  doc.fontSize(8).fillColor('#6b7280')
-     .text(`Report ID: ${packId.slice(-8)} | Generated: ${currentDate}`, 450, 65);
+  // Right side - certification mark
+  doc.rect(450, 20, 100, 80).fill('#ffffff').stroke('#e2e8f0', 1);
+  doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('LACRA®', 485, 45);
+  doc.fontSize(10).fillColor('#718096')
+     .text('CERTIFIED', 485, 65);
+  doc.fontSize(8).fillColor('#a0aec0')
+     .text(`ID: ${packId.slice(-6)}`, 485, 80);
 }
 
-function generateExecutiveSummary(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData) {
-  const startY = 100;
+function generateComplianceJourneyTimeline(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData) {
+  const startY = 140;
   
-  // Executive Summary Header
-  doc.rect(40, startY, 515, 30).fill('#1f2937');
+  // Section header with background
+  doc.rect(40, startY, 515, 35).fill('#2d3748');
+  doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('SUPPORTING COMPLIANCE – LACRA ALIGNED FOR EUDR', 60, startY + 12);
+  
+  // Three main pillars section - modern card layout
+  const pillarsY = startY + 50;
+  const pillarWidth = 165;
+  
+  // Pillar 1: Risk Assessment
+  doc.rect(40, pillarsY, pillarWidth, 120).fill('#ffffff').stroke('#e2e8f0', 1);
+  doc.rect(40, pillarsY, pillarWidth, 30).fill('#edf2f7');
+  doc.fontSize(14).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Risk Assessment', 50, pillarsY + 10);
+  
+  doc.fontSize(10).fillColor('#4a5568')
+     .text('Add-on module that builds on', 50, pillarsY + 45)
+     .text('LACRA\'s rigorous responsible', 50, pillarsY + 60)
+     .text('forestry practices with specific', 50, pillarsY + 75)
+     .text('EUDR regulatory expectations', 50, pillarsY + 90)
+     .text('around risk & due diligence.', 50, pillarsY + 105);
+  
+  // Pillar 2: Compliance Status
+  doc.rect(215, pillarsY, pillarWidth, 120).fill('#ffffff').stroke('#e2e8f0', 1);
+  doc.rect(215, pillarsY, pillarWidth, 30).fill('#e6fffa');
+  doc.fontSize(14).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Certification Status', 225, pillarsY + 10);
+  
+  // Status indicator circle
+  doc.circle(297, pillarsY + 70, 25).fill('#38b2ac');
   doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('EXECUTIVE SUMMARY', 50, startY + 10);
+     .text('✓', 292, pillarsY + 63);
   
-  // Summary cards row
-  const cardY = startY + 40;
-  const cardWidth = 165;
-  const cardHeight = 80;
+  doc.fontSize(10).fillColor('#4a5568')
+     .text(`Producer: ${farmerData.name}`, 225, pillarsY + 105);
   
-  // Farmer Information Card
-  doc.rect(40, cardY, cardWidth, cardHeight).fill('#ffffff').stroke('#e5e7eb', 1);
-  doc.rect(40, cardY, cardWidth, 25).fill('#eff6ff');
-  doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold').text('Producer Profile', 50, cardY + 8);
+  // Pillar 3: Data Traceability
+  doc.rect(390, pillarsY, pillarWidth, 120).fill('#ffffff').stroke('#e2e8f0', 1);
+  doc.rect(390, pillarsY, pillarWidth, 30).fill('#fef5e7');
+  doc.fontSize(14).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('LACRA Trace', 400, pillarsY + 10);
   
-  doc.fontSize(10).fillColor('#374151').text('Name:', 50, cardY + 35);
-  doc.fontSize(10).fillColor('#1f2937').font('Helvetica-Bold').text(farmerData.name || 'Test Farmer', 50, cardY + 50);
-  doc.fontSize(9).fillColor('#6b7280').text(`${farmerData.county}, Liberia`, 50, cardY + 65);
-  
-  // Export Information Card  
-  doc.rect(215, cardY, cardWidth, cardHeight).fill('#ffffff').stroke('#e5e7eb', 1);
-  doc.rect(215, cardY, cardWidth, 25).fill('#fef3c7');
-  doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold').text('Export Details', 225, cardY + 8);
-  
-  doc.fontSize(10).fillColor('#374151').text('Company:', 225, cardY + 35);
-  doc.fontSize(9).fillColor('#1f2937').font('Helvetica-Bold').text(exportData.company, 225, cardY + 48);
-  doc.fontSize(8).fillColor('#6b7280').text(`Quantity: ${exportData.quantity}`, 225, cardY + 62);
-  
-  // Compliance Status Card
-  doc.rect(390, cardY, cardWidth, cardHeight).fill('#ffffff').stroke('#e5e7eb', 1);
-  doc.rect(390, cardY, cardWidth, 25).fill('#dcfce7');
-  doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold').text('Compliance Status', 400, cardY + 8);
-  
-  // Large compliance indicator
-  doc.circle(472, cardY + 55, 20).fill('#10b981');
-  doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 467, cardY + 47);
-  doc.fontSize(9).fillColor('#15803d').font('Helvetica-Bold').text('APPROVED', 448, cardY + 75);
+  doc.fontSize(10).fillColor('#4a5568')
+     .text('Automated data compilation', 400, pillarsY + 45)
+     .text('that helps you deliver the', 400, pillarsY + 60)
+     .text('required Due Diligence', 400, pillarsY + 75)
+     .text('Reports & Statements for', 400, pillarsY + 90)
+     .text('EUDR compliance.', 400, pillarsY + 105);
 }
 
-function generateAdvancedKPIDashboard(doc: PDFDocument) {
-  const dashboardY = 220;
+function generateBenefitsSection(doc: PDFDocument) {
+  const benefitsY = 320;
   
-  // Dashboard header
-  doc.rect(40, dashboardY, 515, 25).fill('#374151');
+  // Benefits section header
+  doc.rect(40, benefitsY, 515, 35).fill('#2d3748');
+  doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('THE BENEFITS OF LACRA ALIGNED FOR EUDR', 60, benefitsY + 12);
+  
+  // Two column layout for benefits
+  const leftColX = 60;
+  const rightColX = 320;
+  const benefitsContentY = benefitsY + 50;
+  
+  // Left column - Why choose LACRA
+  doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Why choose LACRA Aligned', leftColX, benefitsContentY);
+  doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Certification for EUDR?', leftColX, benefitsContentY + 20);
+  
+  const leftBenefits = [
+    '• PURPOSE-BUILT FOR ACCURACY:',
+    '  Specifically aligned with EUDR requirements,',
+    '  taking the guesswork out of compliance.',
+    '',
+    '• NATURAL PROGRESSION:',
+    '  Your LACRA certification is already a strong',
+    '  mitigation measure against deforestation.',
+    '',
+    '• CREDIBLE ASSURANCE:',
+    '  Independent third party verification provides',
+    '  an extra layer of credibility.',
+    '',
+    '• THOUGHTFUL RISK MITIGATION:',
+    '  Every aspect of your supply chain is',
+    '  considered to ensure risk awareness.'
+  ];
+  
+  leftBenefits.forEach((benefit, index) => {
+    const isBold = benefit.startsWith('•');
+    const fontSize = isBold ? 10 : 9;
+    const color = isBold ? '#2d3748' : '#4a5568';
+    const font = isBold ? 'Helvetica-Bold' : 'Helvetica';
+    
+    doc.fontSize(fontSize).fillColor(color).font(font)
+       .text(benefit, leftColX, benefitsContentY + 50 + (index * 12));
+  });
+  
+  // Right column - Why use LACRA Reporting
+  doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Why use LACRA Aligned', rightColX, benefitsContentY);
+  doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Reporting for EUDR?', rightColX, benefitsContentY + 20);
+  
+  const rightBenefits = [
+    '• TRACEABILITY:',
+    '  LACRA Trace provides infrastructure for',
+    '  critical data flow from forest to customer.',
+    '',
+    '• THOROUGH VETTING:',
+    '  Integrates information from risk assessments',
+    '  verified by certification bodies.',
+    '',
+    '• AUTOMATED ASSISTANCE:',
+    '  Draft Due Diligence Statements & Reports',
+    '  generated on demand for submission.',
+    '',
+    '• SEAMLESS DATA MANAGEMENT:',
+    '  Data needed for due diligence is automatically',
+    '  structured in one place.'
+  ];
+  
+  rightBenefits.forEach((benefit, index) => {
+    const isBold = benefit.startsWith('•');
+    const fontSize = isBold ? 10 : 9;
+    const color = isBold ? '#2d3748' : '#4a5568';
+    const font = isBold ? 'Helvetica-Bold' : 'Helvetica';
+    
+    doc.fontSize(fontSize).fillColor(color).font(font)
+       .text(benefit, rightColX, benefitsContentY + 50 + (index * 12));
+  });
+}
+
+function generateTimelineInfographic(doc: PDFDocument) {
+  const timelineY = 580;
+  
+  // Timeline section header
+  doc.rect(40, timelineY, 515, 35).fill('#2d3748');
+  doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('TIMELINE FOR LACRA CERTIFICATE HOLDERS', 60, timelineY + 12);
+  
+  // Main timeline description
+  doc.fontSize(14).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Get ahead of the EUDR deadlines by taking LACRA\'s three-stage journey.', 60, timelineY + 60);
+  
+  // EUDR Deadlines section
+  doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('THE EUDR DEADLINES', 60, timelineY + 90);
+  
+  // Timeline circles with dates
+  const deadline1X = 150;
+  const deadline2X = 400;
+  const deadlineY = timelineY + 130;
+  
+  // December 2024 deadline
+  doc.circle(deadline1X, deadlineY, 30).fill('#e53e3e');
+  doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('30', deadline1X - 10, deadlineY - 8);
+  doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('December', deadline1X - 25, deadlineY + 5);
+  doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('2024', deadline1X - 15, deadlineY + 18);
+  
+  doc.fontSize(10).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Medium & large', deadline1X - 30, deadlineY + 45);
+  doc.fontSize(10).fillColor('#2d3748')
+     .text('companies must comply', deadline1X - 40, deadlineY + 58);
+  
+  // Connecting line
+  doc.rect(deadline1X + 30, deadlineY, deadline2X - deadline1X - 60, 3).fill('#e2e8f0');
+  
+  // June 2025 deadline
+  doc.circle(deadline2X, deadlineY, 30).fill('#d69e2e');
+  doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('30', deadline2X - 10, deadlineY - 8);
+  doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('June', deadline2X - 15, deadlineY + 5);
+  doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('2025', deadline2X - 15, deadlineY + 18);
+  
+  doc.fontSize(10).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Micro & small', deadline2X - 25, deadlineY + 45);
+  doc.fontSize(10).fillColor('#2d3748')
+     .text('enterprises must comply', deadline2X - 40, deadlineY + 58);
+}
+
+function generateCertificationDetailsBox(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string) {
+  const detailsY = 720;
+  
+  // Certification details box
+  doc.rect(40, detailsY, 515, 80).fill('#ffffff').stroke('#e2e8f0', 2);
+  doc.rect(40, detailsY, 515, 25).fill('#edf2f7');
+  doc.fontSize(14).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('CERTIFICATION DETAILS', 60, detailsY + 8);
+  
+  // Details content in two columns
+  const leftColX = 60;
+  const rightColX = 320;
+  const contentY = detailsY + 35;
+  
+  // Left column
+  doc.fontSize(10).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Certificate Holder:', leftColX, contentY);
+  doc.fontSize(10).fillColor('#4a5568')
+     .text(farmerData.name || 'Test Farmer', leftColX, contentY + 15);
+  doc.fontSize(9).fillColor('#718096')
+     .text(`${farmerData.county}, Liberia`, leftColX, contentY + 30);
+  
+  // Right column  
+  doc.fontSize(10).fillColor('#2d3748').font('Helvetica-Bold')
+     .text('Export Partner:', rightColX, contentY);
+  doc.fontSize(10).fillColor('#4a5568')
+     .text(exportData.company || 'Liberia Premium Ltd', rightColX, contentY + 15);
+  doc.fontSize(9).fillColor('#718096')
+     .text(`License: ${exportData.license}`, rightColX, contentY + 30);
+}
+
+function generateModernFooter(doc: PDFDocument, packId: string, currentDate: string) {
+  const footerY = 810;
+  
+  // Footer background
+  doc.rect(0, footerY, 595, 32).fill('#2d3748');
+  
+  // Footer content
+  doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('LET LACRA SUPPORT YOUR EUDR JOURNEY', 60, footerY + 8);
+  
+  doc.fontSize(8).fillColor('#a0aec0')
+     .text(`Certificate ID: LACRA-EUDR-${packId.slice(-8)} | Generated: ${currentDate}`, 60, footerY + 22);
+  
+  // Right side - LACRA trademark
+  doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('LACRA®', 520, footerY + 10);
+}
   doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold')
      .text('KEY PERFORMANCE INDICATORS', 50, dashboardY + 8);
   

@@ -6236,9 +6236,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📊 Using farmer data:', farmerData.name, 'from', farmerData.county);
       console.log('🚢 Using export data:', exportData.company);
       
-      // Generate FSC-style professional report
-      const { generateFSCStyleReport } = await import('./fsc-style-generator.js');
-      const doc = generateFSCStyleReport(farmerData, exportData, packId);
+      // Generate FSC-styled EUDR report (keeps EUDR content with FSC design)
+      const { generateFSCStyledEUDRReport } = await import('./fsc-styled-eudr-generator.js');
+      const doc = generateFSCStyledEUDRReport(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');
@@ -7330,9 +7330,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate FSC-style professional complete pack
-      const { generateFSCStyleReport } = await import('./fsc-style-generator.js');
-      const doc = generateFSCStyleReport(farmerData, exportData, packId);
+      // Generate FSC-styled EUDR complete pack (keeps EUDR content with FSC design)
+      const { generateFSCStyledEUDRReport } = await import('./fsc-styled-eudr-generator.js');
+      const doc = generateFSCStyledEUDRReport(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

@@ -29,9 +29,9 @@ export function addSimplePdfRoutes(app: Express) {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate FSC-style professional report
-      const { generateFSCStyleReport } = await import('./fsc-style-generator.js');
-      const doc = generateFSCStyleReport(farmerData, exportData, packId);
+      // Generate FSC-styled EUDR report (keeps EUDR content with FSC design)
+      const { generateFSCStyledEUDRReport } = await import('./fsc-styled-eudr-generator.js');
+      const doc = generateFSCStyledEUDRReport(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

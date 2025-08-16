@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import QRCode from 'qrcode';
 
 type PDFDocumentType = InstanceType<typeof PDFDocument>;
 
@@ -21,11 +22,11 @@ interface ExportData {
   shipmentId: string;
 }
 
-export function generateFixedEUDRPack(
+export async function generateFixedEUDRPack(
   farmerData: FarmerData,
   exportData: ExportData,
   packId: string
-): PDFDocumentType {
+): Promise<PDFDocumentType> {
   // Create document with automatic first page - exactly 6 pages total
   const doc = new PDFDocument({ 
     size: 'A4', 
@@ -35,27 +36,27 @@ export function generateFixedEUDRPack(
   const currentDate = new Date().toLocaleDateString();
 
   // CERTIFICATE 1: Cover Page (uses automatic first page)
-  generateCoverPage(doc, farmerData, exportData, packId, currentDate);
+  await generateCoverPage(doc, farmerData, exportData, packId, currentDate);
   
   // CERTIFICATE 2: Export Eligibility (add new page)
   doc.addPage();
-  generateExportEligibility(doc, farmerData, exportData, packId, currentDate);
+  await generateExportEligibility(doc, farmerData, exportData, packId, currentDate);
   
   // CERTIFICATE 3: Compliance Assessment (add new page)
   doc.addPage();
-  generateComplianceAssessment(doc, farmerData, exportData, packId, currentDate);
+  await generateComplianceAssessment(doc, farmerData, exportData, packId, currentDate);
   
   // CERTIFICATE 4: Deforestation Analysis (add new page)
   doc.addPage();
-  generateDeforestationAnalysis(doc, farmerData, exportData, packId, currentDate);
+  await generateDeforestationAnalysis(doc, farmerData, exportData, packId, currentDate);
   
   // CERTIFICATE 5: Due Diligence (add new page)
   doc.addPage();
-  generateDueDiligence(doc, farmerData, exportData, packId, currentDate);
+  await generateDueDiligence(doc, farmerData, exportData, packId, currentDate);
   
   // CERTIFICATE 6: Supply Chain Traceability (add new page)
   doc.addPage();
-  generateSupplyTraceability(doc, farmerData, exportData, packId, currentDate);
+  await generateSupplyTraceability(doc, farmerData, exportData, packId, currentDate);
 
   return doc;
 }
@@ -80,17 +81,51 @@ function generateHeader(doc: PDFDocumentType, title: string, packId: string, cur
      .text('LACRA', 485, 45);
 }
 
-// Professional footer function
-function generateFooter(doc: PDFDocumentType, packId: string, currentDate: string, pageTitle: string) {
+// Professional footer function with QR code
+async function generateFooter(doc: PDFDocumentType, packId: string, currentDate: string, pageTitle: string, certificateData: any) {
   doc.rect(0, 750, 595, 50).fill('#2d3748');
   doc.fontSize(8).fillColor('#ffffff')
      .text(`LACRA-EUDR-${packId} | ${pageTitle} | Generated: ${currentDate}`, 60, 770);
   doc.fontSize(8).fillColor('#a0aec0')
-     .text('www.lacra.gov.lr | compliance@lacra.gov.lr', 400, 770);
+     .text('www.lacra.gov.lr | compliance@lacra.gov.lr', 300, 770);
+
+  // Generate QR code for certificate verification
+  const qrData = JSON.stringify({
+    packId: packId,
+    certificate: pageTitle,
+    date: currentDate,
+    farmer: certificateData.farmerName,
+    company: certificateData.exportCompany,
+    verification: `LACRA-EUDR-${packId}-${pageTitle.replace(/\s+/g, '')}`
+  });
+
+  try {
+    const qrCodeDataURL = await QRCode.toDataURL(qrData, {
+      width: 40,
+      margin: 1,
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    });
+    
+    // Convert data URL to buffer and add to PDF
+    const qrBuffer = Buffer.from(qrCodeDataURL.split(',')[1], 'base64');
+    doc.image(qrBuffer, 520, 755, { width: 35, height: 35 });
+    
+    // QR code label
+    doc.fontSize(6).fillColor('#a0aec0')
+       .text('Scan to verify', 520, 792);
+  } catch (error) {
+    console.error('QR code generation error:', error);
+    // Fallback: show verification code as text
+    doc.fontSize(6).fillColor('#a0aec0')
+       .text(`Verify: ${packId.slice(-6)}`, 520, 775);
+  }
 }
 
 // CERTIFICATE 1: Cover Page
-function generateCoverPage(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
+async function generateCoverPage(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
   // Use the automatic first page - do not call doc.addPage()
   
   // Professional header with gradient effect
@@ -159,11 +194,14 @@ function generateCoverPage(doc: PDFDocumentType, farmerData: FarmerData, exportD
        .text(box.status, x + 10, 555);
   });
   
-  generateFooter(doc, packId, currentDate, 'Cover Page');
+  await generateFooter(doc, packId, currentDate, 'Cover Page', { 
+    farmerName: farmerData.name, 
+    exportCompany: exportData.company 
+  });
 }
 
 // CERTIFICATE 2: Export Eligibility
-function generateExportEligibility(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
+async function generateExportEligibility(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
   generateHeader(doc, 'EXPORT ELIGIBILITY CERTIFICATE', packId, currentDate);
   
   // Eligibility metrics
@@ -216,11 +254,14 @@ function generateExportEligibility(doc: PDFDocumentType, farmerData: FarmerData,
      .text(`Vessel: ${exportData.vessel}`, 80, 520)
      .text(`Export Date: ${exportData.exportDate}`, 80, 540);
   
-  generateFooter(doc, packId, currentDate, 'Export Eligibility');
+  await generateFooter(doc, packId, currentDate, 'Export Eligibility', { 
+    farmerName: farmerData.name, 
+    exportCompany: exportData.company 
+  });
 }
 
 // CERTIFICATE 3: Compliance Assessment
-function generateComplianceAssessment(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
+async function generateComplianceAssessment(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
   generateHeader(doc, 'COMPLIANCE ASSESSMENT REPORT', packId, currentDate);
   
   // Assessment results
@@ -271,11 +312,14 @@ function generateComplianceAssessment(doc: PDFDocumentType, farmerData: FarmerDa
   doc.fontSize(12).fillColor('#38a169').font('Helvetica-Bold')
      .text('STATUS: APPROVED FOR EXPORT', 90, 440);
   
-  generateFooter(doc, packId, currentDate, 'Compliance Assessment');
+  await generateFooter(doc, packId, currentDate, 'Compliance Assessment', { 
+    farmerName: farmerData.name, 
+    exportCompany: exportData.company 
+  });
 }
 
 // CERTIFICATE 4: Deforestation Analysis
-function generateDeforestationAnalysis(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
+async function generateDeforestationAnalysis(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
   generateHeader(doc, 'DEFORESTATION RISK ANALYSIS', packId, currentDate);
   
   // Risk analysis results
@@ -325,11 +369,14 @@ function generateDeforestationAnalysis(doc: PDFDocumentType, farmerData: FarmerD
      .text('with the commodity production area. The assessment includes forest degradation monitoring, land use', 70, 505)
      .text('change analysis, and biodiversity impact evaluation to ensure EUDR environmental compliance.', 70, 520);
   
-  generateFooter(doc, packId, currentDate, 'Deforestation Analysis');
+  await generateFooter(doc, packId, currentDate, 'Deforestation Analysis', { 
+    farmerName: farmerData.name, 
+    exportCompany: exportData.company 
+  });
 }
 
 // CERTIFICATE 5: Due Diligence
-function generateDueDiligence(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
+async function generateDueDiligence(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
   generateHeader(doc, 'DUE DILIGENCE STATEMENT', packId, currentDate);
   
   // Due diligence verification
@@ -380,11 +427,14 @@ function generateDueDiligence(doc: PDFDocumentType, farmerData: FarmerData, expo
   doc.fontSize(10).fillColor('#e2e8f0')
      .text('All due diligence requirements satisfied per EU Regulation 2023/1115', 90, 500);
   
-  generateFooter(doc, packId, currentDate, 'Due Diligence');
+  await generateFooter(doc, packId, currentDate, 'Due Diligence', { 
+    farmerName: farmerData.name, 
+    exportCompany: exportData.company 
+  });
 }
 
 // CERTIFICATE 6: Supply Chain Traceability
-function generateSupplyTraceability(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
+async function generateSupplyTraceability(doc: PDFDocumentType, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
   generateHeader(doc, 'SUPPLY CHAIN TRACEABILITY', packId, currentDate);
   
   // Traceability flow
@@ -449,5 +499,8 @@ function generateSupplyTraceability(doc: PDFDocumentType, farmerData: FarmerData
   doc.fontSize(10).fillColor('#e2e8f0')
      .text('Complete traceability from farm to export confirmed', 90, 510);
   
-  generateFooter(doc, packId, currentDate, 'Supply Chain Traceability');
+  await generateFooter(doc, packId, currentDate, 'Supply Chain Traceability', { 
+    farmerName: farmerData.name, 
+    exportCompany: exportData.company 
+  });
 }

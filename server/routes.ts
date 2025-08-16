@@ -7332,7 +7332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate fixed EUDR pack with exactly 6 pages (no empty pages)
       const { generateFixedEUDRPack } = await import('./fixed-eudr-generator.js');
-      const doc = generateFixedEUDRPack(farmerData, exportData, packId);
+      const doc = await generateFixedEUDRPack(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

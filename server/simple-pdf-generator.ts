@@ -7,7 +7,7 @@ export function addSimplePdfRoutes(app: Express) {
     try {
       const { packId, documentType } = req.params;
       
-      console.log('🔥 ADMIN DOWNLOADING FSC-STYLE PROFESSIONAL DOCUMENT:', documentType, 'Pack:', packId);
+      console.log('🔥 ADMIN DOWNLOADING ENHANCED PROFESSIONAL DOCUMENT:', documentType, 'Pack:', packId);
       
       // Get farmer and export data (simulate real data for now)
       const farmerData = {
@@ -29,15 +29,15 @@ export function addSimplePdfRoutes(app: Express) {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate FSC-styled EUDR report (keeps EUDR content with FSC design)
-      const { generateFSCStyledEUDRReport } = await import('./fsc-styled-eudr-generator.js');
-      const doc = generateFSCStyledEUDRReport(farmerData, exportData, packId);
+      // Generate enhanced professional EUDR report pack (clean and synchronized)
+      const { generateEnhancedProfessionalEUDRPack } = await import('./enhanced-professional-generator.js');
+      const doc = generateEnhancedProfessionalEUDRPack(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="EUDR-FSC-Style-${documentType}-${packId}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="EUDR-Enhanced-Professional-${documentType}-${packId}.pdf"`);
       
-      console.log('✅ FSC-STYLE PROFESSIONAL DOCUMENT GENERATED SUCCESSFULLY');
+      console.log('✅ ENHANCED PROFESSIONAL DOCUMENT GENERATED SUCCESSFULLY');
       
       // Pipe the PDF to response
       doc.pipe(res);

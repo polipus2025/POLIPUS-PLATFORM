@@ -6236,9 +6236,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📊 Using farmer data:', farmerData.name, 'from', farmerData.county);
       console.log('🚢 Using export data:', exportData.company);
       
-      // Generate FSC-styled EUDR report (keeps EUDR content with FSC design)
-      const { generateFSCStyledEUDRReport } = await import('./fsc-styled-eudr-generator.js');
-      const doc = generateFSCStyledEUDRReport(farmerData, exportData, packId);
+      // Generate enhanced professional EUDR report (clean and synchronized)
+      const { generateEnhancedProfessionalEUDRPack } = await import('./enhanced-professional-generator.js');
+      const doc = generateEnhancedProfessionalEUDRPack(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');
@@ -7308,7 +7308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { packId } = req.params;
     
     try {
-      console.log('🔥 ADMIN DOWNLOADING COMPLETE FSC-STYLE PACK:', packId);
+      console.log('🔥 ADMIN DOWNLOADING ENHANCED PROFESSIONAL PACK:', packId);
       
       // Get farmer and export data (simulate real data for now)
       const farmerData = {
@@ -7330,15 +7330,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate FSC-styled EUDR complete pack (keeps EUDR content with FSC design)
-      const { generateFSCStyledEUDRReport } = await import('./fsc-styled-eudr-generator.js');
-      const doc = generateFSCStyledEUDRReport(farmerData, exportData, packId);
+      // Generate enhanced professional EUDR complete pack (clean and synchronized)
+      const { generateEnhancedProfessionalEUDRPack } = await import('./enhanced-professional-generator.js');
+      const doc = generateEnhancedProfessionalEUDRPack(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="EUDR-Complete-Pack-FSC-Style-${packId}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="EUDR-Enhanced-Professional-Complete-${packId}.pdf"`);
       
-      console.log('✅ FSC-STYLE COMPLETE PACK GENERATED SUCCESSFULLY');
+      console.log('✅ ENHANCED PROFESSIONAL COMPLETE PACK GENERATED SUCCESSFULLY');
       
       // Pipe the PDF to response
       doc.pipe(res);

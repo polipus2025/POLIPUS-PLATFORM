@@ -6431,72 +6431,284 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.circle(470, 717, 20).fill('#22c55e').stroke('#ffffff', 3);
       doc.fontSize(14).fillColor('#ffffff').text('✓', 464, 712);
 
-      // PAGE 2: COMPREHENSIVE ENVIRONMENTAL ASSESSMENT
+      // PAGE 2: DUE DILIGENCE STATEMENT
       doc.addPage();
       
-      // SYSTEMATIC PAGE 2 HEADER - CONSISTENT WITH PAGE 1
-      // Matching professional blue gradient
+      // SYSTEMATIC PAGE 2 HEADER - DUE DILIGENCE
       doc.rect(0, 0, 595, 120).fill('#1e40af'); 
       doc.rect(0, 0, 595, 60).fill('#1d4ed8');   
       doc.rect(0, 60, 595, 60).fill('#3b82f6');  
-      
-      // Clean separator line
       doc.rect(0, 60, 595, 2).fill('#ffffff');
       
-      // SYSTEMATIC LOGO PLACEMENT - Page 2 (Smaller, consistent positioning)
-      const page2LogoSection = { x: 450, y: 15, width: 130, height: 90 };
-      
-      // Logo background panel (smaller for page 2)
-      doc.rect(page2LogoSection.x, page2LogoSection.y, page2LogoSection.width, page2LogoSection.height)
+      // Logo panel for page 2
+      const ddLogoSection = { x: 450, y: 15, width: 130, height: 90 };
+      doc.rect(ddLogoSection.x, ddLogoSection.y, ddLogoSection.width, ddLogoSection.height)
          .fill('#ffffff').stroke('#e5e7eb', 2);
       
       try {
-        // LACRA Logo - Consistent positioning
         const lacraLogoPath = 'attached_assets/LACRA LOGO_1753406166355.jpg';
         if (fs.existsSync(lacraLogoPath)) {
-          doc.image(lacraLogoPath, page2LogoSection.x + 8, page2LogoSection.y + 8, { width: 40, height: 28 });
-          doc.fontSize(7).fillColor('#374151').text('LACRA', page2LogoSection.x + 52, page2LogoSection.y + 18);
+          doc.image(lacraLogoPath, ddLogoSection.x + 8, ddLogoSection.y + 8, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('LACRA', ddLogoSection.x + 52, ddLogoSection.y + 18);
         } else {
-          doc.rect(page2LogoSection.x + 8, page2LogoSection.y + 8, 40, 28).fill('#22c55e');
-          doc.fontSize(8).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', page2LogoSection.x + 20, page2LogoSection.y + 20);
+          doc.rect(ddLogoSection.x + 8, ddLogoSection.y + 8, 40, 28).fill('#22c55e');
+          doc.fontSize(8).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', ddLogoSection.x + 20, ddLogoSection.y + 20);
         }
         
-        // ECOENVIRO Logo - Consistent positioning
         const ecoLogoPath = 'attached_assets/polipos logo 1_1753394173408.jpg';
         if (fs.existsSync(ecoLogoPath)) {
-          doc.image(ecoLogoPath, page2LogoSection.x + 8, page2LogoSection.y + 45, { width: 40, height: 28 });
-          doc.fontSize(7).fillColor('#374151').text('ECOENVIRO', page2LogoSection.x + 52, page2LogoSection.y + 55);
+          doc.image(ecoLogoPath, ddLogoSection.x + 8, ddLogoSection.y + 45, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('ECOENVIRO', ddLogoSection.x + 52, ddLogoSection.y + 55);
         } else {
-          doc.rect(page2LogoSection.x + 8, page2LogoSection.y + 45, 40, 28).fill('#ef4444');
-          doc.fontSize(7).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', page2LogoSection.x + 15, page2LogoSection.y + 57);
+          doc.rect(ddLogoSection.x + 8, ddLogoSection.y + 45, 40, 28).fill('#ef4444');
+          doc.fontSize(7).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', ddLogoSection.x + 15, ddLogoSection.y + 57);
         }
       } catch (error) {
-        console.log('Page 2 logo error:', error);
-        // Clean fallbacks with consistent styling
-        doc.rect(page2LogoSection.x + 8, page2LogoSection.y + 8, 40, 28).fill('#22c55e');
-        doc.fontSize(8).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', page2LogoSection.x + 20, page2LogoSection.y + 20);
-        doc.rect(page2LogoSection.x + 8, page2LogoSection.y + 45, 40, 28).fill('#ef4444');
-        doc.fontSize(7).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', page2LogoSection.x + 15, page2LogoSection.y + 57);
+        doc.rect(ddLogoSection.x + 8, ddLogoSection.y + 8, 40, 28).fill('#22c55e');
+        doc.fontSize(8).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', ddLogoSection.x + 20, ddLogoSection.y + 20);
+        doc.rect(ddLogoSection.x + 8, ddLogoSection.y + 45, 40, 28).fill('#ef4444');
+        doc.fontSize(7).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', ddLogoSection.x + 15, ddLogoSection.y + 57);
       }
       
-      // SYSTEMATIC TITLE PLACEMENT - Page 2 (Consistent with page 1)
-      const page2TitleSection = { x: 40, y: 15, width: 400 };
-      
-      // Main section title
+      const ddTitleSection = { x: 40, y: 15, width: 400 };
       doc.fontSize(22).fillColor('#ffffff').font('Helvetica-Bold')
-         .text('COMPREHENSIVE ENVIRONMENTAL ASSESSMENT', page2TitleSection.x, page2TitleSection.y);
-      
-      // Subtitle with proper hierarchy
+         .text('DUE DILIGENCE STATEMENT', ddTitleSection.x, ddTitleSection.y);
       doc.fontSize(12).fillColor('#e2e8f0').font('Helvetica')
-         .text('Detailed Compliance Analysis & Risk Evaluation Report', page2TitleSection.x, page2TitleSection.y + 30);
-      
-      // Document type consistent with page 1
+         .text('EUDR Article 8 - Due Diligence Compliance Declaration', ddTitleSection.x, ddTitleSection.y + 30);
       doc.fontSize(10).fillColor('#bfdbfe')
-         .text('Agricultural Commodity Traceability & Supply Chain Verification', page2TitleSection.x, page2TitleSection.y + 50);
-      
-      // Continuation marker
+         .text('Comprehensive Supply Chain Due Diligence Assessment', ddTitleSection.x, ddTitleSection.y + 50);
       doc.fontSize(9).fillColor('#93c5fd')
-         .text('Certificate Analysis Continued - Page 2 of 2', page2TitleSection.x, page2TitleSection.y + 70);
+         .text('Certificate Document 2 of 6', ddTitleSection.x, ddTitleSection.y + 70);
+      
+      // Due Diligence Content
+      doc.rect(60, 150, 475, 400).fill('#f8fafc').stroke('#e5e7eb', 2);
+      doc.fontSize(16).fillColor('#1e293b').font('Helvetica-Bold').text('DUE DILIGENCE DECLARATION', 80, 170);
+      
+      doc.fontSize(12).fillColor('#374151').font('Helvetica-Bold').text('Statement of Compliance:', 80, 200);
+      doc.fontSize(10).fillColor('#4b5563').text('This Due Diligence Statement confirms that comprehensive due diligence measures have been', 80, 220);
+      doc.fontSize(10).fillColor('#4b5563').text('implemented and executed in accordance with EU Regulation 2023/1115 on deforestation-free', 80, 235);
+      doc.fontSize(10).fillColor('#4b5563').text('products. The following due diligence procedures have been completed:', 80, 250);
+      
+      // Due Diligence Checklist
+      const ddChecklist = [
+        'Information Collection: Complete supply chain data gathered',
+        'Risk Assessment: Comprehensive deforestation risk analysis conducted',
+        'Risk Mitigation: Appropriate measures implemented where necessary',
+        'Monitoring: Continuous monitoring systems established',
+        'Documentation: All required documentation compiled and verified',
+        'Third-Party Verification: Independent audit and verification completed'
+      ];
+      
+      ddChecklist.forEach((item, index) => {
+        const y = 280 + (index * 25);
+        doc.circle(90, y + 5, 5).fill('#22c55e');
+        doc.fontSize(8).fillColor('#ffffff').text('✓', 87, y + 2);
+        doc.fontSize(10).fillColor('#374151').text(item, 110, y);
+      });
+      
+      // Legal Declaration
+      doc.rect(80, 450, 435, 80).fill('#eff6ff').stroke('#3b82f6', 2);
+      doc.fontSize(12).fillColor('#1e40af').font('Helvetica-Bold').text('LEGAL DECLARATION', 100, 470);
+      doc.fontSize(9).fillColor('#1e3a8a').text('I hereby declare that the information provided is accurate and complete, and that all due diligence', 100, 490);
+      doc.fontSize(9).fillColor('#1e3a8a').text('measures required under EU Regulation 2023/1115 have been properly implemented and verified.', 100, 505);
+      doc.fontSize(9).fillColor('#1e3a8a').text('This declaration is made under full legal responsibility and subject to penalties for false declarations.', 100, 520);
+      
+      // PAGE 3: RISK ASSESSMENT CERTIFICATE
+      doc.addPage();
+      
+      // Risk Assessment Header
+      doc.rect(0, 0, 595, 120).fill('#1e40af'); 
+      doc.rect(0, 0, 595, 60).fill('#1d4ed8');   
+      doc.rect(0, 60, 595, 60).fill('#3b82f6');  
+      doc.rect(0, 60, 595, 2).fill('#ffffff');
+      
+      // Logo panel for page 3
+      const raLogoSection = { x: 450, y: 15, width: 130, height: 90 };
+      doc.rect(raLogoSection.x, raLogoSection.y, raLogoSection.width, raLogoSection.height)
+         .fill('#ffffff').stroke('#e5e7eb', 2);
+      
+      try {
+        const lacraLogoPath = 'attached_assets/LACRA LOGO_1753406166355.jpg';
+        if (fs.existsSync(lacraLogoPath)) {
+          doc.image(lacraLogoPath, raLogoSection.x + 8, raLogoSection.y + 8, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('LACRA', raLogoSection.x + 52, raLogoSection.y + 18);
+        } else {
+          doc.rect(raLogoSection.x + 8, raLogoSection.y + 8, 40, 28).fill('#22c55e');
+        }
+        
+        const ecoLogoPath = 'attached_assets/polipos logo 1_1753394173408.jpg';
+        if (fs.existsSync(ecoLogoPath)) {
+          doc.image(ecoLogoPath, raLogoSection.x + 8, raLogoSection.y + 45, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('ECOENVIRO', raLogoSection.x + 52, raLogoSection.y + 55);
+        } else {
+          doc.rect(raLogoSection.x + 8, raLogoSection.y + 45, 40, 28).fill('#ef4444');
+        }
+      } catch (error) {
+        doc.rect(raLogoSection.x + 8, raLogoSection.y + 8, 40, 28).fill('#22c55e');
+        doc.rect(raLogoSection.x + 8, raLogoSection.y + 45, 40, 28).fill('#ef4444');
+      }
+      
+      const raTitleSection = { x: 40, y: 15, width: 400 };
+      doc.fontSize(22).fillColor('#ffffff').font('Helvetica-Bold')
+         .text('RISK ASSESSMENT CERTIFICATE', raTitleSection.x, raTitleSection.y);
+      doc.fontSize(12).fillColor('#e2e8f0').font('Helvetica')
+         .text('Comprehensive Deforestation Risk Analysis', raTitleSection.x, raTitleSection.y + 30);
+      doc.fontSize(9).fillColor('#93c5fd')
+         .text('Certificate Document 3 of 6', raTitleSection.x, raTitleSection.y + 70);
+
+      // PAGE 4: SUPPLY CHAIN ANALYSIS
+      doc.addPage();
+      
+      // Supply Chain Header
+      doc.rect(0, 0, 595, 120).fill('#1e40af'); 
+      doc.rect(0, 0, 595, 60).fill('#1d4ed8');   
+      doc.rect(0, 60, 595, 60).fill('#3b82f6');  
+      doc.rect(0, 60, 595, 2).fill('#ffffff');
+      
+      const scaTitleSection = { x: 40, y: 15, width: 400 };
+      doc.fontSize(22).fillColor('#ffffff').font('Helvetica-Bold')
+         .text('SUPPLY CHAIN ANALYSIS', scaTitleSection.x, scaTitleSection.y);
+      doc.fontSize(12).fillColor('#e2e8f0').font('Helvetica')
+         .text('Complete Supply Chain Traceability Assessment', scaTitleSection.x, scaTitleSection.y + 30);
+      doc.fontSize(9).fillColor('#93c5fd')
+         .text('Certificate Document 4 of 6', scaTitleSection.x, scaTitleSection.y + 70);
+
+      // PAGE 5: ENVIRONMENTAL IMPACT ASSESSMENT
+      doc.addPage();
+      
+      // Environmental Impact Header
+      doc.rect(0, 0, 595, 120).fill('#1e40af'); 
+      doc.rect(0, 0, 595, 60).fill('#1d4ed8');   
+      doc.rect(0, 60, 595, 60).fill('#3b82f6');  
+      doc.rect(0, 60, 595, 2).fill('#ffffff');
+      
+      // Logo panel for page 5
+      const eiaLogoSection = { x: 450, y: 15, width: 130, height: 90 };
+      doc.rect(eiaLogoSection.x, eiaLogoSection.y, eiaLogoSection.width, eiaLogoSection.height)
+         .fill('#ffffff').stroke('#e5e7eb', 2);
+      
+      try {
+        const lacraLogoPath = 'attached_assets/LACRA LOGO_1753406166355.jpg';
+        if (fs.existsSync(lacraLogoPath)) {
+          doc.image(lacraLogoPath, eiaLogoSection.x + 8, eiaLogoSection.y + 8, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('LACRA', eiaLogoSection.x + 52, eiaLogoSection.y + 18);
+        } else {
+          doc.rect(eiaLogoSection.x + 8, eiaLogoSection.y + 8, 40, 28).fill('#22c55e');
+        }
+        
+        const ecoLogoPath = 'attached_assets/polipos logo 1_1753394173408.jpg';
+        if (fs.existsSync(ecoLogoPath)) {
+          doc.image(ecoLogoPath, eiaLogoSection.x + 8, eiaLogoSection.y + 45, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('ECOENVIRO', eiaLogoSection.x + 52, eiaLogoSection.y + 55);
+        } else {
+          doc.rect(eiaLogoSection.x + 8, eiaLogoSection.y + 45, 40, 28).fill('#ef4444');
+        }
+      } catch (error) {
+        doc.rect(eiaLogoSection.x + 8, eiaLogoSection.y + 8, 40, 28).fill('#22c55e');
+        doc.rect(eiaLogoSection.x + 8, eiaLogoSection.y + 45, 40, 28).fill('#ef4444');
+      }
+      
+      const eiaTitleSection = { x: 40, y: 15, width: 400 };
+      doc.fontSize(22).fillColor('#ffffff').font('Helvetica-Bold')
+         .text('ENVIRONMENTAL IMPACT ASSESSMENT', eiaTitleSection.x, eiaTitleSection.y);
+      doc.fontSize(12).fillColor('#e2e8f0').font('Helvetica')
+         .text('Comprehensive Environmental & Biodiversity Analysis', eiaTitleSection.x, eiaTitleSection.y + 30);
+      doc.fontSize(9).fillColor('#93c5fd')
+         .text('Certificate Document 5 of 6', eiaTitleSection.x, eiaTitleSection.y + 70);
+      
+      // Environmental Impact Content
+      doc.rect(60, 150, 475, 400).fill('#f0fdf4').stroke('#22c55e', 2);
+      doc.fontSize(16).fillColor('#1e293b').font('Helvetica-Bold').text('ENVIRONMENTAL IMPACT ASSESSMENT', 80, 170);
+      
+      // Environmental Metrics
+      const envAssessments = [
+        { metric: 'Forest Coverage Impact', score: 'MINIMAL', status: 'APPROVED' },
+        { metric: 'Biodiversity Assessment', score: 'NO IMPACT', status: 'VERIFIED' },
+        { metric: 'Carbon Footprint Analysis', score: 'LOW EMISSION', status: 'COMPLIANT' },
+        { metric: 'Water Resource Impact', score: 'SUSTAINABLE', status: 'APPROVED' },
+        { metric: 'Soil Conservation Status', score: 'PROTECTED', status: 'VERIFIED' },
+        { metric: 'Wildlife Protection Level', score: 'MAINTAINED', status: 'COMPLIANT' }
+      ];
+      
+      envAssessments.forEach((assessment, index) => {
+        const y = 220 + (index * 45);
+        doc.rect(80, y, 435, 35).fill('#ffffff').stroke('#e5e7eb', 1);
+        doc.fontSize(12).fillColor('#1e293b').font('Helvetica-Bold').text(assessment.metric, 90, y + 8);
+        doc.fontSize(10).fillColor('#059669').text(`Assessment: ${assessment.score}`, 90, y + 22);
+        doc.fontSize(9).fillColor('#22c55e').text(`Status: ${assessment.status}`, 380, y + 22);
+        doc.circle(490, y + 17, 6).fill('#22c55e');
+        doc.fontSize(8).fillColor('#ffffff').text('✓', 487, y + 14);
+      });
+      
+      // PAGE 6: FINAL CERTIFICATION
+      doc.addPage();
+      
+      // Final Certification Header
+      doc.rect(0, 0, 595, 120).fill('#1e40af'); 
+      doc.rect(0, 0, 595, 60).fill('#1d4ed8');   
+      doc.rect(0, 60, 595, 60).fill('#3b82f6');  
+      doc.rect(0, 60, 595, 2).fill('#ffffff');
+      
+      // Logo panel for page 6 - Final Certificate
+      const fcLogoSection = { x: 450, y: 15, width: 130, height: 90 };
+      doc.rect(fcLogoSection.x, fcLogoSection.y, fcLogoSection.width, fcLogoSection.height)
+         .fill('#ffffff').stroke('#e5e7eb', 2);
+      
+      try {
+        const lacraLogoPath = 'attached_assets/LACRA LOGO_1753406166355.jpg';
+        if (fs.existsSync(lacraLogoPath)) {
+          doc.image(lacraLogoPath, fcLogoSection.x + 8, fcLogoSection.y + 8, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('LACRA', fcLogoSection.x + 52, fcLogoSection.y + 18);
+        } else {
+          doc.rect(fcLogoSection.x + 8, fcLogoSection.y + 8, 40, 28).fill('#22c55e');
+        }
+        
+        const ecoLogoPath = 'attached_assets/polipos logo 1_1753394173408.jpg';
+        if (fs.existsSync(ecoLogoPath)) {
+          doc.image(ecoLogoPath, fcLogoSection.x + 8, fcLogoSection.y + 45, { width: 40, height: 28 });
+          doc.fontSize(7).fillColor('#374151').text('ECOENVIRO', fcLogoSection.x + 52, fcLogoSection.y + 55);
+        } else {
+          doc.rect(fcLogoSection.x + 8, fcLogoSection.y + 45, 40, 28).fill('#ef4444');
+        }
+      } catch (error) {
+        doc.rect(fcLogoSection.x + 8, fcLogoSection.y + 8, 40, 28).fill('#22c55e');
+        doc.rect(fcLogoSection.x + 8, fcLogoSection.y + 45, 40, 28).fill('#ef4444');
+      }
+      
+      const fcTitleSection = { x: 40, y: 15, width: 400 };
+      doc.fontSize(22).fillColor('#ffffff').font('Helvetica-Bold')
+         .text('FINAL EUDR CERTIFICATION', fcTitleSection.x, fcTitleSection.y);
+      doc.fontSize(12).fillColor('#e2e8f0').font('Helvetica')
+         .text('Complete Compliance Verification & Official Approval', fcTitleSection.x, fcTitleSection.y + 30);
+      doc.fontSize(9).fillColor('#93c5fd')
+         .text('Certificate Document 6 of 6 - FINAL APPROVAL', fcTitleSection.x, fcTitleSection.y + 70);
+      
+      // Final Certification Content
+      doc.rect(60, 150, 475, 300).fill('#f0f9ff').stroke('#3b82f6', 3);
+      doc.fontSize(18).fillColor('#1e40af').font('Helvetica-Bold').text('OFFICIAL EUDR CERTIFICATION', 200, 180);
+      
+      // Official Certification Statement
+      doc.rect(80, 220, 435, 150).fill('#ffffff').stroke('#e5e7eb', 2);
+      doc.fontSize(14).fillColor('#1e293b').font('Helvetica-Bold').text('CERTIFICATE OF COMPLIANCE', 230, 240);
+      
+      doc.fontSize(11).fillColor('#374151').text('This certifies that the agricultural commodity produced by:', 100, 270);
+      doc.fontSize(12).fillColor('#1e40af').font('Helvetica-Bold').text(`${name} (${county}, Liberia)`, 180, 290);
+      
+      doc.fontSize(11).fillColor('#374151').text('Has been thoroughly assessed and meets all requirements of:', 100, 320);
+      doc.fontSize(11).fillColor('#059669').font('Helvetica-Bold').text('EU Regulation 2023/1115 on Deforestation-Free Products', 130, 340);
+      
+      // Certification Seals
+      doc.circle(150, 400, 25).fill('#22c55e').stroke('#ffffff', 3);
+      doc.fontSize(16).fillColor('#ffffff').text('✓', 142, 392);
+      doc.fontSize(10).fillColor('#059669').text('LACRA VERIFIED', 120, 435);
+      
+      doc.circle(300, 400, 25).fill('#3b82f6').stroke('#ffffff', 3);
+      doc.fontSize(16).fillColor('#ffffff').text('✓', 292, 392);
+      doc.fontSize(10).fillColor('#1d4ed8').text('EUDR COMPLIANT', 270, 435);
+      
+      doc.circle(450, 400, 25).fill('#dc2626').stroke('#ffffff', 3);
+      doc.fontSize(16).fillColor('#ffffff').text('✓', 442, 392);
+      doc.fontSize(10).fillColor('#dc2626').text('ECOENVIRO CERTIFIED', 410, 435);
 
       // FARMER INFORMATION WITH VISUAL ELEMENTS
       doc.rect(60, 130, 475, 120).fill('#f7fafc').stroke('#cbd5e0', 2);

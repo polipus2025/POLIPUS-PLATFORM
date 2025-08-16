@@ -326,46 +326,6 @@ function generateModernFooter(doc: PDFDocument, packId: string, currentDate: str
   doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold')
      .text('LACRA®', 520, footerY + 10);
 }
-  doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('KEY PERFORMANCE INDICATORS', 50, dashboardY + 8);
-  
-  // KPI metrics with professional grade system
-  const kpiData = [
-    { metric: 'Deforestation Risk', value: '0.2%', grade: 'A+', color: '#10b981', score: 98 },
-    { metric: 'Carbon Footprint', value: 'MINIMAL', grade: 'A', color: '#3b82f6', score: 95 },
-    { metric: 'Supply Chain', value: 'VERIFIED', grade: 'A-', color: '#8b5cf6', score: 92 },
-    { metric: 'Documentation', value: 'COMPLETE', grade: 'A+', color: '#f59e0b', score: 99 }
-  ];
-  
-  kpiData.forEach((kpi, index) => {
-    const x = 40 + (index * 128);
-    const y = dashboardY + 35;
-    
-    // KPI card with professional styling
-    doc.rect(x, y, 120, 90).fill('#ffffff').stroke('#e5e7eb', 1);
-    
-    // Header with gradient-like effect
-    doc.rect(x, y, 120, 25).fill('#f8fafc').stroke('#e5e7eb', 0.5);
-    
-    // Grade badge - circular professional design
-    doc.circle(x + 100, y + 12, 12).fill(kpi.color);
-    doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text(kpi.grade, x + 95, y + 8);
-    
-    // Metric name
-    doc.fontSize(10).fillColor('#374151').font('Helvetica-Bold').text(kpi.metric, x + 8, y + 8);
-    
-    // Large value display
-    doc.fontSize(14).fillColor(kpi.color).font('Helvetica-Bold').text(kpi.value, x + 8, y + 35);
-    
-    // Score bar
-    const barWidth = (kpi.score / 100) * 100;
-    doc.rect(x + 8, y + 60, 104, 8).fill('#f1f5f9');
-    doc.rect(x + 8, y + 60, barWidth, 8).fill(kpi.color);
-    
-    // Score percentage
-    doc.fontSize(9).fillColor('#6b7280').text(`${kpi.score}% Compliant`, x + 8, y + 75);
-  });
-}
 
 function generateProfessionalCharts(doc: PDFDocument) {
   const chartsY = 350;

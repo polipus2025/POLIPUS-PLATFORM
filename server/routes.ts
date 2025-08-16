@@ -6236,9 +6236,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📊 Using farmer data:', farmerData.name, 'from', farmerData.county);
       console.log('🚢 Using export data:', exportData.company);
       
-      // Generate advanced professional report
-      const { generateAdvancedProfessionalReport } = await import('./advanced-professional-generator.js');
-      const doc = generateAdvancedProfessionalReport(farmerData, exportData, packId);
+      // Generate FSC-style professional report
+      const { generateFSCStyleReport } = await import('./fsc-style-generator.js');
+      const doc = generateFSCStyleReport(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

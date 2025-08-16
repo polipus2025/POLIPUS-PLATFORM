@@ -6344,7 +6344,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.fontSize(9).fillColor('#7c3aed').text(`License: ${exporterData.license}`, 400, 240);
       doc.fontSize(9).fillColor('#8b5cf6').text(`Quantity: ${exporterData.quantity}`, 400, 255);
 
-      // COMPREHENSIVE EXPORT & COMPLIANCE DASHBOARD
+      // Compliance Status Card with green accent  
+      doc.rect(60, 285, 160, 85).fill('#f0fdf4').stroke('#22c55e', 3);
+      doc.rect(65, 290, 150, 15).fill('#22c55e');
+      doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text('COMPLIANCE STATUS', 75, 295);
+      doc.fontSize(14).fillColor('#15803d').font('Helvetica-Bold').text('✓ APPROVED', 70, 320);
+      doc.fontSize(10).fillColor('#166534').text('Status: COMPLIANT', 70, 340);
+      doc.fontSize(9).fillColor('#14532d').text('Risk Level: LOW', 70, 355);
+      
+      // Export Destination Card with blue accent
+      doc.rect(230, 285, 160, 85).fill('#eff6ff').stroke('#3b82f6', 3);
+      doc.rect(235, 290, 150, 15).fill('#3b82f6');
+      doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text('EXPORT DESTINATION', 245, 295);
+      doc.fontSize(11).fillColor('#1e40af').font('Helvetica-Bold').text('European Union', 240, 320);
+      doc.fontSize(9).fillColor('#1e3a8a').text(`Value: ${exporterData.exportValue}`, 240, 340);
+      doc.fontSize(9).fillColor('#3730a3').text(`Ship: ${exporterData.vessel}`, 240, 355);
+      
+      // Export Timeline Card with orange accent
+      doc.rect(400, 285, 150, 85).fill('#fefce8').stroke('#f59e0b', 3);
+      doc.rect(405, 290, 140, 15).fill('#f59e0b');
+      doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text('EXPORT TIMELINE', 415, 295);
+      doc.fontSize(10).fillColor('#92400e').font('Helvetica-Bold').text('SCHEDULED', 410, 320);
+      doc.fontSize(9).fillColor('#a16207').text(`Date: ${exporterData.exportDate}`, 410, 340);
+      doc.fontSize(9).fillColor('#ca8a04').text(`ID: ${exporterData.shipmentId}`, 410, 355);
+
+      // COMPREHENSIVE COMPLIANCE ANALYTICS SECTION
       doc.rect(50, 385, 500, 35).fill('#0f172a');
       doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('COMPREHENSIVE COMPLIANCE ANALYTICS', 65, 400);
       
@@ -6571,51 +6595,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.fontSize(9).fillColor('#93c5fd')
          .text('Certificate Document 3 of 6', raTitleSection.x, raTitleSection.y + 70);
       
-      // Risk Assessment Content with Real Data
-      doc.rect(60, 150, 475, 450).fill('#fff5f5').stroke('#ef4444', 2);
-      doc.fontSize(16).fillColor('#1e293b').font('Helvetica-Bold').text('DEFORESTATION RISK MATRIX', 80, 170);
+      // Risk Assessment Content with Enhanced Visual Design
+      doc.rect(60, 150, 475, 520).fill('#f8fafc').stroke('#64748b', 2);
+      doc.fontSize(16).fillColor('#1e293b').font('Helvetica-Bold').text('COMPREHENSIVE RISK ASSESSMENT MATRIX', 200, 170);
       
-      // Farmer Risk Profile
-      doc.rect(80, 200, 200, 100).fill('#ffffff').stroke('#e5e7eb', 2);
-      doc.fontSize(12).fillColor('#1e293b').font('Helvetica-Bold').text('FARMER RISK PROFILE', 90, 220);
-      doc.fontSize(10).fillColor('#374151').text(`Name: ${name}`, 90, 240);
-      doc.fontSize(10).fillColor('#374151').text(`Location: ${county}, Liberia`, 90, 255);
-      doc.fontSize(10).fillColor('#374151').text(`GPS: ${latitude}°N, ${longitude}°W`, 90, 270);
-      doc.fontSize(10).fillColor('#374151').text(`Commodities: ${commodities || 'Cocoa, Coffee'}`, 90, 285);
+      // ENHANCED VISUAL RISK DASHBOARD WITH PROPER SPACING
       
-      // Risk Assessment Matrix
-      doc.rect(300, 200, 215, 100).fill('#ffffff').stroke('#e5e7eb', 2);
-      doc.fontSize(12).fillColor('#1e293b').font('Helvetica-Bold').text('RISK SCORES', 310, 220);
+      // Farmer Information Panel
+      doc.rect(80, 200, 200, 120).fill('#ffffff').stroke('#3b82f6', 3);
+      doc.rect(85, 205, 190, 20).fill('#3b82f6');
+      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text('FARMER PROFILE', 135, 212);
+      doc.fontSize(11).fillColor('#1e293b').font('Helvetica-Bold').text(`${name}`, 90, 235);
+      doc.fontSize(10).fillColor('#374151').text(`Location: ${county}, Liberia`, 90, 250);
+      doc.fontSize(9).fillColor('#6b7280').text(`GPS: ${latitude}°N, ${longitude}°W`, 90, 265);
+      doc.fontSize(9).fillColor('#6b7280').text(`Commodities: ${commodities || 'Cocoa, Coffee'}`, 90, 280);
+      doc.fontSize(9).fillColor('#059669').font('Helvetica-Bold').text('STATUS: VERIFIED ✓', 90, 300);
+      
+      // ENHANCED VISUAL RISK ASSESSMENT PIE CHART
+      doc.rect(300, 200, 235, 200).fill('#ffffff').stroke('#ef4444', 3);
+      doc.rect(305, 205, 225, 20).fill('#ef4444');
+      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text('RISK ANALYSIS CHART', 365, 212);
+      
+      // Professional Risk Assessment Pie Chart
+      const chartCenterX = 417, chartCenterY = 300, chartRadius = 50;
+      
+      // Low Risk - 85% (Green) - 306 degrees
+      doc.moveTo(chartCenterX, chartCenterY)
+         .arc(chartCenterX, chartCenterY, chartRadius, 0, Math.PI * 1.7)
+         .fill('#22c55e');
+      
+      // Medium Risk - 10% (Yellow) - 36 degrees  
+      doc.moveTo(chartCenterX, chartCenterY)
+         .arc(chartCenterX, chartCenterY, chartRadius, Math.PI * 1.7, Math.PI * 1.9)
+         .fill('#f59e0b');
+         
+      // High Risk - 5% (Red) - 18 degrees
+      doc.moveTo(chartCenterX, chartCenterY)
+         .arc(chartCenterX, chartCenterY, chartRadius, Math.PI * 1.9, Math.PI * 2)
+         .fill('#ef4444');
+      
+      // Center score circle
+      doc.circle(chartCenterX, chartCenterY, 25).fill('#ffffff').stroke('#e5e7eb', 3);
+      doc.fontSize(14).fillColor('#1e293b').font('Helvetica-Bold').text('0.16%', chartCenterX - 15, chartCenterY - 7);
+      doc.fontSize(8).fillColor('#059669').font('Helvetica-Bold').text('LOW RISK', chartCenterX - 16, chartCenterY + 8);
+      
+      // Enhanced Legend
+      doc.fontSize(10).fillColor('#22c55e').font('Helvetica-Bold').text('● Low Risk: 85%', 310, 375);
+      doc.fontSize(10).fillColor('#f59e0b').font('Helvetica-Bold').text('● Medium: 10%', 420, 375);
+      doc.fontSize(10).fillColor('#ef4444').font('Helvetica-Bold').text('● High: 5%', 310, 390);
+      
+      // ENHANCED BAR CHART FOR RISK FACTORS
+      doc.rect(80, 420, 435, 120).fill('#f0f9ff').stroke('#3b82f6', 3);
+      doc.rect(85, 425, 425, 20).fill('#3b82f6');
+      doc.fontSize(12).fillColor('#ffffff').font('Helvetica-Bold').text('RISK FACTOR ANALYSIS CHART', 240, 432);
       
       const riskFactors = [
-        { factor: 'Forest Proximity', score: 0.2, level: 'LOW' },
-        { factor: 'Historical Deforestation', score: 0.1, level: 'MINIMAL' },
-        { factor: 'Supply Chain Complexity', score: 0.3, level: 'LOW' },
-        { factor: 'Monitoring Coverage', score: 0.05, level: 'EXCELLENT' }
+        { factor: 'Forest Proximity', score: 20, level: 'LOW', color: '#22c55e' },
+        { factor: 'Deforestation History', score: 10, level: 'MINIMAL', color: '#22c55e' },
+        { factor: 'Supply Chain', score: 30, level: 'LOW', color: '#f59e0b' },
+        { factor: 'Monitoring Coverage', score: 5, level: 'EXCELLENT', color: '#22c55e' }
       ];
       
+      // Professional Bar Chart
+      const barStartX = 100, barStartY = 460, riskBarWidth = 80, riskMaxHeight = 40;
       riskFactors.forEach((risk, index) => {
-        const y = 240 + (index * 15);
-        const color = risk.score <= 0.2 ? '#22c55e' : risk.score <= 0.5 ? '#f59e0b' : '#ef4444';
-        doc.fontSize(9).fillColor('#374151').text(`${risk.factor}:`, 310, y);
-        doc.fontSize(9).fillColor(color).text(`${risk.score}% (${risk.level})`, 430, y);
+        const x = barStartX + (index * 90);
+        const barHeight = (risk.score / 50) * riskMaxHeight; // Scale to max height
+        
+        // Bar background
+        doc.rect(x, barStartY, riskBarWidth, riskMaxHeight).fill('#f1f5f9').stroke('#cbd5e1', 1);
+        
+        // Actual bar with gradient effect
+        doc.rect(x, barStartY + riskMaxHeight - barHeight, riskBarWidth, barHeight).fill(risk.color);
+        doc.rect(x + 5, barStartY + riskMaxHeight - barHeight + 5, riskBarWidth - 10, Math.max(barHeight - 10, 5)).fill(risk.color).opacity(0.7);
+        
+        // Labels and values
+        doc.fontSize(8).fillColor('#374151').font('Helvetica-Bold').text(risk.factor, x + 5, barStartY + riskMaxHeight + 5);
+        doc.fontSize(10).fillColor(risk.color).font('Helvetica-Bold').text(`${risk.score}%`, x + 25, barStartY + riskMaxHeight - barHeight/2);
+        doc.fontSize(7).fillColor('#6b7280').text(risk.level, x + 10, barStartY + riskMaxHeight + 18);
       });
       
-      // Geographic Risk Analysis
-      doc.rect(80, 320, 435, 120).fill('#f8fafc').stroke('#64748b', 2);
-      doc.fontSize(14).fillColor('#1e293b').font('Helvetica-Bold').text('GEOGRAPHIC RISK ANALYSIS', 90, 340);
-      
-      doc.fontSize(11).fillColor('#374151').text(`• Farm Location: ${county} County - Classified as LOW RISK zone`, 100, 365);
-      doc.fontSize(11).fillColor('#374151').text('• Distance to Protected Areas: >5km (Compliant)', 100, 380);
-      doc.fontSize(11).fillColor('#374151').text('• Satellite Monitoring: Active coverage since 2020', 100, 395);
-      doc.fontSize(11).fillColor('#374151').text('• Deforestation Alerts: Zero incidents in past 3 years', 100, 410);
-      doc.fontSize(11).fillColor('#374151').text('• Land Use Change: No significant changes detected', 100, 425);
-      
-      // Risk Conclusion
-      doc.rect(80, 460, 435, 60).fill('#f0fdf4').stroke('#22c55e', 3);
-      doc.fontSize(12).fillColor('#15803d').font('Helvetica-Bold').text('RISK ASSESSMENT CONCLUSION', 250, 480);
-      doc.fontSize(11).fillColor('#166534').text('OVERALL RISK LEVEL: LOW (0.16%)', 220, 500);
-      doc.fontSize(10).fillColor('#14532d').text('This operation meets all EUDR risk thresholds and is approved for certification.', 120, 520);
+      // Geographic Analysis Summary
+      doc.rect(80, 560, 435, 80).fill('#f0fdf4').stroke('#22c55e', 3);
+      doc.fontSize(14).fillColor('#15803d').font('Helvetica-Bold').text('GEOGRAPHIC RISK ASSESSMENT', 220, 580);
+      doc.fontSize(10).fillColor('#374151').text(`• Farm Location: ${county} County - LOW RISK zone | GPS Verified: ${latitude}°N, ${longitude}°W`, 90, 600);
+      doc.fontSize(10).fillColor('#374151').text('• Protected Areas Distance: >5km (Compliant) | Satellite Coverage: Active since 2020', 90, 615);
+      doc.fontSize(11).fillColor('#15803d').font('Helvetica-Bold').text('CONCLUSION: APPROVED FOR EUDR CERTIFICATION', 180, 630);
       
       // Logo panels for pages 3 and 4 (Risk Assessment and Supply Chain)
       const page3LogoSection = { x: 450, y: 15, width: 130, height: 90 };

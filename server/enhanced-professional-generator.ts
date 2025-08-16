@@ -26,12 +26,13 @@ export function generateEnhancedProfessionalEUDRPack(
 ): PDFDocument {
   const doc = new PDFDocument({ 
     size: 'A4', 
-    margins: { top: 50, bottom: 50, left: 50, right: 50 }
+    margins: { top: 50, bottom: 50, left: 50, right: 50 },
+    autoFirstPage: false
   });
 
   const currentDate = new Date().toLocaleDateString();
 
-  // Generate all 6 certificates with enhanced professional design
+  // Generate all 6 certificates with enhanced professional design (no empty pages)
   generateCertificate1_CoverPage(doc, farmerData, exportData, packId, currentDate);
   generateCertificate2_ExportEligibility(doc, farmerData, exportData, packId, currentDate);
   generateCertificate3_ComplianceAssessment(doc, farmerData, exportData, packId, currentDate);
@@ -44,6 +45,8 @@ export function generateEnhancedProfessionalEUDRPack(
 
 // Certificate 1: Enhanced Professional Cover Page
 function generateCertificate1_CoverPage(doc: PDFDocument, farmerData: FarmerData, exportData: ExportData, packId: string, currentDate: string) {
+  // Add first page (no automatic first page)
+  doc.addPage();
   // Professional header with gradient-like effect
   doc.rect(0, 0, 595, 120).fill('#1a365d');
   doc.rect(0, 120, 595, 10).fill('#2c5282');
@@ -675,11 +678,14 @@ function generateCertificate6_SupplyTraceability(doc: PDFDocument, farmerData: F
 
 // Enhanced professional header for all certificates
 function generateProfessionalHeader(doc: PDFDocument, title: string, packId: string, currentDate: string) {
+  // Reset to top of page for consistent header placement
+  const startY = 50; // Match document margins
+  
   // Header background
   doc.rect(0, 0, 595, 100).fill('#1a365d');
   doc.rect(0, 100, 595, 8).fill('#2c5282');
   
-  // Title
+  // Title - ensure proper positioning
   doc.fontSize(24).fillColor('#ffffff').font('Helvetica-Bold')
      .text(title, 60, 30);
   
@@ -699,7 +705,9 @@ function generateProfessionalHeader(doc: PDFDocument, title: string, packId: str
 
 // Enhanced professional footer for all certificates
 function generateProfessionalFooter(doc: PDFDocument, packId: string, currentDate: string, certificateType: string) {
-  const footerY = 720;
+  // Calculate dynamic footer position based on page height
+  const pageHeight = 842; // A4 height in points
+  const footerY = pageHeight - 122; // 122 points from bottom (about 1.7 inches)
   
   // Certification statement
   doc.rect(50, footerY, 495, 60).fill('#f7fafc').stroke('#cbd5e0', 1);
@@ -709,14 +717,15 @@ function generateProfessionalFooter(doc: PDFDocument, packId: string, currentDat
      .text('This certificate confirms full compliance with EU Deforestation Regulation', 70, footerY + 35)
      .text('requirements for agricultural commodities exported from Liberia to the EU.', 70, footerY + 50);
   
-  // Official footer
-  doc.rect(0, 790, 595, 52).fill('#1a365d');
+  // Official footer at bottom
+  const bottomFooterY = pageHeight - 52;
+  doc.rect(0, bottomFooterY, 595, 52).fill('#1a365d');
   doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('LACRA - LIBERIA AGRICULTURE COMMODITY REGULATORY AUTHORITY', 60, 810);
+     .text('LACRA - LIBERIA AGRICULTURE COMMODITY REGULATORY AUTHORITY', 60, bottomFooterY + 20);
   doc.fontSize(10).fillColor('#cbd5e0')
-     .text(`Certificate: LACRA-EUDR-${packId.slice(-8)} | ${certificateType} | Generated: ${currentDate}`, 60, 830);
+     .text(`Certificate: LACRA-EUDR-${packId.slice(-8)} | ${certificateType} | Generated: ${currentDate}`, 60, bottomFooterY + 40);
   
   // Official seal
   doc.fontSize(16).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('LACRA®', 500, 815);
+     .text('LACRA®', 500, bottomFooterY + 25);
 }

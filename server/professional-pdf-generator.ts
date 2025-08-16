@@ -1,4 +1,6 @@
 // Professional EUDR PDF Generator - Clean Report Style
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const PDFDocument = require('pdfkit');
 
 export function createProfessionalEUDRPack(farmerData: any, packId: string) {

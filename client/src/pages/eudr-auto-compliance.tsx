@@ -106,7 +106,7 @@ export default function EudrAutoCompliancePage() {
   // Download individual EUDR document mutation
   const downloadDocumentsMutation = useMutation({
     mutationFn: async (documentPath: string) => {
-      const response = await fetch(`/api/eudr/download-document/${documentPath}`, {
+      const response = await fetch(`/api/eudr/simple-pdf/${documentPath}`, {
         method: "GET"
       });
       if (!response.ok) throw new Error("Failed to download document");

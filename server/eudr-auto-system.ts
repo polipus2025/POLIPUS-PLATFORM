@@ -115,10 +115,10 @@ export function registerAutoEudrRoutes(app: Express) {
       const packId = `AUTO-EUDR-${farmerId}-${Date.now()}`;
       
       const autoData: AutoComplianceData = {
-        farmerId: farmer.id,
-        farmerName: farmer.name,
+        farmerId: farmer.farmerId,
+        farmerName: `${farmer.firstName} ${farmer.lastName}`,
         gpsCoordinates: farmer.gpsCoordinates || farmerFarms[0].gpsCoordinates || "GPS data available",
-        farmIds: farmerFarms.map(f => f.id),
+        farmIds: farmerFarms.map(f => f.farmerId),
         
         // Exporter info from request
         exporterId: exporterData.exporterId,
@@ -157,11 +157,11 @@ export function registerAutoEudrRoutes(app: Express) {
       const [pack] = await db.insert(eudrCompliancePacks).values({
         packId,
         ...autoData,
-        documentsGenerated: 6,
+        // documentsGenerated: 6,
         packGeneratedAt: new Date(),
         storageExpiryDate: new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000),
         auditReadyStatus: false, // Requires admin approval
-        adminApprovalStatus: 'pending',
+        complianceStatus: 'pending',
         adminApprovedBy: null,
         adminApprovedAt: null
       }).returning();
@@ -171,7 +171,7 @@ export function registerAutoEudrRoutes(app: Express) {
       res.json({
         success: true,
         packId,
-        farmerName: farmer.name,
+        farmerName: `${farmer.firstName} ${farmer.lastName}`,
         complianceScore: autoData.complianceScore,
         status: 'pending_approval',
         message: 'EUDR Compliance Pack auto-generated from existing data - Awaiting admin approval'
@@ -226,7 +226,7 @@ export function registerAutoEudrRoutes(app: Express) {
         // Update pack status to approved
         await db.update(eudrCompliancePacks)
           .set({
-            adminApprovalStatus: 'approved',
+            complianceStatus: 'approved',
             adminApprovedBy: adminName,
             adminApprovedAt: new Date(),
             auditReadyStatus: true,
@@ -271,7 +271,7 @@ export function registerAutoEudrRoutes(app: Express) {
     try {
       const approvedPacks = await db.select()
         .from(eudrCompliancePacks)
-        .where(eq(eudrCompliancePacks.adminApprovalStatus, 'approved'))
+        .where(eq(eudrCompliancePacks.complianceStatus, 'approved'))
         .orderBy(desc(eudrCompliancePacks.adminApprovedAt));
         
       res.json(approvedPacks);
@@ -325,21 +325,13 @@ export function registerAutoEudrRoutes(app: Express) {
       
       const packData = pack[0];
 
-      // Generate PDF document based on type
-      const doc = new PDFDocument();
-      const chunks: Buffer[] = [];
+      // Generate PDF document using a promise-based approach
+      const pdfBuffer = await generatePdfDocument(documentType, packData);
       
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => {
-        const pdfBuffer = Buffer.concat(chunks);
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${getDocumentFileName(documentType, packId)}"`);
-        res.send(pdfBuffer);
-      });
-
-      // Generate specific document based on type
-      generateEudrDocument(doc, documentType, packData);
-      doc.end();
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${getDocumentFileName(documentType, packId)}"`);
+      res.setHeader('Content-Length', pdfBuffer.length.toString());
+      res.send(pdfBuffer);
       
     } catch (error) {
       console.error('❌ Download document failed:', error);
@@ -483,153 +475,106 @@ function getDocumentFileName(documentType: string, packId: string): string {
   return fileNames[documentType] || `EUDR_Document_${packId}.pdf`;
 }
 
-function generateEudrDocument(doc: typeof PDFDocument.prototype, documentType: string, packData: any) {
-  const currentDate = new Date().toLocaleDateString();
-  
-  // Common header for all documents
-  doc.fontSize(20).fillColor('#1e40af').text('LACRA', 50, 50);
-  doc.fontSize(12).fillColor('#64748b').text('Liberia Agriculture Commodity Regulatory Authority', 50, 75);
-  doc.fontSize(10).text('In partnership with ECOENVIRO Audit & Certification', 50, 90);
-  
-  switch (documentType) {
-    case 'cover':
-      generateCoverSheet(doc, packData, currentDate);
-      break;
-    case 'certificate':
-      generateExportCertificate(doc, packData, currentDate);
-      break;
-    case 'assessment':
-      generateComplianceAssessment(doc, packData, currentDate);
-      break;
-    case 'deforestation':
-      generateDeforestationReport(doc, packData, currentDate);
-      break;
-    case 'diligence':
-      generateDueDiligenceStatement(doc, packData, currentDate);
-      break;
-    case 'traceability':
-      generateTraceabilityReport(doc, packData, currentDate);
-      break;
-    default:
-      generateDefaultDocument(doc, packData, currentDate);
-  }
-  
-  // Common footer
-  doc.fontSize(8).fillColor('#64748b')
-     .text(`Generated: ${currentDate}`, 50, 750)
-     .text(`Pack ID: ${packData.packId}`, 200, 750)
-     .text('compliance@lacra.gov.lr | cert@ecoenviro.com', 350, 750);
-}
+async function generatePdfDocument(documentType: string, packData: any): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument();
+      const chunks: Buffer[] = [];
+      
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => {
+        const pdfBuffer = Buffer.concat(chunks);
+        resolve(pdfBuffer);
+      });
+      doc.on('error', (err) => reject(err));
 
-function generateCoverSheet(doc: any, packData: any, currentDate: string) {
-  doc.fontSize(18).fillColor('#1e40af').text('EUDR COMPLIANCE PACK', 50, 130);
-  doc.fontSize(16).fillColor('#dc2626').text('COVER SHEET', 50, 155);
-  
-  doc.fontSize(12).fillColor('#000')
-     .text(`Pack ID: ${packData.packId}`, 50, 200)
-     .text(`Farmer: ${packData.farmerName}`, 50, 220)
-     .text(`Exporter: ${packData.exporterName}`, 50, 240)
-     .text(`Commodity: ${packData.commodity}`, 50, 260)
-     .text(`Status: APPROVED`, 50, 280)
-     .text(`Compliance Score: ${packData.complianceScore}/100`, 50, 300);
-     
-  doc.fontSize(10).text('This pack contains all required EUDR compliance documentation.', 50, 350);
-}
+      const currentDate = new Date().toLocaleDateString();
+      
+      // Document title
+      const titles: Record<string, string> = {
+        'cover': 'EUDR COMPLIANCE PACK - COVER SHEET',
+        'certificate': 'LACRA EXPORT ELIGIBILITY CERTIFICATE',
+        'assessment': 'EUDR COMPLIANCE ASSESSMENT',
+        'deforestation': 'DEFORESTATION ANALYSIS REPORT',
+        'diligence': 'DUE DILIGENCE STATEMENT',
+        'traceability': 'SUPPLY CHAIN TRACEABILITY REPORT'
+      };
 
-function generateExportCertificate(doc: any, packData: any, currentDate: string) {
-  doc.fontSize(18).fillColor('#dc2626').text('EXPORT ELIGIBILITY CERTIFICATE', 50, 130);
-  doc.fontSize(14).fillColor('#1e40af').text(`Certificate No: LACRA-${packData.packId}`, 50, 160);
-  
-  doc.fontSize(12).fillColor('#000')
-     .text('This certifies that the following commodity is eligible for export:', 50, 200)
-     .text(`Farmer: ${packData.farmerName}`, 50, 230)
-     .text(`Commodity: ${packData.commodity}`, 50, 250)
-     .text(`HS Code: ${packData.hsCode}`, 50, 270)
-     .text(`Destination: ${packData.destination}`, 50, 290)
-     .text('Meets all LACRA export requirements and EUDR compliance standards.', 50, 330);
-}
-
-function generateComplianceAssessment(doc: any, packData: any, currentDate: string) {
-  doc.fontSize(18).fillColor('#059669').text('EUDR COMPLIANCE ASSESSMENT', 50, 130);
-  
-  doc.fontSize(12).fillColor('#000')
-     .text(`Assessment ID: EUDR-${packData.packId}`, 50, 170)
-     .text(`Overall Compliance Score: ${packData.complianceScore}/100`, 50, 200)
-     .text(`Risk Classification: ${packData.riskClassification}`, 50, 220)
-     .text(`Deforestation Risk: ${packData.deforestationRisk}`, 50, 240)
-     .text(`Forest Protection Score: ${packData.forestProtectionScore || 95}/100`, 50, 260)
-     .text(`Documentation Score: ${packData.documentationScore || 98}/100`, 50, 280)
-     .text('Assessment Result: COMPLIANT', 50, 320);
-}
-
-function generateDeforestationReport(doc: any, packData: any, currentDate: string) {
-  doc.fontSize(18).fillColor('#dc2626').text('DEFORESTATION ANALYSIS REPORT', 50, 130);
-  
-  doc.fontSize(12).fillColor('#000')
-     .text(`Analysis ID: DEFOR-${packData.packId}`, 50, 170)
-     .text(`Satellite Data Source: ${packData.satelliteDataSource || 'Sentinel-2, Landsat-8'}`, 50, 200)
-     .text(`Forest Cover Change: ${packData.forestCoverChange || 0}%`, 50, 220)
-     .text(`Carbon Stock Impact: ${packData.carbonStockImpact || 0} tCO2`, 50, 240)
-     .text(`Biodiversity Impact: ${packData.biodiversityImpactLevel || 'Low'}`, 50, 260)
-     .text('Conclusion: No significant deforestation detected.', 50, 300);
-}
-
-function generateDueDiligenceStatement(doc: any, packData: any, currentDate: string) {
-  doc.fontSize(18).fillColor('#7c3aed').text('DUE DILIGENCE STATEMENT', 50, 130);
-  
-  doc.fontSize(12).fillColor('#000')
-     .text(`Statement ID: DD-${packData.packId}`, 50, 170)
-     .text('This statement confirms that due diligence procedures have been', 50, 200)
-     .text('conducted in accordance with EU Deforestation Regulation requirements.', 50, 220)
-     .text('All necessary documentation has been reviewed and verified.', 50, 250)
-     .text(`Verified by: LACRA Compliance Officer`, 50, 280)
-     .text(`Date: ${currentDate}`, 50, 300);
-}
-
-function generateTraceabilityReport(doc: any, packData: any, currentDate: string) {
-  doc.fontSize(18).fillColor('#ea580c').text('SUPPLY CHAIN TRACEABILITY REPORT', 50, 130);
-  
-  doc.fontSize(12).fillColor('#000')
-     .text(`Trace ID: TRACE-${packData.packId}`, 50, 170)
-     .text(`Origin: ${packData.farmerName} Farm, Liberia`, 50, 200)
-     .text(`Destination: ${packData.destination}`, 50, 220)
-     .text(`Shipment ID: ${packData.shipmentId}`, 50, 240)
-     .text(`HS Code: ${packData.hsCode}`, 50, 260)
-     .text(`Exporter: ${packData.exporterName}`, 50, 280)
-     .text('Complete traceability chain verified and documented.', 50, 320);
-}
-
-function generateDefaultDocument(doc: any, packData: any, currentDate: string) {
-  doc.fontSize(18).fillColor('#1e40af').text('EUDR COMPLIANCE DOCUMENT', 50, 130);
-  doc.fontSize(12).fillColor('#000').text(`Pack ID: ${packData.packId}`, 50, 170);
-}
-
-}
-
-// Simplified document generation (would use the full generators from main file)
-async function generateComplianceDocuments(packId: string, data: any) {
-  // This would call the full PDF generators, simplified for now
-  const documents = [
-    {
-      packId,
-      documentType: 'cover_sheet',
-      documentNumber: `COVER-${packId}`,
-      title: 'EUDR Compliance Pack Cover Sheet',
-      referenceNumber: `COVER-${packId}`,
-      issuedBy: 'LACRA',
-      pdfContent: 'base64_pdf_content' // Would be actual PDF
-    },
-    {
-      packId,
-      documentType: 'export_certificate',
-      documentNumber: `CERT-${packId}`,
-      title: 'LACRA Export Eligibility Certificate',
-      referenceNumber: `CERT-${packId}`,
-      issuedBy: 'LACRA',
-      pdfContent: 'base64_pdf_content'
-    },
-    // ... other 4 documents
-  ];
-  
-  return documents;
+      // Header
+      doc.fontSize(16).fillColor('black').text('LACRA', 50, 50);
+      doc.fontSize(10).text('Liberia Agriculture Commodity Regulatory Authority', 50, 70);
+      doc.fontSize(8).text('In partnership with ECOENVIRO Audit & Certification', 50, 85);
+      
+      // Title
+      doc.fontSize(14).fillColor('black').text(titles[documentType] || 'EUDR DOCUMENT', 50, 120);
+      
+      // Content based on document type
+      let yPosition = 160;
+      
+      // Pack identification
+      doc.fontSize(10).fillColor('black')
+         .text(`Pack ID: ${packData.packId}`, 50, yPosition)
+         .text(`Date: ${currentDate}`, 300, yPosition);
+      yPosition += 25;
+      
+      // Farmer information
+      doc.text(`Farmer: ${packData.farmerName}`, 50, yPosition);
+      doc.text(`Farmer ID: ${packData.farmerId}`, 300, yPosition);
+      yPosition += 20;
+      
+      // Exporter information
+      doc.text(`Exporter: ${packData.exporterName}`, 50, yPosition);
+      doc.text(`Exporter ID: ${packData.exporterId}`, 300, yPosition);
+      yPosition += 20;
+      
+      // Commodity details
+      doc.text(`Commodity: ${packData.commodity}`, 50, yPosition);
+      doc.text(`HS Code: ${packData.hsCode}`, 300, yPosition);
+      yPosition += 25;
+      
+      // Document-specific content
+      switch (documentType) {
+        case 'cover':
+          doc.text('STATUS: APPROVED', 50, yPosition);
+          doc.text(`Compliance Score: ${packData.complianceScore}/100`, 50, yPosition + 20);
+          doc.text('This pack contains all required EUDR compliance documentation.', 50, yPosition + 45);
+          break;
+        case 'certificate':
+          doc.text('CERTIFICATION STATUS: ELIGIBLE FOR EXPORT', 50, yPosition);
+          doc.text('This commodity meets all LACRA export requirements.', 50, yPosition + 20);
+          break;
+        case 'assessment':
+          doc.text(`Compliance Score: ${packData.complianceScore}/100`, 50, yPosition);
+          doc.text(`Risk Classification: ${packData.riskClassification}`, 50, yPosition + 20);
+          doc.text(`Deforestation Risk: ${packData.deforestationRisk}`, 50, yPosition + 40);
+          doc.text('ASSESSMENT RESULT: COMPLIANT', 50, yPosition + 60);
+          break;
+        case 'deforestation':
+          doc.text('DEFORESTATION ANALYSIS RESULTS', 50, yPosition);
+          doc.text('Satellite monitoring shows no deforestation activity.', 50, yPosition + 20);
+          doc.text('Forest cover remains stable and protected.', 50, yPosition + 40);
+          break;
+        case 'diligence':
+          doc.text('DUE DILIGENCE CONFIRMATION', 50, yPosition);
+          doc.text('All due diligence procedures completed successfully.', 50, yPosition + 20);
+          doc.text('Documentation reviewed and verified by LACRA.', 50, yPosition + 40);
+          break;
+        case 'traceability':
+          doc.text('SUPPLY CHAIN TRACEABILITY CONFIRMED', 50, yPosition);
+          doc.text(`Origin: ${packData.farmerName} Farm, Liberia`, 50, yPosition + 20);
+          doc.text(`Destination: ${packData.destination}`, 50, yPosition + 40);
+          break;
+      }
+      
+      // Footer
+      doc.fontSize(8).fillColor('gray')
+         .text(`Generated: ${currentDate}`, 50, 750)
+         .text(`Pack: ${packData.packId}`, 200, 750)
+         .text('compliance@lacra.gov.lr', 400, 750);
+      
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
 }

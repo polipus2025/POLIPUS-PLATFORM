@@ -117,7 +117,13 @@ function generatePage1UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
      .text(`Name: ${farmerData.name}`, 80, 270)
      .text(`Location: ${farmerData.county}, Liberia`, 80, 290)
      .text(`Coordinates: ${farmerData.latitude}°N, ${farmerData.longitude}°W`, 80, 310)
-     .text(`Export Company: ${exportData.company}`, 80, 330);
+     .text(`Farm Size: 12.5 hectares`, 80, 330);
+  
+  doc.fontSize(12).fillColor('#374151')
+     .text(`Primary Crop: Cacao (Theobroma cacao)`, 280, 270)
+     .text(`Cultivation Type: Organic Sustainable`, 280, 290)
+     .text(`Planting Year: 2018`, 280, 310)
+     .text(`Export Company: ${exportData.company}`, 280, 330);
   
   // Progress bar (like UniDOC)
   doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold').text('OVERALL COMPLIANCE PROGRESS', 70, 380);
@@ -184,6 +190,8 @@ function generatePage2UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
   doc.rect(70, 300, 455, 120).fill('#ffffff').stroke('#e5e7eb');
   
   const exportDetails = [
+    ['Product', 'Dried Cacao Beans (Premium Grade)'],
+    ['Farm Size', '12.5 hectares'],
     ['Quantity', exportData.quantity],
     ['Destination', exportData.destination],
     ['Export Value', exportData.exportValue],
@@ -243,10 +251,10 @@ function generatePage3UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
   
   const assessments = [
     { criteria: 'EUDR Compliance', score: 95, status: 'APPROVED', risk: 'LOW' },
-    { criteria: 'Forest Protection', score: 98, status: 'EXCELLENT', risk: 'NONE' },
-    { criteria: 'Documentation', score: 96, status: 'COMPLETE', risk: 'LOW' },
-    { criteria: 'Supply Chain', score: 94, status: 'VERIFIED', risk: 'LOW' },
-    { criteria: 'Environmental', score: 97, status: 'SUSTAINABLE', risk: 'MINIMAL' }
+    { criteria: 'Cacao Quality', score: 98, status: 'PREMIUM', risk: 'NONE' },
+    { criteria: 'Organic Certification', score: 96, status: 'CERTIFIED', risk: 'LOW' },
+    { criteria: 'Land Use (12.5 ha)', score: 94, status: 'VERIFIED', risk: 'LOW' },
+    { criteria: 'Sustainable Farming', score: 97, status: 'EXCELLENT', risk: 'MINIMAL' }
   ];
   
   // Table header
@@ -298,10 +306,10 @@ function generatePage4UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
   doc.fontSize(14).fillColor('#1f2937').font('Helvetica-Bold').text('RISK ASSESSMENT MATRIX', 70, 90);
   
   const riskCategories = [
-    { name: 'Deforestation Risk', value: 2, status: 'LOW', color: '#22c55e', grade: 'A' },
-    { name: 'Forest Degradation', value: 1, status: 'MINIMAL', color: '#22c55e', grade: 'A' },
-    { name: 'Land Use Change', value: 3, status: 'LOW', color: '#22c55e', grade: 'A' },
-    { name: 'Biodiversity Impact', value: 1, status: 'MINIMAL', color: '#22c55e', grade: 'A' }
+    { name: 'Deforestation Risk (12.5 ha)', value: 2, status: 'LOW', color: '#22c55e', grade: 'A' },
+    { name: 'Cacao Agroforestry', value: 1, status: 'OPTIMAL', color: '#22c55e', grade: 'A' },
+    { name: 'Land Use Change', value: 3, status: 'STABLE', color: '#22c55e', grade: 'A' },
+    { name: 'Shade Tree Coverage', value: 1, status: 'EXCELLENT', color: '#22c55e', grade: 'A' }
   ];
   
   let riskY = 120;
@@ -329,9 +337,9 @@ function generatePage4UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
   doc.rect(70, 360, 455, 80).fill('#ffffff').stroke('#e5e7eb');
   
   doc.fontSize(11).fillColor('#374151')
-     .text('✓ Sentinel-2 imagery analysis: No deforestation detected', 80, 380)
-     .text('✓ Landsat-8 temporal analysis: Stable forest cover (99.8%)', 80, 400)
-     .text('✓ MODIS fire detection: No active fire alerts in area', 80, 420);
+     .text('✓ Sentinel-2 imagery analysis: 12.5 ha cacao farm - No deforestation detected', 80, 380)
+     .text('✓ Landsat-8 temporal analysis: Agroforestry system stable (99.8% coverage)', 80, 400)
+     .text('✓ MODIS fire detection: No active fire alerts in cacao cultivation area', 80, 420);
   
   // Environmental status
   doc.rect(70, 470, 455, 60).fill('#22c55e');
@@ -372,11 +380,11 @@ function generatePage5UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
   doc.fontSize(14).fillColor('#1f2937').font('Helvetica-Bold').text('DUE DILIGENCE VERIFICATION PROCESS', 70, 90);
   
   const diligenceSteps = [
-    { step: 'Geolocation Verification', status: 'COMPLETE', method: 'GPS coordinates verified using satellite technology' },
-    { step: 'Supply Chain Documentation', status: 'COMPLETE', method: 'Full chain of custody documentation reviewed' },
-    { step: 'Risk Assessment', status: 'COMPLETE', method: 'Comprehensive risk analysis using EUDR criteria' },
-    { step: 'Legal Compliance Check', status: 'COMPLETE', method: 'Local and international legal requirements verified' },
-    { step: 'EUDR Statement Preparation', status: 'COMPLETE', method: 'Due diligence statement prepared per Article 8' }
+    { step: 'Farm Geolocation (12.5 ha)', status: 'COMPLETE', method: 'GPS coordinates verified for entire cacao plantation' },
+    { step: 'Cacao Supply Chain Documentation', status: 'COMPLETE', method: 'Full chain of custody from farm to export documented' },
+    { step: 'Agroforestry Risk Assessment', status: 'COMPLETE', method: 'Sustainable cacao cultivation practices verified' },
+    { step: 'Organic Certification Check', status: 'COMPLETE', method: 'Organic cacao farming standards compliance verified' },
+    { step: 'EUDR Cacao Statement', status: 'COMPLETE', method: 'Due diligence for cacao beans per Article 8' }
   ];
   
   let stepY = 120;
@@ -450,10 +458,10 @@ function generatePage6UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
   doc.fontSize(14).fillColor('#1f2937').font('Helvetica-Bold').text('TRACEABILITY VERIFICATION', 70, 250);
   
   const traceabilityChecks = [
-    { checkpoint: 'Farm Origin', verification: 'GPS coordinates verified', status: 'VERIFIED', timestamp: '2024-01-15' },
-    { checkpoint: 'Collection Point', verification: 'Chain of custody documented', status: 'VERIFIED', timestamp: '2024-01-16' },
-    { checkpoint: 'Processing Facility', verification: 'Quality control records', status: 'VERIFIED', timestamp: '2024-01-18' },
-    { checkpoint: 'Export Terminal', verification: 'Final inspection completed', status: 'VERIFIED', timestamp: '2024-01-20' }
+    { checkpoint: 'Cacao Farm (12.5 ha)', verification: 'GPS coordinates and farm boundaries verified', status: 'VERIFIED', timestamp: '2024-01-15' },
+    { checkpoint: 'Bean Collection Point', verification: 'Dried cacao beans quality and chain of custody', status: 'VERIFIED', timestamp: '2024-01-16' },
+    { checkpoint: 'Processing Facility', verification: 'Cacao processing and quality control records', status: 'VERIFIED', timestamp: '2024-01-18' },
+    { checkpoint: 'Export Terminal', verification: 'Final cacao beans inspection and grading', status: 'VERIFIED', timestamp: '2024-01-20' }
   ];
   
   // Table header
@@ -487,9 +495,10 @@ function generatePage6UniDoc(doc: PDFDocumentType, farmerData: FarmerData, expor
   
   doc.fontSize(10).fillColor('#374151')
      .text('Scan this QR code to access the complete digital', 170, 480)
-     .text('traceability record for this shipment.', 170, 495)
-     .text(`Certificate ID: LACRA-EUDR-${packId}`, 170, 520)
-     .text(`Verification URL: verify.lacra.gov.lr/${packId}`, 170, 535);
+     .text('traceability record for this cacao shipment.', 170, 495)
+     .text(`Farm Size: 12.5 hectares | Product: Premium Cacao`, 170, 510)
+     .text(`Certificate ID: LACRA-EUDR-${packId}`, 170, 525)
+     .text(`Verification URL: verify.lacra.gov.lr/${packId}`, 170, 540);
   
   // Final status
   doc.rect(70, 580, 455, 60).fill('#22c55e');

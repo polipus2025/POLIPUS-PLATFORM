@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,18 +46,47 @@ export default function PaymentServices() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [services, setServices] = useState<PaymentService[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
   // Check authentication
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
 
-  const { data: services = [], isLoading, error } = useQuery({
-    queryKey: ['/api/payment-services'],
-  });
+  // Direct fetch instead of React Query to troubleshoot
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/payment-services');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("Direct fetch data:", data);
+        setServices(data || []);
+        setError(null);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(err);
+        setServices([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  console.log("Payment services data:", services);
+    fetchServices();
+  }, []);
+
+  console.log("Current services state:", services);
   console.log("Loading state:", isLoading);
   console.log("Error state:", error);
+
+  // Force show services if we have data but still loading
+  const hasData = services && Array.isArray(services) && services.length > 0;
 
   // Filter services based on search and type
   const filteredServices = services.filter((service: PaymentService) => {
@@ -76,12 +104,13 @@ export default function PaymentServices() {
     setLocation(`/payment-checkout?service=${serviceId}`);
   };
 
-  if (isLoading) {
+  if (isLoading && !hasData) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-gray-600">Loading payment services...</p>
+          <p className="text-xs text-gray-400 mt-2">Debug: Loading={isLoading.toString()}, HasData={hasData.toString()}</p>
         </div>
       </div>
     );

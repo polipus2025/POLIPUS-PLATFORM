@@ -178,7 +178,7 @@ export default function PaymentSuccess() {
                 <div className="text-gray-600">Platform maintenance and development</div>
               </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
 
         {/* Next Steps */}

@@ -52,9 +52,13 @@ export default function PaymentServices() {
   const authToken = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
 
-  const { data: services = [], isLoading } = useQuery({
+  const { data: services = [], isLoading, error } = useQuery({
     queryKey: ['/api/payment-services'],
   });
+
+  console.log("Payment services data:", services);
+  console.log("Loading state:", isLoading);
+  console.log("Error state:", error);
 
   // Filter services based on search and type
   const filteredServices = services.filter((service: PaymentService) => {
@@ -75,7 +79,42 @@ export default function PaymentServices() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full" />
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-600">Loading payment services...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+            <h2 className="text-red-800 text-lg font-semibold mb-2">Error Loading Services</h2>
+            <p className="text-red-600 mb-4">{error?.message || "Failed to load payment services"}</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!services || services.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
+            <h2 className="text-yellow-800 text-lg font-semibold mb-2">No Services Available</h2>
+            <p className="text-yellow-600 mb-4">Payment services are not currently available.</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Refresh
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

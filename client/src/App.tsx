@@ -159,6 +159,11 @@ import MarineProtectionPage from "@/pages/blue-carbon360/marine-protection-page"
 import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
 import IntegratedDashboard from "@/pages/integrated-dashboard";
 
+// Payment Pages
+import PaymentServices from "@/pages/payments/payment-services";
+import PaymentCheckout from "@/pages/payments/payment-checkout";
+import PaymentSuccess from "@/pages/payments/payment-success";
+
 import NotFound from "@/pages/not-found";
 
 // Helper component to check user access to routes
@@ -461,9 +466,9 @@ function Router() {
           </Route>
           
           {/* Payment Routes - Available to all authenticated users */}
-          <Route path="/payment-services" component={lazy(() => import("@/pages/payments/payment-services"))} />
-          <Route path="/payment-checkout" component={lazy(() => import("@/pages/payments/payment-checkout"))} />
-          <Route path="/payment-success" component={lazy(() => import("@/pages/payments/payment-success"))} />
+          <Route path="/payment-services" component={PaymentServices} />
+          <Route path="/payment-checkout" component={PaymentCheckout} />
+          <Route path="/payment-success" component={PaymentSuccess} />
           
           {/* Document Verification - Available to all */}
           <Route path="/verification" component={Verification} />

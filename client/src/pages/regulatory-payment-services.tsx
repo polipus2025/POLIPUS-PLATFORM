@@ -48,8 +48,12 @@ export default function RegulatoryPaymentServices() {
     const fetchServices = async () => {
       try {
         const response = await fetch('/api/payment-services');
-        const data = await response.json();
-        setServices(data);
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data);
+        } else {
+          throw new Error('Failed to fetch payment services');
+        }
       } catch (error) {
         console.error('Error fetching payment services:', error);
         // Fallback data for demonstration
@@ -346,11 +350,11 @@ export default function RegulatoryPaymentServices() {
 
                   {/* Target Users */}
                   <div className="flex flex-wrap gap-1">
-                    {service.targetUsers.slice(0, 2).map((user, index) => (
+                    {service.targetUsers?.slice(0, 2).map((user, index) => (
                       <Badge key={index} variant="secondary" className="text-xs">
                         {user}
                       </Badge>
-                    ))}
+                    )) || []}
                   </div>
 
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white group-hover:bg-blue-700 transition-colors">

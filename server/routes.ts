@@ -7334,9 +7334,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate professional complete working - UniDOC style with advanced charts
-      const { generateProfessionalCompleteWorking } = await import('./professional-complete-working.js');
-      const doc = await generateProfessionalCompleteWorking(farmerData, exportData, packId);
+      // Generate UniDOC-style professional report - exactly 6 pages with advanced graphics
+      const { generateUnidocStyleReport } = await import('./unidoc-style-generator.js');
+      const doc = generateUnidocStyleReport(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

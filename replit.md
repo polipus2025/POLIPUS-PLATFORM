@@ -7,7 +7,7 @@ AgriTrace360™ is a comprehensive web application for the Liberia Agriculture C
 Preferred communication style: Simple, everyday language.
 Maintenance Page Preference: Always use the generic maintenance page template (red gradient background, "Website Maintenance" title, no specific branding) for any maintenance page requests. This template is stored in server/index.ts as inline HTML.
 Module Development Strategy: Ready to simultaneously develop all 7 new modules (Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, Carbon Trace) with complete functionality, maintaining consistent ISMS.online-inspired design system and professional standards from AgriTrace360. Will create full database schemas, backend APIs, frontend interfaces, and cross-module integration for each portal.
-PDF Report Design Preference: User confirmed satisfaction with enhanced professional design approach featuring comprehensive charts, graphs, and visual elements. Prefers clean synchronized formatting with advanced data visualizations including radar charts, 3D pie charts, bar charts with benchmarks, and timeline flow diagrams across all 6 certificates.
+PDF Report Design Preference: User confirmed satisfaction with enhanced professional design approach featuring comprehensive charts, graphs, and visual elements. Prefers clean synchronized formatting with advanced data visualizations including radar charts, 3D pie charts, bar charts with benchmarks, and timeline flow diagrams across all 6 certificates. Recently updated to use UniDOC-inspired professional style with dashboard-style metrics, color-coded risk indicators, progress bars, and network diagrams as shown in reference image.
 
 ## Recent Changes (August 16, 2025)
 - **BLANK PAGES ISSUE RESOLVED COMPLETELY**: Successfully eliminated all blank pages by fixing route conflicts and implementing direct-success-final generator
@@ -17,6 +17,7 @@ PDF Report Design Preference: User confirmed satisfaction with enhanced professi
 - **PROFESSIONAL COMMENTARY ENHANCED**: Added detailed explanations on each certificate page describing report purpose and methodology
 - **EUDR DUE DILIGENCE EXPANDED**: Enhanced due diligence certificate with full EUDR Article 8 requirements and EU Regulation 2023/1115 compliance
 - **PRODUCTION-READY 6-PAGE SOLUTION**: Final direct-success-final.ts generator delivers exactly 6 pages with professional design, QR codes, and commentary
+- **UNIDOC-STYLE PROFESSIONAL GRAPHICS**: Applied professional dashboard-style design with color-coded risk indicators, progress bars, network diagrams, and advanced chart visualizations based on user's reference image
 - **ENHANCED PROFESSIONAL EUDR PACK SYSTEM**: Successfully created comprehensive 6-certificate professional pack with advanced charts and visualizations
 - **ADVANCED DATA VISUALIZATION**: Implemented radar charts, 3D pie charts, horizontal bar charts with grid systems, trend line charts, and timeline flow diagrams
 - **PROFESSIONAL CHART INTEGRATION**: Added shadow effects, gradient overlays, benchmark indicators, and mini trend charts across all certificates

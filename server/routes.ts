@@ -748,11 +748,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
       
-      // Monitoring admin credentials
-      if (username === 'monitor001' && password === 'monitor123') {
+      // Monitoring admin credentials - allow both dedicated monitoring credentials and admin credentials
+      if ((username === 'monitor001' && password === 'monitor123') || 
+          (username === 'admin' && password === 'admin123') ||
+          (username === 'admin001' && password === 'password123')) {
+        const userId = username === 'admin' ? 1 : (username === 'admin001' ? 2 : 999);
+        const firstName = username === 'admin' ? 'Administrator' : (username === 'admin001' ? 'Inspector' : 'Monitoring');
+        const lastName = username === 'admin' ? 'LACRA' : (username === 'admin001' ? 'System' : 'Portal');
+        
         const token = jwt.sign(
           { 
-            userId: 999,
+            userId: userId,
             username: username,
             role: 'monitoring_admin',
             userType: 'monitoring'
@@ -765,10 +771,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           success: true,
           token,
           user: {
-            id: 999,
+            id: userId,
             username: username,
             role: 'monitoring_admin',
-            userType: 'monitoring'
+            userType: 'monitoring',
+            firstName: firstName,
+            lastName: lastName
           }
         });
       } else {

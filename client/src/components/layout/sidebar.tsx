@@ -18,7 +18,8 @@ import {
   Smartphone,
   Award,
   MessageSquare,
-  TrendingUp
+  TrendingUp,
+  DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -49,6 +50,7 @@ const regulatoryNavigation = [
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Real-Time Verification", href: "/verification-dashboard", icon: Award },
+  { name: "Payment Services", href: "/regulatory-payment-services", icon: DollarSign },
   { name: "GIS Mapping", href: "/gis-mapping", icon: Satellite },
   { name: "Government Integration", href: "/government-integration", icon: Building2 },
   { name: "International Standards", href: "/international-standards", icon: Globe },

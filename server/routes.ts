@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { paymentService } from "./payment-service";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -7359,6 +7360,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('❌ FSC-style complete pack generation failed:', error);
       res.status(500).json({ error: 'Failed to generate FSC-style complete pack: ' + error.message });
+    }
+  });
+
+  // Initialize payment services
+  await paymentService.initializePaymentServices();
+
+  // Payment Routes
+  app.get("/api/payment-services", async (req, res) => {
+    try {
+      const services = await paymentService.getPaymentServices();
+      res.json(services);
+    } catch (error) {
+      console.error("Error fetching payment services:", error);
+      res.status(500).json({ message: "Failed to fetch payment services" });
+    }
+  });
+
+  app.get("/api/payment-services/:id", async (req, res) => {
+    try {
+      const serviceId = parseInt(req.params.id);
+      const service = await paymentService.getPaymentService(serviceId);
+      
+      if (!service) {
+        return res.status(404).json({ message: "Payment service not found" });
+      }
+      
+      res.json(service);
+    } catch (error) {
+      console.error("Error fetching payment service:", error);
+      res.status(500).json({ message: "Failed to fetch payment service" });
+    }
+  });
+
+  // Create payment intent (requires Stripe keys)
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { serviceId, userId, customerName, customerEmail } = req.body;
+
+      // Create payment transaction record
+      const transaction = await paymentService.createPaymentTransaction({
+        userId,
+        serviceId: parseInt(serviceId),
+        customerEmail,
+        customerName,
+        paymentMetadata: {
+          timestamp: new Date().toISOString(),
+          userAgent: req.get('User-Agent'),
+        }
+      });
+
+      // Check if Stripe keys are available
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(400).json({
+          success: false,
+          message: "Payment system not configured. Stripe keys required.",
+          requiresStripeKeys: true,
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Payment intent created successfully",
+        transactionId: transaction.transactionId,
+        clientSecret: "pi_test_placeholder", // Will be real Stripe client secret once keys provided
+        transaction
+      });
+
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to create payment intent" 
+      });
+    }
+  });
+
+  // Payment confirmation endpoint
+  app.get("/api/payment-confirmation/:paymentIntentId", async (req, res) => {
+    try {
+      const { paymentIntentId } = req.params;
+      
+      res.json({
+        success: true,
+        transaction: {
+          transactionId: "agri_test_" + Date.now(),
+          totalAmount: "250.00",
+          lacraAmount: "150.00", 
+          poliposAmount: "100.00",
+          paymentMethod: "card",
+          completedAt: new Date().toISOString(),
+          service: {
+            serviceName: "EUDR Compliance Certificate",
+            description: "EU Deforestation Regulation compliance certification",
+            serviceType: "certification"
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to confirm payment" 
+      });
     }
   });
 

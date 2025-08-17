@@ -1546,6 +1546,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
+// Import payment schemas
+export * from './payment-schema';
+
 // Exporters table for independent exporter operations
 export const exporters = pgTable("exporters", {
   id: serial("id").primaryKey(),

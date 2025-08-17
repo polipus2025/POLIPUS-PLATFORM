@@ -124,10 +124,10 @@ export default function FrontPage() {
             {/* GPS Active and Login Portals Buttons - Positioned to the left */}
             <div className="absolute left-0 top-0 flex flex-col gap-2">
               <GlobalGPSDetector />
-              <Link href="#login-portals">
+              <Link href="/monitoring-login">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Login Portals
+                  Monitoring Portal
                 </Button>
               </Link>
             </div>

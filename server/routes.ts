@@ -7312,7 +7312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('🔥 ADMIN DOWNLOADING ENHANCED PROFESSIONAL PACK:', packId);
       console.log('📍 Route: /api/eudr/final-pdf/:packId called');
-      console.log('🧪 Using final-working-test generator');
+      console.log('🧪 Using test-clean-final generator');
       
       // Get farmer and export data (simulate real data for now)
       const farmerData = {
@@ -7334,9 +7334,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shipmentId: 'SH-' + Math.floor(Math.random() * 999999)
       };
       
-      // Generate professional complete working - UniDOC style with advanced charts
-      const { generateProfessionalCompleteWorking } = await import('./professional-complete-working.js');
-      const doc = await generateProfessionalCompleteWorking(farmerData, exportData, packId);
+      // Generate test clean final - Ultra simple design, exactly 6 pages, no blank pages
+      const { generateTestCleanFinal } = await import('./test-clean-final.js');
+      const doc = generateTestCleanFinal(farmerData, exportData, packId);
       
       // Set headers for PDF download
       res.setHeader('Content-Type', 'application/pdf');

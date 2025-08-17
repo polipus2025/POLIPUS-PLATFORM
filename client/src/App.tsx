@@ -163,6 +163,8 @@ import IntegratedDashboard from "@/pages/integrated-dashboard";
 import PaymentServices from "@/pages/payments/payment-services";
 import PaymentCheckout from "@/pages/payments/payment-checkout";
 import PaymentSuccess from "@/pages/payments/payment-success";
+import FarmerPaymentServices from "@/pages/farmer/farmer-payment-services";
+import ExporterPaymentServices from "@/pages/exporter/exporter-payment-services";
 
 import NotFound from "@/pages/not-found";
 
@@ -469,6 +471,10 @@ function Router() {
           <Route path="/payment-services" component={PaymentServices} />
           <Route path="/payment-checkout" component={PaymentCheckout} />
           <Route path="/payment-success" component={PaymentSuccess} />
+          
+          {/* Portal-specific Payment Routes */}
+          <Route path="/farmer-payment-services" component={FarmerPaymentServices} />
+          <Route path="/exporter-payment-services" component={ExporterPaymentServices} />
           
           {/* Document Verification - Available to all */}
           <Route path="/verification" component={Verification} />

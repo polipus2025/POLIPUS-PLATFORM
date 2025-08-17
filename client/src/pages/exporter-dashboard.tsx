@@ -20,7 +20,8 @@ import {
   ClipboardCheck,
   MapPin,
   Phone,
-  Users
+  Users,
+  DollarSign
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -1145,6 +1146,22 @@ export default function ExporterDashboard() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Business Operations</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <Link href="/exporter-payment-services">
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white p-4 h-auto justify-start">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="h-6 w-6" />
+                    <div className="text-left">
+                      <div className="font-semibold">Payment Services</div>
+                      <div className="text-sm text-green-100">Export permits & certifications</div>
+                    </div>
+                  </div>
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+          
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">
               <Button 

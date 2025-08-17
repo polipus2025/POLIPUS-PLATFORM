@@ -76,6 +76,13 @@ export default function FarmerDashboard() {
               <span className="sm:hidden">New Batch</span>
             </Button>
           </Link>
+          <Link href="/farmer-payment-services" className="flex-1 sm:flex-none">
+            <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50 w-full sm:w-auto">
+              <DollarSign className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Payment Services</span>
+              <span className="sm:hidden">Payments</span>
+            </Button>
+          </Link>
           <Button 
             className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
             onClick={() => setShowEUDRViewer(true)}

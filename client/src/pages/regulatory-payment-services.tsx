@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -238,10 +238,6 @@ export default function RegulatoryPaymentServices() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Helmet>
-        <title>Payment Services - LACRA Regulatory Authority</title>
-        <meta name="description" content="Official payment services for LACRA regulatory compliance, permits, and certifications" />
-      </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Navigation */}
@@ -306,7 +302,7 @@ export default function RegulatoryPaymentServices() {
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="bg-blue-100 p-3 rounded-lg">
-                      <IconComponent className="h-6 w-6 text-blue-600" />
+                      {IconComponent && <IconComponent className="h-6 w-6 text-blue-600" />}
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-gray-900">

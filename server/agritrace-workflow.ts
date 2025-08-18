@@ -639,7 +639,7 @@ export class AgriTraceWorkflowService {
       .set({ 
         completedStages: 5,
         currentStage: "eudr_verified",
-        complianceScore: 95
+        complianceScore: "95.00"
       })
       .where(eq(agriTraceWorkflows.id, workflowId));
 
@@ -656,9 +656,9 @@ export class AgriTraceWorkflowService {
       metricName: "Grade Assessment", 
       value: gradeValue,
       unit: "percentage",
-      measuredBy: qualityData.inspector || "LACRA-INSPECTOR",
-      measurementMethod: "visual_inspection",
-      standardReference: "LACRA-QS-001"
+      testedBy: qualityData.inspector || "LACRA-INSPECTOR",
+      testMethod: "visual_inspection",
+      status: "pass"
     }).returning();
 
     await db.update(agriTraceWorkflows)
@@ -687,7 +687,7 @@ export class AgriTraceWorkflowService {
       documentName: "EUDR Compliance Certificate",
       filePath: `/certificates/${certificationData.certificateNumber}.pdf`,
       uploadedBy: "LACRA-SYSTEM",
-      documentMetadata: certificationData
+      metadata: certificationData
     });
 
     await db.update(agriTraceWorkflows)
@@ -766,7 +766,7 @@ export class AgriTraceWorkflowService {
       documentName: "Complete EUDR Compliance Pack", 
       filePath: `/eudr-packs/${packData.packId}.pdf`,
       uploadedBy: "LACRA-SYSTEM",
-      documentMetadata: packData
+      metadata: packData
     });
 
     await db.update(agriTraceWorkflows)

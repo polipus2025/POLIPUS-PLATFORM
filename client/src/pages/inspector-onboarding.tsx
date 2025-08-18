@@ -20,9 +20,6 @@ import type { UploadResult } from '@uppy/core';
 
 const formSchema = insertInspectorSchema.extend({
   confirmPhoneNumber: z.string().min(8, "Phone number confirmation is required"),
-  inspectorType: z.enum(["land", "port"], {
-    required_error: "Inspector type is required",
-  }),
 }).refine((data) => data.phoneNumber === data.confirmPhoneNumber, {
   message: "Phone numbers don't match",
   path: ["confirmPhoneNumber"],
@@ -105,7 +102,7 @@ export default function InspectorOnboarding() {
   });
 
   const handleGetUploadParameters = async () => {
-    const response = await apiRequest('POST', '/api/inspectors/upload-picture');
+    const response = await apiRequest('POST', '/api/inspectors/upload-picture', {});
     const data = await response.json();
     return {
       method: 'PUT' as const,
@@ -289,28 +286,57 @@ export default function InspectorOnboarding() {
                   )}
                 />
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                {/* Inspector Type Selection - Critical Field */}
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-6 mb-6 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-bold text-blue-900">Inspector Type Selection</h3>
+                  </div>
+                  
                   <FormField
                     control={form.control}
                     name="inspectorType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-blue-900 font-semibold">Inspector Type *</FormLabel>
+                        <FormLabel className="text-blue-900 font-semibold text-base">
+                          Choose Inspector Type <span className="text-red-500">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <SelectTrigger className="bg-white">
-                              <SelectValue placeholder="Select inspector type" />
+                          <Select onValueChange={field.onChange} defaultValue={field.value} required>
+                            <SelectTrigger 
+                              className="bg-white border-2 border-blue-300 h-12 text-base font-medium"
+                              data-testid="inspector-type-select"
+                            >
+                              <SelectValue placeholder="🔍 Select inspector type..." />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="land">🌾 Land Inspector - Agricultural Land & Crop Inspections</SelectItem>
-                              <SelectItem value="port">🚢 Port Inspector - Maritime Port & Export Inspections</SelectItem>
+                              <SelectItem value="land" className="p-3 text-base">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xl">🌾</span>
+                                  <div>
+                                    <div className="font-semibold">Land Inspector</div>
+                                    <div className="text-sm text-gray-600">Agricultural Land & Crop Inspections</div>
+                                  </div>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="port" className="p-3 text-base">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xl">🚢</span>
+                                  <div>
+                                    <div className="font-semibold">Port Inspector</div>
+                                    <div className="text-sm text-gray-600">Maritime Port & Export Inspections</div>
+                                  </div>
+                                </div>
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
                         <FormMessage />
-                        <p className="text-sm text-blue-700 mt-1">
-                          Choose the type of inspector role for specialized training and responsibilities.
-                        </p>
+                        <div className="bg-white rounded-lg p-3 mt-2 border border-blue-200">
+                          <p className="text-sm text-blue-800 font-medium">
+                            💡 This determines your specialized training, access permissions, and inspection responsibilities.
+                          </p>
+                        </div>
                       </FormItem>
                     )}
                   />

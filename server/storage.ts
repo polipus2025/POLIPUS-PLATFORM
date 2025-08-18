@@ -51,6 +51,10 @@ import {
   inspectorAreaAssignments,
   inspectorCredentials,
   inspectorActivities,
+  buyers,
+  buyerCredentials,
+  buyerDocuments,
+  buyerTransactions,
   type Commodity,
   type Inspection,
   type Certification,
@@ -154,7 +158,15 @@ import {
   type InsertInspector,
   type InsertInspectorAreaAssignment,
   type InsertInspectorCredentials,
-  type InsertInspectorActivity
+  type InsertInspectorActivity,
+  type Buyer,
+  type BuyerCredentials,
+  type BuyerDocument,
+  type BuyerTransaction,
+  type InsertBuyer,
+  type InsertBuyerCredentials,
+  type InsertBuyerDocument,
+  type InsertBuyerTransaction
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -571,6 +583,23 @@ export interface IStorage {
   getInspectorCheckInsByInspector(inspectorId: string): Promise<InspectorCheckIn[]>;
   createInspectorCheckIn(checkIn: InsertInspectorCheckIn): Promise<InspectorCheckIn>;
   getTodayInspectorCheckIns(): Promise<InspectorCheckIn[]>;
+
+  // Buyer Management System methods
+  getBuyers(): Promise<Buyer[]>;
+  getBuyer(id: number): Promise<Buyer | undefined>;
+  getBuyerByBuyerId(buyerId: string): Promise<Buyer | undefined>;
+  createBuyer(buyer: InsertBuyer): Promise<Buyer>;
+  updateBuyer(id: number, buyer: Partial<Buyer>): Promise<Buyer | undefined>;
+  
+  getBuyerCredentials(buyerId: string): Promise<BuyerCredentials | undefined>;
+  createBuyerCredentials(credentials: InsertBuyerCredentials): Promise<BuyerCredentials>;
+  updateBuyerCredentials(buyerId: string, credentials: Partial<BuyerCredentials>): Promise<BuyerCredentials | undefined>;
+  
+  getBuyerDocuments(buyerId: string): Promise<BuyerDocument[]>;
+  createBuyerDocument(document: InsertBuyerDocument): Promise<BuyerDocument>;
+  
+  getBuyerTransactions(buyerId: string): Promise<BuyerTransaction[]>;
+  createBuyerTransaction(transaction: InsertBuyerTransaction): Promise<BuyerTransaction>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2017,6 +2046,75 @@ export class DatabaseStorage implements IStorage {
   async createInspectorActivity(activity: InsertInspectorActivity): Promise<InspectorActivity> {
     const [newActivity] = await db.insert(inspectorActivities).values(activity).returning();
     return newActivity;
+  }
+
+  // Buyer Management System implementations
+  async getBuyers(): Promise<Buyer[]> {
+    return await db.select().from(buyers).orderBy(desc(buyers.createdAt));
+  }
+
+  async getBuyer(id: number): Promise<Buyer | undefined> {
+    const [buyer] = await db.select().from(buyers).where(eq(buyers.id, id));
+    return buyer || undefined;
+  }
+
+  async getBuyerByBuyerId(buyerId: string): Promise<Buyer | undefined> {
+    const [buyer] = await db.select().from(buyers).where(eq(buyers.buyerId, buyerId));
+    return buyer || undefined;
+  }
+
+  async createBuyer(buyer: InsertBuyer): Promise<Buyer> {
+    const [newBuyer] = await db.insert(buyers).values(buyer).returning();
+    return newBuyer;
+  }
+
+  async updateBuyer(id: number, buyer: Partial<Buyer>): Promise<Buyer | undefined> {
+    const [updatedBuyer] = await db.update(buyers)
+      .set({ ...buyer, updatedAt: new Date() })
+      .where(eq(buyers.id, id))
+      .returning();
+    return updatedBuyer || undefined;
+  }
+
+  async getBuyerCredentials(buyerId: string): Promise<BuyerCredentials | undefined> {
+    const [credentials] = await db.select().from(buyerCredentials)
+      .where(eq(buyerCredentials.buyerId, buyerId));
+    return credentials || undefined;
+  }
+
+  async createBuyerCredentials(credentials: InsertBuyerCredentials): Promise<BuyerCredentials> {
+    const [newCredentials] = await db.insert(buyerCredentials).values(credentials).returning();
+    return newCredentials;
+  }
+
+  async updateBuyerCredentials(buyerId: string, credentials: Partial<BuyerCredentials>): Promise<BuyerCredentials | undefined> {
+    const [updatedCredentials] = await db.update(buyerCredentials)
+      .set({ ...credentials, updatedAt: new Date() })
+      .where(eq(buyerCredentials.buyerId, buyerId))
+      .returning();
+    return updatedCredentials || undefined;
+  }
+
+  async getBuyerDocuments(buyerId: string): Promise<BuyerDocument[]> {
+    return await db.select().from(buyerDocuments)
+      .where(eq(buyerDocuments.buyerId, buyerId))
+      .orderBy(desc(buyerDocuments.createdAt));
+  }
+
+  async createBuyerDocument(document: InsertBuyerDocument): Promise<BuyerDocument> {
+    const [newDocument] = await db.insert(buyerDocuments).values(document).returning();
+    return newDocument;
+  }
+
+  async getBuyerTransactions(buyerId: string): Promise<BuyerTransaction[]> {
+    return await db.select().from(buyerTransactions)
+      .where(eq(buyerTransactions.buyerId, buyerId))
+      .orderBy(desc(buyerTransactions.createdAt));
+  }
+
+  async createBuyerTransaction(transaction: InsertBuyerTransaction): Promise<BuyerTransaction> {
+    const [newTransaction] = await db.insert(buyerTransactions).values(transaction).returning();
+    return newTransaction;
   }
 }
 

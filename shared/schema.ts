@@ -1426,17 +1426,148 @@ export const authUsers = pgTable("auth_users", {
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  role: text("role").notNull(), // regulatory_admin, regulatory_staff, field_agent, farmer, exporter
+  role: text("role").notNull(), // regulatory_admin, regulatory_staff, field_agent, farmer, exporter, buyer
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phoneNumber: text("phone_number"),
   department: text("department"), // for regulatory staff
   jurisdiction: text("jurisdiction"), // county/district for field agents
   farmerId: integer("farmer_id").references(() => farmers.id), // linked farmer account
+  buyerId: text("buyer_id"), // linked buyer account
   isActive: boolean("is_active").default(true),
   lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Buyer Management System
+export const buyers = pgTable("buyers", {
+  id: serial("id").primaryKey(),
+  buyerId: text("buyer_id").notNull().unique(), // BUY-YYYYMMDD-XXX format
+  businessName: text("business_name").notNull(),
+  businessType: text("business_type").notNull(), // wholesaler, exporter, processor, retailer, distributor
+  registrationNumber: text("registration_number").unique(),
+  taxId: text("tax_id"),
+  contactPersonFirstName: text("contact_person_first_name").notNull(),
+  contactPersonLastName: text("contact_person_last_name").notNull(),
+  contactPersonTitle: text("contact_person_title"), // CEO, Manager, Director, etc.
+  primaryEmail: text("primary_email").notNull().unique(),
+  secondaryEmail: text("secondary_email"),
+  primaryPhone: text("primary_phone").notNull(),
+  secondaryPhone: text("secondary_phone"),
+  businessAddress: text("business_address").notNull(),
+  city: text("city").notNull(),
+  county: text("county").notNull(),
+  postalCode: text("postal_code"),
+  country: text("country").notNull().default("Liberia"),
+  
+  // Business Details
+  yearEstablished: integer("year_established"),
+  numberOfEmployees: integer("number_of_employees"),
+  annualTurnover: decimal("annual_turnover", { precision: 15, scale: 2 }),
+  bankName: text("bank_name"),
+  bankAccountNumber: text("bank_account_number"),
+  bankBranch: text("bank_branch"),
+  
+  // Commodities and Trade Info
+  interestedCommodities: text("interested_commodities"), // JSON array: cocoa, coffee, palm_oil, rubber, rice, etc.
+  tradingRegions: text("trading_regions"), // JSON array of counties/countries
+  purchaseVolume: text("purchase_volume"), // expected monthly/annual volume
+  paymentTerms: text("payment_terms"), // cash, credit, installment
+  creditLimit: decimal("credit_limit", { precision: 12, scale: 2 }),
+  
+  // Compliance and Verification
+  licenseNumber: text("license_number"),
+  licenseType: text("license_type"), // trading_license, export_license, processing_license
+  licenseIssuedBy: text("license_issued_by"),
+  licenseIssueDate: timestamp("license_issue_date"),
+  licenseExpiryDate: timestamp("license_expiry_date"),
+  complianceStatus: text("compliance_status").notNull().default("pending"), // pending, approved, suspended, rejected
+  verificationStatus: text("verification_status").notNull().default("unverified"), // unverified, in_progress, verified, rejected
+  kycStatus: text("kyc_status").notNull().default("pending"), // pending, completed, failed
+  
+  // Platform Access
+  portalAccess: boolean("portal_access").default(false),
+  accessLevel: text("access_level").default("basic"), // basic, premium, enterprise
+  loginCredentialsGenerated: boolean("login_credentials_generated").default(false),
+  passwordHash: text("password_hash"),
+  
+  // Onboarding Process
+  onboardingStep: integer("onboarding_step").default(1), // 1-5 steps
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  documentsSubmitted: text("documents_submitted"), // JSON array of document types
+  documentsVerified: text("documents_verified"), // JSON array of verified document types
+  
+  // Regulatory Management
+  assignedOfficer: integer("assigned_officer").references(() => authUsers.id),
+  approvedBy: integer("approved_by").references(() => authUsers.id),
+  approvedAt: timestamp("approved_at"),
+  notes: text("notes"),
+  riskRating: text("risk_rating").default("medium"), // low, medium, high
+  
+  // Status Management
+  isActive: boolean("is_active").default(true),
+  suspensionReason: text("suspension_reason"),
+  suspendedBy: integer("suspended_by").references(() => authUsers.id),
+  suspendedAt: timestamp("suspended_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const buyerCredentials = pgTable("buyer_credentials", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  username: text("username").notNull().unique(), // same as buyer_id
+  passwordHash: text("password_hash").notNull(),
+  temporaryPassword: text("temporary_password"), // for first login
+  passwordChangeRequired: boolean("password_change_required").default(true),
+  lastPasswordChange: timestamp("last_password_change"),
+  loginAttempts: integer("login_attempts").default(0),
+  isLocked: boolean("is_locked").default(false),
+  lockedUntil: timestamp("locked_until"),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorSecret: text("two_factor_secret"),
+  createdBy: integer("created_by").references(() => authUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const buyerDocuments = pgTable("buyer_documents", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  documentType: text("document_type").notNull(), // business_registration, tax_certificate, trading_license, bank_statement, id_card
+  documentName: text("document_name").notNull(),
+  documentPath: text("document_path"), // file path or URL
+  documentNumber: text("document_number"),
+  issuedBy: text("issued_by"),
+  issueDate: timestamp("issue_date"),
+  expiryDate: timestamp("expiry_date"),
+  verificationStatus: text("verification_status").default("pending"), // pending, verified, rejected
+  verifiedBy: integer("verified_by").references(() => authUsers.id),
+  verifiedAt: timestamp("verified_at"),
+  rejectionReason: text("rejection_reason"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const buyerTransactions = pgTable("buyer_transactions", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  commodityId: integer("commodity_id").references(() => commodities.id),
+  transactionType: text("transaction_type").notNull(), // purchase, inquiry, contract, payment
+  transactionAmount: decimal("transaction_amount", { precision: 12, scale: 2 }),
+  currency: text("currency").default("USD"),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }),
+  unit: text("unit"),
+  pricePerUnit: decimal("price_per_unit", { precision: 8, scale: 2 }),
+  paymentStatus: text("payment_status").default("pending"), // pending, paid, overdue, cancelled
+  paymentMethod: text("payment_method"), // cash, bank_transfer, mobile_money, credit
+  transactionDate: timestamp("transaction_date").notNull(),
+  deliveryDate: timestamp("delivery_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const userSessions = pgTable("user_sessions", {
@@ -2846,5 +2977,39 @@ export type CertificateApproval = typeof certificateApprovals.$inferSelect;
 export type InsertCertificateApproval = typeof certificateApprovals.$inferInsert;
 export type CertificateType = typeof certificateTypes.$inferSelect;
 export type InsertCertificateType = typeof certificateTypes.$inferInsert;
+
+// Buyer Management System insert schemas
+export const insertBuyerSchema = createInsertSchema(buyers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBuyerCredentialsSchema = createInsertSchema(buyerCredentials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBuyerDocumentSchema = createInsertSchema(buyerDocuments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBuyerTransactionSchema = createInsertSchema(buyerTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Buyer Management System types
+export type Buyer = typeof buyers.$inferSelect;
+export type InsertBuyer = z.infer<typeof insertBuyerSchema>;
+export type BuyerCredentials = typeof buyerCredentials.$inferSelect;
+export type InsertBuyerCredentials = z.infer<typeof insertBuyerCredentialsSchema>;
+export type BuyerDocument = typeof buyerDocuments.$inferSelect;
+export type InsertBuyerDocument = z.infer<typeof insertBuyerDocumentSchema>;
+export type BuyerTransaction = typeof buyerTransactions.$inferSelect;
+export type InsertBuyerTransaction = z.infer<typeof insertBuyerTransactionSchema>;
 
 

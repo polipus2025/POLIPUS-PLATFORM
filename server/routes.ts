@@ -63,6 +63,12 @@ import {
   insertInspectorCredentialsSchema,
   insertInspectorActivitySchema,
   
+  // Buyer Management System Schemas
+  insertBuyerSchema,
+  insertBuyerCredentialsSchema,
+  insertBuyerDocumentSchema,
+  insertBuyerTransactionSchema,
+  
   // Blue Carbon 360 Schemas
   insertBlueCarbon360ProjectSchema,
   insertCarbonMarketplaceListingSchema,
@@ -8477,6 +8483,273 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating profile picture:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // ============================================================================
+  // BUYER MANAGEMENT SYSTEM ROUTES
+  // ============================================================================
+
+  // Get all buyers - FOR REGULATORY ADMIN BMS
+  app.get("/api/buyers", async (req, res) => {
+    try {
+      const buyers = await storage.getBuyers();
+      res.json(buyers);
+    } catch (error) {
+      console.error("Error fetching buyers:", error);
+      res.status(500).json({ message: "Failed to fetch buyers" });
+    }
+  });
+
+  // Get buyer by ID - FOR BMS DETAILS VIEW
+  app.get("/api/buyers/:id", async (req, res) => {
+    try {
+      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+      res.json(buyer);
+    } catch (error) {
+      console.error("Error fetching buyer:", error);
+      res.status(500).json({ message: "Failed to fetch buyer" });
+    }
+  });
+
+  // Create new buyer - ONBOARDING SYSTEM
+  app.post("/api/buyers", async (req, res) => {
+    try {
+      const validatedData = insertBuyerSchema.parse(req.body);
+      
+      // Generate unique buyer ID (BYR-YYYYMMDD-XXX format)
+      const date = new Date();
+      const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const buyerId = `BYR-${dateStr}-${randomSuffix}`;
+      
+      const buyerData = {
+        ...validatedData,
+        buyerId,
+        complianceStatus: 'pending',
+        portalAccess: false,
+        loginCredentialsGenerated: false
+      };
+
+      const buyer = await storage.createBuyer(buyerData);
+
+      res.status(201).json({ 
+        ...buyer, 
+        message: "Buyer registered successfully. Approval pending.",
+        credentials: {
+          buyerId: buyer.buyerId,
+          businessName: buyer.businessName,
+          status: "Pending regulatory approval"
+        }
+      });
+    } catch (error) {
+      console.error("Error creating buyer:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid buyer data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create buyer" });
+    }
+  });
+
+  // Approve buyer and grant portal access
+  app.put("/api/buyers/:id/approve", async (req, res) => {
+    try {
+      const { complianceStatus, portalAccess } = req.body;
+      
+      const updatedBuyer = await storage.updateBuyer(parseInt(req.params.id), {
+        complianceStatus: complianceStatus || 'approved',
+        portalAccess: portalAccess !== undefined ? portalAccess : true,
+        approvedAt: new Date(),
+        approvedBy: req.user?.username || 'System Admin'
+      });
+
+      if (!updatedBuyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+
+      res.json({
+        ...updatedBuyer,
+        message: "Buyer approved successfully"
+      });
+    } catch (error) {
+      console.error("Error approving buyer:", error);
+      res.status(500).json({ message: "Failed to approve buyer" });
+    }
+  });
+
+  // Generate login credentials for approved buyer
+  app.post("/api/buyers/:id/generate-credentials", async (req, res) => {
+    try {
+      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+
+      if (buyer.complianceStatus !== 'approved') {
+        return res.status(400).json({ message: "Buyer must be approved first" });
+      }
+
+      // Generate username from business name (simplified)
+      const username = buyer.businessName.toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+        .substring(0, 20) + Math.floor(Math.random() * 100);
+      
+      const temporaryPassword = crypto.randomBytes(8).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(temporaryPassword, salt);
+
+      // Create buyer credentials
+      await storage.createBuyerCredentials({
+        buyerId: buyer.buyerId,
+        username,
+        passwordHash,
+        salt,
+        mustChangePassword: true,
+        portalAccess: true
+      });
+
+      // Update buyer status
+      await storage.updateBuyer(parseInt(req.params.id), {
+        loginCredentialsGenerated: true,
+        portalAccess: true
+      });
+
+      res.json({
+        message: "Login credentials generated successfully",
+        credentials: {
+          buyerId: buyer.buyerId,
+          businessName: buyer.businessName,
+          username,
+          temporaryPassword,
+          mustChangePassword: true,
+          portalUrl: "/farmer-buyer-portal/login"
+        }
+      });
+    } catch (error) {
+      console.error("Error generating buyer credentials:", error);
+      res.status(500).json({ message: "Failed to generate credentials" });
+    }
+  });
+
+  // Update buyer information
+  app.put("/api/buyers/:id", async (req, res) => {
+    try {
+      const validatedData = insertBuyerSchema.partial().parse(req.body);
+      
+      const updatedBuyer = await storage.updateBuyer(parseInt(req.params.id), {
+        ...validatedData,
+        updatedAt: new Date()
+      });
+
+      if (!updatedBuyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+
+      res.json(updatedBuyer);
+    } catch (error) {
+      console.error("Error updating buyer:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid buyer data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update buyer" });
+    }
+  });
+
+  // Get buyer documents
+  app.get("/api/buyers/:id/documents", async (req, res) => {
+    try {
+      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+      
+      const documents = await storage.getBuyerDocuments(buyer.buyerId);
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching buyer documents:", error);
+      res.status(500).json({ message: "Failed to fetch buyer documents" });
+    }
+  });
+
+  // Upload buyer document
+  app.post("/api/buyers/:id/documents", async (req, res) => {
+    try {
+      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+
+      const validatedData = insertBuyerDocumentSchema.parse({
+        ...req.body,
+        buyerId: buyer.buyerId,
+        uploadedBy: req.user?.username || 'System Admin'
+      });
+
+      const document = await storage.createBuyerDocument(validatedData);
+      res.status(201).json(document);
+    } catch (error) {
+      console.error("Error creating buyer document:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid document data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create buyer document" });
+    }
+  });
+
+  // Get buyer transactions/purchase history
+  app.get("/api/buyers/:id/transactions", async (req, res) => {
+    try {
+      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+      
+      const transactions = await storage.getBuyerTransactions(buyer.buyerId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching buyer transactions:", error);
+      res.status(500).json({ message: "Failed to fetch buyer transactions" });
+    }
+  });
+
+  // Create buyer transaction record
+  app.post("/api/buyers/:id/transactions", async (req, res) => {
+    try {
+      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+
+      const validatedData = insertBuyerTransactionSchema.parse({
+        ...req.body,
+        buyerId: buyer.buyerId,
+        recordedBy: req.user?.username || 'System Admin'
+      });
+
+      const transaction = await storage.createBuyerTransaction(validatedData);
+      res.status(201).json(transaction);
+    } catch (error) {
+      console.error("Error creating buyer transaction:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid transaction data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create buyer transaction" });
+    }
+  });
+
+  // Buyer upload document helper
+  app.post("/api/buyers/upload-document", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting document upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
     }
   });
 

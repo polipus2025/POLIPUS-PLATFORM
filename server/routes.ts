@@ -6,6 +6,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { 
+  ObjectStorageService,
+  ObjectNotFoundError,
+} from "./objectStorage";
+import { ObjectPermission } from "./objectAcl";
+import { 
   insertCommoditySchema, 
   insertInspectionSchema, 
   insertCertificationSchema,
@@ -51,6 +56,12 @@ import {
   insertInspectorLocationHistorySchema,
   insertInspectorDeviceAlertSchema,
   insertInspectorCheckInSchema,
+  
+  // Inspector Management System Schemas
+  insertInspectorSchema,
+  insertInspectorAreaAssignmentSchema,
+  insertInspectorCredentialsSchema,
+  insertInspectorActivitySchema,
   
   // Blue Carbon 360 Schemas
   insertBlueCarbon360ProjectSchema,
@@ -7776,6 +7787,343 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error sending certificate:', error);
       res.status(500).json({ message: 'Failed to send certificate' });
+    }
+  });
+
+  // ============================================================================
+  // INSPECTOR MANAGEMENT SYSTEM ROUTES
+  // ============================================================================
+
+  // Get all inspectors - FOR REGULATORY ADMIN MIS
+  app.get("/api/inspectors", async (req, res) => {
+    try {
+      const inspectors = await storage.getInspectors();
+      res.json(inspectors);
+    } catch (error) {
+      console.error("Error fetching inspectors:", error);
+      res.status(500).json({ message: "Failed to fetch inspectors" });
+    }
+  });
+
+  // Get inspector by ID - FOR MIS DETAILS VIEW
+  app.get("/api/inspectors/:id", async (req, res) => {
+    try {
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      if (!inspector) {
+        return res.status(404).json({ message: "Inspector not found" });
+      }
+      res.json(inspector);
+    } catch (error) {
+      console.error("Error fetching inspector:", error);
+      res.status(500).json({ message: "Failed to fetch inspector" });
+    }
+  });
+
+  // Get inspectors by county - FOR REGIONAL MANAGEMENT
+  app.get("/api/inspectors/county/:county", async (req, res) => {
+    try {
+      const inspectors = await storage.getInspectorsByCounty(req.params.county);
+      res.json(inspectors);
+    } catch (error) {
+      console.error("Error fetching inspectors by county:", error);
+      res.status(500).json({ message: "Failed to fetch inspectors by county" });
+    }
+  });
+
+  // Create new inspector - ONBOARDING SYSTEM
+  app.post("/api/inspectors", async (req, res) => {
+    try {
+      const validatedData = insertInspectorSchema.parse(req.body);
+      
+      // Generate unique inspector ID (INS-YYYYMMDD-XXX format)
+      const date = new Date();
+      const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const inspectorId = `INS-${dateStr}-${randomSuffix}`;
+      
+      const inspectorData = {
+        ...validatedData,
+        inspectorId,
+        fullName: `${validatedData.firstName} ${validatedData.lastName}`,
+        assignedBy: req.user?.username || 'System Admin'
+      };
+
+      const inspector = await storage.createInspector(inspectorData);
+
+      // Create default login credentials
+      const username = `${validatedData.firstName.toLowerCase()}.${validatedData.lastName.toLowerCase()}`;
+      const temporaryPassword = crypto.randomBytes(8).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(temporaryPassword, salt);
+
+      await storage.createInspectorCredentials({
+        inspectorId: inspector.inspectorId,
+        username,
+        passwordHash,
+        salt,
+        mustChangePassword: true
+      });
+
+      // Log inspector creation activity
+      await storage.createInspectorActivity({
+        inspectorId: inspector.inspectorId,
+        activityType: 'profile_created',
+        description: `Inspector profile created by ${req.user?.username || 'System Admin'}`,
+        county: inspector.inspectionAreaCounty
+      });
+
+      res.status(201).json({
+        inspector,
+        credentials: {
+          username,
+          temporaryPassword,
+          mustChangePassword: true
+        }
+      });
+    } catch (error) {
+      console.error("Error creating inspector:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid inspector data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inspector" });
+    }
+  });
+
+  // Update inspector profile
+  app.put("/api/inspectors/:id", async (req, res) => {
+    try {
+      const updates = { ...req.body };
+      delete updates.id; // Don't allow ID updates
+      delete updates.inspectorId; // Don't allow inspector ID updates
+      delete updates.createdAt; // Don't allow creation date updates
+      
+      if (updates.firstName && updates.lastName) {
+        updates.fullName = `${updates.firstName} ${updates.lastName}`;
+      }
+
+      const updatedInspector = await storage.updateInspector(parseInt(req.params.id), updates);
+      if (!updatedInspector) {
+        return res.status(404).json({ message: "Inspector not found" });
+      }
+
+      // Log profile update activity
+      await storage.createInspectorActivity({
+        inspectorId: updatedInspector.inspectorId,
+        activityType: 'profile_update',
+        description: `Inspector profile updated by ${req.user?.username || 'System Admin'}`,
+        county: updatedInspector.inspectionAreaCounty
+      });
+
+      res.json(updatedInspector);
+    } catch (error) {
+      console.error("Error updating inspector:", error);
+      res.status(500).json({ message: "Failed to update inspector" });
+    }
+  });
+
+  // Activate inspector
+  app.put("/api/inspectors/:id/activate", async (req, res) => {
+    try {
+      await storage.activateInspector(parseInt(req.params.id));
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      
+      if (inspector) {
+        await storage.createInspectorActivity({
+          inspectorId: inspector.inspectorId,
+          activityType: 'status_change',
+          description: `Inspector activated by ${req.user?.username || 'System Admin'}`,
+          county: inspector.inspectionAreaCounty
+        });
+      }
+
+      res.json({ message: "Inspector activated successfully" });
+    } catch (error) {
+      console.error("Error activating inspector:", error);
+      res.status(500).json({ message: "Failed to activate inspector" });
+    }
+  });
+
+  // Deactivate inspector
+  app.put("/api/inspectors/:id/deactivate", async (req, res) => {
+    try {
+      await storage.deactivateInspector(parseInt(req.params.id));
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      
+      if (inspector) {
+        await storage.createInspectorActivity({
+          inspectorId: inspector.inspectorId,
+          activityType: 'status_change',
+          description: `Inspector deactivated by ${req.user?.username || 'System Admin'}`,
+          county: inspector.inspectionAreaCounty
+        });
+      }
+
+      res.json({ message: "Inspector deactivated successfully" });
+    } catch (error) {
+      console.error("Error deactivating inspector:", error);
+      res.status(500).json({ message: "Failed to deactivate inspector" });
+    }
+  });
+
+  // Enable inspector login
+  app.put("/api/inspectors/:id/enable-login", async (req, res) => {
+    try {
+      await storage.enableInspectorLogin(parseInt(req.params.id));
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      
+      if (inspector) {
+        await storage.createInspectorActivity({
+          inspectorId: inspector.inspectorId,
+          activityType: 'login_status_change',
+          description: `Login access enabled by ${req.user?.username || 'System Admin'}`,
+          county: inspector.inspectionAreaCounty
+        });
+      }
+
+      res.json({ message: "Inspector login enabled successfully" });
+    } catch (error) {
+      console.error("Error enabling inspector login:", error);
+      res.status(500).json({ message: "Failed to enable inspector login" });
+    }
+  });
+
+  // Disable inspector login
+  app.put("/api/inspectors/:id/disable-login", async (req, res) => {
+    try {
+      await storage.disableInspectorLogin(parseInt(req.params.id));
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      
+      if (inspector) {
+        await storage.createInspectorActivity({
+          inspectorId: inspector.inspectorId,
+          activityType: 'login_status_change',
+          description: `Login access disabled by ${req.user?.username || 'System Admin'}`,
+          county: inspector.inspectionAreaCounty
+        });
+      }
+
+      res.json({ message: "Inspector login disabled successfully" });
+    } catch (error) {
+      console.error("Error disabling inspector login:", error);
+      res.status(500).json({ message: "Failed to disable inspector login" });
+    }
+  });
+
+  // Get inspector activities - FOR MIS ACTIVITY LOG
+  app.get("/api/inspectors/:id/activities", async (req, res) => {
+    try {
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      if (!inspector) {
+        return res.status(404).json({ message: "Inspector not found" });
+      }
+      
+      const activities = await storage.getInspectorActivitiesByInspector(inspector.inspectorId);
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching inspector activities:", error);
+      res.status(500).json({ message: "Failed to fetch inspector activities" });
+    }
+  });
+
+  // Get inspector area assignments
+  app.get("/api/inspectors/:id/areas", async (req, res) => {
+    try {
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      if (!inspector) {
+        return res.status(404).json({ message: "Inspector not found" });
+      }
+      
+      const assignments = await storage.getInspectorAreaAssignmentsByInspector(inspector.inspectorId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching inspector area assignments:", error);
+      res.status(500).json({ message: "Failed to fetch inspector area assignments" });
+    }
+  });
+
+  // Create new area assignment for inspector
+  app.post("/api/inspectors/:id/areas", async (req, res) => {
+    try {
+      const inspector = await storage.getInspector(parseInt(req.params.id));
+      if (!inspector) {
+        return res.status(404).json({ message: "Inspector not found" });
+      }
+
+      const validatedData = insertInspectorAreaAssignmentSchema.parse({
+        ...req.body,
+        inspectorId: inspector.inspectorId,
+        assignedBy: req.user?.username || 'System Admin'
+      });
+
+      const assignment = await storage.createInspectorAreaAssignment(validatedData);
+
+      // Log area assignment activity
+      await storage.createInspectorActivity({
+        inspectorId: inspector.inspectorId,
+        activityType: 'area_assignment',
+        description: `New area assignment: ${validatedData.areaDescription || validatedData.county}`,
+        county: validatedData.county
+      });
+
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error("Error creating area assignment:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid area assignment data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create area assignment" });
+    }
+  });
+
+  // Upload inspector profile picture
+  app.post("/api/inspectors/upload-picture", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting profile picture upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  // Update inspector profile picture after upload
+  app.put("/api/inspectors/:id/profile-picture", async (req, res) => {
+    try {
+      const { profilePictureURL } = req.body;
+      if (!profilePictureURL) {
+        return res.status(400).json({ error: "profilePictureURL is required" });
+      }
+
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        profilePictureURL,
+        {
+          owner: `inspector-${req.params.id}`,
+          visibility: "public" // Profile pictures should be publicly accessible
+        }
+      );
+
+      const updatedInspector = await storage.updateInspector(parseInt(req.params.id), {
+        profilePicture: objectPath
+      });
+
+      if (updatedInspector) {
+        await storage.createInspectorActivity({
+          inspectorId: updatedInspector.inspectorId,
+          activityType: 'profile_update',
+          description: 'Profile picture updated',
+          county: updatedInspector.inspectionAreaCounty
+        });
+      }
+
+      res.status(200).json({
+        objectPath: objectPath,
+        message: "Profile picture updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 

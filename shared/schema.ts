@@ -2740,6 +2740,108 @@ export const certificateTypes = pgTable("certificate_types", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
+// Inspector Management System Tables
+export const inspectors = pgTable("inspectors", {
+  id: serial("id").primaryKey(),
+  inspectorId: text("inspector_id").notNull().unique(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  fullName: text("full_name").notNull(),
+  email: text("email").unique(),
+  phoneNumber: text("phone_number").notNull(),
+  nationalId: text("national_id").notNull().unique(),
+  address: text("address").notNull(),
+  profilePicture: text("profile_picture"), // Object storage path
+  inspectionAreaCounty: text("inspection_area_county").notNull(),
+  inspectionAreaDistrict: text("inspection_area_district"),
+  inspectionAreaDescription: text("inspection_area_description"),
+  specializations: text("specializations"), // comma separated: cocoa,coffee,palm_oil,etc
+  certificationLevel: text("certification_level").notNull().default("junior"), // junior, senior, lead, expert
+  isActive: boolean("is_active").default(true),
+  canLogin: boolean("can_login").default(true),
+  loginCredentials: jsonb("login_credentials"), // encrypted login info
+  assignedBy: text("assigned_by").notNull(),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const inspectorAreaAssignments = pgTable("inspector_area_assignments", {
+  id: serial("id").primaryKey(),
+  inspectorId: text("inspector_id").references(() => inspectors.inspectorId).notNull(),
+  county: text("county").notNull(),
+  district: text("district"),
+  areaDescription: text("area_description"),
+  areaType: text("area_type").notNull(), // primary, secondary, temporary
+  isPrimary: boolean("is_primary").default(false),
+  effectiveFrom: timestamp("effective_from").notNull(),
+  effectiveUntil: timestamp("effective_until"),
+  assignedBy: text("assigned_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const inspectorCredentials = pgTable("inspector_credentials", {
+  id: serial("id").primaryKey(),
+  inspectorId: text("inspector_id").references(() => inspectors.inspectorId).notNull(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  salt: text("salt").notNull(),
+  resetToken: text("reset_token"),
+  resetTokenExpires: timestamp("reset_token_expires"),
+  mustChangePassword: boolean("must_change_password").default(true),
+  lastPasswordChange: timestamp("last_password_change"),
+  failedLoginAttempts: integer("failed_login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const inspectorActivities = pgTable("inspector_activities", {
+  id: serial("id").primaryKey(),
+  inspectorId: text("inspector_id").references(() => inspectors.inspectorId).notNull(),
+  activityType: text("activity_type").notNull(), // login, logout, inspection, report_submission, profile_update
+  description: text("description").notNull(),
+  location: text("location"), // GPS coordinates
+  county: text("county"),
+  district: text("district"),
+  metadata: jsonb("metadata"), // additional activity data
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// Inspector Management System insert schemas
+export const insertInspectorSchema = createInsertSchema(inspectors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInspectorAreaAssignmentSchema = createInsertSchema(inspectorAreaAssignments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertInspectorCredentialsSchema = createInsertSchema(inspectorCredentials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInspectorActivitySchema = createInsertSchema(inspectorActivities).omit({
+  id: true,
+  timestamp: true,
+});
+
+// Inspector Management System types
+export type Inspector = typeof inspectors.$inferSelect;
+export type InsertInspector = z.infer<typeof insertInspectorSchema>;
+export type InspectorAreaAssignment = typeof inspectorAreaAssignments.$inferSelect;
+export type InsertInspectorAreaAssignment = z.infer<typeof insertInspectorAreaAssignmentSchema>;
+export type InspectorCredentials = typeof inspectorCredentials.$inferSelect;
+export type InsertInspectorCredentials = z.infer<typeof insertInspectorCredentialsSchema>;
+export type InspectorActivity = typeof inspectorActivities.$inferSelect;
+export type InsertInspectorActivity = z.infer<typeof insertInspectorActivitySchema>;
+
 export type CertificateApproval = typeof certificateApprovals.$inferSelect;
 export type InsertCertificateApproval = typeof certificateApprovals.$inferInsert;
 export type CertificateType = typeof certificateTypes.$inferSelect;

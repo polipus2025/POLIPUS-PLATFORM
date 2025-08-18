@@ -47,6 +47,10 @@ import {
   inspectorLocationHistory,
   inspectorDeviceAlerts,
   inspectorCheckIns,
+  inspectors,
+  inspectorAreaAssignments,
+  inspectorCredentials,
+  inspectorActivities,
   type Commodity,
   type Inspection,
   type Certification,
@@ -142,7 +146,15 @@ import {
   type InsertInspectorDevice,
   type InsertInspectorLocationHistory,
   type InsertInspectorDeviceAlert,
-  type InsertInspectorCheckIn
+  type InsertInspectorCheckIn,
+  type Inspector,
+  type InspectorAreaAssignment,
+  type InspectorCredentials,
+  type InspectorActivity,
+  type InsertInspector,
+  type InsertInspectorAreaAssignment,
+  type InsertInspectorCredentials,
+  type InsertInspectorActivity
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -277,6 +289,31 @@ export interface IStorage {
   getVerificationLogs(): Promise<VerificationLog[]>;
   getVerificationLogsByType(type: string): Promise<VerificationLog[]>;
   createVerificationLog(log: InsertVerificationLog): Promise<VerificationLog>;
+
+  // Inspector Management System methods
+  getInspectors(): Promise<Inspector[]>;
+  getInspector(id: number): Promise<Inspector | undefined>;
+  getInspectorByInspectorId(inspectorId: string): Promise<Inspector | undefined>;
+  getInspectorsByCounty(county: string): Promise<Inspector[]>;
+  getActiveInspectors(): Promise<Inspector[]>;
+  createInspector(inspector: InsertInspector): Promise<Inspector>;
+  updateInspector(id: number, inspector: Partial<Inspector>): Promise<Inspector | undefined>;
+  deactivateInspector(id: number): Promise<void>;
+  activateInspector(id: number): Promise<void>;
+  disableInspectorLogin(id: number): Promise<void>;
+  enableInspectorLogin(id: number): Promise<void>;
+  
+  getInspectorAreaAssignments(): Promise<InspectorAreaAssignment[]>;
+  getInspectorAreaAssignmentsByInspector(inspectorId: string): Promise<InspectorAreaAssignment[]>;
+  createInspectorAreaAssignment(assignment: InsertInspectorAreaAssignment): Promise<InspectorAreaAssignment>;
+  
+  getInspectorCredentials(inspectorId: string): Promise<InspectorCredentials | undefined>;
+  createInspectorCredentials(credentials: InsertInspectorCredentials): Promise<InspectorCredentials>;
+  updateInspectorCredentials(inspectorId: string, credentials: Partial<InspectorCredentials>): Promise<InspectorCredentials | undefined>;
+  
+  getInspectorActivities(): Promise<InspectorActivity[]>;
+  getInspectorActivitiesByInspector(inspectorId: string): Promise<InspectorActivity[]>;
+  createInspectorActivity(activity: InsertInspectorActivity): Promise<InspectorActivity>;
 
   // Exporter methods
   getExporters(): Promise<any[]>;
@@ -1811,6 +1848,114 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(inspectorCheckIns.timestamp));
+  }
+
+  // Inspector Management System implementations
+  async getInspectors(): Promise<Inspector[]> {
+    return await db.select().from(inspectors).orderBy(desc(inspectors.createdAt));
+  }
+
+  async getInspector(id: number): Promise<Inspector | undefined> {
+    const [inspector] = await db.select().from(inspectors).where(eq(inspectors.id, id));
+    return inspector || undefined;
+  }
+
+  async getInspectorByInspectorId(inspectorId: string): Promise<Inspector | undefined> {
+    const [inspector] = await db.select().from(inspectors).where(eq(inspectors.inspectorId, inspectorId));
+    return inspector || undefined;
+  }
+
+  async getInspectorsByCounty(county: string): Promise<Inspector[]> {
+    return await db.select().from(inspectors).where(eq(inspectors.inspectionAreaCounty, county));
+  }
+
+  async getActiveInspectors(): Promise<Inspector[]> {
+    return await db.select().from(inspectors).where(eq(inspectors.isActive, true));
+  }
+
+  async createInspector(inspector: InsertInspector): Promise<Inspector> {
+    const [newInspector] = await db.insert(inspectors).values(inspector).returning();
+    return newInspector;
+  }
+
+  async updateInspector(id: number, inspector: Partial<Inspector>): Promise<Inspector | undefined> {
+    const [updatedInspector] = await db.update(inspectors)
+      .set({ ...inspector, updatedAt: new Date() })
+      .where(eq(inspectors.id, id))
+      .returning();
+    return updatedInspector || undefined;
+  }
+
+  async deactivateInspector(id: number): Promise<void> {
+    await db.update(inspectors)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(inspectors.id, id));
+  }
+
+  async activateInspector(id: number): Promise<void> {
+    await db.update(inspectors)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(inspectors.id, id));
+  }
+
+  async disableInspectorLogin(id: number): Promise<void> {
+    await db.update(inspectors)
+      .set({ canLogin: false, updatedAt: new Date() })
+      .where(eq(inspectors.id, id));
+  }
+
+  async enableInspectorLogin(id: number): Promise<void> {
+    await db.update(inspectors)
+      .set({ canLogin: true, updatedAt: new Date() })
+      .where(eq(inspectors.id, id));
+  }
+
+  async getInspectorAreaAssignments(): Promise<InspectorAreaAssignment[]> {
+    return await db.select().from(inspectorAreaAssignments).orderBy(desc(inspectorAreaAssignments.createdAt));
+  }
+
+  async getInspectorAreaAssignmentsByInspector(inspectorId: string): Promise<InspectorAreaAssignment[]> {
+    return await db.select().from(inspectorAreaAssignments)
+      .where(eq(inspectorAreaAssignments.inspectorId, inspectorId));
+  }
+
+  async createInspectorAreaAssignment(assignment: InsertInspectorAreaAssignment): Promise<InspectorAreaAssignment> {
+    const [newAssignment] = await db.insert(inspectorAreaAssignments).values(assignment).returning();
+    return newAssignment;
+  }
+
+  async getInspectorCredentials(inspectorId: string): Promise<InspectorCredentials | undefined> {
+    const [credentials] = await db.select().from(inspectorCredentials)
+      .where(eq(inspectorCredentials.inspectorId, inspectorId));
+    return credentials || undefined;
+  }
+
+  async createInspectorCredentials(credentials: InsertInspectorCredentials): Promise<InspectorCredentials> {
+    const [newCredentials] = await db.insert(inspectorCredentials).values(credentials).returning();
+    return newCredentials;
+  }
+
+  async updateInspectorCredentials(inspectorId: string, credentials: Partial<InspectorCredentials>): Promise<InspectorCredentials | undefined> {
+    const [updatedCredentials] = await db.update(inspectorCredentials)
+      .set({ ...credentials, updatedAt: new Date() })
+      .where(eq(inspectorCredentials.inspectorId, inspectorId))
+      .returning();
+    return updatedCredentials || undefined;
+  }
+
+  async getInspectorActivities(): Promise<InspectorActivity[]> {
+    return await db.select().from(inspectorActivities).orderBy(desc(inspectorActivities.timestamp));
+  }
+
+  async getInspectorActivitiesByInspector(inspectorId: string): Promise<InspectorActivity[]> {
+    return await db.select().from(inspectorActivities)
+      .where(eq(inspectorActivities.inspectorId, inspectorId))
+      .orderBy(desc(inspectorActivities.timestamp));
+  }
+
+  async createInspectorActivity(activity: InsertInspectorActivity): Promise<InspectorActivity> {
+    const [newActivity] = await db.insert(inspectorActivities).values(activity).returning();
+    return newActivity;
   }
 }
 

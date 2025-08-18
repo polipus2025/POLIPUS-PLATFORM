@@ -1514,7 +1514,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVED: Duplicate exporter login route - using proper exporter credentials system below
 
-  // Inspector Portal Login endpoint
+  // Land Inspector Login endpoint
+  app.post("/api/auth/land-inspector-login", async (req, res) => {
+    try {
+      const { username, password, inspectorType } = req.body;
+      
+      // Validate input
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Check if inspector credentials exist and is of correct type
+      const credentials = await storage.getInspectorCredentialsByUsername(username);
+      if (!credentials || credentials.inspectorType !== 'land') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid land inspector credentials" 
+        });
+      }
+
+      // Check for account lockout
+      if (credentials.lockedUntil && new Date() < credentials.lockedUntil) {
+        return res.status(423).json({ 
+          success: false, 
+          message: "Account is temporarily locked due to failed login attempts" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, credentials.passwordHash);
+      if (!isValidPassword) {
+        // Increment failed login attempts
+        await storage.incrementFailedLoginAttempts(credentials.inspectorId);
+        
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid land inspector credentials" 
+        });
+      }
+
+      // Get inspector profile
+      const inspector = await storage.getInspectorByInspectorId(credentials.inspectorId);
+      if (!inspector || !inspector.isActive || !inspector.canLogin || inspector.inspectorType !== 'land') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Land inspector account is not active or login is disabled" 
+        });
+      }
+
+      // Reset failed login attempts on successful login
+      await storage.resetFailedLoginAttempts(credentials.inspectorId);
+
+      // Update last login
+      await storage.updateInspectorLastLogin(inspector.id);
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          inspectorId: inspector.inspectorId,
+          username: credentials.username,
+          role: 'land_inspector',
+          userType: 'land_inspector',
+          inspectorType: 'land',
+          county: inspector.inspectionAreaCounty
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Log login activity
+      await storage.createInspectorActivity({
+        inspectorId: inspector.inspectorId,
+        activityType: 'login',
+        description: `Land Inspector logged in from ${req.ip}`,
+        county: inspector.inspectionAreaCounty
+      });
+
+      res.json({
+        success: true,
+        token,
+        inspector: {
+          id: inspector.id,
+          inspectorId: inspector.inspectorId,
+          firstName: inspector.firstName,
+          lastName: inspector.lastName,
+          fullName: inspector.fullName,
+          email: inspector.email,
+          phoneNumber: inspector.phoneNumber,
+          inspectorType: inspector.inspectorType,
+          inspectionAreaCounty: inspector.inspectionAreaCounty,
+          inspectionAreaDistrict: inspector.inspectionAreaDistrict,
+          specializations: inspector.specializations,
+          certificationLevel: inspector.certificationLevel
+        },
+        mustChangePassword: credentials.mustChangePassword
+      });
+
+    } catch (error) {
+      console.error("Land Inspector login error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Port Inspector Login endpoint
+  app.post("/api/auth/port-inspector-login", async (req, res) => {
+    try {
+      const { username, password, inspectorType } = req.body;
+      
+      // Validate input
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Check if inspector credentials exist and is of correct type
+      const credentials = await storage.getInspectorCredentialsByUsername(username);
+      if (!credentials || credentials.inspectorType !== 'port') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid port inspector credentials" 
+        });
+      }
+
+      // Check for account lockout
+      if (credentials.lockedUntil && new Date() < credentials.lockedUntil) {
+        return res.status(423).json({ 
+          success: false, 
+          message: "Account is temporarily locked due to failed login attempts" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, credentials.passwordHash);
+      if (!isValidPassword) {
+        // Increment failed login attempts
+        await storage.incrementFailedLoginAttempts(credentials.inspectorId);
+        
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid port inspector credentials" 
+        });
+      }
+
+      // Get inspector profile
+      const inspector = await storage.getInspectorByInspectorId(credentials.inspectorId);
+      if (!inspector || !inspector.isActive || !inspector.canLogin || inspector.inspectorType !== 'port') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Port inspector account is not active or login is disabled" 
+        });
+      }
+
+      // Reset failed login attempts on successful login
+      await storage.resetFailedLoginAttempts(credentials.inspectorId);
+
+      // Update last login
+      await storage.updateInspectorLastLogin(inspector.id);
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          inspectorId: inspector.inspectorId,
+          username: credentials.username,
+          role: 'port_inspector',
+          userType: 'port_inspector',
+          inspectorType: 'port',
+          county: inspector.inspectionAreaCounty
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Log login activity
+      await storage.createInspectorActivity({
+        inspectorId: inspector.inspectorId,
+        activityType: 'login',
+        description: `Port Inspector logged in from ${req.ip}`,
+        county: inspector.inspectionAreaCounty
+      });
+
+      res.json({
+        success: true,
+        token,
+        inspector: {
+          id: inspector.id,
+          inspectorId: inspector.inspectorId,
+          firstName: inspector.firstName,
+          lastName: inspector.lastName,
+          fullName: inspector.fullName,
+          email: inspector.email,
+          phoneNumber: inspector.phoneNumber,
+          inspectorType: inspector.inspectorType,
+          inspectionAreaCounty: inspector.inspectionAreaCounty,
+          inspectionAreaDistrict: inspector.inspectionAreaDistrict,
+          portFacility: inspector.portFacility,
+          specializations: inspector.specializations,
+          certificationLevel: inspector.certificationLevel
+        },
+        mustChangePassword: credentials.mustChangePassword
+      });
+
+    } catch (error) {
+      console.error("Port Inspector login error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Generic Inspector Portal Login endpoint (for backward compatibility)
   app.post("/api/auth/inspector-login", async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -1578,6 +1795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: credentials.username,
           role: 'inspector',
           userType: 'inspector',
+          inspectorType: inspector.inspectorType || 'land',
           county: inspector.inspectionAreaCounty
         },
         JWT_SECRET,
@@ -1603,6 +1821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fullName: inspector.fullName,
           email: inspector.email,
           phoneNumber: inspector.phoneNumber,
+          inspectorType: inspector.inspectorType,
           inspectionAreaCounty: inspector.inspectionAreaCounty,
           inspectionAreaDistrict: inspector.inspectionAreaDistrict,
           specializations: inspector.specializations,

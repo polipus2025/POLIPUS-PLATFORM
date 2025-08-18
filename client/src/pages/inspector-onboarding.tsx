@@ -20,6 +20,9 @@ import type { UploadResult } from '@uppy/core';
 
 const formSchema = insertInspectorSchema.extend({
   confirmPhoneNumber: z.string().min(8, "Phone number confirmation is required"),
+  inspectorType: z.enum(["land", "port"], {
+    required_error: "Inspector type is required",
+  }),
 }).refine((data) => data.phoneNumber === data.confirmPhoneNumber, {
   message: "Phone numbers don't match",
   path: ["confirmPhoneNumber"],
@@ -62,6 +65,7 @@ export default function InspectorOnboarding() {
       confirmPhoneNumber: "",
       nationalId: "",
       address: "",
+      inspectorType: "land",
       inspectionAreaCounty: "",
       inspectionAreaDistrict: "",
       inspectionAreaDescription: "",
@@ -280,6 +284,28 @@ export default function InspectorOnboarding() {
                       <FormControl>
                         <Textarea placeholder="Enter full address" className="min-h-[80px]" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="inspectorType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Inspector Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select inspector type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="land">Land Inspector - Agricultural Land & Crop Inspections</SelectItem>
+                          <SelectItem value="port">Port Inspector - Maritime Port & Export Inspections</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

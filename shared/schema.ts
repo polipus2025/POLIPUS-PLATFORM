@@ -3068,9 +3068,11 @@ export const inspectors = pgTable("inspectors", {
   nationalId: text("national_id").notNull().unique(),
   address: text("address").notNull(),
   profilePicture: text("profile_picture"), // Object storage path
+  inspectorType: text("inspector_type").notNull().default("land"), // land, port
   inspectionAreaCounty: text("inspection_area_county").notNull(),
   inspectionAreaDistrict: text("inspection_area_district"),
   inspectionAreaDescription: text("inspection_area_description"),
+  portFacility: text("port_facility"), // for port inspectors - which port/facility
   specializations: text("specializations"), // comma separated: cocoa,coffee,palm_oil,etc
   certificationLevel: text("certification_level").notNull().default("junior"), // junior, senior, lead, expert
   isActive: boolean("is_active").default(true),
@@ -3103,6 +3105,7 @@ export const inspectorCredentials = pgTable("inspector_credentials", {
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   salt: text("salt").notNull(),
+  inspectorType: text("inspector_type").notNull().default("land"), // land, port
   resetToken: text("reset_token"),
   resetTokenExpires: timestamp("reset_token_expires"),
   mustChangePassword: boolean("must_change_password").default(true),

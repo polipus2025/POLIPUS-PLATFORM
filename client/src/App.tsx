@@ -172,6 +172,9 @@ import InspectorOnboarding from "@/pages/inspector-onboarding";
 import InspectorManagement from "@/pages/inspector-management";
 import BuyerManagement from "@/pages/buyer-management";
 import ExporterManagement from "@/pages/exporter-management";
+import InspectorPortal from "@/pages/inspector-portal";
+import LandInspectorLogin from "@/pages/auth/land-inspector-login";
+import PortInspectorLogin from "@/pages/auth/port-inspector-login";
 
 import NotFound from "@/pages/not-found";
 
@@ -205,6 +208,12 @@ function Router() {
       <Route path="/mobile-field-agent-login" component={MobileFieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
       <Route path="/monitoring-login" component={MonitoringLogin} />
+      
+      {/* Inspector Portal Routes */}
+      <Route path="/inspector-portal" component={InspectorPortal} />
+      <Route path="/land-inspector-login" component={LandInspectorLogin} />
+      <Route path="/port-inspector-login" component={PortInspectorLogin} />
+      <Route path="/inspector-onboarding" component={InspectorOnboarding} />
 
       {/* LiveTrace Authentication Routes */}
       <Route path="/live-trace-regulatory-login" component={LiveTraceRegulatoryLogin} />

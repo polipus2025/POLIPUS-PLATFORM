@@ -65,9 +65,6 @@ import {
   
   // Buyer Management System Schemas
   insertBuyerSchema,
-  insertBuyerCredentialsSchema,
-  insertBuyerDocumentSchema,
-  insertBuyerTransactionSchema,
   
   // Blue Carbon 360 Schemas
   insertBlueCarbon360ProjectSchema,
@@ -8743,6 +8740,196 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Buyer upload document helper
   app.post("/api/buyers/upload-document", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting document upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  // ============================================================================
+  // EXPORTER MANAGEMENT SYSTEM ROUTES
+  // ============================================================================
+
+  // Get all exporters - FOR REGULATORY ADMIN EMS
+  app.get("/api/exporters", async (req, res) => {
+    try {
+      const exporters = await storage.getExporters();
+      res.json(exporters);
+    } catch (error) {
+      console.error("Error fetching exporters:", error);
+      res.status(500).json({ message: "Failed to fetch exporters" });
+    }
+  });
+
+  // Get exporter by ID - FOR EMS DETAILS VIEW
+  app.get("/api/exporters/:id", async (req, res) => {
+    try {
+      const exporter = await storage.getExporter(parseInt(req.params.id));
+      if (!exporter) {
+        return res.status(404).json({ message: "Exporter not found" });
+      }
+      res.json(exporter);
+    } catch (error) {
+      console.error("Error fetching exporter:", error);
+      res.status(500).json({ message: "Failed to fetch exporter" });
+    }
+  });
+
+  // Create new exporter - ONBOARDING SYSTEM
+  app.post("/api/exporters", async (req, res) => {
+    try {
+      const validatedData = insertExporterSchema.parse(req.body);
+      
+      // Generate unique exporter ID (EXP-YYYYMMDD-XXX format)
+      const date = new Date();
+      const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const exporterId = `EXP-${dateStr}-${randomSuffix}`;
+      
+      const exporterData = {
+        ...validatedData,
+        exporterId,
+        complianceStatus: 'pending',
+        portalAccess: false,
+        loginCredentialsGenerated: false
+      };
+
+      const exporter = await storage.createExporter(exporterData);
+
+      res.status(201).json({ 
+        ...exporter,
+        message: "Exporter registered successfully - awaiting compliance review"
+      });
+
+    } catch (error) {
+      console.error("Error creating exporter:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid exporter data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create exporter" });
+    }
+  });
+
+  // Approve exporter and grant portal access
+  app.put("/api/exporters/:id/approve", async (req, res) => {
+    try {
+      const { complianceStatus, portalAccess } = req.body;
+      
+      const updatedExporter = await storage.updateExporter(parseInt(req.params.id), {
+        complianceStatus: complianceStatus || 'approved',
+        portalAccess: portalAccess !== undefined ? portalAccess : true,
+        approvedAt: new Date(),
+        approvedBy: req.user?.username || 'System Admin'
+      });
+
+      if (!updatedExporter) {
+        return res.status(404).json({ message: "Exporter not found" });
+      }
+
+      res.json({
+        ...updatedExporter,
+        message: "Exporter approved successfully"
+      });
+    } catch (error) {
+      console.error("Error approving exporter:", error);
+      res.status(500).json({ message: "Failed to approve exporter" });
+    }
+  });
+
+  // Generate login credentials for approved exporter
+  app.post("/api/exporters/:id/generate-credentials", async (req, res) => {
+    try {
+      const exporter = await storage.getExporter(parseInt(req.params.id));
+      
+      if (!exporter) {
+        return res.status(404).json({ message: "Exporter not found" });
+      }
+
+      if (exporter.complianceStatus !== 'approved') {
+        return res.status(400).json({ message: "Exporter must be approved first" });
+      }
+
+      // Generate username from company name (simplified)
+      const username = exporter.companyName.toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+        .substring(0, 20) + Math.floor(Math.random() * 100);
+      
+      const temporaryPassword = crypto.randomBytes(8).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
+
+      // Create credentials record
+      const credentials = await storage.createExporterCredentials({
+        exporterId: exporter.exporterId,
+        username,
+        passwordHash: hashedPassword,
+        isTemporary: true,
+        lastPasswordChange: new Date(),
+        loginAttempts: 0,
+        accountLocked: false,
+        generatedBy: req.user?.username || 'System Admin'
+      });
+
+      // Update exporter to mark credentials as generated
+      await storage.updateExporter(parseInt(req.params.id), {
+        loginCredentialsGenerated: true,
+        credentialsGeneratedAt: new Date()
+      });
+
+      res.json({
+        message: "Login credentials generated successfully",
+        credentials: {
+          username,
+          temporaryPassword,
+          exporter: exporter.companyName,
+          portalUrl: "https://lacra.agritrace360.com/exporter-portal"
+        }
+      });
+
+    } catch (error) {
+      console.error("Error generating exporter credentials:", error);
+      res.status(500).json({ message: "Failed to generate credentials" });
+    }
+  });
+
+  // Get exporter documents
+  app.get("/api/exporters/:id/documents", async (req, res) => {
+    try {
+      const exporter = await storage.getExporter(parseInt(req.params.id));
+      if (!exporter) {
+        return res.status(404).json({ message: "Exporter not found" });
+      }
+      
+      const documents = await storage.getExporterDocuments(exporter.exporterId);
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching exporter documents:", error);
+      res.status(500).json({ message: "Failed to fetch documents" });
+    }
+  });
+
+  // Get exporter transactions
+  app.get("/api/exporters/:id/transactions", async (req, res) => {
+    try {
+      const exporter = await storage.getExporter(parseInt(req.params.id));
+      if (!exporter) {
+        return res.status(404).json({ message: "Exporter not found" });
+      }
+      
+      const transactions = await storage.getExporterTransactions(exporter.exporterId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching exporter transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Exporter upload document helper
+  app.post("/api/exporters/upload-document", async (req, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();

@@ -1520,6 +1520,154 @@ export const buyers = pgTable("buyers", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Exporter Management System
+export const exporters = pgTable("exporters", {
+  id: serial("id").primaryKey(),
+  exporterId: text("exporter_id").notNull().unique(), // EXP-YYYYMMDD-XXX format
+  companyName: text("company_name").notNull(),
+  businessType: text("business_type").notNull(), // agricultural_exporter, commodity_trader, processing_company, cooperative
+  registrationNumber: text("registration_number").unique(),
+  taxId: text("tax_id"),
+  vatNumber: text("vat_number"),
+  contactPersonFirstName: text("contact_person_first_name").notNull(),
+  contactPersonLastName: text("contact_person_last_name").notNull(),
+  contactPersonTitle: text("contact_person_title"), // CEO, Export Manager, Director, etc.
+  primaryEmail: text("primary_email").notNull().unique(),
+  secondaryEmail: text("secondary_email"),
+  primaryPhone: text("primary_phone").notNull(),
+  secondaryPhone: text("secondary_phone"),
+  faxNumber: text("fax_number"),
+  businessAddress: text("business_address").notNull(),
+  city: text("city").notNull(),
+  county: text("county").notNull(),
+  postalCode: text("postal_code"),
+  country: text("country").notNull().default("Liberia"),
+  
+  // Business Details
+  yearEstablished: integer("year_established"),
+  numberOfEmployees: integer("number_of_employees"),
+  annualTurnover: decimal("annual_turnover", { precision: 15, scale: 2 }),
+  exportExperience: integer("export_experience"), // years of export experience
+  bankName: text("bank_name"),
+  bankAccountNumber: text("bank_account_number"),
+  bankBranch: text("bank_branch"),
+  swiftCode: text("swift_code"),
+  
+  // Export Specialization
+  exportCommodities: text("export_commodities"), // JSON array: cocoa, coffee, palm_oil, rubber, rice, etc.
+  exportDestinations: text("export_destinations"), // JSON array of countries
+  exportVolume: text("export_volume"), // expected monthly/annual export volume
+  exportCapacity: decimal("export_capacity", { precision: 12, scale: 2 }), // MT per year
+  storageCapacity: decimal("storage_capacity", { precision: 10, scale: 2 }), // MT
+  processingCapacity: decimal("processing_capacity", { precision: 10, scale: 2 }), // MT per month
+  qualityCertifications: text("quality_certifications"), // JSON array: ISO, HACCP, Organic, Fair Trade, etc.
+  
+  // Compliance and Licenses
+  exportLicenseNumber: text("export_license_number"),
+  exportLicenseType: text("export_license_type"), // general_export, specific_commodity, temporary
+  exportLicenseIssuedBy: text("export_license_issued_by"),
+  exportLicenseIssueDate: timestamp("export_license_issue_date"),
+  exportLicenseExpiryDate: timestamp("export_license_expiry_date"),
+  businessLicenseNumber: text("business_license_number"),
+  businessLicenseExpiryDate: timestamp("business_license_expiry_date"),
+  customsRegistrationNumber: text("customs_registration_number"),
+  eudrComplianceStatus: text("eudr_compliance_status").default("pending"), // pending, compliant, non_compliant, under_review
+  complianceStatus: text("compliance_status").notNull().default("pending"), // pending, approved, suspended, rejected
+  verificationStatus: text("verification_status").notNull().default("unverified"), // unverified, in_progress, verified, rejected
+  kycStatus: text("kyc_status").notNull().default("pending"), // pending, completed, failed
+  
+  // Platform Access
+  portalAccess: boolean("portal_access").default(false),
+  accessLevel: text("access_level").default("basic"), // basic, premium, enterprise
+  loginCredentialsGenerated: boolean("login_credentials_generated").default(false),
+  passwordHash: text("password_hash"),
+  
+  // Onboarding Process
+  onboardingStep: integer("onboarding_step").default(1), // 1-5 steps
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  documentsSubmitted: text("documents_submitted"), // JSON array of document types
+  documentsVerified: text("documents_verified"), // JSON array of verified document types
+  
+  // Profile and Document Uploads
+  profilePhotoUrl: text("profile_photo_url").notNull(), // MANDATORY - company logo/representative photo URL
+  businessLicenseUrl: text("business_license_url"), // OPTIONAL - business license document
+  exportLicenseUrl: text("export_license_url"), // OPTIONAL - export license document
+  
+  // Regulatory Management
+  assignedOfficer: integer("assigned_officer").references(() => authUsers.id),
+  approvedBy: integer("approved_by").references(() => authUsers.id),
+  approvedAt: timestamp("approved_at"),
+  notes: text("notes"),
+  riskRating: text("risk_rating").default("medium"), // low, medium, high
+  
+  // Status Management
+  isActive: boolean("is_active").default(true),
+  suspensionReason: text("suspension_reason"),
+  suspendedBy: integer("suspended_by").references(() => authUsers.id),
+  suspendedAt: timestamp("suspended_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const exporterCredentials = pgTable("exporter_credentials", {
+  id: serial("id").primaryKey(),
+  exporterId: integer("exporter_id").references(() => exporters.id).notNull(),
+  username: text("username").notNull().unique(), // same as exporter_id
+  passwordHash: text("password_hash").notNull(),
+  temporaryPassword: text("temporary_password"), // for first login
+  passwordChangeRequired: boolean("password_change_required").default(true),
+  lastPasswordChange: timestamp("last_password_change"),
+  loginAttempts: integer("login_attempts").default(0),
+  isLocked: boolean("is_locked").default(false),
+  lockedUntil: timestamp("locked_until"),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorSecret: text("two_factor_secret"),
+  createdBy: integer("created_by").references(() => authUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const exporterDocuments = pgTable("exporter_documents", {
+  id: serial("id").primaryKey(),
+  exporterId: integer("exporter_id").references(() => exporters.id).notNull(),
+  documentType: text("document_type").notNull(), // business_registration, export_license, tax_certificate, customs_registration, quality_certificates
+  documentName: text("document_name").notNull(),
+  documentPath: text("document_path"), // file path or URL
+  documentNumber: text("document_number"),
+  issuedBy: text("issued_by"),
+  issueDate: timestamp("issue_date"),
+  expiryDate: timestamp("expiry_date"),
+  verificationStatus: text("verification_status").default("pending"), // pending, verified, rejected
+  verifiedBy: integer("verified_by").references(() => authUsers.id),
+  verifiedAt: timestamp("verified_at"),
+  rejectionReason: text("rejection_reason"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const exporterTransactions = pgTable("exporter_transactions", {
+  id: serial("id").primaryKey(),
+  exporterId: integer("exporter_id").references(() => exporters.id).notNull(),
+  commodityId: integer("commodity_id").references(() => commodities.id),
+  transactionType: text("transaction_type").notNull(), // export_contract, shipment, payment, inquiry
+  transactionAmount: decimal("transaction_amount", { precision: 12, scale: 2 }),
+  currency: text("currency").default("USD"),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }),
+  unit: text("unit"),
+  pricePerUnit: decimal("price_per_unit", { precision: 8, scale: 2 }),
+  destinationCountry: text("destination_country"),
+  exportStatus: text("export_status").default("pending"), // pending, shipped, delivered, completed, cancelled
+  paymentStatus: text("payment_status").default("pending"), // pending, paid, overdue, cancelled
+  paymentMethod: text("payment_method"), // letter_of_credit, bank_transfer, advance_payment
+  transactionDate: timestamp("transaction_date").notNull(),
+  shipmentDate: timestamp("shipment_date"),
+  deliveryDate: timestamp("delivery_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const buyerCredentials = pgTable("buyer_credentials", {
   id: serial("id").primaryKey(),
   buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
@@ -1574,6 +1722,69 @@ export const buyerTransactions = pgTable("buyer_transactions", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Buyer schema types and validation
+export const insertBuyerSchema = createInsertSchema(buyers).omit({
+  id: true,
+  buyerId: true,
+  loginCredentialsGenerated: true,
+  passwordHash: true,
+  onboardingStep: true,
+  onboardingCompleted: true,
+  complianceStatus: true,
+  verificationStatus: true,
+  kycStatus: true,
+  portalAccess: true,
+  accessLevel: true,
+  assignedOfficer: true,
+  approvedBy: true,
+  approvedAt: true,
+  riskRating: true,
+  isActive: true,
+  suspensionReason: true,
+  suspendedBy: true,
+  suspendedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Buyer = typeof buyers.$inferSelect;
+export type InsertBuyer = z.infer<typeof insertBuyerSchema>;
+
+// Exporter schema types and validation
+export const insertExporterSchema = createInsertSchema(exporters).omit({
+  id: true,
+  exporterId: true,
+  loginCredentialsGenerated: true,
+  passwordHash: true,
+  onboardingStep: true,
+  onboardingCompleted: true,
+  complianceStatus: true,
+  verificationStatus: true,
+  kycStatus: true,
+  eudrComplianceStatus: true,
+  portalAccess: true,
+  accessLevel: true,
+  assignedOfficer: true,
+  approvedBy: true,
+  approvedAt: true,
+  riskRating: true,
+  isActive: true,
+  suspensionReason: true,
+  suspendedBy: true,
+  suspendedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type ExporterCredential = typeof exporterCredentials.$inferSelect;
+export type InsertExporterCredential = typeof exporterCredentials.$inferInsert;
+
+export type ExporterDocument = typeof exporterDocuments.$inferSelect;
+export type InsertExporterDocument = typeof exporterDocuments.$inferInsert;
+
+export type ExporterTransaction = typeof exporterTransactions.$inferSelect;
+export type InsertExporterTransaction = typeof exporterTransactions.$inferInsert;
 
 export const userSessions = pgTable("user_sessions", {
   id: serial("id").primaryKey(),
@@ -1861,31 +2072,7 @@ export type InsertAgriTraceCompliance = z.infer<typeof insertAgriTraceCompliance
 // Import payment schemas
 export * from './payment-schema';
 
-// Exporters table for independent exporter operations
-export const exporters = pgTable("exporters", {
-  id: serial("id").primaryKey(),
-  exporterId: varchar("exporter_id", { length: 50 }).unique().notNull(),
-  companyName: varchar("company_name", { length: 255 }).notNull(),
-  businessLicense: varchar("business_license", { length: 100 }).unique().notNull(),
-  taxIdNumber: varchar("tax_id_number", { length: 50 }).unique(),
-  contactPerson: varchar("contact_person", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).unique().notNull(),
-  phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
-  address: text("address").notNull(),
-  county: varchar("county", { length: 100 }).notNull(),
-  district: varchar("district", { length: 100 }),
-  exportLicense: varchar("export_license", { length: 100 }).unique().notNull(),
-  licenseExpiryDate: timestamp("license_expiry_date").notNull(),
-  commodityTypes: text("commodity_types").array().notNull(), // Array of commodity types they can export
-  bankName: varchar("bank_name", { length: 255 }),
-  accountNumber: varchar("account_number", { length: 50 }),
-  swiftCode: varchar("swift_code", { length: 20 }),
-  isActive: boolean("is_active").default(true).notNull(),
-  registrationDate: timestamp("registration_date").defaultNow().notNull(),
-  lastModified: timestamp("last_modified").defaultNow().notNull(),
-  notes: text("notes"),
-});
-
+// Exporter types from the comprehensive management system above
 export type Exporter = typeof exporters.$inferSelect;
 export type InsertExporter = typeof exporters.$inferInsert;
 
@@ -1920,13 +2107,6 @@ export const exportOrders = pgTable("export_orders", {
 
 export type ExportOrder = typeof exportOrders.$inferSelect;
 export type InsertExportOrder = typeof exportOrders.$inferInsert;
-
-// Schema validation for exporters and orders
-export const insertExporterSchema = createInsertSchema(exporters).omit({
-  id: true,
-  registrationDate: true,
-  lastModified: true,
-});
 
 export const insertExportOrderSchema = createInsertSchema(exportOrders).omit({
   id: true,
@@ -2983,38 +3163,6 @@ export type InsertCertificateApproval = typeof certificateApprovals.$inferInsert
 export type CertificateType = typeof certificateTypes.$inferSelect;
 export type InsertCertificateType = typeof certificateTypes.$inferInsert;
 
-// Buyer Management System insert schemas
-export const insertBuyerSchema = createInsertSchema(buyers).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertBuyerCredentialsSchema = createInsertSchema(buyerCredentials).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertBuyerDocumentSchema = createInsertSchema(buyerDocuments).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertBuyerTransactionSchema = createInsertSchema(buyerTransactions).omit({
-  id: true,
-  createdAt: true,
-});
-
-// Buyer Management System types
-export type Buyer = typeof buyers.$inferSelect;
-export type InsertBuyer = z.infer<typeof insertBuyerSchema>;
-export type BuyerCredentials = typeof buyerCredentials.$inferSelect;
-export type InsertBuyerCredentials = z.infer<typeof insertBuyerCredentialsSchema>;
-export type BuyerDocument = typeof buyerDocuments.$inferSelect;
-export type InsertBuyerDocument = z.infer<typeof insertBuyerDocumentSchema>;
-export type BuyerTransaction = typeof buyerTransactions.$inferSelect;
-export type InsertBuyerTransaction = z.infer<typeof insertBuyerTransactionSchema>;
+// Additional buyer and exporter schema types already defined above
 
 

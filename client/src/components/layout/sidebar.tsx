@@ -50,6 +50,7 @@ const regulatoryNavigation = [
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
   { name: "Inspector Management", href: "/regulatory/inspector-management", icon: Users },
   { name: "Buyer Management", href: "/regulatory/buyer-management", icon: UserPlus },
+  { name: "Exporter Management", href: "/regulatory/exporter-management", icon: Building2 },
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Document Verification", href: "/verification", icon: Shield },
   { name: "Real-Time Verification", href: "/verification-dashboard", icon: Award },

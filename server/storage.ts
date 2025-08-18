@@ -55,6 +55,10 @@ import {
   buyerCredentials,
   buyerDocuments,
   buyerTransactions,
+  exporters,
+  exporterCredentials,
+  exporterDocuments,
+  exporterTransactions,
   type Commodity,
   type Inspection,
   type Certification,
@@ -166,7 +170,15 @@ import {
   type InsertBuyer,
   type InsertBuyerCredentials,
   type InsertBuyerDocument,
-  type InsertBuyerTransaction
+  type InsertBuyerTransaction,
+  type Exporter,
+  type ExporterCredential,
+  type ExporterDocument,
+  type ExporterTransaction,
+  type InsertExporter,
+  type InsertExporterCredential,
+  type InsertExporterDocument,
+  type InsertExporterTransaction
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -600,6 +612,23 @@ export interface IStorage {
   
   getBuyerTransactions(buyerId: string): Promise<BuyerTransaction[]>;
   createBuyerTransaction(transaction: InsertBuyerTransaction): Promise<BuyerTransaction>;
+
+  // Exporter Management System methods
+  getExporters(): Promise<Exporter[]>;
+  getExporter(id: number): Promise<Exporter | undefined>;
+  getExporterByExporterId(exporterId: string): Promise<Exporter | undefined>;
+  createExporter(exporter: InsertExporter): Promise<Exporter>;
+  updateExporter(id: number, exporter: Partial<Exporter>): Promise<Exporter | undefined>;
+  
+  getExporterCredentials(exporterId: string): Promise<ExporterCredential | undefined>;
+  createExporterCredentials(credentials: InsertExporterCredential): Promise<ExporterCredential>;
+  updateExporterCredentials(exporterId: string, credentials: Partial<ExporterCredential>): Promise<ExporterCredential | undefined>;
+  
+  getExporterDocuments(exporterId: string): Promise<ExporterDocument[]>;
+  createExporterDocument(document: InsertExporterDocument): Promise<ExporterDocument>;
+  
+  getExporterTransactions(exporterId: string): Promise<ExporterTransaction[]>;
+  createExporterTransaction(transaction: InsertExporterTransaction): Promise<ExporterTransaction>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2114,6 +2143,77 @@ export class DatabaseStorage implements IStorage {
 
   async createBuyerTransaction(transaction: InsertBuyerTransaction): Promise<BuyerTransaction> {
     const [newTransaction] = await db.insert(buyerTransactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  // Exporter Management System implementations
+  async getExporters(): Promise<Exporter[]> {
+    return await db.select().from(exporters).orderBy(desc(exporters.createdAt));
+  }
+
+  async getExporter(id: number): Promise<Exporter | undefined> {
+    const [exporter] = await db.select().from(exporters).where(eq(exporters.id, id));
+    return exporter || undefined;
+  }
+
+  async getExporterByExporterId(exporterId: string): Promise<Exporter | undefined> {
+    const [exporter] = await db.select().from(exporters).where(eq(exporters.exporterId, exporterId));
+    return exporter || undefined;
+  }
+
+  async createExporter(exporter: InsertExporter): Promise<Exporter> {
+    const [newExporter] = await db.insert(exporters).values(exporter).returning();
+    return newExporter;
+  }
+
+  async updateExporter(id: number, exporter: Partial<Exporter>): Promise<Exporter | undefined> {
+    const [updatedExporter] = await db.update(exporters)
+      .set({ ...exporter, updatedAt: new Date() })
+      .where(eq(exporters.id, id))
+      .returning();
+    return updatedExporter || undefined;
+  }
+
+  // Exporter credentials management
+  async getExporterCredentials(exporterId: string): Promise<ExporterCredential | undefined> {
+    const [credentials] = await db.select().from(exporterCredentials)
+      .where(eq(exporterCredentials.exporterId, exporterId));
+    return credentials || undefined;
+  }
+
+  async createExporterCredentials(credentials: InsertExporterCredential): Promise<ExporterCredential> {
+    const [newCredentials] = await db.insert(exporterCredentials).values(credentials).returning();
+    return newCredentials;
+  }
+
+  async updateExporterCredentials(exporterId: string, credentials: Partial<ExporterCredential>): Promise<ExporterCredential | undefined> {
+    const [updatedCredentials] = await db.update(exporterCredentials)
+      .set({ ...credentials, updatedAt: new Date() })
+      .where(eq(exporterCredentials.exporterId, exporterId))
+      .returning();
+    return updatedCredentials || undefined;
+  }
+
+  // Exporter documents management
+  async getExporterDocuments(exporterId: string): Promise<ExporterDocument[]> {
+    return await db.select().from(exporterDocuments)
+      .where(eq(exporterDocuments.exporterId, exporterId))
+      .orderBy(desc(exporterDocuments.createdAt));
+  }
+
+  async createExporterDocument(document: InsertExporterDocument): Promise<ExporterDocument> {
+    const [newDocument] = await db.insert(exporterDocuments).values(document).returning();
+    return newDocument;
+  }
+
+  async getExporterTransactions(exporterId: string): Promise<ExporterTransaction[]> {
+    return await db.select().from(exporterTransactions)
+      .where(eq(exporterTransactions.exporterId, exporterId))
+      .orderBy(desc(exporterTransactions.createdAt));
+  }
+
+  async createExporterTransaction(transaction: InsertExporterTransaction): Promise<ExporterTransaction> {
+    const [newTransaction] = await db.insert(exporterTransactions).values(transaction).returning();
     return newTransaction;
   }
 }

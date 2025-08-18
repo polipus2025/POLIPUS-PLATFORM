@@ -178,6 +178,7 @@ import InspectorPortal from "@/pages/inspector-portal";
 import LandInspectorLogin from "@/pages/auth/land-inspector-login";
 import PortInspectorLogin from "@/pages/auth/port-inspector-login";
 import LandMappingDashboard from "@/pages/land-mapping-dashboard";
+import InspectorFarmerLandManagement from "@/pages/inspector-farmer-land-management";
 
 import NotFound from "@/pages/not-found";
 
@@ -214,10 +215,13 @@ function Router() {
       
       {/* Inspector Portal Routes */}
       <Route path="/inspector-portal" component={InspectorPortal} />
+      <Route path="/auth/land-inspector-login" component={LandInspectorLogin} />
+      <Route path="/auth/port-inspector-login" component={PortInspectorLogin} />
       <Route path="/land-inspector-login" component={LandInspectorLogin} />
       <Route path="/port-inspector-login" component={PortInspectorLogin} />
       <Route path="/inspector-onboarding" component={InspectorOnboarding} />
       <Route path="/land-mapping-dashboard" component={LandMappingDashboard} />
+      <Route path="/inspector-farmer-land-management" component={InspectorFarmerLandManagement} />
       <Route path="/minimal-test" component={MinimalTest} />
 
       {/* LiveTrace Authentication Routes */}

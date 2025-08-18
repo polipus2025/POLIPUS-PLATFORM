@@ -274,10 +274,10 @@ export default function Landing() {
                   <Leaf className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Farmer Portal
+                  Farmer & Buyer Portal
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
-                  Agricultural producers
+                  Agricultural producers & buyers
                 </p>
               </div>
               

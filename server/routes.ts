@@ -1303,6 +1303,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Buyer Login Endpoint
+  app.post("/api/auth/buyer-login", async (req, res) => {
+    try {
+      const { buyerId, password, companyName, phoneNumber, userType } = req.body;
+      
+      // Validate input
+      if (!buyerId || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Buyer ID and password are required" 
+        });
+      }
+
+      // Test credentials for buyers
+      const testBuyerCredentials: Record<string, { password: string; firstName: string; lastName: string; company: string }> = {
+        buyer001: { password: 'password123', firstName: 'John', lastName: 'Trading', company: 'ABC Trading Co.' },
+        buyer002: { password: 'password123', firstName: 'Sarah', lastName: 'Commerce', company: 'Global Commodities Ltd.' },
+        test_buyer: { password: 'password123', firstName: 'Test', lastName: 'Buyer', company: 'Test Company' }
+      };
+
+      if (testBuyerCredentials[buyerId] && testBuyerCredentials[buyerId].password === password) {
+        const token = jwt.sign(
+          { 
+            userId: 301,
+            buyerId: buyerId,
+            userType: 'buyer',
+            role: 'buyer',
+            company: companyName || testBuyerCredentials[buyerId].company
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: 301,
+            buyerId: buyerId,
+            userType: 'buyer',
+            role: 'buyer',
+            company: companyName || testBuyerCredentials[buyerId].company,
+            firstName: testBuyerCredentials[buyerId].firstName,
+            lastName: testBuyerCredentials[buyerId].lastName,
+            phoneNumber: phoneNumber || ''
+          }
+        });
+      }
+
+      // Check if user exists - buyers use buyerId as username
+      const user = await storage.getUserByUsername(buyerId);
+      if (!user || user.role !== 'buyer') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid buyer credentials" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid buyer credentials" 
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          buyerId: user.buyerId, 
+          role: user.role,
+          userType: 'buyer'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          buyerId: user.buyerId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          company: user.company || companyName
+        }
+      });
+
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   app.post("/api/auth/field-agent-login", async (req, res) => {
     try {
       const { agentId, password, jurisdiction, phoneNumber, userType } = req.body;

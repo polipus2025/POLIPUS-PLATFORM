@@ -353,8 +353,8 @@ export default function FrontPage() {
                     <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
                       <Wheat className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Farmer Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">Agricultural producers and farm managers</p>
+                    <h4 className="font-bold text-slate-900 mb-2">Farmer & Buyer Portal</h4>
+                    <p className="text-xs text-slate-600 mb-3">Agricultural producers, farm managers, and commodity buyers</p>
                     <Button size="sm" className="w-full isms-button">Access Portal</Button>
                   </div>
                 </div>

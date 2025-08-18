@@ -648,12 +648,14 @@ export class AgriTraceWorkflowService {
 
   // Step 6: Quality Assessment
   async performQualityAssessment(workflowId: number, qualityData: any) {
+    const gradeValue = qualityData.grade === "Grade A" ? 95 : qualityData.grade === "Grade B" ? 85 : 75;
+    
     const qualityMetrics = await db.insert(agriTraceQualityMetrics).values({
       workflowId: workflowId,
       metricType: "commodity_quality",
-      metricName: "Grade Assessment",
-      value: qualityData.grade || "Grade A",
-      unit: "grade",
+      metricName: "Grade Assessment", 
+      value: gradeValue,
+      unit: "percentage",
       measuredBy: qualityData.inspector || "LACRA-INSPECTOR",
       measurementMethod: "visual_inspection",
       standardReference: "LACRA-QS-001"
@@ -681,9 +683,9 @@ export class AgriTraceWorkflowService {
 
     await db.insert(agriTraceDocuments).values({
       workflowId: workflowId,
-      documentType: "certificate",
+      documentType: "certificate", 
       documentName: "EUDR Compliance Certificate",
-      documentUrl: `/certificates/${certificationData.certificateNumber}.pdf`,
+      filePath: `/certificates/${certificationData.certificateNumber}.pdf`,
       uploadedBy: "LACRA-SYSTEM",
       documentMetadata: certificationData
     });
@@ -761,8 +763,8 @@ export class AgriTraceWorkflowService {
     await db.insert(agriTraceDocuments).values({
       workflowId: workflowId,
       documentType: "eudr_pack",
-      documentName: "Complete EUDR Compliance Pack",
-      documentUrl: `/eudr-packs/${packData.packId}.pdf`,
+      documentName: "Complete EUDR Compliance Pack", 
+      filePath: `/eudr-packs/${packData.packId}.pdf`,
       uploadedBy: "LACRA-SYSTEM",
       documentMetadata: packData
     });

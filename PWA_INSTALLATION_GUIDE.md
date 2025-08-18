@@ -89,7 +89,7 @@ Your AgriTrace360 platform now includes a full Progressive Web App that can be i
 ### **Portal Integration**
 - **Regulatory**: `/regulatory-login` (LACRA staff access)
 - **Farmer**: `/farmer-login` (Farm management)
-- **Field Agent**: `/field-agent-login` (Inspections)
+- **Inspector**: `/inspector-login` (Inspections)
 - **Exporter**: `/exporter-login` (Export permits)
 
 ### **Quick Actions Available**

@@ -7,7 +7,7 @@
 - [ ] Test that all portals work on the public URL:
   - [ ] Regulatory Portal (admin001/admin123)
   - [ ] Farmer Portal (FRM-2024-001/farmer123)
-  - [ ] Field Agent Portal (AGT-2024-001/agent123)
+  - [ ] Inspector Portal (AGT-2024-001/agent123)
   - [ ] Exporter Portal (EXP-2024-001/exporter123)
   - [ ] Monitoring Portal (monitor001/monitor123)
 - [ ] Verify mobile-responsive design works on smartphones
@@ -92,7 +92,7 @@ Your AgriTrace360 platform is currently running with:
 ### For APK Testing:
 - **Regulatory**: admin001 / admin123
 - **Farmer**: FRM-2024-001 / farmer123  
-- **Field Agent**: AGT-2024-001 / agent123
+- **Inspector**: AGT-2024-001 / agent123
 - **Exporter**: EXP-2024-001 / exporter123
 - **Monitoring**: monitor001 / monitor123
 

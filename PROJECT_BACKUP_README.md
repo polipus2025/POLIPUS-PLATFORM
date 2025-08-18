@@ -54,7 +54,7 @@
 ### Authentication Portals
 - **Regulatory**: admin001 / admin123
 - **Farmer**: FRM-2024-001 / farmer123
-- **Field Agent**: AGT-2024-001 / agent123
+- **Inspector**: AGT-2024-001 / agent123
 - **Exporter**: EXP-2024-001 / exporter123
 - **Monitoring**: monitor001 / monitor123
 

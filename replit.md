@@ -1,7 +1,7 @@
 # AgriTrace360™ - Agricultural Commodity Compliance Management System
 
 ## Overview
-AgriTrace360™ is a comprehensive web application for the Liberia Agriculture Commodity Regulatory Authority (LACRA), designed to manage and monitor agricultural commodity compliance across Liberian counties. It provides real-time tracking of commodities, inspections, certifications, and compliance metrics through an intuitive dashboard. The system aims to enhance transparency, efficiency, and regulatory oversight in Liberia's agricultural sector, contributing to food safety, sustainable practices, and adherence to international standards like the EU Deforestation Regulation (EUDR). It offers multi-role access for regulatory staff, farmers, field agents, and exporters, streamlining workflows from farm to export. The project also encompasses an expanded "Polipus" platform with 8 specialized modules, including: Agricultural Traceability & Compliance, Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, and Carbon Trace.
+AgriTrace360™ is a comprehensive web application for the Liberia Agriculture Commodity Regulatory Authority (LACRA), designed to manage and monitor agricultural commodity compliance across Liberian counties. It provides real-time tracking of commodities, inspections, certifications, and compliance metrics through an intuitive dashboard. The system aims to enhance transparency, efficiency, and regulatory oversight in Liberia's agricultural sector, contributing to food safety, sustainable practices, and adherence to international standards like the EU Deforestation Regulation (EUDR). It offers multi-role access for regulatory staff, farmers, inspectors, and exporters, streamlining workflows from farm to export. The project also encompasses an expanded "Polipus" platform with 8 specialized modules, including: Agricultural Traceability & Compliance, Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, and Carbon Trace.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -21,7 +21,7 @@ The application employs a modern full-stack architecture with a clear separation
 - **Frontend**: React (TypeScript), Wouter for routing, TanStack React Query for state management, shadcn/ui components (Radix UI primitives), Tailwind CSS for styling, and Vite for building.
 - **Backend**: Node.js (Express.js) in TypeScript, featuring a RESTful API pattern.
 - **Database**: PostgreSQL, managed with Drizzle ORM (PostgreSQL dialect) and Drizzle Kit for schema migrations.
-- **Authentication**: A three-tier, role-based authentication system with separate portals for regulatory staff, farmers, field agents, and exporters, using JWT tokens and bcrypt for password hashing.
+- **Authentication**: A three-tier, role-based authentication system with separate portals for regulatory staff, farmers, inspectors, and exporters, using JWT tokens and bcrypt for password hashing.
 - **Geographic Integration**: Authentic Liberian geographic data, including all 15 counties, major cities, and transportation networks, integrated into the GIS mapping system. Comprehensive geolocation service with auto-detection of GPS coordinates, click-to-map functionality, and GPS-enhanced farmer registration.
 - **Mobile Integration**: Complete Progressive Web App (PWA) implementation with comprehensive mobile standalone functionality, including offline-first architecture, service worker caching, and push notifications.
 - **Messaging**: A comprehensive cross-portal internal messaging system with threading, role-based filtering, and notification indicators.
@@ -40,7 +40,7 @@ The application employs a modern full-stack architecture with a clear separation
 - **International Standards**: Integration of international certification standards for export applications.
 - **Access Control**: Comprehensive role-based access control (RBAC), including territorial restrictions and restricted access to sensitive features.
 - **Offline Functionality**: Offline data synchronization mechanism with conflict resolution.
-- **Alerts**: Mobile app alert system for field agents and anonymous abuse reporting.
+- **Alerts**: Mobile app alert system for inspectors and anonymous abuse reporting.
 - **Export System**: Comprehensive export permit submission and license management system for exporters.
 - **System Testing**: Comprehensive testing system integrated into the monitoring dashboard for automated validation.
 

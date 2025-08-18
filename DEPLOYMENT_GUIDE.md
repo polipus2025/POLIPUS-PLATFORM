@@ -96,7 +96,7 @@ GET /deployment-status - Deployment information
 - [ ] Main Platform: https://your-domain.replit.app
 - [ ] Regulatory Portal: /regulatory-login
 - [ ] Farmer Portal: /farmer-login  
-- [ ] Field Agent Portal: /field-agent-login
+- [ ] Inspector Portal: /inspector-login
 - [ ] Exporter Portal: /exporter-login
 - [ ] Monitoring Portal: /monitoring-login
 
@@ -119,7 +119,7 @@ GET /deployment-status - Deployment information
 ### Portal Authentication
 - **Regulatory**: admin001 / admin123
 - **Farmer**: FRM-2024-001 / farmer123
-- **Field Agent**: AGT-2024-001 / agent123
+- **Inspector**: AGT-2024-001 / agent123
 - **Exporter**: EXP-2024-001 / exporter123
 - **Monitoring**: monitor001 / monitor123
 

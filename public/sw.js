@@ -81,7 +81,7 @@ self.addEventListener('fetch', (event) => {
                 🔄 Force Refresh
               </button>
               <br><br>
-              <a href="/test-field-agent-login" style="color: yellow; font-size: 18px;">
+              <a href="/test-inspector-login" style="color: yellow; font-size: 18px;">
                 🧪 Go to Test Login
               </a>
             </body>

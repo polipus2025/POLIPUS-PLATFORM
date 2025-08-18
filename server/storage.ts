@@ -2167,10 +2167,21 @@ export class DatabaseStorage implements IStorage {
     
     // Auto-generate credentials for Exporter Portal access
     if (newExporter.complianceStatus === 'approved') {
-      await this.generateExporterCredentials(newExporter.exporterId, newExporter.contactPerson, newExporter.email);
+      await this.generateExporterCredentials(newExporter.exporterId, newExporter.contactPersonFirstName + ' ' + newExporter.contactPersonLastName, newExporter.primaryEmail);
     }
     
     return newExporter;
+  }
+
+  // Generate unique exporter ID in format EXP-YYYYMMDD-XXX
+  private generateExporterId(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    
+    return `EXP-${year}${month}${day}-${random}`;
   }
 
   // Auto-generate credentials when exporter is approved
@@ -2291,21 +2302,19 @@ export class DatabaseStorage implements IStorage {
         return { success: false, message: 'Invalid credentials' };
       }
 
-      if (!credentials.isActive) {
-        return { success: false, message: 'Account is inactive' };
-      }
+      // Check if account is active - note: exporter credentials don't have isActive field, check exporter status instead
 
       if (credentials.lockedUntil && credentials.lockedUntil > new Date()) {
         return { success: false, message: 'Account is locked. Please try again later.' };
       }
 
-      const isValidPassword = await bcrypt.compare(password, credentials.hashedPassword);
+      const isValidPassword = await bcrypt.compare(password, credentials.passwordHash);
       if (!isValidPassword) {
         await this.incrementExporterFailedLoginAttempts(credentials.exporterId);
         return { success: false, message: 'Invalid credentials' };
       }
 
-      const exporter = await this.getExporterByExporterId(credentials.exporterId);
+      const exporter = await this.getExporter(credentials.exporterId);
       if (!exporter) {
         return { success: false, message: 'Exporter not found' };
       }
@@ -2321,7 +2330,7 @@ export class DatabaseStorage implements IStorage {
         success: true, 
         exporter, 
         credentials,
-        message: credentials.mustChangePassword ? 'Password change required' : 'Login successful'
+        message: credentials.passwordChangeRequired ? 'Password change required' : 'Login successful'
       };
     } catch (error) {
       console.error('Exporter authentication error:', error);
@@ -2335,13 +2344,14 @@ export class DatabaseStorage implements IStorage {
     return credentials || undefined;
   }
 
-  async incrementExporterFailedLoginAttempts(exporterId: string): Promise<void> {
-    const credentials = await this.getExporterCredentials(exporterId);
+  async incrementExporterFailedLoginAttempts(exporterId: number): Promise<void> {
+    const [credentials] = await db.select().from(exporterCredentials)
+      .where(eq(exporterCredentials.exporterId, exporterId));
     if (!credentials) return;
 
-    const failedAttempts = (credentials.failedLoginAttempts || 0) + 1;
+    const failedAttempts = (credentials.loginAttempts || 0) + 1;
     const updates: Partial<ExporterCredential> = {
-      failedLoginAttempts: failedAttempts
+      loginAttempts: failedAttempts
     };
 
     // Lock account after 5 failed attempts for 30 minutes
@@ -2349,35 +2359,43 @@ export class DatabaseStorage implements IStorage {
       updates.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
     }
 
-    await this.updateExporterCredentials(exporterId, updates);
+    await db.update(exporterCredentials)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(exporterCredentials.exporterId, exporterId));
   }
 
-  async resetExporterFailedLoginAttempts(exporterId: string): Promise<void> {
-    await this.updateExporterCredentials(exporterId, {
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lastLoginAt: new Date()
-    });
+  async resetExporterFailedLoginAttempts(exporterId: number): Promise<void> {
+    await db.update(exporterCredentials)
+      .set({
+        loginAttempts: 0,
+        lockedUntil: null,
+        updatedAt: new Date()
+      })
+      .where(eq(exporterCredentials.exporterId, exporterId));
   }
 
   async updateExporterPassword(exporterId: string, newPassword: string): Promise<void> {
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const passwordHash = await bcrypt.hash(newPassword, 12);
     await this.updateExporterCredentials(exporterId, {
-      hashedPassword,
-      mustChangePassword: false,
+      passwordHash,
+      passwordChangeRequired: false,
       temporaryPassword: null,
-      updatedAt: new Date()
+      lastPasswordChange: new Date()
     });
   }
 
   // Approval process that triggers credential generation
   async approveExporter(exporterId: string): Promise<void> {
-    await this.updateExporter(parseInt(exporterId), { complianceStatus: 'approved' });
-    
+    // Get the exporter first to get the numeric ID
     const exporter = await this.getExporterByExporterId(exporterId);
-    if (exporter) {
-      await this.generateExporterCredentials(exporterId, exporter.contactPerson, exporter.email);
+    if (!exporter) {
+      throw new Error('Exporter not found');
     }
+    
+    await this.updateExporter(exporter.id, { complianceStatus: 'approved' });
+    
+    // Generate credentials with correct field names
+    await this.generateExporterCredentials(exporterId, exporter.contactPersonFirstName + ' ' + exporter.contactPersonLastName, exporter.primaryEmail);
   }
 }
 

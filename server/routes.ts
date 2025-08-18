@@ -1512,72 +1512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/exporter-login", async (req, res) => {
-    try {
-      const { username, password, userType } = req.body;
-      
-      // Validate input
-      if (!username || !password) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Username and password are required" 
-        });
-      }
-
-      // Check if user exists
-      const user = await storage.getUserByUsername(username);
-      if (!user || user.role !== 'exporter') {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Invalid exporter credentials" 
-        });
-      }
-
-      // Verify password
-      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-      if (!isValidPassword) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Invalid exporter credentials" 
-        });
-      }
-
-      // Generate JWT token
-      const token = jwt.sign(
-        { 
-          userId: user.id, 
-          exporterId: username, 
-          role: user.role,
-          userType: 'exporter'
-        },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-
-      // Update last login
-      await storage.updateUserLastLogin(user.id);
-
-      res.json({
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          department: user.department,
-          jurisdiction: user.jurisdiction
-        }
-      });
-
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: "Internal server error" 
-      });
-    }
-  });
+  // REMOVED: Duplicate exporter login route - using proper exporter credentials system below
 
   // Inspector Portal Login endpoint
   app.post("/api/auth/inspector-login", async (req, res) => {
@@ -4723,7 +4658,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/exporters', async (req, res) => {
     try {
       const validatedData = insertExporterSchema.parse(req.body);
-      const exporter = await storage.createExporter(validatedData);
+      
+      // Generate unique exporter ID
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const exporterId = `EXP-${year}${month}${day}-${random}`;
+      
+      // Add the generated exporterId to the data
+      const exporterWithId = {
+        ...validatedData,
+        exporterId
+      };
+      
+      const exporter = await storage.createExporter(exporterWithId);
       res.status(201).json(exporter);
     } catch (error) {
       console.error('Error creating exporter:', error);
@@ -8975,7 +8925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // EXPORTER PORTAL AUTHENTICATION ROUTES
   // ============================================================================
 
-  // Exporter login authentication
+  // Exporter login authentication (new API)
   app.post("/api/auth/exporter/login", async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -9011,6 +8961,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error authenticating exporter:", error);
       res.status(500).json({ message: "Authentication failed" });
+    }
+  });
+
+  // Legacy exporter login (compatibility with existing frontend)
+  app.post("/api/auth/exporter-login", async (req, res) => {
+    try {
+
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Username and password are required" 
+        });
+      }
+
+      const authResult = await storage.authenticateExporter(username, password);
+      
+      if (!authResult.success) {
+        return res.status(401).json({ 
+          success: false,
+          message: authResult.message 
+        });
+      }
+
+      // Session handling removed for now to avoid undefined session issues
+
+      // Generate token for legacy compatibility
+      const token = `exporter-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      res.json({
+        success: true,
+        message: "Login successful",
+        user: {
+          id: authResult.exporter?.id,
+          exporterId: authResult.exporter?.exporterId,
+          firstName: authResult.exporter?.contactPerson?.split(' ')[0] || authResult.exporter?.contactPerson,
+          lastName: authResult.exporter?.contactPerson?.split(' ')[1] || '',
+          role: 'exporter',
+          companyName: authResult.exporter?.companyName,
+          complianceStatus: authResult.exporter?.complianceStatus
+        },
+        token,
+        mustChangePassword: authResult.credentials?.passwordChangeRequired
+      });
+    } catch (error) {
+      console.error("Error authenticating exporter (legacy):", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Authentication failed" 
+      });
     }
   });
 

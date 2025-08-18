@@ -1,0 +1,112 @@
+AgriTrace LACRA (EUDR Workflow – Fixed Draft)
+
+Step 0 – National Mapping Plan
+•	LACRA prepares a national plan to map all farms.
+
+Step 1 – Inspector Registration
+•	LACRA registers all assigned inspectors by county/area in the AgriTrace system.
+
+Step 2 – Farmer Onboarding & Mapping
+•	Inspector maps farm plots.
+•	Farm output estimated (via satellite or manual calculation).
+•	Farmer information and data registered.
+•	EUDR & deforestation status generated and viewed → confirms compliance (positive/negative).
+•	Note: Farmers cannot sell crops if their farm is not mapped.
+
+Step 3 – Farmer to Licensed Agents/Buyers  Communication
+•	Farmers notify Licensed Agents/Licensed Agents/Buyers when crops are ready (harvest).
+•	If online → farmers use the AgriTrace Platform.
+•	If offline → farmers use SMS gateway (1111) or bulk SMS services provided by telecom/third-party.
+How the SMS System Works:
+1.	Farmer sends SMS to shortcode (e.g., 1111) in this format: FarmerID, Crop Type, Quantity, Contact Number.
+2.	Telecom system checks farmer ID and broadcasts to all Licensed Agents/Licensed Agents/Buyers in the county.
+3.	Licensed Agents/Licensed Agents/Buyers s (opted-in via LACRA) receive SMS and may contact farmer directly.
+•	Each county has its own dedicated gateway number (15 in total).
+•	Sales are on a first-come-first-served basis.
+•	A unique reference/confirmation code is generated once Farmer & Licensed Agents/Buyers  agree. Code is sent to Licensed Agents/Buyers ’s phone and automatically registered in AgriTrace. 
+•	Code includes details: volume, crop type, location, farmer, and Licensed Agents/Buyers contact details
+
+Step 4 – Traceable Bag Collection
+•	Licensed Agents/Buyers goes to government warehouse to collect traceable bags linked to the unique reference code.
+•	Government inspector releases bags equal to the crop volume (e.g., 65 bags for 5 tons).
+•	Bags issued by LACRA & Eco Enviros after payment.
+
+Step 5 – Collection of Crops from Farmer 
+•	Licensed Agents/Buyer will go back to the Farmer to collect the crops
+•	Consecutively a payment will be made by the Licensed Agents/Buyers to the farmer for the crop
+•	Farmer will release the crops to the Licensed Agents/Buyers  
+•	Farmer confirms payment by sending a “lot sale and paid” message to a gateway (2222) with details: Farmer ID, crop type, quantity, and Licensed Agents/Buyers ID.
+•	If payment is not confirmed the government warehouse will not receive the crops. 
+•	This will send a confirmation too to the Licensed Agents/Buyer and automatically registered the transaction complete in the AgriTrace Portal
+•	Traceable bag collected will be used to transport crops back to the government warehouse.
+
+Step 6 – Government Warehouse / Supply Chain  Traceability
+•	Product delivered → basic quantity & quality check by Lacra and EcoEnviros.
+•	Batch code scanning for crop arrival confirmation
+•	Product data registered in AgriTrace 
+•	Registered and Evaluated Product will be stored in the said warehouse 
+•	It will be re-assigned to the Licensed Agents/Buyer that crops is ready for release to Lacra Regisered or Licensed Exporter.
+
+
+
+
+Step 7 – Licensed Agents/Buyers  to Exporter Communication
+•	Licensed Agents/Buyers  logs into AgriTrace portal, opens Exporter Tab.
+•	Selects an Exporter and proposes sale.
+•	Exporter accepts or declines via messaging system:
+o	If Accepts → new unique reference number generated.
+o	If Declines → Licensed Agents/Buyers  contacts next exporter.
+
+Step 8 – Warehouse Transfer
+•	Once Exporter accepts, government warehouse authorizes transfer of crops to exporter warehouse.
+
+Step 9 – Exporter Warehouse Confirmation
+•	Exporter request basic inspection
+•	Inspector confirms arrival via batch code scan.
+•	LACRA & Eco Enviros inspect for quality & quantity.
+•	Confirmation report submitted into AgriTrace, synced to Exporter Portal.
+
+Step 10 – Payment to Licensed Agents/Buyers 
+•	Licensed Agents/Buyers confirms receipt of payment from Exporter via AgriTrace portal.
+Payment Conditions Option (Mandatory/Non-Mandatory):
+•	Exporter may pay within 7 business days. (Mandatory)
+•	Late payment penalties: (Subject to agreement between Licensed Agent Buyer/Exporter (Non-Mandatory))
+o	7–15 days = daily interest fee (set by LACRA).
+o	15–30 days = double interest.
+o	After 30 days = exporter’s license suspended, transaction cancelled, product reassigned.
+•	Licensed Agents/Buyers  may reclaim crops if exporter fails to pay.
+•	Exporter Warehouse holds product max 30 days (free of charge) → if unsold, returned to Licensed Agents/Buyers .
+
+
+ 
+Step 11 – Export Preparation
+•	Exporter processes crops (cleaning, drying, bagging).
+•	Exporter requests Quality Check & Export Permit via Exporter Portal.
+•	LACRA & Eco Enviros schedule inspection.
+
+Step 12 – Quality & Compliance Check
+•	Final inspection for quality & quantity subject to international standard
+•	Fumigation conducted.
+•	Reports auto-generated (viewable only by regulators):
+o	EUDR Compliance Fee
+o	Quality Control Fee
+o	Satellite Monitoring Fees
+o	Deforestation Certificate Fee
+o	Certificate of Origin Fee
+o	Fumigation & Phytosanitary Fees
+o	Good Practice Certificate Fee
+
+Step 13 – Payment of Reports & Fees
+•	Payments made through AgriTrace for:
+o	EUDR Compliance Fee
+o	Quality Control Fee
+o	Satellite Monitoring Fees
+o	Deforestation Certificate Fee
+o	Certificate of Origin Fee
+o	Fumigation & Phytosanitary Fees
+o	Good Practice Certificate Fee
+•	Export Permit & LACRA Royalty Fee paid separately.
+
+Step 14 – Report Release
+•	Once payment confirmed, reports available to the Exporter for download 
+•	Exporter ready to proceed with international shipment.

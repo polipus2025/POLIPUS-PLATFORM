@@ -166,6 +166,7 @@ import PaymentSuccess from "@/pages/payments/payment-success";
 import FarmerPaymentServices from "@/pages/farmer/farmer-payment-services";
 import ExporterPaymentServices from "@/pages/exporter/exporter-payment-services";
 import RegulatoryPaymentServices from "@/pages/regulatory-payment-services";
+import AgriTraceDashboard from "@/pages/agritrace-dashboard";
 
 import NotFound from "@/pages/not-found";
 
@@ -532,6 +533,7 @@ function Router() {
       <Route path="/carbon-trace" component={CarbonTracePortal} />
       
       {/* New Module Dashboard Routes - Fully Functional */}
+      <Route path="/agritrace-dashboard" component={AgriTraceDashboard} />
       <Route path="/live-trace-dashboard" component={LiveTraceDashboard} />
       <Route path="/land-map360-dashboard" component={LandMap360Dashboard} />
       <Route path="/landmap360/main-dashboard" component={LandMap360MainDashboard} />

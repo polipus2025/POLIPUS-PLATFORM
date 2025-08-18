@@ -2702,3 +2702,5 @@ export type EudrCompliancePack = typeof eudrCompliancePacks.$inferSelect;
 export type EudrComplianceDocument = typeof eudrComplianceDocuments.$inferSelect;
 export type InsertEudrCompliancePack = z.infer<typeof insertEudrCompliancePackSchema>;
 export type InsertEudrComplianceDocument = z.infer<typeof insertEudrComplianceDocumentSchema>;
+
+

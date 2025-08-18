@@ -66,16 +66,23 @@ import {
   economicImpactRecords,
   conservationMonitoring,
   carbonTransactions,
-  blueCarbon360Users
+  blueCarbon360Users,
+  
+  // AgriTrace Workflow Tables
+  agriTraceWorkflows
 } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { db } from './db';
 import { eq } from "drizzle-orm";
+import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
+
+// Initialize AgriTrace Workflow Service
+const agriTraceService = new AgriTraceWorkflowService();
 
 // MAINTENANCE MODE - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false;
@@ -7463,6 +7470,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: "Failed to confirm payment" 
       });
+    }
+  });
+
+  // === AGRITRACE WORKFLOW API ENDPOINTS ===
+
+  // Get all workflows overview
+  app.get('/api/agritrace/workflows', async (req, res) => {
+    try {
+      const workflows = await db.select().from(agriTraceWorkflows);
+      res.json(workflows);
+    } catch (error) {
+      console.error('Error fetching agritrace workflows:', error);
+      res.status(500).json({ message: 'Failed to fetch workflows' });
+    }
+  });
+
+  // Step 0: Initialize National Mapping Plan
+  app.post('/api/agritrace/national-mapping', async (req, res) => {
+    try {
+      const { lacraAdminId } = req.body;
+      const workflow = await agriTraceService.initializeNationalMappingPlan(lacraAdminId);
+      res.json(workflow);
+    } catch (error) {
+      console.error('Error initializing national mapping:', error);
+      res.status(500).json({ message: 'Failed to initialize national mapping plan' });
+    }
+  });
+
+  // Get Workflow Status
+  app.get('/api/agritrace/workflow/:id', async (req, res) => {
+    try {
+      const workflowId = parseInt(req.params.id);
+      const status = await agriTraceService.getWorkflowStatus(workflowId);
+      res.json(status);
+    } catch (error) {
+      console.error('Error fetching workflow status:', error);
+      res.status(500).json({ message: 'Failed to fetch workflow status' });
     }
   });
 

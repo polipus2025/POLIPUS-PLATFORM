@@ -1546,6 +1546,182 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
+// === AGRITRACE WORKFLOW SYSTEM ===
+
+export const agriTraceWorkflows = pgTable("agri_trace_workflows", {
+  id: serial("id").primaryKey(),
+  workflowName: text("workflow_name").notNull(),
+  workflowType: text("workflow_type").notNull(), // seed_to_export, compliance_verification, quality_assurance, traceability_chain
+  status: text("status").notNull().default("active"), // active, paused, completed, failed
+  priority: integer("priority").default(3), // 1=critical, 2=high, 3=medium, 4=low, 5=minimal
+  farmerId: text("farmer_id").notNull(),
+  commodityId: integer("commodity_id").references(() => commodities.id),
+  currentStage: text("current_stage").notNull(), // seeding, growing, harvesting, processing, inspection, certification, export
+  stageProgress: integer("stage_progress").default(0), // 0-100 percentage
+  totalStages: integer("total_stages").default(7),
+  completedStages: integer("completed_stages").default(0),
+  estimatedCompletion: timestamp("estimated_completion"),
+  actualCompletion: timestamp("actual_completion"),
+  assignedInspector: text("assigned_inspector"),
+  complianceScore: decimal("compliance_score", { precision: 5, scale: 2 }), // 0-100
+  qualityMetrics: jsonb("quality_metrics"), // JSON with quality measurements
+  traceabilityData: jsonb("traceability_data"), // Complete supply chain trace
+  gpsTracking: jsonb("gps_tracking"), // Array of GPS coordinates through workflow
+  automatedAlerts: boolean("automated_alerts").default(true),
+  workflowConfiguration: jsonb("workflow_configuration"), // Custom workflow settings
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const agriTraceStages = pgTable("agri_trace_stages", {
+  id: serial("id").primaryKey(),
+  workflowId: integer("workflow_id").references(() => agriTraceWorkflows.id).notNull(),
+  stageName: text("stage_name").notNull(),
+  stageOrder: integer("stage_order").notNull(),
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed, failed, skipped
+  startDate: timestamp("start_date"),
+  completionDate: timestamp("completion_date"),
+  duration: integer("duration"), // hours
+  assignedTo: text("assigned_to"),
+  requirements: jsonb("requirements"), // Required actions/documents
+  completionData: jsonb("completion_data"), // Data collected during stage
+  verificationStatus: text("verification_status").default("unverified"), // unverified, verified, rejected
+  verifiedBy: text("verified_by"),
+  verifiedAt: timestamp("verified_at"),
+  gpsLocation: text("gps_location"),
+  photosUploaded: integer("photos_uploaded").default(0),
+  documentsUploaded: integer("documents_uploaded").default(0),
+  qualityChecks: jsonb("quality_checks"),
+  compliance: jsonb("compliance"), // Compliance checks for this stage
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const agriTraceEvents = pgTable("agri_trace_events", {
+  id: serial("id").primaryKey(),
+  workflowId: integer("workflow_id").references(() => agriTraceWorkflows.id).notNull(),
+  stageId: integer("stage_id").references(() => agriTraceStages.id),
+  eventType: text("event_type").notNull(), // stage_start, stage_complete, quality_check, compliance_check, alert, manual_entry
+  eventName: text("event_name").notNull(),
+  eventData: jsonb("event_data"), // Event-specific data
+  triggeredBy: text("triggered_by").notNull(), // user_id or system
+  triggerType: text("trigger_type").notNull(), // manual, automatic, scheduled, sensor
+  gpsCoordinates: text("gps_coordinates"),
+  deviceId: text("device_id"), // Mobile device or sensor ID
+  severity: text("severity").default("info"), // info, warning, error, critical
+  isAutomated: boolean("is_automated").default(false),
+  requiresAction: boolean("requires_action").default(false),
+  actionTaken: text("action_taken"),
+  eventTimestamp: timestamp("event_timestamp").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const agriTraceDocuments = pgTable("agri_trace_documents", {
+  id: serial("id").primaryKey(),
+  workflowId: integer("workflow_id").references(() => agriTraceWorkflows.id).notNull(),
+  stageId: integer("stage_id").references(() => agriTraceStages.id),
+  documentType: text("document_type").notNull(), // photo, certificate, inspection_report, compliance_doc, quality_test
+  documentName: text("document_name").notNull(),
+  filePath: text("file_path").notNull(),
+  fileSize: integer("file_size"), // bytes
+  mimeType: text("mime_type"),
+  uploadedBy: text("uploaded_by").notNull(),
+  description: text("description"),
+  tags: text("tags"), // comma-separated tags
+  isRequired: boolean("is_required").default(false),
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: text("verified_by"),
+  verifiedAt: timestamp("verified_at"),
+  gpsLocation: text("gps_location"), // Where photo/document was taken
+  metadata: jsonb("metadata"), // EXIF data, timestamps, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const agriTraceQualityMetrics = pgTable("agri_trace_quality_metrics", {
+  id: serial("id").primaryKey(),
+  workflowId: integer("workflow_id").references(() => agriTraceWorkflows.id).notNull(),
+  stageId: integer("stage_id").references(() => agriTraceStages.id),
+  metricType: text("metric_type").notNull(), // moisture_content, bean_size, color_grade, purity, density, acidity
+  metricName: text("metric_name").notNull(),
+  value: decimal("value", { precision: 10, scale: 3 }).notNull(),
+  unit: text("unit").notNull(),
+  standardValue: decimal("standard_value", { precision: 10, scale: 3 }), // Expected/standard value
+  tolerance: decimal("tolerance", { precision: 5, scale: 2 }), // Acceptable variance
+  status: text("status").notNull(), // pass, fail, warning, not_tested
+  testMethod: text("test_method"),
+  testEquipment: text("test_equipment"),
+  testedBy: text("tested_by").notNull(),
+  testDate: timestamp("test_date").defaultNow(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const agriTraceCompliance = pgTable("agri_trace_compliance", {
+  id: serial("id").primaryKey(),
+  workflowId: integer("workflow_id").references(() => agriTraceWorkflows.id).notNull(),
+  complianceType: text("compliance_type").notNull(), // eudr, organic, fair_trade, local_regulations, export_standards
+  requirement: text("requirement").notNull(),
+  status: text("status").notNull(), // compliant, non_compliant, pending, not_applicable
+  evidence: jsonb("evidence"), // Supporting documents/data
+  assessedBy: text("assessed_by").notNull(),
+  assessmentDate: timestamp("assessment_date").defaultNow(),
+  expiryDate: timestamp("expiry_date"),
+  remedialActions: text("remedial_actions"),
+  completionDeadline: timestamp("completion_deadline"),
+  priority: integer("priority").default(3), // 1=critical, 5=minimal
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// AgriTrace Schema Exports
+export const insertAgriTraceWorkflowSchema = createInsertSchema(agriTraceWorkflows).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgriTraceStageSchema = createInsertSchema(agriTraceStages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAgriTraceEventSchema = createInsertSchema(agriTraceEvents).omit({
+  id: true,
+  createdAt: true,
+  eventTimestamp: true,
+});
+
+export const insertAgriTraceDocumentSchema = createInsertSchema(agriTraceDocuments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAgriTraceQualityMetricSchema = createInsertSchema(agriTraceQualityMetrics).omit({
+  id: true,
+  createdAt: true,
+  testDate: true,
+});
+
+export const insertAgriTraceComplianceSchema = createInsertSchema(agriTraceCompliance).omit({
+  id: true,
+  createdAt: true,
+  assessmentDate: true,
+});
+
+// AgriTrace Types
+export type AgriTraceWorkflow = typeof agriTraceWorkflows.$inferSelect;
+export type InsertAgriTraceWorkflow = z.infer<typeof insertAgriTraceWorkflowSchema>;
+export type AgriTraceStage = typeof agriTraceStages.$inferSelect;
+export type InsertAgriTraceStage = z.infer<typeof insertAgriTraceStageSchema>;
+export type AgriTraceEvent = typeof agriTraceEvents.$inferSelect;
+export type InsertAgriTraceEvent = z.infer<typeof insertAgriTraceEventSchema>;
+export type AgriTraceDocument = typeof agriTraceDocuments.$inferSelect;
+export type InsertAgriTraceDocument = z.infer<typeof insertAgriTraceDocumentSchema>;
+export type AgriTraceQualityMetric = typeof agriTraceQualityMetrics.$inferSelect;
+export type InsertAgriTraceQualityMetric = z.infer<typeof insertAgriTraceQualityMetricSchema>;
+export type AgriTraceCompliance = typeof agriTraceCompliance.$inferSelect;
+export type InsertAgriTraceCompliance = z.infer<typeof insertAgriTraceComplianceSchema>;
+
 // Import payment schemas
 export * from './payment-schema';
 

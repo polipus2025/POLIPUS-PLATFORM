@@ -8940,6 +8940,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // EXPORTER APPROVAL & CREDENTIAL GENERATION ROUTES
+  // ============================================================================
+
+  // Approve exporter and generate credentials
+  app.post("/api/exporters/:id/approve", async (req, res) => {
+    try {
+      const exporter = await storage.getExporter(parseInt(req.params.id));
+      if (!exporter) {
+        return res.status(404).json({ message: "Exporter not found" });
+      }
+
+      await storage.approveExporter(exporter.exporterId);
+      
+      // Get the generated credentials
+      const credentials = await storage.getExporterCredentials(exporter.exporterId);
+      
+      res.json({
+        message: "Exporter approved and credentials generated",
+        credentials: {
+          username: credentials?.username,
+          temporaryPassword: credentials?.temporaryPassword,
+          portalUrl: "/login?portal=exporter"
+        }
+      });
+    } catch (error) {
+      console.error("Error approving exporter:", error);
+      res.status(500).json({ message: "Failed to approve exporter" });
+    }
+  });
+
+  // ============================================================================
+  // EXPORTER PORTAL AUTHENTICATION ROUTES
+  // ============================================================================
+
+  // Exporter login authentication
+  app.post("/api/auth/exporter/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+
+      const authResult = await storage.authenticateExporter(username, password);
+      
+      if (!authResult.success) {
+        return res.status(401).json({ message: authResult.message });
+      }
+
+      // Store session information
+      req.session.userType = 'exporter';
+      req.session.exporterId = authResult.exporter?.exporterId;
+      req.session.userId = authResult.exporter?.id;
+      req.session.username = authResult.credentials?.username;
+      req.session.mustChangePassword = authResult.credentials?.mustChangePassword;
+
+      res.json({
+        success: true,
+        message: authResult.message,
+        exporter: {
+          id: authResult.exporter?.id,
+          exporterId: authResult.exporter?.exporterId,
+          companyName: authResult.exporter?.companyName,
+          contactPerson: authResult.exporter?.contactPerson
+        },
+        mustChangePassword: authResult.credentials?.mustChangePassword
+      });
+    } catch (error) {
+      console.error("Error authenticating exporter:", error);
+      res.status(500).json({ message: "Authentication failed" });
+    }
+  });
+
+  // Change password for first-time login
+  app.post("/api/auth/exporter/change-password", async (req, res) => {
+    try {
+      const { newPassword } = req.body;
+      
+      if (!req.session.exporterId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      if (!newPassword || newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
+      await storage.updateExporterPassword(req.session.exporterId, newPassword);
+      
+      // Update session
+      req.session.mustChangePassword = false;
+
+      res.json({ 
+        success: true, 
+        message: "Password updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // Get current exporter session
+  app.get("/api/auth/exporter/session", async (req, res) => {
+    try {
+      if (!req.session.exporterId || req.session.userType !== 'exporter') {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const exporter = await storage.getExporterByExporterId(req.session.exporterId);
+      if (!exporter) {
+        return res.status(404).json({ message: "Exporter not found" });
+      }
+
+      res.json({
+        exporter: {
+          id: exporter.id,
+          exporterId: exporter.exporterId,
+          companyName: exporter.companyName,
+          contactPerson: exporter.contactPerson,
+          complianceStatus: exporter.complianceStatus
+        },
+        mustChangePassword: req.session.mustChangePassword
+      });
+    } catch (error) {
+      console.error("Error fetching session:", error);
+      res.status(500).json({ message: "Failed to fetch session" });
+    }
+  });
+
+  // Logout exporter
+  app.post("/api/auth/exporter/logout", async (req, res) => {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to logout" });
+        }
+        res.json({ success: true, message: "Logged out successfully" });
+      });
+    } catch (error) {
+      console.error("Error logging out:", error);
+      res.status(500).json({ message: "Failed to logout" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Import working PDF generator - DISABLED TO FIX 12-PAGE ISSUE

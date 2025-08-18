@@ -182,6 +182,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // User methods (legacy)
@@ -2163,7 +2164,72 @@ export class DatabaseStorage implements IStorage {
 
   async createExporter(exporter: InsertExporter): Promise<Exporter> {
     const [newExporter] = await db.insert(exporters).values(exporter).returning();
+    
+    // Auto-generate credentials for Exporter Portal access
+    if (newExporter.complianceStatus === 'approved') {
+      await this.generateExporterCredentials(newExporter.exporterId, newExporter.contactPerson, newExporter.email);
+    }
+    
     return newExporter;
+  }
+
+  // Auto-generate credentials when exporter is approved
+  async generateExporterCredentials(exporterId: string, contactPerson?: string, email?: string): Promise<ExporterCredential> {
+    const username = `exp_${exporterId.toLowerCase()}`;
+    const tempPassword = this.generateSecurePassword();
+    const hashedPassword = await bcrypt.hash(tempPassword, 12);
+    
+    const credentials: InsertExporterCredential = {
+      exporterId,
+      username,
+      hashedPassword,
+      temporaryPassword: tempPassword,
+      mustChangePassword: true,
+      isActive: true,
+      portalAccess: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    const [newCredentials] = await db.insert(exporterCredentials).values(credentials).returning();
+    
+    // Log credential generation activity
+    await this.createExporterTransaction({
+      exporterId,
+      transactionType: 'credential_generation',
+      transactionId: `CRED-${Date.now()}`,
+      amount: 0,
+      currency: 'USD',
+      status: 'completed',
+      description: `Portal access credentials generated for ${contactPerson || 'exporter'}`,
+      createdAt: new Date()
+    });
+
+    return newCredentials;
+  }
+
+  // Generate secure 12-character password
+  private generateSecurePassword(): string {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*';
+    const allChars = uppercase + lowercase + numbers + symbols;
+    
+    let password = '';
+    // Ensure at least one character from each category
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Fill remaining 8 characters randomly
+    for (let i = 4; i < 12; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+    
+    // Shuffle the password
+    return password.split('').sort(() => Math.random() - 0.5).join('');
   }
 
   async updateExporter(id: number, exporter: Partial<Exporter>): Promise<Exporter | undefined> {
@@ -2215,6 +2281,103 @@ export class DatabaseStorage implements IStorage {
   async createExporterTransaction(transaction: InsertExporterTransaction): Promise<ExporterTransaction> {
     const [newTransaction] = await db.insert(exporterTransactions).values(transaction).returning();
     return newTransaction;
+  }
+
+  // Exporter authentication methods for portal access
+  async authenticateExporter(username: string, password: string): Promise<{ success: boolean; exporter?: Exporter; credentials?: ExporterCredential; message?: string }> {
+    try {
+      const credentials = await this.getExporterCredentialsByUsername(username);
+      if (!credentials) {
+        return { success: false, message: 'Invalid credentials' };
+      }
+
+      if (!credentials.isActive) {
+        return { success: false, message: 'Account is inactive' };
+      }
+
+      if (credentials.lockedUntil && credentials.lockedUntil > new Date()) {
+        return { success: false, message: 'Account is locked. Please try again later.' };
+      }
+
+      const isValidPassword = await bcrypt.compare(password, credentials.hashedPassword);
+      if (!isValidPassword) {
+        await this.incrementExporterFailedLoginAttempts(credentials.exporterId);
+        return { success: false, message: 'Invalid credentials' };
+      }
+
+      const exporter = await this.getExporterByExporterId(credentials.exporterId);
+      if (!exporter) {
+        return { success: false, message: 'Exporter not found' };
+      }
+
+      if (exporter.complianceStatus !== 'approved') {
+        return { success: false, message: 'Account not approved for portal access' };
+      }
+
+      // Reset failed attempts on successful login
+      await this.resetExporterFailedLoginAttempts(credentials.exporterId);
+
+      return { 
+        success: true, 
+        exporter, 
+        credentials,
+        message: credentials.mustChangePassword ? 'Password change required' : 'Login successful'
+      };
+    } catch (error) {
+      console.error('Exporter authentication error:', error);
+      return { success: false, message: 'Authentication failed' };
+    }
+  }
+
+  async getExporterCredentialsByUsername(username: string): Promise<ExporterCredential | undefined> {
+    const [credentials] = await db.select().from(exporterCredentials)
+      .where(eq(exporterCredentials.username, username));
+    return credentials || undefined;
+  }
+
+  async incrementExporterFailedLoginAttempts(exporterId: string): Promise<void> {
+    const credentials = await this.getExporterCredentials(exporterId);
+    if (!credentials) return;
+
+    const failedAttempts = (credentials.failedLoginAttempts || 0) + 1;
+    const updates: Partial<ExporterCredential> = {
+      failedLoginAttempts: failedAttempts
+    };
+
+    // Lock account after 5 failed attempts for 30 minutes
+    if (failedAttempts >= 5) {
+      updates.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
+    }
+
+    await this.updateExporterCredentials(exporterId, updates);
+  }
+
+  async resetExporterFailedLoginAttempts(exporterId: string): Promise<void> {
+    await this.updateExporterCredentials(exporterId, {
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      lastLoginAt: new Date()
+    });
+  }
+
+  async updateExporterPassword(exporterId: string, newPassword: string): Promise<void> {
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await this.updateExporterCredentials(exporterId, {
+      hashedPassword,
+      mustChangePassword: false,
+      temporaryPassword: null,
+      updatedAt: new Date()
+    });
+  }
+
+  // Approval process that triggers credential generation
+  async approveExporter(exporterId: string): Promise<void> {
+    await this.updateExporter(parseInt(exporterId), { complianceStatus: 'approved' });
+    
+    const exporter = await this.getExporterByExporterId(exporterId);
+    if (exporter) {
+      await this.generateExporterCredentials(exporterId, exporter.contactPerson, exporter.email);
+    }
   }
 }
 

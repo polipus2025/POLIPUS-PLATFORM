@@ -186,17 +186,25 @@ export default function ExporterManagement() {
     },
   });
 
-  // Approve exporter mutation
+  // Approve exporter mutation with automatic credential generation
   const approveExporterMutation = useMutation({
-    mutationFn: async ({ id, complianceStatus, portalAccess }: { id: number; complianceStatus: string; portalAccess: boolean }) => {
-      return await apiRequest('PUT', `/api/exporters/${id}/approve`, { complianceStatus, portalAccess });
+    mutationFn: async (id: number) => {
+      return await apiRequest('POST', `/api/exporters/${id}/approve`);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/exporters'] });
       toast({
-        title: "Exporter Approved",
-        description: "Exporter has been successfully approved for export operations.",
+        title: "Exporter Approved & Credentials Generated",
+        description: `Portal access credentials created. Username: ${data.credentials.username}`,
       });
+      
+      // Show credentials in a separate dialog/alert
+      alert(`Exporter Portal Access Credentials Generated:
+Username: ${data.credentials.username}
+Temporary Password: ${data.credentials.temporaryPassword}
+Portal URL: ${window.location.origin}${data.credentials.portalUrl}
+
+Please provide these credentials to the exporter. They will be required to change the password on first login.`);
     },
     onError: (error: any) => {
       toast({
@@ -897,17 +905,22 @@ export default function ExporterManagement() {
                     {selectedExporter.complianceStatus === 'pending' && (
                       <div className="mt-6 pt-6 border-t flex gap-4">
                         <Button
-                          onClick={() => approveExporterMutation.mutate({ id: selectedExporter.id, complianceStatus: 'approved', portalAccess: true })}
+                          onClick={() => approveExporterMutation.mutate(selectedExporter.id)}
                           disabled={approveExporterMutation.isPending}
                           data-testid="button-approve-detail"
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
-                          Approve Exporter
+                          Approve & Generate Portal Access
                         </Button>
                         <Button
                           variant="destructive"
-                          onClick={() => approveExporterMutation.mutate({ id: selectedExporter.id, complianceStatus: 'rejected', portalAccess: false })}
-                          disabled={approveExporterMutation.isPending}
+                          onClick={() => {
+                            // TODO: Add reject functionality
+                            toast({
+                              title: "Feature Coming Soon",
+                              description: "Reject functionality will be added in the next update",
+                            });
+                          }}
                           data-testid="button-reject-detail"
                         >
                           <AlertCircle className="h-4 w-4 mr-1" />

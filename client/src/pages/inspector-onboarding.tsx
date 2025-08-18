@@ -105,7 +105,7 @@ export default function InspectorOnboarding() {
   });
 
   const handleGetUploadParameters = async () => {
-    const response = await apiRequest('POST', '/api/inspectors/upload-picture', {});
+    const response = await apiRequest('POST', '/api/inspectors/upload-picture');
     const data = await response.json();
     return {
       method: 'PUT' as const,
@@ -289,27 +289,32 @@ export default function InspectorOnboarding() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="inspectorType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Inspector Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <FormField
+                    control={form.control}
+                    name="inspectorType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-blue-900 font-semibold">Inspector Type *</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select inspector type" />
-                          </SelectTrigger>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select inspector type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="land">🌾 Land Inspector - Agricultural Land & Crop Inspections</SelectItem>
+                              <SelectItem value="port">🚢 Port Inspector - Maritime Port & Export Inspections</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="land">Land Inspector - Agricultural Land & Crop Inspections</SelectItem>
-                          <SelectItem value="port">Port Inspector - Maritime Port & Export Inspections</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                        <p className="text-sm text-blue-700 mt-1">
+                          Choose the type of inspector role for specialized training and responsibilities.
+                        </p>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="flex justify-end">
                   <Button type="button" onClick={nextStep}>

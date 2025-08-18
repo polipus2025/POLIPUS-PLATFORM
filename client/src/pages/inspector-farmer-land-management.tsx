@@ -239,7 +239,7 @@ export default function InspectorFarmerLandManagement() {
   // Create new land mapping for farmer
   const createMapping = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/farmer-land-mappings", {}, {
+      return await apiRequest("POST", "/api/farmer-land-mappings", {
         ...data,
         farmerId: selectedFarmer?.id,
         farmerName: `${selectedFarmer?.firstName} ${selectedFarmer?.lastName}`,
@@ -276,7 +276,7 @@ export default function InspectorFarmerLandManagement() {
   // Create harvest schedule for land mapping
   const createSchedule = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/harvest-schedules", {}, {
+      return await apiRequest("POST", "/api/harvest-schedules", {
         ...data,
         farmerId: selectedFarmer?.id,
         landMappingId: selectedMappingForSchedule,
@@ -867,7 +867,7 @@ export default function InspectorFarmerLandManagement() {
                     boundaryData: boundary,
                     totalAreaHectares: boundary.area ? boundary.area.toFixed(2) : prev.totalAreaHectares,
                     coordinates: boundary.points.length > 0 ? 
-                      `${boundary.points[0].lat.toFixed(6)}, ${boundary.points[0].lng.toFixed(6)}` : 
+                      `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
                       prev.coordinates
                   }));
                   toast({
@@ -913,7 +913,7 @@ export default function InspectorFarmerLandManagement() {
                     <SelectItem value="gentle">Gentle (3-8%)</SelectItem>
                     <SelectItem value="moderate">Moderate (8-15%)</SelectItem>
                     <SelectItem value="steep">Steep (15-25%)</SelectItem>
-                    <SelectItem value="very_steep">Very Steep (>25%)</SelectItem>
+                    <SelectItem value="very_steep">Very Steep (&gt;25%)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

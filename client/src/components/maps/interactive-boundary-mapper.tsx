@@ -56,7 +56,7 @@ interface BoundaryMapping {
 interface InteractiveBoundaryMapperProps {
   existingBoundary?: BoundaryMapping;
   onBoundaryUpdate?: (boundary: BoundaryMapping) => void;
-  onBoundaryComplete?: (boundary: BoundaryMapping & { complianceReports: any }) => void;
+  onBoundaryComplete?: (boundary: BoundaryMapping) => void;
   minPoints?: number;
 }
 

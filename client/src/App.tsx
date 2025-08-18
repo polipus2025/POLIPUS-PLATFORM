@@ -177,6 +177,7 @@ import ExporterManagement from "@/pages/exporter-management";
 import InspectorPortal from "@/pages/inspector-portal";
 import LandInspectorLogin from "@/pages/auth/land-inspector-login";
 import PortInspectorLogin from "@/pages/auth/port-inspector-login";
+import LandMappingDashboard from "@/pages/land-mapping-dashboard";
 
 import NotFound from "@/pages/not-found";
 
@@ -216,6 +217,7 @@ function Router() {
       <Route path="/land-inspector-login" component={LandInspectorLogin} />
       <Route path="/port-inspector-login" component={PortInspectorLogin} />
       <Route path="/inspector-onboarding" component={InspectorOnboarding} />
+      <Route path="/land-mapping-dashboard" component={LandMappingDashboard} />
       <Route path="/minimal-test" component={MinimalTest} />
 
       {/* LiveTrace Authentication Routes */}

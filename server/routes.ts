@@ -20,6 +20,10 @@ import {
   insertFarmPlotSchema,
   insertCropPlanSchema,
   insertHarvestRecordSchema,
+  insertFarmerLandMappingSchema,
+  insertHarvestScheduleSchema,
+  insertLandMappingInspectionSchema,
+  insertHarvestScheduleMonitoringSchema,
 
 
   insertLraIntegrationSchema,
@@ -3792,7 +3796,375 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // MULTIPLE LAND MAPPING & HARVEST SCHEDULE SYSTEM API ROUTES
+  // ========================================
 
+  // Farmer Land Mappings routes
+  app.get("/api/farmer-land-mappings", async (req, res) => {
+    try {
+      const { farmerId, mappingId, isActive } = req.query;
+      let mappings;
+      
+      if (farmerId) {
+        mappings = await storage.getFarmerLandMappingsByFarmer(parseInt(farmerId as string));
+      } else if (mappingId) {
+        const mapping = await storage.getFarmerLandMappingByMappingId(mappingId as string);
+        return res.json(mapping ? [mapping] : []);
+      } else {
+        mappings = await storage.getFarmerLandMappings();
+      }
+      
+      // Filter by active status if specified
+      if (isActive !== undefined) {
+        mappings = mappings.filter(m => m.isActive === (isActive === 'true'));
+      }
+      
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error fetching farmer land mappings:", error);
+      res.status(500).json({ message: "Failed to fetch farmer land mappings" });
+    }
+  });
+
+  app.get("/api/farmer-land-mappings/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const mapping = await storage.getFarmerLandMapping(id);
+      
+      if (!mapping) {
+        return res.status(404).json({ message: "Land mapping not found" });
+      }
+      
+      res.json(mapping);
+    } catch (error) {
+      console.error("Error fetching land mapping:", error);
+      res.status(500).json({ message: "Failed to fetch land mapping" });
+    }
+  });
+
+  app.post("/api/farmer-land-mappings", async (req, res) => {
+    try {
+      const validatedData = insertFarmerLandMappingSchema.parse(req.body);
+      const mapping = await storage.createFarmerLandMapping(validatedData);
+      res.status(201).json(mapping);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Land mapping validation errors:", error.errors);
+        return res.status(400).json({ message: "Invalid land mapping data", errors: error.errors });
+      }
+      console.error("Error creating land mapping:", error);
+      res.status(500).json({ message: "Failed to create land mapping" });
+    }
+  });
+
+  app.put("/api/farmer-land-mappings/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const mapping = await storage.updateFarmerLandMapping(id, req.body);
+      
+      if (!mapping) {
+        return res.status(404).json({ message: "Land mapping not found" });
+      }
+      
+      res.json(mapping);
+    } catch (error) {
+      console.error("Error updating land mapping:", error);
+      res.status(500).json({ message: "Failed to update land mapping" });
+    }
+  });
+
+  app.delete("/api/farmer-land-mappings/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteFarmerLandMapping(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Land mapping not found" });
+      }
+      
+      res.json({ message: "Land mapping deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting land mapping:", error);
+      res.status(500).json({ message: "Failed to delete land mapping" });
+    }
+  });
+
+  app.patch("/api/farmer-land-mappings/:id/approve", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { inspectorId } = req.body;
+      
+      if (!inspectorId) {
+        return res.status(400).json({ message: "Inspector ID is required for approval" });
+      }
+      
+      const mapping = await storage.approveFarmerLandMapping(id, inspectorId);
+      
+      if (!mapping) {
+        return res.status(404).json({ message: "Land mapping not found" });
+      }
+      
+      res.json({ ...mapping, message: "Land mapping approved successfully" });
+    } catch (error) {
+      console.error("Error approving land mapping:", error);
+      res.status(500).json({ message: "Failed to approve land mapping" });
+    }
+  });
+
+  // Harvest Schedules routes
+  app.get("/api/harvest-schedules", async (req, res) => {
+    try {
+      const { landMappingId, farmerId, inspectorId, cropType, status, upcoming } = req.query;
+      let schedules;
+      
+      if (upcoming === 'true') {
+        schedules = await storage.getUpcomingHarvests();
+      } else if (landMappingId) {
+        schedules = await storage.getHarvestSchedulesByLandMapping(parseInt(landMappingId as string));
+      } else if (farmerId) {
+        schedules = await storage.getHarvestSchedulesByFarmer(parseInt(farmerId as string));
+      } else if (inspectorId) {
+        schedules = await storage.getHarvestSchedulesByInspector(inspectorId as string);
+      } else if (cropType) {
+        schedules = await storage.getHarvestSchedulesByCropType(cropType as string);
+      } else if (status) {
+        schedules = await storage.getHarvestSchedulesByStatus(status as string);
+      } else {
+        schedules = await storage.getHarvestSchedules();
+      }
+      
+      res.json(schedules);
+    } catch (error) {
+      console.error("Error fetching harvest schedules:", error);
+      res.status(500).json({ message: "Failed to fetch harvest schedules" });
+    }
+  });
+
+  app.get("/api/harvest-schedules/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const schedule = await storage.getHarvestSchedule(id);
+      
+      if (!schedule) {
+        return res.status(404).json({ message: "Harvest schedule not found" });
+      }
+      
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error fetching harvest schedule:", error);
+      res.status(500).json({ message: "Failed to fetch harvest schedule" });
+    }
+  });
+
+  app.post("/api/harvest-schedules", async (req, res) => {
+    try {
+      const validatedData = insertHarvestScheduleSchema.parse(req.body);
+      const schedule = await storage.createHarvestSchedule(validatedData);
+      res.status(201).json(schedule);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Harvest schedule validation errors:", error.errors);
+        return res.status(400).json({ message: "Invalid harvest schedule data", errors: error.errors });
+      }
+      console.error("Error creating harvest schedule:", error);
+      res.status(500).json({ message: "Failed to create harvest schedule" });
+    }
+  });
+
+  app.put("/api/harvest-schedules/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const schedule = await storage.updateHarvestSchedule(id, req.body);
+      
+      if (!schedule) {
+        return res.status(404).json({ message: "Harvest schedule not found" });
+      }
+      
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error updating harvest schedule:", error);
+      res.status(500).json({ message: "Failed to update harvest schedule" });
+    }
+  });
+
+  app.delete("/api/harvest-schedules/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteHarvestSchedule(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Harvest schedule not found" });
+      }
+      
+      res.json({ message: "Harvest schedule deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting harvest schedule:", error);
+      res.status(500).json({ message: "Failed to delete harvest schedule" });
+    }
+  });
+
+  app.patch("/api/harvest-schedules/:id/approve", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { inspectorId } = req.body;
+      
+      if (!inspectorId) {
+        return res.status(400).json({ message: "Inspector ID is required for approval" });
+      }
+      
+      const schedule = await storage.approveHarvestSchedule(id, inspectorId);
+      
+      if (!schedule) {
+        return res.status(404).json({ message: "Harvest schedule not found" });
+      }
+      
+      res.json({ ...schedule, message: "Harvest schedule approved successfully" });
+    } catch (error) {
+      console.error("Error approving harvest schedule:", error);
+      res.status(500).json({ message: "Failed to approve harvest schedule" });
+    }
+  });
+
+  // Land Mapping Inspections routes
+  app.get("/api/land-mapping-inspections", async (req, res) => {
+    try {
+      const { landMappingId, farmerId, inspectorId } = req.query;
+      let inspections;
+      
+      if (landMappingId) {
+        inspections = await storage.getLandMappingInspectionsByLandMapping(parseInt(landMappingId as string));
+      } else if (farmerId) {
+        inspections = await storage.getLandMappingInspectionsByFarmer(parseInt(farmerId as string));
+      } else if (inspectorId) {
+        inspections = await storage.getLandMappingInspectionsByInspector(inspectorId as string);
+      } else {
+        inspections = await storage.getLandMappingInspections();
+      }
+      
+      res.json(inspections);
+    } catch (error) {
+      console.error("Error fetching land mapping inspections:", error);
+      res.status(500).json({ message: "Failed to fetch land mapping inspections" });
+    }
+  });
+
+  app.get("/api/land-mapping-inspections/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const inspection = await storage.getLandMappingInspection(id);
+      
+      if (!inspection) {
+        return res.status(404).json({ message: "Land mapping inspection not found" });
+      }
+      
+      res.json(inspection);
+    } catch (error) {
+      console.error("Error fetching land mapping inspection:", error);
+      res.status(500).json({ message: "Failed to fetch land mapping inspection" });
+    }
+  });
+
+  app.post("/api/land-mapping-inspections", async (req, res) => {
+    try {
+      const validatedData = insertLandMappingInspectionSchema.parse(req.body);
+      const inspection = await storage.createLandMappingInspection(validatedData);
+      res.status(201).json(inspection);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Land mapping inspection validation errors:", error.errors);
+        return res.status(400).json({ message: "Invalid inspection data", errors: error.errors });
+      }
+      console.error("Error creating land mapping inspection:", error);
+      res.status(500).json({ message: "Failed to create land mapping inspection" });
+    }
+  });
+
+  app.put("/api/land-mapping-inspections/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const inspection = await storage.updateLandMappingInspection(id, req.body);
+      
+      if (!inspection) {
+        return res.status(404).json({ message: "Land mapping inspection not found" });
+      }
+      
+      res.json(inspection);
+    } catch (error) {
+      console.error("Error updating land mapping inspection:", error);
+      res.status(500).json({ message: "Failed to update land mapping inspection" });
+    }
+  });
+
+  // Harvest Schedule Monitoring routes
+  app.get("/api/harvest-schedule-monitoring", async (req, res) => {
+    try {
+      const { scheduleId, landMappingId, inspectorId } = req.query;
+      let monitoring;
+      
+      if (scheduleId) {
+        monitoring = await storage.getHarvestScheduleMonitoringBySchedule(parseInt(scheduleId as string));
+      } else if (landMappingId) {
+        monitoring = await storage.getHarvestScheduleMonitoringByLandMapping(parseInt(landMappingId as string));
+      } else if (inspectorId) {
+        monitoring = await storage.getHarvestScheduleMonitoringByInspector(inspectorId as string);
+      } else {
+        monitoring = await storage.getHarvestScheduleMonitoring();
+      }
+      
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Error fetching harvest schedule monitoring:", error);
+      res.status(500).json({ message: "Failed to fetch harvest schedule monitoring" });
+    }
+  });
+
+  app.get("/api/harvest-schedule-monitoring/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const monitoring = await storage.getHarvestScheduleMonitoringEntry(id);
+      
+      if (!monitoring) {
+        return res.status(404).json({ message: "Harvest schedule monitoring not found" });
+      }
+      
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Error fetching harvest schedule monitoring:", error);
+      res.status(500).json({ message: "Failed to fetch harvest schedule monitoring" });
+    }
+  });
+
+  app.post("/api/harvest-schedule-monitoring", async (req, res) => {
+    try {
+      const validatedData = insertHarvestScheduleMonitoringSchema.parse(req.body);
+      const monitoring = await storage.createHarvestScheduleMonitoring(validatedData);
+      res.status(201).json(monitoring);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Harvest schedule monitoring validation errors:", error.errors);
+        return res.status(400).json({ message: "Invalid monitoring data", errors: error.errors });
+      }
+      console.error("Error creating harvest schedule monitoring:", error);
+      res.status(500).json({ message: "Failed to create harvest schedule monitoring" });
+    }
+  });
+
+  app.put("/api/harvest-schedule-monitoring/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const monitoring = await storage.updateHarvestScheduleMonitoring(id, req.body);
+      
+      if (!monitoring) {
+        return res.status(404).json({ message: "Harvest schedule monitoring not found" });
+      }
+      
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Error updating harvest schedule monitoring:", error);
+      res.status(500).json({ message: "Failed to update harvest schedule monitoring" });
+    }
+  });
 
   // Government Integration Routes
   

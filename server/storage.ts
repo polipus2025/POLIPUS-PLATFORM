@@ -12,6 +12,10 @@ import {
   farmPlots,
   cropPlanning,
   harvestRecords,
+  farmerLandMappings,
+  harvestSchedules,
+  landMappingInspections,
+  harvestScheduleMonitoring,
   lraIntegration,
   moaIntegration,
   customsIntegration,
@@ -72,6 +76,14 @@ import {
   type FarmPlot,
   type CropPlan,
   type HarvestRecord,
+  type FarmerLandMapping,
+  type HarvestSchedule,
+  type LandMappingInspection,
+  type HarvestScheduleMonitoring,
+  type InsertFarmerLandMapping,
+  type InsertHarvestSchedule,
+  type InsertLandMappingInspection,
+  type InsertHarvestScheduleMonitoring,
   type LraIntegration,
   type MoaIntegration,
   type CustomsIntegration,
@@ -630,6 +642,50 @@ export interface IStorage {
   
   getExporterTransactions(exporterId: string): Promise<ExporterTransaction[]>;
   createExporterTransaction(transaction: InsertExporterTransaction): Promise<ExporterTransaction>;
+
+  // Multiple Land Mapping & Harvest Schedule System methods
+  // Farmer Land Mappings
+  getFarmerLandMappings(): Promise<FarmerLandMapping[]>;
+  getFarmerLandMapping(id: number): Promise<FarmerLandMapping | undefined>;
+  getFarmerLandMappingByMappingId(mappingId: string): Promise<FarmerLandMapping | undefined>;
+  getFarmerLandMappingsByFarmer(farmerId: number): Promise<FarmerLandMapping[]>;
+  createFarmerLandMapping(mapping: InsertFarmerLandMapping): Promise<FarmerLandMapping>;
+  updateFarmerLandMapping(id: number, mapping: Partial<FarmerLandMapping>): Promise<FarmerLandMapping | undefined>;
+  deleteFarmerLandMapping(id: number): Promise<boolean>;
+  approveFarmerLandMapping(id: number, inspectorId: string): Promise<FarmerLandMapping | undefined>;
+
+  // Harvest Schedules
+  getHarvestSchedules(): Promise<HarvestSchedule[]>;
+  getHarvestSchedule(id: number): Promise<HarvestSchedule | undefined>;
+  getHarvestScheduleByScheduleId(scheduleId: string): Promise<HarvestSchedule | undefined>;
+  getHarvestSchedulesByLandMapping(landMappingId: number): Promise<HarvestSchedule[]>;
+  getHarvestSchedulesByFarmer(farmerId: number): Promise<HarvestSchedule[]>;
+  getHarvestSchedulesByInspector(inspectorId: string): Promise<HarvestSchedule[]>;
+  getHarvestSchedulesByCropType(cropType: string): Promise<HarvestSchedule[]>;
+  getHarvestSchedulesByStatus(status: string): Promise<HarvestSchedule[]>;
+  getUpcomingHarvests(): Promise<HarvestSchedule[]>;
+  createHarvestSchedule(schedule: InsertHarvestSchedule): Promise<HarvestSchedule>;
+  updateHarvestSchedule(id: number, schedule: Partial<HarvestSchedule>): Promise<HarvestSchedule | undefined>;
+  deleteHarvestSchedule(id: number): Promise<boolean>;
+  approveHarvestSchedule(id: number, inspectorId: string): Promise<HarvestSchedule | undefined>;
+
+  // Land Mapping Inspections
+  getLandMappingInspections(): Promise<LandMappingInspection[]>;
+  getLandMappingInspection(id: number): Promise<LandMappingInspection | undefined>;
+  getLandMappingInspectionsByLandMapping(landMappingId: number): Promise<LandMappingInspection[]>;
+  getLandMappingInspectionsByFarmer(farmerId: number): Promise<LandMappingInspection[]>;
+  getLandMappingInspectionsByInspector(inspectorId: string): Promise<LandMappingInspection[]>;
+  createLandMappingInspection(inspection: InsertLandMappingInspection): Promise<LandMappingInspection>;
+  updateLandMappingInspection(id: number, inspection: Partial<LandMappingInspection>): Promise<LandMappingInspection | undefined>;
+
+  // Harvest Schedule Monitoring
+  getHarvestScheduleMonitoring(): Promise<HarvestScheduleMonitoring[]>;
+  getHarvestScheduleMonitoringEntry(id: number): Promise<HarvestScheduleMonitoring | undefined>;
+  getHarvestScheduleMonitoringBySchedule(scheduleId: number): Promise<HarvestScheduleMonitoring[]>;
+  getHarvestScheduleMonitoringByLandMapping(landMappingId: number): Promise<HarvestScheduleMonitoring[]>;
+  getHarvestScheduleMonitoringByInspector(inspectorId: string): Promise<HarvestScheduleMonitoring[]>;
+  createHarvestScheduleMonitoring(monitoring: InsertHarvestScheduleMonitoring): Promise<HarvestScheduleMonitoring>;
+  updateHarvestScheduleMonitoring(id: number, monitoring: Partial<HarvestScheduleMonitoring>): Promise<HarvestScheduleMonitoring | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2396,6 +2452,254 @@ export class DatabaseStorage implements IStorage {
     
     // Generate credentials with correct field names
     await this.generateExporterCredentials(exporterId, exporter.contactPersonFirstName + ' ' + exporter.contactPersonLastName, exporter.primaryEmail);
+  }
+
+  // ========================================
+  // MULTIPLE LAND MAPPING & HARVEST SCHEDULE SYSTEM IMPLEMENTATION
+  // ========================================
+
+  // Farmer Land Mappings methods
+  async getFarmerLandMappings(): Promise<FarmerLandMapping[]> {
+    return await db.select().from(farmerLandMappings).orderBy(desc(farmerLandMappings.createdAt));
+  }
+
+  async getFarmerLandMapping(id: number): Promise<FarmerLandMapping | undefined> {
+    const [mapping] = await db.select().from(farmerLandMappings).where(eq(farmerLandMappings.id, id));
+    return mapping || undefined;
+  }
+
+  async getFarmerLandMappingByMappingId(mappingId: string): Promise<FarmerLandMapping | undefined> {
+    const [mapping] = await db.select().from(farmerLandMappings).where(eq(farmerLandMappings.mappingId, mappingId));
+    return mapping || undefined;
+  }
+
+  async getFarmerLandMappingsByFarmer(farmerId: number): Promise<FarmerLandMapping[]> {
+    return await db.select().from(farmerLandMappings)
+      .where(and(eq(farmerLandMappings.farmerId, farmerId), eq(farmerLandMappings.isActive, true)))
+      .orderBy(desc(farmerLandMappings.createdAt));
+  }
+
+  async createFarmerLandMapping(mapping: InsertFarmerLandMapping): Promise<FarmerLandMapping> {
+    // Generate unique mapping ID
+    const mappingId = `MAP-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    
+    const [newMapping] = await db.insert(farmerLandMappings).values({
+      ...mapping,
+      mappingId,
+      updatedAt: new Date()
+    }).returning();
+    return newMapping;
+  }
+
+  async updateFarmerLandMapping(id: number, mapping: Partial<FarmerLandMapping>): Promise<FarmerLandMapping | undefined> {
+    const [updated] = await db.update(farmerLandMappings)
+      .set({ ...mapping, updatedAt: new Date() })
+      .where(eq(farmerLandMappings.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteFarmerLandMapping(id: number): Promise<boolean> {
+    // Soft delete by setting isActive to false
+    const result = await db.update(farmerLandMappings)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(farmerLandMappings.id, id));
+    return (result as any).changes > 0;
+  }
+
+  async approveFarmerLandMapping(id: number, inspectorId: string): Promise<FarmerLandMapping | undefined> {
+    return await this.updateFarmerLandMapping(id, {
+      approvedBy: inspectorId,
+      approvedAt: new Date()
+    });
+  }
+
+  // Harvest Schedules methods
+  async getHarvestSchedules(): Promise<HarvestSchedule[]> {
+    return await db.select().from(harvestSchedules).orderBy(desc(harvestSchedules.createdAt));
+  }
+
+  async getHarvestSchedule(id: number): Promise<HarvestSchedule | undefined> {
+    const [schedule] = await db.select().from(harvestSchedules).where(eq(harvestSchedules.id, id));
+    return schedule || undefined;
+  }
+
+  async getHarvestScheduleByScheduleId(scheduleId: string): Promise<HarvestSchedule | undefined> {
+    const [schedule] = await db.select().from(harvestSchedules).where(eq(harvestSchedules.scheduleId, scheduleId));
+    return schedule || undefined;
+  }
+
+  async getHarvestSchedulesByLandMapping(landMappingId: number): Promise<HarvestSchedule[]> {
+    return await db.select().from(harvestSchedules)
+      .where(and(eq(harvestSchedules.landMappingId, landMappingId), eq(harvestSchedules.isActive, true)))
+      .orderBy(desc(harvestSchedules.expectedHarvestStartDate));
+  }
+
+  async getHarvestSchedulesByFarmer(farmerId: number): Promise<HarvestSchedule[]> {
+    return await db.select().from(harvestSchedules)
+      .where(and(eq(harvestSchedules.farmerId, farmerId), eq(harvestSchedules.isActive, true)))
+      .orderBy(desc(harvestSchedules.expectedHarvestStartDate));
+  }
+
+  async getHarvestSchedulesByInspector(inspectorId: string): Promise<HarvestSchedule[]> {
+    return await db.select().from(harvestSchedules)
+      .where(and(eq(harvestSchedules.inspectedBy, inspectorId), eq(harvestSchedules.isActive, true)))
+      .orderBy(desc(harvestSchedules.nextInspectionDate));
+  }
+
+  async getHarvestSchedulesByCropType(cropType: string): Promise<HarvestSchedule[]> {
+    return await db.select().from(harvestSchedules)
+      .where(and(eq(harvestSchedules.cropType, cropType), eq(harvestSchedules.isActive, true)))
+      .orderBy(desc(harvestSchedules.expectedHarvestStartDate));
+  }
+
+  async getHarvestSchedulesByStatus(status: string): Promise<HarvestSchedule[]> {
+    return await db.select().from(harvestSchedules)
+      .where(and(eq(harvestSchedules.status, status), eq(harvestSchedules.isActive, true)))
+      .orderBy(desc(harvestSchedules.expectedHarvestStartDate));
+  }
+
+  async getUpcomingHarvests(): Promise<HarvestSchedule[]> {
+    const now = new Date();
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    
+    return await db.select().from(harvestSchedules)
+      .where(and(
+        eq(harvestSchedules.isActive, true),
+        gte(harvestSchedules.expectedHarvestStartDate, now),
+        lte(harvestSchedules.expectedHarvestStartDate, nextMonth)
+      ))
+      .orderBy(asc(harvestSchedules.expectedHarvestStartDate));
+  }
+
+  async createHarvestSchedule(schedule: InsertHarvestSchedule): Promise<HarvestSchedule> {
+    // Generate unique schedule ID
+    const scheduleId = `SCH-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    
+    const [newSchedule] = await db.insert(harvestSchedules).values({
+      ...schedule,
+      scheduleId,
+      updatedAt: new Date()
+    }).returning();
+    return newSchedule;
+  }
+
+  async updateHarvestSchedule(id: number, schedule: Partial<HarvestSchedule>): Promise<HarvestSchedule | undefined> {
+    const [updated] = await db.update(harvestSchedules)
+      .set({ ...schedule, updatedAt: new Date() })
+      .where(eq(harvestSchedules.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteHarvestSchedule(id: number): Promise<boolean> {
+    // Soft delete by setting isActive to false
+    const result = await db.update(harvestSchedules)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(harvestSchedules.id, id));
+    return (result as any).changes > 0;
+  }
+
+  async approveHarvestSchedule(id: number, inspectorId: string): Promise<HarvestSchedule | undefined> {
+    return await this.updateHarvestSchedule(id, {
+      approvedBy: inspectorId,
+      approvedAt: new Date()
+    });
+  }
+
+  // Land Mapping Inspections methods
+  async getLandMappingInspections(): Promise<LandMappingInspection[]> {
+    return await db.select().from(landMappingInspections).orderBy(desc(landMappingInspections.inspectionDate));
+  }
+
+  async getLandMappingInspection(id: number): Promise<LandMappingInspection | undefined> {
+    const [inspection] = await db.select().from(landMappingInspections).where(eq(landMappingInspections.id, id));
+    return inspection || undefined;
+  }
+
+  async getLandMappingInspectionsByLandMapping(landMappingId: number): Promise<LandMappingInspection[]> {
+    return await db.select().from(landMappingInspections)
+      .where(eq(landMappingInspections.landMappingId, landMappingId))
+      .orderBy(desc(landMappingInspections.inspectionDate));
+  }
+
+  async getLandMappingInspectionsByFarmer(farmerId: number): Promise<LandMappingInspection[]> {
+    return await db.select().from(landMappingInspections)
+      .where(eq(landMappingInspections.farmerId, farmerId))
+      .orderBy(desc(landMappingInspections.inspectionDate));
+  }
+
+  async getLandMappingInspectionsByInspector(inspectorId: string): Promise<LandMappingInspection[]> {
+    return await db.select().from(landMappingInspections)
+      .where(eq(landMappingInspections.inspectorId, inspectorId))
+      .orderBy(desc(landMappingInspections.inspectionDate));
+  }
+
+  async createLandMappingInspection(inspection: InsertLandMappingInspection): Promise<LandMappingInspection> {
+    // Generate unique inspection ID
+    const inspectionId = `INS-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    
+    const [newInspection] = await db.insert(landMappingInspections).values({
+      ...inspection,
+      inspectionId
+    }).returning();
+    return newInspection;
+  }
+
+  async updateLandMappingInspection(id: number, inspection: Partial<LandMappingInspection>): Promise<LandMappingInspection | undefined> {
+    const [updated] = await db.update(landMappingInspections)
+      .set(inspection)
+      .where(eq(landMappingInspections.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  // Harvest Schedule Monitoring methods
+  async getHarvestScheduleMonitoring(): Promise<HarvestScheduleMonitoring[]> {
+    return await db.select().from(harvestScheduleMonitoring).orderBy(desc(harvestScheduleMonitoring.monitoringDate));
+  }
+
+  async getHarvestScheduleMonitoringEntry(id: number): Promise<HarvestScheduleMonitoring | undefined> {
+    const [monitoring] = await db.select().from(harvestScheduleMonitoring).where(eq(harvestScheduleMonitoring.id, id));
+    return monitoring || undefined;
+  }
+
+  async getHarvestScheduleMonitoringBySchedule(scheduleId: number): Promise<HarvestScheduleMonitoring[]> {
+    return await db.select().from(harvestScheduleMonitoring)
+      .where(eq(harvestScheduleMonitoring.scheduleId, scheduleId))
+      .orderBy(desc(harvestScheduleMonitoring.monitoringDate));
+  }
+
+  async getHarvestScheduleMonitoringByLandMapping(landMappingId: number): Promise<HarvestScheduleMonitoring[]> {
+    return await db.select().from(harvestScheduleMonitoring)
+      .where(eq(harvestScheduleMonitoring.landMappingId, landMappingId))
+      .orderBy(desc(harvestScheduleMonitoring.monitoringDate));
+  }
+
+  async getHarvestScheduleMonitoringByInspector(inspectorId: string): Promise<HarvestScheduleMonitoring[]> {
+    return await db.select().from(harvestScheduleMonitoring)
+      .where(eq(harvestScheduleMonitoring.inspectorId, inspectorId))
+      .orderBy(desc(harvestScheduleMonitoring.monitoringDate));
+  }
+
+  async createHarvestScheduleMonitoring(monitoring: InsertHarvestScheduleMonitoring): Promise<HarvestScheduleMonitoring> {
+    // Generate unique monitoring ID
+    const monitoringId = `MON-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    
+    const [newMonitoring] = await db.insert(harvestScheduleMonitoring).values({
+      ...monitoring,
+      monitoringId
+    }).returning();
+    return newMonitoring;
+  }
+
+  async updateHarvestScheduleMonitoring(id: number, monitoring: Partial<HarvestScheduleMonitoring>): Promise<HarvestScheduleMonitoring | undefined> {
+    const [updated] = await db.update(harvestScheduleMonitoring)
+      .set(monitoring)
+      .where(eq(harvestScheduleMonitoring.id, id))
+      .returning();
+    return updated || undefined;
   }
 }
 

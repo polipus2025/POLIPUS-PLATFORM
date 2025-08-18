@@ -1342,6 +1342,218 @@ export const insertHarvestRecordSchema = createInsertSchema(harvestRecords).omit
   createdAt: true,
 });
 
+// ========================================
+// MULTIPLE LAND MAPPING & HARVEST SCHEDULE SYSTEM
+// ========================================
+
+// Farmer Land Mappings - Multiple mappings per farmer
+export const farmerLandMappings = pgTable("farmer_land_mappings", {
+  id: serial("id").primaryKey(),
+  mappingId: text("mapping_id").notNull().unique(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  landMappingName: text("land_mapping_name").notNull(),
+  totalArea: decimal("total_area", { precision: 12, scale: 4 }).notNull(), // hectares
+  areaUnit: text("area_unit").default("hectares"),
+  gpsCoordinates: jsonb("gps_coordinates").notNull(), // array of GPS boundary points
+  centerLatitude: decimal("center_latitude", { precision: 10, scale: 8 }),
+  centerLongitude: decimal("center_longitude", { precision: 11, scale: 8 }),
+  landType: text("land_type").notNull(), // agricultural, forest, residential, mixed_use, fallow
+  soilType: text("soil_type"), // clay, sandy, loamy, rocky, mixed
+  soilQuality: text("soil_quality"), // poor, fair, good, excellent
+  waterSource: text("water_source"), // river, well, rain_fed, irrigation, none
+  accessibility: text("accessibility").default("accessible"), // accessible, difficult, remote
+  elevationRange: text("elevation_range"), // low, medium, high, varied
+  slopeGradient: text("slope_gradient"), // flat, gentle, moderate, steep
+  vegetationCover: text("vegetation_cover"), // bare, sparse, moderate, dense, forest
+  currentUse: text("current_use").notNull(), // active_farming, fallow, grazing, forest, unused
+  landTenure: text("land_tenure").default("owned"), // owned, leased, family_land, community_land
+  registrationStatus: text("registration_status").default("registered"), // registered, pending, unregistered
+  legalDocuments: jsonb("legal_documents"), // array of document references
+  acquisitionDate: timestamp("acquisition_date"),
+  lastSurveyDate: timestamp("last_survey_date"),
+  surveyedBy: text("surveyed_by"), // inspector who conducted the survey
+  mappingAccuracy: text("mapping_accuracy").default("medium"), // high, medium, low
+  notes: text("notes"),
+  photos: jsonb("photos"), // array of photo URLs
+  isActive: boolean("is_active").default(true),
+  createdBy: text("created_by").notNull(), // inspector or farmer who created this
+  approvedBy: text("approved_by"), // land inspector who approved the mapping
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Harvest Schedules - Multiple schedules per land mapping
+export const harvestSchedules = pgTable("harvest_schedules", {
+  id: serial("id").primaryKey(),
+  scheduleId: text("schedule_id").notNull().unique(),
+  landMappingId: integer("land_mapping_id").references(() => farmerLandMappings.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  scheduleName: text("schedule_name").notNull(),
+  cropType: text("crop_type").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava, plantain
+  cropVariety: text("crop_variety"),
+  plantingArea: decimal("planting_area", { precision: 10, scale: 2 }).notNull(), // hectares
+  plantingStartDate: timestamp("planting_start_date").notNull(),
+  plantingEndDate: timestamp("planting_end_date"),
+  expectedGerminationDate: timestamp("expected_germination_date"),
+  expectedMaturityDate: timestamp("expected_maturity_date"),
+  expectedHarvestStartDate: timestamp("expected_harvest_start_date").notNull(),
+  expectedHarvestEndDate: timestamp("expected_harvest_end_date"),
+  actualPlantingDate: timestamp("actual_planting_date"),
+  actualHarvestStartDate: timestamp("actual_harvest_start_date"),
+  actualHarvestEndDate: timestamp("actual_harvest_end_date"),
+  expectedYield: decimal("expected_yield", { precision: 10, scale: 2 }),
+  actualYield: decimal("actual_yield", { precision: 10, scale: 2 }),
+  yieldUnit: text("yield_unit").default("kg"),
+  plantingMethod: text("planting_method"), // direct_seeding, transplanting, broadcasting
+  seedingRate: decimal("seeding_rate", { precision: 8, scale: 2 }), // kg per hectare
+  fertilizerPlan: jsonb("fertilizer_plan"), // fertilizer application schedule
+  pestControlPlan: jsonb("pest_control_plan"), // pest and disease management plan
+  irrigationSchedule: jsonb("irrigation_schedule"), // irrigation timing and amounts
+  harvestingMethod: text("harvesting_method"), // manual, mechanical, mixed
+  postHarvestTreatment: text("post_harvest_treatment"), // drying, processing, storage
+  marketingPlan: text("marketing_plan"), // intended buyer or market
+  expectedPrice: decimal("expected_price", { precision: 8, scale: 2 }),
+  actualPrice: decimal("actual_price", { precision: 8, scale: 2 }),
+  priceUnit: text("price_unit").default("per_kg"),
+  season: text("season").notNull(), // dry_season, rainy_season, year_round
+  cropYear: integer("crop_year").notNull(),
+  status: text("status").notNull().default("planned"), // planned, planted, growing, ready_for_harvest, harvested, completed
+  riskFactors: jsonb("risk_factors"), // weather, pests, market, financial risks
+  insuranceCoverage: boolean("insurance_coverage").default(false),
+  certificationTarget: text("certification_target"), // organic, fair_trade, rainforest_alliance
+  qualityGrade: text("quality_grade"), // actual quality after harvest
+  yieldPerformance: text("yield_performance"), // below_expected, as_expected, above_expected
+  profitability: decimal("profitability", { precision: 12, scale: 2 }), // calculated profit/loss
+  lessons: text("lessons_learned"), // what was learned from this cycle
+  nextCyclePlans: text("next_cycle_plans"), // plans for the next planting cycle
+  inspectedBy: text("inspected_by"), // land inspector who monitors this schedule
+  lastInspectionDate: timestamp("last_inspection_date"),
+  nextInspectionDate: timestamp("next_inspection_date"),
+  inspectionNotes: text("inspection_notes"),
+  complianceStatus: text("compliance_status").default("compliant"), // compliant, non_compliant, pending_review
+  alerts: jsonb("alerts"), // active alerts for this schedule
+  weatherData: jsonb("weather_data"), // relevant weather information
+  createdBy: text("created_by").notNull(),
+  approvedBy: text("approved_by"), // land inspector who approved the schedule
+  approvedAt: timestamp("approved_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Land Mapping Inspections by Land Inspectors
+export const landMappingInspections = pgTable("land_mapping_inspections", {
+  id: serial("id").primaryKey(),
+  inspectionId: text("inspection_id").notNull().unique(),
+  landMappingId: integer("land_mapping_id").references(() => farmerLandMappings.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  inspectorId: text("inspector_id").notNull(),
+  inspectorName: text("inspector_name").notNull(),
+  inspectorType: text("inspector_type").default("land_inspector"), // should be land_inspector for this module
+  inspectionDate: timestamp("inspection_date").notNull(),
+  inspectionType: text("inspection_type").notNull(), // initial_mapping, routine, compliance, dispute_resolution, boundary_verification
+  purpose: text("purpose").notNull(), // survey, boundary_check, crop_assessment, compliance_check, farmer_support
+  areaInspected: decimal("area_inspected", { precision: 10, scale: 2 }),
+  boundaryAccuracy: text("boundary_accuracy"), // accurate, minor_discrepancy, major_discrepancy, disputed
+  boundaryChanges: jsonb("boundary_changes"), // any changes made to boundaries
+  soilAssessment: text("soil_assessment"),
+  waterSourceVerification: text("water_source_verification"),
+  cropConditionAssessment: text("crop_condition_assessment"),
+  landUseCompliance: text("land_use_compliance"), // compliant, non_compliant, needs_improvement
+  environmentalConcerns: text("environmental_concerns"),
+  findingsAndRecommendations: text("findings_and_recommendations").notNull(),
+  correctiveActions: text("corrective_actions"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  complianceScore: integer("compliance_score"), // 0-100
+  riskAssessment: text("risk_assessment"), // low, medium, high, critical
+  photosEvidence: jsonb("photos_evidence"), // inspection photos
+  gpsReadings: jsonb("gps_readings"), // GPS measurements taken during inspection
+  farmerPresent: boolean("farmer_present").default(true),
+  farmerFeedback: text("farmer_feedback"),
+  inspectorNotes: text("inspector_notes"),
+  weatherConditions: text("weather_conditions"),
+  equipmentUsed: text("equipment_used"), // GPS, drone, measuring_tape, soil_tester
+  nextInspectionRecommended: timestamp("next_inspection_recommended"),
+  status: text("status").default("completed"), // scheduled, in_progress, completed, follow_up_pending
+  verifiedBy: text("verified_by"), // senior inspector who verified the report
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Harvest Schedule Monitoring by Land Inspectors
+export const harvestScheduleMonitoring = pgTable("harvest_schedule_monitoring", {
+  id: serial("id").primaryKey(),
+  monitoringId: text("monitoring_id").notNull().unique(),
+  scheduleId: integer("schedule_id").references(() => harvestSchedules.id).notNull(),
+  landMappingId: integer("land_mapping_id").references(() => farmerLandMappings.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  inspectorId: text("inspector_id").notNull(),
+  inspectorName: text("inspector_name").notNull(),
+  monitoringDate: timestamp("monitoring_date").notNull(),
+  growthStage: text("growth_stage").notNull(), // seedling, vegetative, flowering, fruiting, mature, harvesting
+  monitoringType: text("monitoring_type").notNull(), // routine, problem_investigation, harvest_readiness, quality_check
+  cropHealthAssessment: text("crop_health_assessment").notNull(), // excellent, good, fair, poor, critical
+  pestDiseaseStatus: text("pest_disease_status"), // none, minor, moderate, severe, critical
+  pestDiseaseDetails: text("pest_disease_details"),
+  treatmentRecommendations: text("treatment_recommendations"),
+  waterStressLevel: text("water_stress_level"), // none, mild, moderate, severe
+  nutritionalStatus: text("nutritional_status"), // excellent, adequate, deficient, severely_deficient
+  weedInfestation: text("weed_infestation"), // none, light, moderate, heavy
+  yieldEstimate: decimal("yield_estimate", { precision: 10, scale: 2 }),
+  harvestReadiness: text("harvest_readiness"), // not_ready, nearly_ready, ready, overdue
+  qualityProjection: text("quality_projection"), // premium, grade_a, grade_b, grade_c, poor
+  scheduledHarvestDate: timestamp("scheduled_harvest_date"),
+  actualHarvestDate: timestamp("actual_harvest_date"),
+  harvestDelayReason: text("harvest_delay_reason"),
+  weatherImpact: text("weather_impact"), // positive, neutral, negative, severe
+  marketConditions: text("market_conditions"), // favorable, average, poor, unknown
+  priceProjection: decimal("price_projection", { precision: 8, scale: 2 }),
+  recommendations: text("recommendations").notNull(),
+  correctiveActions: text("corrective_actions"),
+  farmerGuidance: text("farmer_guidance"), // advice provided to the farmer
+  trainingNeeded: boolean("training_needed").default(false),
+  trainingTopics: text("training_topics"), // areas where farmer needs training
+  supportRequired: text("support_required"), // inputs, technical, financial
+  riskFactors: jsonb("risk_factors"), // identified risks
+  mitigationStrategies: text("mitigation_strategies"),
+  photos: jsonb("photos"), // monitoring photos
+  measurements: jsonb("measurements"), // plant height, fruit count, etc.
+  soilMoisture: text("soil_moisture"), // dry, adequate, wet, waterlogged
+  fertilizerApplication: text("fertilizer_application"), // as_scheduled, delayed, excessive, insufficient
+  nextMonitoringDate: timestamp("next_monitoring_date"),
+  followUpActions: text("follow_up_actions"),
+  farmerFeedback: text("farmer_feedback"),
+  monitoringNotes: text("monitoring_notes"),
+  complianceIssues: text("compliance_issues"),
+  status: text("status").default("completed"), // scheduled, in_progress, completed, follow_up_required
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert Schemas
+export const insertFarmerLandMappingSchema = createInsertSchema(farmerLandMappings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertHarvestScheduleSchema = createInsertSchema(harvestSchedules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLandMappingInspectionSchema = createInsertSchema(landMappingInspections).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertHarvestScheduleMonitoringSchema = createInsertSchema(harvestScheduleMonitoring).omit({
+  id: true,
+  createdAt: true,
+});
+
 
 
 
@@ -1419,6 +1631,21 @@ export type InsertCountyEconomicSummary = z.infer<typeof insertCountyEconomicSum
 
 export type EconomicIndicator = typeof economicIndicators.$inferSelect;
 export type InsertEconomicIndicator = z.infer<typeof insertEconomicIndicatorSchema>;
+
+// Multiple Land Mapping & Harvest Schedule Types
+export type FarmerLandMapping = typeof farmerLandMappings.$inferSelect;
+export type InsertFarmerLandMapping = z.infer<typeof insertFarmerLandMappingSchema>;
+
+export type HarvestSchedule = typeof harvestSchedules.$inferSelect;
+export type InsertHarvestSchedule = z.infer<typeof insertHarvestScheduleSchema>;
+
+export type LandMappingInspection = typeof landMappingInspections.$inferSelect;
+export type InsertLandMappingInspection = z.infer<typeof insertLandMappingInspectionSchema>;
+
+export type HarvestScheduleMonitoring = typeof harvestScheduleMonitoring.$inferSelect;
+export type InsertHarvestScheduleMonitoring = z.infer<typeof insertHarvestScheduleMonitoringSchema>;
+
+// Farmer types (legacy support - already defined above)
 
 // Authentication and User Management System
 export const authUsers = pgTable("auth_users", {
@@ -2114,19 +2341,7 @@ export const insertExportOrderSchema = createInsertSchema(exportOrders).omit({
   updatedAt: true,
 });
 
-// Farm Management Platform types
-export type Farmer = typeof farmers.$inferSelect;
-export type FarmPlot = typeof farmPlots.$inferSelect;
-export type CropPlan = typeof cropPlanning.$inferSelect;
-export type HarvestRecord = typeof harvestRecords.$inferSelect;
-
-
-
-// Farm Management Platform insert types
-export type InsertFarmer = z.infer<typeof insertFarmerSchema>;
-export type InsertFarmPlot = z.infer<typeof insertFarmPlotSchema>;
-export type InsertCropPlan = z.infer<typeof insertCropPlanSchema>;
-export type InsertHarvestRecord = z.infer<typeof insertHarvestRecordSchema>;
+// Farm Management Platform types (legacy support - already defined in Multiple Land Mapping section above)
 
 
 // Authentication insert schemas

@@ -170,6 +170,7 @@ import AgriTraceDashboard from "@/pages/agritrace-dashboard";
 import CertificateApprovals from "@/pages/certificate-approvals";
 import InspectorOnboarding from "@/pages/inspector-onboarding";
 import InspectorManagement from "@/pages/inspector-management";
+import BuyerManagement from "@/pages/buyer-management";
 
 import NotFound from "@/pages/not-found";
 
@@ -483,6 +484,7 @@ function Router() {
           <Route path="/certificate-approvals" component={CertificateApprovals} />
           <Route path="/regulatory/inspector-onboarding" component={InspectorOnboarding} />
           <Route path="/regulatory/inspector-management" component={InspectorManagement} />
+          <Route path="/regulatory/buyer-management" component={BuyerManagement} />
           <Route path="/farmer-payment-services" component={FarmerPaymentServices} />
           <Route path="/exporter-payment-services" component={ExporterPaymentServices} />
           

@@ -53,6 +53,23 @@ interface InspectorActivity {
   timestamp: string;
 }
 
+interface InspectorCredentials {
+  inspectorId: string;
+  username: string;
+  mustChangePassword: boolean;
+  lastPasswordChange: string | null;
+  failedLoginAttempts: number;
+  isLocked: boolean;
+  lockedUntil: string | null;
+  createdAt: string;
+}
+
+interface NewInspectorCredentials {
+  username: string;
+  temporaryPassword: string;
+  mustChangePassword: boolean;
+}
+
 const liberianCounties = [
   "All Counties", "Bomi", "Bong", "Gbarpolu", "Grand Bassa", "Grand Cape Mount",
   "Grand Gedeh", "Grand Kru", "Lofa", "Margibi", "Maryland",
@@ -65,6 +82,8 @@ export default function InspectorManagement() {
   const [selectedInspector, setSelectedInspector] = useState<Inspector | null>(null);
   const [showActivities, setShowActivities] = useState(false);
   const [activeTab, setActiveTab] = useState("management");
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [newInspectorCredentials, setNewInspectorCredentials] = useState<NewInspectorCredentials | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -109,6 +128,22 @@ export default function InspectorManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Login Disabled", description: "Inspector login access has been disabled." });
+    }
+  });
+
+  // Fetch inspector credentials
+  const { data: selectedInspectorCredentials } = useQuery<InspectorCredentials>({
+    queryKey: ['/api/inspectors', selectedInspector?.inspectorId, 'credentials'],
+    enabled: !!selectedInspector && showCredentials,
+  });
+
+  // Reset password mutation
+  const resetPasswordMutation = useMutation({
+    mutationFn: (inspectorId: string) => apiRequest('POST', `/api/inspectors/${inspectorId}/reset-password`),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
+      setNewInspectorCredentials(data.credentials);
+      toast({ title: "Password Reset", description: "New temporary password has been generated." });
     }
   });
 
@@ -179,8 +214,18 @@ export default function InspectorManagement() {
       });
 
       try {
-        await apiRequest('POST', '/api/inspectors', submitData);
-        toast({ title: "Success", description: "Inspector onboarded successfully!" });
+        const response = await apiRequest('POST', '/api/inspectors', submitData);
+        
+        // Store the generated credentials for display
+        if (response.credentials) {
+          setNewInspectorCredentials(response.credentials);
+        }
+        
+        toast({ 
+          title: "Success", 
+          description: "Inspector onboarded successfully! Login credentials have been generated." 
+        });
+        
         queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
         setActiveTab('management');
         setCurrentStep(1);
@@ -680,6 +725,18 @@ export default function InspectorManagement() {
                         <Key className="w-4 h-4" />
                       </Button>
                     )}
+
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setSelectedInspector(inspector);
+                        setShowCredentials(true);
+                      }}
+                      title="View Login Credentials"
+                    >
+                      <Shield className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -690,6 +747,127 @@ export default function InspectorManagement() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Credentials Display Dialog */}
+      <Dialog open={showCredentials} onOpenChange={setShowCredentials}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Inspector Login Credentials
+            </DialogTitle>
+            <DialogDescription>
+              {selectedInspector && (
+                <>Manage login credentials for {selectedInspector.fullName} ({selectedInspector.inspectorId})</>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedInspectorCredentials && (
+            <div className="space-y-6">
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-3">Current Login Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Username</label>
+                    <div className="p-2 bg-white border rounded text-sm font-mono">
+                      {selectedInspectorCredentials.username}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Account Status</label>
+                    <div className="p-2">
+                      <Badge 
+                        variant={selectedInspectorCredentials.isLocked ? "destructive" : "default"}
+                        className="text-xs"
+                      >
+                        {selectedInspectorCredentials.isLocked ? "Locked" : "Active"}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Password Status</label>
+                    <div className="p-2">
+                      <Badge 
+                        variant={selectedInspectorCredentials.mustChangePassword ? "secondary" : "default"}
+                        className="text-xs"
+                      >
+                        {selectedInspectorCredentials.mustChangePassword ? "Must Change" : "Set"}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Failed Attempts</label>
+                    <div className="p-2 text-sm">
+                      {selectedInspectorCredentials.failedLoginAttempts} / 5
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => selectedInspector && resetPasswordMutation.mutate(selectedInspector.inspectorId)}
+                  disabled={resetPasswordMutation.isPending}
+                  className="flex items-center gap-2"
+                >
+                  <Key className="w-4 h-4" />
+                  Reset Password
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Inspector Credentials Dialog */}
+      <Dialog open={!!newInspectorCredentials} onOpenChange={() => setNewInspectorCredentials(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-green-600" />
+              Inspector Login Credentials Generated
+            </DialogTitle>
+            <DialogDescription>
+              New login credentials have been generated. Please provide these to the inspector.
+            </DialogDescription>
+          </DialogHeader>
+
+          {newInspectorCredentials && (
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-green-800">Username</label>
+                    <div className="p-3 bg-white border border-green-200 rounded font-mono text-lg">
+                      {newInspectorCredentials.username}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-green-800">Temporary Password</label>
+                    <div className="p-3 bg-white border border-green-200 rounded font-mono text-lg">
+                      {newInspectorCredentials.temporaryPassword}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  <strong>Important:</strong> The inspector must change this temporary password on first login.
+                </p>
+              </div>
+
+              <Button 
+                onClick={() => setNewInspectorCredentials(null)}
+                className="w-full"
+              >
+                Got it
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

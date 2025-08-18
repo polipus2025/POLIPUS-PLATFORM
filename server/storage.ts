@@ -1878,6 +1878,67 @@ export class DatabaseStorage implements IStorage {
     return newInspector;
   }
 
+  // Inspector credentials management
+  async createInspectorCredentials(credentials: InsertInspectorCredentials): Promise<InspectorCredentials> {
+    const [newCredentials] = await db.insert(inspectorCredentials).values(credentials).returning();
+    return newCredentials;
+  }
+
+  async getInspectorCredentials(inspectorId: string): Promise<InspectorCredentials | undefined> {
+    const [credentials] = await db.select().from(inspectorCredentials).where(eq(inspectorCredentials.inspectorId, inspectorId));
+    return credentials || undefined;
+  }
+
+  async updateInspectorCredentials(inspectorId: string, updates: Partial<InspectorCredentials>): Promise<void> {
+    await db.update(inspectorCredentials)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(inspectorCredentials.inspectorId, inspectorId));
+  }
+
+  async getInspectorCredentialsByUsername(username: string): Promise<InspectorCredentials | undefined> {
+    const [credentials] = await db.select().from(inspectorCredentials).where(eq(inspectorCredentials.username, username));
+    return credentials || undefined;
+  }
+
+  async getInspectorByInspectorId(inspectorId: string): Promise<Inspector | undefined> {
+    const [inspector] = await db.select().from(inspectors).where(eq(inspectors.inspectorId, inspectorId));
+    return inspector || undefined;
+  }
+
+  async incrementFailedLoginAttempts(inspectorId: string): Promise<void> {
+    const credentials = await this.getInspectorCredentials(inspectorId);
+    if (!credentials) return;
+
+    const failedAttempts = (credentials.failedLoginAttempts || 0) + 1;
+    const updates: Partial<InspectorCredentials> = {
+      failedLoginAttempts: failedAttempts
+    };
+
+    // Lock account after 5 failed attempts for 30 minutes
+    if (failedAttempts >= 5) {
+      updates.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
+    }
+
+    await this.updateInspectorCredentials(inspectorId, updates);
+  }
+
+  async resetFailedLoginAttempts(inspectorId: string): Promise<void> {
+    await this.updateInspectorCredentials(inspectorId, {
+      failedLoginAttempts: 0,
+      lockedUntil: null
+    });
+  }
+
+  async updateInspectorLastLogin(inspectorId: number): Promise<void> {
+    await db.update(inspectors)
+      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+      .where(eq(inspectors.id, inspectorId));
+  }
+
+  async createInspectorActivity(activity: InsertInspectorActivity): Promise<void> {
+    await db.insert(inspectorActivities).values(activity);
+  }
+
   async updateInspector(id: number, inspector: Partial<Inspector>): Promise<Inspector | undefined> {
     const [updatedInspector] = await db.update(inspectors)
       .set({ ...inspector, updatedAt: new Date() })

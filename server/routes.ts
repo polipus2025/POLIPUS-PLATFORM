@@ -1473,6 +1473,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Inspector Portal Login endpoint
+  app.post("/api/auth/inspector-login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Validate input
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Check if inspector credentials exist
+      const credentials = await storage.getInspectorCredentialsByUsername(username);
+      if (!credentials) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid inspector credentials" 
+        });
+      }
+
+      // Check for account lockout
+      if (credentials.lockedUntil && new Date() < credentials.lockedUntil) {
+        return res.status(423).json({ 
+          success: false, 
+          message: "Account is temporarily locked due to failed login attempts" 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, credentials.passwordHash);
+      if (!isValidPassword) {
+        // Increment failed login attempts
+        await storage.incrementFailedLoginAttempts(credentials.inspectorId);
+        
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid inspector credentials" 
+        });
+      }
+
+      // Get inspector profile
+      const inspector = await storage.getInspectorByInspectorId(credentials.inspectorId);
+      if (!inspector || !inspector.isActive || !inspector.canLogin) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Inspector account is not active or login is disabled" 
+        });
+      }
+
+      // Reset failed login attempts on successful login
+      await storage.resetFailedLoginAttempts(credentials.inspectorId);
+
+      // Update last login
+      await storage.updateInspectorLastLogin(inspector.id);
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          inspectorId: inspector.inspectorId,
+          username: credentials.username,
+          role: 'inspector',
+          userType: 'inspector',
+          county: inspector.inspectionAreaCounty
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Log login activity
+      await storage.createInspectorActivity({
+        inspectorId: inspector.inspectorId,
+        activityType: 'login',
+        description: `Inspector logged in from ${req.ip}`,
+        county: inspector.inspectionAreaCounty
+      });
+
+      res.json({
+        success: true,
+        token,
+        inspector: {
+          id: inspector.id,
+          inspectorId: inspector.inspectorId,
+          firstName: inspector.firstName,
+          lastName: inspector.lastName,
+          fullName: inspector.fullName,
+          email: inspector.email,
+          phoneNumber: inspector.phoneNumber,
+          inspectionAreaCounty: inspector.inspectionAreaCounty,
+          inspectionAreaDistrict: inspector.inspectionAreaDistrict,
+          specializations: inspector.specializations,
+          certificationLevel: inspector.certificationLevel
+        },
+        mustChangePassword: credentials.mustChangePassword
+      });
+
+    } catch (error) {
+      console.error("Inspector login error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Inspector Password Change endpoint
+  app.post("/api/auth/inspector-change-password", async (req, res) => {
+    try {
+      const { username, currentPassword, newPassword } = req.body;
+      
+      // Validate input
+      if (!username || !currentPassword || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username, current password, and new password are required" 
+        });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "New password must be at least 8 characters long" 
+        });
+      }
+
+      // Get inspector credentials
+      const credentials = await storage.getInspectorCredentialsByUsername(username);
+      if (!credentials) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Inspector account not found" 
+        });
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(currentPassword, credentials.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Current password is incorrect" 
+        });
+      }
+
+      // Hash new password
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(newPassword, salt);
+
+      // Update credentials
+      await storage.updateInspectorCredentials(credentials.inspectorId, {
+        passwordHash,
+        salt,
+        mustChangePassword: false,
+        lastPasswordChange: new Date()
+      });
+
+      // Log activity
+      await storage.createInspectorActivity({
+        inspectorId: credentials.inspectorId,
+        activityType: 'password_change',
+        description: 'Inspector changed password successfully'
+      });
+
+      res.json({
+        success: true,
+        message: "Password changed successfully"
+      });
+
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // LandMap360 Login endpoint
   app.post("/api/auth/landmap360-login", async (req, res) => {
     try {
@@ -7827,6 +8004,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching inspectors by county:", error);
       res.status(500).json({ message: "Failed to fetch inspectors by county" });
+    }
+  });
+
+  // Get inspector credentials - FOR ADMIN TO PROVIDE LOGIN INFO
+  app.get("/api/inspectors/:inspectorId/credentials", async (req, res) => {
+    try {
+      const { inspectorId } = req.params;
+      const credentials = await storage.getInspectorCredentials(inspectorId);
+      
+      if (!credentials) {
+        return res.status(404).json({ message: "Inspector credentials not found" });
+      }
+
+      // Only return username and status information - never passwords
+      res.json({
+        inspectorId: credentials.inspectorId,
+        username: credentials.username,
+        mustChangePassword: credentials.mustChangePassword,
+        lastPasswordChange: credentials.lastPasswordChange,
+        failedLoginAttempts: credentials.failedLoginAttempts,
+        isLocked: credentials.lockedUntil && new Date() < credentials.lockedUntil,
+        lockedUntil: credentials.lockedUntil,
+        createdAt: credentials.createdAt
+      });
+    } catch (error) {
+      console.error("Error fetching inspector credentials:", error);
+      res.status(500).json({ message: "Failed to fetch inspector credentials" });
+    }
+  });
+
+  // Reset inspector password - FOR ADMIN SUPPORT
+  app.post("/api/inspectors/:inspectorId/reset-password", async (req, res) => {
+    try {
+      const { inspectorId } = req.params;
+      const inspector = await storage.getInspectorByInspectorId(inspectorId);
+      
+      if (!inspector) {
+        return res.status(404).json({ message: "Inspector not found" });
+      }
+
+      // Generate new temporary password
+      const temporaryPassword = crypto.randomBytes(8).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(temporaryPassword, salt);
+
+      // Update credentials
+      await storage.updateInspectorCredentials(inspectorId, {
+        passwordHash,
+        salt,
+        mustChangePassword: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null
+      });
+
+      // Log activity
+      await storage.createInspectorActivity({
+        inspectorId: inspectorId,
+        activityType: 'password_reset',
+        description: `Password reset by admin: ${req.user?.username || 'System Admin'}`,
+        county: inspector.inspectionAreaCounty
+      });
+
+      res.json({
+        message: "Password reset successfully",
+        credentials: {
+          username: inspector.firstName.toLowerCase() + '.' + inspector.lastName.toLowerCase(),
+          temporaryPassword,
+          mustChangePassword: true
+        }
+      });
+    } catch (error) {
+      console.error("Error resetting inspector password:", error);
+      res.status(500).json({ message: "Failed to reset inspector password" });
     }
   });
 

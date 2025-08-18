@@ -12,11 +12,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ObjectUploader } from '@/components/ObjectUploader';
+// // import { ObjectUploader } from '@/components/ObjectUploader';
 import { useToast } from '@/hooks/use-toast';
 import { insertInspectorSchema } from '@shared/schema';
 import { Users, MapPin, Shield, Camera, UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
-import type { UploadResult } from '@uppy/core';
+// import type { UploadResult } from '@uppy/core';
 
 const formSchema = insertInspectorSchema.extend({
   confirmPhoneNumber: z.string().min(8, "Phone number confirmation is required"),
@@ -80,8 +80,11 @@ export default function InspectorOnboarding() {
       };
       delete (inspectorData as any).confirmPhoneNumber;
       
-      const response = await apiRequest('POST', '/api/inspectors', inspectorData);
-      return await response.json();
+      const response = await apiRequest('/api/inspectors', {
+        method: 'POST',
+        body: JSON.stringify(inspectorData)
+      });
+      return response;
     },
     onSuccess: (data) => {
       setCreatedInspector(data);
@@ -101,25 +104,28 @@ export default function InspectorOnboarding() {
     }
   });
 
-  const handleGetUploadParameters = async () => {
-    const response = await apiRequest('POST', '/api/inspectors/upload-picture', {});
-    const data = await response.json();
-    return {
-      method: 'PUT' as const,
-      url: data.uploadURL,
-    };
-  };
+  // const handleGetUploadParameters = async () => {
+  //   const response = await apiRequest('/api/inspectors/upload-picture', {
+  //     method: 'POST',
+  //     body: JSON.stringify({})
+  //   });
+  //   const data = response;
+  //   return {
+  //     method: 'PUT' as const,
+  //     url: data.uploadURL,
+  //   };
+  // };
 
-  const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful.length > 0) {
-      const uploadedFile = result.successful[0];
-      setProfilePictureUrl(uploadedFile.uploadURL as string);
-      toast({
-        title: "Profile Picture Uploaded",
-        description: "Profile picture uploaded successfully!",
-      });
-    }
-  };
+  // const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+  //   if (result.successful && result.successful.length > 0) {
+  //     const uploadedFile = result.successful[0];
+  //     setProfilePictureUrl(uploadedFile.uploadURL as string);
+  //     toast({
+  //       title: "Profile Picture Uploaded",
+  //       description: "Profile picture uploaded successfully!",
+  //     });
+  //   }
+  // };
 
   const onSubmit = (data: FormData) => {
     createInspectorMutation.mutate(data);
@@ -505,15 +511,21 @@ export default function InspectorOnboarding() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <ObjectUploader
-                        maxNumberOfFiles={1}
-                        maxFileSize={5 * 1024 * 1024} // 5MB
-                        onGetUploadParameters={handleGetUploadParameters}
-                        onComplete={handleUploadComplete}
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={() => {
+                          // Temporarily disabled - will implement later
+                          toast({
+                            title: "Coming Soon",
+                            description: "Photo upload will be available shortly",
+                          });
+                        }}
                       >
-                        <Camera className="w-4 h-4 mr-2" />
+                        <Camera className="w-4 h-4" />
                         Upload Profile Picture
-                      </ObjectUploader>
+                      </Button>
                       <p className="text-sm text-slate-500 mt-1">
                         Upload a professional headshot (max 5MB)
                       </p>

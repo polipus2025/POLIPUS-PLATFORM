@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Thermometer, Droplets, Mountain, Sprout, Satellite, Cloud, Sun, Leaf, MapPin, Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { Thermometer, Droplets, Mountain, Sprout, Satellite, Cloud, Sun, Leaf, MapPin, Activity, ChevronLeft, ChevronRight, FileCheck, AlertTriangle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 export default function QuickActions() {
   const [currentCountyIndex, setCurrentCountyIndex] = useState(0);
@@ -493,6 +494,42 @@ export default function QuickActions() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Certificate Approval Quick Action - Only for Regulatory Users */}
+      {(localStorage.getItem("userType") === "regulatory" || localStorage.getItem("userRole") === "director") && (
+        <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 hover:shadow-md transition-all">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-amber-800">
+              <FileCheck className="h-5 w-5" />
+              Certificate Approvals
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between mb-4">
+              <div className="grid grid-cols-3 gap-3 text-center flex-1">
+                <div>
+                  <p className="text-xl font-bold text-yellow-600">12</p>
+                  <p className="text-xs text-gray-600">Pending</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-green-600">8</p>
+                  <p className="text-xs text-gray-600">Approved</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-red-600">2</p>
+                  <p className="text-xs text-gray-600">Rejected</p>
+                </div>
+              </div>
+            </div>
+            <Link href="/certificate-approvals">
+              <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Review Certificates
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

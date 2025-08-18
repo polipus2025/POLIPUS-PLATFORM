@@ -69,13 +69,17 @@ import {
   blueCarbon360Users,
   
   // AgriTrace Workflow Tables
-  agriTraceWorkflows
+  agriTraceWorkflows,
+  
+  // Certificate Approval System
+  certificateTypes,
+  certificateApprovals
 } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { db } from './db';
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables
@@ -7615,6 +7619,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching workflow status:', error);
       res.status(500).json({ message: 'Failed to fetch workflow status' });
+    }
+  });
+
+  // === CERTIFICATE APPROVAL SYSTEM API ===
+
+  // Seed certificate types
+  app.post('/api/certificates/seed-types', async (req, res) => {
+    try {
+      const certificateTypesData = [
+        // EUDR Pack Certificates
+        { name: "Cover Page Certificate", category: "eudr_pack", description: "Main identification document for EUDR compliance pack" },
+        { name: "Export Eligibility Certificate", category: "eudr_pack", description: "Authorizes export based on EUDR compliance" },
+        { name: "Compliance Assessment Certificate", category: "eudr_pack", description: "Verifies EUDR regulation compliance" },
+        { name: "Deforestation Analysis Certificate", category: "eudr_pack", description: "Forest impact assessment documentation" },
+        { name: "Due Diligence Declaration Certificate", category: "eudr_pack", description: "Legal compliance and due diligence verification" },
+        { name: "Supply Chain Traceability Certificate", category: "eudr_pack", description: "Full supply chain documentation" },
+        
+        // Individual Compliance Certificates
+        { name: "EUDR Compliance Certificate", category: "individual", description: "Individual EUDR compliance verification" },
+        { name: "Quality Control Certificate", category: "individual", description: "Commodity grade and quality assessment" },
+        { name: "Certificate of Origin", category: "individual", description: "Product origin and source verification" },
+        { name: "Fumigation & Phytosanitary Certificate", category: "individual", description: "Health and safety treatment certification" },
+        { name: "Good Agricultural Practice Certificate", category: "individual", description: "Sustainable farming standards certification" },
+        { name: "Satellite Monitoring Certificate", category: "individual", description: "Environmental monitoring verification" },
+        
+        // Export & Trade Certificates
+        { name: "Export Permit Certificate", category: "export", description: "Official government export authorization" },
+        { name: "International Standards Certificate", category: "export", description: "Global compliance standards verification" },
+        { name: "Agricultural Commodity License", category: "export", description: "Trading and export licensing authorization" }
+      ];
+
+      for (const certType of certificateTypesData) {
+        await db.insert(certificateTypes).values(certType).onConflictDoNothing();
+      }
+
+      res.json({ message: "Certificate types seeded successfully", count: certificateTypesData.length });
+    } catch (error) {
+      console.error('Error seeding certificate types:', error);
+      res.status(500).json({ message: 'Failed to seed certificate types' });
+    }
+  });
+
+  // Get pending certificate approvals (for directors)
+  app.get('/api/certificates/approvals/pending', async (req, res) => {
+    try {
+      const pendingApprovals = await db.select().from(certificateApprovals)
+        .where(eq(certificateApprovals.status, 'pending'))
+        .orderBy(desc(certificateApprovals.priority), desc(certificateApprovals.createdAt));
+      
+      res.json(pendingApprovals);
+    } catch (error) {
+      console.error('Error fetching pending approvals:', error);
+      res.status(500).json({ message: 'Failed to fetch pending approvals' });
+    }
+  });
+
+  // Submit certificate for approval
+  app.post('/api/certificates/submit-approval', async (req, res) => {
+    try {
+      const {
+        certificateType,
+        certificateNumber,
+        requestedBy,
+        requestedByType,
+        inspectorReport,
+        inspectorId,
+        certificateData,
+        priority,
+        workflowId,
+        recipientEmail
+      } = req.body;
+
+      const approval = await db.insert(certificateApprovals).values({
+        certificateType,
+        certificateNumber,
+        requestedBy,
+        requestedByType,
+        inspectorReport,
+        inspectorId,
+        certificateData,
+        priority: priority || 2,
+        workflowId,
+        recipientEmail,
+        status: 'pending'
+      }).returning();
+
+      res.json(approval[0]);
+    } catch (error) {
+      console.error('Error submitting certificate for approval:', error);
+      res.status(500).json({ message: 'Failed to submit certificate for approval' });
+    }
+  });
+
+  // Approve certificate
+  app.post('/api/certificates/approve/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { directorId, notes } = req.body;
+
+      const [approval] = await db.update(certificateApprovals)
+        .set({
+          status: 'approved',
+          directorId,
+          approvalDate: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(certificateApprovals.id, parseInt(id)))
+        .returning();
+
+      res.json(approval);
+    } catch (error) {
+      console.error('Error approving certificate:', error);
+      res.status(500).json({ message: 'Failed to approve certificate' });
+    }
+  });
+
+  // Reject certificate
+  app.post('/api/certificates/reject/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { directorId, rejectionReason } = req.body;
+
+      const [approval] = await db.update(certificateApprovals)
+        .set({
+          status: 'rejected',
+          directorId,
+          rejectionReason,
+          updatedAt: new Date()
+        })
+        .where(eq(certificateApprovals.id, parseInt(id)))
+        .returning();
+
+      res.json(approval);
+    } catch (error) {
+      console.error('Error rejecting certificate:', error);
+      res.status(500).json({ message: 'Failed to reject certificate' });
+    }
+  });
+
+  // Send approved certificate to recipient
+  app.post('/api/certificates/send/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const [approval] = await db.update(certificateApprovals)
+        .set({
+          status: 'sent',
+          sentDate: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(certificateApprovals.id, parseInt(id)))
+        .returning();
+
+      res.json({ message: 'Certificate sent successfully', approval });
+    } catch (error) {
+      console.error('Error sending certificate:', error);
+      res.status(500).json({ message: 'Failed to send certificate' });
     }
   });
 

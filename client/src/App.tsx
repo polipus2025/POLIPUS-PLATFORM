@@ -167,6 +167,7 @@ import FarmerPaymentServices from "@/pages/farmer/farmer-payment-services";
 import ExporterPaymentServices from "@/pages/exporter/exporter-payment-services";
 import RegulatoryPaymentServices from "@/pages/regulatory-payment-services";
 import AgriTraceDashboard from "@/pages/agritrace-dashboard";
+import CertificateApprovals from "@/pages/certificate-approvals";
 
 import NotFound from "@/pages/not-found";
 
@@ -476,6 +477,7 @@ function Router() {
           
           {/* Portal-specific Payment Routes */}
           <Route path="/regulatory-payment-services" component={RegulatoryPaymentServices} />
+          <Route path="/certificate-approvals" component={CertificateApprovals} />
           <Route path="/farmer-payment-services" component={FarmerPaymentServices} />
           <Route path="/exporter-payment-services" component={ExporterPaymentServices} />
           

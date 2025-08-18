@@ -2703,4 +2703,46 @@ export type EudrComplianceDocument = typeof eudrComplianceDocuments.$inferSelect
 export type InsertEudrCompliancePack = z.infer<typeof insertEudrCompliancePackSchema>;
 export type InsertEudrComplianceDocument = z.infer<typeof insertEudrComplianceDocumentSchema>;
 
+// ========================================
+// CERTIFICATE APPROVAL SYSTEM
+// ========================================
+
+export const certificateApprovals = pgTable("certificate_approvals", {
+  id: serial("id").primaryKey(),
+  certificateType: varchar("certificate_type", { length: 100 }).notNull(),
+  certificateNumber: varchar("certificate_number", { length: 100 }).notNull().unique(),
+  requestedBy: varchar("requested_by", { length: 100 }).notNull(), // farmer_id, exporter_id etc
+  requestedByType: varchar("requested_by_type", { length: 50 }).notNull(), // "farmer", "exporter", "agent"
+  inspectorReport: jsonb("inspector_report"), // Inspector findings and recommendation
+  inspectorId: varchar("inspector_id", { length: 100 }),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // "pending", "approved", "rejected", "sent"
+  directorId: varchar("director_id", { length: 100 }), // Who approved/rejected
+  approvalDate: timestamp("approval_date"),
+  rejectionReason: text("rejection_reason"),
+  certificateData: jsonb("certificate_data").notNull(), // Complete certificate data
+  priority: integer("priority").default(2), // 1=urgent, 2=normal, 3=low
+  workflowId: integer("workflow_id").references(() => agriTraceWorkflows.id),
+  sentDate: timestamp("sent_date"),
+  recipientEmail: varchar("recipient_email", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const certificateTypes = pgTable("certificate_types", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  category: varchar("category", { length: 50 }).notNull(), // "eudr_pack", "individual", "export", "compliance"
+  description: text("description"),
+  requiresInspectorApproval: boolean("requires_inspector_approval").default(true),
+  requiresDirectorApproval: boolean("requires_director_approval").default(true),
+  averageProcessingDays: integer("average_processing_days").default(3),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export type CertificateApproval = typeof certificateApprovals.$inferSelect;
+export type InsertCertificateApproval = typeof certificateApprovals.$inferInsert;
+export type CertificateType = typeof certificateTypes.$inferSelect;
+export type InsertCertificateType = typeof certificateTypes.$inferInsert;
+
 

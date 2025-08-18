@@ -12,6 +12,10 @@ PDF Report Design Preference: User confirmed satisfaction with enhanced professi
 ## System Architecture
 The application employs a modern full-stack architecture with a clear separation of concerns.
 
+### Recent Updates (August 18, 2025)
+- **Two-Tier Inspector Portal System**: Complete implementation of separated Land Inspector and Port Inspector authentication flows with specialized themes and functionality. Land Inspectors handle agricultural/crop inspections while Port Inspectors manage maritime/export inspections.
+- **Database Schema Updates**: Added inspector_type field and port_facility column to support the two-tier inspector system with proper type differentiation.
+
 ### UI/UX Decisions
 - **Design System**: An elegant and refined ISMS.online-inspired design system with a modern slate/blue color palette, large metric numbers, professional typography, clean white cards, colored icon backgrounds, and smooth hover transitions. Official LACRA and AgriTrace360 branding is integrated throughout, with EU logos for EUDR compliance sections.
 - **Responsiveness**: Fully mobile-responsive design optimized for all devices, including a comprehensive Progressive Web App (PWA) with offline capabilities.
@@ -21,7 +25,7 @@ The application employs a modern full-stack architecture with a clear separation
 - **Frontend**: React (TypeScript), Wouter for routing, TanStack React Query for state management, shadcn/ui components (Radix UI primitives), Tailwind CSS for styling, and Vite for building.
 - **Backend**: Node.js (Express.js) in TypeScript, featuring a RESTful API pattern.
 - **Database**: PostgreSQL, managed with Drizzle ORM (PostgreSQL dialect) and Drizzle Kit for schema migrations.
-- **Authentication**: A three-tier, role-based authentication system with separate portals for regulatory staff, farmers, inspectors, and exporters, using JWT tokens and bcrypt for password hashing.
+- **Authentication**: A comprehensive multi-tier, role-based authentication system with separate portals for regulatory staff, farmers, two-tier inspector system (Land & Port Inspectors), buyers, and exporters, using JWT tokens and bcrypt for password hashing.
 - **Geographic Integration**: Authentic Liberian geographic data, including all 15 counties, major cities, and transportation networks, integrated into the GIS mapping system. Comprehensive geolocation service with auto-detection of GPS coordinates, click-to-map functionality, and GPS-enhanced farmer registration.
 - **Mobile Integration**: Complete Progressive Web App (PWA) implementation with comprehensive mobile standalone functionality, including offline-first architecture, service worker caching, and push notifications.
 - **Messaging**: A comprehensive cross-portal internal messaging system with threading, role-based filtering, and notification indicators.

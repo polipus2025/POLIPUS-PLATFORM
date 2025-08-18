@@ -203,7 +203,7 @@ function Router() {
       <Route path="/regulatory-login" component={RegulatoryLogin} />
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
-      <Route path="/inspector-login" component={FieldAgentLogin} />
+      <Route path="/inspector-login" component={InspectorPortal} />
       <Route path="/test-field-agent-login" component={TestFieldAgentLogin} />
       <Route path="/mobile-field-agent-login" component={MobileFieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />

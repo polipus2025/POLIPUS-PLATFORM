@@ -650,6 +650,8 @@ export class AgriTraceWorkflowService {
   async performQualityAssessment(workflowId: number, qualityData: any) {
     const gradeValue = qualityData.grade === "Grade A" ? 95 : qualityData.grade === "Grade B" ? 85 : 75;
     
+    const qualityStatus = gradeValue >= 90 ? "pass" : gradeValue >= 70 ? "warning" : "fail";
+    
     const qualityMetrics = await db.insert(agriTraceQualityMetrics).values({
       workflowId: workflowId,
       metricType: "commodity_quality",
@@ -658,7 +660,7 @@ export class AgriTraceWorkflowService {
       unit: "percentage",
       testedBy: qualityData.inspector || "LACRA-INSPECTOR",
       testMethod: "visual_inspection",
-      status: "pass"
+      status: qualityStatus
     }).returning();
 
     await db.update(agriTraceWorkflows)

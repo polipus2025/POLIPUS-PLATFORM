@@ -13,6 +13,8 @@ PDF Report Design Preference: User confirmed satisfaction with enhanced professi
 The application employs a modern full-stack architecture with a clear separation of concerns.
 
 ### Recent Updates (August 18, 2025)
+- **React Mounting Issues Fixed**: Successfully resolved critical React application mounting problems by removing complex service worker implementations and problematic upload components that were preventing the app from loading.
+- **Inspector Upload Functionality Removed**: Eliminated profile picture upload functionality from inspector onboarding system to fix runtime errors, while preserving upload capabilities for farmer onboarding as requested.
 - **Two-Tier Inspector Portal System**: Complete implementation of separated Land Inspector and Port Inspector authentication flows with specialized themes and functionality. Land Inspectors handle agricultural/crop inspections while Port Inspectors manage maritime/export inspections.
 - **Database Schema Updates**: Added inspector_type field and port_facility column to support the two-tier inspector system with proper type differentiation.
 

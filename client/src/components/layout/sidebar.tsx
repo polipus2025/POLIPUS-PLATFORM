@@ -48,7 +48,6 @@ const regulatoryNavigation = [
   { name: "Economic Reporting", href: "/economic-reporting", icon: TrendingUp },
   { name: "Commodities", href: "/commodities", icon: Leaf },
   { name: "Inspections", href: "/inspections", icon: ClipboardCheck },
-  { name: "Inspector Onboarding", href: "/regulatory/inspector-onboarding", icon: UserPlus },
   { name: "Inspector Management", href: "/regulatory/inspector-management", icon: Users },
   { name: "Export Certifications", href: "/certifications", icon: Tag },
   { name: "Document Verification", href: "/verification", icon: Shield },

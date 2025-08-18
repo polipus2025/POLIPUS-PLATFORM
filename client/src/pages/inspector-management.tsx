@@ -64,16 +64,17 @@ export default function InspectorManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInspector, setSelectedInspector] = useState<Inspector | null>(null);
   const [showActivities, setShowActivities] = useState(false);
+  const [activeTab, setActiveTab] = useState("management");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch inspectors
-  const { data: inspectors = [], isLoading } = useQuery({
+  const { data: inspectors = [], isLoading } = useQuery<Inspector[]>({
     queryKey: ['/api/inspectors'],
   });
 
   // Fetch inspector activities
-  const { data: activities = [] } = useQuery({
+  const { data: activities = [] } = useQuery<InspectorActivity[]>({
     queryKey: ['/api/inspectors', selectedInspector?.id, 'activities'],
     enabled: !!selectedInspector,
   });
@@ -150,131 +151,357 @@ export default function InspectorManagement() {
     });
   };
 
+  // Inline Inspector Onboarding Form Component
+  const InspectorOnboardingForm = () => {
+    const [currentStep, setCurrentStep] = useState(1);
+    const [formData, setFormData] = useState({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      nationalId: '',
+      address: '',
+      inspectionAreaCounty: '',
+      inspectionAreaDistrict: '',
+      inspectionAreaDescription: '',
+      specializations: '',
+      certificationLevel: '',
+      profilePicture: null as File | null
+    });
+
+    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+    const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+    const handleSubmit = async () => {
+      const submitData = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) submitData.append(key, value);
+      });
+
+      try {
+        await apiRequest('POST', '/api/inspectors', submitData);
+        toast({ title: "Success", description: "Inspector onboarded successfully!" });
+        queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
+        setActiveTab('management');
+        setCurrentStep(1);
+        setFormData({
+          firstName: '', lastName: '', email: '', phoneNumber: '', nationalId: '', 
+          address: '', inspectionAreaCounty: '', inspectionAreaDistrict: '',
+          inspectionAreaDescription: '', specializations: '', certificationLevel: '',
+          profilePicture: null
+        });
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to onboard inspector" });
+      }
+    };
+
+    return (
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="w-5 h-5" />
+            Inspector Onboarding - Step {currentStep} of 4
+          </CardTitle>
+          <CardDescription>
+            Complete the multi-step process to register a new agricultural inspector
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {currentStep === 1 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Personal Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">First Name</label>
+                  <Input 
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    placeholder="Enter first name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Last Name</label>
+                  <Input 
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    placeholder="Enter last name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email</label>
+                  <Input 
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Phone Number</label>
+                  <Input 
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                    placeholder="Enter phone number"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">National ID</label>
+                  <Input 
+                    value={formData.nationalId}
+                    onChange={(e) => setFormData({...formData, nationalId: e.target.value})}
+                    placeholder="Enter national ID number"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Address</label>
+                  <Input 
+                    value={formData.address}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    placeholder="Enter full address"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Location Assignment</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Inspection Area County</label>
+                  <Select value={formData.inspectionAreaCounty} onValueChange={(value) => setFormData({...formData, inspectionAreaCounty: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select county" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {liberianCounties.slice(1).map(county => (
+                        <SelectItem key={county} value={county}>{county}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">District (Optional)</label>
+                  <Input 
+                    value={formData.inspectionAreaDistrict || ''}
+                    onChange={(e) => setFormData({...formData, inspectionAreaDistrict: e.target.value})}
+                    placeholder="Enter district"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Area Description</label>
+                <Input 
+                  value={formData.inspectionAreaDescription || ''}
+                  onChange={(e) => setFormData({...formData, inspectionAreaDescription: e.target.value})}
+                  placeholder="Describe the inspection area coverage"
+                />
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Qualifications</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Specializations</label>
+                  <Input 
+                    value={formData.specializations || ''}
+                    onChange={(e) => setFormData({...formData, specializations: e.target.value})}
+                    placeholder="e.g., Crop inspection, Livestock"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Certification Level</label>
+                  <Select value={formData.certificationLevel} onValueChange={(value) => setFormData({...formData, certificationLevel: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Junior">Junior Inspector</SelectItem>
+                      <SelectItem value="Senior">Senior Inspector</SelectItem>
+                      <SelectItem value="Lead">Lead Inspector</SelectItem>
+                      <SelectItem value="Specialist">Specialist Inspector</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Profile Picture</h3>
+              <div>
+                <label className="block text-sm font-medium mb-2">Upload Profile Picture</label>
+                <Input 
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFormData({...formData, profilePicture: e.target.files?.[0] || null})}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-6">
+            <Button 
+              variant="outline" 
+              onClick={prevStep} 
+              disabled={currentStep === 1}
+            >
+              Previous
+            </Button>
+            
+            {currentStep < 4 ? (
+              <Button onClick={nextStep}>
+                Next
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit} className="bg-green-600 hover:bg-green-700">
+                Complete Onboarding
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+
       <div className="mb-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
-              Inspector Management Information System
-            </h1>
-            <p className="text-slate-600">
-              Manage inspector profiles, access controls, and monitor activities
-            </p>
-          </div>
-          <Button 
-            onClick={() => window.location.href = '/regulatory/inspector-onboarding'}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add New Inspector
-          </Button>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            Inspector Management System
+          </h1>
+          <p className="text-slate-600">
+            Complete inspector onboarding and management solution for agricultural compliance monitoring
+          </p>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <Users className="w-8 h-8 text-blue-600 mr-3" />
-                <div>
-                  <p className="text-sm text-slate-600">Total Inspectors</p>
-                  <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <UserCheck className="w-8 h-8 text-green-600 mr-3" />
-                <div>
-                  <p className="text-sm text-slate-600">Active Inspectors</p>
-                  <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <XCircle className="w-8 h-8 text-red-600 mr-3" />
-                <div>
-                  <p className="text-sm text-slate-600">Inactive</p>
-                  <p className="text-2xl font-bold text-slate-900">{stats.inactive}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <Key className="w-8 h-8 text-orange-600 mr-3" />
-                <div>
-                  <p className="text-sm text-slate-600">Can Login</p>
-                  <p className="text-2xl font-bold text-slate-900">{stats.canLogin}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="onboarding" className="flex items-center gap-2">
+              <UserPlus className="w-4 h-4" />
+              Inspector Onboarding
+            </TabsTrigger>
+            <TabsTrigger value="management" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Inspector Management
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Filters */}
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <Input
-                placeholder="Search by name, ID, or phone number..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <TabsContent value="onboarding" className="mt-6">
+            <InspectorOnboardingForm />
+          </TabsContent>
+
+          <TabsContent value="management" className="mt-6">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center">
+                    <Users className="w-8 h-8 text-blue-600 mr-3" />
+                    <div>
+                      <p className="text-sm text-slate-600">Total Inspectors</p>
+                      <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center">
+                    <UserCheck className="w-8 h-8 text-green-600 mr-3" />
+                    <div>
+                      <p className="text-sm text-slate-600">Active Inspectors</p>
+                      <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center">
+                    <XCircle className="w-8 h-8 text-red-600 mr-3" />
+                    <div>
+                      <p className="text-sm text-slate-600">Inactive</p>
+                      <p className="text-2xl font-bold text-slate-900">{stats.inactive}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center">
+                    <Key className="w-8 h-8 text-orange-600 mr-3" />
+                    <div>
+                      <p className="text-sm text-slate-600">Can Login</p>
+                      <p className="text-2xl font-bold text-slate-900">{stats.canLogin}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-          <Select value={selectedCounty} onValueChange={setSelectedCounty}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select county" />
-            </SelectTrigger>
-            <SelectContent>
-              {liberianCounties.map((county) => (
-                <SelectItem key={county} value={county}>
-                  {county}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
-      {/* Inspector List */}
-      <div className="grid gap-4">
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-slate-600">Loading inspectors...</p>
-          </div>
-        ) : filteredInspectors.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No inspectors found</h3>
-              <p className="text-slate-600 mb-4">No inspectors match your current search criteria.</p>
-              <Button onClick={() => window.location.href = '/regulatory/inspector-onboarding'}>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add First Inspector
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredInspectors.map((inspector: Inspector) => (
-            <Card key={inspector.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="w-16 h-16">
-                      <AvatarImage src={inspector.profilePicture || ""} />
-                      <AvatarFallback>
+            {/* Filters */}
+            <div className="flex gap-4 mb-6">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search by name, ID, or phone number..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <Select value={selectedCounty} onValueChange={setSelectedCounty}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select county" />
+                </SelectTrigger>
+                <SelectContent>
+                  {liberianCounties.map((county) => (
+                    <SelectItem key={county} value={county}>
+                      {county}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Inspector List */}
+            <div className="grid gap-4">
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-slate-600">Loading inspectors...</p>
+                </div>
+              ) : filteredInspectors.length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No inspectors found</h3>
+                    <p className="text-slate-600 mb-4">No inspectors match your current search criteria.</p>
+                    <Button onClick={() => setActiveTab('onboarding')}>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Add First Inspector
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredInspectors.map((inspector: Inspector) => (
+                  <Card key={inspector.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                          <Avatar className="w-16 h-16">
+                            <AvatarImage src={inspector.profilePicture || ""} />
+                            <AvatarFallback>
                         {inspector.firstName[0]}{inspector.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
@@ -459,6 +686,9 @@ export default function InspectorManagement() {
             </Card>
           ))
         )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

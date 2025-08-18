@@ -1498,6 +1498,11 @@ export const buyers = pgTable("buyers", {
   documentsSubmitted: text("documents_submitted"), // JSON array of document types
   documentsVerified: text("documents_verified"), // JSON array of verified document types
   
+  // Profile and Document Uploads
+  profilePhotoUrl: text("profile_photo_url").notNull(), // MANDATORY - profile photo URL
+  businessCardFrontUrl: text("business_card_front_url"), // OPTIONAL - business card front
+  businessCardBackUrl: text("business_card_back_url"), // OPTIONAL - business card back
+  
   // Regulatory Management
   assignedOfficer: integer("assigned_officer").references(() => authUsers.id),
   approvedBy: integer("approved_by").references(() => authUsers.id),

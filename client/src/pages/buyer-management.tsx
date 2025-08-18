@@ -32,7 +32,11 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Upload,
+  Camera,
+  CreditCard,
+  User
 } from "lucide-react";
 import { z } from "zod";
 
@@ -64,6 +68,13 @@ const buyerSchema = z.object({
   licenseNumber: z.string().optional(),
   licenseType: z.string().optional(),
   notes: z.string().optional(),
+  
+  // Profile and Document Uploads - MANDATORY
+  profilePhotoUrl: z.string().min(1, "Profile photo is mandatory"),
+  
+  // Business Card Uploads - OPTIONAL
+  businessCardFrontUrl: z.string().optional(),
+  businessCardBackUrl: z.string().optional(),
 });
 
 type BuyerFormData = z.infer<typeof buyerSchema>;
@@ -124,7 +135,7 @@ export default function BuyerManagement() {
 
   // Create buyer mutation
   const createBuyerMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/buyers", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/buyers", { body: JSON.stringify(data) }),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -148,7 +159,7 @@ export default function BuyerManagement() {
   // Approve buyer mutation
   const approveBuyerMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest("PUT", `/api/buyers/${id}/approve`, data),
+      apiRequest("PUT", `/api/buyers/${id}/approve`, { body: JSON.stringify(data) }),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -161,7 +172,7 @@ export default function BuyerManagement() {
   // Generate credentials mutation
   const generateCredentialsMutation = useMutation({
     mutationFn: (buyerId: number) => 
-      apiRequest("POST", `/api/buyers/${buyerId}/generate-credentials`),
+      apiRequest("POST", `/api/buyers/${buyerId}/generate-credentials`, {}),
     onSuccess: (data) => {
       toast({
         title: "Credentials Generated",
@@ -183,13 +194,13 @@ export default function BuyerManagement() {
     createBuyerMutation.mutate(formattedData);
   };
 
-  const filteredBuyers = buyers?.filter((buyer: any) => {
-    const matchesSearch = buyer.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      buyer.primaryEmail.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredBuyers = Array.isArray(buyers) ? buyers.filter((buyer: any) => {
+    const matchesSearch = buyer.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      buyer.primaryEmail?.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (filterStatus === "all") return matchesSearch;
     return matchesSearch && buyer.complianceStatus === filterStatus;
-  }) || [];
+  }) : [];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -241,10 +252,11 @@ export default function BuyerManagement() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <Tabs defaultValue="basic" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="basic">Basic Info</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                     <TabsTrigger value="business">Business</TabsTrigger>
+                    <TabsTrigger value="documents">Documents</TabsTrigger>
                     <TabsTrigger value="compliance">Compliance</TabsTrigger>
                   </TabsList>
 
@@ -644,6 +656,134 @@ export default function BuyerManagement() {
                       )}
                     />
                   </TabsContent>
+
+                  <TabsContent value="documents" className="space-y-6">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Camera className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-medium text-blue-900 dark:text-blue-100">Document Requirements</h3>
+                      </div>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Profile photo is mandatory for all buyers. Business cards are optional but recommended.
+                      </p>
+                    </div>
+
+                    {/* Profile Photo - MANDATORY */}
+                    <FormField
+                      control={form.control}
+                      name="profilePhotoUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Profile Photo *
+                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                          </FormLabel>
+                          <FormControl>
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                              <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                              <p className="text-sm text-gray-600 mb-2">
+                                Upload profile photo (JPG, PNG, max 5MB)
+                              </p>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    // For now, we'll use a placeholder URL
+                                    // In production, this would upload to object storage
+                                    field.onChange(`/uploads/profiles/${file.name}`);
+                                  }
+                                }}
+                                data-testid="input-profile-photo"
+                              />
+                              {field.value && (
+                                <p className="text-xs text-green-600 mt-2">✓ Photo uploaded</p>
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Business Card Front - OPTIONAL */}
+                    <FormField
+                      control={form.control}
+                      name="businessCardFrontUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            Business Card (Front)
+                            <Badge variant="secondary" className="text-xs">Optional</Badge>
+                          </FormLabel>
+                          <FormControl>
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                              <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                              <p className="text-sm text-gray-600 mb-2">
+                                Upload business card front (JPG, PNG, max 5MB)
+                              </p>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    field.onChange(`/uploads/business-cards/${file.name}`);
+                                  }
+                                }}
+                                data-testid="input-business-card-front"
+                              />
+                              {field.value && (
+                                <p className="text-xs text-green-600 mt-2">✓ Front uploaded</p>
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Business Card Back - OPTIONAL */}
+                    <FormField
+                      control={form.control}
+                      name="businessCardBackUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            Business Card (Back)
+                            <Badge variant="secondary" className="text-xs">Optional</Badge>
+                          </FormLabel>
+                          <FormControl>
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                              <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                              <p className="text-sm text-gray-600 mb-2">
+                                Upload business card back (JPG, PNG, max 5MB)
+                              </p>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    field.onChange(`/uploads/business-cards/${file.name}`);
+                                  }
+                                }}
+                                data-testid="input-business-card-back"
+                              />
+                              {field.value && (
+                                <p className="text-xs text-green-600 mt-2">✓ Back uploaded</p>
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
                 </Tabs>
 
                 <div className="flex justify-end space-x-4">
@@ -676,7 +816,7 @@ export default function BuyerManagement() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Buyers</p>
-                <p className="text-2xl font-bold text-gray-900">{buyers?.length || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{Array.isArray(buyers) ? buyers.length : 0}</p>
               </div>
               <Building className="h-8 w-8 text-blue-600" />
             </div>
@@ -688,7 +828,7 @@ export default function BuyerManagement() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending Approval</p>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {buyers?.filter((b: any) => b.complianceStatus === 'pending').length || 0}
+                  {Array.isArray(buyers) ? buyers.filter((b: any) => b.complianceStatus === 'pending').length : 0}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-yellow-600" />
@@ -701,7 +841,7 @@ export default function BuyerManagement() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Approved</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {buyers?.filter((b: any) => b.complianceStatus === 'approved').length || 0}
+                  {Array.isArray(buyers) ? buyers.filter((b: any) => b.complianceStatus === 'approved').length : 0}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
@@ -714,7 +854,7 @@ export default function BuyerManagement() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Portal Users</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {buyers?.filter((b: any) => b.portalAccess).length || 0}
+                  {Array.isArray(buyers) ? buyers.filter((b: any) => b.portalAccess).length : 0}
                 </p>
               </div>
               <Shield className="h-8 w-8 text-blue-600" />

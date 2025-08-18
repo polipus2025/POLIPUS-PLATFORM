@@ -168,7 +168,7 @@ import ExporterPaymentServices from "@/pages/exporter/exporter-payment-services"
 import RegulatoryPaymentServices from "@/pages/regulatory-payment-services";
 import AgriTraceDashboard from "@/pages/agritrace-dashboard";
 import CertificateApprovals from "@/pages/certificate-approvals";
-// import InspectorOnboarding from "@/pages/inspector-onboarding";
+import InspectorOnboarding from "@/pages/inspector-onboarding";
 import TestInspector from "@/pages/test-inspector";
 import MinimalTest from "@/pages/minimal-test";
 import InspectorManagement from "@/pages/inspector-management";
@@ -215,7 +215,7 @@ function Router() {
       <Route path="/inspector-portal" component={InspectorPortal} />
       <Route path="/land-inspector-login" component={LandInspectorLogin} />
       <Route path="/port-inspector-login" component={PortInspectorLogin} />
-      <Route path="/inspector-onboarding" component={MinimalTest} />
+      <Route path="/inspector-onboarding" component={InspectorOnboarding} />
       <Route path="/minimal-test" component={MinimalTest} />
 
       {/* LiveTrace Authentication Routes */}

@@ -11,12 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-// // import { ObjectUploader } from '@/components/ObjectUploader';
+
 import { useToast } from '@/hooks/use-toast';
 import { insertInspectorSchema } from '@shared/schema';
-import { Users, MapPin, Shield, Camera, UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
-// import type { UploadResult } from '@uppy/core';
+import { Users, MapPin, Shield, UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
 
 const formSchema = insertInspectorSchema.extend({
   confirmPhoneNumber: z.string().min(8, "Phone number confirmation is required"),
@@ -47,7 +45,7 @@ const specializations = [
 
 export default function InspectorOnboarding() {
   const [step, setStep] = useState(1);
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
+
   const [createdInspector, setCreatedInspector] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -75,7 +73,6 @@ export default function InspectorOnboarding() {
     mutationFn: async (data: FormData) => {
       const inspectorData = {
         ...data,
-        profilePicture: profilePictureUrl,
         specializations: data.specializations
       };
       delete (inspectorData as any).confirmPhoneNumber;
@@ -142,7 +139,6 @@ export default function InspectorOnboarding() {
   const resetForm = () => {
     form.reset();
     setStep(1);
-    setProfilePictureUrl("");
     setCreatedInspector(null);
   };
 
@@ -501,37 +497,7 @@ export default function InspectorOnboarding() {
                   )}
                 />
 
-                <div className="space-y-4">
-                  <FormLabel>Profile Picture</FormLabel>
-                  <div className="flex items-center gap-4">
-                    <Avatar className="w-24 h-24">
-                      <AvatarImage src={profilePictureUrl} />
-                      <AvatarFallback>
-                        <Camera className="w-8 h-8 text-slate-400" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <Button 
-                        type="button" 
-                        variant="outline"
-                        className="flex items-center gap-2"
-                        onClick={() => {
-                          // Temporarily disabled - will implement later
-                          toast({
-                            title: "Coming Soon",
-                            description: "Photo upload will be available shortly",
-                          });
-                        }}
-                      >
-                        <Camera className="w-4 h-4" />
-                        Upload Profile Picture
-                      </Button>
-                      <p className="text-sm text-slate-500 mt-1">
-                        Upload a professional headshot (max 5MB)
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {/* Profile picture upload removed to fix React mounting issues */}
 
                 <div className="flex justify-between">
                   <Button type="button" variant="outline" onClick={prevStep}>

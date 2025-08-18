@@ -655,14 +655,14 @@ Please provide these credentials to the exporter. They will be required to chang
                             <td data-testid={`text-county-${exporter.id}`} className="p-3">{exporter.county}</td>
                             <td className="p-3">
                               <div className="flex flex-wrap gap-1">
-                                {exporter.commodityTypes.slice(0, 2).map((commodity, idx) => (
+                                {(exporter.commodityTypes || []).slice(0, 2).map((commodity, idx) => (
                                   <Badge key={idx} variant="secondary" className="text-xs">
                                     {commodity}
                                   </Badge>
                                 ))}
-                                {exporter.commodityTypes.length > 2 && (
+                                {(exporter.commodityTypes || []).length > 2 && (
                                   <Badge variant="secondary" className="text-xs">
-                                    +{exporter.commodityTypes.length - 2} more
+                                    +{(exporter.commodityTypes || []).length - 2} more
                                   </Badge>
                                 )}
                               </div>

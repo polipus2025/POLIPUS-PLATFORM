@@ -126,25 +126,25 @@ export default function LandMappingDashboard() {
   const queryClient = useQueryClient();
 
   // Fetch land mappings
-  const { data: landMappings = [], isLoading: loadingMappings } = useQuery({
+  const { data: landMappings = [], isLoading: loadingMappings } = useQuery<FarmerLandMapping[]>({
     queryKey: ["/api/farmer-land-mappings"],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch harvest schedules
-  const { data: harvestSchedules = [], isLoading: loadingSchedules } = useQuery({
+  const { data: harvestSchedules = [], isLoading: loadingSchedules } = useQuery<HarvestSchedule[]>({
     queryKey: ["/api/harvest-schedules"],
     refetchInterval: 30000,
   });
 
   // Fetch upcoming harvests
-  const { data: upcomingHarvests = [] } = useQuery({
+  const { data: upcomingHarvests = [] } = useQuery<HarvestSchedule[]>({
     queryKey: ["/api/harvest-schedules", { upcoming: true }],
     refetchInterval: 30000,
   });
 
   // Fetch land mapping inspections
-  const { data: inspections = [], isLoading: loadingInspections } = useQuery({
+  const { data: inspections = [], isLoading: loadingInspections } = useQuery<any[]>({
     queryKey: ["/api/land-mapping-inspections"],
     refetchInterval: 30000,
   });
@@ -152,9 +152,7 @@ export default function LandMappingDashboard() {
   // Approve land mapping mutation
   const approveMapping = useMutation({
     mutationFn: async (data: { id: number; inspectorId: string }) => {
-      return await apiRequest("PATCH", `/api/farmer-land-mappings/${data.id}/approve`, {
-        inspectorId: data.inspectorId
-      });
+      return await apiRequest("PATCH", `/api/farmer-land-mappings/${data.id}/approve`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/farmer-land-mappings"] });
@@ -176,9 +174,7 @@ export default function LandMappingDashboard() {
   // Approve harvest schedule mutation
   const approveSchedule = useMutation({
     mutationFn: async (data: { id: number; inspectorId: string }) => {
-      return await apiRequest("PATCH", `/api/harvest-schedules/${data.id}/approve`, {
-        inspectorId: data.inspectorId
-      });
+      return await apiRequest("PATCH", `/api/harvest-schedules/${data.id}/approve`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/harvest-schedules"] });
@@ -200,7 +196,7 @@ export default function LandMappingDashboard() {
   // Create inspection mutation
   const createInspection = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/land-mapping-inspections", data);
+      return await apiRequest("POST", "/api/land-mapping-inspections", {}, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/land-mapping-inspections"] });

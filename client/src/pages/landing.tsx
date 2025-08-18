@@ -311,14 +311,14 @@ export default function Landing() {
               </Button>
             </div>
 
-            {/* Field Agent Portal */}
+            {/* Inspector Portal */}
             <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
               <div className="text-center pb-3">
                 <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                   <Users className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Field Agent Portal
+                  Inspector Portal
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
                   Extension officers
@@ -348,7 +348,7 @@ export default function Landing() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/field-agent-login">
+                <a href="/inspector-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

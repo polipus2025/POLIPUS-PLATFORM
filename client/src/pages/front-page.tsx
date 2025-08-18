@@ -360,14 +360,14 @@ export default function FrontPage() {
                 </div>
               </Link>
 
-              {/* Field Agent Portal */}
-              <Link href="/field-agent-login">
+              {/* Inspector Portal */}
+              <Link href="/inspector-login">
                 <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-300">
                   <div className="text-center p-4">
                     <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
                       <MapPin className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Field Agent Portal</h4>
+                    <h4 className="font-bold text-slate-900 mb-2">Inspector Portal</h4>
                     <p className="text-xs text-slate-600 mb-3">Inspection and field operations staff</p>
                     <Button size="sm" className="w-full isms-button">Access Portal</Button>
                   </div>

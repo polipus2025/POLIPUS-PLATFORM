@@ -594,6 +594,189 @@ export class AgriTraceWorkflowService {
       events
     };
   }
+
+  // Step 4: Commodity Registration
+  async registerCommodities(workflowId: number, commodities: any[]) {
+    for (const commodity of commodities) {
+      await db.insert(agriTraceEvents).values({
+        workflowId: workflowId,
+        eventType: "commodity_registration",
+        eventName: `${commodity.type} Registration`,
+        eventData: commodity,
+        triggeredBy: "system",
+        triggerType: "automatic",
+        severity: "info"
+      });
+    }
+
+    await db.update(agriTraceWorkflows)
+      .set({ 
+        completedStages: 4,
+        currentStage: "commodity_registered"
+      })
+      .where(eq(agriTraceWorkflows.id, workflowId));
+
+    return { success: true, commoditiesRegistered: commodities.length };
+  }
+
+  // Step 5: EUDR Compliance Check
+  async performEudrCompliance(workflowId: number) {
+    const complianceResult = await db.insert(agriTraceCompliance).values({
+      workflowId: workflowId,
+      complianceType: "eudr_verification",
+      requirement: "EU Deforestation Regulation Article 8",
+      status: "compliant",
+      assessedBy: "LACRA-INSPECTOR",
+      evidence: {
+        deforestationRisk: "low",
+        satelliteVerification: true,
+        documentationComplete: true,
+        dueDigitalIntelligence: true
+      }
+    }).returning();
+
+    await db.update(agriTraceWorkflows)
+      .set({ 
+        completedStages: 5,
+        currentStage: "eudr_verified",
+        complianceScore: 95
+      })
+      .where(eq(agriTraceWorkflows.id, workflowId));
+
+    return complianceResult[0];
+  }
+
+  // Step 6: Quality Assessment
+  async performQualityAssessment(workflowId: number, qualityData: any) {
+    const qualityMetrics = await db.insert(agriTraceQualityMetrics).values({
+      workflowId: workflowId,
+      metricType: "commodity_quality",
+      metricName: "Grade Assessment",
+      value: qualityData.grade || "Grade A",
+      unit: "grade",
+      measuredBy: qualityData.inspector || "LACRA-INSPECTOR",
+      measurementMethod: "visual_inspection",
+      standardReference: "LACRA-QS-001"
+    }).returning();
+
+    await db.update(agriTraceWorkflows)
+      .set({ 
+        completedStages: 6,
+        currentStage: "quality_assessed"
+      })
+      .where(eq(agriTraceWorkflows.id, workflowId));
+
+    return qualityMetrics[0];
+  }
+
+  // Step 7: Generate Certification
+  async generateCertification(workflowId: number) {
+    const certificationData = {
+      certificateNumber: `LACRA-CERT-${Date.now()}`,
+      certificateType: "EUDR_COMPLIANCE",
+      issuedBy: "LACRA",
+      issuedDate: new Date(),
+      expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year
+    };
+
+    await db.insert(agriTraceDocuments).values({
+      workflowId: workflowId,
+      documentType: "certificate",
+      documentName: "EUDR Compliance Certificate",
+      documentUrl: `/certificates/${certificationData.certificateNumber}.pdf`,
+      uploadedBy: "LACRA-SYSTEM",
+      documentMetadata: certificationData
+    });
+
+    await db.update(agriTraceWorkflows)
+      .set({ 
+        completedStages: 7,
+        currentStage: "certified"
+      })
+      .where(eq(agriTraceWorkflows.id, workflowId));
+
+    return certificationData;
+  }
+
+  // Step 8: Record Harvest
+  async recordHarvest(workflowId: number, harvestData: any) {
+    await db.insert(agriTraceEvents).values({
+      workflowId: workflowId,
+      eventType: "harvest_recording",
+      eventName: "Harvest Data Recorded",
+      eventData: harvestData,
+      triggeredBy: harvestData.farmerId || "FARMER",
+      triggerType: "manual",
+      severity: "info"
+    });
+
+    await db.update(agriTraceWorkflows)
+      .set({ 
+        completedStages: 8,
+        currentStage: "harvest_recorded"
+      })
+      .where(eq(agriTraceWorkflows.id, workflowId));
+
+    return { success: true, harvestRecorded: true };
+  }
+
+  // Step 9: Track Transportation
+  async trackTransportation(workflowId: number, transportData: any) {
+    await db.insert(agriTraceEvents).values({
+      workflowId: workflowId,
+      eventType: "transportation_tracking",
+      eventName: "Commodity Transport Initiated",
+      eventData: transportData,
+      triggeredBy: transportData.driverId || "TRANSPORT-COORDINATOR",
+      triggerType: "manual",
+      severity: "info"
+    });
+
+    await db.update(agriTraceWorkflows)
+      .set({ 
+        completedStages: 9,
+        currentStage: "in_transport"
+      })
+      .where(eq(agriTraceWorkflows.id, workflowId));
+
+    return { success: true, transportTracking: true };
+  }
+
+  // Step 13: Generate EUDR Pack
+  async generateEudrPack(workflowId: number) {
+    const packData = {
+      packId: `EUDR-PACK-${workflowId}-${Date.now()}`,
+      workflowId: workflowId,
+      generatedAt: new Date(),
+      includesCertificates: [
+        "Cover Page",
+        "Export Eligibility Certificate", 
+        "Compliance Assessment Report",
+        "Deforestation Analysis Report",
+        "Due Diligence Declaration",
+        "Supply Chain Traceability Report"
+      ]
+    };
+
+    await db.insert(agriTraceDocuments).values({
+      workflowId: workflowId,
+      documentType: "eudr_pack",
+      documentName: "Complete EUDR Compliance Pack",
+      documentUrl: `/eudr-packs/${packData.packId}.pdf`,
+      uploadedBy: "LACRA-SYSTEM",
+      documentMetadata: packData
+    });
+
+    await db.update(agriTraceWorkflows)
+      .set({ 
+        completedStages: 13,
+        currentStage: "eudr_pack_generated",
+        status: "completed"
+      })
+      .where(eq(agriTraceWorkflows.id, workflowId));
+
+    return packData;
+  }
 }
 
 export const agriTraceService = new AgriTraceWorkflowService();

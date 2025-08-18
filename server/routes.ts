@@ -7498,6 +7498,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Step 1: Inspector Registration
+  app.post('/api/agritrace/inspector-registration', async (req, res) => {
+    try {
+      const inspectorData = req.body;
+      const workflow = await agriTraceService.registerInspector(inspectorData);
+      res.json(workflow);
+    } catch (error) {
+      console.error('Error registering inspector:', error);
+      res.status(500).json({ message: 'Failed to register inspector' });
+    }
+  });
+
+  // Step 2: Farmer Onboarding
+  app.post('/api/agritrace/farmer-onboarding', async (req, res) => {
+    try {
+      const farmerData = req.body;
+      const workflow = await agriTraceService.onboardFarmer(farmerData);
+      res.json(workflow);
+    } catch (error) {
+      console.error('Error onboarding farmer:', error);
+      res.status(500).json({ message: 'Failed to onboard farmer' });
+    }
+  });
+
+  // Step 4: Commodity Registration
+  app.post('/api/agritrace/commodity-registration', async (req, res) => {
+    try {
+      const { workflowId, commodities } = req.body;
+      const result = await agriTraceService.registerCommodities(workflowId, commodities);
+      res.json(result);
+    } catch (error) {
+      console.error('Error registering commodities:', error);
+      res.status(500).json({ message: 'Failed to register commodities' });
+    }
+  });
+
+  // Step 5: EUDR Compliance Check
+  app.post('/api/agritrace/eudr-compliance', async (req, res) => {
+    try {
+      const { workflowId } = req.body;
+      const result = await agriTraceService.performEudrCompliance(workflowId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error performing EUDR compliance check:', error);
+      res.status(500).json({ message: 'Failed to perform EUDR compliance check' });
+    }
+  });
+
+  // Step 6: Quality Assessment
+  app.post('/api/agritrace/quality-assessment', async (req, res) => {
+    try {
+      const { workflowId, qualityData } = req.body;
+      const result = await agriTraceService.performQualityAssessment(workflowId, qualityData);
+      res.json(result);
+    } catch (error) {
+      console.error('Error performing quality assessment:', error);
+      res.status(500).json({ message: 'Failed to perform quality assessment' });
+    }
+  });
+
+  // Step 7: Generate Certification
+  app.post('/api/agritrace/generate-certification', async (req, res) => {
+    try {
+      const { workflowId } = req.body;
+      const result = await agriTraceService.generateCertification(workflowId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error generating certification:', error);
+      res.status(500).json({ message: 'Failed to generate certification' });
+    }
+  });
+
+  // Step 8: Record Harvest
+  app.post('/api/agritrace/record-harvest', async (req, res) => {
+    try {
+      const { workflowId, harvestData } = req.body;
+      const result = await agriTraceService.recordHarvest(workflowId, harvestData);
+      res.json(result);
+    } catch (error) {
+      console.error('Error recording harvest:', error);
+      res.status(500).json({ message: 'Failed to record harvest' });
+    }
+  });
+
+  // Step 9: Track Transportation
+  app.post('/api/agritrace/track-transportation', async (req, res) => {
+    try {
+      const { workflowId, transportData } = req.body;
+      const result = await agriTraceService.trackTransportation(workflowId, transportData);
+      res.json(result);
+    } catch (error) {
+      console.error('Error tracking transportation:', error);
+      res.status(500).json({ message: 'Failed to track transportation' });
+    }
+  });
+
+  // Step 13: Generate EUDR Pack
+  app.post('/api/agritrace/generate-eudr-pack', async (req, res) => {
+    try {
+      const { workflowId } = req.body;
+      const result = await agriTraceService.generateEudrPack(workflowId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error generating EUDR pack:', error);
+      res.status(500).json({ message: 'Failed to generate EUDR pack' });
+    }
+  });
+
   // Get Workflow Status
   app.get('/api/agritrace/workflow/:id', async (req, res) => {
     try {

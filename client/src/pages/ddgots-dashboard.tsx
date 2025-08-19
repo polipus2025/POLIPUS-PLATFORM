@@ -26,6 +26,16 @@ import { useLocation } from "wouter";
 export default function DDGOTSDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('operations');
+  
+  // Check authentication
+  const ddgotsToken = localStorage.getItem('ddgotsToken');
+  const ddgotsUser = localStorage.getItem('ddgotsUser');
+  
+  // Redirect if not authenticated
+  if (!ddgotsToken || !ddgotsUser) {
+    navigate('/auth/ddgots-login');
+    return null;
+  }
 
   // Fetch DDGOTS-specific data
   const { data: inspectorAssignments, isLoading: assignmentsLoading } = useQuery({

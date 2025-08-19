@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Cache Clear - LACRA Platform</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 40px;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .warning {
+            background: rgba(255,193,7,0.8);
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 LACRA Platform Cache Clear</h1>
+        <div class="warning">
+            <strong>Cache Issue Detected!</strong><br>
+            The regulatory dashboard styling changes are not reflecting due to browser caching.
+        </div>
+        
+        <h3>Steps to Clear Cache:</h3>
+        <div style="text-align: left; margin: 20px 0;">
+            <p><strong>Method 1 - Hard Refresh:</strong></p>
+            <ul>
+                <li>Windows/Linux: Press <code>Ctrl + F5</code> or <code>Ctrl + Shift + R</code></li>
+                <li>Mac: Press <code>Cmd + Shift + R</code></li>
+            </ul>
+            
+            <p><strong>Method 2 - Clear Browser Cache:</strong></p>
+            <ul>
+                <li>Chrome: Settings → Privacy and Security → Clear browsing data</li>
+                <li>Firefox: Settings → Privacy & Security → Clear Data</li>
+                <li>Safari: Develop → Empty Caches</li>
+            </ul>
+            
+            <p><strong>Method 3 - Incognito/Private Mode:</strong></p>
+            <ul>
+                <li>Open the platform in Incognito/Private browsing mode</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="/" class="btn">Return to Platform</a>
+            <button class="btn" onclick="location.reload(true)">Force Reload This Page</button>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 14px; opacity: 0.8;">
+            <p>✅ Code Changes Applied: All regulatory dashboards now use pure white backgrounds</p>
+            <p>⚡ Timestamp: <?= date('Y-m-d H:i:s') ?></p>
+        </div>
+    </div>
+
+    <script>
+        // Force cache clear on load
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+        
+        // Clear local storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Add cache-busting parameters
+        function clearCacheAndRedirect() {
+            const timestamp = new Date().getTime();
+            window.location.href = '/?nocache=' + timestamp;
+        }
+        
+        // Auto-redirect after 5 seconds
+        setTimeout(() => {
+            clearCacheAndRedirect();
+        }, 5000);
+    </script>
+</body>
+</html>

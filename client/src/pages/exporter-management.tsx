@@ -924,7 +924,7 @@ Please provide these credentials to the exporter. They will be required to chang
                         <div className="space-y-2 text-sm">
                           <div><span className="font-medium">Commodities:</span></div>
                           <div className="flex flex-wrap gap-1">
-                            {selectedExporter.commodityTypes.map((commodity, idx) => (
+                            {(selectedExporter.commodityTypes || []).map((commodity, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs">
                                 {commodity}
                               </Badge>

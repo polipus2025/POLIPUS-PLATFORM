@@ -999,7 +999,7 @@ export default function BuyerManagement() {
 
                   {buyer.interestedCommodities && (
                     <div className="flex flex-wrap gap-1">
-                      {JSON.parse(buyer.interestedCommodities).map((commodity: string) => (
+                      {(JSON.parse(buyer.interestedCommodities || '[]')).map((commodity: string) => (
                         <Badge key={commodity} variant="secondary" className="text-xs">
                           {commodity}
                         </Badge>

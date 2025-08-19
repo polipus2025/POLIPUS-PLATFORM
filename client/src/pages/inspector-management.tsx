@@ -648,7 +648,7 @@ export default function InspectorManagement() {
                       </div>
                       {inspector.specializations && (
                         <div className="flex flex-wrap gap-2 mt-3">
-                          {inspector.specializations.split(',').map((spec) => (
+                          {(inspector.specializations || '').split(',').filter(s => s.trim()).map((spec) => (
                             <Badge key={spec} variant="secondary" className="text-xs">
                               {spec.trim().replace('_', ' ')}
                             </Badge>

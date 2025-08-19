@@ -72,7 +72,7 @@ const buyerSchema = z.object({
   notes: z.string().optional(),
   
   // Profile and Document Uploads - MANDATORY
-  profilePhotoUrl: z.string().min(1, "Profile photo is mandatory"),
+  profilePhotoUrl: z.string().optional(),
   
   // Business Card Uploads - OPTIONAL
   businessCardFrontUrl: z.string().optional(),
@@ -215,6 +215,11 @@ export default function BuyerManagement() {
   });
 
   const onSubmit = (data: BuyerFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
+    console.log("Selected commodities:", selectedCommodities);
+    console.log("Selected regions:", selectedRegions);
+    
     const formattedData = {
       ...data,
       interestedCommodities: JSON.stringify(selectedCommodities),
@@ -223,6 +228,7 @@ export default function BuyerManagement() {
       creditLimit: data.creditLimit ? parseFloat(data.creditLimit) : null,
     };
 
+    console.log("Formatted data being sent:", formattedData);
     createBuyerMutation.mutate(formattedData);
   };
 

@@ -134,7 +134,7 @@ export default function InspectorManagement() {
 
   // Mutations for inspector actions
   const activateInspectorMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/activate`, {}),
+    mutationFn: (inspectorId: number) => apiRequest(`/api/inspectors/${inspectorId}/activate`, { method: 'PUT' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Inspector Activated", description: "Inspector has been activated successfully." });
@@ -142,7 +142,7 @@ export default function InspectorManagement() {
   });
 
   const deactivateInspectorMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/deactivate`, {}),
+    mutationFn: (inspectorId: number) => apiRequest(`/api/inspectors/${inspectorId}/deactivate`, { method: 'PUT' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Inspector Deactivated", description: "Inspector has been deactivated successfully." });
@@ -150,7 +150,7 @@ export default function InspectorManagement() {
   });
 
   const enableLoginMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/enable-login`, {}),
+    mutationFn: (inspectorId: number) => apiRequest(`/api/inspectors/${inspectorId}/enable-login`, { method: 'PUT' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Login Enabled", description: "Inspector login access has been enabled." });
@@ -158,7 +158,7 @@ export default function InspectorManagement() {
   });
 
   const disableLoginMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/disable-login`, {}),
+    mutationFn: (inspectorId: number) => apiRequest(`/api/inspectors/${inspectorId}/disable-login`, { method: 'PUT' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Login Disabled", description: "Inspector login access has been disabled." });
@@ -173,7 +173,7 @@ export default function InspectorManagement() {
 
   // Reset password mutation
   const resetPasswordMutation = useMutation({
-    mutationFn: (inspectorId: string) => apiRequest('POST', `/api/inspectors/${inspectorId}/reset-password`, {}),
+    mutationFn: (inspectorId: string) => apiRequest(`/api/inspectors/${inspectorId}/reset-password`, { method: 'POST' }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       setNewInspectorCredentials(data.credentials);
@@ -243,7 +243,11 @@ export default function InspectorManagement() {
 
     const handleSubmit = async () => {
       try {
-        const response = await apiRequest('POST', '/api/inspectors', formData);
+        const response = await apiRequest('/api/inspectors', { 
+          method: 'POST', 
+          body: JSON.stringify(formData),
+          headers: { 'Content-Type': 'application/json' }
+        });
         
         // Store the generated credentials for display
         if (response.credentials) {

@@ -123,6 +123,7 @@ import DirectorDashboard from "@/pages/director-dashboard";
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
 import FarmerDashboard from "@/pages/farmer-dashboard";
+import BuyerDashboard from "@/pages/buyer-dashboard";
 import Messaging from "@/pages/messaging";
 
 import ExportPermitSubmission from "@/pages/export-permit-submission";
@@ -371,6 +372,22 @@ function Router() {
             <ProtectedRoute 
               component={FieldAgentDashboard} 
               allowedUserTypes={['field_agent']} 
+            />
+          </Route>
+          
+          {/* Farmer Dashboard Route */}
+          <Route path="/farmer-dashboard">
+            <ProtectedRoute 
+              component={FarmerDashboard} 
+              allowedUserTypes={['farmer']} 
+            />
+          </Route>
+          
+          {/* Buyer Dashboard Route */}
+          <Route path="/buyer-dashboard">
+            <ProtectedRoute 
+              component={BuyerDashboard} 
+              allowedUserTypes={['buyer']} 
             />
           </Route>
           

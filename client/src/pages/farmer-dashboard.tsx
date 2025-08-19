@@ -20,7 +20,8 @@ import {
   Plus,
   Download,
   Shield,
-  X
+  X,
+  DollarSign
 } from "lucide-react";
 import { Link } from "wouter";
 

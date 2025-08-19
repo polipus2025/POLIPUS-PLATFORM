@@ -1877,7 +1877,7 @@ export const exporterCredentials = pgTable("exporter_credentials", {
   lockedUntil: timestamp("locked_until"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
   twoFactorSecret: text("two_factor_secret"),
-  createdBy: integer("created_by").references(() => authUsers.id).notNull(),
+  createdBy: integer("created_by").references(() => authUsers.id), // Made nullable
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -9658,14 +9658,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create credentials record
       const credentials = await storage.createExporterCredentials({
-        exporterId: exporter.exporterId,
+        exporterId: exporter.id, // Use integer ID for FK reference
         username,
         passwordHash: hashedPassword,
-        isTemporary: true,
-        lastPasswordChange: new Date(),
-        loginAttempts: 0,
-        accountLocked: false,
-        generatedBy: req.user?.username || 'System Admin'
+        temporaryPassword,
+        createdBy: req.user?.id || null
       });
 
       // Update exporter to mark credentials as generated

@@ -121,6 +121,31 @@ export default function FrontPage() {
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
+            {/* Platform Documentation Download - Prominent Section */}
+            <div className="bg-gradient-to-r from-blue-50 to-emerald-50 border-2 border-blue-200 rounded-lg p-4 mt-6 mb-4">
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 flex items-center justify-center mx-auto mb-3">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">
+                  Platform Documentation
+                </h3>
+                <p className="text-sm text-slate-600 mb-3 max-w-lg mx-auto">
+                  Download comprehensive technical documentation covering all 8 environmental intelligence modules with 200+ satellite integration.
+                </p>
+                <Button 
+                  onClick={() => window.open('/api/download/platform-documentation', '_blank')}
+                  className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-6 py-2 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Complete PDF
+                </Button>
+                <p className="text-xs text-slate-500 mt-2">
+                  24-page comprehensive analysis • Generated: {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            
             {/* GPS Active and Login Portals Buttons - Positioned to the left */}
             <div className="absolute left-0 top-0 flex flex-col gap-2">
               <GlobalGPSDetector />

@@ -50,15 +50,15 @@ export default function DDGOTSDashboard() {
   };
 
   const handleInspectorManagement = () => {
-    navigate('/inspector-management');
+    navigate('/regulatory/inspector-management');
   };
 
   const handleBuyerManagement = () => {
-    navigate('/buyer-management');
+    navigate('/regulatory/buyer-management');
   };
 
   const handleExporterManagement = () => {
-    navigate('/exporter-management');
+    navigate('/regulatory/exporter-management');
   };
 
   // Mock data for DDGOTS operations

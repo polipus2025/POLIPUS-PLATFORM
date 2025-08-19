@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,39 @@ export default function ExporterManagement() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+
+  // Check authentication and permissions
+  useEffect(() => {
+    const ddgotsToken = localStorage.getItem('ddgotsToken');
+    const inspectorToken = localStorage.getItem('authToken');
+    
+    // If inspector is logged in instead of DDGOTS, redirect to inspector dashboard
+    if (inspectorToken && !ddgotsToken) {
+      toast({
+        title: "Access Denied",
+        description: "Exporter Management is only accessible to DDGOTS personnel. Redirecting to Inspector Dashboard...",
+        variant: "destructive"
+      });
+      setTimeout(() => {
+        setLocation('/inspector-farmer-land-management');
+      }, 2000);
+      return;
+    }
+    
+    // If no DDGOTS token, redirect to DDGOTS login
+    if (!ddgotsToken) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in with DDGOTS credentials to access Exporter Management.",
+        variant: "destructive"
+      });
+      setTimeout(() => {
+        setLocation('/auth/ddgots-login');
+      }, 2000);
+      return;
+    }
+  }, [toast, setLocation]);
 
   // Fetch exporters
   const { data: exporters = [], isLoading: exportersLoading } = useQuery<Exporter[]>({

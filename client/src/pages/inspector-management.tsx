@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -86,6 +87,39 @@ export default function InspectorManagement() {
   const [newInspectorCredentials, setNewInspectorCredentials] = useState<NewInspectorCredentials | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+
+  // Check authentication and permissions
+  useEffect(() => {
+    const ddgotsToken = localStorage.getItem('ddgotsToken');
+    const inspectorToken = localStorage.getItem('authToken');
+    
+    // If inspector is logged in instead of DDGOTS, redirect to inspector dashboard
+    if (inspectorToken && !ddgotsToken) {
+      toast({
+        title: "Access Denied",
+        description: "Inspector Management is only accessible to DDGOTS personnel. Redirecting to Inspector Dashboard...",
+        variant: "destructive"
+      });
+      setTimeout(() => {
+        setLocation('/inspector-farmer-land-management');
+      }, 2000);
+      return;
+    }
+    
+    // If no DDGOTS token, redirect to DDGOTS login
+    if (!ddgotsToken) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in with DDGOTS credentials to access Inspector Management.",
+        variant: "destructive"
+      });
+      setTimeout(() => {
+        setLocation('/auth/ddgots-login');
+      }, 2000);
+      return;
+    }
+  }, [toast, setLocation]);
 
   // Fetch inspectors
   const { data: inspectors = [], isLoading } = useQuery<Inspector[]>({

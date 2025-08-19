@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -110,6 +111,39 @@ export default function BuyerManagement() {
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+
+  // Check authentication and permissions
+  useEffect(() => {
+    const ddgotsToken = localStorage.getItem('ddgotsToken');
+    const inspectorToken = localStorage.getItem('authToken');
+    
+    // If inspector is logged in instead of DDGOTS, redirect to inspector dashboard
+    if (inspectorToken && !ddgotsToken) {
+      toast({
+        title: "Access Denied",
+        description: "Buyer Management is only accessible to DDGOTS personnel. Redirecting to Inspector Dashboard...",
+        variant: "destructive"
+      });
+      setTimeout(() => {
+        setLocation('/inspector-farmer-land-management');
+      }, 2000);
+      return;
+    }
+    
+    // If no DDGOTS token, redirect to DDGOTS login
+    if (!ddgotsToken) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in with DDGOTS credentials to access Buyer Management.",
+        variant: "destructive"
+      });
+      setTimeout(() => {
+        setLocation('/auth/ddgots-login');
+      }, 2000);
+      return;
+    }
+  }, [toast, setLocation]);
 
   const form = useForm<BuyerFormData>({
     resolver: zodResolver(buyerSchema),

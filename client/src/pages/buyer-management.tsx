@@ -62,8 +62,8 @@ const buyerSchema = z.object({
   yearEstablished: z.number().min(1900).max(new Date().getFullYear()).optional(),
   numberOfEmployees: z.number().min(0).optional(),
   annualTurnover: z.string().optional(),
-  interestedCommodities: z.array(z.string()).min(1, "Select at least one commodity"),
-  tradingRegions: z.array(z.string()).min(1, "Select at least one trading region"),
+  interestedCommodities: z.string().optional(),
+  tradingRegions: z.string().optional(),
   purchaseVolume: z.string().optional(),
   paymentTerms: z.string().optional(),
   creditLimit: z.string().optional(),
@@ -155,8 +155,8 @@ export default function BuyerManagement() {
       businessAddress: "",
       city: "",
       county: "",
-      interestedCommodities: [],
-      tradingRegions: [],
+      interestedCommodities: "",
+      tradingRegions: "",
     },
   });
 
@@ -853,6 +853,13 @@ export default function BuyerManagement() {
                     type="submit" 
                     disabled={createBuyerMutation.isPending}
                     data-testid="button-register-buyer"
+                    onClick={() => {
+                      console.log("Button clicked");
+                      console.log("Form valid:", form.formState.isValid);
+                      console.log("Form errors:", form.formState.errors);
+                      console.log("Selected commodities:", selectedCommodities);
+                      console.log("Selected regions:", selectedRegions);
+                    }}
                   >
                     {createBuyerMutation.isPending ? "Registering..." : "Register Buyer"}
                   </Button>

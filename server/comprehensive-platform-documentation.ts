@@ -365,11 +365,13 @@ The platform serves environmental agencies, agricultural stakeholders, mining au
     '• Integration with major cloud platforms (AWS, Azure, GCP)',
     
     'Intermodule Intelligence:',
-    '• Agricultural activities trigger forest monitoring alerts',
-    '• Mining operations automatically activate water quality monitoring',
-    '• Livestock movements correlate with land use changes',
-    '• Carbon calculations incorporate data from all environmental modules',
-    '• Cross-module risk assessment and prediction algorithms'
+    '• Agricultural activities (AgriTrace360™) trigger forest monitoring alerts (Forest Guard)',
+    '• Mining operations (Mine Watch) automatically activate water quality monitoring (Aqua Trace)',
+    '• Livestock movements (Live Trace) correlate with land use changes (Land Map360)',
+    '• Carbon calculations (Carbon Trace) incorporate data from all 8 environmental modules',
+    '• Marine conservation economics (Blue Carbon 360) integrates with carbon tracking and aqua monitoring',
+    '• Cross-module risk assessment and prediction algorithms across all 8 platforms',
+    '• Real-time data synchronization ensures all 8 modules share environmental intelligence'
   ]);
 
   addSection('6. GOVERNMENT INTEGRATION & COMPLIANCE', [

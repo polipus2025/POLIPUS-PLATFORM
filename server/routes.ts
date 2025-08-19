@@ -8969,7 +8969,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new inspector - ONBOARDING SYSTEM
   app.post("/api/inspectors", async (req, res) => {
     try {
-      const validatedData = insertInspectorSchema.parse(req.body);
+      // For onboarding, we only need the basic fields from the form
+      const onboardingData = req.body;
       
       // Generate unique inspector ID (INS-YYYYMMDD-XXX format)
       const date = new Date();
@@ -8977,17 +8978,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
       const inspectorId = `INS-${dateStr}-${randomSuffix}`;
       
+      // Create the complete inspector data object
       const inspectorData = {
-        ...validatedData,
         inspectorId,
-        fullName: `${validatedData.firstName} ${validatedData.lastName}`,
-        assignedBy: req.user?.username || 'System Admin'
+        fullName: `${onboardingData.firstName} ${onboardingData.lastName}`,
+        firstName: onboardingData.firstName,
+        lastName: onboardingData.lastName,
+        email: onboardingData.email,
+        phoneNumber: onboardingData.phoneNumber,
+        nationalId: onboardingData.nationalId,
+        address: onboardingData.address,
+        inspectorType: onboardingData.inspectorType || 'Land Inspector',
+        inspectionAreaCounty: onboardingData.inspectionAreaCounty,
+        inspectionAreaDistrict: onboardingData.inspectionAreaDistrict,
+        inspectionAreaDescription: onboardingData.inspectionAreaDescription,
+        specializations: onboardingData.specializations,
+        certificationLevel: onboardingData.certificationLevel,
+        assignedBy: 'DDGOTS Admin', // Since this is DDGOTS onboarding
+        isActive: true,
+        canLogin: true
       };
 
       const inspector = await storage.createInspector(inspectorData);
 
       // Create default login credentials
-      const username = `${validatedData.firstName.toLowerCase()}.${validatedData.lastName.toLowerCase()}`;
+      const username = `${onboardingData.firstName.toLowerCase()}.${onboardingData.lastName.toLowerCase()}`;
       const temporaryPassword = crypto.randomBytes(8).toString('hex');
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(temporaryPassword, salt);

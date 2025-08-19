@@ -24,6 +24,11 @@ import DGLogin from "@/pages/auth/dg-login";
 import DDGOTSLogin from "@/pages/auth/ddgots-login";
 import DDGAFLogin from "@/pages/auth/ddgaf-login";
 
+// Three-Tier Regulatory Department Dashboards
+import DGDashboard from "@/pages/dg-dashboard";
+import DDGOTSDashboard from "@/pages/ddgots-dashboard";
+import DDGAFDashboard from "@/pages/ddgaf-dashboard";
+
 // LiveTrace Authentication
 import LiveTraceRegulatoryLogin from "@/pages/auth/live-trace-regulatory-login";
 import LiveTraceFarmerLogin from "@/pages/auth/live-trace-farmer-login";

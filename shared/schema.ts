@@ -1753,7 +1753,7 @@ export const buyers = pgTable("buyers", {
   documentsVerified: text("documents_verified"), // JSON array of verified document types
   
   // Profile and Document Uploads
-  profilePhotoUrl: text("profile_photo_url").notNull(), // MANDATORY - profile photo URL
+  profilePhotoUrl: text("profile_photo_url"), // Profile photo URL
   businessCardFrontUrl: text("business_card_front_url"), // OPTIONAL - business card front
   businessCardBackUrl: text("business_card_back_url"), // OPTIONAL - business card back
   
@@ -1935,7 +1935,7 @@ export const buyerCredentials = pgTable("buyer_credentials", {
   lockedUntil: timestamp("locked_until"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
   twoFactorSecret: text("two_factor_secret"),
-  createdBy: integer("created_by").references(() => authUsers.id).notNull(),
+  createdBy: integer("created_by").references(() => authUsers.id), // Made nullable
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -2000,6 +2000,10 @@ export const insertBuyerSchema = createInsertSchema(buyers).omit({
   suspendedAt: true,
   createdAt: true,
   updatedAt: true,
+}).partial({
+  profilePhotoUrl: true,
+  businessCardFrontUrl: true,
+  businessCardBackUrl: true,
 });
 
 export type Buyer = typeof buyers.$inferSelect;

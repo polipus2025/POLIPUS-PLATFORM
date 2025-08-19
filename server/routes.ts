@@ -9355,7 +9355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         complianceStatus: complianceStatus || 'approved',
         portalAccess: portalAccess !== undefined ? portalAccess : true,
         approvedAt: new Date(),
-        approvedBy: req.user?.username || 'System Admin'
+        approvedBy: req.user?.id || null
       });
 
       if (!updatedBuyer) {
@@ -9396,12 +9396,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create buyer credentials
       await storage.createBuyerCredentials({
-        buyerId: buyer.buyerId,
+        buyerId: buyer.id, // Use integer ID for FK reference
         username,
         passwordHash,
-        salt,
-        mustChangePassword: true,
-        portalAccess: true
+        temporaryPassword,
+        createdBy: null // System-generated credentials
       });
 
       // Update buyer status
@@ -9618,7 +9617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         complianceStatus: complianceStatus || 'approved',
         portalAccess: portalAccess !== undefined ? portalAccess : true,
         approvedAt: new Date(),
-        approvedBy: req.user?.username || 'System Admin'
+        approvedBy: req.user?.id || null
       });
 
       if (!updatedExporter) {

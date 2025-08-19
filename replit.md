@@ -12,11 +12,12 @@ PDF Report Design Preference: User confirmed satisfaction with enhanced professi
 ## System Architecture
 The application employs a modern full-stack architecture with a clear separation of concerns.
 
-### Recent Updates (August 18, 2025)
-- **React Mounting Issues Fixed**: Successfully resolved critical React application mounting problems by removing complex service worker implementations and problematic upload components that were preventing the app from loading.
-- **Inspector Upload Functionality Removed**: Eliminated profile picture upload functionality from inspector onboarding system to fix runtime errors, while preserving upload capabilities for farmer onboarding as requested.
-- **Two-Tier Inspector Portal System**: Complete implementation of separated Land Inspector and Port Inspector authentication flows with specialized themes and functionality. Land Inspectors handle agricultural/crop inspections while Port Inspectors manage maritime/export inspections.
-- **Database Schema Updates**: Added inspector_type field and port_facility column to support the two-tier inspector system with proper type differentiation.
+### Recent Updates (August 19, 2025)
+- **Three-Tier LACRA Regulatory Portal System**: Implemented comprehensive departmental separation with DG (Director General), DDGOTS (Deputy Director General Operations & Technical Services), and DDGAF (Deputy Director General Administration & Finance) portals, each with specialized authentication and permissions.
+- **Departmental Dashboard Integration**: Successfully added all three regulatory dashboards to App.tsx routing system with proper route protection and department-specific functionality distribution.
+- **DG Portal Oversight Implementation**: Enhanced Director General dashboard with comprehensive "Portal Oversight" tab providing read-only visibility across all departmental activities including Inspector Management, Buyer Management, Exporter Management systems under DDGOTS, and Payment Validation, Financial Records under DDGAF.
+- **Permission-Based Access Control**: Established proper permission distribution where DG has strategic oversight and final approvals, DDGOTS manages operational systems (Inspector/Buyer/Exporter management), and DDGAF handles financial validation and account management.
+- **Preserved Existing Functionality**: Successfully maintained all existing regulatory portal functionality while redistributing it among the three departments without deletion, ensuring seamless operational continuity.
 
 ### UI/UX Decisions
 - **Design System**: An elegant and refined ISMS.online-inspired design system with a modern slate/blue color palette, large metric numbers, professional typography, clean white cards, colored icon backgrounds, and smooth hover transitions. Official LACRA and AgriTrace360 branding is integrated throughout, with EU logos for EUDR compliance sections.

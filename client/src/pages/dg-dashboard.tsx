@@ -11,7 +11,8 @@ import {
   TrendingUp, 
   Users, 
   FileText, 
-  CheckCircle, 
+  CheckCircle,
+  XCircle, 
   AlertTriangle, 
   BarChart3,
   Settings,
@@ -19,7 +20,8 @@ import {
   Crown,
   Globe,
   Target,
-  Award
+  Award,
+  Eye
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -133,18 +135,22 @@ export default function DGDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Executive Overview
             </TabsTrigger>
-            <TabsTrigger value="strategic" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Strategic Initiatives
-            </TabsTrigger>
             <TabsTrigger value="departments" className="flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Departmental Reports
+            </TabsTrigger>
+            <TabsTrigger value="portal-oversight" className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Portal Oversight
+            </TabsTrigger>
+            <TabsTrigger value="strategic" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Strategic Initiatives
             </TabsTrigger>
             <TabsTrigger value="governance" className="flex items-center gap-2">
               <Award className="w-4 h-4" />
@@ -407,6 +413,136 @@ export default function DGDashboard() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          {/* Portal Oversight */}
+          <TabsContent value="portal-oversight" className="space-y-6">
+            <Alert>
+              <Shield className="w-4 h-4" />
+              <AlertDescription>
+                <strong>Director General Portal Oversight:</strong> Read-only visibility across all regulatory portals and departmental activities. All actions require departmental permissions.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* DDGOTS Department Overview */}
+              <Card className="bg-white shadow-lg border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    DDGOTS Operations Overview
+                  </CardTitle>
+                  <CardDescription>
+                    Technical Services & Operations Management (Read-Only View)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Inspector Management System</div>
+                      <div className="text-sm text-slate-600">Active inspectors and assignments</div>
+                    </div>
+                    <Badge variant="default" className="bg-green-500">Active</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Buyer Management Portal</div>
+                      <div className="text-sm text-slate-600">Registered buyers and compliance status</div>
+                    </div>
+                    <Badge variant="default" className="bg-green-500">Active</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Exporter Management System</div>
+                      <div className="text-sm text-slate-600">Export licenses and certifications</div>
+                    </div>
+                    <Badge variant="default" className="bg-green-500">Active</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Technical Compliance</div>
+                      <div className="text-sm text-slate-600">EUDR and international standards</div>
+                    </div>
+                    <Badge variant="secondary">Monitoring</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* DDGAF Department Overview */}
+              <Card className="bg-white shadow-lg border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                    DDGAF Financial Overview
+                  </CardTitle>
+                  <CardDescription>
+                    Administration & Finance Management (Read-Only View)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Payment Validation System</div>
+                      <div className="text-sm text-slate-600">Transaction verification and approval</div>
+                    </div>
+                    <Badge variant="default" className="bg-blue-500">Processing</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Financial Records Management</div>
+                      <div className="text-sm text-slate-600">Revenue tracking and reporting</div>
+                    </div>
+                    <Badge variant="default" className="bg-green-500">Active</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Unpaid Account Management</div>
+                      <div className="text-sm text-slate-600">Outstanding payment tracking</div>
+                    </div>
+                    <Badge variant="destructive">Attention Required</Badge>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold">Budget Oversight</div>
+                      <div className="text-sm text-slate-600">Departmental budget allocation</div>
+                    </div>
+                    <Badge variant="secondary">Monitoring</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Cross-Portal Activities */}
+            <Card className="bg-white shadow-lg border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-purple-600" />
+                  Cross-Portal Activity Monitor
+                </CardTitle>
+                <CardDescription>
+                  Real-time visibility of inter-departmental activities and workflows
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">24</div>
+                    <div className="text-sm text-slate-600">Active Inspections</div>
+                    <div className="text-xs text-slate-500 mt-1">DDGOTS Operations</div>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">$2.4M</div>
+                    <div className="text-sm text-slate-600">Revenue This Month</div>
+                    <div className="text-xs text-slate-500 mt-1">DDGAF Finance</div>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">98.2%</div>
+                    <div className="text-sm text-slate-600">System Uptime</div>
+                    <div className="text-xs text-slate-500 mt-1">All Portals</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Governance */}

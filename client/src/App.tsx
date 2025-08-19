@@ -336,6 +336,11 @@ function Router() {
       {/* Protected Routes */}
       {authToken ? (
         <>
+          {/* Three-Tier Regulatory Department Dashboard Routes */}
+          <Route path="/dg-dashboard" component={DGDashboard} />
+          <Route path="/ddgots-dashboard" component={DDGOTSDashboard} />
+          <Route path="/ddgaf-dashboard" component={DDGAFDashboard} />
+
           {/* Dashboard - Show correct component based on user type */}
           <Route path="/dashboard">
             {() => {

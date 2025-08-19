@@ -720,7 +720,7 @@ Please provide these credentials to the exporter. They will be required to chang
                         <div className="flex-1">
                           <h3 data-testid={`text-pending-company-${exporter.id}`} className="font-semibold">{exporter.companyName}</h3>
                           <p className="text-sm text-slate-600">{exporter.contactPerson} • {exporter.email}</p>
-                          <p className="text-sm text-slate-600">{exporter.county} • {exporter.commodityTypes.join(", ")}</p>
+                          <p className="text-sm text-slate-600">{exporter.county} • {exporter.commodityTypes?.join(", ") || "No commodities specified"}</p>
                         </div>
                         <div className="flex gap-2">
                           <Button
@@ -776,7 +776,7 @@ Please provide these credentials to the exporter. They will be required to chang
                         <div className="flex-1">
                           <h3 data-testid={`text-approved-company-${exporter.id}`} className="font-semibold">{exporter.companyName}</h3>
                           <p className="text-sm text-slate-600">{exporter.contactPerson} • {exporter.email}</p>
-                          <p className="text-sm text-slate-600">{exporter.county} • {exporter.commodityTypes.join(", ")}</p>
+                          <p className="text-sm text-slate-600">{exporter.county} • {exporter.commodityTypes?.join(", ") || "No commodities specified"}</p>
                           <div className="flex items-center gap-4 mt-2">
                             <Badge variant={exporter.loginCredentialsGenerated ? "default" : "secondary"}>
                               {exporter.loginCredentialsGenerated ? "Credentials Generated" : "Credentials Pending"}

@@ -100,7 +100,7 @@ export default function InspectorManagement() {
 
   // Mutations for inspector actions
   const activateInspectorMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/activate`),
+    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/activate`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Inspector Activated", description: "Inspector has been activated successfully." });
@@ -108,7 +108,7 @@ export default function InspectorManagement() {
   });
 
   const deactivateInspectorMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/deactivate`),
+    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/deactivate`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Inspector Deactivated", description: "Inspector has been deactivated successfully." });
@@ -116,7 +116,7 @@ export default function InspectorManagement() {
   });
 
   const enableLoginMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/enable-login`),
+    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/enable-login`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Login Enabled", description: "Inspector login access has been enabled." });
@@ -124,7 +124,7 @@ export default function InspectorManagement() {
   });
 
   const disableLoginMutation = useMutation({
-    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/disable-login`),
+    mutationFn: (inspectorId: number) => apiRequest('PUT', `/api/inspectors/${inspectorId}/disable-login`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       toast({ title: "Login Disabled", description: "Inspector login access has been disabled." });
@@ -139,7 +139,7 @@ export default function InspectorManagement() {
 
   // Reset password mutation
   const resetPasswordMutation = useMutation({
-    mutationFn: (inspectorId: string) => apiRequest('POST', `/api/inspectors/${inspectorId}/reset-password`),
+    mutationFn: (inspectorId: string) => apiRequest('POST', `/api/inspectors/${inspectorId}/reset-password`, {}),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/inspectors'] });
       setNewInspectorCredentials(data.credentials);
@@ -201,21 +201,15 @@ export default function InspectorManagement() {
       inspectionAreaDistrict: '',
       inspectionAreaDescription: '',
       specializations: '',
-      certificationLevel: '',
-      profilePicture: null as File | null
+      certificationLevel: ''
     });
 
-    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3));
     const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
     const handleSubmit = async () => {
-      const submitData = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null) submitData.append(key, value);
-      });
-
       try {
-        const response = await apiRequest('POST', '/api/inspectors', submitData);
+        const response = await apiRequest('POST', '/api/inspectors', formData);
         
         // Store the generated credentials for display
         if (response.credentials) {
@@ -233,8 +227,7 @@ export default function InspectorManagement() {
         setFormData({
           firstName: '', lastName: '', email: '', phoneNumber: '', nationalId: '', 
           address: '', inspectorType: '', inspectionAreaCounty: '', inspectionAreaDistrict: '',
-          inspectionAreaDescription: '', specializations: '', certificationLevel: '',
-          profilePicture: null
+          inspectionAreaDescription: '', specializations: '', certificationLevel: ''
         });
       } catch (error) {
         toast({ title: "Error", description: "Failed to onboard inspector" });
@@ -246,10 +239,10 @@ export default function InspectorManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserPlus className="w-5 h-5" />
-            Inspector Onboarding - Step {currentStep} of 4
+            Inspector Onboarding - Step {currentStep} of 3
           </CardTitle>
           <CardDescription>
-            Complete the multi-step process to register a new agricultural inspector
+            Complete the 3-step process to register a new agricultural inspector
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -397,19 +390,7 @@ export default function InspectorManagement() {
             </div>
           )}
 
-          {currentStep === 4 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Profile Picture</h3>
-              <div>
-                <label className="block text-sm font-medium mb-2">Upload Profile Picture</label>
-                <Input 
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setFormData({...formData, profilePicture: e.target.files?.[0] || null})}
-                />
-              </div>
-            </div>
-          )}
+
 
           <div className="flex justify-between pt-6">
             <Button 
@@ -420,7 +401,7 @@ export default function InspectorManagement() {
               Previous
             </Button>
             
-            {currentStep < 4 ? (
+            {currentStep < 3 ? (
               <Button onClick={nextStep}>
                 Next
               </Button>

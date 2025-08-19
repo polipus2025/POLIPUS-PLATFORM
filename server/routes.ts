@@ -10,6 +10,7 @@ import {
   ObjectNotFoundError,
 } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
+import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
 import { 
   insertCommoditySchema, 
   insertInspectionSchema, 
@@ -165,8 +166,19 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 import { registerPolipusRoutes } from './polipus-routes';
+import path from 'path';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Comprehensive Platform Documentation PDF Download
+  app.get("/api/download/platform-documentation", async (req, res) => {
+    try {
+      await generateComprehensivePlatformDocumentation(res);
+    } catch (error) {
+      console.error("Error generating platform documentation:", error);
+      res.status(500).json({ message: "Failed to generate documentation" });
+    }
+  });
   
   // Serve protection page directly
   app.get('/service-blocked.html', (req, res) => {

@@ -129,6 +129,7 @@ import BuyerExporterNetwork from "@/pages/buyer-exporter-network";
 import BuyerTransactionDashboard from "@/pages/buyer-transaction-dashboard";
 import BuyerHarvestTracking from "@/pages/buyer-harvest-tracking";
 import BuyerBusinessMetrics from "@/pages/buyer-business-metrics";
+import PlatformDocumentation from "@/pages/platform-documentation";
 import Messaging from "@/pages/messaging";
 
 import ExportPermitSubmission from "@/pages/export-permit-submission";
@@ -679,6 +680,7 @@ function Router() {
       <Route path="/install-app" component={MobileAppDownload} />
       <Route path="/download-app" component={MobileAppDownload} />
       <Route path="/pwa-test" component={PWATest} />
+      <Route path="/platform-documentation" component={PlatformDocumentation} />
       
       {/* Default fallback */}
       <Route component={NotFound} />

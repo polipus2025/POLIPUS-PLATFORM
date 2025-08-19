@@ -130,6 +130,12 @@ export default function FarmerBuyerLogin() {
           description: "Welcome to your Buyer Portal",
         });
         
+        // Clear any old regulatory tokens first
+        localStorage.removeItem("dgToken");
+        localStorage.removeItem("ddgotsToken");
+        localStorage.removeItem("ddgafToken");
+        
+        // Set buyer credentials
         localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "buyer");
         localStorage.setItem("userType", "buyer");

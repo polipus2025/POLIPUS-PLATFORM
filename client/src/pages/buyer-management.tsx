@@ -96,11 +96,8 @@ const liberianCounties = [
 ];
 
 const businessTypes = [
-  { value: "wholesaler", label: "Wholesaler" },
-  { value: "exporter", label: "Exporter" },
-  { value: "processor", label: "Processor" },
-  { value: "retailer", label: "Retailer" },
-  { value: "distributor", label: "Distributor" },
+  { value: "agency", label: "Agency" },
+  { value: "entity", label: "Entity" },
 ];
 
 export default function BuyerManagement() {

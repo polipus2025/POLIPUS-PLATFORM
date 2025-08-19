@@ -20,7 +20,10 @@ import {
   MessageSquare,
   TrendingUp,
   DollarSign,
-  UserPlus
+  UserPlus,
+  Eye,
+  Receipt,
+  CreditCard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -42,7 +45,38 @@ const getUserInfo = () => {
   }
 };
 
-// LACRA Officer/Regulatory Staff Navigation
+// DG (Director General) Navigation - Strategic oversight and final approvals
+const dgNavigation = [
+  { name: "Strategic Dashboard", href: "/dg-dashboard", icon: BarChart3 },
+  { name: "Portal Oversight", href: "/dg-portal-oversight", icon: Eye },
+  { name: "Final Approvals", href: "/dg-final-approvals", icon: Award },
+  { name: "Strategic Reports", href: "/dg-strategic-reports", icon: FileText },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
+];
+
+// DDGOTS (Deputy Director General Operations & Technical Services) Navigation
+const ddgotsNavigation = [
+  { name: "DDGOTS Dashboard", href: "/ddgots-dashboard", icon: BarChart3 },
+  { name: "Inspector Management", href: "/regulatory/inspector-management", icon: Users },
+  { name: "Buyer Management", href: "/regulatory/buyer-management", icon: UserPlus },
+  { name: "Exporter Management", href: "/regulatory/exporter-management", icon: Building2 },
+  { name: "Farmer Oversight", href: "/ddgots-farmer-oversight", icon: Leaf },
+  { name: "Technical Compliance", href: "/ddgots-technical-compliance", icon: ClipboardCheck },
+  { name: "Operations Reports", href: "/ddgots-operations-reports", icon: FileText },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
+];
+
+// DDGAF (Deputy Director General Administration & Finance) Navigation
+const ddgafNavigation = [
+  { name: "DDGAF Dashboard", href: "/ddgaf-dashboard", icon: BarChart3 },
+  { name: "Payment Validation", href: "/ddgaf-payment-validation", icon: DollarSign },
+  { name: "Financial Records", href: "/ddgaf-financial-records", icon: Receipt },
+  { name: "Account Management", href: "/ddgaf-account-management", icon: CreditCard },
+  { name: "Financial Reports", href: "/ddgaf-financial-reports", icon: FileText },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
+];
+
+// Legacy LACRA Officer/Regulatory Staff Navigation (for backward compatibility)
 const regulatoryNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Economic Reporting", href: "/economic-reporting", icon: TrendingUp },
@@ -92,6 +126,22 @@ const exporterNavigation = [
 
 // Function to get navigation items based on user type and role
 const getNavigationItems = (userType: string | null, role: string | null) => {
+  // Check for three-tier regulatory system first
+  const ddgotsToken = localStorage.getItem('ddgotsToken');
+  const dgToken = localStorage.getItem('dgToken');
+  const ddgafToken = localStorage.getItem('ddgafToken');
+
+  if (ddgotsToken) {
+    return ddgotsNavigation;
+  }
+  if (dgToken) {
+    return dgNavigation;
+  }
+  if (ddgafToken) {
+    return ddgafNavigation;
+  }
+
+  // Legacy user type switching
   switch (userType) {
     case 'regulatory':
       return regulatoryNavigation;
@@ -138,7 +188,10 @@ export default function Sidebar() {
         {/* Main Navigation Section */}
         <div className="mb-6 lg:mb-8">
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            {userType === 'farmer' ? 'Farm Management' : 
+            {localStorage.getItem('ddgotsToken') ? 'DDGOTS OPERATIONS' :
+             localStorage.getItem('dgToken') ? 'DG STRATEGIC OVERSIGHT' :
+             localStorage.getItem('ddgafToken') ? 'DDGAF ADMINISTRATION' :
+             userType === 'farmer' ? 'Farm Management' : 
              userType === 'field_agent' ? 'Field Operations' : 
              userType === 'exporter' ? 'Export Operations' :
              'Regulatory Compliance'}

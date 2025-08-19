@@ -149,8 +149,7 @@ export default function ExporterManagement() {
   // Create exporter mutation
   const createExporterMutation = useMutation({
     mutationFn: async (exporterData: any) => {
-      const response = await apiRequest('POST', '/api/exporters', exporterData);
-      return response.json();
+      return await apiRequest('POST', '/api/exporters', exporterData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/exporters'] });
@@ -190,11 +189,10 @@ export default function ExporterManagement() {
   // Approve exporter mutation with automatic credential generation
   const approveExporterMutation = useMutation({
     mutationFn: async (data: { id: number; complianceStatus: string; portalAccess: boolean }) => {
-      const response = await apiRequest('POST', `/api/exporters/${data.id}/approve`, {
+      return await apiRequest('POST', `/api/exporters/${data.id}/approve`, {
         complianceStatus: data.complianceStatus,
         portalAccess: data.portalAccess
       });
-      return response.json();
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/exporters'] });
@@ -223,8 +221,7 @@ Please provide these credentials to the exporter. They will be required to chang
   // Generate credentials mutation
   const generateCredentialsMutation = useMutation({
     mutationFn: async (exporterId: number) => {
-      const response = await apiRequest('POST', `/api/exporters/${exporterId}/generate-credentials`);
-      return response.json();
+      return await apiRequest('POST', `/api/exporters/${exporterId}/generate-credentials`);
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/exporters'] });
@@ -911,7 +908,11 @@ Please provide these credentials to the exporter. They will be required to chang
                     {selectedExporter.complianceStatus === 'pending' && (
                       <div className="mt-6 pt-6 border-t flex gap-4">
                         <Button
-                          onClick={() => approveExporterMutation.mutate(selectedExporter.id)}
+                          onClick={() => approveExporterMutation.mutate({
+                            id: selectedExporter.id,
+                            complianceStatus: 'approved',
+                            portalAccess: true
+                          })}
                           disabled={approveExporterMutation.isPending}
                           data-testid="button-approve-detail"
                         >

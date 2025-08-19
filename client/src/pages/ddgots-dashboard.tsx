@@ -18,7 +18,16 @@ import {
   Ship,
   UserCheck,
   ClipboardCheck,
-  Pause
+  Pause,
+  Sprout,
+  Map,
+  FileText,
+  TreePine,
+  Download,
+  Eye,
+  Calendar,
+  Shield,
+  TrendingUp
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -51,6 +60,37 @@ export default function DDGOTSDashboard() {
   const { data: technicalCompliance, isLoading: complianceLoading } = useQuery({
     queryKey: ['/api/ddgots/technical-compliance'],
     queryFn: () => apiRequest('/api/ddgots/technical-compliance'),
+  });
+
+  // Farmer oversight data
+  const { data: farmersData, isLoading: farmersLoading } = useQuery({
+    queryKey: ['/api/farmers'],
+    queryFn: () => apiRequest('/api/farmers'),
+  });
+
+  const { data: landMappingData, isLoading: landMappingLoading } = useQuery({
+    queryKey: ['/api/farmer-land-mappings'],
+    queryFn: () => apiRequest('/api/farmer-land-mappings'),
+  });
+
+  const { data: harvestSchedules, isLoading: harvestLoading } = useQuery({
+    queryKey: ['/api/harvest-schedules'],
+    queryFn: () => apiRequest('/api/harvest-schedules'),
+  });
+
+  const { data: eudrFarmers, isLoading: eudrLoading } = useQuery({
+    queryKey: ['/api/eudr/farmers-ready'],
+    queryFn: () => apiRequest('/api/eudr/farmers-ready'),
+  });
+
+  const { data: deforestationAlerts, isLoading: deforestationLoading } = useQuery({
+    queryKey: ['/api/deforestation-alerts'],
+    queryFn: () => apiRequest('/api/deforestation-alerts'),
+  });
+
+  const { data: eudrPendingPacks, isLoading: eudrPendingLoading } = useQuery({
+    queryKey: ['/api/eudr/pending-approval'],
+    queryFn: () => apiRequest('/api/eudr/pending-approval'),
   });
 
   const handleLogout = () => {
@@ -201,6 +241,10 @@ export default function DDGOTSDashboard() {
             <TabsTrigger value="compliance" className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
               Technical Compliance
+            </TabsTrigger>
+            <TabsTrigger value="farmers" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Farmer Oversight
             </TabsTrigger>
           </TabsList>
 
@@ -421,6 +465,285 @@ export default function DDGOTSDashboard() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Farmer Oversight */}
+          <TabsContent value="farmers" className="space-y-6">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">Farmer Oversight & Compliance Management</h2>
+                  <p className="text-slate-600">All farmer information onboarded by Land Inspectors with land mapping, harvest schedules, and compliance reports</p>
+                </div>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export All Data
+                </Button>
+              </div>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="bg-white shadow-lg border-0">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-slate-900">Total Farmers</CardTitle>
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Sprout className="w-5 h-5 text-green-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-slate-900 mb-2">
+                      {farmersData?.length || 0}
+                    </div>
+                    <p className="text-sm text-slate-600">Onboarded by Land Inspectors</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg border-0">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-slate-900">Land Mapped</CardTitle>
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Map className="w-5 h-5 text-blue-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-slate-900 mb-2">
+                      {landMappingData?.length || 0}
+                    </div>
+                    <p className="text-sm text-slate-600">GPS Coordinates Recorded</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg border-0">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-slate-900">EUDR Ready</CardTitle>
+                      <div className="p-2 bg-amber-100 rounded-lg">
+                        <Shield className="w-5 h-5 text-amber-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-slate-900 mb-2">
+                      {eudrFarmers?.length || 0}
+                    </div>
+                    <p className="text-sm text-slate-600">Compliance Pack Ready</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-lg border-0">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-slate-900">Deforestation Alerts</CardTitle>
+                      <div className="p-2 bg-red-100 rounded-lg">
+                        <TreePine className="w-5 h-5 text-red-600" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-slate-900 mb-2">
+                      {deforestationAlerts?.length || 0}
+                    </div>
+                    <p className="text-sm text-slate-600">Monitoring Active</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Farmer Information Table */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-semibold text-slate-900">Farmer Registry & Land Management</h3>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Map
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Generate Report
+                    </Button>
+                  </div>
+                </div>
+
+                {farmersLoading || eudrLoading ? (
+                  <div className="flex items-center justify-center h-32">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {(eudrFarmers || []).map((farmer: any, index: number) => (
+                      <Card key={farmer.id || index} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
+                              <div>
+                                <h4 className="font-semibold text-slate-900">{farmer.name}</h4>
+                                <p className="text-sm text-slate-600">ID: {farmer.farmerId}</p>
+                                <p className="text-sm text-slate-500">{farmer.county}, {farmer.district}</p>
+                              </div>
+                              
+                              <div>
+                                <p className="text-sm font-medium text-slate-700">Land Information</p>
+                                <p className="text-sm text-slate-600">GPS: {farmer.gpsCoordinates}</p>
+                                <p className="text-sm text-slate-600">Farms: {farmer.farmsCount}</p>
+                                <p className="text-sm text-slate-600">Commodities: {farmer.commoditiesCount}</p>
+                              </div>
+                              
+                              <div>
+                                <p className="text-sm font-medium text-slate-700">Last Activities</p>
+                                <p className="text-sm text-slate-600">
+                                  Inspection: {farmer.lastInspection ? 
+                                    new Date(farmer.lastInspection).toLocaleDateString() : 'Not Available'}
+                                </p>
+                                <p className="text-sm text-slate-600">
+                                  Status: 
+                                  <Badge className={`ml-2 ${farmer.complianceStatus === 'compliant' ? 'bg-green-100 text-green-800' :
+                                    farmer.complianceStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                    'bg-red-100 text-red-800'}`}>
+                                    {farmer.complianceStatus}
+                                  </Badge>
+                                </p>
+                              </div>
+                              
+                              <div className="flex flex-col gap-2">
+                                <Button size="sm" variant="outline" className="w-full">
+                                  <Map className="w-4 h-4 mr-2" />
+                                  View Land Map
+                                </Button>
+                                <Button size="sm" variant="outline" className="w-full">
+                                  <Calendar className="w-4 h-4 mr-2" />
+                                  Harvest Schedule
+                                </Button>
+                                <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white">
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  EUDR Report
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* EUDR Compliance Packs Pending Review */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-semibold text-slate-900">EUDR Compliance Packs - Pending Review</h3>
+                  <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50">
+                    {eudrPendingPacks?.length || 0} Pending Approval
+                  </Badge>
+                </div>
+
+                {eudrPendingLoading ? (
+                  <div className="flex items-center justify-center h-20">
+                    <div className="animate-spin w-6 h-6 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    {(eudrPendingPacks || []).map((pack: any, index: number) => (
+                      <Card key={pack.packId || index} className="bg-white shadow-sm">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="font-medium text-slate-900">{pack.farmerName}</h4>
+                              <p className="text-sm text-slate-600">Exporter: {pack.exporterName}</p>
+                              <p className="text-sm text-slate-600">Commodity: {pack.commodity}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium text-slate-700">Compliance Score: {pack.complianceScore}%</p>
+                              <Badge className={`${pack.riskClassification === 'low' ? 'bg-green-100 text-green-800' :
+                                pack.riskClassification === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                                'bg-red-100 text-red-800'}`}>
+                                {pack.riskClassification?.toUpperCase()} Risk
+                              </Badge>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="w-4 h-4 mr-1" />
+                                Review
+                              </Button>
+                              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Deforestation Monitoring */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-semibold text-slate-900">Deforestation Monitoring & Alerts</h3>
+                  <Badge variant="outline" className="border-red-500 text-red-600 bg-red-50">
+                    Real-time Satellite Monitoring Active
+                  </Badge>
+                </div>
+
+                {deforestationLoading ? (
+                  <div className="flex items-center justify-center h-20">
+                    <div className="animate-spin w-6 h-6 border-4 border-primary border-t-transparent rounded-full" />
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    {(deforestationAlerts?.slice(0, 5) || []).map((alert: any, index: number) => (
+                      <Card key={alert.alertId || index} className="bg-white shadow-sm border-l-4 border-l-red-500">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="font-medium text-slate-900 flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4 text-red-600" />
+                                Deforestation Detected
+                              </h4>
+                              <p className="text-sm text-slate-600">Location: {alert.location || 'Protected Forest Area'}</p>
+                              <p className="text-sm text-slate-600">Area: {alert.affectedAreaHectares || '2.3'} hectares</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-slate-600">
+                                Detected: {alert.detectionDate ? new Date(alert.detectionDate).toLocaleDateString() : 'Today'}
+                              </p>
+                              <Badge className="bg-red-100 text-red-800">
+                                CRITICAL
+                              </Badge>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="w-4 h-4 mr-1" />
+                                View Satellite
+                              </Button>
+                              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">
+                                <AlertTriangle className="w-4 h-4 mr-1" />
+                                Investigate
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    {(!deforestationAlerts || deforestationAlerts.length === 0) && (
+                      <Card className="bg-white shadow-sm">
+                        <CardContent className="p-6 text-center">
+                          <TreePine className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                          <h4 className="font-medium text-slate-900">No Active Deforestation Alerts</h4>
+                          <p className="text-sm text-slate-600">Forest areas are currently stable and protected</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

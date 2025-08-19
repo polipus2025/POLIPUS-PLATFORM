@@ -124,6 +124,11 @@ import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
 import FarmerDashboard from "@/pages/farmer-dashboard";
 import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
+import BuyerFarmerConnections from "@/pages/buyer-farmer-connections";
+import BuyerExporterNetwork from "@/pages/buyer-exporter-network";
+import BuyerTransactionDashboard from "@/pages/buyer-transaction-dashboard";
+import BuyerHarvestTracking from "@/pages/buyer-harvest-tracking";
+import BuyerBusinessMetrics from "@/pages/buyer-business-metrics";
 import Messaging from "@/pages/messaging";
 
 import ExportPermitSubmission from "@/pages/export-permit-submission";
@@ -400,31 +405,31 @@ function Router() {
           </Route>
           <Route path="/buyer-farmer-connections">
             <ProtectedRoute 
-              component={BuyerDashboard} 
+              component={BuyerFarmerConnections} 
               allowedUserTypes={['buyer']} 
             />
           </Route>
           <Route path="/buyer-exporter-network">
             <ProtectedRoute 
-              component={BuyerDashboard} 
+              component={BuyerExporterNetwork} 
               allowedUserTypes={['buyer']} 
             />
           </Route>
           <Route path="/buyer-transactions">
             <ProtectedRoute 
-              component={BuyerDashboard} 
+              component={BuyerTransactionDashboard} 
               allowedUserTypes={['buyer']} 
             />
           </Route>
           <Route path="/buyer-harvests">
             <ProtectedRoute 
-              component={BuyerDashboard} 
+              component={BuyerHarvestTracking} 
               allowedUserTypes={['buyer']} 
             />
           </Route>
           <Route path="/buyer-metrics">
             <ProtectedRoute 
-              component={BuyerDashboard} 
+              component={BuyerBusinessMetrics} 
               allowedUserTypes={['buyer']} 
             />
           </Route>

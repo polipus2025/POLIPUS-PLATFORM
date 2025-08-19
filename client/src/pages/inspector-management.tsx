@@ -196,6 +196,7 @@ export default function InspectorManagement() {
       phoneNumber: '',
       nationalId: '',
       address: '',
+      inspectorType: '', // Land Inspector or Port Inspector
       inspectionAreaCounty: '',
       inspectionAreaDistrict: '',
       inspectionAreaDescription: '',
@@ -231,7 +232,7 @@ export default function InspectorManagement() {
         setCurrentStep(1);
         setFormData({
           firstName: '', lastName: '', email: '', phoneNumber: '', nationalId: '', 
-          address: '', inspectionAreaCounty: '', inspectionAreaDistrict: '',
+          address: '', inspectorType: '', inspectionAreaCounty: '', inspectionAreaDistrict: '',
           inspectionAreaDescription: '', specializations: '', certificationLevel: '',
           profilePicture: null
         });
@@ -304,6 +305,26 @@ export default function InspectorManagement() {
                     onChange={(e) => setFormData({...formData, address: e.target.value})}
                     placeholder="Enter full address"
                   />
+                </div>
+              </div>
+              
+              {/* Inspector Type Selection */}
+              <div className="mt-6">
+                <h4 className="text-md font-semibold mb-3 text-slate-900">Inspector Type Selection</h4>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Inspector Type *</label>
+                  <Select value={formData.inspectorType} onValueChange={(value) => setFormData({...formData, inspectorType: value})}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select inspector type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Land Inspector">Land Inspector</SelectItem>
+                      <SelectItem value="Port Inspector">Port Inspector</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Land Inspectors monitor farm operations and agricultural facilities. Port Inspectors oversee export/import operations at ports.
+                  </p>
                 </div>
               </div>
             </div>

@@ -193,6 +193,18 @@ export default function Sidebar() {
 
   // Get the appropriate navigation items based on user type
   const navigationItems = getNavigationItems(userType, role);
+  
+  // Debug logging for buyer navigation
+  if (userType === 'buyer') {
+    console.log('Buyer navigation debug:', {
+      userType,
+      role,
+      navigationItems,
+      dgToken: localStorage.getItem('dgToken'),
+      ddgotsToken: localStorage.getItem('ddgotsToken'),
+      ddgafToken: localStorage.getItem('ddgafToken')
+    });
+  }
 
   return (
     <aside className="hidden lg:block w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto shrink-0">
@@ -214,8 +226,13 @@ export default function Sidebar() {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
-                  <Link href={item.href} className={cn(
-                    "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base mobile-menu-item",
+                  <Link 
+                    href={item.href} 
+                    onClick={(e) => {
+                      console.log('Sidebar link clicked:', item.href, item.name);
+                    }}
+                    className={cn(
+                      "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base cursor-pointer hover:cursor-pointer",
                     isActive
                       ? userType === 'farmer' 
                         ? "text-green-700 bg-green-50"
@@ -229,7 +246,7 @@ export default function Sidebar() {
                       : "text-gray-600 hover:bg-gray-50"
                   )}>
                     <item.icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
-                    <span className="truncate mobile-menu-item">{item.name}</span>
+                    <span className="truncate">{item.name}</span>
                     {/* Show blinking red notification for Internal Messaging */}
                     {item.name === "Internal Messaging" && unreadCount > 0 && (
                       <div className="ml-auto flex items-center space-x-1">

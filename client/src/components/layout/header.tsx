@@ -143,7 +143,9 @@ export default function Header() {
         name: `${firstName} ${lastName}`,
         initials: `${firstName[0]}${lastName[0]}`.toUpperCase(),
         role: userType === 'farmer' ? 'Farmer' : 
-              userType === 'field_agent' ? 'Field Agent' : 
+              userType === 'field_agent' ? 'Field Agent' :
+              userType === 'buyer' ? 'Agricultural Buyer' :
+              userType === 'exporter' ? 'Licensed Exporter' :
               'LACRA Officer'
       };
     }
@@ -151,7 +153,9 @@ export default function Header() {
       name: username || 'User',
       initials: username ? username.substring(0, 2).toUpperCase() : 'U',
       role: userType === 'farmer' ? 'Farmer' : 
-            userType === 'field_agent' ? 'Field Agent' : 
+            userType === 'field_agent' ? 'Field Agent' :
+            userType === 'buyer' ? 'Agricultural Buyer' :
+            userType === 'exporter' ? 'Licensed Exporter' :
             'LACRA Officer'
     };
   };

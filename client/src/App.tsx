@@ -210,6 +210,7 @@ function Router() {
       
       {/* Authentication Routes - Public */}
       <Route path="/regulatory-login" component={RegulatoryLogin} />
+      <Route path="/auth/regulatory-login" component={RegulatoryLogin} />
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/inspector-login" component={InspectorPortal} />

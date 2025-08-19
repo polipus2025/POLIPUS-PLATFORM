@@ -1,278 +1,157 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Helmet } from "react-helmet";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, Building2, AlertCircle, Eye, EyeOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, Building2, DollarSign, Settings, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.string().min(1, "Role selection is required"),
-  department: z.string().optional(),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
 export default function RegulatoryLogin() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
-  const { toast } = useToast();
-
-  const form = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "admin",
-      password: "admin123",
-      role: "regulatory_admin",
-      department: "LACRA",
-    },
-  });
-
-  const selectedRole = form.watch("role");
-
-  const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true);
-    setError("");
-
-    // Enhanced offline check with connection test
-    if (!navigator.onLine) {
-      setError("You're currently offline. Login requires an internet connection. Please connect to the internet and try again.");
-      setIsLoading(false);
-      toast({
-        title: "Offline Mode",
-        description: "Internet connection required for login",
-        variant: "destructive",
-      });
-      return;
-    }
-
-
-
-    try {
-      const result = await apiRequest("/api/auth/regulatory-login", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          userType: "regulatory"
-        })
-      });
-      
-      if (result && result.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to AgriTrace360™ Regulatory Portal",
-        });
-        
-        // Store session data
-        localStorage.setItem("authToken", result.token);
-        localStorage.setItem("userRole", data.role);
-        localStorage.setItem("userType", "regulatory");
-        
-        // Redirect to regulatory dashboard
-        window.location.href = "/dashboard";
-      }
-    } catch (error: any) {
-      const errorMessage = error.message || "Login failed. Please check your credentials.";
-      setError(errorMessage);
-      toast({
-        title: "Login Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen isms-gradient flex items-center justify-center p-4">
-      <Helmet>
-        <title>Regulatory Portal Login - AgriTrace360™ LACRA</title>
-        <meta name="description" content="Secure login portal for LACRA regulatory staff and administrators" />
-      </Helmet>
-
-      <div className="w-full max-w-md">
-        <div className="isms-card">
-          <div className="text-center pb-6">
-            <div className="flex justify-center mb-6">
-              <img 
-                src={lacraLogo} 
-                alt="LACRA Official Logo" 
-                className="h-32 w-32 object-contain"
-              />
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
-              LACRA Regulatory Portal
-            </h1>
-            <p className="text-slate-600 text-sm mb-1">
-              Liberia Agriculture Commodity Regulatory Authority
-            </p>
-            <p className="text-slate-500 text-xs">
-              AgriTrace360™ | Authorized Personnel Only
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
+            <img 
+              src={lacraLogo} 
+              alt="LACRA Logo" 
+              className="w-16 h-16 object-contain rounded-full"
+            />
           </div>
+          <h1 className="text-4xl font-bold text-white mb-2">LACRA Regulatory Portal</h1>
+          <p className="text-slate-300 text-lg">Three-Tier Access System</p>
+          <p className="text-slate-400 text-sm mt-2">Liberia Agriculture Commodity Regulatory Authority</p>
+        </div>
 
-          <div className="pt-4">
-            {error && (
-              <Alert className="mb-6 border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-800">{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Role Selection */}
-              <div>
-                <Label htmlFor="role">Access Level *</Label>
-                <Select 
-                  value={form.watch("role")} 
-                  onValueChange={(value) => form.setValue("role", value)}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select your access level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="regulatory_admin">
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4" />
-                        System Administrator
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="regulatory_staff">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
-                        Regulatory Officer
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {form.formState.errors.role && (
-                  <p className="text-sm text-red-600 mt-1">{form.formState.errors.role.message}</p>
-                )}
+        {/* Three-Tier Access Cards */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          {/* DG Portal */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all cursor-pointer group" 
+                onClick={() => navigate('/auth/dg-login')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Shield className="w-8 h-8 text-white" />
               </div>
-
-              {/* Department for Regulatory Staff */}
-              {selectedRole === "regulatory_staff" && (
-                <div>
-                  <Label htmlFor="department">Department</Label>
-                  <Select 
-                    value={form.watch("department") || ""} 
-                    onValueChange={(value) => form.setValue("department", value)}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="compliance">Compliance & Monitoring</SelectItem>
-                      <SelectItem value="certification">Certification & Quality</SelectItem>
-                      <SelectItem value="inspection">Inspection Services</SelectItem>
-                      <SelectItem value="analytics">Analytics & Reporting</SelectItem>
-                      <SelectItem value="government_relations">Government Relations</SelectItem>
-                      <SelectItem value="eudr_compliance">EUDR Compliance</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Username */}
-              <div>
-                <Label htmlFor="username">Username *</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  {...form.register("username")}
-                  className="mt-1"
-                  placeholder="Enter your username"
-                />
-                {form.formState.errors.username && (
-                  <p className="text-sm text-red-600 mt-1">{form.formState.errors.username.message}</p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <Label htmlFor="password">Password *</Label>
-                <div className="relative mt-1">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    {...form.register("password")}
-                    className="pr-10"
-                    placeholder="Enter your password"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </button>
-                </div>
-                {form.formState.errors.password && (
-                  <p className="text-sm text-red-600 mt-1">{form.formState.errors.password.message}</p>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="isms-button w-full py-3"
-                disabled={isLoading}
+              <CardTitle className="text-xl text-white flex items-center justify-center gap-2">
+                <Building2 className="w-5 h-5" />
+                Director General
+              </CardTitle>
+              <CardDescription className="text-slate-300">
+                Executive Leadership Portal
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-blue-400 text-blue-300 bg-blue-500/20">
+                Executive Level Access
+              </Badge>
+              <ul className="text-sm text-slate-300 space-y-2">
+                <li>• Strategic oversight and governance</li>
+                <li>• Policy formulation and approval</li>
+                <li>• Executive decision-making</li>
+                <li>• Board reporting and compliance</li>
+              </ul>
+              <Button 
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
+                onClick={(e) => { e.stopPropagation(); navigate('/auth/dg-login'); }}
               >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Authenticating...
-                  </>
-                ) : (
-                  "Access Regulatory Portal"
-                )}
+                Access DG Portal
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </form>
+            </CardContent>
+          </Card>
 
-            {/* Footer */}
-            <div className="mt-6 text-center">
-              <p className="text-xs text-slate-500">
-                Liberia Agriculture Commodity Regulatory Authority
-              </p>
-              <p className="text-xs text-slate-400 mt-1">
-                Secure access portal for authorized personnel
-              </p>
-            </div>
+          {/* DDGOTS Portal */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all cursor-pointer group"
+                onClick={() => navigate('/auth/ddgots-login')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Settings className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-xl text-white flex items-center justify-center gap-2">
+                <Settings className="w-5 h-5" />
+                DDGOTS
+              </CardTitle>
+              <CardDescription className="text-emerald-200">
+                Operations & Technical Services
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-emerald-400 text-emerald-300 bg-emerald-500/20">
+                Operations Level Access
+              </Badge>
+              <ul className="text-sm text-slate-300 space-y-2">
+                <li>• Field operations management</li>
+                <li>• Quality control and certifications</li>
+                <li>• Technical standards compliance</li>
+                <li>• Inspection coordination</li>
+              </ul>
+              <Button 
+                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white group"
+                onClick={(e) => { e.stopPropagation(); navigate('/auth/ddgots-login'); }}
+              >
+                Access DDGOTS Portal
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* DDGAF Portal */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all cursor-pointer group"
+                onClick={() => navigate('/auth/ddgaf-login')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <DollarSign className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-xl text-white flex items-center justify-center gap-2">
+                <DollarSign className="w-5 h-5" />
+                DDGAF
+              </CardTitle>
+              <CardDescription className="text-amber-200">
+                Administration & Finance
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-amber-400 text-amber-300 bg-amber-500/20">
+                Finance Level Access
+              </Badge>
+              <ul className="text-sm text-slate-300 space-y-2">
+                <li>• Budget planning and management</li>
+                <li>• HR administration and procurement</li>
+                <li>• Financial compliance and reporting</li>
+                <li>• Revenue and cost management</li>
+              </ul>
+              <Button 
+                className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white group"
+                onClick={(e) => { e.stopPropagation(); navigate('/auth/ddgaf-login'); }}
+              >
+                Access DDGAF Portal
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Security Notice */}
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 text-center">
+          <Shield className="w-8 h-8 text-slate-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-white mb-2">Secure Access Portal</h3>
+          <p className="text-slate-300 text-sm mb-4">
+            Each departmental portal provides role-specific access controls and specialized functionality. 
+            All sessions are secured with JWT authentication and audit logging.
+          </p>
+          <div className="flex justify-center space-x-6 text-xs text-slate-400">
+            <span>✓ Multi-factor Authentication</span>
+            <span>✓ Session Timeout Protection</span>
+            <span>✓ Audit Trail Monitoring</span>
           </div>
         </div>
 
-        {/* Access Information */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-slate-600 mb-2">Need different access?</p>
-          <div className="flex justify-center gap-4">
-            <a
-              href="/farmer-login"
-              className="text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
-            >
-              Farmer Portal
-            </a>
-            <a
-              href="/field-agent-login"
-              className="text-sm text-green-600 hover:text-green-800 underline transition-colors"
-            >
-              Field Agent Portal
-            </a>
-          </div>
+        {/* Footer */}
+        <div className="text-center mt-6 text-slate-400 text-sm">
+          <p>AgriTrace360™ Three-Tier Regulatory Portal System</p>
+          <p className="text-xs mt-1">Authorized Personnel Only • All Access Attempts are Logged</p>
         </div>
       </div>
     </div>

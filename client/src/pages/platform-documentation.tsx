@@ -26,7 +26,7 @@ export default function PlatformDocumentation() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Platform Documentation</h1>
-          <p className="text-xl text-gray-600">Comprehensive technical documentation of the Polipus Platform ecosystem</p>
+          <p className="text-xl text-gray-600">Comprehensive technical documentation of the Polipus Environmental Intelligence Ecosystem</p>
         </div>
 
         {/* Download Section */}
@@ -37,8 +37,8 @@ export default function PlatformDocumentation() {
               Complete Technical Documentation
             </CardTitle>
             <p className="text-gray-700">
-              Download the comprehensive PDF documentation detailing all platform capabilities, 
-              technical specifications, satellite integration, and comparative analysis.
+              Download the comprehensive PDF documentation detailing the world's first environmental intelligence ecosystem with 8 integrated modules, 
+              200+ satellite sources, and comprehensive monitoring capabilities.
             </p>
           </CardHeader>
           <CardContent>
@@ -51,7 +51,7 @@ export default function PlatformDocumentation() {
               Download Full Documentation PDF
             </Button>
             <p className="text-sm text-gray-600 mt-2">
-              24-page comprehensive technical analysis • Generated: {new Date().toLocaleDateString()}
+              24-page comprehensive environmental intelligence analysis • Generated: {new Date().toLocaleDateString()}
             </p>
           </CardContent>
         </Card>

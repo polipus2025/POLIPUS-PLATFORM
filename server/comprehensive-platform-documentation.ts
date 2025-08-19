@@ -9,8 +9,8 @@ export async function generateComprehensivePlatformDocumentation(res: Response) 
     info: {
       Title: 'Polipus Platform - Comprehensive Technical Documentation',
       Author: 'LACRA & Polipus Development Team',
-      Subject: 'Agricultural Intelligence & Environmental Monitoring Platform',
-      Keywords: 'Agricultural Technology, Satellite Monitoring, Environmental Intelligence, EUDR Compliance'
+      Subject: 'Comprehensive Environmental Intelligence Platform',
+      Keywords: 'Environmental Intelligence, Satellite Monitoring, Agricultural Technology, Mining Oversight, Forest Protection, Marine Conservation, Carbon Tracking'
     }
   });
 
@@ -69,7 +69,7 @@ export async function generateComprehensivePlatformDocumentation(res: Response) 
      
   doc.fontSize(subHeadingSize).font('Helvetica-Bold')
      .fillColor('#059669')
-     .text('Agricultural Intelligence & Environmental Monitoring Ecosystem', 50, 170, { align: 'center', width: 495 });
+     .text('Comprehensive Environmental Intelligence Ecosystem', 50, 170, { align: 'center', width: 495 });
 
   // Add platform overview box
   doc.rect(50, 220, 495, 400).stroke('#e5e7eb');
@@ -77,7 +77,7 @@ export async function generateComprehensivePlatformDocumentation(res: Response) 
      .fillColor('#374151')
      .text('Platform Overview:', 70, 240);
      
-  const overviewText = `The Polipus Platform represents the world's first comprehensive agricultural intelligence and environmental monitoring ecosystem, integrating 8 specialized modules with unprecedented precision and capability. This revolutionary platform combines real-time satellite monitoring, GPS technology, blockchain traceability, and AI-powered analytics to deliver unmatched environmental intelligence and agricultural compliance management.
+  const overviewText = `The Polipus Platform represents the world's first comprehensive environmental intelligence ecosystem, integrating 8 specialized modules with unprecedented precision and capability. This revolutionary platform combines real-time satellite monitoring, GPS technology, blockchain traceability, and AI-powered analytics to deliver unmatched environmental intelligence across agricultural, mining, forestry, marine, and carbon monitoring sectors.
 
 Key Differentiators:
 • First-of-its-kind integrated 8-module ecosystem
@@ -88,7 +88,7 @@ Key Differentiators:
 • Complete government integration capabilities
 • Fully auditable blockchain-based traceability
 
-The platform serves agricultural stakeholders, regulatory bodies, environmental agencies, and international compliance organizations with unprecedented accuracy and reliability.`;
+The platform serves environmental agencies, agricultural stakeholders, mining authorities, forestry departments, marine conservation organizations, carbon traders, regulatory bodies, and international compliance organizations with unprecedented accuracy and reliability across all environmental monitoring sectors.`;
 
   doc.text(overviewText, 70, 260, { width: 455, align: 'justify' });
 
@@ -122,13 +122,13 @@ The platform serves agricultural stakeholders, regulatory bodies, environmental 
 
   // Executive Summary
   addSection('1. EXECUTIVE SUMMARY', [
-    'The Polipus Platform represents a paradigm shift in agricultural intelligence and environmental monitoring technology. This comprehensive ecosystem delivers unprecedented precision, reliability, and integration capabilities that distinguish it as the world\'s first platform of its kind.',
+    'The Polipus Platform represents a paradigm shift in comprehensive environmental intelligence technology. This revolutionary ecosystem delivers unprecedented precision, reliability, and integration capabilities across all environmental monitoring sectors, distinguishing it as the world\'s first platform of its kind.',
     
     'Core Innovation: The platform integrates 8 specialized modules into a cohesive ecosystem, each designed for specific environmental and agricultural monitoring tasks while maintaining seamless interconnectivity and data sharing.',
     
     'Technical Superiority: With access to over 200 satellite data sources, real-time GPS tracking with centimeter-level precision, and AI-powered analytics, the platform delivers monitoring capabilities that surpass existing solutions by orders of magnitude.',
     
-    'Market Position: As the first integrated platform combining agricultural traceability, environmental monitoring, mining oversight, forest protection, marine conservation, and carbon tracking in a single ecosystem, Polipus establishes a new category in environmental technology.',
+    'Market Position: As the first integrated platform combining agricultural intelligence, environmental monitoring, mining oversight, forest protection, marine conservation, livestock tracking, land mapping, and carbon monitoring in a single ecosystem, Polipus establishes an entirely new category in comprehensive environmental intelligence technology.',
     
     'Compliance Leadership: The platform provides full automation for EU Deforestation Regulation (EUDR) compliance, international agricultural standards, and environmental reporting requirements, positioning users at the forefront of regulatory compliance.'
   ]);

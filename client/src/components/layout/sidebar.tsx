@@ -124,6 +124,16 @@ const exporterNavigation = [
   { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
 ];
 
+// Agricultural Buyer Navigation - Commerce-focused for agricultural trade
+const buyerNavigation = [
+  { name: "Business Overview", href: "/buyer-dashboard", icon: BarChart3 },
+  { name: "Farmer Connections", href: "/buyer-farmer-connections", icon: Leaf },
+  { name: "Exporter Network", href: "/buyer-exporter-network", icon: Building2 },
+  { name: "Transaction Dashboard", href: "/buyer-transactions", icon: DollarSign },
+  { name: "Available Harvests", href: "/buyer-harvests", icon: Calendar },
+  { name: "Business Metrics", href: "/buyer-metrics", icon: TrendingUp },
+];
+
 // Function to get navigation items based on user type and role
 const getNavigationItems = (userType: string | null, role: string | null) => {
   // Check for three-tier regulatory system first
@@ -149,6 +159,8 @@ const getNavigationItems = (userType: string | null, role: string | null) => {
       return farmerNavigation;
     case 'field_agent':
       return fieldAgentNavigation;
+    case 'buyer':
+      return buyerNavigation;
     case 'exporter':
       return exporterNavigation;
     default:
@@ -193,6 +205,7 @@ export default function Sidebar() {
              localStorage.getItem('ddgafToken') ? 'DDGAF ADMINISTRATION' :
              userType === 'farmer' ? 'Farm Management' : 
              userType === 'field_agent' ? 'Field Operations' : 
+             userType === 'buyer' ? 'Agricultural Buyer Portal' :
              userType === 'exporter' ? 'Export Operations' :
              'Regulatory Compliance'}
           </h3>
@@ -208,6 +221,8 @@ export default function Sidebar() {
                         ? "text-green-700 bg-green-50"
                         : userType === 'field_agent'
                         ? "text-orange-700 bg-orange-50"
+                        : userType === 'buyer'
+                        ? "text-blue-700 bg-blue-50"
                         : userType === 'exporter'
                         ? "text-purple-700 bg-purple-50"
                         : "text-lacra-blue bg-blue-50"
@@ -237,6 +252,7 @@ export default function Sidebar() {
           <div className="text-sm font-medium text-gray-700">
             {userType === 'farmer' ? 'Farmer' : 
              userType === 'field_agent' ? 'Field Agent' : 
+             userType === 'buyer' ? 'Agricultural Buyer' :
              userType === 'exporter' ? 'Licensed Exporter' :
              'LACRA Officer'}
           </div>

@@ -391,8 +391,38 @@ function Router() {
             />
           </Route>
           
-          {/* Buyer Dashboard Route */}
+          {/* Agricultural Buyer Portal Routes */}
           <Route path="/buyer-dashboard">
+            <ProtectedRoute 
+              component={BuyerDashboard} 
+              allowedUserTypes={['buyer']} 
+            />
+          </Route>
+          <Route path="/buyer-farmer-connections">
+            <ProtectedRoute 
+              component={BuyerDashboard} 
+              allowedUserTypes={['buyer']} 
+            />
+          </Route>
+          <Route path="/buyer-exporter-network">
+            <ProtectedRoute 
+              component={BuyerDashboard} 
+              allowedUserTypes={['buyer']} 
+            />
+          </Route>
+          <Route path="/buyer-transactions">
+            <ProtectedRoute 
+              component={BuyerDashboard} 
+              allowedUserTypes={['buyer']} 
+            />
+          </Route>
+          <Route path="/buyer-harvests">
+            <ProtectedRoute 
+              component={BuyerDashboard} 
+              allowedUserTypes={['buyer']} 
+            />
+          </Route>
+          <Route path="/buyer-metrics">
             <ProtectedRoute 
               component={BuyerDashboard} 
               allowedUserTypes={['buyer']} 

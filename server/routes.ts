@@ -1662,6 +1662,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Agricultural Buyer API Routes
+  // Get available harvests from farmers
+  app.get("/api/buyer/available-harvests", async (req, res) => {
+    try {
+      // Mock data for available harvests from farmers who confirmed harvesting
+      const availableHarvests = [
+        {
+          id: 1,
+          farmerId: "FRM-2024-045",
+          farmerName: "Mary Johnson",
+          commodity: "Cocoa Beans",
+          quantity: "750kg",
+          pricePerKg: 2.50,
+          county: "Nimba County",
+          district: "Ganta District",
+          harvestDate: "2024-01-15",
+          status: "Ready",
+          gpsCoordinates: "7.2306° N, 8.5559° W"
+        },
+        {
+          id: 2,
+          farmerId: "FRM-2024-067",
+          farmerName: "David Wilson", 
+          commodity: "Coffee Beans",
+          quantity: "450kg",
+          pricePerKg: 3.20,
+          county: "Bong County",
+          district: "Gbarnga District",
+          harvestDate: "2024-01-12",
+          status: "Ready",
+          gpsCoordinates: "6.9983° N, 9.4739° W"
+        },
+        {
+          id: 3,
+          farmerId: "FRM-2024-089",
+          farmerName: "Sarah Brown",
+          commodity: "Palm Oil",
+          quantity: "200L",
+          pricePerKg: 1.80,
+          county: "Grand Bassa County",
+          district: "Owensgrove",
+          harvestDate: "2024-01-20",
+          status: "Processing",
+          gpsCoordinates: "6.2506° N, 9.7489° W"
+        }
+      ];
+      
+      res.json(availableHarvests);
+    } catch (error) {
+      console.error("Error fetching available harvests:", error);
+      res.status(500).json({ message: "Error fetching available harvests" });
+    }
+  });
+
+  // Get connected exporters for selling
+  app.get("/api/buyer/connected-exporters", async (req, res) => {
+    try {
+      // Mock data for connected exporters
+      const exporters = [
+        {
+          id: 1,
+          exporterId: "EST-2024-012",
+          companyName: "Global Trading Ltd",
+          contactPerson: "James Mitchell",
+          specialties: ["Cocoa", "Coffee"],
+          priceRange: "$2.80 - $3.50/kg",
+          destinations: ["EU", "USA", "Asia"],
+          status: "Active",
+          rating: 4.8,
+          completedTrades: 45
+        },
+        {
+          id: 2,
+          exporterId: "EST-2024-008",
+          companyName: "International Export Co.",
+          contactPerson: "Lisa Rodriguez",
+          specialties: ["All commodities"],
+          priceRange: "$3.00 - $4.20/kg",
+          destinations: ["Global markets"],
+          status: "Premium",
+          rating: 4.9,
+          completedTrades: 78
+        }
+      ];
+      
+      res.json(exporters);
+    } catch (error) {
+      console.error("Error fetching connected exporters:", error);
+      res.status(500).json({ message: "Error fetching connected exporters" });
+    }
+  });
+
+  // Get buyer transactions
+  app.get("/api/buyer/transactions", async (req, res) => {
+    try {
+      // Mock data for buyer transactions
+      const transactions = [
+        {
+          id: 1,
+          type: "purchase",
+          farmerId: "FRM-2024-045",
+          farmerName: "Mary Johnson",
+          commodity: "Cocoa Beans",
+          quantity: "750kg",
+          amount: -1875,
+          date: "2024-01-15",
+          status: "Completed"
+        },
+        {
+          id: 2,
+          type: "sale",
+          exporterId: "EST-2024-012",
+          exporterName: "Global Trading Ltd",
+          commodity: "Cocoa Beans",
+          quantity: "500kg",
+          amount: 1750,
+          date: "2024-01-14",
+          status: "Completed"
+        },
+        {
+          id: 3,
+          type: "purchase",
+          farmerId: "FRM-2024-067",
+          farmerName: "David Wilson",
+          commodity: "Coffee Beans",
+          quantity: "450kg",
+          amount: -1440,
+          date: "2024-01-12",
+          status: "Completed"
+        },
+        {
+          id: 4,
+          type: "sale",
+          exporterId: "EST-2024-008",
+          exporterName: "International Export Co.",
+          commodity: "Coffee Beans", 
+          quantity: "300kg",
+          amount: 1260,
+          date: "2024-01-10",
+          status: "Completed"
+        }
+      ];
+      
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching buyer transactions:", error);
+      res.status(500).json({ message: "Error fetching buyer transactions" });
+    }
+  });
+
+  // Get buyer business metrics
+  app.get("/api/buyer/business-metrics", async (req, res) => {
+    try {
+      // Mock data for buyer business metrics
+      const metrics = {
+        totalPurchases: 124500,
+        totalSales: 145200,
+        netProfit: 20700,
+        profitMargin: 16.6,
+        activeConnections: 28,
+        availableHarvests: 15,
+        monthlyVolume: 12.5, // tons
+        monthlyRevenue: 45200
+      };
+      
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching buyer business metrics:", error);
+      res.status(500).json({ message: "Error fetching buyer business metrics" });
+    }
+  });
+
   app.post("/api/auth/field-agent-login", async (req, res) => {
     try {
       const { agentId, password, jurisdiction, phoneNumber, userType } = req.body;

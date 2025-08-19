@@ -123,7 +123,7 @@ import DirectorDashboard from "@/pages/director-dashboard";
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
 import FarmerDashboard from "@/pages/farmer-dashboard";
-import BuyerDashboard from "@/pages/buyer-dashboard";
+import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
 import Messaging from "@/pages/messaging";
 
 import ExportPermitSubmission from "@/pages/export-permit-submission";
@@ -358,6 +358,8 @@ function Router() {
                   return <FarmerDashboard />;
                 case 'field_agent':
                   return <FieldAgentDashboard />;
+                case 'buyer':
+                  return <BuyerDashboard />;
                 case 'exporter':
                   return <ExporterDashboard />;
                 case 'monitoring':

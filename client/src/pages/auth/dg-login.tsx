@@ -53,30 +53,30 @@ export default function DGLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Director General Portal</h1>
-          <p className="text-slate-300">LACRA Executive Access System</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Director General Portal</h1>
+          <p className="text-slate-600">LACRA Executive Access System</p>
         </div>
 
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="bg-white shadow-xl border-slate-200">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center text-white flex items-center justify-center gap-2">
+            <CardTitle className="text-2xl text-center text-slate-900 flex items-center justify-center gap-2">
               <Building2 className="w-5 h-5" />
               DG Level Access
             </CardTitle>
-            <CardDescription className="text-center text-slate-300">
+            <CardDescription className="text-center text-slate-600">
               Executive leadership authentication
             </CardDescription>
             
             {/* Access Level Badge */}
             <div className="flex justify-center mt-4">
-              <Badge variant="outline" className="border-blue-400 text-blue-300 bg-blue-500/20">
+              <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50">
                 <Shield className="w-4 h-4 mr-1" />
                 Executive Level
               </Badge>
@@ -84,9 +84,16 @@ export default function DGLogin() {
           </CardHeader>
           
           <CardContent className="space-y-4">
+            {/* Test Credentials Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+              <p className="text-sm text-blue-700 font-medium">Test Credentials:</p>
+              <p className="text-xs text-blue-600">Username: <code className="bg-blue-100 px-1 rounded">director_general</code></p>
+              <p className="text-xs text-blue-600">Password: <code className="bg-blue-100 px-1 rounded">dgpassword123</code></p>
+            </div>
+            
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-white">Username</Label>
+                <Label htmlFor="username" className="text-slate-700">Username</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                   <Input
@@ -96,7 +103,7 @@ export default function DGLogin() {
                     placeholder="director_general"
                     value={formData.username}
                     onChange={handleInputChange}
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-slate-400"
+                    className="pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
                     data-testid="input-username"
                     required
                   />
@@ -104,7 +111,7 @@ export default function DGLogin() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">Password</Label>
+                <Label htmlFor="password" className="text-slate-700">Password</Label>
                 <Input
                   id="password"
                   name="password"
@@ -112,16 +119,16 @@ export default function DGLogin() {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-slate-400"
+                  className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
                   data-testid="input-password"
                   required
                 />
               </div>
 
               {error && (
-                <Alert className="bg-red-500/10 border-red-500/50">
-                  <AlertCircle className="h-4 w-4 text-red-400" />
-                  <AlertDescription className="text-red-300">
+                <Alert className="bg-red-50 border-red-200">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-700">
                     {error}
                   </AlertDescription>
                 </Alert>

@@ -49,6 +49,15 @@ const getMobileNavItems = (userType: string | null, role: string | null) => {
     ];
   }
   
+  if (userType === 'buyer') {
+    return [
+      { name: "Home", href: "/", icon: Home },
+      { name: "Farmers", href: "/buyer-farmer-connections", icon: Leaf },
+      { name: "Exports", href: "/buyer-exporter-network", icon: Users },
+      { name: "Trades", href: "/buyer-transactions", icon: BarChart3 },
+    ];
+  }
+  
   if (userType === 'exporter') {
     return [
       { name: "Home", href: "/", icon: Home },

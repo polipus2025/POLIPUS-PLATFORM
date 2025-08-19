@@ -338,6 +338,12 @@ function Router() {
       <Route path="/dg-dashboard" component={DGDashboard} />
       <Route path="/ddgots-dashboard" component={DDGOTSDashboard} />
       <Route path="/ddgaf-dashboard" component={DDGAFDashboard} />
+      
+      {/* DDGOTS Management Routes - Outside auth check (they have internal auth) */}
+      <Route path="/regulatory/inspector-onboarding" component={InspectorOnboarding} />
+      <Route path="/regulatory/inspector-management" component={InspectorManagement} />
+      <Route path="/regulatory/buyer-management" component={BuyerManagement} />
+      <Route path="/regulatory/exporter-management" component={ExporterManagement} />
 
       {/* Protected Routes */}
       {authToken ? (
@@ -540,10 +546,6 @@ function Router() {
           {/* Portal-specific Payment Routes */}
           <Route path="/regulatory-payment-services" component={RegulatoryPaymentServices} />
           <Route path="/certificate-approvals" component={CertificateApprovals} />
-          <Route path="/regulatory/inspector-onboarding" component={InspectorOnboarding} />
-          <Route path="/regulatory/inspector-management" component={InspectorManagement} />
-          <Route path="/regulatory/buyer-management" component={BuyerManagement} />
-          <Route path="/regulatory/exporter-management" component={ExporterManagement} />
           <Route path="/farmer-payment-services" component={FarmerPaymentServices} />
           <Route path="/exporter-payment-services" component={ExporterPaymentServices} />
           

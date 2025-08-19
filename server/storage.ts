@@ -2166,8 +2166,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBuyerCredentials(buyerId: string): Promise<BuyerCredentials | undefined> {
+    // First get the buyer to find the integer ID
+    const buyer = await this.getBuyerByBuyerId(buyerId);
+    if (!buyer) return undefined;
+    
+    // Then get credentials using the integer ID
     const [credentials] = await db.select().from(buyerCredentials)
-      .where(eq(buyerCredentials.buyerId, buyerId));
+      .where(eq(buyerCredentials.buyerId, buyer.id));
     return credentials || undefined;
   }
 

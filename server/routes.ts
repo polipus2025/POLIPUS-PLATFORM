@@ -1598,17 +1598,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if user exists - buyers use buyerId as username
-      const user = await storage.getUserByUsername(buyerId);
-      if (!user || user.role !== 'buyer') {
+      // Check buyer credentials from the buyerCredentials table
+      const buyerCredentials = await storage.getBuyerCredentials(buyerId);
+      if (!buyerCredentials) {
         return res.status(401).json({ 
           success: false, 
           message: "Invalid buyer credentials" 
         });
       }
 
-      // Verify password
-      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      // Verify password against the buyer credentials
+      const isValidPassword = await bcrypt.compare(password, buyerCredentials.passwordHash);
       if (!isValidPassword) {
         return res.status(401).json({ 
           success: false, 
@@ -1616,31 +1616,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get buyer details
+      const buyer = await storage.getBuyerByBuyerId(buyerId);
+      if (!buyer) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Buyer not found" 
+        });
+      }
+
       // Generate JWT token
       const token = jwt.sign(
         { 
-          userId: user.id, 
-          buyerId: user.buyerId, 
-          role: user.role,
+          userId: buyer.id, 
+          buyerId: buyer.buyerId, 
+          role: 'buyer',
           userType: 'buyer'
         },
         JWT_SECRET,
         { expiresIn: '24h' }
       );
 
-      // Update last login
-      await storage.updateUserLastLogin(user.id);
-
       res.json({
         success: true,
         token,
         user: {
-          id: user.id,
-          buyerId: user.buyerId,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          company: user.company || companyName
+          id: buyer.id,
+          buyerId: buyer.buyerId,
+          firstName: buyer.contactPersonFirstName,
+          lastName: buyer.contactPersonLastName,
+          role: 'buyer',
+          userType: 'buyer',
+          company: buyer.businessName || companyName,
+          email: buyer.primaryEmail,
+          phoneNumber: phoneNumber || buyer.primaryPhone,
+          isTemporary: buyerCredentials.passwordChangeRequired || false
         }
       });
 

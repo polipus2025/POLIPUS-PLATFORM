@@ -37,7 +37,8 @@ import {
   Upload,
   Camera,
   CreditCard,
-  User
+  User,
+  ArrowLeft
 } from "lucide-react";
 import { z } from "zod";
 
@@ -263,8 +264,24 @@ export default function BuyerManagement() {
     );
   }
 
+  const handleBackToDashboard = () => {
+    setLocation('/ddgots-dashboard');
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white min-h-screen p-6">
+      {/* Navigation Header */}
+      <div className="mb-6">
+        <Button 
+          onClick={handleBackToDashboard}
+          variant="ghost" 
+          className="mb-4 text-slate-600 hover:text-slate-900"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to DDGOTS Dashboard
+        </Button>
+      </div>
+      
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

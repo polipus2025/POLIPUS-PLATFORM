@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { AlertCircle, CheckCircle, Clock, Building, FileText, Users, DollarSign, Shield, Plus, Eye, Download, ExternalLink } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Building, FileText, Users, DollarSign, Shield, Plus, Eye, Download, ExternalLink, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -331,9 +331,25 @@ Please provide these credentials to the exporter. They will be required to chang
   const approvedExporters = exporters.filter(e => e.complianceStatus === 'approved');
   const suspendedExporters = exporters.filter(e => e.complianceStatus === 'suspended');
 
+  const handleBackToDashboard = () => {
+    setLocation('/ddgots-dashboard');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Navigation Header */}
+        <div className="mb-6">
+          <Button 
+            onClick={handleBackToDashboard}
+            variant="ghost" 
+            className="mb-4 text-slate-600 hover:text-slate-900"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to DDGOTS Dashboard
+          </Button>
+        </div>
+        
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">

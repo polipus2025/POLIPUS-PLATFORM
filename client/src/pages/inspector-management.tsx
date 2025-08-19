@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Search, UserPlus, MapPin, Shield, Phone, Mail, Calendar, 
   CheckCircle, XCircle, Key, Lock, Eye, Edit, History, 
-  Users, TrendingUp, AlertTriangle, UserCheck
+  Users, TrendingUp, AlertTriangle, UserCheck, ArrowLeft
 } from 'lucide-react';
 
 interface Inspector {
@@ -454,10 +454,23 @@ export default function InspectorManagement() {
     );
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
+  const handleBackToDashboard = () => {
+    setLocation('/ddgots-dashboard');
+  };
 
-      <div className="mb-8">
+  return (
+    <div className="container mx-auto px-4 py-8 bg-white">
+      {/* Navigation Header */}
+      <div className="mb-6">
+        <Button 
+          onClick={handleBackToDashboard}
+          variant="ghost" 
+          className="mb-4 text-slate-600 hover:text-slate-900"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to DDGOTS Dashboard
+        </Button>
+        
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
             Inspector Management System
@@ -466,6 +479,9 @@ export default function InspectorManagement() {
             Complete inspector onboarding and management solution for agricultural compliance monitoring
           </p>
         </div>
+      </div>
+
+      <div className="mb-8">
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">

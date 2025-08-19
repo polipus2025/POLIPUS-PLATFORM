@@ -134,7 +134,7 @@ export default function DDGAFDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white border-b border-amber-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -226,25 +226,26 @@ export default function Sidebar() {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
-                  <Link 
-                    href={item.href} 
+                  <button 
                     onClick={(e) => {
-                      console.log('Sidebar link clicked:', item.href, item.name);
+                      e.preventDefault();
+                      console.log('Sidebar button clicked:', item.href, item.name);
+                      window.location.href = item.href;
                     }}
                     className={cn(
-                      "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base cursor-pointer hover:cursor-pointer",
-                    isActive
-                      ? userType === 'farmer' 
-                        ? "text-green-700 bg-green-50"
-                        : userType === 'field_agent'
-                        ? "text-orange-700 bg-orange-50"
-                        : userType === 'buyer'
-                        ? "text-blue-700 bg-blue-50"
-                        : userType === 'exporter'
-                        ? "text-purple-700 bg-purple-50"
-                        : "text-lacra-blue bg-blue-50"
-                      : "text-gray-600 hover:bg-gray-50"
-                  )}>
+                      "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base cursor-pointer hover:cursor-pointer w-full text-left",
+                      isActive
+                        ? userType === 'farmer' 
+                          ? "text-green-700 bg-green-50"
+                          : userType === 'field_agent'
+                          ? "text-orange-700 bg-orange-50"
+                          : userType === 'buyer'
+                          ? "text-blue-700 bg-blue-50"
+                          : userType === 'exporter'
+                          ? "text-purple-700 bg-purple-50"
+                          : "text-lacra-blue bg-blue-50"
+                        : "text-gray-600 hover:bg-gray-50"
+                    )}>
                     <item.icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                     <span className="truncate">{item.name}</span>
                     {/* Show blinking red notification for Internal Messaging */}
@@ -256,7 +257,7 @@ export default function Sidebar() {
                         </span>
                       </div>
                     )}
-                  </Link>
+                  </button>
                 </li>
               );
             })}

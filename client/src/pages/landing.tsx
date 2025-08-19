@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
+import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Download, FileText } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { useState, useEffect } from "react";
@@ -207,6 +207,31 @@ export default function Landing() {
               <p className="text-2xl font-bold text-slate-900 mb-2">Integration</p>
               <p className="text-slate-600 text-sm">Active</p>
             </div>
+          </div>
+        </div>
+
+        {/* Platform Documentation Download - Prominent Section */}
+        <div className="isms-card mb-8 bg-gradient-to-r from-blue-50 to-emerald-50 border-2 border-blue-200">
+          <div className="text-center p-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 flex items-center justify-center mx-auto mb-4">
+              <FileText className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+              Platform Documentation
+            </h2>
+            <p className="text-slate-600 mb-4 max-w-2xl mx-auto">
+              Download the comprehensive technical documentation covering the world's first environmental intelligence ecosystem with 8 integrated modules, 200+ satellite sources, and complete monitoring capabilities.
+            </p>
+            <Button 
+              onClick={() => window.open('/api/download/platform-documentation', '_blank')}
+              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Download Complete Documentation PDF
+            </Button>
+            <p className="text-sm text-slate-500 mt-2">
+              24-page comprehensive environmental intelligence analysis • Generated: {new Date().toLocaleDateString()}
+            </p>
           </div>
         </div>
 

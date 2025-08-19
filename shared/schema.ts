@@ -278,6 +278,29 @@ export const backendLogs = pgTable("backend_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Regulatory Authority Department Schema - Three-Tier System
+export const regulatoryDepartments = pgTable("regulatory_departments", {
+  id: serial("id").primaryKey(),
+  regulatorId: text("regulator_id").notNull().unique(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull().unique(),
+  phoneNumber: text("phone_number"),
+  departmentLevel: text("department_level").notNull(), // dg, ddgots, ddgaf
+  departmentName: text("department_name").notNull(),
+  accessLevel: text("access_level").notNull(), // executive, operations, finance
+  position: text("position").notNull(),
+  permissions: jsonb("permissions").default("{}"),
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  mustChangePassword: boolean("must_change_password").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Super Backend Schema Types
 export type SystemConfiguration = typeof systemConfigurations.$inferSelect;
 export type InsertSystemConfiguration = typeof systemConfigurations.$inferInsert;
@@ -305,6 +328,10 @@ export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
 
 export type BackendLog = typeof backendLogs.$inferSelect;
 export type InsertBackendLog = typeof backendLogs.$inferInsert;
+
+// Regulatory Department Types
+export type RegulatoryDepartment = typeof regulatoryDepartments.$inferSelect;
+export type InsertRegulatoryDepartment = typeof regulatoryDepartments.$inferInsert;
 
 // Inspector Mobile Device Tracking Types
 export type InspectorDevice = typeof inspectorDevices.$inferSelect;

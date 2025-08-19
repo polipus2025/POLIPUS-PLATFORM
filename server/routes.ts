@@ -91,7 +91,11 @@ import {
   
   // Certificate Approval System
   certificateTypes,
-  certificateApprovals
+  certificateApprovals,
+  
+  // Regulatory Department System
+  regulatoryDepartments,
+  type RegulatoryDepartment
 } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
@@ -102,6 +106,21 @@ import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
+
+// Helper function to generate JWT token for regulatory departments
+const generateRegulatoryToken = (regulator: RegulatoryDepartment) => {
+  return jwt.sign(
+    { 
+      regulatorId: regulator.regulatorId,
+      departmentLevel: regulator.departmentLevel,
+      accessLevel: regulator.accessLevel,
+      permissions: regulator.permissions,
+      userType: regulator.departmentLevel // dg, ddgots, ddgaf
+    },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+};
 
 // Initialize AgriTrace Workflow Service
 const agriTraceService = new AgriTraceWorkflowService();
@@ -820,6 +839,226 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: 'Server error during monitoring authentication'
       });
+    }
+  });
+
+  // ========================================
+  // THREE-TIER REGULATORY DEPARTMENT AUTHENTICATION
+  // ========================================
+
+  // DG Level Authentication (Director General)
+  app.post("/api/auth/dg-login", async (req, res) => {
+    try {
+      const { username, password, departmentLevel } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Find regulator by username and department level
+      const [regulator] = await db.select()
+        .from(regulatoryDepartments)
+        .where(eq(regulatoryDepartments.username, username))
+        .limit(1);
+
+      if (!regulator || regulator.departmentLevel !== 'dg') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials or unauthorized access level" 
+        });
+      }
+
+      // Verify password
+      const passwordMatch = await bcrypt.compare(password, regulator.passwordHash);
+      if (!passwordMatch) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      if (!regulator.isActive) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Account is deactivated" 
+        });
+      }
+
+      // Update last login
+      await db.update(regulatoryDepartments)
+        .set({ lastLogin: new Date() })
+        .where(eq(regulatoryDepartments.id, regulator.id));
+
+      // Generate JWT token
+      const token = generateRegulatoryToken(regulator);
+
+      res.json({
+        success: true,
+        token,
+        regulator: {
+          id: regulator.id,
+          regulatorId: regulator.regulatorId,
+          firstName: regulator.firstName,
+          lastName: regulator.lastName,
+          fullName: regulator.fullName,
+          email: regulator.email,
+          departmentLevel: regulator.departmentLevel,
+          departmentName: regulator.departmentName,
+          accessLevel: regulator.accessLevel,
+          position: regulator.position,
+          permissions: regulator.permissions
+        }
+      });
+    } catch (error) {
+      console.error("DG Login error:", error);
+      res.status(500).json({ success: false, message: "Login failed" });
+    }
+  });
+
+  // DDGOTS Authentication (Deputy Director General Operations & Technical Services)
+  app.post("/api/auth/ddgots-login", async (req, res) => {
+    try {
+      const { username, password, departmentLevel } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Find regulator by username and department level
+      const [regulator] = await db.select()
+        .from(regulatoryDepartments)
+        .where(eq(regulatoryDepartments.username, username))
+        .limit(1);
+
+      if (!regulator || regulator.departmentLevel !== 'ddgots') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials or unauthorized access level" 
+        });
+      }
+
+      // Verify password
+      const passwordMatch = await bcrypt.compare(password, regulator.passwordHash);
+      if (!passwordMatch) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      if (!regulator.isActive) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Account is deactivated" 
+        });
+      }
+
+      // Update last login
+      await db.update(regulatoryDepartments)
+        .set({ lastLogin: new Date() })
+        .where(eq(regulatoryDepartments.id, regulator.id));
+
+      // Generate JWT token
+      const token = generateRegulatoryToken(regulator);
+
+      res.json({
+        success: true,
+        token,
+        regulator: {
+          id: regulator.id,
+          regulatorId: regulator.regulatorId,
+          firstName: regulator.firstName,
+          lastName: regulator.lastName,
+          fullName: regulator.fullName,
+          email: regulator.email,
+          departmentLevel: regulator.departmentLevel,
+          departmentName: regulator.departmentName,
+          accessLevel: regulator.accessLevel,
+          position: regulator.position,
+          permissions: regulator.permissions
+        }
+      });
+    } catch (error) {
+      console.error("DDGOTS Login error:", error);
+      res.status(500).json({ success: false, message: "Login failed" });
+    }
+  });
+
+  // DDGAF Authentication (Deputy Director General Admin & Finance)
+  app.post("/api/auth/ddgaf-login", async (req, res) => {
+    try {
+      const { username, password, departmentLevel } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Find regulator by username and department level
+      const [regulator] = await db.select()
+        .from(regulatoryDepartments)
+        .where(eq(regulatoryDepartments.username, username))
+        .limit(1);
+
+      if (!regulator || regulator.departmentLevel !== 'ddgaf') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials or unauthorized access level" 
+        });
+      }
+
+      // Verify password
+      const passwordMatch = await bcrypt.compare(password, regulator.passwordHash);
+      if (!passwordMatch) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+        });
+      }
+
+      if (!regulator.isActive) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Account is deactivated" 
+        });
+      }
+
+      // Update last login
+      await db.update(regulatoryDepartments)
+        .set({ lastLogin: new Date() })
+        .where(eq(regulatoryDepartments.id, regulator.id));
+
+      // Generate JWT token
+      const token = generateRegulatoryToken(regulator);
+
+      res.json({
+        success: true,
+        token,
+        regulator: {
+          id: regulator.id,
+          regulatorId: regulator.regulatorId,
+          firstName: regulator.firstName,
+          lastName: regulator.lastName,
+          fullName: regulator.fullName,
+          email: regulator.email,
+          departmentLevel: regulator.departmentLevel,
+          departmentName: regulator.departmentName,
+          accessLevel: regulator.accessLevel,
+          position: regulator.position,
+          permissions: regulator.permissions
+        }
+      });
+    } catch (error) {
+      console.error("DDGAF Login error:", error);
+      res.status(500).json({ success: false, message: "Login failed" });
     }
   });
 

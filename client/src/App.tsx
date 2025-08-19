@@ -19,6 +19,11 @@ import MobileFieldAgentLogin from "@/pages/auth/mobile-field-agent-login";
 import ExporterLogin from "@/pages/auth/exporter-login";
 import MonitoringLogin from "@/pages/auth/monitoring-login";
 
+// Three-Tier Regulatory Department Authentication
+import DGLogin from "@/pages/auth/dg-login";
+import DDGOTSLogin from "@/pages/auth/ddgots-login";
+import DDGAFLogin from "@/pages/auth/ddgaf-login";
+
 // LiveTrace Authentication
 import LiveTraceRegulatoryLogin from "@/pages/auth/live-trace-regulatory-login";
 import LiveTraceFarmerLogin from "@/pages/auth/live-trace-farmer-login";
@@ -212,6 +217,11 @@ function Router() {
       <Route path="/mobile-field-agent-login" component={MobileFieldAgentLogin} />
       <Route path="/exporter-login" component={ExporterLogin} />
       <Route path="/monitoring-login" component={MonitoringLogin} />
+      
+      {/* Three-Tier Regulatory Department Authentication */}
+      <Route path="/auth/dg-login" component={DGLogin} />
+      <Route path="/auth/ddgots-login" component={DDGOTSLogin} />
+      <Route path="/auth/ddgaf-login" component={DDGAFLogin} />
       
       {/* Inspector Portal Routes */}
       <Route path="/inspector-portal" component={InspectorPortal} />

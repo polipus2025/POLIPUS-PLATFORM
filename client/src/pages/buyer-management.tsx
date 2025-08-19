@@ -167,7 +167,7 @@ export default function BuyerManagement() {
 
   // Create buyer mutation
   const createBuyerMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/buyers", data),
+    mutationFn: (data: any) => apiRequest("/api/buyers", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -191,7 +191,7 @@ export default function BuyerManagement() {
   // Approve buyer mutation
   const approveBuyerMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest("PUT", `/api/buyers/${id}/approve`, data),
+      apiRequest(`/api/buyers/${id}/approve`, { method: "PUT", body: JSON.stringify(data) }),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -204,7 +204,7 @@ export default function BuyerManagement() {
   // Generate credentials mutation
   const generateCredentialsMutation = useMutation({
     mutationFn: (buyerId: number) => 
-      apiRequest("POST", `/api/buyers/${buyerId}/generate-credentials`),
+      apiRequest(`/api/buyers/${buyerId}/generate-credentials`, { method: "POST" }),
     onSuccess: (data) => {
       toast({
         title: "Credentials Generated",

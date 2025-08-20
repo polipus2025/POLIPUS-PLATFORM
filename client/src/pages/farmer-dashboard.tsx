@@ -1049,28 +1049,6 @@ export default function FarmerDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-                          <div className="flex space-x-2">
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              Accept
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <MessageSquare className="w-4 h-4 mr-1" />
-                              Negotiate
-                            </Button>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )) || (
-                    <div className="text-center py-8 text-gray-500">
-                      No buyer inquiries yet. Create marketplace listings to attract buyers.
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Alerts Tab */}
           <TabsContent value="alerts" className="space-y-6">

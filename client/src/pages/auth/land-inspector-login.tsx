@@ -34,11 +34,16 @@ export default function LandInspectorLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      const response = await apiRequest("POST", "/api/auth/land-inspector-login", {
-        ...data,
-        inspectorType: "land"
+      return await apiRequest("/api/auth/land-inspector-login", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          inspectorType: "land"
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      return response.json();
     },
     onSuccess: (data) => {
       if (data.success) {

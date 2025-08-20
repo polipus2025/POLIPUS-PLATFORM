@@ -108,28 +108,28 @@ export default function DirectorDashboardSimple() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <Card>
               <CardHeader>
-                <CardTitle className="text-green-600">✅ Sidebar Visibile</CardTitle>
+                <CardTitle className="text-green-600">✅ Sidebar Visible</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Il menu laterale ora è completamente visibile con tutte le sezioni del portale regolatore.</p>
+                <p>The sidebar menu is now fully visible with all regulatory portal sections.</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-blue-600">📋 Funzionalità Complete</CardTitle>
+                <CardTitle className="text-blue-600">📋 Complete Functionality</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Tutte le funzioni originali sono state preservate: Field Agent Approvals, Mobile Requests, Emergency Alerts, GIS Mapping.</p>
+                <p>All original functions have been preserved: Field Agent Approvals, Mobile Requests, Emergency Alerts, GIS Mapping.</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-600">🔧 Portale Regolatore</CardTitle>
+                <CardTitle className="text-purple-600">🔧 Regulatory Portal</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Accesso completo a Government Integration, International Standards, Analytics, Payment Services.</p>
+                <p>Complete access to Government Integration, International Standards, Analytics, Payment Services.</p>
               </CardContent>
             </Card>
           </div>
@@ -139,28 +139,28 @@ export default function DirectorDashboardSimple() {
             <Card>
               <CardContent className="p-4 text-center">
                 <h3 className="font-semibold mb-2">Field Agent Approvals</h3>
-                <p className="text-sm text-gray-600">Sistema completo per approvazioni richieste agenti</p>
+                <p className="text-sm text-gray-600">Complete system for agent request approvals</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardContent className="p-4 text-center">
                 <h3 className="font-semibold mb-2">Mobile Requests</h3>
-                <p className="text-sm text-gray-600">Gestione richieste mobile con priorità</p>
+                <p className="text-sm text-gray-600">Mobile request management with priority handling</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardContent className="p-4 text-center">
                 <h3 className="font-semibold mb-2">GIS Mapping</h3>
-                <p className="text-sm text-gray-600">Sistema di mappatura geografica avanzato</p>
+                <p className="text-sm text-gray-600">Advanced geographic mapping system</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardContent className="p-4 text-center">
                 <h3 className="font-semibold mb-2">Emergency Alerts</h3>
-                <p className="text-sm text-gray-600">Sistema alert di emergenza in tempo reale</p>
+                <p className="text-sm text-gray-600">Real-time emergency alert system</p>
               </CardContent>
             </Card>
           </div>

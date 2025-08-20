@@ -162,7 +162,6 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 import { registerPolipusRoutes } from './polipus-routes';
-import path from 'path';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register farmer routes

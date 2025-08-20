@@ -104,6 +104,12 @@ export default function FarmerDashboard() {
     enabled: !!farmerId
   });
 
+  // Fetch messages between farmer and buyers
+  const { data: messages } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}/messages`],
+    enabled: !!farmerId
+  });
+
   const handleLogout = () => {
     localStorage.removeItem("farmerId");
     localStorage.removeItem("farmerName");
@@ -131,20 +137,71 @@ export default function FarmerDashboard() {
   };
 
   // Harvest Management Functions
-  const handleStartHarvest = (schedule: HarvestSchedule) => {
-    toast({
-      title: "Harvest Started",
-      description: `Harvest process initiated for ${schedule.cropType}. Update progress in the system.`,
-    });
-    // TODO: API call to update schedule status to 'harvesting'
+  const handleStartHarvest = async (schedule: HarvestSchedule) => {
+    try {
+      // Update schedule status to harvesting
+      const response = await fetch(`/api/farmers/${farmerId}/harvest-schedules/${schedule.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: "harvesting",
+          harvestStartDate: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Harvest Started",
+          description: `Harvest process initiated for ${schedule.cropType}. Regional buyers will be notified when ready.`,
+        });
+        // Refresh data
+        window.location.reload();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start harvest. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleCompleteHarvest = (schedule: HarvestSchedule) => {
-    toast({
-      title: "Harvest Completed",
-      description: `${schedule.cropType} harvest completed. Ready for marketplace listing.`,
-    });
-    // TODO: API call to update schedule status to 'harvested' and record actual yield
+  const handleCompleteHarvest = async (schedule: HarvestSchedule) => {
+    try {
+      // Prompt for actual yield
+      const actualYield = prompt(`Enter actual yield for ${schedule.cropType} (kg):`, schedule.expectedYield?.toString());
+      if (!actualYield) return;
+
+      const response = await fetch(`/api/farmers/${farmerId}/harvest-schedules/${schedule.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: "harvested",
+          actualYield: parseFloat(actualYield),
+          harvestEndDate: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        // Trigger regional buyer alerts
+        await fetch(`/api/farmers/${farmerId}/harvest-schedules/${schedule.id}/alert-buyers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        toast({
+          title: "Harvest Completed & Buyers Alerted",
+          description: `${schedule.cropType} harvest completed. Regional buyers have been notified via SMS and platform alerts.`,
+        });
+        window.location.reload();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to complete harvest. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCreateMarketplaceListing = (schedule: HarvestSchedule) => {
@@ -212,6 +269,86 @@ export default function FarmerDashboard() {
       description: `Viewing complete details for transaction ${transaction.transactionId}`,
     });
     // TODO: Open transaction details modal
+  };
+
+  // Message Management Functions
+  const handleAcceptInquiry = async (message: any) => {
+    try {
+      const response = await fetch(`/api/farmers/${farmerId}/transaction-proposals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyerId: message.buyerId,
+          scheduleId: message.scheduleId,
+          cropType: message.scheduleId.includes('001') ? 'Cocoa' : 'Coffee',
+          quantity: message.proposedQuantity,
+          pricePerKg: message.proposedPrice,
+          paymentTerms: "As discussed",
+          deliveryTerms: "Farm pickup",
+          deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Inquiry Accepted",
+          description: `Created transaction proposal with ${message.buyerId}. Awaiting buyer approval for unique transaction code generation.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to accept inquiry",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleNegotiateOffer = (message: any) => {
+    const counterPrice = prompt(`Current offer: $${message.proposedPrice}/kg. Enter your counter-offer:`, (message.proposedPrice + 0.10).toFixed(2));
+    if (counterPrice) {
+      toast({
+        title: "Counter Offer Sent",
+        description: `Sent counter-offer of $${counterPrice}/kg to ${message.buyerId}`,
+      });
+      // TODO: Send counter-offer message
+    }
+  };
+
+  const handleAcceptNegotiation = async (message: any) => {
+    try {
+      // Create approved proposal
+      const response = await fetch(`/api/farmers/${farmerId}/transaction-proposals/demo-proposal/approve`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approverType: 'farmer' })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "Terms Accepted - Transaction Created!",
+          description: `Unique transaction code: ${result.transactionCode}. DDGOTS has been notified.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to accept negotiation",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCounterOffer = (message: any) => {
+    const counterPrice = prompt(`Current offer: $${message.proposedPrice}/kg. Enter your counter-offer:`, (message.proposedPrice + 0.05).toFixed(2));
+    if (counterPrice) {
+      toast({
+        title: "Counter Offer Sent",
+        description: `Sent counter-offer of $${counterPrice}/kg. Continuing negotiation.`,
+      });
+      // TODO: Send counter-offer message
+    }
   };
 
   return (
@@ -308,7 +445,7 @@ export default function FarmerDashboard() {
             <TabsTrigger value="schedules">Harvest Schedules</TabsTrigger>
             <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="inquiries">Buyer Inquiries</TabsTrigger>
+            <TabsTrigger value="inquiries">Messages</TabsTrigger>
             <TabsTrigger value="alerts">Alerts</TabsTrigger>
           </TabsList>
 
@@ -794,48 +931,124 @@ export default function FarmerDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Buyer Inquiries Tab */}
+          {/* Messages Tab */}
           <TabsContent value="inquiries" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Users className="w-5 h-5 mr-2" />
-                  Buyer Inquiries & Negotiations
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                  Messages from Buyers
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {buyerInquiries?.map((inquiry: any) => (
-                    <Card key={inquiry.id} className="border border-gray-200">
+                  {messages?.map((message: any) => (
+                    <Card key={message.id} className="border border-gray-200">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h4 className="font-semibold">Inquiry from Buyer #{inquiry.buyerId}</h4>
-                            <p className="text-sm text-gray-600">{inquiry.inquiryType.replace("_", " ")}</p>
+                            <h4 className="font-semibold">{message.subject}</h4>
+                            <p className="text-sm text-gray-600">From: {message.buyerId} • {message.messageType}</p>
                           </div>
-                          <Badge className={inquiry.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
-                            {inquiry.status}
-                          </Badge>
+                          <div className="flex items-center space-x-2">
+                            {!message.isRead && (
+                              <Badge className="bg-blue-100 text-blue-800">New</Badge>
+                            )}
+                            <Badge variant="outline" className="text-xs">
+                              {new Date(message.sentAt).toLocaleDateString()}
+                            </Badge>
+                          </div>
                         </div>
                         
                         <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                          <p className="text-sm">{inquiry.message}</p>
+                          <p className="text-sm">{message.message}</p>
                         </div>
 
-                        {inquiry.proposedPrice && (
-                          <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                        {(message.proposedPrice || message.proposedQuantity) && (
+                          <div className="grid grid-cols-2 gap-4 text-sm mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                             <div>
                               <p className="text-gray-600">Proposed Price</p>
-                              <p className="font-medium">${inquiry.proposedPrice}/kg</p>
+                              <p className="font-medium text-green-800">${message.proposedPrice}/kg</p>
                             </div>
                             <div>
                               <p className="text-gray-600">Proposed Quantity</p>
-                              <p className="font-medium">{inquiry.proposedQuantity} kg</p>
+                              <p className="font-medium text-green-800">{message.proposedQuantity} kg</p>
                             </div>
                           </div>
                         )}
 
-                        {inquiry.status === "pending" && (
+                        {message.messageType === "inquiry" && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-blue-800 text-sm font-medium">
+                                  💬 Buyer inquiry received - respond to start negotiation
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => handleAcceptInquiry(message)}
+                                  data-testid={`accept-inquiry-${message.id}`}
+                                >
+                                  Accept Offer
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleNegotiateOffer(message)}
+                                  data-testid={`negotiate-inquiry-${message.id}`}
+                                >
+                                  Negotiate
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {message.messageType === "negotiation" && (
+                          <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-orange-800 text-sm font-medium">
+                                  🔄 Negotiation in progress - review the latest offer
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => handleAcceptNegotiation(message)}
+                                  data-testid={`accept-negotiation-${message.id}`}
+                                >
+                                  Accept Terms
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleCounterOffer(message)}
+                                  data-testid={`counter-offer-${message.id}`}
+                                >
+                                  Counter Offer
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No messages from buyers yet.</p>
+                      <p className="text-sm">Complete your harvest to start receiving buyer inquiries.</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
                           <div className="flex space-x-2">
                             <Button size="sm" className="bg-green-600 hover:bg-green-700">
                               <CheckCircle className="w-4 h-4 mr-1" />

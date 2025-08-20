@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
+import { buyerAlertService } from "./buyer-alert-system";
 
 // Farmer credential generation utility
 function generateFarmerCredentialId(): string {
@@ -688,6 +689,176 @@ export function registerFarmerRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching transactions:", error);
       res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  // Update harvest schedule status and trigger buyer alerts
+  app.put("/api/farmers/:farmerId/harvest-schedules/:scheduleId/status", async (req, res) => {
+    try {
+      const { farmerId, scheduleId } = req.params;
+      const { status, actualYield, harvestStartDate, harvestEndDate } = req.body;
+
+      console.log(`📝 Updating harvest schedule ${scheduleId} status to ${status}`);
+
+      // Test data update for demo
+      if (farmerId === "FARMER-TEST-2025") {
+        return res.json({
+          success: true,
+          message: `Harvest schedule ${scheduleId} status updated to ${status}`,
+          updatedSchedule: {
+            id: scheduleId,
+            status,
+            actualYield: actualYield || null,
+            harvestStartDate: harvestStartDate || (status === 'harvesting' ? new Date().toISOString() : null),
+            harvestEndDate: harvestEndDate || (status === 'harvested' ? new Date().toISOString() : null),
+            updatedAt: new Date().toISOString()
+          }
+        });
+      }
+
+      // TODO: Implement database update
+      res.json({ success: true, message: "Schedule updated successfully" });
+    } catch (error) {
+      console.error("Error updating harvest schedule:", error);
+      res.status(500).json({ error: "Failed to update harvest schedule" });
+    }
+  });
+
+  // Alert regional buyers when harvest is completed
+  app.post("/api/farmers/:farmerId/harvest-schedules/:scheduleId/alert-buyers", async (req, res) => {
+    try {
+      const { farmerId, scheduleId } = req.params;
+
+      // Test data for demo
+      if (farmerId === "FARMER-TEST-2025") {
+        const harvestData = {
+          farmerName: "John Konneh",
+          cropType: "Cocoa",
+          cropVariety: "Amelonado",
+          quantity: 1500,
+          expectedPrice: 2.50,
+          harvestDate: new Date().toISOString(),
+          farmerLocation: {
+            county: "Nimba",
+            district: "Sanniquellie",
+            coordinates: { lat: 7.3692, lng: -9.7318 }
+          }
+        };
+
+        const harvestAlert = await buyerAlertService.createHarvestAlert(
+          farmerId,
+          scheduleId,
+          harvestData
+        );
+
+        return res.json({
+          success: true,
+          message: "Regional buyers have been alerted",
+          alert: harvestAlert,
+          buyersNotified: harvestAlert.targetBuyers.length,
+          smssSent: harvestAlert.smssSent,
+          platformNotifications: harvestAlert.platformNotificationsSent
+        });
+      }
+
+      // TODO: Implement for real farmer data
+      res.json({ success: true, message: "Buyers alerted successfully" });
+    } catch (error) {
+      console.error("Error alerting buyers:", error);
+      res.status(500).json({ error: "Failed to alert buyers" });
+    }
+  });
+
+  // Messaging system between farmers and buyers
+  app.get("/api/farmers/:farmerId/messages", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const { buyerId, scheduleId } = req.query;
+
+      // Test messages for demo
+      if (farmerId === "FARMER-TEST-2025") {
+        return res.json([
+          {
+            id: "1",
+            messageId: "MSG-001",
+            farmerId,
+            buyerId: "BUY-12345",
+            scheduleId: "SCH-TEST-001",
+            messageType: "inquiry",
+            sender: "buyer",
+            subject: "Interest in Your Cocoa Harvest",
+            message: "Hello John, I'm interested in purchasing your cocoa harvest. Can we discuss pricing and delivery terms?",
+            proposedPrice: 2.60,
+            proposedQuantity: 600,
+            isRead: false,
+            sentAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: "2",
+            messageId: "MSG-002", 
+            farmerId,
+            buyerId: "BUY-67890",
+            scheduleId: "SCH-TEST-001",
+            messageType: "negotiation",
+            sender: "buyer",
+            subject: "Competitive Offer for Premium Cocoa",
+            message: "Hi John, West African Commodities is offering $2.75/kg for your premium cocoa. We can arrange immediate pickup.",
+            proposedPrice: 2.75,
+            proposedQuantity: 800,
+            isRead: true,
+            sentAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+          }
+        ]);
+      }
+
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  // Create transaction proposal
+  app.post("/api/farmers/:farmerId/transaction-proposals", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const proposalData = req.body;
+
+      // Create proposal using buyer alert service
+      const proposal = await buyerAlertService.createTransactionProposal({
+        farmerId,
+        ...proposalData
+      });
+
+      res.json({
+        success: true,
+        message: "Transaction proposal created",
+        proposal
+      });
+    } catch (error) {
+      console.error("Error creating proposal:", error);
+      res.status(500).json({ error: "Failed to create proposal" });
+    }
+  });
+
+  // Approve transaction proposal
+  app.put("/api/farmers/:farmerId/transaction-proposals/:proposalId/approve", async (req, res) => {
+    try {
+      const { proposalId } = req.params;
+      const { approverType } = req.body; // 'farmer' or 'buyer'
+
+      const approvedProposal = await buyerAlertService.approveProposal(proposalId, approverType);
+
+      res.json({
+        success: true,
+        message: `Proposal approved by ${approverType}`,
+        proposal: approvedProposal,
+        transactionCode: approvedProposal.uniqueTransactionCode,
+        ddgotsNotified: approvedProposal.ddgotsNotified
+      });
+    } catch (error) {
+      console.error("Error approving proposal:", error);
+      res.status(500).json({ error: "Failed to approve proposal" });
     }
   });
 

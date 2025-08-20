@@ -27,6 +27,7 @@ import {
 import { Link } from "wouter";
 import ExporterNavbar from '@/components/layout/exporter-navbar';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { SoftCommodityPricing } from '@/components/SoftCommodityPricing';
 
 export default function ExporterDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -394,6 +395,25 @@ export default function ExporterDashboard() {
             </Card>
           </div>
         </div>
+
+        {/* LACRA Soft Commodity Pricing */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              LACRA Official Commodity Pricing
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              Current official LACRA pricing with quality grades for export planning and contract negotiations
+            </p>
+          </CardHeader>
+          <CardContent>
+            <SoftCommodityPricing 
+              canEdit={false}
+              compact={true}
+            />
+          </CardContent>
+        </Card>
 
         {/* Important Information */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">

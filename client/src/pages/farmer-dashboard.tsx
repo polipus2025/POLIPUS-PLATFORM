@@ -24,6 +24,7 @@ import {
   DollarSign
 } from "lucide-react";
 import { Link } from "wouter";
+import { SoftCommodityPricing } from '@/components/SoftCommodityPricing';
 
 export default function FarmerDashboard() {
   // Get farmer ID from localStorage
@@ -230,6 +231,25 @@ export default function FarmerDashboard() {
                 </Button>
               </Link>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* LACRA Commodity Pricing */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              LACRA Commodity Pricing
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              Current official LACRA pricing for your crops
+            </p>
+          </CardHeader>
+          <CardContent>
+            <SoftCommodityPricing 
+              canEdit={false}
+              compact={true}
+            />
           </CardContent>
         </Card>
       </div>

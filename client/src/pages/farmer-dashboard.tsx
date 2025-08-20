@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,53 +61,48 @@ export default function FarmerDashboard() {
   const { toast } = useToast();
   const [farmerId] = useState(() => localStorage.getItem("farmerId") || "");
   const [farmerName] = useState(() => localStorage.getItem("farmerName") || "Farmer");
+  const [activeTab, setActiveTab] = useState("overview");
 
-  // Fetch farmer data
+  // Only fetch farmer data initially (needed for overview)
   const { data: farmer } = useQuery({
     queryKey: [`/api/farmers/${farmerId}`],
     enabled: !!farmerId
   });
 
-  // Fetch land mappings
-  const { data: landMappings } = useQuery({
+  // Fetch data only when relevant tabs are active with loading states
+  const { data: landMappings, isLoading: loadingMappings } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/land-mappings`],
-    enabled: !!farmerId
+    enabled: !!farmerId && activeTab === "mappings"
   });
 
-  // Fetch harvest schedules
-  const { data: harvestSchedules } = useQuery({
+  const { data: harvestSchedules, isLoading: loadingSchedules } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/harvest-schedules`],
-    enabled: !!farmerId
+    enabled: !!farmerId && (activeTab === "schedules" || activeTab === "overview")
   });
 
-  // Fetch marketplace listings
-  const { data: marketplaceListings } = useQuery({
+  const { data: marketplaceListings, isLoading: loadingListings } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/marketplace-listings`],
-    enabled: !!farmerId
+    enabled: !!farmerId && (activeTab === "marketplace" || activeTab === "overview")
   });
 
-  // Fetch buyer inquiries
-  const { data: buyerInquiries } = useQuery({
+  const { data: buyerInquiries, isLoading: loadingInquiries } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/buyer-inquiries`],
-    enabled: !!farmerId
+    enabled: !!farmerId && (activeTab === "inquiries" || activeTab === "overview")
   });
 
-  // Fetch harvest alerts
-  const { data: harvestAlerts } = useQuery({
+  const { data: harvestAlerts, isLoading: loadingAlerts } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/harvest-alerts`],
-    enabled: !!farmerId
+    enabled: !!farmerId && activeTab === "alerts"
   });
 
-  // Fetch transactions
-  const { data: transactions } = useQuery({
+  const { data: transactions, isLoading: loadingTransactions } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/transactions`],
-    enabled: !!farmerId
+    enabled: !!farmerId && activeTab === "transactions"
   });
 
-  // Fetch messages between farmer and buyers
-  const { data: messages } = useQuery({
+  const { data: messages, isLoading: loadingMessages } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/messages`],
-    enabled: !!farmerId
+    enabled: !!farmerId && activeTab === "inquiries"
   });
 
   const handleLogout = () => {
@@ -438,15 +433,50 @@ export default function FarmerDashboard() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="mappings">Land Mappings</TabsTrigger>
-            <TabsTrigger value="schedules">Harvest Schedules</TabsTrigger>
-            <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="inquiries">Messages</TabsTrigger>
-            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-7 bg-gray-100 rounded-lg p-1">
+            <TabsTrigger 
+              value="overview" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="mappings" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Land Mappings
+            </TabsTrigger>
+            <TabsTrigger 
+              value="schedules" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Harvest Schedules
+            </TabsTrigger>
+            <TabsTrigger 
+              value="marketplace" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Marketplace
+            </TabsTrigger>
+            <TabsTrigger 
+              value="transactions" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger 
+              value="inquiries" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Messages
+            </TabsTrigger>
+            <TabsTrigger 
+              value="alerts" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Alerts
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -544,8 +574,14 @@ export default function FarmerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {landMappings?.map((mapping: any) => (
+                {loadingMappings ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                    <span className="ml-2 text-gray-600">Loading land mappings...</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {landMappings?.map((mapping: any) => (
                     <Card key={mapping.id} className="border border-gray-200">
                       <CardContent className="p-4">
                         <h4 className="font-semibold mb-2">{mapping.landMappingName}</h4>
@@ -571,12 +607,13 @@ export default function FarmerDashboard() {
                         </div>
                       </CardContent>
                     </Card>
-                  )) || (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                      No land mappings available. Contact your land inspector for mapping.
-                    </div>
-                  )}
-                </div>
+                    )) || (
+                      <div className="col-span-full text-center py-8 text-gray-500">
+                        No land mappings available. Contact your land inspector for mapping.
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

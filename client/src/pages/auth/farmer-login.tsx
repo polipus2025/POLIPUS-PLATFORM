@@ -381,15 +381,9 @@ export default function FarmerBuyerLogin() {
                 <p className="text-sm text-gray-600 mb-2">
                   Need help with registration?
                 </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="text-green-600 border-green-200 hover:bg-green-50 hover:border-green-300"
-                  data-testid="button-registration-help"
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Contact Support
-                </Button>
+                <p className="text-sm text-gray-500">
+                  Contact your local agricultural extension officer or visit the nearest LACRA office for farmer registration assistance.
+                </p>
               </div>
             </div>
           </CardContent>

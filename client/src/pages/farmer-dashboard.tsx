@@ -590,12 +590,16 @@ export default function FarmerDashboard() {
                     <Calendar className="w-5 h-5 mr-2" />
                     Harvest Schedules
                   </CardTitle>
-                  <Link href="/farmer-add-harvest-schedule">
-                    <Button>
-                      <Sprout className="w-4 h-4 mr-2" />
-                      Add Schedule
-                    </Button>
-                  </Link>
+                  <Button 
+                    onClick={() => toast({
+                      title: "Feature Coming Soon",
+                      description: "Harvest scheduling feature will be available in the next update."
+                    })}
+                    variant="outline"
+                  >
+                    <Sprout className="w-4 h-4 mr-2" />
+                    Add Schedule
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -744,12 +748,16 @@ export default function FarmerDashboard() {
                     <Package className="w-5 h-5 mr-2" />
                     My Marketplace Listings
                   </CardTitle>
-                  <Link href="/farmer-create-listing">
-                    <Button>
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      Create Listing
-                    </Button>
-                  </Link>
+                  <Button 
+                    onClick={() => toast({
+                      title: "Feature Coming Soon",
+                      description: "Marketplace listing creation will be available in the next update."
+                    })}
+                    variant="outline"
+                  >
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    Create Listing
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -1090,11 +1098,17 @@ export default function FarmerDashboard() {
                             <p className="text-green-800 text-sm">
                               🌾 Your crop is ready for harvest! Consider creating a marketplace listing.
                             </p>
-                            <Link href="/farmer-create-listing">
-                              <Button size="sm" className="mt-2">
-                                Create Listing
-                              </Button>
-                            </Link>
+                            <Button 
+                              size="sm" 
+                              className="mt-2"
+                              onClick={() => toast({
+                                title: "Feature Coming Soon",
+                                description: "Marketplace listing creation will be available in the next update."
+                              })}
+                              variant="outline"
+                            >
+                              Create Listing
+                            </Button>
                           </div>
                         )}
                       </CardContent>

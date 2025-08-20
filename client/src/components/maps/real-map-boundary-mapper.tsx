@@ -105,8 +105,8 @@ export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCente
 
       // Draw new boundary polygon
       const polygon = window.L.polygon(newPoints.map(p => [p.latitude, p.longitude]), {
-        color: newPoints.length >= 8 ? '#10B981' : '#F59E0B', // Green for 8+ points, yellow for less
-        fillColor: newPoints.length >= 8 ? '#10B981' : '#F59E0B',
+        color: '#3B82F6',
+        fillColor: '#3B82F6',
         fillOpacity: 0.2,
         weight: 3
       }).addTo(map);
@@ -115,14 +115,9 @@ export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCente
       const boundaryData = calculateArea(newPoints);
       onBoundaryComplete(boundaryData);
 
-      const statusMessage = newPoints.length >= 8 
-        ? `Complete boundary: ${boundaryData.areaHectares} hectares (${boundaryData.areaAcres} acres)`
-        : `Need ${8 - newPoints.length} more points for accurate boundary`;
-
       toast({
-        title: newPoints.length >= 8 ? "Boundary Complete" : "Add More Points",
-        description: statusMessage,
-        variant: newPoints.length >= 8 ? "default" : "destructive"
+        title: "Boundary Updated",
+        description: `Area: ${boundaryData.areaHectares} hectares (${boundaryData.areaAcres} acres)`,
       });
     }
   };
@@ -223,8 +218,8 @@ export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCente
       // Redraw polygon if enough points
       if (newPoints.length >= 3) {
         window.L.polygon(newPoints.map(p => [p.latitude, p.longitude]), {
-          color: newPoints.length >= 8 ? '#10B981' : '#F59E0B',
-          fillColor: newPoints.length >= 8 ? '#10B981' : '#F59E0B',
+          color: '#3B82F6',
+          fillColor: '#3B82F6',
           fillOpacity: 0.2,
           weight: 3
         }).addTo(mapInstance);
@@ -380,56 +375,25 @@ export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCente
           Clear Boundary
         </Button>
 
-        <Badge variant={mapPoints.length >= 8 ? "default" : "secondary"} 
-               className={mapPoints.length >= 8 ? "bg-green-100 text-green-800" : ""}>
+        <Badge variant="secondary">
           <MapPin className="w-3 h-3 mr-1" />
-          {mapPoints.length}/8+ points mapped
+          {mapPoints.length} points mapped
         </Badge>
-        
-        {mapPoints.length > 0 && mapPoints.length < 8 && (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
-            Need {8 - mapPoints.length} more points
-          </Badge>
-        )}
       </div>
 
       {/* Instructions */}
       <div className="p-4 bg-blue-50 rounded-lg">
-        <h4 className="font-medium text-blue-800 mb-2">How to Map Farm Boundary (Minimum 8 Points Required):</h4>
+        <h4 className="font-medium text-blue-800 mb-2">How to Map Farm Boundary (Recommended 8+ Points):</h4>
         <ol className="text-sm text-blue-700 space-y-1">
           <li>1. Click "Find My Location" to center map on your GPS location</li>
           <li>2. Walk around the farm perimeter and click on the map at each corner/boundary point</li>
-          <li>3. Add at least <strong>8 boundary points</strong> for accurate area calculation</li>
-          <li>4. More points = more accurate area measurement (especially for irregular shapes)</li>
-          <li>5. Boundary turns <span className="text-yellow-600">yellow</span> until 8 points, then <span className="text-green-600">green</span> when complete</li>
-          <li>6. Area is calculated automatically in hectares, acres, and square meters (2 decimal places)</li>
-          <li>7. Use "Undo Last Point" to remove mistakes or "Clear Boundary" to restart</li>
+          <li>3. Add at least 3 points to create a boundary polygon</li>
+          <li>4. Recommended: Add 8+ points for more accurate area calculation</li>
+          <li>5. Area will be calculated automatically in hectares, acres, and square meters</li>
+          <li>6. Use "Undo Last Point" to remove the most recent point</li>
+          <li>7. Use "Clear Boundary" to start over</li>
         </ol>
       </div>
-
-      {mapPoints.length > 0 && mapPoints.length < 8 && (
-        <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <div className="flex items-center mb-2">
-            <MapPin className="w-4 h-4 text-yellow-600 mr-2" />
-            <h4 className="font-medium text-yellow-800">Need More Boundary Points</h4>
-          </div>
-          <p className="text-sm text-yellow-700">
-            You have mapped <strong>{mapPoints.length}</strong> points. Add <strong>{8 - mapPoints.length} more points</strong> around the farm perimeter for accurate area calculation. Walk to each corner and boundary change, then click on the map.
-          </p>
-        </div>
-      )}
-
-      {mapPoints.length >= 8 && (
-        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-          <div className="flex items-center mb-2">
-            <MapPin className="w-4 h-4 text-green-600 mr-2" />
-            <h4 className="font-medium text-green-800">Boundary Mapping Complete!</h4>
-          </div>
-          <p className="text-sm text-green-700">
-            Excellent! You have mapped <strong>{mapPoints.length} boundary points</strong>. The farm boundary is complete with accurate area calculation. You can continue adding more points for even higher precision if needed.
-          </p>
-        </div>
-      )}
 
       {/* Area Display */}
       {getAreaDisplay()}

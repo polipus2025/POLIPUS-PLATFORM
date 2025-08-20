@@ -593,13 +593,9 @@ export default function OnboardFarmer() {
                             prev.gpsCoordinates
                         }));
                         
-                        const isComplete = boundary.points.length >= 8;
                         toast({
-                          title: isComplete ? "Farm Boundary Complete!" : "Boundary In Progress",
-                          description: isComplete 
-                            ? `Farm mapped with ${boundary.points.length} GPS points - Area: ${boundary.areaHectares} hectares, ${boundary.areaAcres} acres, ${boundary.areaSquareMeters} sq.m`
-                            : `${boundary.points.length} points mapped - Need ${8 - boundary.points.length} more for complete boundary`,
-                          variant: isComplete ? "default" : "destructive"
+                          title: "Farm Boundary Mapped Successfully",
+                          description: `Farm mapped with ${boundary.points.length} GPS points (${boundary.areaHectares} hectares, ${boundary.areaAcres} acres, ${boundary.areaSquareMeters} sq.m)`,
                         });
                       }}
                     />

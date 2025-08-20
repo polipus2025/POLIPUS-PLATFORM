@@ -34,7 +34,8 @@ export default function LandInspectorLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      return await apiRequest("/api/auth/land-inspector-login", {
+      console.log("Attempting login with:", { ...data, password: "***" });
+      const result = await apiRequest("/api/auth/land-inspector-login", {
         method: "POST",
         body: JSON.stringify({
           ...data,
@@ -44,9 +45,12 @@ export default function LandInspectorLogin() {
           'Content-Type': 'application/json'
         }
       });
+      console.log("Login response:", result);
+      return result;
     },
     onSuccess: (data) => {
-      if (data.success) {
+      console.log("Login onSuccess data:", data);
+      if (data && data.success) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("userType", "land_inspector");
         localStorage.setItem("inspectorData", JSON.stringify(data.inspector));
@@ -59,16 +63,18 @@ export default function LandInspectorLogin() {
         // Navigate to land inspector dashboard
         navigate("/inspector-dashboard?type=land");
       } else {
+        console.error("Login failed - invalid response:", data);
         toast({
           title: "Login Failed",
-          description: data.message || "Invalid credentials",
+          description: data?.message || "Invalid credentials or server error",
           variant: "destructive",
         });
       }
     },
     onError: (error: any) => {
+      console.error("Login error:", error);
       toast({
-        title: "Login Failed",
+        title: "Login Failed", 
         description: error.message || "An error occurred during login",
         variant: "destructive",
       });

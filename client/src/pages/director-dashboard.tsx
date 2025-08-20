@@ -44,7 +44,11 @@ import {
   CreditCard,
   Menu,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Settings,
+  Archive,
+  Database,
+  Map
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -294,22 +298,56 @@ const directorNavigation = [
   { name: "Executive Dashboard", href: "/director-dashboard", icon: Crown, category: "Overview" },
   { name: "Strategic Overview", href: "/dashboard", icon: BarChart3, category: "Overview" },
   { name: "Economic Reporting", href: "/economic-reporting", icon: TrendingUp, category: "Reports" },
+  
+  // Regulatory Management Functions
+  { name: "Inspector Management", href: "/regulatory/inspector-management", icon: Users, category: "Regulatory Portal" },
+  { name: "Buyer Management", href: "/regulatory/buyer-management", icon: UserPlus, category: "Regulatory Portal" },
+  { name: "Exporter Management", href: "/regulatory/exporter-management", icon: Building2, category: "Regulatory Portal" },
+  { name: "DG Strategic Oversight", href: "/dg-dashboard", icon: Crown, category: "Regulatory Portal" },
+  { name: "DDGOTS Operations", href: "/ddgots-dashboard", icon: Settings, category: "Regulatory Portal" },
+  { name: "DDGAF Administration", href: "/ddgaf-dashboard", icon: CreditCard, category: "Regulatory Portal" },
+  
+  // Operations & Monitoring
   { name: "Commodities Management", href: "/commodities", icon: Leaf, category: "Operations" },
   { name: "Inspection Oversight", href: "/inspections", icon: ClipboardCheck, category: "Operations" },
-  { name: "Inspector Management", href: "/regulatory/inspector-management", icon: Users, category: "Personnel" },
-  { name: "Buyer Management", href: "/regulatory/buyer-management", icon: UserPlus, category: "Personnel" },
-  { name: "Exporter Management", href: "/regulatory/exporter-management", icon: Building2, category: "Personnel" },
+  { name: "Data Entry Systems", href: "/data-entry", icon: Plus, category: "Operations" },
+  { name: "Satellite Monitoring", href: "/satellite-monitoring", icon: Satellite, category: "Operations" },
+  
+  // Compliance & Verification
   { name: "Export Certifications", href: "/certifications", icon: Tag, category: "Compliance" },
   { name: "Document Verification", href: "/verification", icon: Shield, category: "Compliance" },
   { name: "Real-Time Verification", href: "/verification-dashboard", icon: Award, category: "Compliance" },
+  { name: "International Standards", href: "/international-standards", icon: Globe, category: "Compliance" },
+  { name: "Audit System", href: "/audit-system", icon: CheckCircle, category: "Compliance" },
+  
+  // Financial Management
   { name: "Payment Services", href: "/regulatory-payment-services", icon: DollarSign, category: "Finance" },
   { name: "Financial Records", href: "/ddgaf-financial-records", icon: Receipt, category: "Finance" },
+  
+  // Technology & Integration
   { name: "GIS Mapping", href: "/gis-mapping", icon: Satellite, category: "Technology" },
-  { name: "Government Integration", href: "/government-integration", icon: Building2, category: "Integration" },
-  { name: "International Standards", href: "/international-standards", icon: Globe, category: "Compliance" },
-  { name: "Comprehensive Reports", href: "/reports", icon: FileText, category: "Reports" },
-  { name: "Data Entry Systems", href: "/data-entry", icon: Plus, category: "Operations" },
+  { name: "Government Integration", href: "/government-integration", icon: Building2, category: "Technology" },
+  { name: "Mobile App Dashboard", href: "/mobile-app-dashboard", icon: Smartphone, category: "Technology" },
+  
+  // Communication & Reports
   { name: "Internal Messaging", href: "/messaging", icon: MessageSquare, category: "Communication" },
+  { name: "Comprehensive Reports", href: "/reports", icon: FileText, category: "Reports" },
+  { name: "Analytics Dashboard", href: "/analytics", icon: BarChart3, category: "Reports" },
+  { name: "Monitoring Dashboard", href: "/monitoring-dashboard", icon: Activity, category: "Reports" },
+  { name: "Generate Reports", href: "/generate-reports", icon: Archive, category: "Reports" },
+  
+  // Additional Portals & Systems
+  { name: "Farmer Portal", href: "/farmer-dashboard", icon: Users, category: "Portals" },
+  { name: "Exporter Portal", href: "/exporter-dashboard", icon: Building2, category: "Portals" },
+  { name: "Buyer Portal", href: "/buyer-dashboard", icon: UserPlus, category: "Portals" },
+  { name: "Field Agent Portal", href: "/field-agent-dashboard", icon: MapPin, category: "Portals" },
+  { name: "Inspector Portal", href: "/inspector-portal", icon: Shield, category: "Portals" },
+  
+  // Platform Management
+  { name: "Platform Documentation", href: "/platform-documentation", icon: FileText, category: "Platform" },
+  { name: "System Configuration", href: "/monitoring-dashboard", icon: Settings, category: "Platform" },
+  { name: "Database Management", href: "/audit-system", icon: Database, category: "Platform" },
+  { name: "Land Mapping", href: "/land-mapping-dashboard", icon: Map, category: "Platform" },
 ];
 
 // Director Sidebar Component

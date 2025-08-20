@@ -27,7 +27,7 @@ export default function ExporterNavbar({ user }: ExporterNavbarProps) {
 
   const navItems = [
     { href: '/exporter-dashboard', label: 'Dashboard', icon: Home },
-    { href: '/lacra-commodity-pricing', label: 'LACRA Pricing', icon: DollarSign },
+    { href: '/world-market-pricing', label: 'World Market', icon: DollarSign },
     { href: '/exporter/orders', label: 'Orders', icon: Package, badge: '3' },
     { href: '/exporter/marketplace', label: 'Marketplace', icon: ShoppingCart },
     { href: '/exporter/certificates', label: 'Certificates', icon: Award, badge: '2' },

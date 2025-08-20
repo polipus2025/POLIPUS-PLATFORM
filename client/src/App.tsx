@@ -99,7 +99,7 @@ import Dashboard from "@/pages/dashboard";
 
 import Commodities from "@/pages/commodities";
 import ExporterDashboard from "@/pages/exporter-dashboard";
-import LACRACommodityPricing from "@/pages/lacra-commodity-pricing";
+import WorldMarketPricing from "@/pages/world-market-pricing";
 import ExporterOrders from "@/pages/exporter/orders";
 import ExporterMarketplace from "@/pages/exporter/marketplace";
 import ExporterCertificates from "@/pages/exporter/certificates";
@@ -619,7 +619,8 @@ function Router() {
           </Route>
           
           {/* LACRA Commodity Pricing - Available to all users */}
-          <Route path="/lacra-commodity-pricing" component={LACRACommodityPricing} />
+          <Route path="/world-market-pricing" component={WorldMarketPricing} />
+          <Route path="/lacra-commodity-pricing" component={WorldMarketPricing} />
           
           {/* Exporter Portal Pages */}
           <Route path="/exporter/orders" component={ExporterOrders} />

@@ -4484,9 +4484,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (upcoming === 'true') {
         schedules = await storage.getUpcomingHarvests();
       } else if (landMappingId) {
-        schedules = await storage.getHarvestSchedulesByLandMapping(parseInt(landMappingId as string));
+        const mappingId = parseInt(landMappingId as string);
+        if (isNaN(mappingId)) {
+          return res.status(400).json({ message: "Invalid land mapping ID" });
+        }
+        schedules = await storage.getHarvestSchedulesByLandMapping(mappingId);
       } else if (farmerId) {
-        schedules = await storage.getHarvestSchedulesByFarmer(parseInt(farmerId as string));
+        const farmId = parseInt(farmerId as string);
+        if (isNaN(farmId)) {
+          return res.status(400).json({ message: "Invalid farmer ID" });
+        }
+        schedules = await storage.getHarvestSchedulesByFarmer(farmId);
       } else if (inspectorId) {
         schedules = await storage.getHarvestSchedulesByInspector(inspectorId as string);
       } else if (cropType) {

@@ -366,7 +366,7 @@ export default function LandMappingDashboard() {
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Status</SelectItem>
+                        <SelectItem value="all">All Status</SelectItem>
                         <SelectItem value="approved">Approved</SelectItem>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="rejected">Rejected</SelectItem>
@@ -475,7 +475,7 @@ export default function LandMappingDashboard() {
                         <SelectValue placeholder="Filter by crop" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Crops</SelectItem>
+                        <SelectItem value="all">All Crops</SelectItem>
                         <SelectItem value="coffee">Coffee</SelectItem>
                         <SelectItem value="cocoa">Cocoa</SelectItem>
                         <SelectItem value="rice">Rice</SelectItem>
@@ -487,7 +487,7 @@ export default function LandMappingDashboard() {
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Status</SelectItem>
+                        <SelectItem value="all">All Status</SelectItem>
                         <SelectItem value="planned">Planned</SelectItem>
                         <SelectItem value="planted">Planted</SelectItem>
                         <SelectItem value="growing">Growing</SelectItem>

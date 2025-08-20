@@ -680,7 +680,6 @@ function Router() {
             />
           </Route>
           
-          <Route path="/director-dashboard" component={DirectorDashboard} />
           <Route path="/mobile-app-dashboard">
             <ProtectedRoute 
               component={MobileAppDashboard} 
@@ -713,6 +712,9 @@ function Router() {
       
       {/* ALWAYS AVAILABLE - Monitoring Dashboard */}
       <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
+      
+      {/* ALWAYS AVAILABLE - Director Dashboard with all regulatory functions */}
+      <Route path="/director-dashboard" component={DirectorDashboard} />
       
       {/* New Portal Routes - Public Access for Coming Soon Pages */}
       <Route path="/live-trace" component={LiveTracePortal} />

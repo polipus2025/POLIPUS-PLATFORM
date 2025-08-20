@@ -8,6 +8,7 @@ import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import GPSTest from "@/pages/gps-test";
@@ -745,32 +746,43 @@ function App() {
   const isBlueCarbon360Page = window.location.pathname.startsWith("/blue-carbon360");
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
-          // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
-          <div className="min-h-screen">
-            <Router />
-          </div>
-        ) : (
-          // Render authenticated pages with full layout
-          <div className="min-h-screen bg-gray-50">
-            <Header />
-            <div className="flex">
-              <Sidebar />
-              <main className="flex-1 min-w-0 overflow-hidden pb-16 lg:pb-0">
-                <Router />
-              </main>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Suspense fallback={
+            <div className="min-h-screen bg-white flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading Polipus Platform...</p>
+              </div>
             </div>
-            <MobileNav />
-          </div>
-        )}
-        
-        {/* PWA Install Prompt - Show on all pages */}
-        <PWAInstallPrompt />
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+          }>
+            {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
+              // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
+              <div className="min-h-screen">
+                <Router />
+              </div>
+            ) : (
+              // Render authenticated pages with full layout
+              <div className="min-h-screen bg-gray-50">
+                <Header />
+                <div className="flex">
+                  <Sidebar />
+                  <main className="flex-1 min-w-0 overflow-hidden pb-16 lg:pb-0">
+                    <Router />
+                  </main>
+                </div>
+                <MobileNav />
+              </div>
+            )}
+            
+            {/* PWA Install Prompt - Show on all pages */}
+            <PWAInstallPrompt />
+            <Toaster />
+          </Suspense>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -86,6 +86,42 @@ export default function ExporterDashboard() {
       </Helmet>
 
       <ExporterNavbar user={user} />
+      
+      {/* User Profile Section */}
+      <div className="bg-white shadow-sm border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-xl font-bold">
+                  {(user as any)?.exporterCredentialId ? (user as any).exporterCredentialId.slice(-3) : 'EXP'}
+                </span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Welcome, {(user as any)?.companyName || (user as any)?.username || 'Licensed Exporter'}
+                </h1>
+                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                  <span>Exporter ID: {(user as any)?.exporterCredentialId || (user as any)?.exporterId || 'EXP-DEMO-001'}</span>
+                  <span>•</span>
+                  <span>License Status: Active</span>
+                  <span>•</span>
+                  <span>Established: {(user as any)?.establishedDate || '2024'}</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <Badge className="bg-green-100 text-green-800 mb-2">
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Verified Exporter
+              </Badge>
+              <p className="text-sm text-gray-600">
+                Last Login: {new Date().toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

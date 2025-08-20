@@ -2683,7 +2683,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get current authenticated user endpoint
-  app.get("/api/auth/user", authenticateToken, async (req, res) => {
+  app.get("/api/auth/user", async (req, res) => {
+    try {
+      // Check for token in Authorization header or session
+      const authHeader = req.headers.authorization;
+      const token = authHeader && authHeader.split(' ')[1];
+      
+      if (token) {
+        // Handle JWT token authentication
+        try {
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          
+          // Handle exporter authentication
+          if (decoded.role === 'exporter' || decoded.userType === 'exporter') {
+            const exporter = await storage.getExporterByExporterId(decoded.exporterId || decoded.username);
+            if (exporter) {
+              return res.json({
+                id: exporter.id,
+                username: exporter.exporterId,
+                exporterId: exporter.exporterId,
+                companyName: exporter.companyName,
+                contactPerson: exporter.contactPerson,
+                email: exporter.email,
+                userType: 'exporter',
+                role: 'exporter'
+              });
+            }
+          }
+          
+          // Handle other user types
+          const user = await storage.getUserById(decoded.userId);
+          if (user) {
+            return res.json(user);
+          }
+        } catch (jwtError) {
+          // JWT verification failed, continue to check session
+        }
+      }
+      
+      // Check session for exporter authentication
+      if (req.session && req.session.userType === 'exporter') {
+        const exporter = await storage.getExporterByExporterId(req.session.exporterId);
+        if (exporter) {
+          return res.json({
+            id: exporter.id,
+            username: exporter.exporterId,
+            exporterId: exporter.exporterId,
+            companyName: exporter.companyName,
+            contactPerson: exporter.contactPerson,
+            email: exporter.email,
+            userType: 'exporter',
+            role: 'exporter'
+          });
+        }
+      }
+      
+      // Fallback to existing authentication logic
+      return res.status(401).json({ message: "No authenticated user found" });
+    } catch (error) {
+      console.error("User auth check error:", error);
+      res.status(500).json({ message: "Authentication error" });
+    }
+  });
+
+  app.get("/api/auth/user-legacy", authenticateToken, async (req, res) => {
     try {
       // Extract user info from JWT token (set by authenticateToken middleware)
       const userId = String(req.user?.userId);

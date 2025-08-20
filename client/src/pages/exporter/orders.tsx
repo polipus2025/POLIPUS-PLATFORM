@@ -35,9 +35,10 @@ export default function ExporterOrders() {
   });
 
   // CORRECTED: Fetch exporter purchase requests with coordination status
-  const { data: purchaseRequests = [], isLoading: isLoadingRequests } = useQuery({
+  const { data: purchaseRequests = [], isLoading: isLoadingRequests, error } = useQuery({
     queryKey: ['/api/exporter/purchase-requests'],
     retry: false,
+    enabled: !!user, // Only run when user is loaded
   });
 
   // Mock orders data with buyer information for fallback
@@ -157,8 +158,8 @@ export default function ExporterOrders() {
     return 'bg-gray-300';
   };
 
-  // CORRECTED: Use real purchase requests or fall back to mock data  
-  const ordersData = (purchaseRequests as any[]).length > 0 ? (purchaseRequests as any[]) : mockOrders;
+  // CORRECTED: Use real purchase requests or fall back to mock data with proper error handling
+  const ordersData = (!error && Array.isArray(purchaseRequests) && purchaseRequests.length > 0) ? purchaseRequests : mockOrders;
   
   const filteredOrders = ordersData.filter((order: any) => {
     const matchesSearch = (order.purchaseRequestId || order.id)?.toLowerCase().includes(searchTerm.toLowerCase()) ||

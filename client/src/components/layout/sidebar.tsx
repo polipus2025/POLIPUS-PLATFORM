@@ -1,5 +1,4 @@
 import { Link, useLocation } from "wouter";
-import { useState, useMemo, useCallback } from "react";
 import { 
   BarChart3, 
   Leaf, 
@@ -29,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useState } from "react";
 
 // Helper function to check user role and type
 const getUserInfo = () => {
@@ -126,10 +126,10 @@ const exporterNavigation = [
 
 // Agricultural Buyer Navigation - Commerce-focused for agricultural trade
 const buyerNavigation = [
-  { name: "Business Overview", href: "/agricultural-buyer-dashboard", icon: BarChart3 },
-  { name: "Farmer Connections", href: "/agricultural-buyer-dashboard?tab=farmers", icon: Leaf },
-  { name: "Exporter Network", href: "/agricultural-buyer-dashboard?tab=exporters", icon: Building2 },
-  { name: "Transaction Dashboard", href: "/buyer-transaction-dashboard", icon: DollarSign },
+  { name: "Business Overview", href: "/buyer-dashboard", icon: BarChart3 },
+  { name: "Farmer Connections", href: "/buyer-farmer-connections", icon: Leaf },
+  { name: "Exporter Network", href: "/buyer-exporter-network", icon: Building2 },
+  { name: "Transaction Dashboard", href: "/buyer-transactions", icon: DollarSign },
   { name: "Available Harvests", href: "/buyer-harvests", icon: Calendar },
   { name: "Business Metrics", href: "/buyer-metrics", icon: TrendingUp },
 ];
@@ -146,7 +146,7 @@ const landInspectorNavigation = [
   { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
 ];
 
-// Memoized function to get navigation items based on user type and role
+// Function to get navigation items based on user type and role
 const getNavigationItems = (userType: string | null, role: string | null) => {
   // Check for three-tier regulatory system first
   const ddgotsToken = localStorage.getItem('ddgotsToken');
@@ -195,28 +195,30 @@ export default function Sidebar() {
     "admin001"
   );
 
-  // Fetch unread message count - optimized for performance
+  // Fetch unread message count - reduced polling to improve performance
   const { data: unreadData } = useQuery({
     queryKey: ["/api/messages", currentUserId, "unread-count"],
     queryFn: () => apiRequest(`/api/messages/${currentUserId}/unread-count`),
-    refetchInterval: 60000, // Check every 60 seconds to reduce load
-    staleTime: 50000, // Consider data fresh for 50 seconds
-    enabled: !!currentUserId, // Only fetch if user ID exists
+    refetchInterval: 30000, // Check every 30 seconds instead of 5
+    staleTime: 25000, // Consider data fresh for 25 seconds
   });
 
   const unreadCount = unreadData?.count || 0;
 
-  // Memoize navigation items to prevent unnecessary recalculations
-  const navigationItems = useMemo(() => getNavigationItems(userType, role), [userType, role]);
+  // Get the appropriate navigation items based on user type
+  const navigationItems = getNavigationItems(userType, role);
   
-  // Navigation handler - use proper routing instead of window.location
-  const handleNavigation = useCallback((href: string) => {
-    // Use wouter's programmatic navigation instead of full page reload
-    window.history.pushState({}, '', href);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-    // Trigger custom event for agricultural buyer dashboard
-    window.dispatchEvent(new CustomEvent('sidebarNavigation'));
-  }, []);
+  // Debug logging for buyer navigation
+  if (userType === 'buyer') {
+    console.log('Buyer navigation debug:', {
+      userType,
+      role,
+      navigationItems,
+      dgToken: localStorage.getItem('dgToken'),
+      ddgotsToken: localStorage.getItem('ddgotsToken'),
+      ddgafToken: localStorage.getItem('ddgafToken')
+    });
+  }
 
   return (
     <aside className="hidden lg:block w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto shrink-0">
@@ -239,8 +241,12 @@ export default function Sidebar() {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
-                  <button
-                    onClick={() => handleNavigation(item.href)}
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log('Sidebar button clicked:', item.href, item.name);
+                      window.location.href = item.href;
+                    }}
                     className={cn(
                       "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base cursor-pointer hover:cursor-pointer w-full text-left",
                       isActive

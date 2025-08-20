@@ -128,8 +128,6 @@ import Verification from "@/pages/verification";
 import BatchCodeGenerator from "@/pages/batch-code-generator";
 
 import DirectorDashboard from "@/pages/director-dashboard";
-import DirectorDashboardTest from "@/pages/director-dashboard-test";
-import DirectorDashboardSimple from "@/pages/director-dashboard-simple";
 
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
@@ -432,12 +430,6 @@ function Router() {
               allowedUserTypes={['buyer']} 
             />
           </Route>
-          <Route path="/agricultural-buyer-dashboard">
-            <ProtectedRoute 
-              component={BuyerDashboard} 
-              allowedUserTypes={['buyer']} 
-            />
-          </Route>
           <Route path="/buyer-farmer-connections">
             <ProtectedRoute 
               component={BuyerFarmerConnections} 
@@ -451,12 +443,6 @@ function Router() {
             />
           </Route>
           <Route path="/buyer-transactions">
-            <ProtectedRoute 
-              component={BuyerTransactionDashboard} 
-              allowedUserTypes={['buyer']} 
-            />
-          </Route>
-          <Route path="/buyer-transaction-dashboard">
             <ProtectedRoute 
               component={BuyerTransactionDashboard} 
               allowedUserTypes={['buyer']} 
@@ -682,6 +668,7 @@ function Router() {
             />
           </Route>
           
+          <Route path="/director-dashboard" component={DirectorDashboard} />
           <Route path="/mobile-app-dashboard">
             <ProtectedRoute 
               component={MobileAppDashboard} 
@@ -714,11 +701,6 @@ function Router() {
       
       {/* ALWAYS AVAILABLE - Monitoring Dashboard */}
       <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
-      
-      {/* ALWAYS AVAILABLE - Director Dashboard with all regulatory functions */}
-      <Route path="/director-dashboard" component={DirectorDashboard} />
-      <Route path="/director-dashboard-simple" component={DirectorDashboardSimple} />
-      <Route path="/director-dashboard-test" component={DirectorDashboardTest} />
       
       {/* New Portal Routes - Public Access for Coming Soon Pages */}
       <Route path="/live-trace" component={LiveTracePortal} />

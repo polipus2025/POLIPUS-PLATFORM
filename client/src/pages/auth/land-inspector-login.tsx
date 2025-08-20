@@ -53,7 +53,7 @@ export default function LandInspectorLogin() {
       if (data && data.success) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("userType", "land_inspector");
-        localStorage.setItem("userRole", "inspector");
+        localStorage.setItem("userRole", "land_inspector");
         localStorage.setItem("inspectorData", JSON.stringify(data.inspector));
         
         toast({
@@ -61,8 +61,8 @@ export default function LandInspectorLogin() {
           description: `Welcome back, ${data.inspector.firstName}!`,
         });
         
-        // Navigate to land inspector dashboard
-        navigate("/landmap360/inspector-dashboard");
+        // Navigate to AgriTrace360 land inspector dashboard
+        navigate("/inspector-farmer-land-management");
       } else {
         console.error("Login failed - invalid response:", data);
         toast({

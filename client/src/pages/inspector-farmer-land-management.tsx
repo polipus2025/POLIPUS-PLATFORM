@@ -239,19 +239,22 @@ export default function InspectorFarmerLandManagement() {
   // Create new land mapping for farmer
   const createMapping = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/farmer-land-mappings", {
-        ...data,
-        farmerId: selectedFarmer?.id,
-        farmerName: `${selectedFarmer?.firstName} ${selectedFarmer?.lastName}`,
-        totalAreaHectares: data.boundaryData?.area || parseFloat(data.totalAreaHectares),
-        elevationMeters: data.elevationMeters ? parseFloat(data.elevationMeters) : null,
-        coordinates: data.boundaryData ? JSON.stringify(data.boundaryData.points) : data.coordinates,
-        boundaryData: data.boundaryData ? JSON.stringify(data.boundaryData) : null,
-        complianceStatus: "approved", // Inspector approval
-        inspectionStatus: "approved",
-        approvedBy: inspectorName,
-        approvedAt: new Date(),
-        isActive: true
+      return await apiRequest("/api/farmer-land-mappings", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          farmerId: selectedFarmer?.id,
+          farmerName: `${selectedFarmer?.firstName} ${selectedFarmer?.lastName}`,
+          totalAreaHectares: data.boundaryData?.area || parseFloat(data.totalAreaHectares),
+          elevationMeters: data.elevationMeters ? parseFloat(data.elevationMeters) : null,
+          coordinates: data.boundaryData ? JSON.stringify(data.boundaryData.points) : data.coordinates,
+          boundaryData: data.boundaryData ? JSON.stringify(data.boundaryData) : null,
+          complianceStatus: "approved", // Inspector approval
+          inspectionStatus: "approved",
+          approvedBy: inspectorName,
+          approvedAt: new Date(),
+          isActive: true
+        })
       });
     },
     onSuccess: () => {
@@ -276,19 +279,22 @@ export default function InspectorFarmerLandManagement() {
   // Create harvest schedule for land mapping
   const createSchedule = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/harvest-schedules", {
-        ...data,
-        farmerId: selectedFarmer?.id,
-        landMappingId: selectedMappingForSchedule,
-        estimatedYieldKg: parseFloat(data.estimatedYieldKg),
-        laborRequirements: parseInt(data.laborRequirements),
-        pricePerKg: data.pricePerKg ? parseFloat(data.pricePerKg) : null,
-        totalEstimatedValue: data.pricePerKg && data.estimatedYieldKg ? 
-          parseFloat(data.pricePerKg) * parseFloat(data.estimatedYieldKg) : null,
-        status: "approved", // Inspector approval
-        approvedBy: inspectorName,
-        approvedAt: new Date(),
-        isActive: true
+      return await apiRequest("/api/harvest-schedules", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          farmerId: selectedFarmer?.id,
+          landMappingId: selectedMappingForSchedule,
+          estimatedYieldKg: parseFloat(data.estimatedYieldKg),
+          laborRequirements: parseInt(data.laborRequirements),
+          pricePerKg: data.pricePerKg ? parseFloat(data.pricePerKg) : null,
+          totalEstimatedValue: data.pricePerKg && data.estimatedYieldKg ? 
+            parseFloat(data.pricePerKg) * parseFloat(data.estimatedYieldKg) : null,
+          status: "approved", // Inspector approval
+          approvedBy: inspectorName,
+          approvedAt: new Date(),
+          isActive: true
+        })
       });
     },
     onSuccess: () => {

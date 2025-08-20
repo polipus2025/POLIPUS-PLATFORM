@@ -11,7 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Target, Globe, TreePine, Camera, Users, Phone } from "lucide-react";
 import { Link } from "wouter";
-import AdvancedBoundaryMapper from '@/components/gps/advanced-boundary-mapper';
+import BoundaryMappingDemo from '@/components/gps/boundary-mapping-demo';
 
 const LIBERIAN_COUNTIES = [
   "Bomi", "Bong", "Gbarpolu", "Grand Bassa", "Grand Cape Mount", "Grand Gedeh",
@@ -582,21 +582,30 @@ export default function OnboardFarmer() {
                       </ul>
                     </div>
 
-                    <AdvancedBoundaryMapper
-                      onBoundaryComplete={(boundary) => {
-                        setFarmerData(prev => ({
-                          ...prev,
-                          boundaryData: boundary,
-                          farmSize: boundary.totalArea ? boundary.totalArea.toFixed(2) : prev.farmSize,
-                          gpsCoordinates: boundary.points.length > 0 ? 
-                            `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
-                            prev.gpsCoordinates
-                        }));
-                        
-                        toast({
-                          title: "Farm Boundary Mapped Successfully",
-                          description: `EUDR Compliant: ${boundary.points.length} GPS points (${boundary.totalArea?.toFixed(2)} hectares) - Start/Pause/Stop mapping system`,
-                        });
+                    <BoundaryMappingDemo
+                      plotName={`${farmerData.farmerName || 'Farmer'}'s Farm`}
+                      farmerName={farmerData.farmerName || 'N/A'}
+                      onMappingUpdate={(mappingData) => {
+                        if (mappingData.progress >= 100) {
+                          const simulatedBoundary = {
+                            points: mappingData.mappingPoints || [],
+                            area: mappingData.area || 0
+                          };
+                          
+                          setFarmerData(prev => ({
+                            ...prev,
+                            boundaryData: simulatedBoundary,
+                            farmSize: simulatedBoundary.area ? simulatedBoundary.area.toFixed(2) : prev.farmSize,
+                            gpsCoordinates: mappingData.currentPoint ? 
+                              `${mappingData.currentPoint.latitude.toFixed(6)}, ${mappingData.currentPoint.longitude.toFixed(6)}` : 
+                              prev.gpsCoordinates
+                          }));
+                          
+                          toast({
+                            title: "Farm Boundary Mapped Successfully", 
+                            description: `EUDR Compliant: ${mappingData.points} GPS points (${mappingData.area?.toFixed(2)} hectares) - Deployed mapping system`,
+                          });
+                        }
                       }}
                     />
                   </div>

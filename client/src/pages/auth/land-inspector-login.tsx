@@ -61,8 +61,8 @@ export default function LandInspectorLogin() {
           description: `Welcome back, ${data.inspector.firstName}!`,
         });
         
-        // Navigate to AgriTrace360 land inspector dashboard
-        navigate("/inspector-farmer-land-management");
+        // Navigate to unified land inspector dashboard
+        navigate("/unified-land-inspector-dashboard");
       } else {
         console.error("Login failed - invalid response:", data);
         toast({

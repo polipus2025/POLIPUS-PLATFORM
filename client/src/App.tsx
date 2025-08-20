@@ -203,6 +203,9 @@ import PortInspectorLogin from "@/pages/auth/port-inspector-login";
 import LandMappingDashboard from "@/pages/land-mapping-dashboard";
 import InspectorFarmerLandManagement from "@/pages/inspector-farmer-land-management";
 import LandMappingManager from "@/pages/landmap360/land-mapping-manager";
+import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashboard";
+import OnboardFarmer from "@/pages/onboard-farmer";
+import CreateLandPlot from "@/pages/create-land-plot";
 
 import NotFound from "@/pages/not-found";
 
@@ -252,6 +255,9 @@ function Router() {
       <Route path="/inspector-onboarding" component={InspectorOnboarding} />
       <Route path="/land-mapping-dashboard" component={LandMappingDashboard} />
       <Route path="/inspector-farmer-land-management" component={InspectorFarmerLandManagement} />
+      <Route path="/unified-land-inspector-dashboard" component={UnifiedLandInspectorDashboard} />
+      <Route path="/onboard-farmer" component={OnboardFarmer} />
+      <Route path="/create-land-plot" component={CreateLandPlot} />
       <Route path="/minimal-test" component={MinimalTest} />
 
       {/* LiveTrace Authentication Routes */}

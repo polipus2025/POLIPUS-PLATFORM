@@ -258,12 +258,19 @@ export function registerFarmerRoutes(app: Express) {
             expectedHarvestEndDate: "2025-12-15",
             expectedYield: 1500,
             yieldUnit: "kg",
+            actualYield: null,
             expectedPrice: 2.50,
             priceUnit: "per_kg",
             season: "rainy_season",
             cropYear: 2025,
             status: "ready_for_harvest",
             marketingPlan: "Local buyers and cooperatives",
+            harvestStartDate: null,
+            harvestEndDate: null,
+            marketplaceListingCreated: false,
+            buyerInterestCount: 0,
+            transactionCount: 0,
+            totalSalesValue: 0,
             createdBy: "John Konneh",
             isActive: true
           },
@@ -281,12 +288,49 @@ export function registerFarmerRoutes(app: Express) {
             expectedHarvestEndDate: "2026-01-30",
             expectedYield: 800,
             yieldUnit: "kg",
+            actualYield: null,
             expectedPrice: 3.20,
             priceUnit: "per_kg",
             season: "dry_season",
             cropYear: 2025,
             status: "growing",
             marketingPlan: "Coffee exporters",
+            harvestStartDate: null,
+            harvestEndDate: null,
+            marketplaceListingCreated: false,
+            buyerInterestCount: 0,
+            transactionCount: 0,
+            totalSalesValue: 0,
+            createdBy: "John Konneh",
+            isActive: true
+          },
+          {
+            id: 3,
+            scheduleId: "SCH-TEST-003",
+            farmerId: 1,
+            scheduleName: "Cocoa Second Season 2024",
+            cropType: "Cocoa",
+            cropVariety: "Trinitario",
+            plantingArea: 2.0,
+            plantingStartDate: "2024-01-15",
+            plantingEndDate: "2024-02-28",
+            expectedHarvestStartDate: "2024-08-01",
+            expectedHarvestEndDate: "2024-10-15",
+            expectedYield: 800,
+            yieldUnit: "kg",
+            actualYield: 850,
+            expectedPrice: 2.40,
+            priceUnit: "per_kg",
+            season: "dry_season",
+            cropYear: 2024,
+            status: "harvested",
+            marketingPlan: "Direct buyer sales",
+            harvestStartDate: "2024-08-05",
+            harvestEndDate: "2024-09-20",
+            marketplaceListingCreated: true,
+            buyerInterestCount: 3,
+            transactionCount: 2,
+            totalSalesValue: 2040.00,
             createdBy: "John Konneh",
             isActive: true
           }
@@ -558,4 +602,94 @@ export function registerFarmerRoutes(app: Express) {
       res.status(500).json({ error: "Failed to create marketplace listing" });
     }
   });
+
+  // Get farmer transactions (farmer-buyer product transactions)
+  app.get("/api/farmers/:farmerId/transactions", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      
+      // Test data fallback for demo
+      if (farmerId === "FARMER-TEST-2025") {
+        return res.json([
+          {
+            id: 1,
+            transactionId: "TXN-TEST-001",
+            farmerId: 1,
+            scheduleId: 3,
+            buyerId: "BUY-12345",
+            buyerName: "Samuel Johnson",
+            buyerCompany: "Nimba Agricultural Cooperative",
+            cropType: "Cocoa",
+            quantity: 400,
+            pricePerKg: 2.40,
+            totalAmount: 960.00,
+            paymentTerms: "Cash on delivery",
+            deliveryDate: "2024-09-25",
+            transactionType: "direct_sale",
+            status: "completed",
+            farmerApproved: true,
+            buyerApproved: true,
+            negotiationStatus: "agreed",
+            completedAt: "2024-09-25T10:30:00Z",
+            createdAt: "2024-09-20T14:15:00Z"
+          },
+          {
+            id: 2,
+            transactionId: "TXN-TEST-002",
+            farmerId: 1,
+            scheduleId: 3,
+            buyerId: "BUY-67890",
+            buyerName: "Mary Williams",
+            buyerCompany: "West African Commodities",
+            cropType: "Cocoa",
+            quantity: 450,
+            pricePerKg: 2.50,
+            totalAmount: 1125.00,
+            paymentTerms: "Mobile money transfer",
+            deliveryDate: "2024-10-01",
+            transactionType: "marketplace_sale",
+            status: "completed",
+            farmerApproved: true,
+            buyerApproved: true,
+            negotiationStatus: "agreed",
+            completedAt: "2024-10-01T15:45:00Z",
+            createdAt: "2024-09-25T09:20:00Z"
+          },
+          {
+            id: 3,
+            transactionId: "TXN-TEST-003",
+            farmerId: 1,
+            scheduleId: 1,
+            buyerId: "BUY-11111",
+            buyerName: "David Cole",
+            buyerCompany: "Premium Cocoa Buyers",
+            cropType: "Cocoa",
+            quantity: 600,
+            pricePerKg: 2.60,
+            totalAmount: 1560.00,
+            paymentTerms: "50% advance, 50% on delivery",
+            deliveryDate: "2025-10-15",
+            transactionType: "pre_order",
+            status: "pending",
+            farmerApproved: false,
+            buyerApproved: true,
+            negotiationStatus: "buyer_offer",
+            createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+          }
+        ]);
+      }
+
+      try {
+        const transactions = await storage.getFarmerTransactions(farmerId);
+        res.json(transactions);
+      } catch (dbError) {
+        return res.json([]);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  console.log("✅ Farmer routes registered successfully");
 }

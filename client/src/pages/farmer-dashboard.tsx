@@ -98,6 +98,12 @@ export default function FarmerDashboard() {
     enabled: !!farmerId
   });
 
+  // Fetch transactions
+  const { data: transactions } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}/transactions`],
+    enabled: !!farmerId
+  });
+
   const handleLogout = () => {
     localStorage.removeItem("farmerId");
     localStorage.removeItem("farmerName");
@@ -122,6 +128,90 @@ export default function FarmerDashboard() {
       case "low": return "bg-green-100 text-green-800";
       default: return "bg-gray-100 text-gray-800";
     }
+  };
+
+  // Harvest Management Functions
+  const handleStartHarvest = (schedule: HarvestSchedule) => {
+    toast({
+      title: "Harvest Started",
+      description: `Harvest process initiated for ${schedule.cropType}. Update progress in the system.`,
+    });
+    // TODO: API call to update schedule status to 'harvesting'
+  };
+
+  const handleCompleteHarvest = (schedule: HarvestSchedule) => {
+    toast({
+      title: "Harvest Completed",
+      description: `${schedule.cropType} harvest completed. Ready for marketplace listing.`,
+    });
+    // TODO: API call to update schedule status to 'harvested' and record actual yield
+  };
+
+  const handleCreateMarketplaceListing = (schedule: HarvestSchedule) => {
+    toast({
+      title: "Create Listing",
+      description: `Creating marketplace listing for ${schedule.cropType}. Redirecting...`,
+    });
+    // TODO: Navigate to create listing page with pre-filled schedule data
+  };
+
+  const handleFindBuyers = (schedule: HarvestSchedule) => {
+    toast({
+      title: "Finding Buyers",
+      description: `Searching for buyers interested in ${schedule.cropType} in your area.`,
+    });
+    // TODO: Open buyer search/recommendation modal
+  };
+
+  const handleSellToBuyers = (schedule: HarvestSchedule) => {
+    toast({
+      title: "Sell to Buyers",
+      description: `Opening transaction interface for ${schedule.cropType} sales.`,
+    });
+    // TODO: Open transaction/negotiation interface
+  };
+
+  const handleViewTransactions = (schedule: HarvestSchedule) => {
+    toast({
+      title: "Transaction History",
+      description: `Viewing sales transactions for ${schedule.cropType}.`,
+    });
+    // TODO: Open transaction history modal/page
+  };
+
+  // Transaction Management Functions
+  const getTransactionStatusColor = (status: string) => {
+    switch (status) {
+      case "completed": return "bg-green-100 text-green-800";
+      case "pending": return "bg-yellow-100 text-yellow-800";
+      case "cancelled": return "bg-red-100 text-red-800";
+      case "negotiating": return "bg-blue-100 text-blue-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleApproveTransaction = (transaction: any) => {
+    toast({
+      title: "Transaction Approved",
+      description: `Approved sale of ${transaction.quantity}kg ${transaction.cropType} to ${transaction.buyerName}`,
+    });
+    // TODO: API call to approve transaction
+  };
+
+  const handleNegotiateTransaction = (transaction: any) => {
+    toast({
+      title: "Negotiation Started",
+      description: `Opening negotiation interface with ${transaction.buyerName}`,
+    });
+    // TODO: Open negotiation modal/interface
+  };
+
+  const handleViewTransactionDetails = (transaction: any) => {
+    toast({
+      title: "Transaction Details",
+      description: `Viewing complete details for transaction ${transaction.transactionId}`,
+    });
+    // TODO: Open transaction details modal
   };
 
   return (
@@ -212,11 +302,12 @@ export default function FarmerDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="mappings">Land Mappings</TabsTrigger>
             <TabsTrigger value="schedules">Harvest Schedules</TabsTrigger>
             <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="inquiries">Buyer Inquiries</TabsTrigger>
             <TabsTrigger value="alerts">Alerts</TabsTrigger>
           </TabsList>
@@ -405,10 +496,94 @@ export default function FarmerDashboard() {
                         </div>
 
                         {schedule.status === "ready_for_harvest" && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <p className="text-green-800 text-sm font-medium">
-                              🌾 Ready for harvest! Consider listing in marketplace for buyers.
-                            </p>
+                          <div className="mt-3 space-y-3">
+                            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <p className="text-green-800 text-sm font-medium mb-2">
+                                🌾 Ready for harvest! Take action now:
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                <Button 
+                                  size="sm" 
+                                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                                  onClick={() => handleStartHarvest(schedule)}
+                                  data-testid={`start-harvest-${schedule.id}`}
+                                >
+                                  <Sprout className="w-4 h-4 mr-1" />
+                                  Start Harvest
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleCreateMarketplaceListing(schedule)}
+                                  data-testid={`create-listing-${schedule.id}`}
+                                >
+                                  <DollarSign className="w-4 h-4 mr-1" />
+                                  Create Listing
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleFindBuyers(schedule)}
+                                  data-testid={`find-buyers-${schedule.id}`}
+                                >
+                                  <Users className="w-4 h-4 mr-1" />
+                                  Find Buyers
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {schedule.status === "harvesting" && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-blue-800 text-sm font-medium">
+                                  🚜 Harvest in progress
+                                </p>
+                                <p className="text-blue-700 text-xs">Started: {new Date().toLocaleDateString()}</p>
+                              </div>
+                              <Button 
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => handleCompleteHarvest(schedule)}
+                                data-testid={`complete-harvest-${schedule.id}`}
+                              >
+                                Complete Harvest
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {schedule.status === "harvested" && (
+                          <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-purple-800 text-sm font-medium">
+                                  ✅ Harvest completed! Ready for sale
+                                </p>
+                                <p className="text-purple-700 text-xs">Actual yield: {schedule.actualYield || schedule.expectedYield} kg</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => handleSellToBuyers(schedule)}
+                                  data-testid={`sell-to-buyers-${schedule.id}`}
+                                >
+                                  <DollarSign className="w-4 h-4 mr-1" />
+                                  Sell Now
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleViewTransactions(schedule)}
+                                  data-testid={`view-transactions-${schedule.id}`}
+                                >
+                                  View Sales
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </CardContent>
@@ -484,6 +659,134 @@ export default function FarmerDashboard() {
                   )) || (
                     <div className="text-center py-8 text-gray-500">
                       No marketplace listings yet. Create your first listing to connect with buyers.
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Transactions Tab */}
+          <TabsContent value="transactions" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <DollarSign className="w-5 h-5 mr-2" />
+                  Farmer-Buyer Transactions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {transactions?.map((transaction: any) => (
+                    <Card key={transaction.id} className="border border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold">{transaction.transactionId}</h4>
+                            <p className="text-sm text-gray-600">{transaction.buyerName} - {transaction.buyerCompany}</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge className={getTransactionStatusColor(transaction.status)}>
+                              {transaction.status}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {transaction.transactionType.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
+                          <div>
+                            <p className="text-gray-600">Crop</p>
+                            <p className="font-medium">{transaction.cropType}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Quantity</p>
+                            <p className="font-medium">{transaction.quantity} kg</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Price</p>
+                            <p className="font-medium">${transaction.pricePerKg}/kg</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Total Amount</p>
+                            <p className="font-medium text-green-600">${transaction.totalAmount}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-3">
+                          <div>
+                            <p className="text-gray-600">Payment Terms</p>
+                            <p className="font-medium">{transaction.paymentTerms}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Delivery Date</p>
+                            <p className="font-medium">{new Date(transaction.deliveryDate).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+
+                        {transaction.status === "pending" && (
+                          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-yellow-800 text-sm font-medium">
+                                  🔄 Transaction pending your approval
+                                </p>
+                                <p className="text-yellow-700 text-xs">
+                                  Review terms and approve or negotiate with buyer
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => handleApproveTransaction(transaction)}
+                                  data-testid={`approve-transaction-${transaction.id}`}
+                                >
+                                  ✓ Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleNegotiateTransaction(transaction)}
+                                  data-testid={`negotiate-transaction-${transaction.id}`}
+                                >
+                                  💬 Negotiate
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {transaction.status === "completed" && (
+                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-green-800 text-sm font-medium">
+                                  ✅ Transaction completed successfully
+                                </p>
+                                <p className="text-green-700 text-xs">
+                                  Completed on: {new Date(transaction.completedAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleViewTransactionDetails(transaction)}
+                                data-testid={`view-details-${transaction.id}`}
+                              >
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      <DollarSign className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No transactions yet.</p>
+                      <p className="text-sm">Complete your harvest and create marketplace listings to start selling to buyers.</p>
                     </div>
                   )}
                 </div>

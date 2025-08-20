@@ -406,7 +406,7 @@ export default function DirectorDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [approvalNotes, setApprovalNotes] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -497,9 +497,9 @@ export default function DirectorDashboard() {
             variant="outline" 
             size="sm" 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="bg-white shadow-lg"
+            className="bg-white shadow-lg border-2 border-purple-200"
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-5 w-5 text-purple-600" />
           </Button>
         </div>
         
@@ -509,9 +509,9 @@ export default function DirectorDashboard() {
             variant="outline" 
             size="sm" 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="bg-white shadow-lg"
+            className="bg-white shadow-lg border-2 border-purple-200"
           >
-            {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            {sidebarOpen ? <ChevronLeft className="h-5 w-5 text-purple-600" /> : <ChevronRight className="h-5 w-5 text-purple-600" />}
           </Button>
         </div>
 

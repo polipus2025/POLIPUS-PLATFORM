@@ -2370,43 +2370,43 @@ export class DatabaseStorage implements IStorage {
     return newTransaction;
   }
 
-  // Exporter authentication methods for portal access
-  async authenticateExporter(username: string, password: string): Promise<{ success: boolean; exporter?: Exporter; credentials?: ExporterCredential; message?: string }> {
+  // Exporter authentication methods for portal access - simplified version
+  async authenticateExporter(username: string, password: string): Promise<{ success: boolean; exporter?: Exporter; credentials?: any; message?: string }> {
     try {
-      const credentials = await this.getExporterCredentialsByUsername(username);
-      if (!credentials) {
-        return { success: false, message: 'Invalid credentials' };
+      // Try to find exporter by exporterId (username can be exporterId)
+      let exporter = await this.getExporterByExporterId(username);
+      
+      // Also try to find by exporterId if username looks like an exporter ID
+      if (!exporter && username.toUpperCase().startsWith('EXP-')) {
+        exporter = await this.getExporterByExporterId(username.toUpperCase());
       }
 
-      // Check if account is active - note: exporter credentials don't have isActive field, check exporter status instead
-
-      if (credentials.lockedUntil && credentials.lockedUntil > new Date()) {
-        return { success: false, message: 'Account is locked. Please try again later.' };
-      }
-
-      const isValidPassword = await bcrypt.compare(password, credentials.passwordHash);
-      if (!isValidPassword) {
-        await this.incrementExporterFailedLoginAttempts(credentials.exporterId);
-        return { success: false, message: 'Invalid credentials' };
-      }
-
-      const exporter = await this.getExporter(credentials.exporterId);
       if (!exporter) {
-        return { success: false, message: 'Exporter not found' };
+        return { success: false, message: 'Invalid credentials' };
+      }
+
+      if (!exporter.passwordHash) {
+        return { success: false, message: 'Account not set up for login' };
       }
 
       if (exporter.complianceStatus !== 'approved') {
         return { success: false, message: 'Account not approved for portal access' };
       }
 
-      // Reset failed attempts on successful login
-      await this.resetExporterFailedLoginAttempts(credentials.exporterId);
+      if (!exporter.portalAccess) {
+        return { success: false, message: 'Portal access not enabled' };
+      }
+
+      const isValidPassword = await bcrypt.compare(password, exporter.passwordHash);
+      if (!isValidPassword) {
+        return { success: false, message: 'Invalid credentials' };
+      }
 
       return { 
         success: true, 
         exporter, 
-        credentials,
-        message: credentials.passwordChangeRequired ? 'Password change required' : 'Login successful'
+        credentials: { passwordChangeRequired: false },
+        message: 'Login successful'
       };
     } catch (error) {
       console.error('Exporter authentication error:', error);

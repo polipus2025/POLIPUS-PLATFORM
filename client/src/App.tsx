@@ -716,9 +716,9 @@ function Router() {
       <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
       
       {/* ALWAYS AVAILABLE - Director Dashboard with all regulatory functions */}
-      <Route path="/director-dashboard" component={DirectorDashboardSimple} />
-      <Route path="/director-dashboard-full" component={DirectorDashboardTest} />
-      <Route path="/director-dashboard-original" component={DirectorDashboard} />
+      <Route path="/director-dashboard" component={DirectorDashboard} />
+      <Route path="/director-dashboard-simple" component={DirectorDashboardSimple} />
+      <Route path="/director-dashboard-test" component={DirectorDashboardTest} />
       
       {/* New Portal Routes - Public Access for Coming Soon Pages */}
       <Route path="/live-trace" component={LiveTracePortal} />

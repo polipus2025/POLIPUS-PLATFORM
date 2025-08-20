@@ -330,16 +330,18 @@ function DirectorSidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (o
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+          className="fixed inset-0 bg-black bg-opacity-50 lg:hidden" 
+          style={{zIndex: 9998}}
           onClick={() => setIsOpen(false)}
         />
       )}
       
       {/* Sidebar */}
       <div className={cn(
-        "fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50 transition-transform duration-300 ease-in-out overflow-y-auto",
+        "fixed top-0 left-0 h-full bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out overflow-y-auto shadow-xl",
         isOpen ? "translate-x-0" : "-translate-x-full",
-        "w-80 lg:w-72"
+        "w-80 lg:w-72",
+        "z-[9999]"
       )}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-purple-700">
@@ -492,26 +494,26 @@ export default function DirectorDashboard() {
         sidebarOpen ? "lg:ml-72" : "ml-0"
       )}>
         {/* Mobile Menu Button */}
-        <div className="lg:hidden fixed top-4 left-4 z-30">
+        <div className="lg:hidden fixed top-4 left-4" style={{zIndex: 10000}}>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="bg-white shadow-lg border-2 border-purple-200"
+            className="bg-purple-600 text-white shadow-lg border-2 border-purple-400 hover:bg-purple-700"
           >
-            <Menu className="h-5 w-5 text-purple-600" />
+            <Menu className="h-5 w-5" />
           </Button>
         </div>
         
         {/* Desktop Toggle Button */}
-        <div className="hidden lg:block fixed top-4 left-4 z-30">
+        <div className="hidden lg:block fixed top-4 left-4" style={{zIndex: 10000}}>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="bg-white shadow-lg border-2 border-purple-200"
+            className="bg-purple-600 text-white shadow-lg border-2 border-purple-400 hover:bg-purple-700"
           >
-            {sidebarOpen ? <ChevronLeft className="h-5 w-5 text-purple-600" /> : <ChevronRight className="h-5 w-5 text-purple-600" />}
+            {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </Button>
         </div>
 

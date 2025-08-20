@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, MapPin, TreePine, CheckCircle, AlertCircle, Clock, Users, Leaf, Sprout, Target, Eye } from "lucide-react";
+import { CalendarIcon, MapPin, TreePine, CheckCircle, AlertCircle, Clock, Users, Leaf, Sprout, Target, Eye, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
@@ -152,7 +152,10 @@ export default function LandMappingDashboard() {
   // Approve land mapping mutation
   const approveMapping = useMutation({
     mutationFn: async (data: { id: number; inspectorId: string }) => {
-      return await apiRequest("PATCH", `/api/farmer-land-mappings/${data.id}/approve`, data);
+      return await apiRequest(`/api/farmer-land-mappings/${data.id}/approve`, {
+        method: "PATCH",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/farmer-land-mappings"] });
@@ -174,7 +177,10 @@ export default function LandMappingDashboard() {
   // Approve harvest schedule mutation
   const approveSchedule = useMutation({
     mutationFn: async (data: { id: number; inspectorId: string }) => {
-      return await apiRequest("PATCH", `/api/harvest-schedules/${data.id}/approve`, data);
+      return await apiRequest(`/api/harvest-schedules/${data.id}/approve`, {
+        method: "PATCH",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/harvest-schedules"] });
@@ -196,7 +202,10 @@ export default function LandMappingDashboard() {
   // Create inspection mutation
   const createInspection = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/land-mapping-inspections", {}, data);
+      return await apiRequest("/api/land-mapping-inspections", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/land-mapping-inspections"] });
@@ -335,7 +344,7 @@ export default function LandMappingDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm">
             <TabsTrigger value="mappings" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
               <MapPin className="h-4 w-4 mr-2" />
               Land Mappings
@@ -351,6 +360,10 @@ export default function LandMappingDashboard() {
             <TabsTrigger value="upcoming" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">
               <Clock className="h-4 w-4 mr-2" />
               Upcoming Harvests
+            </TabsTrigger>
+            <TabsTrigger value="onboard" className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white">
+              <Users className="h-4 w-4 mr-2" />
+              Onboard Farmer
             </TabsTrigger>
           </TabsList>
 
@@ -670,6 +683,94 @@ export default function LandMappingDashboard() {
                       </Card>
                     ))
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Farmer Onboarding Tab */}
+          <TabsContent value="onboard" className="space-y-4">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/50">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Farmer Onboarding with EUDR Compliance</span>
+                  <Badge className="bg-indigo-100 text-indigo-800">
+                    <TreePine className="h-4 w-4 mr-1" />
+                    EUDR Enabled
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Register new farmers with comprehensive EUDR compliance assessment and deforestation monitoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <div className="max-w-2xl mx-auto space-y-6">
+                    <div className="flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mx-auto">
+                      <Users className="h-8 w-8 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">Complete Farmer Management System</h3>
+                      <p className="text-gray-600 mt-2">
+                        Access the comprehensive farmer onboarding system with GPS mapping, 
+                        multiple land plot management, and EUDR compliance reporting.
+                      </p>
+                    </div>
+
+                    {/* Key Features */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                        <CardContent className="p-4 text-center">
+                          <Target className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                          <h4 className="font-semibold text-green-800">GPS Mapping</h4>
+                          <p className="text-sm text-green-600">Real-time GPS location detection and boundary mapping</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                        <CardContent className="p-4 text-center">
+                          <MapPin className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                          <h4 className="font-semibold text-blue-800">Multi-Land Plots</h4>
+                          <p className="text-sm text-blue-600">Create multiple land mappings per farmer</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+                        <CardContent className="p-4 text-center">
+                          <TreePine className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
+                          <h4 className="font-semibold text-yellow-800">EUDR Compliance</h4>
+                          <p className="text-sm text-yellow-600">Automated EUDR assessment and reporting</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                        <CardContent className="p-4 text-center">
+                          <FileText className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                          <h4 className="font-semibold text-purple-800">Deforestation Reports</h4>
+                          <p className="text-sm text-purple-600">Generate comprehensive deforestation analysis</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="pt-4">
+                      <Button
+                        size="lg"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3"
+                        onClick={() => window.location.href = '/inspector-farmer-land-management'}
+                        data-testid="button-access-farmer-management"
+                      >
+                        <Users className="h-5 w-5 mr-2" />
+                        Access Farmer Management System
+                      </Button>
+                    </div>
+
+                    {/* Additional Info */}
+                    <div className="text-sm text-gray-500 space-y-2">
+                      <p>• Complete farmer registration and approval workflow</p>
+                      <p>• Multiple land plot creation and management</p>
+                      <p>• EUDR compliance assessment and documentation</p>
+                      <p>• Deforestation monitoring and report generation</p>
+                      <p>• Harvest schedule planning and approval</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

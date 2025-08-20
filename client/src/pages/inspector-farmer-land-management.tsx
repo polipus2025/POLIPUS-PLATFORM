@@ -945,24 +945,46 @@ export default function InspectorFarmerLandManagement() {
               </div>
             </div>
 
-            {/* Interactive Boundary Mapping */}
+            {/* Interactive Boundary Mapping with EUDR */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-base font-medium">Farm Boundary Mapping</Label>
-                <Badge variant="secondary" className="text-xs">
-                  <Globe className="h-3 w-3 mr-1" />
-                  GPS Enhanced
-                </Badge>
+                <Label className="text-base font-medium">Farm Boundary Mapping with EUDR Compliance</Label>
+                <div className="flex space-x-2">
+                  <Badge variant="secondary" className="text-xs">
+                    <Globe className="h-3 w-3 mr-1" />
+                    GPS Enhanced
+                  </Badge>
+                  <Badge className="bg-green-100 text-green-800 text-xs">
+                    <TreePine className="h-3 w-3 mr-1" />
+                    EUDR Ready
+                  </Badge>
+                </div>
               </div>
               
               <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-800 mb-2">How to Map Land Boundaries:</h4>
+                <h4 className="font-medium text-blue-800 mb-2">How to Map Land Boundaries with EUDR Compliance:</h4>
                 <ol className="text-sm text-blue-700 space-y-1">
                   <li>1. Walk around the perimeter of the farm plot with the farmer</li>
                   <li>2. Use the boundary mapper below to record GPS points</li>
                   <li>3. Complete the boundary by connecting back to the starting point</li>
                   <li>4. Area will be calculated automatically from boundary points</li>
+                  <li>5. EUDR compliance assessment will be generated automatically</li>
+                  <li>6. Deforestation report will be created based on satellite data</li>
                 </ol>
+              </div>
+              
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <TreePine className="h-4 w-4 text-green-600 mr-2" />
+                  <h4 className="font-medium text-green-800">EUDR Compliance Features:</h4>
+                </div>
+                <ul className="text-sm text-green-700 space-y-1">
+                  <li>• Automatic deforestation risk assessment</li>
+                  <li>• Forest loss detection using satellite imagery</li>
+                  <li>• EU compliance score calculation</li>
+                  <li>• Required documentation identification</li>
+                  <li>• Compliance recommendations and action items</li>
+                </ul>
               </div>
               
               <InteractiveBoundaryMapper 

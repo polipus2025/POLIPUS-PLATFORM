@@ -430,6 +430,12 @@ function Router() {
               allowedUserTypes={['buyer']} 
             />
           </Route>
+          <Route path="/agricultural-buyer-dashboard">
+            <ProtectedRoute 
+              component={BuyerDashboard} 
+              allowedUserTypes={['buyer']} 
+            />
+          </Route>
           <Route path="/buyer-farmer-connections">
             <ProtectedRoute 
               component={BuyerFarmerConnections} 
@@ -443,6 +449,12 @@ function Router() {
             />
           </Route>
           <Route path="/buyer-transactions">
+            <ProtectedRoute 
+              component={BuyerTransactionDashboard} 
+              allowedUserTypes={['buyer']} 
+            />
+          </Route>
+          <Route path="/buyer-transaction-dashboard">
             <ProtectedRoute 
               component={BuyerTransactionDashboard} 
               allowedUserTypes={['buyer']} 

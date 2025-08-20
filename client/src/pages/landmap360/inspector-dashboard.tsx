@@ -354,7 +354,7 @@ export default function InspectorDashboard() {
                       <p className="text-sm text-slate-600 mb-4">Access full farmer registration system with GPS integration</p>
                       <Button 
                         className="w-full bg-purple-600 hover:bg-purple-700"
-                        onClick={() => window.open('/farmers', '_blank')}
+                        onClick={() => window.location.href = '/farmers'}
                       >
                         Open Farmer Registration
                       </Button>
@@ -370,7 +370,7 @@ export default function InspectorDashboard() {
                       <p className="text-sm text-slate-600 mb-4">Advanced GPS mapping with satellite imagery and boundary detection</p>
                       <Button 
                         className="w-full bg-emerald-600 hover:bg-emerald-700"
-                        onClick={() => window.open('/farmer-gps-mapping', '_blank')}
+                        onClick={() => window.location.href = '/farmer-gps-mapping'}
                       >
                         Start GPS Mapping
                       </Button>
@@ -386,7 +386,7 @@ export default function InspectorDashboard() {
                       <p className="text-sm text-slate-600 mb-4">Manage livestock and agricultural inspections</p>
                       <Button 
                         className="w-full bg-blue-600 hover:bg-blue-700"
-                        onClick={() => window.open('/livetrace/farm-registrations', '_blank')}
+                        onClick={() => window.location.href = '/livetrace/farm-registrations'}
                       >
                         View Farm Registry
                       </Button>

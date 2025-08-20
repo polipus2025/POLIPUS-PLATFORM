@@ -10120,130 +10120,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // BUYER-EXPORTER MARKETPLACE SYSTEM WITH DDGOTS OVERSIGHT & PORT INSPECTOR COORDINATION
   // ========================================================================================
   
-  // Get all buyer requests (for exporter marketplace)
-  app.get("/api/marketplace/buyer-requests", async (req, res) => {
+  // CORRECTED: Get all buyer offers (commodities buyers have FOR SALE to exporters)
+  app.get("/api/marketplace/buyer-offers", async (req, res) => {
     try {
-      const { commodity, location, urgency, status } = req.query;
+      const { commodity, location, priceRange, status } = req.query;
       
-      // Mock buyer requests with realistic data for now
-      const buyerRequests = [
+      // CORRECTED: Buyer offers - commodities buyers purchased from farmers and are selling to exporters
+      const buyerOffers = [
         {
-          id: 'REQ-2025-001',
+          id: 'OFF-2025-001',
+          offerId: 'OFF-2025-001',
           buyerId: 'BYR-20250819-050',
           buyerCompany: 'Liberian Agricultural Trading Co.',
           buyerContact: 'John Pewee',
           rating: 4.8,
-          verifiedBuyer: true,
+          verifiedSeller: true,
           commodity: 'Coffee',
-          quantityNeeded: '500 MT',
-          priceRange: '$2,600 - $2,900 per MT',
+          quantityAvailable: '500 MT', // What buyer has for sale
+          pricePerMT: 2750, // Selling price to exporters
+          totalValue: 1375000,
           qualityGrade: 'Premium Grade',
+          sourceLocation: 'Lofa County', // Where buyer purchased from farmers
+          farmerSources: ['Farmer John Kollie', 'Farmer Mary Pewee', 'Farmer David Konneh'],
+          harvestDate: '2024-11-15',
+          availableFromDate: '2025-01-25',
+          expirationDate: '2025-03-15',
           deliveryLocation: 'Port of Monrovia',
-          preferredCounty: 'Lofa County',
-          urgency: 'high',
-          paymentTerms: '30% deposit, 70% on delivery',
-          certificationRequired: ['EUDR Compliant', 'Organic Certified', 'Fair Trade'],
+          currentLocation: 'Liberian Agricultural Trading Co. Warehouse',
+          paymentTerms: '30% advance, 70% on delivery',
+          qualityCertificates: ['Organic', 'Fair Trade', 'EUDR Compliant'],
+          eudrCompliance: true,
+          certificationAvailable: ['Organic Certificate', 'Fair Trade Certificate', 'EUDR Declaration'],
           postedDate: '2025-01-22',
-          deadline: '2025-02-15',
-          description: 'Looking for premium coffee beans for European export. Must meet EUDR requirements.',
-          complianceStatus: 'pre_approved'
+          description: 'Premium coffee beans sourced directly from Lofa County smallholder farmers. Ready for export.',
+          complianceStatus: 'approved',
+          complianceOfficer: 'Sarah Konneh (DDGOTS)',
+          complianceDate: '2025-01-20'
         },
         {
-          id: 'REQ-2025-002',
+          id: 'OFF-2025-002',
+          offerId: 'OFF-2025-002',
           buyerId: 'BYR-20250820-051',
           buyerCompany: 'West African Commodities Ltd.',
           buyerContact: 'Maria Santos',
           rating: 4.6,
-          verifiedBuyer: true,
+          verifiedSeller: true,
           commodity: 'Cocoa',
-          quantityNeeded: '300 MT',
-          priceRange: '$3,100 - $3,300 per MT',
+          quantityAvailable: '300 MT',
+          pricePerMT: 3200,
+          totalValue: 960000,
           qualityGrade: 'Grade 1',
-          deliveryLocation: 'Port of Monrovia',
-          preferredCounty: 'Margibi County',
-          urgency: 'medium',
-          paymentTerms: '40% deposit, 60% on shipment',
-          certificationRequired: ['EUDR Compliant', 'Rainforest Alliance'],
+          sourceLocation: 'Margibi County',
+          farmerSources: ['Farmer Joseph Clarke', 'Farmer Grace Tubman'],
+          harvestDate: '2024-10-20',
+          availableFromDate: '2025-01-22',
+          expirationDate: '2025-03-10',
+          deliveryLocation: 'Port of Buchanan',
+          currentLocation: 'West African Commodities Storage Facility',
+          paymentTerms: '40% advance, 60% on shipment',
+          qualityCertificates: ['Quality Certificate', 'EUDR Compliant', 'Rainforest Alliance'],
+          eudrCompliance: true,
+          certificationAvailable: ['Quality Certificate', 'EUDR Declaration', 'Rainforest Alliance Certificate'],
           postedDate: '2025-01-20',
-          deadline: '2025-02-10',
-          description: 'High-quality cocoa beans needed for North American markets.',
-          complianceStatus: 'approved'
+          description: 'High-quality cocoa beans perfect for North American and European markets.',
+          complianceStatus: 'approved',
+          complianceOfficer: 'James Wilson (DDGOTS)',
+          complianceDate: '2025-01-18'
         },
         {
-          id: 'REQ-2025-003',
+          id: 'OFF-2025-003',
+          offerId: 'OFF-2025-003',
           buyerId: 'BYR-20250821-052',
           buyerCompany: 'Global Rubber Trading',
           buyerContact: 'Ahmed Hassan',
           rating: 4.9,
-          verifiedBuyer: true,
+          verifiedSeller: true,
           commodity: 'Rubber',
-          quantityNeeded: '800 MT',
-          priceRange: '$1,400 - $1,600 per MT',
+          quantityAvailable: '800 MT',
+          pricePerMT: 1500,
+          totalValue: 1200000,
           qualityGrade: 'RSS 1',
-          deliveryLocation: 'Port of Buchanan',
-          preferredCounty: 'Bong County',
-          urgency: 'low',
-          paymentTerms: '25% deposit, 75% on quality inspection',
-          certificationRequired: ['EUDR Compliant', 'ISO 9001'],
+          sourceLocation: 'Bong County',
+          farmerSources: ['Farmer Thomas Johnson', 'Farmer Rebecca Wilson', 'Farmer Michael Tarr'],
+          harvestDate: '2024-12-05',
+          availableFromDate: '2025-01-20',
+          expirationDate: '2025-04-20',
+          deliveryLocation: 'Port of Monrovia',
+          currentLocation: 'Global Rubber Processing Center',
+          paymentTerms: '25% advance, 75% on quality inspection',
+          qualityCertificates: ['EUDR Compliant', 'ISO 9001'],
+          eudrCompliance: true,
+          certificationAvailable: ['EUDR Declaration', 'ISO Quality Report'],
           postedDate: '2025-01-18',
-          deadline: '2025-02-05',
-          description: 'Natural rubber for tire manufacturing. Long-term partnership opportunity.',
-          complianceStatus: 'pending_review'
+          description: 'Natural rubber from Bong County smallholder farmers. Excellent for tire manufacturing.',
+          complianceStatus: 'approved',
+          complianceOfficer: 'Patricia Johnson (DDGOTS)',
+          complianceDate: '2025-01-16'
         }
       ];
 
       // Apply filters
-      let filteredRequests = buyerRequests;
+      let filteredOffers = buyerOffers;
       if (commodity && commodity !== 'all') {
-        filteredRequests = filteredRequests.filter(req => 
-          req.commodity.toLowerCase() === commodity.toString().toLowerCase()
+        filteredOffers = filteredOffers.filter(offer => 
+          offer.commodity.toLowerCase() === commodity.toString().toLowerCase()
         );
       }
       if (location && location !== 'all') {
-        filteredRequests = filteredRequests.filter(req => 
-          req.preferredCounty.toLowerCase().includes(location.toString().toLowerCase())
+        filteredOffers = filteredOffers.filter(offer => 
+          offer.sourceLocation.toLowerCase().includes(location.toString().toLowerCase())
         );
       }
-      if (urgency && urgency !== 'all') {
-        filteredRequests = filteredRequests.filter(req => req.urgency === urgency);
+      if (priceRange && priceRange !== 'all') {
+        // Filter by price ranges if needed
+        const [min, max] = priceRange.toString().split('-').map(p => parseInt(p));
+        if (min && max) {
+          filteredOffers = filteredOffers.filter(offer => 
+            offer.pricePerMT >= min && offer.pricePerMT <= max
+          );
+        }
       }
 
-      res.json(filteredRequests);
+      res.json(filteredOffers);
     } catch (error) {
-      console.error("Error fetching buyer requests:", error);
-      res.status(500).json({ error: "Failed to fetch buyer requests" });
+      console.error("Error fetching buyer offers:", error);
+      res.status(500).json({ error: "Failed to fetch buyer offers" });
     }
   });
 
-  // Submit exporter proposal with DDGOTS oversight
-  app.post("/api/exporter/submit-proposal", async (req, res) => {
+  // CORRECTED: Submit exporter purchase request (to buy from buyers) with DDGOTS oversight
+  app.post("/api/exporter/submit-purchase-request", async (req, res) => {
     try {
       if (!req.session.exporterId || req.session.userType !== 'exporter') {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const proposalData = req.body;
+      const purchaseData = req.body;
       
-      // Generate unique proposal ID
-      const proposalId = `PROP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
+      // Generate unique purchase request ID
+      const requestId = `PREQ-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
       
       // Create coordination workflow
       const coordinationId = `COORD-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
       
-      // Simulate proposal creation (would be database operation in production)
-      const proposal = {
-        id: proposalId,
-        proposalId,
-        requestId: proposalData.requestId,
-        buyerId: proposalData.buyerId,
+      // CORRECTED: Purchase request creation (exporter wants to buy from buyer)
+      const purchaseRequest = {
+        id: requestId,
+        requestId,
+        offerId: purchaseData.offerId, // Buyer's offer being purchased
+        buyerId: purchaseData.buyerId,
         exporterId: req.session.exporterId,
-        pricePerMT: proposalData.pricePerMT,
-        totalQuantity: proposalData.totalQuantity,
-        deliveryDate: proposalData.deliveryDate,
-        qualityGrade: proposalData.qualityGrade,
-        paymentTerms: proposalData.paymentTerms,
-        additionalNotes: proposalData.additionalNotes,
-        certifications: proposalData.certifications,
+        quantityRequested: purchaseData.quantityRequested, // How much exporter wants to buy
+        agreedPricePerMT: purchaseData.agreedPricePerMT, // Agreed purchase price
+        totalValue: purchaseData.quantityRequested * purchaseData.agreedPricePerMT,
+        proposedPickupDate: purchaseData.proposedPickupDate,
+        deliveryLocation: purchaseData.deliveryLocation,
+        paymentTerms: purchaseData.paymentTerms,
+        additionalRequests: purchaseData.additionalRequests,
+        certificationRequests: purchaseData.certificationRequests,
         ddgotsReviewStatus: 'pending',
         portInspectionStatus: 'not_scheduled',
         buyerResponseStatus: 'pending',
@@ -10255,25 +10289,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Simulate coordination workflow creation
       const coordination = {
         coordinationId,
-        proposalId,
-        requestId: proposalData.requestId,
+        purchaseRequestId: requestId,
+        offerId: purchaseData.offerId,
         coordinationStatus: 'initiated',
         progressPercentage: 0,
         initiatedAt: new Date().toISOString(),
-        coordinationNotes: `Proposal ${proposalId} submitted for DDGOTS review and port inspector coordination`,
+        coordinationNotes: `Purchase request ${requestId} submitted for DDGOTS review and port inspector coordination`,
         stakeholderComments: [],
         nextSteps: [
           'DDGOTS technical review',
           'Port inspector assignment',
-          'Buyer notification',
+          'Buyer notification and response',
           'Final approval workflow'
         ]
       };
 
       res.status(201).json({
         success: true,
-        message: 'Proposal submitted successfully and routed to DDGOTS for review',
-        proposal,
+        message: 'Purchase request submitted successfully and routed to DDGOTS for review',
+        purchaseRequest,
         coordination,
         timeline: {
           submitted: new Date().toISOString(),
@@ -10283,54 +10317,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      console.error("Error submitting proposal:", error);
-      res.status(500).json({ message: "Failed to submit proposal" });
+      console.error("Error submitting purchase request:", error);
+      res.status(500).json({ message: "Failed to submit purchase request" });
     }
   });
 
-  // Get exporter's proposals with coordination status
-  app.get("/api/exporter/proposals", async (req, res) => {
+  // CORRECTED: Get exporter's purchase requests with coordination status
+  app.get("/api/exporter/purchase-requests", async (req, res) => {
     try {
       if (!req.session.exporterId || req.session.userType !== 'exporter') {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      // Mock proposal data with comprehensive coordination tracking
-      const proposals = [
+      // CORRECTED: Purchase request data - exporter's requests to buy from buyers
+      const purchaseRequests = [
         {
-          id: 'PROP-2025-001',
-          proposalId: 'PROP-2025-001',
-          requestId: 'REQ-2025-001',
+          id: 'PREQ-2025-001',
+          requestId: 'PREQ-2025-001',
+          offerId: 'OFF-2025-001', // Buyer's offer being purchased
           buyerCompany: 'Liberian Agricultural Trading Co.',
           commodity: 'Coffee',
-          quantityOffered: '500 MT',
-          pricePerMT: 2750,
+          quantityRequested: '500 MT', // What exporter wants to buy
+          agreedPricePerMT: 2750,
           totalValue: 1375000,
-          deliveryDate: '2025-02-28',
+          proposedPickupDate: '2025-02-28',
+          deliveryLocation: 'Port of Monrovia',
           ddgotsReviewStatus: 'approved',
           ddgotsReviewOfficer: 'Dr. James Johnson',
           ddgotsReviewDate: '2025-01-20',
-          ddgotsReviewNotes: 'Quality standards met. Approved for port inspection.',
+          ddgotsReviewNotes: 'Purchase terms verified. Quality standards met. Approved for port inspection coordination.',
           portInspectionStatus: 'scheduled',
           portInspector: 'Inspector Mary Wilson',
           portInspectionDate: '2025-01-25',
-          buyerResponseStatus: 'pending',
-          status: 'under_review',
+          buyerResponseStatus: 'accepted', // Buyer's response to purchase request
+          status: 'approved',
           coordinationStatus: 'in_progress',
-          progressPercentage: 65,
+          progressPercentage: 75,
           submittedAt: '2025-01-18',
-          lastUpdate: '2025-01-20'
+          lastUpdate: '2025-01-21'
         },
         {
-          id: 'PROP-2025-002',
-          proposalId: 'PROP-2025-002',
-          requestId: 'REQ-2025-002',
+          id: 'PREQ-2025-002',
+          requestId: 'PREQ-2025-002',
+          offerId: 'OFF-2025-002',
           buyerCompany: 'West African Commodities Ltd.',
           commodity: 'Cocoa',
-          quantityOffered: '300 MT',
-          pricePerMT: 3200,
+          quantityRequested: '300 MT',
+          agreedPricePerMT: 3200,
           totalValue: 960000,
-          deliveryDate: '2025-02-15',
+          proposedPickupDate: '2025-02-15',
+          deliveryLocation: 'Port of Buchanan',
           ddgotsReviewStatus: 'pending',
           ddgotsReviewOfficer: 'TBD',
           portInspectionStatus: 'not_scheduled',
@@ -10340,13 +10376,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           progressPercentage: 15,
           submittedAt: '2025-01-19',
           lastUpdate: '2025-01-19'
+        },
+        {
+          id: 'PREQ-2025-003',
+          requestId: 'PREQ-2025-003',
+          offerId: 'OFF-2025-003',
+          buyerCompany: 'Global Rubber Trading',
+          commodity: 'Rubber',
+          quantityRequested: '400 MT', // Partial purchase of 800 MT offer
+          agreedPricePerMT: 1500,
+          totalValue: 600000,
+          proposedPickupDate: '2025-03-05',
+          deliveryLocation: 'Port of Monrovia',
+          ddgotsReviewStatus: 'approved',
+          ddgotsReviewOfficer: 'Patricia Johnson',
+          ddgotsReviewDate: '2025-01-21',
+          ddgotsReviewNotes: 'Purchase request compliant. Partial purchase approved.',
+          portInspectionStatus: 'completed',
+          portInspector: 'Inspector David Tarr',
+          portInspectionDate: '2025-01-22',
+          buyerResponseStatus: 'accepted',
+          status: 'contract_signed',
+          coordinationStatus: 'completed',
+          progressPercentage: 100,
+          submittedAt: '2025-01-17',
+          lastUpdate: '2025-01-22'
         }
       ];
 
-      res.json(proposals);
+      res.json(purchaseRequests);
     } catch (error) {
-      console.error("Error fetching proposals:", error);
-      res.status(500).json({ message: "Failed to fetch proposals" });
+      console.error("Error fetching purchase requests:", error);
+      res.status(500).json({ message: "Failed to fetch purchase requests" });
     }
   });
 

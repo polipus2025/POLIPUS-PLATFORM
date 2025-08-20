@@ -34,9 +34,9 @@ export default function ExporterOrders() {
     retry: false,
   });
 
-  // Fetch exporter proposals with coordination status
-  const { data: proposals = [], isLoading: isLoadingProposals } = useQuery({
-    queryKey: ['/api/exporter/proposals'],
+  // CORRECTED: Fetch exporter purchase requests with coordination status
+  const { data: purchaseRequests = [], isLoading: isLoadingRequests } = useQuery({
+    queryKey: ['/api/exporter/purchase-requests'],
     retry: false,
   });
 
@@ -157,11 +157,11 @@ export default function ExporterOrders() {
     return 'bg-gray-300';
   };
 
-  // Use real proposals or fall back to mock data
-  const ordersData = proposals.length > 0 ? proposals : mockOrders;
+  // CORRECTED: Use real purchase requests or fall back to mock data  
+  const ordersData = (purchaseRequests as any[]).length > 0 ? (purchaseRequests as any[]) : mockOrders;
   
-  const filteredOrders = ordersData.filter(order => {
-    const matchesSearch = (order.proposalId || order.id)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredOrders = ordersData.filter((order: any) => {
+    const matchesSearch = (order.purchaseRequestId || order.id)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.buyerCompany?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.commodity?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
@@ -172,7 +172,7 @@ export default function ExporterOrders() {
     <div className="min-h-screen bg-gray-50">
       <Helmet>
         <title>Orders - Exporter Portal</title>
-        <meta name="description" content="Manage your export orders and buyer transactions" />
+        <meta name="description" content="Manage your purchase orders from buyers and commodity transactions" />
       </Helmet>
 
       <ExporterNavbar user={user} />
@@ -182,10 +182,10 @@ export default function ExporterOrders() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
             <Package className="h-6 w-6 text-blue-600" />
-            Export Orders
+            Purchase Orders
           </h1>
           <p className="text-gray-600 mt-2">
-            Manage your export orders with integrated buyer connections and DDGOTS compliance oversight
+            CORRECTED: Manage your commodity purchase orders from buyers with DDGOTS compliance oversight
           </p>
         </div>
 
@@ -194,7 +194,7 @@ export default function ExporterOrders() {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              placeholder="Search by order ID, buyer company, or commodity..."
+              placeholder="Search by purchase request ID, buyer company, or commodity..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -216,31 +216,31 @@ export default function ExporterOrders() {
         </div>
 
         {/* Loading State */}
-        {isLoadingProposals && (
+        {isLoadingRequests && (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
-            <span className="ml-3 text-gray-600">Loading proposals...</span>
+            <span className="ml-3 text-gray-600">Loading purchase requests...</span>
           </div>
         )}
 
         {/* Empty State */}
-        {!isLoadingProposals && filteredOrders.length === 0 && (
+        {!isLoadingRequests && filteredOrders.length === 0 && (
           <div className="text-center py-12">
             <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600">No proposals found</h3>
-            <p className="text-gray-500">Submit proposals through the marketplace to see them here.</p>
+            <h3 className="text-lg font-semibold text-gray-600">No purchase requests found</h3>
+            <p className="text-gray-500">Submit purchase requests through the marketplace to see them here.</p>
           </div>
         )}
 
         {/* Orders Grid */}
         <div className="grid grid-cols-1 gap-6">
-          {!isLoadingProposals && filteredOrders.map((order) => (
-            <Card key={order.proposalId || order.id} className="hover:shadow-md transition-shadow">
+          {!isLoadingRequests && filteredOrders.map((order: any) => (
+            <Card key={order.purchaseRequestId || order.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg font-semibold text-gray-900">
-                      {order.proposalId || order.id}
+                      {order.purchaseRequestId || order.id}
                     </CardTitle>
                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
@@ -404,7 +404,7 @@ export default function ExporterOrders() {
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h4 className="font-medium text-gray-900 mb-2">Required Documents</h4>
                     <div className="flex flex-wrap gap-2">
-                      {order.documents.map((doc, index) => (
+                      {order.documents.map((doc: any, index: number) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {doc}
                         </Badge>

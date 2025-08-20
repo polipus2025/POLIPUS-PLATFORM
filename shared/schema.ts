@@ -2009,81 +2009,103 @@ export const insertBuyerSchema = createInsertSchema(buyers).omit({
 export type Buyer = typeof buyers.$inferSelect;
 
 // Buyer-Exporter Marketplace System
-export const buyerRequests = pgTable("buyer_requests", {
+// CORRECTED: Buyer Offers - Buyers offer commodities they purchased from farmers FOR SALE to exporters
+export const buyerOffers = pgTable("buyer_offers", {
   id: serial("id").primaryKey(),
-  requestId: text("request_id").notNull().unique(), // REQ-YYYY-XXX format
+  offerId: text("offer_id").notNull().unique(), // OFF-YYYY-XXX format
   buyerId: text("buyer_id").references(() => buyers.buyerId).notNull(),
   buyerCompany: text("buyer_company").notNull(),
   buyerContact: text("buyer_contact").notNull(),
   
-  // Commodity Requirements
+  // Commodity FOR SALE (what buyer purchased from farmers)
   commodity: text("commodity").notNull(), // coffee, cocoa, rubber, palm_oil, rice
-  quantityNeeded: text("quantity_needed").notNull(), // e.g., "500 MT"
-  priceRange: text("price_range").notNull(), // e.g., "$2,600 - $2,900 per MT"
+  quantityAvailable: text("quantity_available").notNull(), // e.g., "500 MT" - what buyer has for sale
+  pricePerMT: decimal("price_per_mt", { precision: 10, scale: 2 }).notNull(), // Selling price to exporters
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
   qualityGrade: text("quality_grade").notNull(), // Premium Grade, Grade 1, RSS 1, etc.
   
-  // Delivery Details
+  // Source Information (from farmers)
+  sourceLocation: text("source_location").notNull(), // Where buyer purchased from farmers
+  farmerSources: text("farmer_sources"), // JSON array of farmer IDs/names
+  harvestDate: timestamp("harvest_date"),
+  
+  // Sale Details to Exporters
+  availableFromDate: timestamp("available_from_date").notNull(),
+  expirationDate: timestamp("expiration_date").notNull(),
   deliveryLocation: text("delivery_location").notNull(), // Port of Monrovia, Port of Buchanan
-  preferredCounty: text("preferred_county").notNull(),
-  urgency: text("urgency").notNull().default("medium"), // low, medium, high
+  currentLocation: text("current_location").notNull(), // Where commodity is stored
   paymentTerms: text("payment_terms").notNull(),
   
-  // Requirements and Compliance
-  certificationRequired: text("certification_required"), // JSON array of required certifications
+  // Quality and Compliance
+  qualityCertificates: text("quality_certificates"), // JSON array of quality certs
+  eudrCompliance: boolean("eudr_compliance").default(false),
+  certificationAvailable: text("certification_available"), // JSON array of available certifications
   description: text("description"),
-  deadline: timestamp("deadline").notNull(),
   
-  // DDGOTS Oversight
+  // DDGOTS Pre-approval for Sale
   complianceStatus: text("compliance_status").notNull().default("pending_review"), // pending_review, pre_approved, approved, rejected
   complianceOfficer: integer("compliance_officer").references(() => authUsers.id),
   complianceNotes: text("compliance_notes"),
   complianceDate: timestamp("compliance_date"),
   
   // Status and Management
-  status: text("status").notNull().default("active"), // active, closed, suspended
+  status: text("status").notNull().default("active"), // active, reserved, sold, expired, withdrawn
   isActive: boolean("is_active").default(true),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const exporterProposals = pgTable("exporter_proposals", {
+// CORRECTED: Exporter Purchase Requests - Exporters request to BUY from buyer offers
+export const exporterPurchaseRequests = pgTable("exporter_purchase_requests", {
   id: serial("id").primaryKey(),
-  proposalId: text("proposal_id").notNull().unique(), // PROP-YYYY-XXX format
-  requestId: text("request_id").references(() => buyerRequests.requestId).notNull(),
+  requestId: text("request_id").notNull().unique(), // REQ-YYYY-XXX format
+  offerId: text("offer_id").references(() => buyerOffers.offerId).notNull(),
   buyerId: text("buyer_id").references(() => buyers.buyerId).notNull(),
   exporterId: text("exporter_id").references(() => exporters.exporterId).notNull(),
+  exporterCompany: text("exporter_company").notNull(),
+  exporterContact: text("exporter_contact").notNull(),
   
-  // Proposal Details
-  pricePerMT: decimal("price_per_mt", { precision: 10, scale: 2 }).notNull(),
-  totalQuantity: decimal("total_quantity", { precision: 10, scale: 2 }).notNull(),
-  deliveryDate: timestamp("delivery_date").notNull(),
-  qualityGrade: text("quality_grade").notNull(),
-  paymentTerms: text("payment_terms").notNull(),
-  additionalNotes: text("additional_notes"),
-  certifications: text("certifications"), // JSON array of available certifications
+  // Purchase Request Details (what exporter wants to buy)
+  quantityRequested: text("quantity_requested").notNull(), // e.g., "300 MT" - what exporter wants to buy
+  offeredPricePerMT: decimal("offered_price_per_mt", { precision: 10, scale: 2 }).notNull(), // What exporter is willing to pay
+  totalOfferValue: decimal("total_offer_value", { precision: 12, scale: 2 }).notNull(),
+  requestedDeliveryDate: timestamp("requested_delivery_date").notNull(),
+  deliveryLocation: text("delivery_location").notNull(), // Where exporter wants delivery
+  paymentTermsProposed: text("payment_terms_proposed").notNull(),
+  additionalRequirements: text("additional_requirements"),
+  urgency: text("urgency").notNull().default("medium"), // low, medium, high
   
-  // DDGOTS Review Process
+  // Export Intent
+  exportDestination: text("export_destination"), // Final export destination country
+  exportPurpose: text("export_purpose"), // commercial, processing, retail
+  requiredCertifications: text("required_certifications"), // JSON array of needed certifications
+  
+  // DDGOTS Review Process (ensuring exporter compliance)
   ddgotsReviewStatus: text("ddgots_review_status").notNull().default("pending"), // pending, approved, rejected, revision_required
   ddgotsReviewOfficer: integer("ddgots_review_officer").references(() => authUsers.id),
   ddgotsReviewNotes: text("ddgots_review_notes"),
   ddgotsReviewDate: timestamp("ddgots_review_date"),
   
-  // Port Inspector Coordination
+  // Port Inspector Coordination (for quality verification)
   portInspectorAssigned: integer("port_inspector_assigned").references(() => authUsers.id),
   portInspectionScheduled: timestamp("port_inspection_scheduled"),
   portInspectionStatus: text("port_inspection_status").default("not_scheduled"), // not_scheduled, scheduled, in_progress, completed, failed
   portInspectionNotes: text("port_inspection_notes"),
   
-  // Buyer Response
-  buyerResponseStatus: text("buyer_response_status").default("pending"), // pending, accepted, rejected, negotiating
+  // Buyer Response to Purchase Request
+  buyerResponseStatus: text("buyer_response_status").default("pending"), // pending, accepted, rejected, negotiating, counter_offer
   buyerResponseDate: timestamp("buyer_response_date"),
   buyerResponseNotes: text("buyer_response_notes"),
+  counterOfferPrice: decimal("counter_offer_price", { precision: 10, scale: 2 }),
+  counterOfferTerms: text("counter_offer_terms"),
   
   // Overall Status
-  status: text("status").notNull().default("pending"), // pending, approved, rejected, withdrawn, contract_signed
+  status: text("status").notNull().default("pending"), // pending, approved, rejected, withdrawn, contract_signed, completed
   finalApprovalBy: integer("final_approval_by").references(() => authUsers.id),
   finalApprovalDate: timestamp("final_approval_date"),
+  contractSigned: boolean("contract_signed").default(false),
+  contractDate: timestamp("contract_date"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -2092,8 +2114,8 @@ export const exporterProposals = pgTable("exporter_proposals", {
 export const marketplaceCoordination = pgTable("marketplace_coordination", {
   id: serial("id").primaryKey(),
   coordinationId: text("coordination_id").notNull().unique(), // COORD-YYYY-XXX format
-  proposalId: text("proposal_id").references(() => exporterProposals.proposalId).notNull(),
-  requestId: text("request_id").references(() => buyerRequests.requestId).notNull(),
+  purchaseRequestId: text("purchase_request_id").references(() => exporterPurchaseRequests.requestId).notNull(),
+  offerId: text("offer_id").references(() => buyerOffers.offerId).notNull(),
   
   // Stakeholder Coordination
   ddgotsOfficer: integer("ddgots_officer").references(() => authUsers.id).notNull(),
@@ -2122,14 +2144,14 @@ export const marketplaceCoordination = pgTable("marketplace_coordination", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Schema exports for the new marketplace system
-export const insertBuyerRequestSchema = createInsertSchema(buyerRequests).omit({
+// Schema exports for the corrected marketplace system
+export const insertBuyerOfferSchema = createInsertSchema(buyerOffers).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertExporterProposalSchema = createInsertSchema(exporterProposals).omit({
+export const insertExporterPurchaseRequestSchema = createInsertSchema(exporterPurchaseRequests).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -2141,11 +2163,11 @@ export const insertMarketplaceCoordinationSchema = createInsertSchema(marketplac
   updatedAt: true,
 });
 
-export type BuyerRequest = typeof buyerRequests.$inferSelect;
-export type InsertBuyerRequest = z.infer<typeof insertBuyerRequestSchema>;
+export type BuyerOffer = typeof buyerOffers.$inferSelect;
+export type InsertBuyerOffer = z.infer<typeof insertBuyerOfferSchema>;
 
-export type ExporterProposal = typeof exporterProposals.$inferSelect;
-export type InsertExporterProposal = z.infer<typeof insertExporterProposalSchema>;
+export type ExporterPurchaseRequest = typeof exporterPurchaseRequests.$inferSelect;
+export type InsertExporterPurchaseRequest = z.infer<typeof insertExporterPurchaseRequestSchema>;
 
 export type MarketplaceCoordination = typeof marketplaceCoordination.$inferSelect;
 export type InsertMarketplaceCoordination = z.infer<typeof insertMarketplaceCoordinationSchema>;

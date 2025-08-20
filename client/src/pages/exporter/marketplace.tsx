@@ -43,76 +43,97 @@ export default function ExporterMarketplace() {
     retry: false,
   });
 
-  // Fetch buyer requests from backend
-  const { data: buyerRequests = [], isLoading: isLoadingRequests } = useQuery({
-    queryKey: ['/api/marketplace/buyer-requests', { commodity: commodityFilter, location: locationFilter, urgency: 'all', status: 'active' }],
+  // CORRECTED: Fetch buyer offers from backend - commodities buyers have FOR SALE
+  const { data: buyerOffers = [], isLoading: isLoadingOffers } = useQuery({
+    queryKey: ['/api/marketplace/buyer-offers', { commodity: commodityFilter, location: locationFilter, priceRange: 'all', status: 'active' }],
     retry: false,
   });
 
-  // Mock data for fallback - buyers looking for products
-  const mockBuyerRequests = [
+  // CORRECTED: Mock data for fallback - buyers selling commodities to exporters
+  const mockBuyerOffers = [
     {
-      id: 'REQ-2025-001',
+      id: 'OFF-2025-001',
+      offerId: 'OFF-2025-001',
       buyerId: 'BYR-20250819-050',
       buyerCompany: 'Liberian Agricultural Trading Co.',
       buyerContact: 'John Pewee',
       rating: 4.8,
-      verifiedBuyer: true,
+      verifiedSeller: true,
       commodity: 'Coffee',
-      quantityNeeded: '500 MT',
-      priceRange: '$2,600 - $2,900 per MT',
+      quantityAvailable: '500 MT', // What buyer has for sale
+      pricePerMT: 2750, // Selling price to exporters
+      totalValue: 1375000,
       qualityGrade: 'Premium Grade',
+      sourceLocation: 'Lofa County', // Where buyer purchased from farmers
+      farmerSources: ['Farmer John Kollie', 'Farmer Mary Pewee', 'Farmer David Konneh'],
+      harvestDate: '2024-11-15',
+      availableFromDate: '2025-01-25',
+      expirationDate: '2025-03-15',
       deliveryLocation: 'Port of Monrovia',
-      preferredCounty: 'Lofa County',
-      urgency: 'high',
-      paymentTerms: '30% deposit, 70% on delivery',
-      certificationRequired: ['EUDR Compliant', 'Organic Certified', 'Fair Trade'],
+      currentLocation: 'Liberian Agricultural Trading Co. Warehouse',
+      paymentTerms: '30% advance, 70% on delivery',
+      qualityCertificates: ['Organic', 'Fair Trade', 'EUDR Compliant'],
+      eudrCompliance: true,
+      certificationAvailable: ['Organic Certificate', 'Fair Trade Certificate', 'EUDR Declaration'],
       postedDate: '2025-01-22',
-      deadline: '2025-02-15',
-      description: 'Looking for premium coffee beans for European export. Must meet EUDR requirements.',
-      complianceStatus: 'pre_approved'
+      description: 'Premium coffee beans sourced directly from Lofa County smallholder farmers. Ready for export.',
+      complianceStatus: 'approved'
     },
     {
-      id: 'REQ-2025-002',
+      id: 'OFF-2025-002', 
+      offerId: 'OFF-2025-002',
       buyerId: 'BYR-20250820-051',
       buyerCompany: 'West African Commodities Ltd.',
       buyerContact: 'Maria Santos',
       rating: 4.6,
-      verifiedBuyer: true,
+      verifiedSeller: true,
       commodity: 'Cocoa',
-      quantityNeeded: '300 MT',
-      priceRange: '$3,100 - $3,300 per MT',
+      quantityAvailable: '300 MT',
+      pricePerMT: 3200,
+      totalValue: 960000,
       qualityGrade: 'Grade 1',
-      deliveryLocation: 'Port of Monrovia',
-      preferredCounty: 'Margibi County',
-      urgency: 'medium',
-      paymentTerms: '40% deposit, 60% on shipment',
-      certificationRequired: ['EUDR Compliant', 'Rainforest Alliance'],
+      sourceLocation: 'Margibi County',
+      farmerSources: ['Farmer Joseph Clarke', 'Farmer Grace Tubman'],
+      harvestDate: '2024-10-20',
+      availableFromDate: '2025-01-22',
+      expirationDate: '2025-03-10',
+      deliveryLocation: 'Port of Buchanan',
+      currentLocation: 'West African Commodities Storage Facility',
+      paymentTerms: '40% advance, 60% on shipment',
+      qualityCertificates: ['Quality Certificate', 'EUDR Compliant', 'Rainforest Alliance'],
+      eudrCompliance: true,
+      certificationAvailable: ['Quality Certificate', 'EUDR Declaration', 'Rainforest Alliance Certificate'],
       postedDate: '2025-01-20',
-      deadline: '2025-02-10',
-      description: 'High-quality cocoa beans needed for North American markets.',
+      description: 'High-quality cocoa beans perfect for North American and European markets.',
       complianceStatus: 'approved'
     },
     {
-      id: 'REQ-2025-003',
+      id: 'OFF-2025-003',
+      offerId: 'OFF-2025-003',
       buyerId: 'BYR-20250821-052',
       buyerCompany: 'Global Rubber Trading',
       buyerContact: 'Ahmed Hassan',
       rating: 4.9,
-      verifiedBuyer: true,
+      verifiedSeller: true,
       commodity: 'Rubber',
-      quantityNeeded: '800 MT',
-      priceRange: '$1,400 - $1,600 per MT',
+      quantityAvailable: '800 MT',
+      pricePerMT: 1500,
+      totalValue: 1200000,
       qualityGrade: 'RSS 1',
-      deliveryLocation: 'Port of Buchanan',
-      preferredCounty: 'Bong County',
-      urgency: 'low',
-      paymentTerms: '25% deposit, 75% on quality inspection',
-      certificationRequired: ['EUDR Compliant', 'ISO 9001'],
+      sourceLocation: 'Bong County',
+      farmerSources: ['Farmer Thomas Johnson', 'Farmer Rebecca Wilson', 'Farmer Michael Tarr'],
+      harvestDate: '2024-12-05',
+      availableFromDate: '2025-01-20',
+      expirationDate: '2025-04-20',
+      deliveryLocation: 'Port of Monrovia',
+      currentLocation: 'Global Rubber Processing Center',
+      paymentTerms: '25% advance, 75% on quality inspection',
+      qualityCertificates: ['EUDR Compliant', 'ISO 9001'],
+      eudrCompliance: true,
+      certificationAvailable: ['EUDR Declaration', 'ISO Quality Report'],
       postedDate: '2025-01-18',
-      deadline: '2025-02-05',
-      description: 'Natural rubber for tire manufacturing. Long-term partnership opportunity.',
-      complianceStatus: 'pending_review'
+      description: 'Natural rubber from Bong County smallholder farmers. Excellent for tire manufacturing.',
+      complianceStatus: 'approved'
     }
   ];
 
@@ -134,48 +155,51 @@ export default function ExporterMarketplace() {
     }
   };
 
-  const submitProposal = useMutation({
-    mutationFn: async (proposalData: any) => {
-      return apiRequest('POST', '/api/exporter/submit-proposal', proposalData);
+  // CORRECTED: Submit purchase request (exporter buying from buyer)
+  const submitPurchaseRequest = useMutation({
+    mutationFn: async (purchaseData: any) => {
+      return apiRequest('POST', '/api/exporter/submit-purchase-request', purchaseData);
     },
     onSuccess: () => {
       toast({
-        title: 'Proposal Submitted',
-        description: 'Your proposal has been sent to the buyer and DDGOTS for review.',
+        title: 'Purchase Request Submitted',
+        description: 'Your purchase request has been sent to the buyer and DDGOTS for review.',
       });
       setIsNegotiationOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/exporter/proposals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/exporter/purchase-requests'] });
     },
     onError: (error) => {
       toast({
         title: 'Submission Failed',
-        description: 'Unable to submit proposal. Please try again.',
+        description: 'Unable to submit purchase request. Please try again.',
         variant: 'destructive',
       });
     },
   });
 
-  const handleSubmitProposal = (formData: FormData) => {
-    const proposalData = {
-      requestId: selectedBuyer?.id,
+  const handleSubmitPurchaseRequest = (formData: FormData) => {
+    const purchaseData = {
+      offerId: selectedBuyer?.offerId, // Buyer's offer being purchased
       buyerId: selectedBuyer?.buyerId,
-      pricePerMT: formData.get('pricePerMT'),
-      totalQuantity: formData.get('totalQuantity'),
-      deliveryDate: formData.get('deliveryDate'),
-      qualityGrade: formData.get('qualityGrade'),
+      quantityRequested: formData.get('quantityRequested'), // How much exporter wants to buy
+      agreedPricePerMT: formData.get('agreedPricePerMT'), // Agreed purchase price
+      proposedPickupDate: formData.get('proposedPickupDate'),
+      deliveryLocation: formData.get('deliveryLocation'),
       paymentTerms: formData.get('paymentTerms'),
-      additionalNotes: formData.get('additionalNotes'),
-      certifications: formData.getAll('certifications'),
+      additionalRequests: formData.get('additionalRequests'),
+      certificationRequests: formData.getAll('certificationRequests'),
     };
     
-    submitProposal.mutate(proposalData);
+    submitPurchaseRequest.mutate(purchaseData);
   };
 
-  const filteredRequests = (buyerRequests || []).filter(request => {
-    const matchesSearch = request.buyerCompany?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.commodity?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCommodity = commodityFilter === 'all' || request.commodity?.toLowerCase() === commodityFilter;
-    const matchesLocation = locationFilter === 'all' || request.preferredCounty?.toLowerCase().includes(locationFilter.toLowerCase());
+  // CORRECTED: Filter buyer offers (use mock data if backend not available)
+  const availableOffers = buyerOffers.length > 0 ? buyerOffers : mockBuyerOffers;
+  const filteredOffers = availableOffers.filter(offer => {
+    const matchesSearch = offer.buyerCompany?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         offer.commodity?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCommodity = commodityFilter === 'all' || offer.commodity?.toLowerCase() === commodityFilter;
+    const matchesLocation = locationFilter === 'all' || offer.sourceLocation?.toLowerCase().includes(locationFilter.toLowerCase());
     return matchesSearch && matchesCommodity && matchesLocation;
   });
 
@@ -242,92 +266,95 @@ export default function ExporterMarketplace() {
         </div>
 
         {/* Loading State */}
-        {isLoadingRequests && (
+        {isLoadingOffers && (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
-            <span className="ml-3 text-gray-600">Loading buyer requests...</span>
+            <span className="ml-3 text-gray-600">Loading buyer offers...</span>
           </div>
         )}
 
-        {/* Buyer Requests Grid */}
+        {/* CORRECTED: Buyer Offers Grid */}
         <div className="grid grid-cols-1 gap-6">
-          {!isLoadingRequests && filteredRequests.length === 0 && (
+          {!isLoadingOffers && filteredOffers.length === 0 && (
             <div className="text-center py-12">
               <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600">No buyer requests found</h3>
-              <p className="text-gray-500">Check back later for new opportunities or adjust your filters.</p>
+              <h3 className="text-lg font-semibold text-gray-600">No buyer offers found</h3>
+              <p className="text-gray-500">Check back later for new commodities for sale or adjust your filters.</p>
             </div>
           )}
           
-          {!isLoadingRequests && filteredRequests.map((request) => (
-            <Card key={request.id} className="hover:shadow-md transition-shadow">
+          {!isLoadingOffers && filteredOffers.map((offer) => (
+            <Card key={offer.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="flex items-center gap-3">
                       <span className="text-lg font-semibold text-gray-900">
-                        {request.buyerCompany}
+                        {offer.buyerCompany}
                       </span>
-                      {request.verifiedBuyer && (
+                      {offer.verifiedSeller && (
                         <Badge className="bg-green-100 text-green-800">
                           <CheckCircle className="h-3 w-3 mr-1" />
-                          Verified
+                          Verified Seller
                         </Badge>
                       )}
-                      <Badge className={getComplianceColor(request.complianceStatus)}>
+                      <Badge className={getComplianceColor(offer.complianceStatus)}>
                         <Shield className="h-3 w-3 mr-1" />
-                        {request.complianceStatus.replace('_', ' ')}
+                        {offer.complianceStatus.replace('_', ' ')}
                       </Badge>
                     </CardTitle>
                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                       <span className="flex items-center gap-1">
                         <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        {request.rating}
+                        {offer.rating}
                       </span>
                       <span className="flex items-center gap-1">
                         <User className="h-4 w-4" />
-                        {request.buyerContact}
+                        {offer.buyerContact}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        Posted {request.postedDate}
+                        Posted {offer.postedDate}
                       </span>
                     </div>
                   </div>
-                  <Badge className={getUrgencyColor(request.urgency)}>
-                    {request.urgency} priority
+                  <Badge className="bg-blue-100 text-blue-800">
+                    ${offer.pricePerMT}/MT
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Commodity Requirements */}
+                  {/* CORRECTED: Commodity Available for Purchase */}
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-3">Commodity Requirements</h4>
+                    <h4 className="font-medium text-gray-900 mb-3">Commodity Available</h4>
                     <div className="space-y-2 text-sm">
-                      <p><span className="text-gray-600">Commodity:</span> <span className="font-semibold">{request.commodity}</span></p>
-                      <p><span className="text-gray-600">Quantity:</span> {request.quantityNeeded}</p>
-                      <p><span className="text-gray-600">Grade:</span> {request.qualityGrade}</p>
-                      <p><span className="text-gray-600">Price Range:</span> <span className="font-semibold text-green-600">{request.priceRange}</span></p>
+                      <p><span className="text-gray-600">Commodity:</span> <span className="font-semibold">{offer.commodity}</span></p>
+                      <p><span className="text-gray-600">Quantity Available:</span> {offer.quantityAvailable}</p>
+                      <p><span className="text-gray-600">Grade:</span> {offer.qualityGrade}</p>
+                      <p><span className="text-gray-600">Price per MT:</span> <span className="font-semibold text-green-600">${offer.pricePerMT}</span></p>
+                      <p><span className="text-gray-600">Total Value:</span> <span className="font-semibold text-blue-600">${offer.totalValue?.toLocaleString()}</span></p>
                     </div>
                   </div>
 
-                  {/* Delivery & Location */}
+                  {/* CORRECTED: Source & Delivery Details */}
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-3">Delivery Details</h4>
+                    <h4 className="font-medium text-gray-900 mb-3">Source & Delivery</h4>
                     <div className="space-y-2 text-sm">
-                      <p><span className="text-gray-600">Preferred Source:</span> {request.preferredCounty}</p>
-                      <p><span className="text-gray-600">Delivery Port:</span> {request.deliveryLocation}</p>
-                      <p><span className="text-gray-600">Deadline:</span> {request.deadline}</p>
-                      <p><span className="text-gray-600">Payment:</span> {request.paymentTerms}</p>
+                      <p><span className="text-gray-600">Source Location:</span> {offer.sourceLocation}</p>
+                      <p><span className="text-gray-600">Current Location:</span> {offer.currentLocation}</p>
+                      <p><span className="text-gray-600">Delivery Port:</span> {offer.deliveryLocation}</p>
+                      <p><span className="text-gray-600">Available From:</span> {offer.availableFromDate}</p>
+                      <p><span className="text-gray-600">Expires:</span> {offer.expirationDate}</p>
+                      <p><span className="text-gray-600">Payment Terms:</span> {offer.paymentTerms}</p>
                     </div>
                   </div>
 
-                  {/* Certifications & Actions */}
+                  {/* CORRECTED: Certifications & Purchase Action */}
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-3">Required Certifications</h4>
+                    <h4 className="font-medium text-gray-900 mb-3">Quality Certifications</h4>
                     <div className="space-y-2 mb-4">
-                      {request.certificationRequired.map((cert, index) => (
+                      {offer.qualityCertificates?.map((cert, index) => (
                         <Badge key={index} variant="outline" className="text-xs mr-1 mb-1">
                           {cert}
                         </Badge>
@@ -338,118 +365,123 @@ export default function ExporterMarketplace() {
                         <DialogTrigger asChild>
                           <Button 
                             className="w-full bg-green-600 hover:bg-green-700"
-                            onClick={() => setSelectedBuyer(request)}
+                            onClick={() => setSelectedBuyer(offer)}
                           >
                             <Handshake className="h-4 w-4 mr-2" />
-                            Submit Proposal
+                            Submit Purchase Request
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Submit Proposal to {selectedBuyer?.buyerCompany}</DialogTitle>
+                            <DialogTitle>Submit Purchase Request to {selectedBuyer?.buyerCompany}</DialogTitle>
                           </DialogHeader>
                           
                           <form 
                             onSubmit={(e) => {
                               e.preventDefault();
                               const formData = new FormData(e.currentTarget);
-                              handleSubmitProposal(formData);
+                              handleSubmitPurchaseRequest(formData);
                             }} 
                             className="space-y-6"
                           >
-                            {/* Request Summary */}
+                            {/* CORRECTED: Offer Summary - What buyer is selling */}
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                              <h4 className="font-medium text-blue-900 mb-2">Request Summary</h4>
+                              <h4 className="font-medium text-blue-900 mb-2">Available Commodity</h4>
                               <div className="grid grid-cols-2 gap-4 text-sm">
                                 <p><span className="text-blue-700">Commodity:</span> {selectedBuyer?.commodity}</p>
-                                <p><span className="text-blue-700">Quantity:</span> {selectedBuyer?.quantityNeeded}</p>
-                                <p><span className="text-blue-700">Price Range:</span> {selectedBuyer?.priceRange}</p>
-                                <p><span className="text-blue-700">Deadline:</span> {selectedBuyer?.deadline}</p>
+                                <p><span className="text-blue-700">Available Quantity:</span> {selectedBuyer?.quantityAvailable}</p>
+                                <p><span className="text-blue-700">Seller's Price:</span> ${selectedBuyer?.pricePerMT}/MT</p>
+                                <p><span className="text-blue-700">Total Value:</span> ${selectedBuyer?.totalValue?.toLocaleString()}</p>
+                                <p><span className="text-blue-700">Available Until:</span> {selectedBuyer?.expirationDate}</p>
+                                <p><span className="text-blue-700">Source Location:</span> {selectedBuyer?.sourceLocation}</p>
                               </div>
                             </div>
 
-                            {/* Proposal Details */}
+                            {/* CORRECTED: Purchase Request Details - What exporter wants to buy */}
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <Label htmlFor="pricePerMT">Your Price per MT ($) *</Label>
+                                <Label htmlFor="quantityRequested">Quantity Requested (MT) *</Label>
                                 <Input 
-                                  id="pricePerMT" 
-                                  name="pricePerMT"
+                                  id="quantityRequested" 
+                                  name="quantityRequested"
                                   type="number"
-                                  placeholder="2800"
+                                  placeholder={selectedBuyer?.quantityAvailable?.split(' ')[0] || "500"}
+                                  max={selectedBuyer?.quantityAvailable?.split(' ')[0]}
+                                  required 
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Max available: {selectedBuyer?.quantityAvailable}</p>
+                              </div>
+                              <div>
+                                <Label htmlFor="agreedPricePerMT">Agreed Price per MT ($) *</Label>
+                                <Input 
+                                  id="agreedPricePerMT" 
+                                  name="agreedPricePerMT"
+                                  type="number"
+                                  placeholder={selectedBuyer?.pricePerMT?.toString() || "2800"}
+                                  defaultValue={selectedBuyer?.pricePerMT}
                                   required 
                                 />
                               </div>
                               <div>
-                                <Label htmlFor="totalQuantity">Quantity Available (MT) *</Label>
+                                <Label htmlFor="proposedPickupDate">Proposed Pickup Date *</Label>
                                 <Input 
-                                  id="totalQuantity" 
-                                  name="totalQuantity"
-                                  type="number"
-                                  placeholder="500"
-                                  required 
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="deliveryDate">Delivery Date *</Label>
-                                <Input 
-                                  id="deliveryDate" 
-                                  name="deliveryDate"
+                                  id="proposedPickupDate" 
+                                  name="proposedPickupDate"
                                   type="date"
-                                  min={new Date().toISOString().split('T')[0]}
+                                  min={selectedBuyer?.availableFromDate || new Date().toISOString().split('T')[0]}
+                                  max={selectedBuyer?.expirationDate}
                                   required 
                                 />
                               </div>
                               <div>
-                                <Label htmlFor="qualityGrade">Quality Grade *</Label>
-                                <Select name="qualityGrade" required>
+                                <Label htmlFor="deliveryLocation">Delivery Location *</Label>
+                                <Select name="deliveryLocation" required>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select grade" />
+                                    <SelectValue placeholder="Select delivery location" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="premium">Premium Grade</SelectItem>
-                                    <SelectItem value="grade1">Grade 1</SelectItem>
-                                    <SelectItem value="grade2">Grade 2</SelectItem>
-                                    <SelectItem value="standard">Standard Grade</SelectItem>
+                                    <SelectItem value={selectedBuyer?.deliveryLocation || "port_monrovia"}>{selectedBuyer?.deliveryLocation || "Port of Monrovia"}</SelectItem>
+                                    <SelectItem value="port_buchanan">Port of Buchanan</SelectItem>
+                                    <SelectItem value="warehouse_pickup">Warehouse Pickup</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
                             </div>
 
                             <div>
-                              <Label htmlFor="paymentTerms">Payment Terms *</Label>
+                              <Label htmlFor="paymentTerms">Preferred Payment Terms *</Label>
                               <Select name="paymentTerms" required>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select payment terms" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="30_70">30% deposit, 70% on delivery</SelectItem>
-                                  <SelectItem value="40_60">40% deposit, 60% on shipment</SelectItem>
-                                  <SelectItem value="25_75">25% deposit, 75% on inspection</SelectItem>
-                                  <SelectItem value="50_50">50% deposit, 50% on delivery</SelectItem>
+                                  <SelectItem value="30_70">30% advance, 70% on delivery</SelectItem>
+                                  <SelectItem value="40_60">40% advance, 60% on pickup</SelectItem>
+                                  <SelectItem value="25_75">25% advance, 75% on inspection</SelectItem>
+                                  <SelectItem value="50_50">50% advance, 50% on delivery</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
 
                             <div>
-                              <Label htmlFor="additionalNotes">Additional Notes</Label>
+                              <Label htmlFor="additionalRequests">Additional Requests</Label>
                               <Textarea 
-                                id="additionalNotes" 
-                                name="additionalNotes"
-                                placeholder="Any additional information about your proposal..."
+                                id="additionalRequests" 
+                                name="additionalRequests"
+                                placeholder="Any additional requirements for this purchase..."
                                 rows={3}
                               />
                             </div>
 
-                            {/* DDGOTS Notice */}
+                            {/* CORRECTED: DDGOTS Notice for Purchase Requests */}
                             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                               <div className="flex items-start gap-3">
                                 <Shield className="h-5 w-5 text-green-600 mt-0.5" />
                                 <div>
                                   <h4 className="font-medium text-green-900">DDGOTS Compliance Review</h4>
                                   <p className="text-sm text-green-800 mt-1">
-                                    This proposal will be automatically reviewed by DDGOTS for compliance before being sent to the buyer. 
-                                    All transactions are monitored for LACRA regulations and EUDR requirements.
+                                    This purchase request will be automatically reviewed by DDGOTS for compliance before being sent to the buyer. 
+                                    All commodity purchases are monitored for LACRA regulations and EUDR requirements.
                                   </p>
                                 </div>
                               </div>
@@ -466,9 +498,9 @@ export default function ExporterMarketplace() {
                               <Button 
                                 type="submit" 
                                 className="bg-green-600 hover:bg-green-700"
-                                disabled={submitProposal.isPending}
+                                disabled={submitPurchaseRequest.isPending}
                               >
-                                Submit Proposal
+                                Submit Purchase Request
                               </Button>
                             </div>
                           </form>
@@ -483,24 +515,29 @@ export default function ExporterMarketplace() {
                   </div>
                 </div>
 
-                {/* Description */}
+                {/* CORRECTED: Description */}
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-700">{request.description}</p>
+                  <p className="text-sm text-gray-700">{offer.description}</p>
+                  <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                    <span>🧑‍🌾 Farmer Sources: {offer.farmerSources?.join(', ')}</span>
+                    <span>📅 Harvest Date: {offer.harvestDate}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {filteredRequests.length === 0 && (
+        {/* CORRECTED: Use filteredOffers instead of filteredRequests */}
+        {!isLoadingOffers && (buyerOffers.length === 0 || filteredOffers.length === 0) && (
           <Card className="text-center py-12">
             <CardContent>
               <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Buyer Requests Found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Buyer Offers Found</h3>
               <p className="text-gray-600">
                 {searchTerm || commodityFilter !== 'all' || locationFilter !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
-                  : 'No buyers are currently looking for your commodities. Check back later or contact DDGOTS for assistance.'
+                  : 'No buyers are currently selling commodities. Check back later or contact DDGOTS for assistance.'
                 }
               </p>
             </CardContent>

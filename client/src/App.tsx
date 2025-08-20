@@ -129,6 +129,7 @@ import BatchCodeGenerator from "@/pages/batch-code-generator";
 
 import DirectorDashboard from "@/pages/director-dashboard";
 import DirectorDashboardTest from "@/pages/director-dashboard-test";
+import DirectorDashboardSimple from "@/pages/director-dashboard-simple";
 
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
@@ -715,7 +716,8 @@ function Router() {
       <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
       
       {/* ALWAYS AVAILABLE - Director Dashboard with all regulatory functions */}
-      <Route path="/director-dashboard" component={DirectorDashboardTest} />
+      <Route path="/director-dashboard" component={DirectorDashboardSimple} />
+      <Route path="/director-dashboard-full" component={DirectorDashboardTest} />
       <Route path="/director-dashboard-original" component={DirectorDashboard} />
       
       {/* New Portal Routes - Public Access for Coming Soon Pages */}

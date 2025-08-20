@@ -962,7 +962,7 @@ export default function DirectorDashboardTest() {
                         <p><strong>Agent:</strong> {selectedRequest.agentId}</p>
                         <p><strong>Location:</strong> {selectedRequest.location}</p>
                         <p><strong>Priority:</strong> 
-                          <Badge className={urgencyColor(selectedRequest.urgencyLevel)} size="sm">
+                          <Badge className={urgencyColor(selectedRequest.urgencyLevel)}>
                             {selectedRequest.urgencyLevel}
                           </Badge>
                         </p>

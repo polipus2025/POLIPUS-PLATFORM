@@ -28,9 +28,14 @@ export default function LACRACommodityPricing() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <Link href="/polipus">
+              <Link href="/exporter-dashboard">
                 <Button variant="outline" size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+              <Link href="/polipus">
+                <Button variant="outline" size="sm">
                   Back to Platform
                 </Button>
               </Link>

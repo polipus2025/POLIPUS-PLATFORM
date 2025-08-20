@@ -1806,25 +1806,7 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* LACRA Soft Commodity Pricing Widget */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-lacra-blue" />
-            LACRA Soft Commodity Pricing System
-          </CardTitle>
-          <p className="text-sm text-slate-600">
-            Official LACRA commodity pricing with quality grades (Subgrade, Grade 2, Grade 1, Premium)
-            {userRole === "DDGOTS" && " - You have editing permissions"}
-          </p>
-        </CardHeader>
-        <CardContent>
-          <SoftCommodityPricing 
-            canEdit={userRole === "DDGOTS"}
-            compact={true}
-          />
-        </CardContent>
-      </Card>
+
 
       </div>
     </div>

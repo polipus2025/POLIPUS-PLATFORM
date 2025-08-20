@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState, useMemo, useCallback } from "react";
 import { 
   BarChart3, 
   Leaf, 
@@ -28,7 +29,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
 
 // Helper function to check user role and type
 const getUserInfo = () => {
@@ -146,7 +146,7 @@ const landInspectorNavigation = [
   { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
 ];
 
-// Function to get navigation items based on user type and role
+// Memoized function to get navigation items based on user type and role
 const getNavigationItems = (userType: string | null, role: string | null) => {
   // Check for three-tier regulatory system first
   const ddgotsToken = localStorage.getItem('ddgotsToken');
@@ -195,30 +195,26 @@ export default function Sidebar() {
     "admin001"
   );
 
-  // Fetch unread message count - reduced polling to improve performance
+  // Fetch unread message count - optimized for performance
   const { data: unreadData } = useQuery({
     queryKey: ["/api/messages", currentUserId, "unread-count"],
     queryFn: () => apiRequest(`/api/messages/${currentUserId}/unread-count`),
-    refetchInterval: 30000, // Check every 30 seconds instead of 5
-    staleTime: 25000, // Consider data fresh for 25 seconds
+    refetchInterval: 60000, // Check every 60 seconds to reduce load
+    staleTime: 50000, // Consider data fresh for 50 seconds
+    enabled: !!currentUserId, // Only fetch if user ID exists
   });
 
   const unreadCount = unreadData?.count || 0;
 
-  // Get the appropriate navigation items based on user type
-  const navigationItems = getNavigationItems(userType, role);
+  // Memoize navigation items to prevent unnecessary recalculations
+  const navigationItems = useMemo(() => getNavigationItems(userType, role), [userType, role]);
   
-  // Debug logging for buyer navigation
-  if (userType === 'buyer') {
-    console.log('Buyer navigation debug:', {
-      userType,
-      role,
-      navigationItems,
-      dgToken: localStorage.getItem('dgToken'),
-      ddgotsToken: localStorage.getItem('ddgotsToken'),
-      ddgafToken: localStorage.getItem('ddgafToken')
-    });
-  }
+  // Navigation handler - use proper routing instead of window.location
+  const handleNavigation = useCallback((href: string) => {
+    // Use wouter's programmatic navigation instead of full page reload
+    window.history.pushState({}, '', href);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, []);
 
   return (
     <aside className="hidden lg:block w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto shrink-0">
@@ -241,12 +237,8 @@ export default function Sidebar() {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      console.log('Sidebar button clicked:', item.href, item.name);
-                      window.location.href = item.href;
-                    }}
+                  <Link 
+                    href={item.href}
                     className={cn(
                       "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base cursor-pointer hover:cursor-pointer w-full text-left",
                       isActive
@@ -272,7 +264,7 @@ export default function Sidebar() {
                         </span>
                       </div>
                     )}
-                  </button>
+                  </Link>
                 </li>
               );
             })}

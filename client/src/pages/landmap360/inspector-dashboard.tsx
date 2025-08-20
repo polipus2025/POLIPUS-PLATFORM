@@ -269,7 +269,10 @@ export default function InspectorDashboard() {
                       <SelectItem value="margibi">Margibi</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button className="bg-emerald-600 hover:bg-emerald-700">
+                  <Button 
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                    onClick={() => window.location.href = '/landmap360/inspections'}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Schedule Inspection
                   </Button>
@@ -370,7 +373,7 @@ export default function InspectorDashboard() {
                       <p className="text-sm text-slate-600 mb-4">Advanced GPS mapping with satellite imagery and boundary detection</p>
                       <Button 
                         className="w-full bg-emerald-600 hover:bg-emerald-700"
-                        onClick={() => window.location.href = '/farmer-gps-mapping'}
+                        onClick={() => window.location.href = '/landmap360/land-mapping-manager'}
                       >
                         Start GPS Mapping
                       </Button>
@@ -460,7 +463,12 @@ export default function InspectorDashboard() {
                             </div>
                             <div className="flex gap-2 ml-4">
                               {farmer.status === 'pending_gps' && (
-                                <Button size="sm" variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                                  onClick={() => window.location.href = '/landmap360/land-mapping-manager'}
+                                >
                                   <Map className="h-3 w-3 mr-1" />
                                   GPS Map
                                 </Button>

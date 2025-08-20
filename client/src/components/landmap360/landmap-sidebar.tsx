@@ -29,7 +29,14 @@ import { Badge } from "@/components/ui/badge";
 // Helper function to get user role
 const getUserRole = () => {
   const userRole = localStorage.getItem('userRole');
-  return userRole || 'surveyor';
+  const userType = localStorage.getItem('userType');
+  
+  // Map userType to userRole for compatibility
+  if (userType === 'land_inspector') {
+    return 'inspector';
+  }
+  
+  return userRole || 'inspector'; // Default to inspector for LandMap360
 };
 
 // Navigation items based on user roles
@@ -59,6 +66,7 @@ const getNavigationItems = (role: string) => {
       { name: "Property Search", href: "/landmap360/search", icon: Search },
     ],
     inspector: [
+      { name: "Land Mapping Manager", href: "/landmap360/land-mapping-manager", icon: Map },
       { name: "Inspections", href: "/landmap360/inspections", icon: Search },
       { name: "Compliance Checks", href: "/landmap360/compliance", icon: Shield },
       { name: "Violation Reports", href: "/landmap360/violations", icon: AlertTriangle },

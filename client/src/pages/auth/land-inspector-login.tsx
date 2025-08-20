@@ -53,6 +53,7 @@ export default function LandInspectorLogin() {
       if (data && data.success) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("userType", "land_inspector");
+        localStorage.setItem("userRole", "inspector");
         localStorage.setItem("inspectorData", JSON.stringify(data.inspector));
         
         toast({

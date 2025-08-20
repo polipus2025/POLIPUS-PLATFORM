@@ -442,6 +442,42 @@ function Router() {
               allowedUserTypes={['exporter']} 
             />
           </Route>
+          <Route path="/exporter/orders">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/orders"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/exporter/marketplace">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/marketplace"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/exporter/certificates">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/certificates"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/exporter/messages">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/messages"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/exporter/shipments">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/shipments"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/exporter/analytics">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/analytics"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
           <Route path="/export-permit-submission">
             <ProtectedRoute 
               component={ExportPermitSubmission} 

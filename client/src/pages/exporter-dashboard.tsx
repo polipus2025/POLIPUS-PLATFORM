@@ -21,10 +21,11 @@ import {
   BarChart3,
   Truck,
   Shield,
-  Award
+  Award,
+  ShoppingCart
 } from 'lucide-react';
 import { Link } from "wouter";
-import lacraLogo from '@assets/LACRA LOGO_1753406166355.jpg';
+import ExporterNavbar from '@/components/layout/exporter-navbar';
 
 export default function ExporterDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -76,49 +77,7 @@ export default function ExporterDashboard() {
         <meta name="description" content="Export management dashboard for licensed agricultural commodity exporters" />
       </Helmet>
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            {/* Logo and Title */}
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-lg overflow-hidden">
-                <img 
-                  src={lacraLogo} 
-                  alt="LACRA Official Logo" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <Ship className="h-6 w-6 text-blue-600" />
-                  Exporter Portal
-                </h1>
-                <p className="text-sm text-gray-600">
-                  LACRA Licensed Exporter - {user?.companyName || 'Demo Export Company Ltd.'}
-                </p>
-              </div>
-            </div>
-
-            {/* Navigation Links */}
-            <div className="flex items-center space-x-4">
-              <Link href="/polipus" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                Back to Polipus Platform
-              </Link>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  localStorage.clear();
-                  window.location.href = '/auth/exporter-login';
-                }}
-              >
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ExporterNavbar user={user} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -145,15 +104,17 @@ export default function ExporterDashboard() {
 
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <Shield className="h-5 w-5 text-blue-600" />
+                <Link href="/exporter/marketplace" className="block">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <ShoppingCart className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Buyer Marketplace</h3>
+                      <p className="text-sm text-gray-600">Connect with buyers</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">Inspection Request</h3>
-                    <p className="text-sm text-gray-600">Request LACRA inspection</p>
-                  </div>
-                </div>
+                </Link>
               </CardContent>
             </Card>
 
@@ -175,15 +136,17 @@ export default function ExporterDashboard() {
 
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-orange-100 p-2 rounded-lg">
-                    <BarChart3 className="h-5 w-5 text-orange-600" />
+                <Link href="/exporter/orders" className="block">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-orange-100 p-2 rounded-lg">
+                      <Package className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Export Orders</h3>
+                      <p className="text-sm text-gray-600">Manage buyer orders</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">Export Analytics</h3>
-                    <p className="text-sm text-gray-600">View export reports</p>
-                  </div>
-                </div>
+                </Link>
               </CardContent>
             </Card>
           </div>

@@ -99,6 +99,7 @@ import Dashboard from "@/pages/dashboard";
 
 import Commodities from "@/pages/commodities";
 import ExporterDashboard from "@/pages/exporter-dashboard";
+import LACRACommodityPricing from "@/pages/lacra-commodity-pricing";
 import ExportLicense from "@/pages/export-license";
 import Inspections from "@/pages/inspections";
 import Certifications from "@/pages/certifications";
@@ -612,6 +613,9 @@ function Router() {
               allowedUserTypes={['farmer']} 
             />
           </Route>
+          
+          {/* LACRA Commodity Pricing - Available to all users */}
+          <Route path="/lacra-commodity-pricing" component={LACRACommodityPricing} />
           
           {/* Payment Routes - Available to all authenticated users */}
           <Route path="/payment-services" component={PaymentServices} />

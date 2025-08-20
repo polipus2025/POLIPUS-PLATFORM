@@ -13,7 +13,8 @@ import {
   ShoppingCart,
   Truck,
   BarChart3,
-  Settings
+  Settings,
+  CreditCard
 } from 'lucide-react';
 import lacraLogo from '@assets/LACRA LOGO_1753406166355.jpg';
 
@@ -26,13 +27,14 @@ export default function ExporterNavbar({ user }: ExporterNavbarProps) {
 
   const navItems = [
     { href: '/exporter-dashboard', label: 'Dashboard', icon: Home },
+    { href: '/lacra-commodity-pricing', label: 'LACRA Pricing', icon: DollarSign },
     { href: '/exporter/orders', label: 'Orders', icon: Package, badge: '3' },
     { href: '/exporter/marketplace', label: 'Marketplace', icon: ShoppingCart },
     { href: '/exporter/certificates', label: 'Certificates', icon: Award, badge: '2' },
     { href: '/exporter/messages', label: 'Messages', icon: MessageSquare, badge: '5' },
     { href: '/exporter/shipments', label: 'Shipments', icon: Truck },
     { href: '/exporter/analytics', label: 'Analytics', icon: BarChart3 },
-    { href: '/exporter-payment-services', label: 'Payments', icon: DollarSign },
+    { href: '/exporter-payment-services', label: 'Payments', icon: CreditCard },
   ];
 
   return (

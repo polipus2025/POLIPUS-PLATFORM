@@ -134,12 +134,11 @@ export default function BuyerDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Purchase Orders</TabsTrigger>
             <TabsTrigger value="contracts">Farmer Contracts</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="pricing">LACRA Pricing</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -308,25 +307,7 @@ export default function BuyerDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="pricing">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                  LACRA Official Commodity Pricing
-                </CardTitle>
-                <CardDescription>
-                  Current official LACRA pricing with quality grades for purchase planning and negotiations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SoftCommodityPricing 
-                  canEdit={false}
-                  compact={false}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+
         </Tabs>
       </div>
     </div>

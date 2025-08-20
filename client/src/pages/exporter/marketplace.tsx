@@ -43,8 +43,14 @@ export default function ExporterMarketplace() {
     retry: false,
   });
 
-  // Mock marketplace data - buyers looking for products
-  const buyerRequests = [
+  // Fetch buyer requests from backend
+  const { data: buyerRequests = [], isLoading: isLoadingRequests } = useQuery({
+    queryKey: ['/api/marketplace/buyer-requests', { commodity: commodityFilter, location: locationFilter, urgency: 'all', status: 'active' }],
+    retry: false,
+  });
+
+  // Mock data for fallback - buyers looking for products
+  const mockBuyerRequests = [
     {
       id: 'REQ-2025-001',
       buyerId: 'BYR-20250819-050',
@@ -165,11 +171,11 @@ export default function ExporterMarketplace() {
     submitProposal.mutate(proposalData);
   };
 
-  const filteredRequests = buyerRequests.filter(request => {
-    const matchesSearch = request.buyerCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.commodity.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCommodity = commodityFilter === 'all' || request.commodity.toLowerCase() === commodityFilter;
-    const matchesLocation = locationFilter === 'all' || request.preferredCounty.toLowerCase().includes(locationFilter.toLowerCase());
+  const filteredRequests = (buyerRequests || []).filter(request => {
+    const matchesSearch = request.buyerCompany?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         request.commodity?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCommodity = commodityFilter === 'all' || request.commodity?.toLowerCase() === commodityFilter;
+    const matchesLocation = locationFilter === 'all' || request.preferredCounty?.toLowerCase().includes(locationFilter.toLowerCase());
     return matchesSearch && matchesCommodity && matchesLocation;
   });
 
@@ -235,9 +241,25 @@ export default function ExporterMarketplace() {
           </Button>
         </div>
 
+        {/* Loading State */}
+        {isLoadingRequests && (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+            <span className="ml-3 text-gray-600">Loading buyer requests...</span>
+          </div>
+        )}
+
         {/* Buyer Requests Grid */}
         <div className="grid grid-cols-1 gap-6">
-          {filteredRequests.map((request) => (
+          {!isLoadingRequests && filteredRequests.length === 0 && (
+            <div className="text-center py-12">
+              <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-600">No buyer requests found</h3>
+              <p className="text-gray-500">Check back later for new opportunities or adjust your filters.</p>
+            </div>
+          )}
+          
+          {!isLoadingRequests && filteredRequests.map((request) => (
             <Card key={request.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">

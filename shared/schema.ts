@@ -2007,6 +2007,148 @@ export const insertBuyerSchema = createInsertSchema(buyers).omit({
 });
 
 export type Buyer = typeof buyers.$inferSelect;
+
+// Buyer-Exporter Marketplace System
+export const buyerRequests = pgTable("buyer_requests", {
+  id: serial("id").primaryKey(),
+  requestId: text("request_id").notNull().unique(), // REQ-YYYY-XXX format
+  buyerId: text("buyer_id").references(() => buyers.buyerId).notNull(),
+  buyerCompany: text("buyer_company").notNull(),
+  buyerContact: text("buyer_contact").notNull(),
+  
+  // Commodity Requirements
+  commodity: text("commodity").notNull(), // coffee, cocoa, rubber, palm_oil, rice
+  quantityNeeded: text("quantity_needed").notNull(), // e.g., "500 MT"
+  priceRange: text("price_range").notNull(), // e.g., "$2,600 - $2,900 per MT"
+  qualityGrade: text("quality_grade").notNull(), // Premium Grade, Grade 1, RSS 1, etc.
+  
+  // Delivery Details
+  deliveryLocation: text("delivery_location").notNull(), // Port of Monrovia, Port of Buchanan
+  preferredCounty: text("preferred_county").notNull(),
+  urgency: text("urgency").notNull().default("medium"), // low, medium, high
+  paymentTerms: text("payment_terms").notNull(),
+  
+  // Requirements and Compliance
+  certificationRequired: text("certification_required"), // JSON array of required certifications
+  description: text("description"),
+  deadline: timestamp("deadline").notNull(),
+  
+  // DDGOTS Oversight
+  complianceStatus: text("compliance_status").notNull().default("pending_review"), // pending_review, pre_approved, approved, rejected
+  complianceOfficer: integer("compliance_officer").references(() => authUsers.id),
+  complianceNotes: text("compliance_notes"),
+  complianceDate: timestamp("compliance_date"),
+  
+  // Status and Management
+  status: text("status").notNull().default("active"), // active, closed, suspended
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const exporterProposals = pgTable("exporter_proposals", {
+  id: serial("id").primaryKey(),
+  proposalId: text("proposal_id").notNull().unique(), // PROP-YYYY-XXX format
+  requestId: text("request_id").references(() => buyerRequests.requestId).notNull(),
+  buyerId: text("buyer_id").references(() => buyers.buyerId).notNull(),
+  exporterId: text("exporter_id").references(() => exporters.exporterId).notNull(),
+  
+  // Proposal Details
+  pricePerMT: decimal("price_per_mt", { precision: 10, scale: 2 }).notNull(),
+  totalQuantity: decimal("total_quantity", { precision: 10, scale: 2 }).notNull(),
+  deliveryDate: timestamp("delivery_date").notNull(),
+  qualityGrade: text("quality_grade").notNull(),
+  paymentTerms: text("payment_terms").notNull(),
+  additionalNotes: text("additional_notes"),
+  certifications: text("certifications"), // JSON array of available certifications
+  
+  // DDGOTS Review Process
+  ddgotsReviewStatus: text("ddgots_review_status").notNull().default("pending"), // pending, approved, rejected, revision_required
+  ddgotsReviewOfficer: integer("ddgots_review_officer").references(() => authUsers.id),
+  ddgotsReviewNotes: text("ddgots_review_notes"),
+  ddgotsReviewDate: timestamp("ddgots_review_date"),
+  
+  // Port Inspector Coordination
+  portInspectorAssigned: integer("port_inspector_assigned").references(() => authUsers.id),
+  portInspectionScheduled: timestamp("port_inspection_scheduled"),
+  portInspectionStatus: text("port_inspection_status").default("not_scheduled"), // not_scheduled, scheduled, in_progress, completed, failed
+  portInspectionNotes: text("port_inspection_notes"),
+  
+  // Buyer Response
+  buyerResponseStatus: text("buyer_response_status").default("pending"), // pending, accepted, rejected, negotiating
+  buyerResponseDate: timestamp("buyer_response_date"),
+  buyerResponseNotes: text("buyer_response_notes"),
+  
+  // Overall Status
+  status: text("status").notNull().default("pending"), // pending, approved, rejected, withdrawn, contract_signed
+  finalApprovalBy: integer("final_approval_by").references(() => authUsers.id),
+  finalApprovalDate: timestamp("final_approval_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const marketplaceCoordination = pgTable("marketplace_coordination", {
+  id: serial("id").primaryKey(),
+  coordinationId: text("coordination_id").notNull().unique(), // COORD-YYYY-XXX format
+  proposalId: text("proposal_id").references(() => exporterProposals.proposalId).notNull(),
+  requestId: text("request_id").references(() => buyerRequests.requestId).notNull(),
+  
+  // Stakeholder Coordination
+  ddgotsOfficer: integer("ddgots_officer").references(() => authUsers.id).notNull(),
+  portInspector: integer("port_inspector").references(() => authUsers.id),
+  complianceOfficer: integer("compliance_officer").references(() => authUsers.id),
+  
+  // Coordination Timeline
+  initiatedAt: timestamp("initiated_at").defaultNow(),
+  ddgotsReviewStart: timestamp("ddgots_review_start"),
+  ddgotsReviewComplete: timestamp("ddgots_review_complete"),
+  portInspectionScheduled: timestamp("port_inspection_scheduled"),
+  portInspectionComplete: timestamp("port_inspection_complete"),
+  finalApprovalDate: timestamp("final_approval_date"),
+  
+  // Communication and Notes
+  coordinationNotes: text("coordination_notes"),
+  stakeholderComments: text("stakeholder_comments"), // JSON array of comments from different stakeholders
+  issuesIdentified: text("issues_identified"), // JSON array of any issues found
+  resolutionActions: text("resolution_actions"), // JSON array of actions taken to resolve issues
+  
+  // Status and Progress
+  coordinationStatus: text("coordination_status").notNull().default("initiated"), // initiated, in_progress, review_complete, approved, rejected
+  progressPercentage: integer("progress_percentage").default(0), // 0-100
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schema exports for the new marketplace system
+export const insertBuyerRequestSchema = createInsertSchema(buyerRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertExporterProposalSchema = createInsertSchema(exporterProposals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMarketplaceCoordinationSchema = createInsertSchema(marketplaceCoordination).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type BuyerRequest = typeof buyerRequests.$inferSelect;
+export type InsertBuyerRequest = z.infer<typeof insertBuyerRequestSchema>;
+
+export type ExporterProposal = typeof exporterProposals.$inferSelect;
+export type InsertExporterProposal = z.infer<typeof insertExporterProposalSchema>;
+
+export type MarketplaceCoordination = typeof marketplaceCoordination.$inferSelect;
+export type InsertMarketplaceCoordination = z.infer<typeof insertMarketplaceCoordinationSchema>;
 export type InsertBuyer = z.infer<typeof insertBuyerSchema>;
 
 // Exporter schema types and validation

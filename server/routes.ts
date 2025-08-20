@@ -10116,6 +10116,498 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================================================================
+  // BUYER-EXPORTER MARKETPLACE SYSTEM WITH DDGOTS OVERSIGHT & PORT INSPECTOR COORDINATION
+  // ========================================================================================
+  
+  // Get all buyer requests (for exporter marketplace)
+  app.get("/api/marketplace/buyer-requests", async (req, res) => {
+    try {
+      const { commodity, location, urgency, status } = req.query;
+      
+      // Mock buyer requests with realistic data for now
+      const buyerRequests = [
+        {
+          id: 'REQ-2025-001',
+          buyerId: 'BYR-20250819-050',
+          buyerCompany: 'Liberian Agricultural Trading Co.',
+          buyerContact: 'John Pewee',
+          rating: 4.8,
+          verifiedBuyer: true,
+          commodity: 'Coffee',
+          quantityNeeded: '500 MT',
+          priceRange: '$2,600 - $2,900 per MT',
+          qualityGrade: 'Premium Grade',
+          deliveryLocation: 'Port of Monrovia',
+          preferredCounty: 'Lofa County',
+          urgency: 'high',
+          paymentTerms: '30% deposit, 70% on delivery',
+          certificationRequired: ['EUDR Compliant', 'Organic Certified', 'Fair Trade'],
+          postedDate: '2025-01-22',
+          deadline: '2025-02-15',
+          description: 'Looking for premium coffee beans for European export. Must meet EUDR requirements.',
+          complianceStatus: 'pre_approved'
+        },
+        {
+          id: 'REQ-2025-002',
+          buyerId: 'BYR-20250820-051',
+          buyerCompany: 'West African Commodities Ltd.',
+          buyerContact: 'Maria Santos',
+          rating: 4.6,
+          verifiedBuyer: true,
+          commodity: 'Cocoa',
+          quantityNeeded: '300 MT',
+          priceRange: '$3,100 - $3,300 per MT',
+          qualityGrade: 'Grade 1',
+          deliveryLocation: 'Port of Monrovia',
+          preferredCounty: 'Margibi County',
+          urgency: 'medium',
+          paymentTerms: '40% deposit, 60% on shipment',
+          certificationRequired: ['EUDR Compliant', 'Rainforest Alliance'],
+          postedDate: '2025-01-20',
+          deadline: '2025-02-10',
+          description: 'High-quality cocoa beans needed for North American markets.',
+          complianceStatus: 'approved'
+        },
+        {
+          id: 'REQ-2025-003',
+          buyerId: 'BYR-20250821-052',
+          buyerCompany: 'Global Rubber Trading',
+          buyerContact: 'Ahmed Hassan',
+          rating: 4.9,
+          verifiedBuyer: true,
+          commodity: 'Rubber',
+          quantityNeeded: '800 MT',
+          priceRange: '$1,400 - $1,600 per MT',
+          qualityGrade: 'RSS 1',
+          deliveryLocation: 'Port of Buchanan',
+          preferredCounty: 'Bong County',
+          urgency: 'low',
+          paymentTerms: '25% deposit, 75% on quality inspection',
+          certificationRequired: ['EUDR Compliant', 'ISO 9001'],
+          postedDate: '2025-01-18',
+          deadline: '2025-02-05',
+          description: 'Natural rubber for tire manufacturing. Long-term partnership opportunity.',
+          complianceStatus: 'pending_review'
+        }
+      ];
+
+      // Apply filters
+      let filteredRequests = buyerRequests;
+      if (commodity && commodity !== 'all') {
+        filteredRequests = filteredRequests.filter(req => 
+          req.commodity.toLowerCase() === commodity.toString().toLowerCase()
+        );
+      }
+      if (location && location !== 'all') {
+        filteredRequests = filteredRequests.filter(req => 
+          req.preferredCounty.toLowerCase().includes(location.toString().toLowerCase())
+        );
+      }
+      if (urgency && urgency !== 'all') {
+        filteredRequests = filteredRequests.filter(req => req.urgency === urgency);
+      }
+
+      res.json(filteredRequests);
+    } catch (error) {
+      console.error("Error fetching buyer requests:", error);
+      res.status(500).json({ error: "Failed to fetch buyer requests" });
+    }
+  });
+
+  // Submit exporter proposal with DDGOTS oversight
+  app.post("/api/exporter/submit-proposal", async (req, res) => {
+    try {
+      if (!req.session.exporterId || req.session.userType !== 'exporter') {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const proposalData = req.body;
+      
+      // Generate unique proposal ID
+      const proposalId = `PROP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
+      
+      // Create coordination workflow
+      const coordinationId = `COORD-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
+      
+      // Simulate proposal creation (would be database operation in production)
+      const proposal = {
+        id: proposalId,
+        proposalId,
+        requestId: proposalData.requestId,
+        buyerId: proposalData.buyerId,
+        exporterId: req.session.exporterId,
+        pricePerMT: proposalData.pricePerMT,
+        totalQuantity: proposalData.totalQuantity,
+        deliveryDate: proposalData.deliveryDate,
+        qualityGrade: proposalData.qualityGrade,
+        paymentTerms: proposalData.paymentTerms,
+        additionalNotes: proposalData.additionalNotes,
+        certifications: proposalData.certifications,
+        ddgotsReviewStatus: 'pending',
+        portInspectionStatus: 'not_scheduled',
+        buyerResponseStatus: 'pending',
+        status: 'pending',
+        coordinationId,
+        submittedAt: new Date().toISOString()
+      };
+
+      // Simulate coordination workflow creation
+      const coordination = {
+        coordinationId,
+        proposalId,
+        requestId: proposalData.requestId,
+        coordinationStatus: 'initiated',
+        progressPercentage: 0,
+        initiatedAt: new Date().toISOString(),
+        coordinationNotes: `Proposal ${proposalId} submitted for DDGOTS review and port inspector coordination`,
+        stakeholderComments: [],
+        nextSteps: [
+          'DDGOTS technical review',
+          'Port inspector assignment',
+          'Buyer notification',
+          'Final approval workflow'
+        ]
+      };
+
+      res.status(201).json({
+        success: true,
+        message: 'Proposal submitted successfully and routed to DDGOTS for review',
+        proposal,
+        coordination,
+        timeline: {
+          submitted: new Date().toISOString(),
+          expectedDdgotsReview: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days
+          expectedPortInspection: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days
+          expectedFinalDecision: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
+        }
+      });
+    } catch (error) {
+      console.error("Error submitting proposal:", error);
+      res.status(500).json({ message: "Failed to submit proposal" });
+    }
+  });
+
+  // Get exporter's proposals with coordination status
+  app.get("/api/exporter/proposals", async (req, res) => {
+    try {
+      if (!req.session.exporterId || req.session.userType !== 'exporter') {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Mock proposal data with comprehensive coordination tracking
+      const proposals = [
+        {
+          id: 'PROP-2025-001',
+          proposalId: 'PROP-2025-001',
+          requestId: 'REQ-2025-001',
+          buyerCompany: 'Liberian Agricultural Trading Co.',
+          commodity: 'Coffee',
+          quantityOffered: '500 MT',
+          pricePerMT: 2750,
+          totalValue: 1375000,
+          deliveryDate: '2025-02-28',
+          ddgotsReviewStatus: 'approved',
+          ddgotsReviewOfficer: 'Dr. James Johnson',
+          ddgotsReviewDate: '2025-01-20',
+          ddgotsReviewNotes: 'Quality standards met. Approved for port inspection.',
+          portInspectionStatus: 'scheduled',
+          portInspector: 'Inspector Mary Wilson',
+          portInspectionDate: '2025-01-25',
+          buyerResponseStatus: 'pending',
+          status: 'under_review',
+          coordinationStatus: 'in_progress',
+          progressPercentage: 65,
+          submittedAt: '2025-01-18',
+          lastUpdate: '2025-01-20'
+        },
+        {
+          id: 'PROP-2025-002',
+          proposalId: 'PROP-2025-002',
+          requestId: 'REQ-2025-002',
+          buyerCompany: 'West African Commodities Ltd.',
+          commodity: 'Cocoa',
+          quantityOffered: '300 MT',
+          pricePerMT: 3200,
+          totalValue: 960000,
+          deliveryDate: '2025-02-15',
+          ddgotsReviewStatus: 'pending',
+          ddgotsReviewOfficer: 'TBD',
+          portInspectionStatus: 'not_scheduled',
+          buyerResponseStatus: 'pending',
+          status: 'pending',
+          coordinationStatus: 'initiated',
+          progressPercentage: 15,
+          submittedAt: '2025-01-19',
+          lastUpdate: '2025-01-19'
+        }
+      ];
+
+      res.json(proposals);
+    } catch (error) {
+      console.error("Error fetching proposals:", error);
+      res.status(500).json({ message: "Failed to fetch proposals" });
+    }
+  });
+
+  // Get proposal coordination details
+  app.get("/api/exporter/proposals/:proposalId/coordination", async (req, res) => {
+    try {
+      if (!req.session.exporterId || req.session.userType !== 'exporter') {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { proposalId } = req.params;
+
+      // Mock coordination details
+      const coordination = {
+        coordinationId: `COORD-2025-${proposalId.split('-')[2]}`,
+        proposalId,
+        coordinationStatus: 'in_progress',
+        progressPercentage: 65,
+        timeline: {
+          submitted: '2025-01-18T10:00:00Z',
+          ddgotsReviewStart: '2025-01-19T09:00:00Z',
+          ddgotsReviewComplete: '2025-01-20T16:30:00Z',
+          portInspectionScheduled: '2025-01-25T14:00:00Z',
+          expectedCompletion: '2025-01-28T17:00:00Z'
+        },
+        stakeholders: {
+          ddgotsOfficer: {
+            name: 'Dr. James Johnson',
+            role: 'Technical Compliance Officer',
+            status: 'review_complete',
+            notes: 'Quality standards verified. Export documentation compliant.'
+          },
+          portInspector: {
+            name: 'Inspector Mary Wilson',
+            role: 'Port Inspection Officer',
+            status: 'scheduled',
+            notes: 'Inspection scheduled for January 25th at 2:00 PM'
+          },
+          complianceOfficer: {
+            name: 'Sarah Mitchell',
+            role: 'EUDR Compliance Specialist',
+            status: 'monitoring',
+            notes: 'Monitoring for final compliance validation'
+          }
+        },
+        checkpoints: [
+          {
+            stage: 'Proposal Submission',
+            status: 'completed',
+            date: '2025-01-18T10:00:00Z',
+            notes: 'Proposal submitted by exporter'
+          },
+          {
+            stage: 'DDGOTS Technical Review',
+            status: 'completed',
+            date: '2025-01-20T16:30:00Z',
+            notes: 'Technical compliance verified and approved'
+          },
+          {
+            stage: 'Port Inspector Assignment',
+            status: 'completed',
+            date: '2025-01-21T09:00:00Z',
+            notes: 'Inspector Mary Wilson assigned'
+          },
+          {
+            stage: 'Port Inspection Scheduling',
+            status: 'completed',
+            date: '2025-01-22T11:00:00Z',
+            notes: 'Inspection scheduled for January 25th'
+          },
+          {
+            stage: 'Port Quality Inspection',
+            status: 'pending',
+            expectedDate: '2025-01-25T14:00:00Z',
+            notes: 'Physical inspection at port facilities'
+          },
+          {
+            stage: 'Buyer Notification',
+            status: 'pending',
+            expectedDate: '2025-01-26T10:00:00Z',
+            notes: 'Notify buyer of inspection results'
+          },
+          {
+            stage: 'Final Approval',
+            status: 'pending',
+            expectedDate: '2025-01-28T17:00:00Z',
+            notes: 'Final regulatory approval and contract enablement'
+          }
+        ],
+        communicationLog: [
+          {
+            timestamp: '2025-01-20T16:30:00Z',
+            from: 'Dr. James Johnson (DDGOTS)',
+            to: 'System',
+            message: 'Technical review completed. Quality standards verified.',
+            type: 'system_update'
+          },
+          {
+            timestamp: '2025-01-21T09:00:00Z',
+            from: 'System',
+            to: 'Inspector Mary Wilson',
+            message: 'Port inspection assignment for Proposal PROP-2025-001',
+            type: 'assignment'
+          }
+        ]
+      };
+
+      res.json(coordination);
+    } catch (error) {
+      console.error("Error fetching coordination details:", error);
+      res.status(500).json({ message: "Failed to fetch coordination details" });
+    }
+  });
+
+  // DDGOTS Routes for Marketplace Oversight
+  app.get("/api/ddgots/marketplace/pending-reviews", async (req, res) => {
+    try {
+      // Verify DDGOTS authentication
+      if (!req.session.regulatorId || req.session.userType !== 'ddgots') {
+        return res.status(401).json({ message: "DDGOTS access required" });
+      }
+
+      // Mock pending reviews for DDGOTS
+      const pendingReviews = [
+        {
+          proposalId: 'PROP-2025-002',
+          requestId: 'REQ-2025-002',
+          exporterId: 'EXP-20250818-627',
+          exporterCompany: 'Premium Exports Liberia',
+          buyerCompany: 'West African Commodities Ltd.',
+          commodity: 'Cocoa',
+          quantityOffered: '300 MT',
+          pricePerMT: 3200,
+          deliveryDate: '2025-02-15',
+          submittedAt: '2025-01-19',
+          urgency: 'medium',
+          requiresPortInspection: true,
+          complianceChecks: {
+            eudrCompliance: 'verified',
+            qualityStandards: 'pending_review',
+            exportLicense: 'verified',
+            documentation: 'complete'
+          }
+        }
+      ];
+
+      res.json(pendingReviews);
+    } catch (error) {
+      console.error("Error fetching DDGOTS pending reviews:", error);
+      res.status(500).json({ message: "Failed to fetch pending reviews" });
+    }
+  });
+
+  // DDGOTS approve/reject proposal
+  app.post("/api/ddgots/marketplace/review-proposal", async (req, res) => {
+    try {
+      if (!req.session.regulatorId || req.session.userType !== 'ddgots') {
+        return res.status(401).json({ message: "DDGOTS access required" });
+      }
+
+      const { proposalId, decision, notes, assignPortInspector, inspectionDate } = req.body;
+
+      const reviewResult = {
+        proposalId,
+        reviewedBy: req.session.regulatorId,
+        reviewDate: new Date().toISOString(),
+        decision, // approved, rejected, revision_required
+        notes,
+        portInspectorAssigned: assignPortInspector,
+        inspectionScheduledFor: inspectionDate,
+        nextSteps: decision === 'approved' ? [
+          'Port inspector coordination',
+          'Quality inspection scheduling',
+          'Buyer notification'
+        ] : ['Exporter notification of required revisions']
+      };
+
+      res.json({
+        success: true,
+        message: `Proposal ${decision} by DDGOTS`,
+        reviewResult
+      });
+    } catch (error) {
+      console.error("Error processing DDGOTS review:", error);
+      res.status(500).json({ message: "Failed to process review" });
+    }
+  });
+
+  // Port Inspector Routes
+  app.get("/api/port-inspector/assigned-inspections", async (req, res) => {
+    try {
+      // Verify port inspector authentication
+      if (!req.session.userId || req.session.userType !== 'land_inspector') {
+        return res.status(401).json({ message: "Port inspector access required" });
+      }
+
+      // Mock assigned inspections
+      const assignedInspections = [
+        {
+          proposalId: 'PROP-2025-001',
+          inspectionId: 'INS-2025-001',
+          exporterCompany: 'Premium Exports Liberia',
+          buyerCompany: 'Liberian Agricultural Trading Co.',
+          commodity: 'Coffee',
+          quantity: '500 MT',
+          scheduledDate: '2025-01-25T14:00:00Z',
+          location: 'Port of Monrovia - Warehouse 3',
+          status: 'scheduled',
+          priority: 'high',
+          inspectionType: 'quality_and_compliance',
+          requiredChecks: [
+            'Physical quality assessment',
+            'Documentation verification',
+            'EUDR compliance validation',
+            'Export readiness confirmation'
+          ]
+        }
+      ];
+
+      res.json(assignedInspections);
+    } catch (error) {
+      console.error("Error fetching assigned inspections:", error);
+      res.status(500).json({ message: "Failed to fetch assigned inspections" });
+    }
+  });
+
+  // Submit port inspection results
+  app.post("/api/port-inspector/submit-inspection", async (req, res) => {
+    try {
+      if (!req.session.userId || req.session.userType !== 'land_inspector') {
+        return res.status(401).json({ message: "Port inspector access required" });
+      }
+
+      const { proposalId, inspectionResults, qualityGrade, complianceStatus, notes } = req.body;
+
+      const inspectionReport = {
+        proposalId,
+        inspectedBy: req.session.userId,
+        inspectionDate: new Date().toISOString(),
+        qualityGrade,
+        complianceStatus, // passed, failed, conditional
+        notes,
+        inspectionResults,
+        nextSteps: complianceStatus === 'passed' ? [
+          'Buyer notification',
+          'Contract enablement',
+          'Final approval workflow'
+        ] : ['Exporter remediation required']
+      };
+
+      res.json({
+        success: true,
+        message: 'Inspection results submitted successfully',
+        inspectionReport
+      });
+    } catch (error) {
+      console.error("Error submitting inspection results:", error);
+      res.status(500).json({ message: "Failed to submit inspection results" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Import working PDF generator - DISABLED TO FIX 12-PAGE ISSUE

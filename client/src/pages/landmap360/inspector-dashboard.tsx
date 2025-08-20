@@ -19,7 +19,8 @@ import {
   Flag,
   Building,
   Map,
-  Activity
+  Activity,
+  Users
 } from "lucide-react";
 import LandMapSidebar from "../../components/landmap360/landmap-sidebar";
 import LandMapHeader from "../../components/landmap360/landmap-header";
@@ -214,13 +215,218 @@ export default function InspectorDashboard() {
               </div>
             </div>
 
-            <Tabs defaultValue="inspections" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+            <Tabs defaultValue="farmer-onboarding" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="farmer-onboarding">Farmer On-Boarding</TabsTrigger>
                 <TabsTrigger value="inspections">Active Inspections</TabsTrigger>
                 <TabsTrigger value="violations">Violations</TabsTrigger>
                 <TabsTrigger value="compliance">Compliance</TabsTrigger>
                 <TabsTrigger value="reports">Reports</TabsTrigger>
               </TabsList>
+
+              {/* Farmer On-Boarding Tab */}
+              <TabsContent value="farmer-onboarding" className="space-y-6">
+                {/* Farmer Registration Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-purple-900">
+                        New Farmers This Month
+                      </CardTitle>
+                      <Plus className="h-5 w-5 text-purple-700" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-purple-900">24</div>
+                      <p className="text-xs text-purple-700 mt-1">+15% from last month</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-emerald-900">
+                        GPS Mapped Farms
+                      </CardTitle>
+                      <MapPin className="h-5 w-5 text-emerald-700" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-emerald-900">156</div>
+                      <p className="text-xs text-emerald-700 mt-1">Ready for inspection</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-blue-900">
+                        Pending Verification
+                      </CardTitle>
+                      <Clock className="h-5 w-5 text-blue-700" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-blue-900">12</div>
+                      <p className="text-xs text-blue-700 mt-1">Awaiting field visit</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-green-900">
+                        Completed This Week
+                      </CardTitle>
+                      <CheckCircle className="h-5 w-5 text-green-700" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-green-900">8</div>
+                      <p className="text-xs text-green-700 mt-1">Fully registered</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Quick Actions for Farmer On-Boarding */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-purple-200 hover:border-purple-400">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Plus className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900 mb-2">Register New Farmer</h3>
+                      <p className="text-sm text-slate-600 mb-4">Access full farmer registration system with GPS integration</p>
+                      <Button 
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        onClick={() => window.open('/farmers', '_blank')}
+                      >
+                        Open Farmer Registration
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-emerald-200 hover:border-emerald-400">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Map className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900 mb-2">GPS Land Mapping</h3>
+                      <p className="text-sm text-slate-600 mb-4">Advanced GPS mapping with satellite imagery and boundary detection</p>
+                      <Button 
+                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                        onClick={() => window.open('/farmer-gps-mapping', '_blank')}
+                      >
+                        Start GPS Mapping
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-dashed border-blue-200 hover:border-blue-400">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Eye className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900 mb-2">Farm Inspections</h3>
+                      <p className="text-sm text-slate-600 mb-4">Manage livestock and agricultural inspections</p>
+                      <Button 
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        onClick={() => window.open('/livetrace/farm-registrations', '_blank')}
+                      >
+                        View Farm Registry
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Pending Farmer Registrations */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                      <Users className="h-5 w-5 text-purple-600" />
+                      Pending Farmer Registrations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        {
+                          id: "REG-001",
+                          name: "John Kpehe",
+                          location: "Montserrado County - Paynesville",
+                          phone: "+231777123456",
+                          farmSize: "2.3 hectares",
+                          crops: "Cocoa, Coffee",
+                          status: "pending_gps",
+                          registrationDate: "2025-01-15"
+                        },
+                        {
+                          id: "REG-002", 
+                          name: "Mary Johnson",
+                          location: "Bong County - Gbarnga",
+                          phone: "+231888654321",
+                          farmSize: "1.8 hectares",
+                          crops: "Palm Oil, Cassava",
+                          status: "pending_verification",
+                          registrationDate: "2025-01-14"
+                        },
+                        {
+                          id: "REG-003",
+                          name: "Samuel Tuah",
+                          location: "Nimba County - Sanniquellie",
+                          phone: "+231666789123",
+                          farmSize: "3.1 hectares", 
+                          crops: "Rubber, Cocoa",
+                          status: "gps_mapped",
+                          registrationDate: "2025-01-13"
+                        }
+                      ].map((farmer) => (
+                        <div key={farmer.id} className="p-4 border border-slate-200 rounded-lg bg-white hover:bg-slate-50">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-medium text-slate-900">{farmer.name}</h3>
+                                <Badge className={farmer.status === 'pending_gps' ? 'bg-orange-100 text-orange-800' : 
+                                               farmer.status === 'pending_verification' ? 'bg-blue-100 text-blue-800' :
+                                               'bg-green-100 text-green-800'}>
+                                  {farmer.status.replace('_', ' ')}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-slate-600 flex items-center gap-1 mb-1">
+                                <MapPin className="h-3 w-3" />
+                                {farmer.location}
+                              </p>
+                              <p className="text-sm text-slate-600 mb-2">
+                                Farm Size: {farmer.farmSize} • Crops: {farmer.crops}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Phone: {farmer.phone} • Registered: {farmer.registrationDate}
+                              </p>
+                            </div>
+                            <div className="flex gap-2 ml-4">
+                              {farmer.status === 'pending_gps' && (
+                                <Button size="sm" variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                                  <Map className="h-3 w-3 mr-1" />
+                                  GPS Map
+                                </Button>
+                              )}
+                              {farmer.status === 'pending_verification' && (
+                                <Button size="sm" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  Verify
+                                </Button>
+                              )}
+                              {farmer.status === 'gps_mapped' && (
+                                <Button size="sm" variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Complete
+                                </Button>
+                              )}
+                              <Button size="sm" variant="outline">
+                                <FileText className="h-3 w-3 mr-1" />
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
               <TabsContent value="inspections" className="space-y-6">
                 {/* Key Metrics Cards */}

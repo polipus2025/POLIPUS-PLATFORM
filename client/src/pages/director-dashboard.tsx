@@ -601,13 +601,25 @@ export default function DirectorDashboard() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="pending-requests">Mobile Requests</TabsTrigger>
-            <TabsTrigger value="field-agent-approvals">Field Agent Approvals</TabsTrigger>
-            <TabsTrigger value="emergency-alerts">Emergency Alerts</TabsTrigger>
-            <TabsTrigger value="verification-history">Verification History</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="flex w-max space-x-2 p-2">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="pending-requests">Mobile Requests</TabsTrigger>
+              <TabsTrigger value="field-agent-approvals">Field Agent Approvals</TabsTrigger>
+              <TabsTrigger value="emergency-alerts">Emergency Alerts</TabsTrigger>
+              <TabsTrigger value="verification-history">Verification History</TabsTrigger>
+              <TabsTrigger value="gis-mapping">GIS Mapping</TabsTrigger>
+              <TabsTrigger value="government-integration">Government Integration</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics & Reports</TabsTrigger>
+              <TabsTrigger value="commodity-management">Commodity Management</TabsTrigger>
+              <TabsTrigger value="certification-system">Certification System</TabsTrigger>
+              <TabsTrigger value="monitoring-dashboard">Monitoring Dashboard</TabsTrigger>
+              <TabsTrigger value="international-standards">International Standards</TabsTrigger>
+              <TabsTrigger value="payment-services">Payment Services</TabsTrigger>
+              <TabsTrigger value="audit-system">Audit System</TabsTrigger>
+              <TabsTrigger value="satellite-monitoring">Satellite Monitoring</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
@@ -814,6 +826,438 @@ export default function DirectorDashboard() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* GIS Mapping Tab */}
+          <TabsContent value="gis-mapping" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Satellite className="h-5 w-5" />
+                  GIS Mapping System
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Geographic Information System for land mapping and farm plot visualization
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Mapping Statistics</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Total Farm Plots Mapped</span>
+                        <span className="font-medium">1,247 plots</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Counties Covered</span>
+                        <span className="font-medium">15 counties</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">GPS Accuracy</span>
+                        <span className="font-medium text-green-600">±2.5m average</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Deforestation Risk Areas</span>
+                        <span className="font-medium text-orange-600">23 flagged areas</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Recent Mapping Activities</h4>
+                    <div className="space-y-2">
+                      <div className="p-3 bg-gray-50 rounded">
+                        <p className="text-sm font-medium">Nimba County - Plot #NB-2025-045</p>
+                        <p className="text-xs text-gray-600">Mapped by Inspector John K. • 2.3 hectares</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded">
+                        <p className="text-sm font-medium">Lofa County - Plot #LF-2025-032</p>
+                        <p className="text-xs text-gray-600">Mapped by Inspector Mary T. • 4.7 hectares</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Government Integration Tab */}
+          <TabsContent value="government-integration" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Government Integration
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Integration status with LRA, MOA, and Customs authorities
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-green-800">LRA Integration</h4>
+                    <p className="text-sm text-green-600">Active & Synced</p>
+                    <p className="text-xs text-gray-600 mt-2">Last sync: 2 hours ago</p>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-green-800">MOA Integration</h4>
+                    <p className="text-sm text-green-600">Active & Synced</p>
+                    <p className="text-xs text-gray-600 mt-2">Last sync: 45 minutes ago</p>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Clock className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <h4 className="font-semibold text-orange-800">Customs Integration</h4>
+                    <p className="text-sm text-orange-600">Pending Update</p>
+                    <p className="text-xs text-gray-600 mt-2">Requires attention</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics & Reports Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Export Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Total Exports (2025)</span>
+                      <span className="font-semibold">$24.8M USD</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Cocoa Exports</span>
+                      <span className="font-medium">67% ($16.6M)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Coffee Exports</span>
+                      <span className="font-medium">23% ($5.7M)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Other Commodities</span>
+                      <span className="font-medium">10% ($2.5M)</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Performance Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Compliance Rate</span>
+                      <span className="font-semibold text-green-600">96.4%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Processing Time</span>
+                      <span className="font-medium">2.3 days avg</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Farmer Satisfaction</span>
+                      <span className="font-medium text-green-600">94.7%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Export Efficiency</span>
+                      <span className="font-medium text-blue-600">92.1%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Commodity Management Tab */}
+          <TabsContent value="commodity-management" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Leaf className="h-5 w-5" />
+                  Commodity Management System
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Overview of all registered commodities and their status
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg text-center">
+                    <h4 className="font-semibold text-green-800">Active Commodities</h4>
+                    <p className="text-2xl font-bold text-green-600">143</p>
+                    <p className="text-sm text-gray-600">Ready for export</p>
+                  </div>
+                  <div className="p-4 bg-orange-50 rounded-lg text-center">
+                    <h4 className="font-semibold text-orange-800">Pending Inspection</h4>
+                    <p className="text-2xl font-bold text-orange-600">27</p>
+                    <p className="text-sm text-gray-600">Awaiting quality check</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 rounded-lg text-center">
+                    <h4 className="font-semibold text-blue-800">In Transit</h4>
+                    <p className="text-2xl font-bold text-blue-600">89</p>
+                    <p className="text-sm text-gray-600">En route to port</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Certification System Tab */}
+          <TabsContent value="certification-system" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5" />
+                    Certificate Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                      <span className="text-sm font-medium">EUDR Certificates</span>
+                      <Badge className="bg-green-100 text-green-800">142 Active</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
+                      <span className="text-sm font-medium">Quality Certificates</span>
+                      <Badge className="bg-blue-100 text-blue-800">89 Active</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-orange-50 rounded">
+                      <span className="text-sm font-medium">Export Certificates</span>
+                      <Badge className="bg-orange-100 text-orange-800">34 Pending</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5" />
+                    Recent Certifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded">
+                      <p className="text-sm font-medium">EUDR-2025-0847</p>
+                      <p className="text-xs text-gray-600">Cocoa • Nimba County • Issued today</p>
+                    </div>
+                    <div className="p-3 border rounded">
+                      <p className="text-sm font-medium">QC-2025-0234</p>
+                      <p className="text-xs text-gray-600">Coffee • Lofa County • Issued yesterday</p>
+                    </div>
+                    <div className="p-3 border rounded">
+                      <p className="text-sm font-medium">EXP-2025-0198</p>
+                      <p className="text-xs text-gray-600">Mixed • Grand Gedeh • Pending approval</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Additional Tabs Continue... */}
+          <TabsContent value="monitoring-dashboard" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Real-time Monitoring Dashboard
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Live system monitoring and alerts
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-green-50 rounded">
+                    <p className="text-sm text-gray-600">System Status</p>
+                    <p className="font-semibold text-green-600">Online</p>
+                  </div>
+                  <div className="text-center p-3 bg-blue-50 rounded">
+                    <p className="text-sm text-gray-600">Active Users</p>
+                    <p className="font-semibold text-blue-600">247</p>
+                  </div>
+                  <div className="text-center p-3 bg-orange-50 rounded">
+                    <p className="text-sm text-gray-600">Processing Queue</p>
+                    <p className="font-semibold text-orange-600">23</p>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded">
+                    <p className="text-sm text-gray-600">Data Sync</p>
+                    <p className="font-semibold text-purple-600">Live</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Continue with remaining tabs... */}
+          <TabsContent value="international-standards" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  International Standards Compliance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">EU Deforestation Regulation (EUDR)</h4>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Compliance Rate</span>
+                      <Badge className="bg-green-100 text-green-800">97.8% Compliant</Badge>
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-semibold mb-2">Fair Trade Standards</h4>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Certified Farmers</span>
+                      <Badge className="bg-blue-100 text-blue-800">89% Certified</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="payment-services" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Payment Services & Financial Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Payment Statistics</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Total Processed (Today)</span>
+                        <span className="font-medium">$127,450</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Pending Payments</span>
+                        <span className="font-medium text-orange-600">$23,890</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Failed Transactions</span>
+                        <span className="font-medium text-red-600">2 ($1,250)</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3">Revenue Distribution</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">LACRA Share (30%)</span>
+                        <span className="font-medium">$38,235</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Polipus Share (70%)</span>
+                        <span className="font-medium">$89,215</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="audit-system" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Audit System & Compliance Tracking
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-3 bg-green-50 rounded">
+                      <h4 className="font-semibold text-green-800">Audit Score</h4>
+                      <p className="text-2xl font-bold text-green-600">94.7%</p>
+                    </div>
+                    <div className="text-center p-3 bg-blue-50 rounded">
+                      <h4 className="font-semibold text-blue-800">Audits This Month</h4>
+                      <p className="text-2xl font-bold text-blue-600">23</p>
+                    </div>
+                    <div className="text-center p-3 bg-orange-50 rounded">
+                      <h4 className="font-semibold text-orange-800">Pending Reviews</h4>
+                      <p className="text-2xl font-bold text-orange-600">7</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="satellite-monitoring" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Satellite className="h-5 w-5" />
+                  Satellite Monitoring & Environmental Tracking
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Satellite Data</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Active Satellites</span>
+                        <span className="font-medium">200+ monitoring</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Coverage Area</span>
+                        <span className="font-medium">100% of Liberia</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Update Frequency</span>
+                        <span className="font-medium">Every 6 hours</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3">Environmental Alerts</h4>
+                    <div className="space-y-2">
+                      <div className="p-2 bg-yellow-50 rounded text-sm">
+                        <span className="font-medium">Deforestation Alert</span>
+                        <p className="text-gray-600">Nimba County - 0.3 hectares detected</p>
+                      </div>
+                      <div className="p-2 bg-green-50 rounded text-sm">
+                        <span className="font-medium">Normal Activity</span>
+                        <p className="text-gray-600">All other regions stable</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

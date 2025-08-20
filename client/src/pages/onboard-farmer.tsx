@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, MapPin, Target, Globe, TreePine } from "lucide-react";
+import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users } from "lucide-react";
 import { Link } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
@@ -41,7 +41,14 @@ export default function OnboardFarmer() {
     cooperativeMembership: "",
     landOwnership: "",
     irrigationAccess: "",
-    boundaryData: null as any
+    boundaryData: null as any,
+    farmerPhoto: null as File | null,
+    spouseName: "",
+    numberOfChildren: "",
+    dependents: "",
+    emergencyContact: "",
+    emergencyPhone: "",
+    familyMembers: ""
   });
 
   const inspectorId = localStorage.getItem("inspectorId") || "land_inspector";
@@ -138,7 +145,14 @@ export default function OnboardFarmer() {
         cooperativeMembership: "",
         landOwnership: "",
         irrigationAccess: "",
-        boundaryData: null
+        boundaryData: null,
+        farmerPhoto: null,
+        spouseName: "",
+        numberOfChildren: "",
+        dependents: "",
+        emergencyContact: "",
+        emergencyPhone: "",
+        familyMembers: ""
       });
     },
     onError: (error: any) => {
@@ -265,6 +279,130 @@ export default function OnboardFarmer() {
                       value={farmerData.idNumber}
                       onChange={(e) => setFarmerData(prev => ({ ...prev, idNumber: e.target.value }))}
                       placeholder="Enter ID number"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="w-5 h-5 mr-2 text-purple-600" />
+                    Farmer Photo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="farmerPhoto">Upload Farmer Photo</Label>
+                    <div className="flex items-center space-x-4">
+                      <input
+                        id="farmerPhoto"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setFarmerData(prev => ({ ...prev, farmerPhoto: file }));
+                        }}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('farmerPhoto')?.click()}
+                        className="flex items-center"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        {farmerData.farmerPhoto ? 'Change Photo' : 'Upload Photo'}
+                      </Button>
+                      {farmerData.farmerPhoto && (
+                        <span className="text-sm text-green-600">
+                          ✓ {farmerData.farmerPhoto.name}
+                        </span>
+                      )}
+                    </div>
+                    {farmerData.farmerPhoto && (
+                      <div className="mt-3">
+                        <img
+                          src={URL.createObjectURL(farmerData.farmerPhoto)}
+                          alt="Farmer preview"
+                          className="w-24 h-24 object-cover rounded-lg border"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-green-600" />
+                    Family Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="spouseName">Spouse Name</Label>
+                      <Input
+                        id="spouseName"
+                        value={farmerData.spouseName}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, spouseName: e.target.value }))}
+                        placeholder="Enter spouse name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="numberOfChildren">Number of Children</Label>
+                      <Input
+                        id="numberOfChildren"
+                        type="number"
+                        value={farmerData.numberOfChildren}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, numberOfChildren: e.target.value }))}
+                        placeholder="e.g., 3"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="dependents">Total Dependents</Label>
+                    <Input
+                      id="dependents"
+                      type="number"
+                      value={farmerData.dependents}
+                      onChange={(e) => setFarmerData(prev => ({ ...prev, dependents: e.target.value }))}
+                      placeholder="Total number of dependents"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="emergencyContact">Emergency Contact Name</Label>
+                      <Input
+                        id="emergencyContact"
+                        value={farmerData.emergencyContact}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, emergencyContact: e.target.value }))}
+                        placeholder="Emergency contact person"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
+                      <Input
+                        id="emergencyPhone"
+                        value={farmerData.emergencyPhone}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, emergencyPhone: e.target.value }))}
+                        placeholder="+231 XXX XXX XXX"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="familyMembers">Family Members (Names & Ages)</Label>
+                    <Textarea
+                      id="familyMembers"
+                      value={farmerData.familyMembers}
+                      onChange={(e) => setFarmerData(prev => ({ ...prev, familyMembers: e.target.value }))}
+                      placeholder="List family members with their ages..."
+                      rows={3}
                     />
                   </div>
                 </CardContent>

@@ -48,7 +48,7 @@ interface RealMapBoundaryMapperProps {
 
 export default function RealMapBoundaryMapper({ 
   onBoundaryComplete, 
-  minPoints = 3,
+  minPoints = 6,
   maxPoints = 20,
   enableRealTimeGPS = true
 }: RealMapBoundaryMapperProps) {
@@ -617,8 +617,8 @@ export default function RealMapBoundaryMapper({
         transform: translate(-50%, -50%);
         cursor: pointer;
         transition: all 0.2s ease;
-        background-color: ${index === 0 ? '#22c55e' : index === points.length - 1 && points.length >= 3 ? '#ef4444' : '#3b82f6'};
-        ${index === points.length - 1 && points.length >= 3 ? 'animation: pulse 2s infinite;' : ''}
+        background-color: ${index === 0 ? '#22c55e' : index === points.length - 1 && points.length >= 6 ? '#ef4444' : '#3b82f6'};
+        ${index === points.length - 1 && points.length >= 6 ? 'animation: pulse 2s infinite;' : ''}
       `;
       
       // Add alphabetical label (A, B, C, D, etc.)
@@ -660,8 +660,8 @@ export default function RealMapBoundaryMapper({
         console.log(`✓ Connected point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
       }
       
-      // If we have 3+ points, close the polygon with a line back to the first point
-      if (points.length >= 3) {
+      // If we have 6+ points, close the polygon with a line back to the first point
+      if (points.length >= 6) {
         const firstPoint = points[0];
         const lastPoint = points[points.length - 1];
         
@@ -687,8 +687,8 @@ export default function RealMapBoundaryMapper({
       }
     }
 
-    // CRITICAL: Create filled polygon with EUDR risk visualization when 3+ points exist
-    if (points.length >= 3) {
+    // CRITICAL: Create filled polygon with EUDR risk visualization when 6+ points exist
+    if (points.length >= 6) {
       console.log(`Creating polygon boundary with ${points.length} points and risk overlay`);
       
       const pointsStr = points.map(point => {
@@ -862,13 +862,13 @@ export default function RealMapBoundaryMapper({
     setStatus(`Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
     
     // Trigger EUDR analysis if we have enough points
-    if (points.length + 1 >= 3) {
+    if (points.length + 1 >= 6) {
       setTimeout(() => analyzeEUDRCompliance([...points, newPoint]), 500);
     }
   };
 
   const calculateArea = (points: BoundaryPoint[]): number => {
-    if (points.length < 3) return 0;
+    if (points.length < 6) return 0;
     
     let area = 0;
     for (let i = 0; i < points.length; i++) {
@@ -882,7 +882,7 @@ export default function RealMapBoundaryMapper({
 
   // EUDR Compliance Analysis
   const analyzeEUDRCompliance = async (analysisPoints: BoundaryPoint[]) => {
-    if (analysisPoints.length < 3) return;
+    if (analysisPoints.length < 6) return;
     
     setIsAnalyzing(true);
     setStatus('Analyzing EUDR compliance and deforestation risk...');
@@ -1058,7 +1058,7 @@ export default function RealMapBoundaryMapper({
 
   // Professional PDF Report Generation with AgriTrace LACRA Letterhead
   const generateProfessionalEUDRReport = () => {
-    if (points.length < 3 || !eudrReport) return;
+    if (points.length < 6 || !eudrReport) return;
     
     const area = calculateArea(points);
     const coordinatesString = points.map((p, i) => 
@@ -1083,7 +1083,7 @@ export default function RealMapBoundaryMapper({
   };
 
   const generateProfessionalDeforestationReport = () => {
-    if (points.length < 3 || !deforestationReport) return;
+    if (points.length < 6 || !deforestationReport) return;
     
     const coordinatesString = points.map((p, i) => 
       `Point ${String.fromCharCode(65 + i)}: ${p.latitude.toFixed(6)}, ${p.longitude.toFixed(6)}`
@@ -1211,8 +1211,8 @@ export default function RealMapBoundaryMapper({
             }
           });
           
-          // Close polygon if we have 3+ points
-          if (points.length >= 3) {
+          // Close polygon if we have 6+ points
+          if (points.length >= 6) {
             ctx.closePath();
             ctx.strokeStyle = '#22c55e';
             ctx.lineWidth = 2.5;
@@ -1573,7 +1573,7 @@ export default function RealMapBoundaryMapper({
       )}
 
       {/* Map Download Feature */}
-      {points.length >= 3 && (
+      {points.length >= 6 && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-medium text-green-900">High-Resolution Satellite Map</h4>

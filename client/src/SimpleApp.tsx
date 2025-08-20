@@ -1,22 +1,41 @@
-export default function SimpleApp() {
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import Landing from "@/pages/landing";
+import FrontPage from "@/pages/front-page";
+import ExporterDashboard from "@/pages/exporter-dashboard";
+import ExporterLogin from "@/pages/auth/exporter-login";
+
+function SimpleRouter() {
   return (
-    <div style={{padding: '32px', backgroundColor: '#f8f9fa', minHeight: '100vh'}}>
-      <h1 style={{fontSize: '24px', fontWeight: 'bold', marginBottom: '16px'}}>
-        REACT IS WORKING - POLIPUS PLATFORM ACTIVE
-      </h1>
-      <p style={{fontSize: '18px', marginBottom: '16px'}}>
-        ✅ React application is now mounting successfully!
-      </p>
-      <div>
-        <div style={{padding: '16px', backgroundColor: 'white', marginBottom: '16px', borderRadius: '8px'}}>
-          <h2 style={{fontSize: '20px', fontWeight: '600', marginBottom: '8px'}}>Inspector Portal System</h2>
-          <p>Two-tier Inspector authentication system ready</p>
+    <Switch>
+      <Route path="/" component={FrontPage} />
+      <Route path="/landing" component={Landing} />
+      <Route path="/front-page" component={FrontPage} />
+      <Route path="/exporter-login" component={ExporterLogin} />
+      <Route path="/exporter-dashboard" component={ExporterDashboard} />
+      <Route>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Polipus Platform</h1>
+            <p className="text-gray-600">Page not found</p>
+          </div>
         </div>
-        <div style={{padding: '16px', backgroundColor: 'white', marginBottom: '16px', borderRadius: '8px'}}>
-          <h2 style={{fontSize: '20px', fontWeight: '600', marginBottom: '8px'}}>Database Schema</h2>
-          <p>Inspector tables with inspector_type and port_facility fields</p>
-        </div>
-      </div>
-    </div>
+      </Route>
+    </Switch>
   );
 }
+
+function SimpleApp() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <div className="min-h-screen">
+        <SimpleRouter />
+      </div>
+      <Toaster />
+    </QueryClientProvider>
+  );
+}
+
+export default SimpleApp;

@@ -10671,5 +10671,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //   console.log('📄 Working PDF generator loaded');
   // }).catch(err => console.error('PDF generator error:', err));
 
+  // Add a simple health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      message: "Polipus Platform is running"
+    });
+  });
+
   return httpServer;
 }

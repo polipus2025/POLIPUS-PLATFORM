@@ -265,11 +265,11 @@ const LeafletMap = ({
         }).addTo(mapInstanceRef.current);
 
         // Fit map bounds to show all points
-        const group = new (L as any).featureGroup([...markersRef.current, polygonRef.current]);
+        const group = new L.featureGroup([...markersRef.current, polygonRef.current]);
         mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
       } else if (points.length > 0) {
         // Fit bounds to markers only
-        const group = new (L as any).featureGroup(markersRef.current);
+        const group = new L.featureGroup(markersRef.current);
         mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
       }
     };

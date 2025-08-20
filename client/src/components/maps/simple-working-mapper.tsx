@@ -197,7 +197,7 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
       }
 
       // Closing line for polygon
-      if (points.length >= 6) {
+      if (points.length >= 3) {
         const start = coordToPixel(points[points.length - 1].latitude, points[points.length - 1].longitude, canvas);
         const end = coordToPixel(points[0].latitude, points[0].longitude, canvas);
         
@@ -295,7 +295,7 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
 
   // Complete boundary
   const completeBoundary = () => {
-    if (points.length >= 6) {
+    if (points.length >= 3) {
       const area = calculateArea(points);
       onBoundaryComplete({ points, area });
       console.log(`✅ Boundary completed: ${points.length} points, ${area.toFixed(2)} hectares`);
@@ -388,22 +388,22 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
           
           <Button 
             onClick={completeBoundary}
-            disabled={points.length < 6}
+            disabled={points.length < 3}
             className="flex-1 bg-green-500 hover:bg-green-600 text-white disabled:bg-gray-300"
             data-testid="complete-boundary"
           >
-            ✓ Complete ({points.length}/6+ EUDR)
+            ✓ Complete ({points.length}/3+)
           </Button>
         </div>
         
         {points.length > 0 && (
           <div className="mt-3 p-3 bg-blue-50 rounded-lg">
             <div className="text-sm font-medium text-blue-800 mb-1">
-              {points.length} boundary points mapped on real satellite imagery (EUDR requires 6+ points)
+              {points.length} boundary points mapped on real satellite imagery
             </div>
             <div className="text-xs text-blue-600">
               Points: {points.map(p => p.label).join(' → ')}
-              {points.length >= 6 && ` • Area: ${calculateArea(points).toFixed(2)} hectares`}
+              {points.length >= 3 && ` • Area: ${calculateArea(points).toFixed(2)} hectares`}
             </div>
             {satelliteLoaded && (
               <div className="text-xs text-green-600 mt-1">

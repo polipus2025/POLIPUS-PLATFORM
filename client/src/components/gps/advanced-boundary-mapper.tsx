@@ -204,8 +204,8 @@ export default function AdvancedBoundaryMapper({
   };
 
   const completeBoundary = () => {
-    if (!currentBoundary || currentBoundary.points.length < 6) {
-      alert('Need at least 6 points to complete a boundary (EUDR regulation compliance)');
+    if (!currentBoundary || currentBoundary.points.length < 3) {
+      alert('Need at least 3 points to complete a boundary');
       return;
     }
 
@@ -220,6 +220,11 @@ export default function AdvancedBoundaryMapper({
     setCurrentBoundary(completedBoundary);
     stopBoundaryMapping();
     onBoundaryComplete?.(completedBoundary);
+
+      points: completedBoundary.points.length,
+      area: `${completedBoundary.totalArea.toFixed(2)} hectares`,
+      perimeter: `${completedBoundary.perimeter.toFixed(1)} meters`
+    });
   };
 
   const resetBoundary = () => {
@@ -239,7 +244,7 @@ export default function AdvancedBoundaryMapper({
         mappingDuration: currentBoundary.points.length > 0 
           ? Date.now() - currentBoundary.points[0].timestamp.getTime()
           : 0,
-        averageAccuracy: currentBoundary.points.reduce((sum: number, p: BoundaryPoint) => sum + p.accuracy, 0) / currentBoundary.points.length
+        averageAccuracy: currentBoundary.points.reduce((sum, p) => sum + p.accuracy, 0) / currentBoundary.points.length
       }
     };
 
@@ -403,14 +408,9 @@ export default function AdvancedBoundaryMapper({
                   <Trash2 className="h-4 w-4" />
                   Remove Last
                 </Button>
-                <Button 
-                  onClick={completeBoundary} 
-                  disabled={currentBoundary.points.length < 6}
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                >
+                <Button onClick={completeBoundary} variant="outline" className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4" />
-                  Complete ({currentBoundary.points.length}/6+ EUDR)
+                  Complete
                 </Button>
               </>
             )}

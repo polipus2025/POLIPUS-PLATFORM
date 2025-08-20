@@ -206,6 +206,10 @@ import LandMappingManager from "@/pages/landmap360/land-mapping-manager";
 import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashboard";
 import OnboardFarmer from "@/pages/onboard-farmer";
 import CreateLandPlot from "@/pages/create-land-plot";
+import FarmersList from "@/pages/farmers-list";
+import LandPlotsList from "@/pages/land-plots-list";
+import EUDRAssessment from "@/pages/eudr-assessment";
+import GenerateReports from "@/pages/generate-reports";
 
 import NotFound from "@/pages/not-found";
 
@@ -258,6 +262,10 @@ function Router() {
       <Route path="/unified-land-inspector-dashboard" component={UnifiedLandInspectorDashboard} />
       <Route path="/onboard-farmer" component={OnboardFarmer} />
       <Route path="/create-land-plot" component={CreateLandPlot} />
+      <Route path="/farmers-list" component={FarmersList} />
+      <Route path="/land-plots-list" component={LandPlotsList} />
+      <Route path="/eudr-assessment" component={EUDRAssessment} />
+      <Route path="/generate-reports" component={GenerateReports} />
       <Route path="/minimal-test" component={MinimalTest} />
 
       {/* LiveTrace Authentication Routes */}

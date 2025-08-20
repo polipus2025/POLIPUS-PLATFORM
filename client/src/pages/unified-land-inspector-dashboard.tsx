@@ -347,14 +347,18 @@ export default function UnifiedLandInspectorDashboard() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">EUDR Compliance System</h3>
                 <p className="text-gray-600 mb-4">Monitor deforestation, assess compliance status, and generate EUDR reports</p>
                 <div className="space-y-3">
-                  <Button size="lg" className="w-full">
-                    <Shield className="w-5 h-5 mr-2" />
-                    Perform EUDR Assessment
-                  </Button>
-                  <Button variant="outline" size="lg" className="w-full">
-                    <Download className="w-5 h-5 mr-2" />
-                    Download Compliance Reports
-                  </Button>
+                  <Link href="/eudr-assessment">
+                    <Button size="lg" className="w-full">
+                      <Shield className="w-5 h-5 mr-2" />
+                      Perform EUDR Assessment
+                    </Button>
+                  </Link>
+                  <Link href="/generate-reports">
+                    <Button variant="outline" size="lg" className="w-full">
+                      <Download className="w-5 h-5 mr-2" />
+                      Download Compliance Reports
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </CardContent>
@@ -373,14 +377,18 @@ export default function UnifiedLandInspectorDashboard() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Generate Reports</h3>
                 <p className="text-gray-600 mb-4">Create detailed reports on farm activities, compliance status, and land mapping progress</p>
                 <div className="space-y-3">
-                  <Button size="lg" className="w-full">
-                    <FileText className="w-5 h-5 mr-2" />
-                    Generate Farm Report
-                  </Button>
-                  <Button variant="outline" size="lg" className="w-full">
-                    <Download className="w-5 h-5 mr-2" />
-                    Export Compliance Data
-                  </Button>
+                  <Link href="/generate-reports">
+                    <Button size="lg" className="w-full">
+                      <FileText className="w-5 h-5 mr-2" />
+                      Generate Farm Report
+                    </Button>
+                  </Link>
+                  <Link href="/generate-reports">
+                    <Button variant="outline" size="lg" className="w-full">
+                      <Download className="w-5 h-5 mr-2" />
+                      Export Compliance Data
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </CardContent>

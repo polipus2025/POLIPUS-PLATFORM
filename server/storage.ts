@@ -698,6 +698,19 @@ export interface IStorage {
   createSoftCommodity(commodity: InsertSoftCommodity): Promise<SoftCommodity>;
   updateSoftCommodity(id: number, commodity: Partial<SoftCommodity>): Promise<SoftCommodity | undefined>;
   deleteSoftCommodity(id: number): Promise<void>;
+
+  // Farmer-specific methods for farmer-routes.ts
+  createFarmerCredentials(credentials: any): Promise<any>;
+  getFarmerCredentialsByUsername(username: string): Promise<any>;
+  updateFarmerLastLogin(credentialsId: number): Promise<void>;
+  getFarmerHarvestSchedules(farmerId: number): Promise<HarvestSchedule[]>;
+  getFarmerMarketplaceListings(farmerId: number): Promise<any[]>;
+  getFarmerBuyerInquiries(farmerId: number): Promise<any[]>;
+  getFarmerHarvestAlerts(farmerId: number): Promise<any[]>;
+  createMarketplaceListing(listing: any): Promise<any>;
+  createHarvestAlert(alert: any): Promise<any>;
+  getFarmerTransactions(farmerId: number): Promise<any[]>;
+  incrementFailedLoginAttempts(credentialsId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2753,6 +2766,61 @@ export class DatabaseStorage implements IStorage {
     await db.update(softCommodities)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(softCommodities.id, id));
+  }
+
+  // Farmer-specific methods for farmer-routes.ts
+  async createFarmerCredentials(credentials: any): Promise<any> {
+    // Mock implementation - in real app would create farmer credentials table
+    return { id: Date.now(), ...credentials };
+  }
+
+  async getFarmerCredentialsByUsername(username: string): Promise<any> {
+    // Mock implementation - in real app would query farmer credentials table
+    return null;
+  }
+
+  async updateFarmerLastLogin(credentialsId: number): Promise<void> {
+    // Mock implementation - in real app would update farmer credentials table
+    console.log(`Updating last login for farmer credentials ID: ${credentialsId}`);
+  }
+
+  async getFarmerHarvestSchedules(farmerId: number): Promise<HarvestSchedule[]> {
+    return await db.select().from(harvestSchedules).where(eq(harvestSchedules.farmerId, farmerId));
+  }
+
+  async getFarmerMarketplaceListings(farmerId: number): Promise<any[]> {
+    // Mock implementation - in real app would query marketplace listings table
+    return [];
+  }
+
+  async getFarmerBuyerInquiries(farmerId: number): Promise<any[]> {
+    // Mock implementation - in real app would query buyer inquiries table
+    return [];
+  }
+
+  async getFarmerHarvestAlerts(farmerId: number): Promise<any[]> {
+    // Mock implementation - in real app would query harvest alerts table
+    return [];
+  }
+
+  async createMarketplaceListing(listing: any): Promise<any> {
+    // Mock implementation - in real app would create marketplace listing
+    return { id: Date.now(), ...listing };
+  }
+
+  async createHarvestAlert(alert: any): Promise<any> {
+    // Mock implementation - in real app would create harvest alert
+    return { id: Date.now(), ...alert };
+  }
+
+  async getFarmerTransactions(farmerId: number): Promise<any[]> {
+    // Mock implementation - in real app would query farmer transactions table
+    return [];
+  }
+
+  async incrementFailedLoginAttempts(credentialsId: number): Promise<void> {
+    // Mock implementation - in real app would increment failed login attempts
+    console.log(`Incrementing failed login attempts for credentials ID: ${credentialsId}`);
   }
 }
 

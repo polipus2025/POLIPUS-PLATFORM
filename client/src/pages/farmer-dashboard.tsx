@@ -41,6 +41,7 @@ interface HarvestSchedule {
   expectedHarvestStartDate: string;
   status: string;
   expectedYield?: number;
+  actualYield?: number;
   marketingPlan?: string;
   expectedPrice?: number;
 }
@@ -461,12 +462,12 @@ export default function FarmerDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {farmer && (
+                  {farmer && typeof farmer === 'object' && ('firstName' in farmer) && (
                     <>
                       <div className="flex items-center space-x-4">
-                        {farmer.profilePicture ? (
+                        {(farmer as any).profilePicture ? (
                           <img 
-                            src={farmer.profilePicture} 
+                            src={(farmer as any).profilePicture} 
                             alt="Profile" 
                             className="w-16 h-16 rounded-full object-cover"
                           />
@@ -476,27 +477,27 @@ export default function FarmerDashboard() {
                           </div>
                         )}
                         <div>
-                          <h3 className="text-lg font-semibold">{farmer.firstName} {farmer.lastName}</h3>
-                          <p className="text-gray-600">{farmer.county}, {farmer.district}</p>
+                          <h3 className="text-lg font-semibold">{(farmer as any).firstName} {(farmer as any).lastName}</h3>
+                          <p className="text-gray-600">{(farmer as any).county}, {(farmer as any).district}</p>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm text-gray-600">Primary Crop</p>
-                          <p className="font-medium">{farmer.primaryCrop || "Not specified"}</p>
+                          <p className="font-medium">{(farmer as any).primaryCrop || "Not specified"}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Farm Size</p>
-                          <p className="font-medium">{farmer.farmSize || "Not specified"} hectares</p>
+                          <p className="font-medium">{(farmer as any).farmSize || "Not specified"} hectares</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Phone</p>
-                          <p className="font-medium">{farmer.phoneNumber || "Not provided"}</p>
+                          <p className="font-medium">{(farmer as any).phoneNumber || "Not provided"}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Email</p>
-                          <p className="font-medium">{farmer.email || "Not provided"}</p>
+                          <p className="font-medium">{(farmer as any).email || "Not provided"}</p>
                         </div>
                       </div>
                     </>
@@ -1043,28 +1044,6 @@ export default function FarmerDashboard() {
                       <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                       <p>No messages from buyers yet.</p>
                       <p className="text-sm">Complete your harvest to start receiving buyer inquiries.</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-                          <div className="flex space-x-2">
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              Accept
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <MessageSquare className="w-4 h-4 mr-1" />
-                              Negotiate
-                            </Button>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )) || (
-                    <div className="text-center py-8 text-gray-500">
-                      No buyer inquiries yet. Create marketplace listings to attract buyers.
                     </div>
                   )}
                 </div>

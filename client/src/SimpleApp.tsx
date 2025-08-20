@@ -76,10 +76,41 @@ function SimpleRouter() {
       
       <Route>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Polipus Platform</h1>
-            <p className="text-gray-600">Page not found</p>
-            <p className="text-sm text-gray-500 mt-2">Available routes: /dashboard, /farmer-registration, /farm-management, /inspection-dashboard, /compliance-monitoring, /eudr-dashboard, /reports, /analytics</p>
+          <div className="text-center max-w-2xl mx-auto p-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">Polipus Environmental Intelligence Platform</h1>
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">AgriTrace360™ Access</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <a href="/dashboard" className="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                  <h3 className="font-medium text-green-800">Main Dashboard</h3>
+                  <p className="text-sm text-green-600">Agricultural overview & metrics</p>
+                </a>
+                <a href="/farmer-registration" className="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                  <h3 className="font-medium text-blue-800">Farmer Registration</h3>
+                  <p className="text-sm text-blue-600">Register new farmers</p>
+                </a>
+                <a href="/compliance-monitoring" className="p-4 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
+                  <h3 className="font-medium text-orange-800">Compliance Monitoring</h3>
+                  <p className="text-sm text-orange-600">LACRA regulatory oversight</p>
+                </a>
+                <a href="/eudr-dashboard" className="p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors">
+                  <h3 className="font-medium text-purple-800">EUDR Dashboard</h3>
+                  <p className="text-sm text-purple-600">EU Deforestation Regulation</p>
+                </a>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">System Access</h2>
+              <div className="flex gap-4 justify-center">
+                <a href="/exporter-login" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  Exporter Portal Login
+                </a>
+                <a href="/landing" className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                  Platform Information
+                </a>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-4">Current path: {window.location.pathname}</p>
           </div>
         </div>
       </Route>
@@ -96,7 +127,17 @@ function SimpleApp() {
   const isLandingPage = window.location.pathname === "/landing";
   const isFrontPage = window.location.pathname === "/" || 
                       window.location.pathname === "/front-page";
-  const isExporterDashboard = window.location.pathname === "/exporter-dashboard" && userType === 'exporter';
+  const isExporterDashboard = window.location.pathname === "/exporter-dashboard";
+  
+  // AgriTrace pages should use the full layout
+  const isAgriTracePage = window.location.pathname.startsWith("/dashboard") ||
+                          window.location.pathname.startsWith("/farmer") ||
+                          window.location.pathname.startsWith("/farm") ||
+                          window.location.pathname.startsWith("/inspection") ||
+                          window.location.pathname.startsWith("/compliance") ||
+                          window.location.pathname.startsWith("/eudr") ||
+                          window.location.pathname.startsWith("/reports") ||
+                          window.location.pathname.startsWith("/analytics");
   
   return (
     <QueryClientProvider client={queryClient}>
@@ -106,7 +147,7 @@ function SimpleApp() {
           <div className="min-h-screen">
             <SimpleRouter />
           </div>
-        ) : (
+        ) : isAgriTracePage ? (
           // Render AgriTrace pages with full layout
           <div className="min-h-screen bg-gray-50">
             <Header />
@@ -117,6 +158,11 @@ function SimpleApp() {
               </main>
             </div>
             <MobileNav />
+          </div>
+        ) : (
+          // Default simple layout for other pages
+          <div className="min-h-screen">
+            <SimpleRouter />
           </div>
         )}
         <Toaster />

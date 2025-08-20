@@ -22,9 +22,10 @@ interface BoundaryData {
 interface Props {
   onBoundaryComplete: (boundary: BoundaryData) => void;
   initialCenter?: { lat: number; lng: number };
+  minPoints?: number; // EUDR regulation requires minimum 6 points
 }
 
-export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCenter }: Props) {
+export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCenter, minPoints = 6 }: Props) {
   const { toast } = useToast();
   const [mapPoints, setMapPoints] = useState<GPSPoint[]>([]);
   const [currentLocation, setCurrentLocation] = useState<GPSPoint | null>(null);
@@ -94,8 +95,8 @@ export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCente
       .addTo(map)
       .bindPopup(`Point ${newPoints.length}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
 
-    // If we have more than 2 points, draw/update the boundary
-    if (newPoints.length >= 3) {
+    // If we have more than minPoints-1 points, draw/update the boundary
+    if (newPoints.length >= minPoints) {
       // Remove existing boundary if any
       map.eachLayer((layer: any) => {
         if (layer instanceof window.L.Polygon) {
@@ -216,7 +217,7 @@ export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCente
       });
 
       // Redraw polygon if enough points
-      if (newPoints.length >= 3) {
+      if (newPoints.length >= minPoints) {
         window.L.polygon(newPoints.map(p => [p.latitude, p.longitude]), {
           color: '#3B82F6',
           fillColor: '#3B82F6',
@@ -387,7 +388,7 @@ export default function RealMapBoundaryMapper({ onBoundaryComplete, initialCente
         <ol className="text-sm text-blue-700 space-y-1">
           <li>1. Click "Find My Location" to center map on your GPS location</li>
           <li>2. Walk around the farm perimeter and click on the map at each corner/boundary point</li>
-          <li>3. Add at least 3 points to create a boundary polygon</li>
+          <li>3. Add at least {minPoints} points to create a boundary polygon (EUDR regulation compliance)</li>
           <li>4. Recommended: Add 8+ points for more accurate area calculation</li>
           <li>5. Area will be calculated automatically in hectares, acres, and square meters</li>
           <li>6. Use "Undo Last Point" to remove the most recent point</li>

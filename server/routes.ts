@@ -10680,5 +10680,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Import shipping integration routes
+  import('./shipping-routes').then(module => {
+    app.use(module.default);
+    console.log('🚢 Shipping integrations loaded: Maersk, MSC, CMA CGM, Hapag-Lloyd');
+  }).catch(err => console.error('Shipping integration error:', err));
+
   return httpServer;
 }

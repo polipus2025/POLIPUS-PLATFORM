@@ -214,6 +214,8 @@ export default function Sidebar() {
     // Use wouter's programmatic navigation instead of full page reload
     window.history.pushState({}, '', href);
     window.dispatchEvent(new PopStateEvent('popstate'));
+    // Trigger custom event for agricultural buyer dashboard
+    window.dispatchEvent(new CustomEvent('sidebarNavigation'));
   }, []);
 
   return (
@@ -237,8 +239,8 @@ export default function Sidebar() {
               const isActive = location === item.href;
               return (
                 <li key={item.name}>
-                  <Link 
-                    href={item.href}
+                  <button
+                    onClick={() => handleNavigation(item.href)}
                     className={cn(
                       "flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg font-medium transition-colors relative text-sm lg:text-base cursor-pointer hover:cursor-pointer w-full text-left",
                       isActive
@@ -264,7 +266,7 @@ export default function Sidebar() {
                         </span>
                       </div>
                     )}
-                  </Link>
+                  </button>
                 </li>
               );
             })}

@@ -29,15 +29,46 @@ import { useLocation } from "wouter";
 
 export default function AgriculturalBuyerDashboard() {
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(() => {
+    // Initialize with URL parameter if available
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    return (tab && ['overview', 'farmers', 'exporters'].includes(tab)) ? tab : 'overview';
+  });
   
   // Handle URL params for tab switching from sidebar
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab');
-    if (tab && ['overview', 'farmers', 'exporters'].includes(tab)) {
-      setActiveTab(tab);
-    }
+    const checkUrlParams = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      console.log('URL tab parameter:', tab); // Debug log
+      if (tab && ['overview', 'farmers', 'exporters'].includes(tab)) {
+        console.log('Setting active tab to:', tab); // Debug log
+        setActiveTab(tab);
+      }
+    };
+    
+    // Check on mount
+    checkUrlParams();
+    
+    // Listen for URL changes
+    const handleUrlChange = () => {
+      checkUrlParams();
+    };
+    
+    window.addEventListener('popstate', handleUrlChange);
+    
+    // Also listen for custom events from sidebar navigation
+    const handleSidebarNavigation = () => {
+      setTimeout(checkUrlParams, 100); // Small delay to ensure URL is updated
+    };
+    
+    window.addEventListener('sidebarNavigation', handleSidebarNavigation);
+    
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('sidebarNavigation', handleSidebarNavigation);
+    };
   }, []);
 
   // Get buyer info from localStorage
@@ -112,7 +143,12 @@ export default function AgriculturalBuyerDashboard() {
 
       {/* Main Content */}
       <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(value) => {
+          setActiveTab(value);
+          // Update URL without page reload
+          const newUrl = value === 'overview' ? '/agricultural-buyer-dashboard' : `/agricultural-buyer-dashboard?tab=${value}`;
+          window.history.pushState({}, '', newUrl);
+        }}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Business Overview</TabsTrigger>
             <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>

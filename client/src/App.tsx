@@ -202,6 +202,7 @@ import LandInspectorLogin from "@/pages/auth/land-inspector-login";
 import PortInspectorLogin from "@/pages/auth/port-inspector-login";
 import LandMappingDashboard from "@/pages/land-mapping-dashboard";
 import InspectorFarmerLandManagement from "@/pages/inspector-farmer-land-management";
+import LandMappingManager from "@/pages/landmap360/land-mapping-manager";
 
 import NotFound from "@/pages/not-found";
 
@@ -715,6 +716,7 @@ function Router() {
       <Route path="/landmap360/field-surveys" component={InspectorDashboard} />
       <Route path="/landmap360/gps-data" component={InspectorDashboard} />
       <Route path="/landmap360/measurement" component={InspectorDashboard} />
+      <Route path="/landmap360/land-mapping-manager" component={LandMappingManager} />
       <Route path="/mine-watch-dashboard" component={MineWatchDashboard} />
       <Route path="/forest-guard-dashboard" component={ForestGuardDashboard} />
       <Route path="/aqua-trace-dashboard" component={AquaTraceDashboard} />

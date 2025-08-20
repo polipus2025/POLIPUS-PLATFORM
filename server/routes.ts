@@ -10868,5 +10868,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('🚢 Shipping integrations loaded: Maersk, MSC, CMA CGM, Hapag-Lloyd');
   }).catch(err => console.error('Shipping integration error:', err));
 
+  // ===== LAND MAPPING API ROUTES =====
+  // Multiple Land Mappings per Farmer - Created by Land Inspectors
+
+  // Get all farmers for land mapping
+  app.get("/api/farmers", async (req, res) => {
+    try {
+      const farmers = await storage.getFarmers();
+      res.json(farmers);
+    } catch (error) {
+      console.error("Error fetching farmers:", error);
+      res.status(500).json({ message: "Failed to fetch farmers" });
+    }
+  });
+
+  // Get land mappings for specific farmer
+  app.get("/api/farmers/:farmerId/land-mappings", async (req, res) => {
+    try {
+      const farmerId = parseInt(req.params.farmerId);
+      const landMappings = await storage.getFarmerLandMappingsByFarmer(farmerId);
+      res.json(landMappings);
+    } catch (error) {
+      console.error("Error fetching farmer land mappings:", error);
+      res.status(500).json({ message: "Failed to fetch land mappings" });
+    }
+  });
+
+  // Create new land mapping for farmer
+  app.post("/api/land-mappings", async (req, res) => {
+    try {
+      const validatedData = insertFarmerLandMappingSchema.parse(req.body);
+      const landMapping = await storage.createFarmerLandMapping(validatedData);
+      res.json(landMapping);
+    } catch (error) {
+      console.error("Error creating land mapping:", error);
+      res.status(500).json({ message: "Failed to create land mapping" });
+    }
+  });
+
+  // Get inspections for specific land mapping
+  app.get("/api/land-mappings/:mappingId/inspections", async (req, res) => {
+    try {
+      const mappingId = parseInt(req.params.mappingId);
+      const inspections = await storage.getLandMappingInspectionsByLandMapping(mappingId);
+      res.json(inspections);
+    } catch (error) {
+      console.error("Error fetching land mapping inspections:", error);
+      res.status(500).json({ message: "Failed to fetch inspections" });
+    }
+  });
+
+  // Create new land mapping inspection
+  app.post("/api/land-mapping-inspections", async (req, res) => {
+    try {
+      const validatedData = insertLandMappingInspectionSchema.parse(req.body);
+      const inspection = await storage.createLandMappingInspection(validatedData);
+      res.json(inspection);
+    } catch (error) {
+      console.error("Error creating land mapping inspection:", error);
+      res.status(500).json({ message: "Failed to create inspection" });
+    }
+  });
+
+  // Update land mapping
+  app.put("/api/land-mappings/:mappingId", async (req, res) => {
+    try {
+      const mappingId = parseInt(req.params.mappingId);
+      const validatedData = insertFarmerLandMappingSchema.parse(req.body);
+      const landMapping = await storage.updateFarmerLandMapping(mappingId, validatedData);
+      res.json(landMapping);
+    } catch (error) {
+      console.error("Error updating land mapping:", error);
+      res.status(500).json({ message: "Failed to update land mapping" });
+    }
+  });
+
+  // Delete land mapping
+  app.delete("/api/land-mappings/:mappingId", async (req, res) => {
+    try {
+      const mappingId = parseInt(req.params.mappingId);
+      await storage.deleteFarmerLandMapping(mappingId);
+      res.json({ message: "Land mapping deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting land mapping:", error);
+      res.status(500).json({ message: "Failed to delete land mapping" });
+    }
+  });
+
+  // Get land mapping details with GPS data
+  app.get("/api/land-mappings/:mappingId", async (req, res) => {
+    try {
+      const mappingId = parseInt(req.params.mappingId);
+      const landMapping = await storage.getFarmerLandMapping(mappingId);
+      if (!landMapping) {
+        return res.status(404).json({ message: "Land mapping not found" });
+      }
+      res.json(landMapping);
+    } catch (error) {
+      console.error("Error fetching land mapping:", error);
+      res.status(500).json({ message: "Failed to fetch land mapping" });
+    }
+  });
+
   return httpServer;
 }

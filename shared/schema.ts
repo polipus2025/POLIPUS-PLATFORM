@@ -1206,10 +1206,12 @@ export const farmers = pgTable("farmers", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phoneNumber: text("phone_number"),
+  email: text("email"),
   idNumber: text("id_number"),
   county: text("county").notNull(),
   district: text("district"),
   village: text("village"),
+  community: text("community"),
   gpsCoordinates: text("gps_coordinates"),
   farmSize: decimal("farm_size", { precision: 10, scale: 2 }),
   farmSizeUnit: text("farm_size_unit").default("hectares"),
@@ -1220,13 +1222,162 @@ export const farmers = pgTable("farmers", {
   profilePicture: text("profile_picture"), // base64 encoded image or URL
   farmBoundaries: jsonb("farm_boundaries"), // array of GPS boundary points
   landMapData: jsonb("land_map_data"), // comprehensive land analysis data
+  // Family details
+  spouseName: text("spouse_name"),
+  numberOfChildren: integer("number_of_children"),
+  dependents: integer("dependents"),
+  emergencyContact: text("emergency_contact"),
+  emergencyPhone: text("emergency_phone"),
+  familyMembers: text("family_members"),
+  // Additional farming details
+  primaryCrop: text("primary_crop"),
+  secondaryCrops: text("secondary_crops"),
+  farmingExperience: integer("farming_experience"),
+  certifications: text("certifications"),
+  cooperativeMembership: text("cooperative_membership"),
+  landOwnership: text("land_ownership"),
+  irrigationAccess: boolean("irrigation_access"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Farmer Login Credentials Table
+export const farmerCredentials = pgTable("farmer_credentials", {
+  id: serial("id").primaryKey(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  credentialId: text("credential_id").notNull().unique(), // e.g., FRM434349
+  username: text("username").notNull().unique(), // same as credentialId
+  passwordHash: text("password_hash").notNull(),
+  temporaryPassword: text("temporary_password"), // initial password shown to farmer
+  mustChangePassword: boolean("must_change_password").default(true),
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  failedLoginAttempts: integer("failed_login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  generatedBy: text("generated_by").notNull(), // inspector who generated credentials
+  generatedAt: timestamp("generated_at").defaultNow(),
+  passwordChangedAt: timestamp("password_changed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Harvest Alerts and Notifications
+export const harvestAlerts = pgTable("harvest_alerts", {
+  id: serial("id").primaryKey(),
+  alertId: text("alert_id").notNull().unique(),
+  scheduleId: integer("schedule_id").references(() => harvestSchedules.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  alertType: text("alert_type").notNull(), // harvest_ready, harvest_started, harvest_completed, quality_update, price_update
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  priority: text("priority").default("medium"), // low, medium, high, urgent
+  targetAudience: text("target_audience").notNull(), // farmer, buyers, inspectors, all
+  isRead: boolean("is_read").default(false),
+  sentToMarketplace: boolean("sent_to_marketplace").default(false),
+  marketplaceListingId: text("marketplace_listing_id"),
+  geofenceRadius: decimal("geofence_radius", { precision: 8, scale: 2 }).default(50), // km radius for nearby buyers
+  targetCounties: jsonb("target_counties"), // specific counties to target
+  readBy: jsonb("read_by"), // array of user IDs who read this alert
+  actionTaken: jsonb("action_taken"), // actions taken by buyers/inspectors
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Farmer-Buyer Marketplace Connection
+export const marketplaceListings = pgTable("marketplace_listings", {
+  id: serial("id").primaryKey(),
+  listingId: text("listing_id").notNull().unique(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  scheduleId: integer("schedule_id").references(() => harvestSchedules.id).notNull(),
+  cropType: text("crop_type").notNull(),
+  cropVariety: text("crop_variety"),
+  quantityAvailable: decimal("quantity_available", { precision: 10, scale: 2 }).notNull(),
+  unit: text("unit").default("kg"),
+  qualityGrade: text("quality_grade"),
+  pricePerUnit: decimal("price_per_unit", { precision: 8, scale: 2 }),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }),
+  harvestDate: timestamp("harvest_date").notNull(),
+  availabilityStartDate: timestamp("availability_start_date").notNull(),
+  availabilityEndDate: timestamp("availability_end_date"),
+  location: text("location").notNull(), // county, district, village
+  gpsCoordinates: text("gps_coordinates"),
+  transportationOptions: jsonb("transportation_options"), // available transport methods
+  storageConditions: text("storage_conditions"),
+  paymentTerms: text("payment_terms"),
+  minimumOrderQuantity: decimal("minimum_order_quantity", { precision: 8, scale: 2 }),
+  maximumOrderQuantity: decimal("maximum_order_quantity", { precision: 8, scale: 2 }),
+  description: text("description"),
+  photos: jsonb("photos"), // product photos
+  certifications: jsonb("certifications"), // organic, fair trade, etc.
+  status: text("status").default("active"), // active, sold, expired, withdrawn
+  urgencyLevel: text("urgency_level").default("normal"), // normal, urgent, critical
+  negotiable: boolean("negotiable").default(true),
+  contactPreference: text("contact_preference").default("phone"), // phone, email, in_person
+  viewCount: integer("view_count").default(0),
+  inquiryCount: integer("inquiry_count").default(0),
+  matchedBuyers: jsonb("matched_buyers"), // automatically matched buyers
+  promotedListing: boolean("promoted_listing").default(false),
+  keywords: text("keywords"), // searchable keywords
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Buyer Interest and Negotiations
+export const buyerInquiries = pgTable("buyer_inquiries", {
+  id: serial("id").primaryKey(),
+  inquiryId: text("inquiry_id").notNull().unique(),
+  listingId: integer("listing_id").references(() => marketplaceListings.id).notNull(),
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  inquiryType: text("inquiry_type").notNull(), // price_inquiry, quantity_check, quality_details, negotiation, order_intent
+  message: text("message").notNull(),
+  proposedPrice: decimal("proposed_price", { precision: 8, scale: 2 }),
+  proposedQuantity: decimal("proposed_quantity", { precision: 10, scale: 2 }),
+  preferredPaymentTerms: text("preferred_payment_terms"),
+  preferredDeliveryDate: timestamp("preferred_delivery_date"),
+  additionalRequirements: text("additional_requirements"),
+  status: text("status").default("pending"), // pending, responded, negotiating, accepted, rejected, completed
+  priority: text("priority").default("normal"), // normal, high, urgent
+  farmerResponse: text("farmer_response"),
+  farmerResponseDate: timestamp("farmer_response_date"),
+  negotiationHistory: jsonb("negotiation_history"), // conversation thread
+  finalAgreedPrice: decimal("final_agreed_price", { precision: 8, scale: 2 }),
+  finalAgreedQuantity: decimal("final_agreed_quantity", { precision: 10, scale: 2 }),
+  dealClosed: boolean("deal_closed").default(false),
+  dealClosedDate: timestamp("deal_closed_date"),
+  transactionId: text("transaction_id"),
+  rating: integer("rating"), // 1-5 star rating after transaction
+  feedback: text("feedback"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertFarmerSchema = createInsertSchema(farmers).omit({
   id: true,
   onboardingDate: true,
   createdAt: true,
+});
+
+export const insertFarmerCredentialSchema = createInsertSchema(farmerCredentials).omit({
+  id: true,
+  passwordHash: true,
+  generatedAt: true,
+  createdAt: true,
+});
+
+export const insertHarvestAlertSchema = createInsertSchema(harvestAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMarketplaceListingSchema = createInsertSchema(marketplaceListings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBuyerInquirySchema = createInsertSchema(buyerInquiries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const farmPlots = pgTable("farm_plots", {

@@ -14,6 +14,9 @@ import Landing from "@/pages/landing";
 import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import FarmerLogin from "@/pages/auth/farmer-login";
+import FarmerLoginPortal from "@/pages/farmer-login-portal";
+import FarmerDashboard from "@/pages/farmer-dashboard";
+import FarmerTestDemo from "@/pages/farmer-test-demo";
 import FieldAgentLogin from "@/pages/auth/field-agent-login";
 import TestFieldAgentLogin from "@/pages/auth/test-field-agent-login";
 import MobileFieldAgentLogin from "@/pages/auth/mobile-field-agent-login";
@@ -128,7 +131,6 @@ import DirectorDashboard from "@/pages/director-dashboard";
 
 import FieldAgentDashboard from "@/pages/field-agent-dashboard";
 import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
-import FarmerDashboard from "@/pages/farmer-dashboard";
 import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
 import BuyerFarmerConnections from "@/pages/buyer-farmer-connections";
 import BuyerExporterNetwork from "@/pages/buyer-exporter-network";
@@ -238,6 +240,9 @@ function Router() {
       <Route path="/regulatory-login" component={RegulatoryLogin} />
       <Route path="/auth/regulatory-login" component={RegulatoryLogin} />
       <Route path="/farmer-login" component={FarmerLogin} />
+      <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
+      <Route path="/farmer-dashboard" component={FarmerDashboard} />
+      <Route path="/farmer-test-demo" component={FarmerTestDemo} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/inspector-login" component={InspectorPortal} />
       <Route path="/test-field-agent-login" component={TestFieldAgentLogin} />

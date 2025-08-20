@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { registerFarmerRoutes } from "./farmer-routes";
 import { paymentService } from "./payment-service";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -164,6 +165,65 @@ import { registerPolipusRoutes } from './polipus-routes';
 import path from 'path';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Register farmer routes
+  registerFarmerRoutes(app);
+
+  // Test farmer creation endpoint
+  app.get("/api/create-test-farmer", async (req, res) => {
+    try {
+      console.log("🌱 Creating test farmer account...");
+      
+      // Mock test farmer data with land mapping
+      const testFarmer = {
+        id: 1,
+        farmerId: "FARMER-TEST-2025",
+        firstName: "John",
+        lastName: "Konneh", 
+        email: "john.konneh@test.com",
+        phoneNumber: "+231777123456",
+        county: "Nimba",
+        district: "Saclepea",
+        village: "Karnplay",
+        farmSize: 5.2,
+        primaryCrop: "Cocoa",
+        secondaryCrops: "Coffee, Plantain",
+        gpsCoordinates: "7.7491, -8.6716",
+        landMapData: {
+          totalArea: 5.2,
+          mappingAccuracy: "high",
+          soilType: "clay-loam",
+          waterSource: "seasonal_stream",
+          slopeGradient: "gentle",
+          mappedBy: "Land Inspector Demo",
+          mappingDate: new Date().toISOString(),
+          eudrCompliance: true,
+          deforestationRisk: "low"
+        }
+      };
+
+      res.json({
+        success: true,
+        message: "Test farmer created successfully!",
+        farmer: testFarmer,
+        credentials: {
+          credentialId: "FRM434923",
+          temporaryPassword: "Test2025!"
+        },
+        loginInstructions: {
+          url: "/farmer-login-portal",
+          steps: [
+            "1. Go to /farmer-login-portal",
+            "2. Enter Login ID: FRM434923", 
+            "3. Enter Password: Test2025!",
+            "4. Click 'Login to Farmer Portal'"
+          ]
+        }
+      });
+    } catch (error) {
+      console.error("❌ Error creating test farmer:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
   
   // Comprehensive Platform Documentation PDF Download
   app.get("/api/download/platform-documentation", async (req, res) => {

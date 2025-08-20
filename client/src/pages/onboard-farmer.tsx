@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users } from "lucide-react";
+import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, Copy, Eye, EyeOff } from "lucide-react";
 import { Link } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
@@ -103,6 +103,13 @@ export default function OnboardFarmer() {
     );
   };
 
+  const [showCredentialsModal, setShowCredentialsModal] = useState({
+    show: false,
+    farmerName: "",
+    credentialId: "",
+    temporaryPassword: ""
+  });
+
   // Create farmer mutation
   const createFarmer = useMutation({
     mutationFn: async (data: any) => {
@@ -120,10 +127,20 @@ export default function OnboardFarmer() {
         })
       });
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
+      const { farmer, credentials } = response;
+      
+      // Show credentials modal
+      setShowCredentialsModal({
+        show: true,
+        farmerName: `${farmer.firstName} ${farmer.lastName}`,
+        credentialId: credentials.credentialId,
+        temporaryPassword: credentials.temporaryPassword
+      });
+      
       toast({
-        title: "Farmer Onboarded Successfully",
-        description: "Farmer has been registered and approved by inspector",
+        title: "Farmer Onboarded Successfully!",
+        description: `Login credentials generated: ${credentials.credentialId}`,
       });
       
       // Reset form
@@ -618,6 +635,82 @@ export default function OnboardFarmer() {
           </div>
         </form>
       </div>
+
+      {/* Farmer Credentials Modal */}
+      {showCredentialsModal.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md bg-green-50 border-green-200">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <Key className="w-8 h-8 text-green-600" />
+                </div>
+              </div>
+              <CardTitle className="text-green-800">Farmer Credentials Generated!</CardTitle>
+              <p className="text-green-600">
+                Login credentials for: {showCredentialsModal.farmerName}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-white p-4 rounded-lg border">
+                <Label className="text-sm font-medium text-gray-600">Login ID</Label>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="font-mono text-lg font-bold text-gray-900">
+                    {showCredentialsModal.credentialId}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigator.clipboard.writeText(showCredentialsModal.credentialId)}
+                    data-testid="copy-credential-id"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="bg-white p-4 rounded-lg border">
+                <Label className="text-sm font-medium text-gray-600">Temporary Password</Label>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="font-mono text-lg font-bold text-gray-900">
+                    {showCredentialsModal.temporaryPassword}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigator.clipboard.writeText(showCredentialsModal.temporaryPassword)}
+                    data-testid="copy-password"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-yellow-800 text-sm">
+                  <strong>Important:</strong> Please provide these credentials to the farmer. 
+                  They will be required to change the password on first login.
+                </p>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-blue-800 text-sm">
+                  <strong>Farmer Portal Access:</strong> Farmers can login at the "Farmer Login" 
+                  page to access their land mapping data, harvesting schedules, and marketplace.
+                </p>
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={() => setShowCredentialsModal({ show: false, farmerName: "", credentialId: "", temporaryPassword: "" })}
+                data-testid="close-credentials-modal"
+              >
+                Close
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

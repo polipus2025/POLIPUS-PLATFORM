@@ -1,471 +1,621 @@
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { 
-  Leaf, 
-  MapPin, 
-  TrendingUp, 
-  Package, 
-  Calendar,
-  Users,
-  Truck,
-  FileText,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Eye,
-  Plus,
-  Download,
-  Shield,
-  X,
-  DollarSign
+  MapPin, Calendar, Clock, Sprout, DollarSign, Bell, 
+  TrendingUp, BarChart3, Users, Phone, Mail, Settings,
+  LogOut, Home, Leaf, AlertCircle, CheckCircle,
+  MessageSquare, Package, Star, Eye, User
 } from "lucide-react";
 import { Link } from "wouter";
-import { SoftCommodityPricing } from '@/components/SoftCommodityPricing';
+
+interface FarmerData {
+  id: number;
+  farmerId: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  county: string;
+  district?: string;
+  village?: string;
+  farmSize?: number;
+  primaryCrop?: string;
+  secondaryCrops?: string;
+  landMapData?: any;
+  profilePicture?: string;
+}
+
+interface HarvestSchedule {
+  id: number;
+  scheduleId: string;
+  scheduleName: string;
+  cropType: string;
+  cropVariety?: string;
+  plantingArea: number;
+  expectedHarvestStartDate: string;
+  status: string;
+  expectedYield?: number;
+  marketingPlan?: string;
+  expectedPrice?: number;
+}
+
+interface MarketplaceListing {
+  id: number;
+  listingId: string;
+  cropType: string;
+  quantityAvailable: number;
+  pricePerUnit: number;
+  harvestDate: string;
+  status: string;
+  viewCount: number;
+  inquiryCount: number;
+}
 
 export default function FarmerDashboard() {
-  // Get farmer ID from localStorage
-  const farmerId = localStorage.getItem("farmerId") || "FRM-2024-001";
-  const farmerName = localStorage.getItem("farmerFirstName") || "Moses";
-  const [showEUDRViewer, setShowEUDRViewer] = useState(false);
-  
-  // Fetch farmer-specific data
-  const { data: farmPlots } = useQuery({ queryKey: ["/api/farm-plots"] });
-  const { data: cropPlans } = useQuery({ queryKey: ["/api/crop-plans"] });
-  const { data: trackingRecords } = useQuery({ queryKey: ["/api/tracking-records"] });
-  const { data: alerts } = useQuery({ queryKey: ["/api/alerts", "unreadOnly=true"] });
+  const { toast } = useToast();
+  const [farmerId] = useState(() => localStorage.getItem("farmerId") || "");
+  const [farmerName] = useState(() => localStorage.getItem("farmerName") || "Farmer");
 
-  // Calculate farmer statistics
-  const totalPlots = Array.isArray(farmPlots) ? farmPlots.length : 0;
-  const activeCropPlans = Array.isArray(cropPlans) ? cropPlans.filter((plan: any) => plan.status === 'active').length : 0;
-  const totalHarvested = Array.isArray(farmPlots) ? farmPlots.reduce((sum: number, plot: any) => {
-    return sum + (parseFloat(plot.harvestedQuantity?.replace(/[^\d.]/g, '') || '0'));
-  }, 0) : 0;
-  const pendingInspections = Array.isArray(trackingRecords) ? trackingRecords.filter((record: any) => 
-    record.status === 'pending_inspection'
-  ).length : 0;
+  // Fetch farmer data
+  const { data: farmer } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}`],
+    enabled: !!farmerId
+  });
+
+  // Fetch land mappings
+  const { data: landMappings } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}/land-mappings`],
+    enabled: !!farmerId
+  });
+
+  // Fetch harvest schedules
+  const { data: harvestSchedules } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}/harvest-schedules`],
+    enabled: !!farmerId
+  });
+
+  // Fetch marketplace listings
+  const { data: marketplaceListings } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}/marketplace-listings`],
+    enabled: !!farmerId
+  });
+
+  // Fetch buyer inquiries
+  const { data: buyerInquiries } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}/buyer-inquiries`],
+    enabled: !!farmerId
+  });
+
+  // Fetch harvest alerts
+  const { data: harvestAlerts } = useQuery({
+    queryKey: [`/api/farmers/${farmerId}/harvest-alerts`],
+    enabled: !!farmerId
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("farmerId");
+    localStorage.removeItem("farmerName");
+    localStorage.removeItem("farmerToken");
+    window.location.href = "/";
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "ready_for_harvest": return "bg-green-100 text-green-800";
+      case "harvested": return "bg-blue-100 text-blue-800";
+      case "planted": return "bg-yellow-100 text-yellow-800";
+      case "planned": return "bg-gray-100 text-gray-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high": return "bg-red-100 text-red-800";
+      case "medium": return "bg-yellow-100 text-yellow-800";
+      case "low": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-3 sm:p-0">
-      {/* Back to Polipus Button */}
-      <div className="mb-4">
-        <Link href="/polipus" className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Polipus Platform
-        </Link>
-      </div>
-
-      {/* Mobile-Responsive Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Welcome back, {farmerName}!
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
-            Farmer ID: {farmerId} | Your farm management dashboard
-          </p>
-        </div>
-        <div className="flex gap-3 w-full sm:w-auto">
-          <Link href="/batch-code-generator" className="flex-1 sm:flex-none">
-            <Button className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
-              <Package className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Generate Batch Code</span>
-              <span className="sm:hidden">New Batch</span>
-            </Button>
-          </Link>
-          <Link href="/farmer-payment-services" className="flex-1 sm:flex-none">
-            <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50 w-full sm:w-auto">
-              <DollarSign className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Payment Services</span>
-              <span className="sm:hidden">Payments</span>
-            </Button>
-          </Link>
-          <Button 
-            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-            onClick={() => setShowEUDRViewer(true)}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">View EUDR Pack</span>
-            <span className="sm:hidden">EUDR Pack</span>
-          </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Home className="w-8 h-8 text-green-600 mr-3" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Farmer Portal</h1>
+                <p className="text-sm text-gray-600">Welcome, {farmerName}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Badge variant="outline" className="text-green-600 border-green-600">
+                ID: {farmerId}
+              </Badge>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Mobile-Responsive Statistics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-green-600">Total Farm Plots</p>
-                <p className="text-2xl sm:text-3xl font-bold text-green-900">{totalPlots}</p>
-                <p className="text-xs text-green-600 mt-1">Registered plots</p>
-              </div>
-              <MapPin className="h-8 w-8 sm:h-12 sm:w-12 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-blue-600">Active Crop Plans</p>
-                <p className="text-2xl sm:text-3xl font-bold text-blue-900">{activeCropPlans}</p>
-                <p className="text-xs text-blue-600 mt-1">Current season</p>
-              </div>
-              <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-orange-600">Total Harvested</p>
-                <p className="text-2xl sm:text-3xl font-bold text-orange-900">{totalHarvested.toFixed(1)}</p>
-                <p className="text-xs text-orange-600 mt-1">Metric tons</p>
-              </div>
-              <Package className="h-8 w-8 sm:h-12 sm:w-12 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-purple-600">Pending Inspections</p>
-                <p className="text-2xl sm:text-3xl font-bold text-purple-900">{pendingInspections}</p>
-                <p className="text-xs text-purple-600 mt-1">Awaiting review</p>
-              </div>
-              <Clock className="h-8 w-8 sm:h-12 sm:w-12 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Activities and Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Farm Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              Recent Farm Activities
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Coffee Harvest Completed</p>
-                  <p className="text-xs text-gray-600">Plot PLT-001 - 2.5 tons harvested</p>
-                  <p className="text-xs text-gray-500">2 days ago</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Land Mappings</p>
+                  <p className="text-2xl font-bold text-gray-900">{Array.isArray(landMappings) ? landMappings.length : 0}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                <Package className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Batch Code Generated</p>
-                  <p className="text-xs text-gray-600">COF-2024-001 for coffee export</p>
-                  <p className="text-xs text-gray-500">3 days ago</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Harvest Schedules</p>
+                  <p className="text-2xl font-bold text-gray-900">{Array.isArray(harvestSchedules) ? harvestSchedules.length : 0}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg">
-                <Calendar className="h-5 w-5 text-yellow-600 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Crop Planning Updated</p>
-                  <p className="text-xs text-gray-600">Next season cocoa planning</p>
-                  <p className="text-xs text-gray-500">1 week ago</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Package className="w-6 h-6 text-purple-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Marketplace Listings</p>
+                  <p className="text-2xl font-bold text-gray-900">{Array.isArray(marketplaceListings) ? marketplaceListings.length : 0}</p>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-green-600" />
-              Farm Management Tools
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              <Link href="/farm-plots">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <MapPin className="h-6 w-6 text-green-600" />
-                  <span className="text-sm">View Farm Plots</span>
-                </Button>
-              </Link>
-
-              <Link href="/farmer-gps-mapping">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <MapPin className="h-6 w-6 text-blue-600" />
-                  <span className="text-sm">GPS Mapping</span>
-                </Button>
-              </Link>
-
-              <Link href="/crop-planning">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <Calendar className="h-6 w-6 text-orange-600" />
-                  <span className="text-sm">Crop Planning</span>
-                </Button>
-              </Link>
-
-              <Link href="/batch-code-generator">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <Package className="h-6 w-6 text-purple-600" />
-                  <span className="text-sm">Batch Codes</span>
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-
-      </div>
-
-      {/* Farm Plot Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-green-600" />
-            Your Farm Plots Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.isArray(farmPlots) && farmPlots.length > 0 ? farmPlots.slice(0, 6).map((plot: any) => (
-              <div key={plot.id} className="border rounded-lg p-4 bg-gradient-to-br from-green-50 to-emerald-50">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-green-900">{plot.plotName}</h4>
-                  <Badge variant={plot.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                    {plot.status}
-                  </Badge>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-orange-600" />
                 </div>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <p><strong>Size:</strong> {plot.plotSize}</p>
-                  <p><strong>Crop:</strong> {plot.cropType}</p>
-                  <p><strong>County:</strong> {plot.county}</p>
-                  {plot.harvestedQuantity && (
-                    <p><strong>Last Harvest:</strong> {plot.harvestedQuantity}</p>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Buyer Inquiries</p>
+                  <p className="text-2xl font-bold text-gray-900">{Array.isArray(buyerInquiries) ? buyerInquiries.length : 0}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="mappings">Land Mappings</TabsTrigger>
+            <TabsTrigger value="schedules">Harvest Schedules</TabsTrigger>
+            <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+            <TabsTrigger value="inquiries">Buyer Inquiries</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Farmer Profile */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    Farmer Profile
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {farmer && (
+                    <>
+                      <div className="flex items-center space-x-4">
+                        {farmer.profilePicture ? (
+                          <img 
+                            src={farmer.profilePicture} 
+                            alt="Profile" 
+                            className="w-16 h-16 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                            <User className="w-8 h-8 text-gray-400" />
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="text-lg font-semibold">{farmer.firstName} {farmer.lastName}</h3>
+                          <p className="text-gray-600">{farmer.county}, {farmer.district}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600">Primary Crop</p>
+                          <p className="font-medium">{farmer.primaryCrop || "Not specified"}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Farm Size</p>
+                          <p className="font-medium">{farmer.farmSize || "Not specified"} hectares</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Phone</p>
+                          <p className="font-medium">{farmer.phoneNumber || "Not provided"}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Email</p>
+                          <p className="font-medium">{farmer.email || "Not provided"}</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Bell className="w-5 h-5 mr-2" />
+                    Recent Alerts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {harvestAlerts?.slice(0, 5).map((alert: any) => (
+                      <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{alert.title}</p>
+                          <p className="text-xs text-gray-600">{alert.message}</p>
+                          <Badge size="sm" className={getPriorityColor(alert.priority)}>
+                            {alert.priority}
+                          </Badge>
+                        </div>
+                      </div>
+                    )) || (
+                      <p className="text-gray-500 text-center py-4">No recent alerts</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Land Mappings Tab */}
+          <TabsContent value="mappings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  My Land Mappings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {landMappings?.map((mapping: any) => (
+                    <Card key={mapping.id} className="border border-gray-200">
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold mb-2">{mapping.landMappingName}</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Area:</span>
+                            <span className="font-medium">{mapping.totalArea} hectares</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Land Type:</span>
+                            <span className="font-medium">{mapping.landType}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Current Use:</span>
+                            <span className="font-medium">{mapping.currentUse}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Status:</span>
+                            <Badge size="sm" className={mapping.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                              {mapping.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )) || (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                      No land mappings available. Contact your land inspector for mapping.
+                    </div>
                   )}
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <Link href="/farm-plots">
-                    <Button size="sm" variant="outline" className="text-xs">
-                      <Eye className="h-3 w-3 mr-1" />
-                      View Details
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Harvest Schedules Tab */}
+          <TabsContent value="schedules" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="flex items-center">
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Harvest Schedules
+                  </CardTitle>
+                  <Link href="/farmer-add-harvest-schedule">
+                    <Button>
+                      <Sprout className="w-4 h-4 mr-2" />
+                      Add Schedule
                     </Button>
                   </Link>
                 </div>
-              </div>
-            )) : (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No farm plots registered yet</p>
-                <Link href="/farm-plots">
-                  <Button className="mt-3 bg-green-600 hover:bg-green-700">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Register Your First Plot
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* System Alerts */}
-      {Array.isArray(alerts) && alerts.length > 0 && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-800">
-              <AlertTriangle className="h-5 w-5" />
-              Farm Alerts & Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {alerts.slice(0, 3).map((alert: any, index: number) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg border">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{alert.title}</p>
-                    <p className="text-xs text-gray-600">{alert.message}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* SECURE EUDR COMPLIANCE PACK VIEWER - VIEW ONLY */}
-      <Dialog open={showEUDRViewer} onOpenChange={setShowEUDRViewer}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-green-600" />
-              EUDR Compliance Pack - View Only
-              <Badge variant="secondary" className="ml-auto">APPROVED</Badge>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-6 p-4 bg-gray-50 rounded-lg" style={{
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            MozUserSelect: 'none',
-            msUserSelect: 'none',
-            pointerEvents: 'auto'
-          }}>
-            {/* Security Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-blue-900">Secure Document Viewing</h4>
-                  <p className="text-sm text-blue-700 mt-1">
-                    This compliance pack is for viewing only. Download and screenshot functions are disabled for security.
-                    Generated automatically upon your farmer registration.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Document 1: Cover Sheet */}
-            <Card>
-              <CardHeader className="bg-blue-600 text-white">
-                <CardTitle className="text-lg">LACRA - EUDR Compliance Pack</CardTitle>
-                <p className="text-blue-100">Complete Documentation Package</p>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Pack ID:</span> EUDR-{farmerId}-AUTO
-                  </div>
-                  <div>
-                    <span className="font-medium">Date:</span> {new Date().toLocaleDateString()}
-                  </div>
-                  <div>
-                    <span className="font-medium">Farmer:</span> {farmerName}
-                  </div>
-                  <div>
-                    <span className="font-medium">Status:</span> 
-                    <Badge className="ml-2 bg-green-100 text-green-800">APPROVED</Badge>
-                  </div>
-                </div>
-                
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-green-900 mb-2">Compliance Summary</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-green-800">
-                    <div>Overall Score: 95/100 (EXCELLENT)</div>
-                    <div>Risk Level: LOW RISK</div>
-                    <div>Deforestation Risk: NONE DETECTED</div>
-                    <div>Forest Protection: 98/100</div>
-                  </div>
-                </div>
+              <CardContent>
+                <div className="space-y-4">
+                  {harvestSchedules?.map((schedule: HarvestSchedule) => (
+                    <Card key={schedule.id} className="border border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold">{schedule.scheduleName}</h4>
+                            <p className="text-sm text-gray-600">{schedule.cropType} {schedule.cropVariety && `- ${schedule.cropVariety}`}</p>
+                          </div>
+                          <Badge className={getStatusColor(schedule.status)}>
+                            {schedule.status.replace("_", " ")}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-600">Area</p>
+                            <p className="font-medium">{schedule.plantingArea} hectares</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Expected Harvest</p>
+                            <p className="font-medium">{new Date(schedule.expectedHarvestStartDate).toLocaleDateString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Expected Yield</p>
+                            <p className="font-medium">{schedule.expectedYield || "TBD"} kg</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Expected Price</p>
+                            <p className="font-medium">${schedule.expectedPrice || "TBD"}/kg</p>
+                          </div>
+                        </div>
 
-                <div>
-                  <h4 className="font-medium mb-2">Documents Included:</h4>
-                  <div className="space-y-1 text-sm text-gray-600">
-                    <div>1. Cover Sheet (This Document)</div>
-                    <div>2. Export Eligibility Certificate</div>
-                    <div>3. EUDR Compliance Assessment</div>
-                    <div>4. Deforestation Analysis Report</div>
-                    <div>5. Due Diligence Statement</div>
-                    <div>6. Supply Chain Traceability Report</div>
-                  </div>
+                        {schedule.status === "ready_for_harvest" && (
+                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <p className="text-green-800 text-sm font-medium">
+                              🌾 Ready for harvest! Consider listing in marketplace for buyers.
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      No harvest schedules yet. Add your first schedule to get started.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Document 2: Export Certificate */}
+          {/* Marketplace Tab */}
+          <TabsContent value="marketplace" className="space-y-6">
             <Card>
-              <CardHeader className="bg-red-600 text-white">
-                <CardTitle className="text-lg">Export Eligibility Certificate</CardTitle>
-                <p className="text-red-100">Certificate No: LACRA-EXP-{farmerId}</p>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="flex items-center">
+                    <Package className="w-5 h-5 mr-2" />
+                    My Marketplace Listings
+                  </CardTitle>
+                  <Link href="/farmer-create-listing">
+                    <Button>
+                      <DollarSign className="w-4 h-4 mr-2" />
+                      Create Listing
+                    </Button>
+                  </Link>
+                </div>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Certification Statement</h4>
-                  <p className="text-sm text-gray-700">
-                    This certifies that your agricultural commodity is eligible for export from Liberia 
-                    and meets all regulatory requirements for European Union markets.
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="font-medium">Farmer Name:</span> {farmerName}</div>
-                  <div><span className="font-medium">Farm Location:</span> Liberia</div>
-                  <div><span className="font-medium">Commodity Type:</span> Agricultural Commodity</div>
-                  <div><span className="font-medium">Quality Grade:</span> Grade A Premium</div>
-                </div>
-
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <h5 className="font-medium text-green-900 mb-2">Certification Confirmed:</h5>
-                  <div className="space-y-1 text-sm text-green-800">
-                    <div>✓ All LACRA export requirements met</div>
-                    <div>✓ EUDR compliance verified</div>
-                    <div>✓ Quality standards confirmed</div>
-                    <div>✓ Export approved for EU markets</div>
-                  </div>
+              <CardContent>
+                <div className="space-y-4">
+                  {marketplaceListings?.map((listing: MarketplaceListing) => (
+                    <Card key={listing.id} className="border border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold">{listing.cropType}</h4>
+                            <p className="text-sm text-gray-600">Listed on {new Date(listing.harvestDate).toLocaleDateString()}</p>
+                          </div>
+                          <Badge className={listing.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                            {listing.status}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-600">Quantity</p>
+                            <p className="font-medium">{listing.quantityAvailable} kg</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Price</p>
+                            <p className="font-medium">${listing.pricePerUnit}/kg</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Views</p>
+                            <p className="font-medium flex items-center">
+                              <Eye className="w-4 h-4 mr-1" />
+                              {listing.viewCount}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Inquiries</p>
+                            <p className="font-medium flex items-center">
+                              <MessageSquare className="w-4 h-4 mr-1" />
+                              {listing.inquiryCount}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      No marketplace listings yet. Create your first listing to connect with buyers.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Document 3: Compliance Assessment */}
+          {/* Buyer Inquiries Tab */}
+          <TabsContent value="inquiries" className="space-y-6">
             <Card>
-              <CardHeader className="bg-green-600 text-white">
-                <CardTitle className="text-lg">EUDR Compliance Assessment</CardTitle>
-                <p className="text-green-100">Assessment ID: EUDR-ASSESS-{farmerId}</p>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="w-5 h-5 mr-2" />
+                  Buyer Inquiries & Negotiations
+                </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="font-medium">Assessment Date:</span> {new Date().toLocaleDateString()}</div>
-                  <div><span className="font-medium">Result:</span> COMPLIANT - APPROVED</div>
-                </div>
-                
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">Compliance Scores</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-blue-800">
-                    <div>Overall Compliance: 95/100 (EXCELLENT)</div>
-                    <div>Deforestation Risk: 98/100 (NO RISK)</div>
-                    <div>Supply Chain: 94/100 (EXCELLENT)</div>
-                    <div>Documentation: 96/100 (EXCELLENT)</div>
-                  </div>
+              <CardContent>
+                <div className="space-y-4">
+                  {buyerInquiries?.map((inquiry: any) => (
+                    <Card key={inquiry.id} className="border border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold">Inquiry from Buyer #{inquiry.buyerId}</h4>
+                            <p className="text-sm text-gray-600">{inquiry.inquiryType.replace("_", " ")}</p>
+                          </div>
+                          <Badge className={inquiry.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
+                            {inquiry.status}
+                          </Badge>
+                        </div>
+                        
+                        <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                          <p className="text-sm">{inquiry.message}</p>
+                        </div>
+
+                        {inquiry.proposedPrice && (
+                          <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                            <div>
+                              <p className="text-gray-600">Proposed Price</p>
+                              <p className="font-medium">${inquiry.proposedPrice}/kg</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600">Proposed Quantity</p>
+                              <p className="font-medium">{inquiry.proposedQuantity} kg</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {inquiry.status === "pending" && (
+                          <div className="flex space-x-2">
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Accept
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <MessageSquare className="w-4 h-4 mr-1" />
+                              Negotiate
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      No buyer inquiries yet. Create marketplace listings to attract buyers.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Footer */}
-            <div className="text-center text-xs text-gray-500 border-t pt-4">
-              Generated: {new Date().toLocaleDateString()} | compliance@lacra.gov.lr | cert@ecoenviro.com
-              <br />
-              <span className="text-blue-600">🔒 Secure viewing mode - Download disabled for document protection</span>
-            </div>
-          </div>
-          
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setShowEUDRViewer(false)}>
-              <X className="h-4 w-4 mr-2" />
-              Close Viewer
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          {/* Alerts Tab */}
+          <TabsContent value="alerts" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Bell className="w-5 h-5 mr-2" />
+                  Harvest Alerts & Notifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {harvestAlerts?.map((alert: any) => (
+                    <Card key={alert.id} className="border border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-start space-x-3">
+                            <div className={`w-2 h-2 rounded-full mt-2 ${
+                              alert.priority === "high" ? "bg-red-500" : 
+                              alert.priority === "medium" ? "bg-yellow-500" : "bg-green-500"
+                            }`} />
+                            <div>
+                              <h4 className="font-semibold">{alert.title}</h4>
+                              <p className="text-sm text-gray-600">{alert.message}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge size="sm" className={getPriorityColor(alert.priority)}>
+                              {alert.priority}
+                            </Badge>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {new Date(alert.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+
+                        {alert.alertType === "harvest_ready" && (
+                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <p className="text-green-800 text-sm">
+                              🌾 Your crop is ready for harvest! Consider creating a marketplace listing.
+                            </p>
+                            <Link href="/farmer-create-listing">
+                              <Button size="sm" className="mt-2">
+                                Create Listing
+                              </Button>
+                            </Link>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      No alerts at this time. Alerts will appear here when your crops are ready for harvest.
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

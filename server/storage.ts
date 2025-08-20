@@ -193,7 +193,10 @@ import {
   type InsertExporter,
   type InsertExporterCredential,
   type InsertExporterDocument,
-  type InsertExporterTransaction
+  type InsertExporterTransaction,
+  softCommodities,
+  type SoftCommodity,
+  type InsertSoftCommodity
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -689,6 +692,12 @@ export interface IStorage {
   getHarvestScheduleMonitoringByInspector(inspectorId: string): Promise<HarvestScheduleMonitoring[]>;
   createHarvestScheduleMonitoring(monitoring: InsertHarvestScheduleMonitoring): Promise<HarvestScheduleMonitoring>;
   updateHarvestScheduleMonitoring(id: number, monitoring: Partial<HarvestScheduleMonitoring>): Promise<HarvestScheduleMonitoring | undefined>;
+
+  // Soft Commodity Pricing methods
+  getSoftCommodities(): Promise<SoftCommodity[]>;
+  createSoftCommodity(commodity: InsertSoftCommodity): Promise<SoftCommodity>;
+  updateSoftCommodity(id: number, commodity: Partial<SoftCommodity>): Promise<SoftCommodity | undefined>;
+  deleteSoftCommodity(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2720,6 +2729,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(harvestScheduleMonitoring.id, id))
       .returning();
     return updated || undefined;
+  }
+
+  // Soft Commodity Pricing methods
+  async getSoftCommodities(): Promise<SoftCommodity[]> {
+    return await db.select().from(softCommodities).where(eq(softCommodities.isActive, true)).orderBy(desc(softCommodities.effectiveDate));
+  }
+
+  async createSoftCommodity(commodity: InsertSoftCommodity): Promise<SoftCommodity> {
+    const [newCommodity] = await db.insert(softCommodities).values(commodity).returning();
+    return newCommodity;
+  }
+
+  async updateSoftCommodity(id: number, commodity: Partial<SoftCommodity>): Promise<SoftCommodity | undefined> {
+    const [updated] = await db.update(softCommodities)
+      .set({ ...commodity, updatedAt: new Date() })
+      .where(eq(softCommodities.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteSoftCommodity(id: number): Promise<void> {
+    await db.update(softCommodities)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(softCommodities.id, id));
   }
 }
 

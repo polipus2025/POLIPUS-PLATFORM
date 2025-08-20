@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar, jsonb } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -2314,6 +2315,31 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// LACRA Soft Commodity Pricing System
+export const softCommodities = pgTable("soft_commodities", {
+  id: serial("id").primaryKey(),
+  commodityType: varchar("commodity_type", { length: 100 }).notNull(), // cocoa, coffee, rubber, etc.
+  grade: varchar("grade", { length: 50 }).notNull(), // subgrade, grade 2, grade 1, premium
+  pricePerTon: decimal("price_per_ton", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
+  effectiveDate: timestamp("effective_date").defaultNow().notNull(),
+  updatedBy: varchar("updated_by").notNull(), // DDGOTS user ID
+  isActive: boolean("is_active").default(true).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const softCommodityRelations = relations(softCommodities, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [softCommodities.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export type SoftCommodity = typeof softCommodities.$inferSelect;
+export type InsertSoftCommodity = typeof softCommodities.$inferInsert;
 
 // === AGRITRACE WORKFLOW SYSTEM ===
 

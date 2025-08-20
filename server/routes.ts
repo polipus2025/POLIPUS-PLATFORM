@@ -174,6 +174,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to generate documentation" });
     }
   });
+
+  // Soft Commodity Pricing API Routes
+  app.get("/api/soft-commodities", async (req, res) => {
+    try {
+      const commodities = await storage.getSoftCommodities();
+      res.json(commodities);
+    } catch (error) {
+      console.error("Error fetching soft commodities:", error);
+      res.status(500).json({ message: "Failed to fetch commodity prices" });
+    }
+  });
+
+  app.post("/api/soft-commodities", authenticateToken, async (req, res) => {
+    try {
+      // Check if user is DDGOTS (Director for Operations and Technical Service)
+      const userRole = req.user?.role;
+      if (userRole !== 'ddgots' && userRole !== 'admin') {
+        return res.status(403).json({ message: "Only DDGOTS can add commodity pricing" });
+      }
+
+      const commodityData = {
+        ...req.body,
+        updatedBy: req.user.id
+      };
+
+      const commodity = await storage.createSoftCommodity(commodityData);
+      res.json(commodity);
+    } catch (error) {
+      console.error("Error creating soft commodity:", error);
+      res.status(500).json({ message: "Failed to create commodity price" });
+    }
+  });
+
+  app.put("/api/soft-commodities/:id", authenticateToken, async (req, res) => {
+    try {
+      // Check if user is DDGOTS (Director for Operations and Technical Service)
+      const userRole = req.user?.role;
+      if (userRole !== 'ddgots' && userRole !== 'admin') {
+        return res.status(403).json({ message: "Only DDGOTS can update commodity pricing" });
+      }
+
+      const id = parseInt(req.params.id);
+      const commodityData = {
+        ...req.body,
+        updatedBy: req.user.id,
+        updatedAt: new Date()
+      };
+
+      const commodity = await storage.updateSoftCommodity(id, commodityData);
+      res.json(commodity);
+    } catch (error) {
+      console.error("Error updating soft commodity:", error);
+      res.status(500).json({ message: "Failed to update commodity price" });
+    }
+  });
+
+  app.delete("/api/soft-commodities/:id", authenticateToken, async (req, res) => {
+    try {
+      // Check if user is DDGOTS (Director for Operations and Technical Service)
+      const userRole = req.user?.role;
+      if (userRole !== 'ddgots' && userRole !== 'admin') {
+        return res.status(403).json({ message: "Only DDGOTS can delete commodity pricing" });
+      }
+
+      const id = parseInt(req.params.id);
+      await storage.deleteSoftCommodity(id);
+      res.json({ message: "Commodity price deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting soft commodity:", error);
+      res.status(500).json({ message: "Failed to delete commodity price" });
+    }
+  });
   
   // Serve protection page directly
   app.get('/service-blocked.html', (req, res) => {
@@ -10661,6 +10733,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error submitting inspection results:", error);
       res.status(500).json({ message: "Failed to submit inspection results" });
+    }
+  });
+
+  // Soft Commodity Pricing endpoints
+  app.get("/api/soft-commodities", async (req, res) => {
+    try {
+      const commodities = await storage.getSoftCommodities();
+      res.json(commodities);
+    } catch (error) {
+      console.error("Error fetching soft commodities:", error);
+      res.status(500).json({ error: "Failed to fetch commodities" });
+    }
+  });
+
+  app.post("/api/soft-commodities", async (req, res) => {
+    try {
+      const commodity = await storage.createSoftCommodity(req.body);
+      res.json(commodity);
+    } catch (error) {
+      console.error("Error creating soft commodity:", error);
+      res.status(500).json({ error: "Failed to create commodity" });
+    }
+  });
+
+  app.put("/api/soft-commodities/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const commodity = await storage.updateSoftCommodity(id, req.body);
+      if (!commodity) {
+        return res.status(404).json({ error: "Commodity not found" });
+      }
+      res.json(commodity);
+    } catch (error) {
+      console.error("Error updating soft commodity:", error);
+      res.status(500).json({ error: "Failed to update commodity" });
+    }
+  });
+
+  app.delete("/api/soft-commodities/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSoftCommodity(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting soft commodity:", error);
+      res.status(500).json({ error: "Failed to delete commodity" });
     }
   });
 

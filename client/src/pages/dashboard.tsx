@@ -15,10 +15,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Shield, TreePine, FileCheck, AlertTriangle, Building2, CheckCircle, Clock, XCircle, Plus, Upload, MessageSquare, Bell, Eye, X, Activity, TrendingUp, Package, MapPin, BarChart3 } from "lucide-react";
+import { Download, Shield, TreePine, FileCheck, AlertTriangle, Building2, CheckCircle, Clock, XCircle, Plus, Upload, MessageSquare, Bell, Eye, X, Activity, TrendingUp, Package, MapPin, BarChart3, DollarSign } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SoftCommodityPricing } from "@/components/SoftCommodityPricing";
 
 export default function Dashboard() {
   const [isEudrDialogOpen, setIsEudrDialogOpen] = useState(false);
@@ -1804,6 +1805,27 @@ export default function Dashboard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* LACRA Soft Commodity Pricing Widget */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-lacra-blue" />
+            LACRA Soft Commodity Pricing System
+          </CardTitle>
+          <p className="text-sm text-slate-600">
+            Official LACRA commodity pricing with quality grades (Subgrade, Grade 2, Grade 1, Premium)
+            {userRole === "DDGOTS" && " - You have editing permissions"}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <SoftCommodityPricing 
+            canEdit={userRole === "DDGOTS"}
+            compact={true}
+          />
+        </CardContent>
+      </Card>
+
       </div>
     </div>
   );

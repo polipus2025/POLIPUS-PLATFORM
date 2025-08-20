@@ -328,7 +328,7 @@ export default function FrontPage() {
               Platform Documentation
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Download comprehensive technical documentation covering the world's first environmental intelligence ecosystem with all 8 integrated modules, 200+ satellite sources, and complete monitoring capabilities.
+              Download comprehensive technical documentation covering the world's first environmental intelligence ecosystem with all 8 integrated modules, 200+ satellite sources, shipping tracking & monitoring system integration, and complete monitoring capabilities.
             </p>
             <Button 
               onClick={() => window.open('/api/download/platform-documentation', '_blank')}

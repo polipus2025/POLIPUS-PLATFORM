@@ -77,12 +77,13 @@ export async function generateComprehensivePlatformDocumentation(res: Response) 
      .fillColor('#374151')
      .text('Platform Overview:', 70, 240);
      
-  const overviewText = `The Polipus Platform represents the world's first comprehensive environmental intelligence ecosystem, integrating 8 specialized modules with unprecedented precision and capability. This revolutionary platform combines real-time satellite monitoring, GPS technology, blockchain traceability, and AI-powered analytics to deliver unmatched environmental intelligence across agricultural, mining, forestry, marine, and carbon monitoring sectors.
+  const overviewText = `The Polipus Platform represents the world's first comprehensive environmental intelligence ecosystem, integrating 8 specialized modules with unprecedented precision and capability. This revolutionary platform combines real-time satellite monitoring, GPS technology, blockchain traceability, shipping tracking & monitoring system integration, and AI-powered analytics to deliver unmatched environmental intelligence across agricultural, mining, forestry, marine, and carbon monitoring sectors.
 
 Key Differentiators:
 • First-of-its-kind integrated 8-module ecosystem
 • Access to 200+ satellite data sources for comprehensive monitoring
 • Real-time GPS tracking with centimeter-level precision
+• Shipping tracking & monitoring integration with major global carriers
 • Full EUDR compliance automation
 • Military-grade security with international cybersecurity standards
 • Complete government integration capabilities
@@ -670,27 +671,39 @@ The platform serves environmental agencies, agricultural stakeholders, mining au
   ]);
 
   addSection('13. SHIPPING INTEGRATIONS & GLOBAL TRADE', [
-    'The platform integrates with major global shipping lines to provide comprehensive supply chain visibility and tracking capabilities.',
+    'The platform now features comprehensive integration with major global shipping lines, providing real-time tracking and monitoring capabilities for complete supply chain visibility.',
     
-    'Integrated Shipping Partners:',
-    '• A.P. Moller-Maersk (World\'s largest container shipping company)',
-    '• Mediterranean Shipping Company (MSC) - Second largest container line',
-    '• CMA CGM Group - Leading French container transportation company',
-    '• Hapag-Lloyd AG - Major German transportation company',
+    'Integrated Shipping Partners & Tracking Systems:',
+    '• A.P. Moller-Maersk - Real-time container tracking via Maersk API',
+    '• Mediterranean Shipping Company (MSC) - Live vessel monitoring system',
+    '• CMA CGM Group - Automated shipment status updates',
+    '• Hapag-Lloyd AG - Container tracking and schedule monitoring',
     
-    'Shipping Integration Capabilities:',
-    '• Real-time container tracking across all major carriers',
-    '• Vessel schedule monitoring and ETA predictions',
-    '• Automated booking management and documentation',
-    '• Port call notifications and customs integration',
-    '• Supply chain visibility from farm to destination',
+    'Real-Time Tracking & Monitoring Features:',
+    '• Live container position tracking with GPS coordinates',
+    '• Real-time vessel location monitoring and route updates',
+    '• Automated port arrival/departure notifications',
+    '• Container status monitoring (loaded, discharged, in-transit)',
+    '• Estimated time of arrival (ETA) calculations with weather factors',
+    '• Supply chain milestone tracking from farm to destination',
+    '• Customs clearance status monitoring',
+    '• Temperature and humidity monitoring for sensitive cargo',
     
-    'Trade Compliance Features:',
+    'Advanced Monitoring Capabilities:',
+    '• Multi-carrier shipment tracking in unified dashboard',
+    '• Automated delay alerts and route optimization suggestions',
+    '• Integration with port authorities for real-time updates',
+    '• Blockchain-verified shipping event recording',
+    '• Predictive analytics for delivery time estimation',
+    '• Exception handling and notification system',
+    
+    'Trade Compliance & Documentation:',
     '• Automated export documentation generation',
     '• International standards compliance verification',
-    '• Customs clearance support and tracking',
-    '• EUDR compliance certification for shipments',
-    '• Blockchain-verified shipping documentation'
+    '• EUDR compliance certification for agricultural shipments',
+    '• Digital bill of lading management',
+    '• Customs documentation automation',
+    '• Supply chain audit trail with immutable records'
   ]);
 
   doc.addPage();
@@ -935,7 +948,7 @@ The platform serves environmental agencies, agricultural stakeholders, mining au
   addSection('21. CONCLUSION', [
     'The Polipus Platform represents a revolutionary advancement in agricultural intelligence and environmental monitoring technology. As the world\'s first integrated 8-module ecosystem with access to 200+ satellite data sources, the platform delivers unprecedented precision, reliability, and capability.',
     
-    'The platform\'s unique combination of real-time satellite monitoring, GPS technology, AI-powered analytics, blockchain verification, and global shipping integration creates a comprehensive solution that addresses the most pressing challenges in agricultural compliance, environmental protection, and sustainable development.',
+    'The platform\'s unique combination of real-time satellite monitoring, GPS technology, AI-powered analytics, blockchain verification, and comprehensive shipping tracking & monitoring system integration creates a revolutionary solution that addresses the most pressing challenges in agricultural compliance, environmental protection, and sustainable development.',
     
     'With military-grade security, complete government integration capabilities, full audit transparency, and extensive training and support programs, the Polipus Platform sets new industry standards while supporting international compliance requirements and environmental protection goals.',
     

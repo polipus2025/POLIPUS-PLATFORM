@@ -32,7 +32,7 @@ export default function ExporterMarketplace() {
   const [searchTerm, setSearchTerm] = useState('');
   const [commodityFilter, setCommodityFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
-  const [selectedBuyer, setSelectedBuyer] = useState(null);
+  const [selectedBuyer, setSelectedBuyer] = useState<any>(null);
   const [isNegotiationOpen, setIsNegotiationOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -158,7 +158,10 @@ export default function ExporterMarketplace() {
   // CORRECTED: Submit purchase request (exporter buying from buyer)
   const submitPurchaseRequest = useMutation({
     mutationFn: async (purchaseData: any) => {
-      return apiRequest('POST', '/api/exporter/submit-purchase-request', purchaseData);
+      return apiRequest('/api/exporter/submit-purchase-request', { 
+        method: 'POST',
+        body: JSON.stringify(purchaseData) 
+      });
     },
     onSuccess: () => {
       toast({
@@ -168,7 +171,7 @@ export default function ExporterMarketplace() {
       setIsNegotiationOpen(false);
       queryClient.invalidateQueries({ queryKey: ['/api/exporter/purchase-requests'] });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Submission Failed',
         description: 'Unable to submit purchase request. Please try again.',
@@ -194,8 +197,8 @@ export default function ExporterMarketplace() {
   };
 
   // CORRECTED: Filter buyer offers (use mock data if backend not available)
-  const availableOffers = buyerOffers.length > 0 ? buyerOffers : mockBuyerOffers;
-  const filteredOffers = availableOffers.filter(offer => {
+  const availableOffers = (buyerOffers as any[]).length > 0 ? (buyerOffers as any[]) : mockBuyerOffers;
+  const filteredOffers = availableOffers.filter((offer: any) => {
     const matchesSearch = offer.buyerCompany?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          offer.commodity?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCommodity = commodityFilter === 'all' || offer.commodity?.toLowerCase() === commodityFilter;
@@ -283,7 +286,7 @@ export default function ExporterMarketplace() {
             </div>
           )}
           
-          {!isLoadingOffers && filteredOffers.map((offer) => (
+          {!isLoadingOffers && filteredOffers.map((offer: any) => (
             <Card key={offer.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -354,7 +357,7 @@ export default function ExporterMarketplace() {
                   <div>
                     <h4 className="font-medium text-gray-900 mb-3">Quality Certifications</h4>
                     <div className="space-y-2 mb-4">
-                      {offer.qualityCertificates?.map((cert, index) => (
+                      {offer.qualityCertificates?.map((cert: any, index: number) => (
                         <Badge key={index} variant="outline" className="text-xs mr-1 mb-1">
                           {cert}
                         </Badge>
@@ -529,7 +532,7 @@ export default function ExporterMarketplace() {
         </div>
 
         {/* CORRECTED: Use filteredOffers instead of filteredRequests */}
-        {!isLoadingOffers && (buyerOffers.length === 0 || filteredOffers.length === 0) && (
+        {!isLoadingOffers && ((buyerOffers as any[]).length === 0 || filteredOffers.length === 0) && (
           <Card className="text-center py-12">
             <CardContent>
               <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />

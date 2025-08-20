@@ -90,6 +90,25 @@ export default function ExporterDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
+        {/* LACRA Soft Commodity Pricing - Top Position */}
+        <Card className="mb-8 border-2 border-green-200 bg-green-50">
+          <CardHeader className="bg-green-100">
+            <CardTitle className="flex items-center gap-2 text-green-800">
+              <DollarSign className="h-6 w-6 text-green-600" />
+              LACRA Official Commodity Pricing
+            </CardTitle>
+            <p className="text-sm text-green-700">
+              Current official LACRA pricing with quality grades for export planning and contract negotiations
+            </p>
+          </CardHeader>
+          <CardContent className="p-6">
+            <SoftCommodityPricing 
+              canEdit={false}
+              compact={false}
+            />
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
@@ -396,24 +415,7 @@ export default function ExporterDashboard() {
           </div>
         </div>
 
-        {/* LACRA Soft Commodity Pricing */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              LACRA Official Commodity Pricing
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              Current official LACRA pricing with quality grades for export planning and contract negotiations
-            </p>
-          </CardHeader>
-          <CardContent>
-            <SoftCommodityPricing 
-              canEdit={false}
-              compact={true}
-            />
-          </CardContent>
-        </Card>
+
 
         {/* Important Information */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">

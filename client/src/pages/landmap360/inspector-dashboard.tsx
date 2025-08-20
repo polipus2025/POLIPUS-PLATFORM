@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,14 @@ import {
   Building,
   Map,
   Activity,
-  Users
+  Users,
+  Globe,
+  Ruler,
+  BarChart3,
+  Navigation,
+  Settings,
+  TreePine,
+  Layers
 } from "lucide-react";
 import LandMapSidebar from "../../components/landmap360/landmap-sidebar";
 import LandMapHeader from "../../components/landmap360/landmap-header";
@@ -28,12 +36,64 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function InspectorDashboard() {
+  const [location] = useLocation();
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  
+  // Get the current module based on URL path
+  const getCurrentModule = () => {
+    if (location.includes('/parcels')) return 'parcels';
+    if (location.includes('/gis-mapping')) return 'gis-mapping';
+    if (location.includes('/surveys')) return 'surveys';
+    if (location.includes('/inspections')) return 'inspections';
+    if (location.includes('/compliance')) return 'compliance';
+    if (location.includes('/violations')) return 'violations';
+    if (location.includes('/disputes')) return 'disputes';
+    if (location.includes('/documents')) return 'documents';
+    if (location.includes('/imagery')) return 'imagery';
+    if (location.includes('/field-surveys')) return 'field-surveys';
+    if (location.includes('/gps-data')) return 'gps-data';
+    if (location.includes('/measurement')) return 'measurement';
+    return 'dashboard';
+  };
 
   // Get user info from localStorage
   const userName = localStorage.getItem("userName");
   const county = localStorage.getItem("county");
+  
+  const currentModule = getCurrentModule();
+  
+  // Function to get module title and description
+  const getModuleInfo = () => {
+    switch (currentModule) {
+      case 'parcels':
+        return { title: 'Land Parcels Management', description: 'Manage and register land parcels' };
+      case 'gis-mapping':
+        return { title: 'GIS Mapping & Analysis', description: 'Interactive GIS mapping and spatial analysis' };
+      case 'surveys':
+        return { title: 'Survey Records', description: 'Survey records and measurement data' };
+      case 'inspections':
+        return { title: 'Property Inspections', description: 'Property inspection operations' };
+      case 'compliance':
+        return { title: 'Compliance Monitoring', description: 'Compliance monitoring and regulatory adherence' };
+      case 'violations':
+        return { title: 'Violation Management', description: 'Track and manage land use violations' };
+      case 'disputes':
+        return { title: 'Dispute Management', description: 'Land ownership dispute resolution' };
+      case 'documents':
+        return { title: 'Land Documentation', description: 'Document management and verification' };
+      case 'imagery':
+        return { title: 'Aerial Imagery & Satellite Data', description: 'Satellite imagery analysis' };
+      case 'field-surveys':
+        return { title: 'Field Survey Operations', description: 'Field survey operations and data collection' };
+      case 'gps-data':
+        return { title: 'GPS Data Management', description: 'GPS coordinates and location data' };
+      case 'measurement':
+        return { title: 'Measurement Tools & Analysis', description: 'Precision measurement tools' };
+      default:
+        return { title: 'Land Inspector Dashboard', description: 'Land management and inspection operations' };
+    }
+  };
 
   // Mock data for inspector dashboard
   const dashboardStats = {
@@ -166,11 +226,13 @@ export default function InspectorDashboard() {
     }
   };
 
+  const moduleInfo = getModuleInfo();
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Helmet>
-        <title>Inspector Dashboard - LandMap360 Land Management</title>
-        <meta name="description" content="Land inspector dashboard for compliance monitoring, inspections, and violation tracking" />
+        <title>{moduleInfo.title} - LandMap360</title>
+        <meta name="description" content={`${moduleInfo.description} for land management operations`} />
       </Helmet>
 
       <LandMapHeader />
@@ -186,11 +248,11 @@ export default function InspectorDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                    Land Inspector Dashboard
+                    {moduleInfo.title}
                   </h1>
                   <p className="text-slate-600 flex items-center gap-2">
                     <Search className="h-4 w-4" />
-                    Compliance Monitoring & Inspection Management
+                    {moduleInfo.description}
                     {county && ` • ${county}`}
                   </p>
                 </div>

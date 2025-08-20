@@ -119,9 +119,9 @@ export default function LandMapSidebar() {
             
             return (
               <Link key={item.href} href={item.href}>
-                <a
+                <div
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer",
                     isActive 
                       ? "bg-emerald-100 text-emerald-900 shadow-sm border border-emerald-200" 
                       : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
@@ -139,7 +139,7 @@ export default function LandMapSidebar() {
                   {!isCollapsed && isActive && (
                     <div className="ml-auto w-2 h-2 bg-emerald-500 rounded-full" />
                   )}
-                </a>
+                </div>
               </Link>
             );
           })}

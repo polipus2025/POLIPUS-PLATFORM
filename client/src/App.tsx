@@ -701,6 +701,20 @@ function Router() {
       <Route path="/landmap360/administrator-dashboard" component={AdministratorDashboard} />
       <Route path="/landmap360/registrar-dashboard" component={RegistrarDashboard} />
       <Route path="/landmap360/inspector-dashboard" component={InspectorDashboard} />
+      
+      {/* LandMap360 Inspector Module Routes */}
+      <Route path="/landmap360/parcels" component={InspectorDashboard} />
+      <Route path="/landmap360/gis-mapping" component={InspectorDashboard} />
+      <Route path="/landmap360/surveys" component={InspectorDashboard} />
+      <Route path="/landmap360/inspections" component={InspectorDashboard} />
+      <Route path="/landmap360/compliance" component={InspectorDashboard} />
+      <Route path="/landmap360/violations" component={InspectorDashboard} />
+      <Route path="/landmap360/disputes" component={InspectorDashboard} />
+      <Route path="/landmap360/documents" component={InspectorDashboard} />
+      <Route path="/landmap360/imagery" component={InspectorDashboard} />
+      <Route path="/landmap360/field-surveys" component={InspectorDashboard} />
+      <Route path="/landmap360/gps-data" component={InspectorDashboard} />
+      <Route path="/landmap360/measurement" component={InspectorDashboard} />
       <Route path="/mine-watch-dashboard" component={MineWatchDashboard} />
       <Route path="/forest-guard-dashboard" component={ForestGuardDashboard} />
       <Route path="/aqua-trace-dashboard" component={AquaTraceDashboard} />

@@ -134,6 +134,18 @@ const buyerNavigation = [
   { name: "Business Metrics", href: "/buyer-metrics", icon: TrendingUp },
 ];
 
+// Land Inspector Navigation - Land management and farmer registration
+const landInspectorNavigation = [
+  { name: "Inspector Dashboard", href: "/landmap360/inspector-dashboard", icon: BarChart3 },
+  { name: "Farmer Registration", href: "/farmers", icon: Users },
+  { name: "GPS Mapping", href: "/farmer-gps-mapping", icon: Map },
+  { name: "Farm Inspections", href: "/livetrace/farm-registrations", icon: ClipboardCheck },
+  { name: "Land Parcels", href: "/landmap360/parcels", icon: MapPin },
+  { name: "GIS Analysis", href: "/landmap360/gis-mapping", icon: Satellite },
+  { name: "Compliance Monitoring", href: "/landmap360/compliance", icon: Shield },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare },
+];
+
 // Function to get navigation items based on user type and role
 const getNavigationItems = (userType: string | null, role: string | null) => {
   // Check for three-tier regulatory system first
@@ -163,6 +175,8 @@ const getNavigationItems = (userType: string | null, role: string | null) => {
       return buyerNavigation;
     case 'exporter':
       return exporterNavigation;
+    case 'land_inspector':
+      return landInspectorNavigation;
     default:
       return regulatoryNavigation; // Default fallback
   }
@@ -219,6 +233,7 @@ export default function Sidebar() {
              userType === 'field_agent' ? 'Field Operations' : 
              userType === 'buyer' ? 'Agricultural Buyer Portal' :
              userType === 'exporter' ? 'Export Operations' :
+             userType === 'land_inspector' ? 'Land Inspector Portal' :
              'Regulatory Compliance'}
           </h3>
           <ul className="space-y-1 lg:space-y-2">

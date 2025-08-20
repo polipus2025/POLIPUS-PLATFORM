@@ -566,7 +566,7 @@ function Router() {
           <Route path="/farmers">
             <ProtectedRoute 
               component={Farmers} 
-              allowedUserTypes={['farmer', 'field_agent']} 
+              allowedUserTypes={['farmer', 'field_agent', 'land_inspector']} 
             />
           </Route>
           <Route path="/farm-plots">
@@ -578,7 +578,7 @@ function Router() {
           <Route path="/farmer-gps-mapping">
             <ProtectedRoute 
               component={FarmerGPSMapping} 
-              allowedUserTypes={['farmer']} 
+              allowedUserTypes={['farmer', 'land_inspector']} 
             />
           </Route>
           <Route path="/field-agent-farm-mapping">

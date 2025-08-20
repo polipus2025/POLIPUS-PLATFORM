@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Helmet } from "react-helmet";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,10 +26,29 @@ import {
   CheckSquare,
   CheckCircle,
   X,
-  UserPlus
+  UserPlus,
+  BarChart3,
+  Leaf,
+  ClipboardCheck,
+  Tag,
+  FileText,
+  Plus,
+  Building2,
+  Satellite,
+  QrCode,
+  Globe,
+  Award,
+  MessageSquare,
+  DollarSign,
+  Receipt,
+  CreditCard,
+  Menu,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 // Field Agent Approval Manager Component
 function FieldAgentApprovalManager() {
@@ -269,10 +289,124 @@ function FieldAgentApprovalManager() {
   );
 }
 
+// Director Dashboard Navigation - Complete administrative access
+const directorNavigation = [
+  { name: "Executive Dashboard", href: "/director-dashboard", icon: Crown, category: "Overview" },
+  { name: "Strategic Overview", href: "/dashboard", icon: BarChart3, category: "Overview" },
+  { name: "Economic Reporting", href: "/economic-reporting", icon: TrendingUp, category: "Reports" },
+  { name: "Commodities Management", href: "/commodities", icon: Leaf, category: "Operations" },
+  { name: "Inspection Oversight", href: "/inspections", icon: ClipboardCheck, category: "Operations" },
+  { name: "Inspector Management", href: "/regulatory/inspector-management", icon: Users, category: "Personnel" },
+  { name: "Buyer Management", href: "/regulatory/buyer-management", icon: UserPlus, category: "Personnel" },
+  { name: "Exporter Management", href: "/regulatory/exporter-management", icon: Building2, category: "Personnel" },
+  { name: "Export Certifications", href: "/certifications", icon: Tag, category: "Compliance" },
+  { name: "Document Verification", href: "/verification", icon: Shield, category: "Compliance" },
+  { name: "Real-Time Verification", href: "/verification-dashboard", icon: Award, category: "Compliance" },
+  { name: "Payment Services", href: "/regulatory-payment-services", icon: DollarSign, category: "Finance" },
+  { name: "Financial Records", href: "/ddgaf-financial-records", icon: Receipt, category: "Finance" },
+  { name: "GIS Mapping", href: "/gis-mapping", icon: Satellite, category: "Technology" },
+  { name: "Government Integration", href: "/government-integration", icon: Building2, category: "Integration" },
+  { name: "International Standards", href: "/international-standards", icon: Globe, category: "Compliance" },
+  { name: "Comprehensive Reports", href: "/reports", icon: FileText, category: "Reports" },
+  { name: "Data Entry Systems", href: "/data-entry", icon: Plus, category: "Operations" },
+  { name: "Internal Messaging", href: "/messaging", icon: MessageSquare, category: "Communication" },
+];
+
+// Director Sidebar Component
+function DirectorSidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (open: boolean) => void }) {
+  const [location] = useLocation();
+  
+  // Group navigation items by category
+  const groupedNavigation = directorNavigation.reduce((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push(item);
+    return acc;
+  }, {} as Record<string, typeof directorNavigation>);
+
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={cn(
+        "fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50 transition-transform duration-300 ease-in-out overflow-y-auto",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        "w-80 lg:w-72"
+      )}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-purple-700">
+          <div className="flex items-center gap-2 text-white">
+            <Crown className="h-6 w-6" />
+            <h2 className="font-bold text-lg">Director Portal</h2>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setIsOpen(false)}
+            className="text-white hover:bg-purple-800"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        {/* Navigation */}
+        <div className="p-4 space-y-6">
+          {Object.entries(groupedNavigation).map(([category, items]) => (
+            <div key={category}>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                {category}
+              </h3>
+              <div className="space-y-1">
+                {items.map((item) => {
+                  const isActive = location === item.href;
+                  return (
+                    <Link key={item.name} href={item.href}>
+                      <div className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer",
+                        isActive 
+                          ? "bg-purple-100 text-purple-700 border-l-4 border-purple-600" 
+                          : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      )}>
+                        <item.icon className={cn(
+                          "h-4 w-4",
+                          isActive ? "text-purple-600" : "text-gray-500"
+                        )} />
+                        <span className="truncate">{item.name}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-200 mt-auto">
+          <div className="text-center">
+            <Badge className="bg-purple-100 text-purple-800">
+              LACRA Director Access
+            </Badge>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function DirectorDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [approvalNotes, setApprovalNotes] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -349,7 +483,39 @@ export default function DirectorDashboard() {
         <meta name="description" content="Executive dashboard for LACRA Director - Mobile alert verification and compliance oversight" />
       </Helmet>
 
-      <div className="p-3 sm:p-6">
+      {/* Director Sidebar */}
+      <DirectorSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      
+      {/* Main Content */}
+      <div className={cn(
+        "transition-all duration-300 ease-in-out",
+        sidebarOpen ? "lg:ml-72" : "ml-0"
+      )}>
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden fixed top-4 left-4 z-30">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="bg-white shadow-lg"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        {/* Desktop Toggle Button */}
+        <div className="hidden lg:block fixed top-4 left-4 z-30">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="bg-white shadow-lg"
+          >
+            {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        <div className="p-3 sm:p-6 pt-16 lg:pt-6">
         {/* Mobile-Responsive Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -748,6 +914,8 @@ export default function DirectorDashboard() {
             </DialogContent>
           </Dialog>
         )}
+        
+        </div>
       </div>
     </div>
   );

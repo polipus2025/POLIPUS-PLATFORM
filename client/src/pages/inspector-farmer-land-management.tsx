@@ -99,6 +99,7 @@ export default function InspectorFarmerLandManagement() {
   const [selectedFarmer, setSelectedFarmer] = useState<Farmer | null>(null);
   const [showNewMappingDialog, setShowNewMappingDialog] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [showFarmerOnboardingDialog, setShowFarmerOnboardingDialog] = useState(false);
   const [selectedMappingForSchedule, setSelectedMappingForSchedule] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPosition, setCurrentPosition] = useState<GeolocationPosition | null>(null);
@@ -110,6 +111,27 @@ export default function InspectorFarmerLandManagement() {
   // Get inspector info from localStorage
   const inspectorId = localStorage.getItem("inspectorId") || "land_inspector";
   const inspectorName = localStorage.getItem("inspectorName") || "Land Inspector";
+
+  // Form states for farmer onboarding
+  const [newFarmer, setNewFarmer] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    county: "",
+    district: "",
+    community: "",
+    idNumber: "",
+    gpsCoordinates: "",
+    farmSize: "",
+    primaryCrop: "",
+    secondaryCrops: "",
+    farmingExperience: "",
+    certifications: "",
+    cooperativeMembership: "",
+    landOwnership: "",
+    irrigationAccess: ""
+  });
 
   // Form states for new land mapping
   const [newMapping, setNewMapping] = useState({
@@ -181,8 +203,8 @@ export default function InspectorFarmerLandManagement() {
     farmer.county.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Auto-detect GPS coordinates (same as farmer onboarding)
-  const getCurrentLocation = () => {
+  // Auto-detect GPS coordinates for both farmer onboarding and land mapping
+  const getCurrentLocation = (isForFarmer = false) => {
     if (!navigator.geolocation) {
       toast({
         title: "GPS Not Supported",
@@ -198,10 +220,20 @@ export default function InspectorFarmerLandManagement() {
         setCurrentPosition(position);
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        setNewMapping(prev => ({
-          ...prev,
-          coordinates: `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-        }));
+        const coordinates = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        
+        if (isForFarmer) {
+          setNewFarmer(prev => ({
+            ...prev,
+            gpsCoordinates: coordinates
+          }));
+        } else {
+          setNewMapping(prev => ({
+            ...prev,
+            coordinates: coordinates
+          }));
+        }
+        
         setIsDetectingGPS(false);
         toast({
           title: "Location Found",
@@ -235,6 +267,40 @@ export default function InspectorFarmerLandManagement() {
       }
     );
   };
+
+  // Create new farmer (onboarding)
+  const createFarmer = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("/api/farmers", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          farmSize: data.farmSize ? parseFloat(data.farmSize) : null,
+          farmingExperience: data.farmingExperience ? parseInt(data.farmingExperience) : null,
+          isActive: true,
+          onboardedBy: inspectorName,
+          onboardedAt: new Date(),
+          approvalStatus: "approved" // Inspector can directly approve
+        })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/farmers"] });
+      toast({
+        title: "Farmer Onboarded Successfully",
+        description: `${newFarmer.firstName} ${newFarmer.lastName} has been registered and approved.`,
+      });
+      setShowFarmerOnboardingDialog(false);
+      resetFarmerForm();
+    },
+    onError: () => {
+      toast({
+        title: "Failed to Onboard Farmer",
+        description: "Please check the information and try again.",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Create new land mapping for farmer
   const createMapping = useMutation({
@@ -361,6 +427,29 @@ export default function InspectorFarmerLandManagement() {
     });
   };
 
+  const resetFarmerForm = () => {
+    setNewFarmer({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      county: "",
+      district: "",
+      community: "",
+      idNumber: "",
+      gpsCoordinates: "",
+      farmSize: "",
+      primaryCrop: "",
+      secondaryCrops: "",
+      farmingExperience: "",
+      certifications: "",
+      cooperativeMembership: "",
+      landOwnership: "",
+      irrigationAccess: ""
+    });
+    setCurrentPosition(null);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved": return "bg-green-100 text-green-800";
@@ -402,22 +491,32 @@ export default function InspectorFarmerLandManagement() {
         /* Farmer Selection Interface */
         <div className="space-y-6">
           {/* Search and Filter */}
-          <div className="flex items-center space-x-4">
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search farmers by name, ID, or county..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  data-testid="input-search-farmers"
-                />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search farmers by name, ID, or county..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                    data-testid="input-search-farmers"
+                  />
+                </div>
               </div>
+              <Badge variant="outline" className="text-sm">
+                {filteredFarmers.length} farmers found
+              </Badge>
             </div>
-            <Badge variant="outline" className="text-sm">
-              {filteredFarmers.length} farmers found
-            </Badge>
+            <Button 
+              onClick={() => setShowFarmerOnboardingDialog(true)}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              data-testid="button-onboard-farmer"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Onboard New Farmer
+            </Button>
           </div>
 
           {/* Farmers Grid */}
@@ -832,7 +931,7 @@ export default function InspectorFarmerLandManagement() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={getCurrentLocation}
+                  onClick={() => getCurrentLocation(false)}
                   disabled={isDetectingGPS}
                   data-testid="button-detect-gps"
                 >
@@ -1283,6 +1382,337 @@ export default function InspectorFarmerLandManagement() {
               data-testid="button-save-schedule"
             >
               {createSchedule.isPending ? "Creating..." : "Create & Approve Schedule"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Farmer Onboarding Dialog */}
+      <Dialog open={showFarmerOnboardingDialog} onOpenChange={setShowFarmerOnboardingDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Onboard New Farmer</DialogTitle>
+            <DialogDescription>
+              Register a new farmer with GPS-enhanced location data and farm details. 
+              As an inspector, this farmer will be automatically approved upon registration.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-6 py-4">
+            {/* Personal Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Personal Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name *</Label>
+                    <Input
+                      id="firstName"
+                      value={newFarmer.firstName}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, firstName: e.target.value }))}
+                      placeholder="Enter first name"
+                      data-testid="input-farmer-first-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Input
+                      id="lastName"
+                      value={newFarmer.lastName}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, lastName: e.target.value }))}
+                      placeholder="Enter last name"
+                      data-testid="input-farmer-last-name"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={newFarmer.email}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="farmer@example.com"
+                      data-testid="input-farmer-email"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      value={newFarmer.phone}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="+231 XXX XXXX"
+                      data-testid="input-farmer-phone"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="idNumber">National ID Number</Label>
+                    <Input
+                      id="idNumber"
+                      value={newFarmer.idNumber}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, idNumber: e.target.value }))}
+                      placeholder="Enter ID number"
+                      data-testid="input-farmer-id"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Location Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Location & Address</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="county">County *</Label>
+                    <Select value={newFarmer.county} onValueChange={(value) => setNewFarmer(prev => ({ ...prev, county: value }))}>
+                      <SelectTrigger data-testid="select-farmer-county">
+                        <SelectValue placeholder="Select county" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Bomi">Bomi</SelectItem>
+                        <SelectItem value="Bong">Bong</SelectItem>
+                        <SelectItem value="Gbarpolu">Gbarpolu</SelectItem>
+                        <SelectItem value="Grand Bassa">Grand Bassa</SelectItem>
+                        <SelectItem value="Grand Cape Mount">Grand Cape Mount</SelectItem>
+                        <SelectItem value="Grand Gedeh">Grand Gedeh</SelectItem>
+                        <SelectItem value="Grand Kru">Grand Kru</SelectItem>
+                        <SelectItem value="Lofa">Lofa</SelectItem>
+                        <SelectItem value="Margibi">Margibi</SelectItem>
+                        <SelectItem value="Maryland">Maryland</SelectItem>
+                        <SelectItem value="Montserrado">Montserrado</SelectItem>
+                        <SelectItem value="Nimba">Nimba</SelectItem>
+                        <SelectItem value="River Cess">River Cess</SelectItem>
+                        <SelectItem value="River Gee">River Gee</SelectItem>
+                        <SelectItem value="Sinoe">Sinoe</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="district">District</Label>
+                    <Input
+                      id="district"
+                      value={newFarmer.district}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, district: e.target.value }))}
+                      placeholder="Enter district"
+                      data-testid="input-farmer-district"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="community">Community</Label>
+                    <Input
+                      id="community"
+                      value={newFarmer.community}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, community: e.target.value }))}
+                      placeholder="Enter community"
+                      data-testid="input-farmer-community"
+                    />
+                  </div>
+                </div>
+
+                {/* GPS Coordinates with same system as existing */}
+                {currentPosition && (
+                  <Card className="mb-4">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Target className="h-4 w-4" />
+                        Current GPS Location
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <p className="font-medium text-gray-600">Latitude</p>
+                          <p className="font-mono">{currentPosition.coords.latitude.toFixed(6)}</p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-600">Longitude</p>
+                          <p className="font-mono">{currentPosition.coords.longitude.toFixed(6)}</p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-600">Accuracy</p>
+                          <p>{currentPosition.coords.accuracy.toFixed(1)} meters</p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-600">Timestamp</p>
+                          <p>{new Date(currentPosition.timestamp).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="gpsCoordinates">Farm GPS Coordinates</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="gpsCoordinates"
+                      value={newFarmer.gpsCoordinates}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, gpsCoordinates: e.target.value }))}
+                      placeholder="e.g., 6.3406, -10.7572"
+                      data-testid="input-farmer-gps"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => getCurrentLocation(true)}
+                      disabled={isDetectingGPS}
+                      data-testid="button-detect-farmer-gps"
+                    >
+                      {isDetectingGPS ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                      ) : (
+                        <Target className="w-4 h-4" />
+                      )}
+                      {isDetectingGPS ? "Detecting..." : "Get Location"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Farm Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Farm Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="farmSize">Total Farm Size (hectares)</Label>
+                    <Input
+                      id="farmSize"
+                      type="number"
+                      step="0.1"
+                      value={newFarmer.farmSize}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, farmSize: e.target.value }))}
+                      placeholder="e.g., 2.5"
+                      data-testid="input-farm-size"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="farmingExperience">Years of Farming Experience</Label>
+                    <Input
+                      id="farmingExperience"
+                      type="number"
+                      value={newFarmer.farmingExperience}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, farmingExperience: e.target.value }))}
+                      placeholder="e.g., 10"
+                      data-testid="input-farming-experience"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="primaryCrop">Primary Crop *</Label>
+                    <Select value={newFarmer.primaryCrop} onValueChange={(value) => setNewFarmer(prev => ({ ...prev, primaryCrop: value }))}>
+                      <SelectTrigger data-testid="select-primary-crop">
+                        <SelectValue placeholder="Select primary crop" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="coffee">Coffee</SelectItem>
+                        <SelectItem value="cocoa">Cocoa</SelectItem>
+                        <SelectItem value="rice">Rice</SelectItem>
+                        <SelectItem value="cassava">Cassava</SelectItem>
+                        <SelectItem value="plantain">Plantain</SelectItem>
+                        <SelectItem value="rubber">Rubber</SelectItem>
+                        <SelectItem value="palm_oil">Palm Oil</SelectItem>
+                        <SelectItem value="vegetables">Vegetables</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryCrops">Secondary Crops</Label>
+                    <Input
+                      id="secondaryCrops"
+                      value={newFarmer.secondaryCrops}
+                      onChange={(e) => setNewFarmer(prev => ({ ...prev, secondaryCrops: e.target.value }))}
+                      placeholder="e.g., vegetables, fruits"
+                      data-testid="input-secondary-crops"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="landOwnership">Land Ownership Status</Label>
+                    <Select value={newFarmer.landOwnership} onValueChange={(value) => setNewFarmer(prev => ({ ...prev, landOwnership: value }))}>
+                      <SelectTrigger data-testid="select-land-ownership">
+                        <SelectValue placeholder="Select ownership status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="owned">Owned</SelectItem>
+                        <SelectItem value="rented">Rented</SelectItem>
+                        <SelectItem value="communal">Communal</SelectItem>
+                        <SelectItem value="customary">Customary Rights</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="irrigationAccess">Irrigation Access</Label>
+                    <Select value={newFarmer.irrigationAccess} onValueChange={(value) => setNewFarmer(prev => ({ ...prev, irrigationAccess: value }))}>
+                      <SelectTrigger data-testid="select-irrigation">
+                        <SelectValue placeholder="Select irrigation status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Irrigation</SelectItem>
+                        <SelectItem value="basic">Basic Irrigation</SelectItem>
+                        <SelectItem value="drip">Drip Irrigation</SelectItem>
+                        <SelectItem value="sprinkler">Sprinkler System</SelectItem>
+                        <SelectItem value="rain_fed">Rain-fed Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="certifications">Current Certifications</Label>
+                  <Input
+                    id="certifications"
+                    value={newFarmer.certifications}
+                    onChange={(e) => setNewFarmer(prev => ({ ...prev, certifications: e.target.value }))}
+                    placeholder="e.g., Organic, Fair Trade, Rainforest Alliance"
+                    data-testid="input-certifications"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cooperativeMembership">Cooperative Membership</Label>
+                  <Input
+                    id="cooperativeMembership"
+                    value={newFarmer.cooperativeMembership}
+                    onChange={(e) => setNewFarmer(prev => ({ ...prev, cooperativeMembership: e.target.value }))}
+                    placeholder="Name of cooperative or 'None'"
+                    data-testid="input-cooperative"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowFarmerOnboardingDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => createFarmer.mutate(newFarmer)}
+              disabled={!newFarmer.firstName || !newFarmer.lastName || !newFarmer.phone || !newFarmer.county || !newFarmer.primaryCrop || createFarmer.isPending}
+              className="bg-green-600 hover:bg-green-700"
+              data-testid="button-save-farmer"
+            >
+              {createFarmer.isPending ? "Registering..." : "Register & Approve Farmer"}
             </Button>
           </div>
         </DialogContent>

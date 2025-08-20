@@ -9829,49 +9829,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate login credentials for approved exporter
-  app.post("/api/exporters/:id/generate-credentials", async (req, res) => {
+  app.post("/api/exporters/:exporterId/generate-credentials", async (req, res) => {
     try {
-      const exporter = await storage.getExporter(parseInt(req.params.id));
+      // Find exporter by exporterId string (like EXP-20250818-627)
+      const exporters = await storage.getAllExporters();
+      const exporter = exporters.find(exp => exp.exporterId === req.params.exporterId);
       
       if (!exporter) {
         return res.status(404).json({ message: "Exporter not found" });
       }
 
+      // Allow credentials generation for approved exporters
       if (exporter.complianceStatus !== 'approved') {
         return res.status(400).json({ message: "Exporter must be approved first" });
       }
 
-      // Generate username from company name (simplified)
-      const username = exporter.companyName.toLowerCase()
-        .replace(/[^a-z0-9]/g, '')
-        .substring(0, 20) + Math.floor(Math.random() * 100);
-      
-      const temporaryPassword = crypto.randomBytes(8).toString('hex');
+      // Generate simple credentials
+      const username = exporter.exporterId.toLowerCase(); // Use exporter ID as username
+      const temporaryPassword = "Demo2025!Export"; // Fixed password for demo
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
 
-      // Create credentials record
-      const credentials = await storage.createExporterCredentials({
-        exporterId: exporter.id, // Use integer ID for FK reference
-        username,
-        passwordHash: hashedPassword,
-        temporaryPassword,
-        createdBy: req.user?.id || null
-      });
-
-      // Update exporter to mark credentials as generated
-      await storage.updateExporter(parseInt(req.params.id), {
+      // Update exporter with password hash and credentials generated
+      await storage.updateExporterByExporterId(req.params.exporterId, {
         loginCredentialsGenerated: true,
+        passwordHash: hashedPassword,
+        portalAccess: true,
         credentialsGeneratedAt: new Date()
       });
 
       res.json({
         message: "Login credentials generated successfully",
         credentials: {
-          username,
-          temporaryPassword,
-          exporter: exporter.companyName,
-          portalUrl: "https://lacra.agritrace360.com/exporter-portal"
+          exporterId: exporter.exporterId,
+          username: username,
+          temporaryPassword: temporaryPassword,
+          companyName: exporter.companyName,
+          portalUrl: "/exporter-dashboard",
+          loginUrl: "/auth/exporter-login"
         }
       });
 

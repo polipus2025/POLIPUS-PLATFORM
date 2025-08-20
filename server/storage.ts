@@ -2216,6 +2216,18 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(exporters).orderBy(desc(exporters.createdAt));
   }
 
+  async getAllExporters(): Promise<Exporter[]> {
+    return await db.select().from(exporters).orderBy(desc(exporters.createdAt));
+  }
+
+  async updateExporterByExporterId(exporterId: string, updates: Partial<Exporter>): Promise<Exporter | undefined> {
+    const [updatedExporter] = await db.update(exporters)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(exporters.exporterId, exporterId))
+      .returning();
+    return updatedExporter || undefined;
+  }
+
   async getExporter(id: number): Promise<Exporter | undefined> {
     const [exporter] = await db.select().from(exporters).where(eq(exporters.id, id));
     return exporter || undefined;

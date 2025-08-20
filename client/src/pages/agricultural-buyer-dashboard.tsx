@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,15 @@ import { useLocation } from "wouter";
 export default function AgriculturalBuyerDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Handle URL params for tab switching from sidebar
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab && ['overview', 'farmers', 'exporters'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, []);
 
   // Get buyer info from localStorage
   const buyerId = localStorage.getItem("buyerId") || localStorage.getItem("userId");
@@ -104,11 +113,10 @@ export default function AgriculturalBuyerDashboard() {
       {/* Main Content */}
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Business Overview</TabsTrigger>
             <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>
             <TabsTrigger value="exporters">Exporter Network</TabsTrigger>
-            <TabsTrigger value="transactions">Transaction Dashboard</TabsTrigger>
           </TabsList>
 
           {/* Business Overview Tab */}
@@ -435,105 +443,6 @@ export default function AgriculturalBuyerDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Transaction Dashboard Tab */}
-          <TabsContent value="transactions" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Transaction Dashboard</CardTitle>
-                <CardDescription>Overview of all your buying and selling activities</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Purchases</CardTitle>
-                      <Package2 className="h-4 w-4 text-green-600" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">$124,500</div>
-                      <p className="text-xs text-gray-600">This month</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-                      <TrendingUp className="h-4 w-4 text-blue-600" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">$145,200</div>
-                      <p className="text-xs text-gray-600">This month</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
-                      <DollarSign className="h-4 w-4 text-purple-600" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">$20,700</div>
-                      <p className="text-xs text-gray-600">16.6% margin</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Recent Transactions Table */}
-                <div className="border rounded-lg">
-                  <div className="p-4 border-b bg-gray-50">
-                    <h4 className="font-medium">Recent Transactions</h4>
-                  </div>
-                  <div className="p-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between py-2 border-b">
-                        <div>
-                          <p className="font-medium">Purchase from Mary Johnson</p>
-                          <p className="text-sm text-gray-600">750kg Cocoa Beans - FRM-2024-045</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-red-600">-$1,875</p>
-                          <p className="text-sm text-gray-600">Jan 15, 2024</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2 border-b">
-                        <div>
-                          <p className="font-medium">Sale to Global Trading Ltd</p>
-                          <p className="text-sm text-gray-600">500kg Cocoa Beans</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-green-600">+$1,750</p>
-                          <p className="text-sm text-gray-600">Jan 14, 2024</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2 border-b">
-                        <div>
-                          <p className="font-medium">Purchase from David Wilson</p>
-                          <p className="text-sm text-gray-600">450kg Coffee Beans - FRM-2024-067</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-red-600">-$1,440</p>
-                          <p className="text-sm text-gray-600">Jan 12, 2024</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2">
-                        <div>
-                          <p className="font-medium">Sale to International Export Co.</p>
-                          <p className="text-sm text-gray-600">300kg Coffee Beans</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-green-600">+$1,260</p>
-                          <p className="text-sm text-gray-600">Jan 10, 2024</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>

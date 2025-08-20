@@ -126,10 +126,10 @@ const exporterNavigation = [
 
 // Agricultural Buyer Navigation - Commerce-focused for agricultural trade
 const buyerNavigation = [
-  { name: "Business Overview", href: "/buyer-dashboard", icon: BarChart3 },
-  { name: "Farmer Connections", href: "/buyer-farmer-connections", icon: Leaf },
-  { name: "Exporter Network", href: "/buyer-exporter-network", icon: Building2 },
-  { name: "Transaction Dashboard", href: "/buyer-transactions", icon: DollarSign },
+  { name: "Business Overview", href: "/agricultural-buyer-dashboard", icon: BarChart3 },
+  { name: "Farmer Connections", href: "/agricultural-buyer-dashboard?tab=farmers", icon: Leaf },
+  { name: "Exporter Network", href: "/agricultural-buyer-dashboard?tab=exporters", icon: Building2 },
+  { name: "Transaction Dashboard", href: "/buyer-transaction-dashboard", icon: DollarSign },
   { name: "Available Harvests", href: "/buyer-harvests", icon: Calendar },
   { name: "Business Metrics", href: "/buyer-metrics", icon: TrendingUp },
 ];

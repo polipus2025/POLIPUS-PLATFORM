@@ -61,7 +61,7 @@ export default function LandInspectorLogin() {
         });
         
         // Navigate to land inspector dashboard
-        navigate("/inspector-dashboard?type=land");
+        navigate("/landmap360/inspector-dashboard");
       } else {
         console.error("Login failed - invalid response:", data);
         toast({

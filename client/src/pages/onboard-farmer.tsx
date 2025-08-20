@@ -11,7 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Target, Globe, TreePine, Camera, Users, Phone } from "lucide-react";
 import { Link } from "wouter";
-import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
+import SimpleWorkingMapper from '@/components/maps/simple-working-mapper';
 
 const LIBERIAN_COUNTIES = [
   "Bomi", "Bong", "Gbarpolu", "Grand Bassa", "Grand Cape Mount", "Grand Gedeh",
@@ -582,12 +582,12 @@ export default function OnboardFarmer() {
                       </ul>
                     </div>
 
-                    <RealMapBoundaryMapper
+                    <SimpleWorkingMapper
                       onBoundaryComplete={(boundary) => {
                         setFarmerData(prev => ({
                           ...prev,
                           boundaryData: boundary,
-                          farmSize: boundary.areaHectares ? boundary.areaHectares.toString() : prev.farmSize,
+                          farmSize: boundary.area ? boundary.area.toFixed(2) : prev.farmSize,
                           gpsCoordinates: boundary.points.length > 0 ? 
                             `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
                             prev.gpsCoordinates
@@ -595,10 +595,9 @@ export default function OnboardFarmer() {
                         
                         toast({
                           title: "Farm Boundary Mapped Successfully",
-                          description: `EUDR Compliant: ${boundary.points.length} GPS points (${boundary.areaHectares} hectares, ${boundary.areaAcres} acres, ${boundary.areaSquareMeters} sq.m)`,
+                          description: `EUDR Compliant: ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares) on satellite imagery`,
                         });
                       }}
-                      minPoints={6}
                     />
                   </div>
                 </CardContent>

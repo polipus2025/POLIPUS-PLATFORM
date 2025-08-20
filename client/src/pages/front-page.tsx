@@ -340,7 +340,7 @@ export default function FrontPage() {
             <div className="mt-4 flex items-center justify-center gap-6 text-xs sm:text-sm text-slate-500">
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>24-Page Analysis</span>
+                <span>Complete 24-Page Analysis</span>
               </div>
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />

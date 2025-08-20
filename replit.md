@@ -13,6 +13,11 @@ PDF Report Design Preference: User confirmed satisfaction with enhanced professi
 The application employs a modern full-stack architecture with a clear separation of concerns.
 
 ### Recent Updates (August 20, 2025)
+- **PLATFORM DOCUMENTATION PDF CORRECTED**: Fixed discrepancy where documentation was advertised as 24 pages but only generating 16 pages. Added comprehensive additional content including shipping integrations, satellite data sources, AI/ML capabilities, blockchain features, mobile capabilities, training programs, regulatory compliance, and future roadmap to reach full 24 pages as advertised.
+- **SHIPPING API INTEGRATION COMPLETE**: Successfully created comprehensive shipping integration service connecting to Maersk, MSC, CMA CGM, and Hapag-Lloyd APIs. Implemented real-time container tracking, vessel monitoring, and shipment status capabilities in exporter portal with dedicated shipping tracking page.
+- **DOCUMENTATION ACCESS OPTIMIZED**: Removed platform documentation PDF window from all AgriTrace 360 access portals as requested, keeping it available only on the front page to maintain clean portal access without documentation interruptions.
+
+### Previous Updates (August 20, 2025)
 - **BREAKTHROUGH: Exporter Authentication System Fixed**: Successfully resolved exporter login credential authentication issues. Fixed authenticateExporter method in storage.ts to work with the existing exporters table schema instead of separate credentials table. Working credentials: EXP-20250818-627 / Demo2025!Export.
 - **DDGOTS Exporter Management System Fully Operational**: Completed debugging and testing of the three-tier regulatory portal system. DDGOTS (Deputy Director General Operations & Technical Services) can now successfully onboard exporters, generate credentials, and manage the complete exporter approval workflow.
 - **Cross-Portal Authentication Integration**: Established seamless authentication flow between regulatory portals and exporter portal access, enabling proper credential validation and role-based access control across all three departments (DG, DDGOTS, DDGAF).

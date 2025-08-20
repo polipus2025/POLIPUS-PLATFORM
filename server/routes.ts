@@ -4,12 +4,6 @@ import { storage } from "./storage";
 import { paymentService } from "./payment-service";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import { 
-  ObjectStorageService,
-  ObjectNotFoundError,
-} from "./objectStorage";
-import { ObjectPermission } from "./objectAcl";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
 import { 
   insertCommoditySchema, 

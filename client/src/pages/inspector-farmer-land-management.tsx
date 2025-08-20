@@ -18,6 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import InteractiveBoundaryMapper from '@/components/maps/interactive-boundary-mapper';
+import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
 interface Farmer {
   id: number;
@@ -130,7 +131,8 @@ export default function InspectorFarmerLandManagement() {
     certifications: "",
     cooperativeMembership: "",
     landOwnership: "",
-    irrigationAccess: ""
+    irrigationAccess: "",
+    boundaryData: null as any
   });
 
   // Form states for new land mapping
@@ -275,8 +277,9 @@ export default function InspectorFarmerLandManagement() {
         method: "POST",
         body: JSON.stringify({
           ...data,
-          farmSize: data.farmSize ? parseFloat(data.farmSize) : null,
+          farmSize: data.boundaryData?.area || (data.farmSize ? parseFloat(data.farmSize) : null),
           farmingExperience: data.farmingExperience ? parseInt(data.farmingExperience) : null,
+          boundaryData: data.boundaryData ? JSON.stringify(data.boundaryData) : null,
           isActive: true,
           onboardedBy: inspectorName,
           onboardedAt: new Date(),
@@ -445,7 +448,8 @@ export default function InspectorFarmerLandManagement() {
       certifications: "",
       cooperativeMembership: "",
       landOwnership: "",
-      irrigationAccess: ""
+      irrigationAccess: "",
+      boundaryData: null
     });
     setCurrentPosition(null);
   };
@@ -987,7 +991,7 @@ export default function InspectorFarmerLandManagement() {
                 </ul>
               </div>
               
-              <InteractiveBoundaryMapper 
+              <RealMapBoundaryMapper 
                 onBoundaryComplete={(boundary) => {
                   setNewMapping(prev => ({
                     ...prev,
@@ -998,8 +1002,8 @@ export default function InspectorFarmerLandManagement() {
                       prev.coordinates
                   }));
                   toast({
-                    title: "Land Boundary Mapped",
-                    description: `${boundary.name} mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
+                    title: "Land Boundary Mapped Successfully",
+                    description: `Land plot mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
                   });
                 }}
               />
@@ -1600,6 +1604,51 @@ export default function InspectorFarmerLandManagement() {
                       {isDetectingGPS ? "Detecting..." : "Get Location"}
                     </Button>
                   </div>
+                </div>
+
+                {/* Interactive GPS Boundary Mapping System */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-medium">Interactive GPS Boundary Mapping</Label>
+                    <div className="flex space-x-2">
+                      <Badge variant="secondary" className="text-xs">
+                        <Globe className="h-3 w-3 mr-1" />
+                        Real Satellite
+                      </Badge>
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        Point-wise Mapping
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <h4 className="font-medium text-green-800 mb-2">How to Map Farm Boundaries:</h4>
+                    <ol className="text-sm text-green-700 space-y-1">
+                      <li>1. Walk around the perimeter of the farm with the farmer</li>
+                      <li>2. Click on the map to add GPS points at boundary corners</li>
+                      <li>3. Add multiple points to trace the exact farm boundary</li>
+                      <li>4. Complete the boundary by connecting back to the starting point</li>
+                      <li>5. Farm area will be calculated automatically from GPS points</li>
+                    </ol>
+                  </div>
+
+                  <RealMapBoundaryMapper
+                    onBoundaryComplete={(boundary) => {
+                      setNewFarmer(prev => ({
+                        ...prev,
+                        boundaryData: boundary,
+                        farmSize: boundary.area ? boundary.area.toFixed(2) : prev.farmSize,
+                        gpsCoordinates: boundary.points.length > 0 ? 
+                          `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
+                          prev.gpsCoordinates
+                      }));
+                      toast({
+                        title: "Farm Boundary Mapped Successfully",
+                        description: `Farm mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
+                      });
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>

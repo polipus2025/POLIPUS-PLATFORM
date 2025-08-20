@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, MapPin, Target, Globe, TreePine } from "lucide-react";
+import { ArrowLeft, MapPin, Target, Globe, TreePine, Camera, Users, Phone } from "lucide-react";
 import { Link } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
@@ -41,7 +41,15 @@ export default function OnboardFarmer() {
     cooperativeMembership: "",
     landOwnership: "",
     irrigationAccess: "",
-    boundaryData: null as any
+    boundaryData: null as any,
+    // Family details
+    spouseName: "",
+    numberOfChildren: "",
+    dependents: "",
+    emergencyContact: "",
+    emergencyPhone: "",
+    // Photo upload
+    farmerPhotoUrl: ""
   });
 
   const inspectorId = localStorage.getItem("inspectorId") || "land_inspector";
@@ -138,7 +146,13 @@ export default function OnboardFarmer() {
         cooperativeMembership: "",
         landOwnership: "",
         irrigationAccess: "",
-        boundaryData: null
+        boundaryData: null,
+        spouseName: "",
+        numberOfChildren: "",
+        dependents: "",
+        emergencyContact: "",
+        emergencyPhone: "",
+        farmerPhotoUrl: ""
       });
     },
     onError: (error: any) => {
@@ -184,18 +198,22 @@ export default function OnboardFarmer() {
         </div>
 
         {/* Progress Steps */}
-        <div className="flex space-x-4 mb-6">
+        <div className="flex flex-wrap space-x-2 space-y-2 mb-6">
           <Badge className="bg-blue-100 text-blue-800">
-            <MapPin className="w-3 h-3 mr-1" />
-            Step 1: Farmer Details
+            <Users className="w-3 h-3 mr-1" />
+            Step 1: Personal Details
           </Badge>
           <Badge className="bg-green-100 text-green-800">
+            <Camera className="w-3 h-3 mr-1" />
+            Step 2: Photo & Family
+          </Badge>
+          <Badge className="bg-yellow-100 text-yellow-800">
             <Globe className="w-3 h-3 mr-1" />
-            Step 2: GPS Mapping
+            Step 3: GPS Mapping
           </Badge>
           <Badge className="bg-purple-100 text-purple-800">
             <TreePine className="w-3 h-3 mr-1" />
-            Step 3: EUDR Compliance
+            Step 4: EUDR Compliance
           </Badge>
         </div>
       </div>
@@ -341,6 +359,122 @@ export default function OnboardFarmer() {
 
               <Card>
                 <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Camera className="w-5 h-5 mr-2 text-blue-600" />
+                    Farmer Photo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="farmerPhoto">Upload Farmer Photo</Label>
+                    <div className="mt-2 flex items-center space-x-4">
+                      <div className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                        {farmerData.farmerPhotoUrl ? (
+                          <img 
+                            src={farmerData.farmerPhotoUrl} 
+                            alt="Farmer" 
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <Camera className="w-8 h-8 text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <Input
+                          id="farmerPhoto"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // For demo purposes, use a placeholder URL
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                setFarmerData(prev => ({ 
+                                  ...prev, 
+                                  farmerPhotoUrl: event.target?.result as string 
+                                }));
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Upload a clear photo of the farmer (max 5MB)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-green-600" />
+                    Family Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="spouseName">Spouse Name</Label>
+                      <Input
+                        id="spouseName"
+                        value={farmerData.spouseName}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, spouseName: e.target.value }))}
+                        placeholder="Enter spouse name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="numberOfChildren">Number of Children</Label>
+                      <Input
+                        id="numberOfChildren"
+                        type="number"
+                        value={farmerData.numberOfChildren}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, numberOfChildren: e.target.value }))}
+                        placeholder="e.g., 3"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="dependents">Total Dependents</Label>
+                    <Input
+                      id="dependents"
+                      type="number"
+                      value={farmerData.dependents}
+                      onChange={(e) => setFarmerData(prev => ({ ...prev, dependents: e.target.value }))}
+                      placeholder="Total number of dependents"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="emergencyContact">Emergency Contact Name</Label>
+                      <Input
+                        id="emergencyContact"
+                        value={farmerData.emergencyContact}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, emergencyContact: e.target.value }))}
+                        placeholder="Emergency contact person"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="emergencyPhone">Emergency Phone</Label>
+                      <Input
+                        id="emergencyPhone"
+                        value={farmerData.emergencyPhone}
+                        onChange={(e) => setFarmerData(prev => ({ ...prev, emergencyPhone: e.target.value }))}
+                        placeholder="+231 XXX XXX XXX"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
                   <CardTitle>Farm Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -355,6 +489,9 @@ export default function OnboardFarmer() {
                         onChange={(e) => setFarmerData(prev => ({ ...prev, farmSize: e.target.value }))}
                         placeholder="e.g., 2.5"
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Will be calculated from GPS mapping
+                      </p>
                     </div>
                     <div>
                       <Label htmlFor="farmingExperience">Years of Experience</Label>
@@ -450,14 +587,19 @@ export default function OnboardFarmer() {
                         setFarmerData(prev => ({
                           ...prev,
                           boundaryData: boundary,
-                          farmSize: boundary.area ? boundary.area.toFixed(2) : prev.farmSize,
+                          farmSize: boundary.areaHectares ? boundary.areaHectares.toString() : prev.farmSize,
                           gpsCoordinates: boundary.points.length > 0 ? 
                             `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
                             prev.gpsCoordinates
                         }));
+                        
+                        const isComplete = boundary.points.length >= 8;
                         toast({
-                          title: "Farm Boundary Mapped Successfully",
-                          description: `Farm mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
+                          title: isComplete ? "Farm Boundary Complete!" : "Boundary In Progress",
+                          description: isComplete 
+                            ? `Farm mapped with ${boundary.points.length} GPS points - Area: ${boundary.areaHectares} hectares, ${boundary.areaAcres} acres, ${boundary.areaSquareMeters} sq.m`
+                            : `${boundary.points.length} points mapped - Need ${8 - boundary.points.length} more for complete boundary`,
+                          variant: isComplete ? "default" : "destructive"
                         });
                       }}
                     />

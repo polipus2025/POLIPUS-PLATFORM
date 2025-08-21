@@ -34,7 +34,7 @@ export default function WarehouseInspectorLogin() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/warehouse-inspector/login', {
+      const response = await fetch('/api/warehouse-inspector/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)

@@ -11232,16 +11232,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Warehouse Inspector Authentication
   app.post("/api/warehouse-inspector/login", async (req, res) => {
     try {
-      const { username, password, facility } = req.body;
+      const { username, password, warehouseFacility } = req.body;
       
-      if (username === "warehouse001" && password === "lacra123") {
+      if (username === "WH-INS-001" && password === "warehouse123") {
         res.json({
           success: true,
           inspector: {
             id: "WH-INS-001",
             name: "Warehouse Inspector Sarah Johnson",
             department: "Warehouse Operations",
-            facility: facility || "Monrovia Central Warehouse",
+            facility: warehouseFacility || "Monrovia Central Warehouse",
             credentials: "WH-CERT-2024-001",
             clearanceLevel: "Level 3",
             specializations: ["Storage Compliance", "Quality Control", "Temperature Management", "Pest Control"],

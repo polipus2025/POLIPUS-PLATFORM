@@ -371,4 +371,104 @@ export class DDGOTSIntegrationService {
       timestamp: new Date().toISOString()
     };
   }
+
+  // Export proposal accepted notifications
+  static async notifyExportProposalAccepted(notificationData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`📢 DDGOTS: Processing export proposal acceptance notifications...`);
+    
+    console.log(`🛒 NOTIFYING BUYER: Marketplace listing accepted by exporter ${notificationData.exporterId}`);
+    console.log(`📋 Transaction Code: ${notificationData.transactionCode}`);
+    console.log(`💰 Final Price: $${notificationData.proposalDetails.finalPrice}/${notificationData.proposalDetails.priceUnit || 'kg'}`);
+    
+    console.log(`🏢 NOTIFYING BUYER WAREHOUSE: ${notificationData.notifications.warehouse.message}`);
+    
+    console.log(`🏛️ NOTIFYING DDGOTS: ${notificationData.notifications.regulator.message}`);
+    
+    console.log(`🔍 NOTIFYING LAND INSPECTOR: ${notificationData.notifications.landInspector.message}`);
+    console.log(`📋 Authorization Required: Product transfer from buyer to exporter`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        buyer: true,
+        warehouse: true,
+        regulator: true,
+        landInspector: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Warehouse delivery authorization notifications
+  static async notifyWarehouseDeliveryAuthorization(authData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`🔍 DDGOTS: Processing Land Inspector authorization notifications...`);
+    
+    console.log(`🏢 NOTIFYING BUYER WAREHOUSE: Land Inspector authorized export transfer`);
+    console.log(`✅ Authorization Code: ${authData.authorizationCode}`);
+    console.log(`📦 Proceed with delivery preparation for transaction: ${authData.transactionCode}`);
+    
+    console.log(`🛒 NOTIFYING BUYER: Export transfer authorized by Land Inspector`);
+    console.log(`🌍 NOTIFYING EXPORTER: Land Inspector approved product transfer - delivery preparation in progress`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        warehouse: true,
+        buyer: true,
+        exporter: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Delivery initiation notifications
+  static async notifyDeliveryInitiated(deliveryData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`📦 DDGOTS: Processing delivery initiation notifications...`);
+    
+    console.log(`🏭 NOTIFYING EXPORTER WAREHOUSE: ${deliveryData.notifications.exporterWarehouse.message}`);
+    console.log(`📅 Expected Delivery: ${deliveryData.deliveryRecord.buyerWarehouse.estimatedDeliveryTime}`);
+    console.log(`🚛 Transport: ${deliveryData.deliveryRecord.buyerWarehouse.transportCompany}`);
+    
+    console.log(`🛒 NOTIFYING BUYER: ${deliveryData.notifications.buyer.message}`);
+    
+    console.log(`🌍 NOTIFYING EXPORTER: ${deliveryData.notifications.exporter.message}`);
+    
+    console.log(`🏛️ NOTIFYING DDGOTS: ${deliveryData.notifications.regulator.message}`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        exporterWarehouse: true,
+        buyer: true,
+        exporter: true,
+        regulator: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Product receipt completion notifications
+  static async notifyProductReceiptCompleted(receiptData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`✅ DDGOTS: Processing product receipt completion notifications...`);
+    
+    console.log(`🛒 NOTIFYING BUYER: ${receiptData.notifications.buyer.message}`);
+    console.log(`📋 Delivery Status: COMPLETED`);
+    
+    console.log(`🌍 NOTIFYING EXPORTER: ${receiptData.notifications.exporter.message}`);
+    console.log(`📦 Product Quality: ${receiptData.receiptRecord.receipt.qualityInspection.overallAssessment}`);
+    console.log(`⚖️ Final Quantity: ${receiptData.receiptRecord.receipt.quantityVerification.actualQuantity}kg`);
+    
+    console.log(`🏛️ NOTIFYING DDGOTS: ${receiptData.notifications.regulator.message}`);
+    console.log(`📄 Export Transaction: COMPLETED SUCCESSFULLY`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        buyer: true,
+        exporter: true,
+        regulator: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
 }

@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Building2, DollarSign, Settings, ArrowRight } from "lucide-react";
+import { Shield, Building2, DollarSign, Settings, ArrowRight, Database, FileCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
@@ -131,6 +131,86 @@ export default function RegulatoryLogin() {
               </Button>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Independent Access Portals */}
+        <div className="mt-8 mb-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Independent Access Portals</h2>
+            <p className="text-slate-600">Alternative portal access for system administrators and regulatory staff</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* System Administrator Portal */}
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group" 
+                  onClick={() => navigate('/system-admin-login')}>
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Database className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                  <Database className="w-5 h-5" />
+                  System Administrator
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Platform Control Center
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Badge variant="outline" className="w-full justify-center border-slate-500 text-slate-600 bg-slate-50">
+                  System Level Access
+                </Badge>
+                <ul className="text-sm text-slate-600 space-y-2">
+                  <li>• Cross-module connectivity monitoring</li>
+                  <li>• Database management and control</li>
+                  <li>• System health oversight</li>
+                  <li>• Platform administration</li>
+                </ul>
+                <Button 
+                  className="w-full bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white group"
+                  onClick={(e) => { e.stopPropagation(); navigate('/system-admin-login'); }}
+                >
+                  Access System Portal
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Regulatory Portal Classic */}
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
+                  onClick={() => navigate('/regulatory-classic-login')}>
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-700 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FileCheck className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                  <FileCheck className="w-5 h-5" />
+                  Regulatory (Classic)
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Original Unified Interface
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Badge variant="outline" className="w-full justify-center border-green-500 text-green-600 bg-green-50">
+                  Unified Access
+                </Badge>
+                <ul className="text-sm text-slate-600 space-y-2">
+                  <li>• EUDR compliance monitoring</li>
+                  <li>• Export control and management</li>
+                  <li>• Inspection oversight</li>
+                  <li>• Unified regulatory interface</li>
+                </ul>
+                <Button 
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white group"
+                  onClick={(e) => { e.stopPropagation(); navigate('/regulatory-classic-login'); }}
+                >
+                  Access Classic Portal
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Security Notice */}

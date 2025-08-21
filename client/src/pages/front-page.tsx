@@ -135,21 +135,7 @@ export default function FrontPage() {
               </Link>
             </div>
 
-            {/* Quick Access to Independent Portals - Positioned to the right */}
-            <div className="absolute right-0 top-0 flex flex-col gap-2">
-              <Link href="/system-admin-login">
-                <Button className="bg-slate-600 hover:bg-slate-700 text-white flex items-center gap-2 text-sm">
-                  <Database className="h-4 w-4" />
-                  System Admin
-                </Button>
-              </Link>
-              <Link href="/regulatory-classic-login">
-                <Button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 text-sm">
-                  <FileCheck className="h-4 w-4" />
-                  Regulatory Classic
-                </Button>
-              </Link>
-            </div>
+
           </div>
         </div>
 

@@ -10939,6 +10939,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('🚢 Shipping integrations loaded: Maersk, MSC, CMA CGM, Hapag-Lloyd');
   }).catch(err => console.error('Shipping integration error:', err));
 
+  // Register admin routes for System General Overview
+  import('./routes/admin.js').then(module => {
+    app.use('/api/admin', module.default);
+    console.log('🔧 ADMIN ROUTES REGISTERED - System General Overview accessible');
+  }).catch(err => console.error('Admin routes error:', err));
+
   // ===== LAND MAPPING API ROUTES =====
   // Multiple Land Mappings per Farmer - Created by Land Inspectors
 

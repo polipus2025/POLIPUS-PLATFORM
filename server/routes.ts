@@ -8,6 +8,7 @@ import { productConfigurationData } from "./product-config-data";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
+import { createTestFarmer } from "./create-test-farmer";
 
 import { 
   insertCommoditySchema, 

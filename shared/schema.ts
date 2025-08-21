@@ -71,6 +71,105 @@ export const alerts = pgTable("alerts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// QR Code Batch Tracking System for Warehouse Bags
+export const qrBatches = pgTable("qr_batches", {
+  id: serial("id").primaryKey(),
+  batchCode: text("batch_code").notNull().unique(), // WH-BATCH-YYYYMMDD-XXXX
+  warehouseId: text("warehouse_id").notNull(),
+  warehouseName: text("warehouse_name").notNull(),
+  buyerId: text("buyer_id").notNull(),
+  buyerName: text("buyer_name").notNull(),
+  farmerId: text("farmer_id").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  commodityType: text("commodity_type").notNull(), // cocoa, coffee, palm_oil, etc.
+  commodityId: integer("commodity_id").references(() => commodities.id),
+  totalBags: integer("total_bags").notNull(),
+  bagWeight: decimal("bag_weight", { precision: 10, scale: 2 }).notNull(), // kg per bag
+  totalWeight: decimal("total_weight", { precision: 10, scale: 2 }).notNull(),
+  qualityGrade: text("quality_grade").notNull(),
+  harvestDate: timestamp("harvest_date").notNull(),
+  inspectionData: jsonb("inspection_data").notNull(), // Complete inspection details
+  eudrCompliance: jsonb("eudr_compliance").notNull(), // EUDR compliance data
+  gpsCoordinates: text("gps_coordinates").notNull(), // Farm location
+  qrCodeData: jsonb("qr_code_data").notNull(), // Complete QR code payload
+  qrCodeUrl: text("qr_code_url"), // Generated QR code image URL
+  status: text("status").notNull().default("generated"), // generated, printed, distributed, scanned
+  createdAt: timestamp("created_at").defaultNow(),
+  printedAt: timestamp("printed_at"),
+  distributedAt: timestamp("distributed_at"),
+});
+
+export const qrScans = pgTable("qr_scans", {
+  id: serial("id").primaryKey(),
+  batchCode: text("batch_code").notNull().references(() => qrBatches.batchCode),
+  scannedBy: text("scanned_by"),
+  scannerType: text("scanner_type").notNull(), // buyer, inspector, exporter, customs
+  scanLocation: text("scan_location"),
+  scanCoordinates: text("scan_coordinates"),
+  deviceInfo: text("device_info"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// Warehouse Bag Inventory System
+export const warehouseBagInventory = pgTable("warehouse_bag_inventory", {
+  id: serial("id").primaryKey(),
+  warehouseId: text("warehouse_id").notNull(),
+  warehouseName: text("warehouse_name").notNull(),
+  batchCode: text("batch_code").notNull().references(() => qrBatches.batchCode),
+  bagType: text("bag_type").notNull(), // jute, polypropylene, paper, etc.
+  bagSize: text("bag_size").notNull(), // 50kg, 60kg, 100kg
+  totalBags: integer("total_bags").notNull(),
+  availableBags: integer("available_bags").notNull(),
+  reservedBags: integer("reserved_bags").default(0),
+  distributedBags: integer("distributed_bags").default(0),
+  damagedBags: integer("damaged_bags").default(0),
+  location: text("location").notNull(), // warehouse section/zone
+  storageConditions: jsonb("storage_conditions").notNull(), // temperature, humidity, etc.
+  lastInventoryCheck: timestamp("last_inventory_check").defaultNow(),
+  checkedBy: text("checked_by"),
+  status: text("status").notNull().default("available"), // available, reserved, low_stock, out_of_stock
+  reorderLevel: integer("reorder_level").default(100),
+  maxCapacity: integer("max_capacity").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const bagMovements = pgTable("bag_movements", {
+  id: serial("id").primaryKey(),
+  warehouseId: text("warehouse_id").notNull(),
+  batchCode: text("batch_code").notNull().references(() => qrBatches.batchCode),
+  movementType: text("movement_type").notNull(), // in, out, transfer, damage, reserve, release
+  quantity: integer("quantity").notNull(),
+  fromLocation: text("from_location"),
+  toLocation: text("to_location"),
+  buyerId: text("buyer_id"),
+  buyerName: text("buyer_name"),
+  authorizedBy: text("authorized_by").notNull(),
+  reason: text("reason"),
+  notes: text("notes"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// Warehouse inventory relations
+export const warehouseBagInventoryRelations = relations(warehouseBagInventory, ({ one, many }) => ({
+  qrBatch: one(qrBatches, {
+    fields: [warehouseBagInventory.batchCode],
+    references: [qrBatches.batchCode],
+  }),
+  movements: many(bagMovements),
+}));
+
+export const bagMovementsRelations = relations(bagMovements, ({ one }) => ({
+  inventory: one(warehouseBagInventory, {
+    fields: [bagMovements.batchCode],
+    references: [warehouseBagInventory.batchCode],
+  }),
+  qrBatch: one(qrBatches, {
+    fields: [bagMovements.batchCode],
+    references: [qrBatches.batchCode],
+  }),
+}));
+
 // Super Backend Administrative Control System
 export const systemConfigurations = pgTable("system_configurations", {
   id: serial("id").primaryKey(),
@@ -323,6 +422,19 @@ export type InsertAccessControlMatrix = typeof accessControlMatrix.$inferInsert;
 
 export type EmergencyControl = typeof emergencyControls.$inferSelect;
 export type InsertEmergencyControl = typeof emergencyControls.$inferInsert;
+
+// QR Code Batch Tracking System Types
+export type QrBatch = typeof qrBatches.$inferSelect;
+export type InsertQrBatch = typeof qrBatches.$inferInsert;
+
+export type QrScan = typeof qrScans.$inferSelect;
+export type InsertQrScan = typeof qrScans.$inferInsert;
+
+export type WarehouseBagInventory = typeof warehouseBagInventory.$inferSelect;
+export type InsertWarehouseBagInventory = typeof warehouseBagInventory.$inferInsert;
+
+export type BagMovement = typeof bagMovements.$inferSelect;
+export type InsertBagMovement = typeof bagMovements.$inferInsert;
 
 export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;

@@ -65,6 +65,10 @@ import {
   exporterTransactions,
   regulatoryDepartments,
   exportOrders,
+  qrBatches,
+  qrScans,
+  warehouseBagInventory,
+  bagMovements,
   type Commodity,
   type Inspection,
   type Certification,
@@ -197,7 +201,15 @@ import {
   type InsertExporterTransaction,
   softCommodities,
   type SoftCommodity,
-  type InsertSoftCommodity
+  type InsertSoftCommodity,
+  type QrBatch,
+  type QrScan,
+  type WarehouseBagInventory,
+  type BagMovement,
+  type InsertQrBatch,
+  type InsertQrScan,
+  type InsertWarehouseBagInventory,
+  type InsertBagMovement
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -715,6 +727,37 @@ export interface IStorage {
   getWarehouseQualityControls(): Promise<any[]>;
   startWarehouseInspection(inspectionId: string): Promise<any>;
   completeWarehouseInspection(inspectionId: string, data: any): Promise<any>;
+
+  // QR Code Batch Tracking System methods
+  getQrBatches(): Promise<QrBatch[]>;
+  getQrBatch(batchCode: string): Promise<QrBatch | undefined>;
+  getQrBatchesByWarehouse(warehouseId: string): Promise<QrBatch[]>;
+  getQrBatchesByBuyer(buyerId: string): Promise<QrBatch[]>;
+  createQrBatch(batch: InsertQrBatch): Promise<QrBatch>;
+  updateQrBatch(batchCode: string, updates: Partial<QrBatch>): Promise<QrBatch | undefined>;
+  
+  // QR Scan tracking methods
+  getQrScans(): Promise<QrScan[]>;
+  getQrScansByBatch(batchCode: string): Promise<QrScan[]>;
+  createQrScan(scan: InsertQrScan): Promise<QrScan>;
+  
+  // Warehouse Bag Inventory methods
+  getWarehouseBagInventory(): Promise<WarehouseBagInventory[]>;
+  getWarehouseBagInventoryByWarehouse(warehouseId: string): Promise<WarehouseBagInventory[]>;
+  getWarehouseBagInventoryByBatch(batchCode: string): Promise<WarehouseBagInventory | undefined>;
+  createWarehouseBagInventory(inventory: InsertWarehouseBagInventory): Promise<WarehouseBagInventory>;
+  updateWarehouseBagInventory(id: number, updates: Partial<WarehouseBagInventory>): Promise<WarehouseBagInventory | undefined>;
+  
+  // Bag Movement tracking methods
+  getBagMovements(): Promise<BagMovement[]>;
+  getBagMovementsByWarehouse(warehouseId: string): Promise<BagMovement[]>;
+  getBagMovementsByBatch(batchCode: string): Promise<BagMovement[]>;
+  createBagMovement(movement: InsertBagMovement): Promise<BagMovement>;
+  
+  // Warehouse inventory operations
+  reserveBags(warehouseId: string, batchCode: string, quantity: number, buyerId: string): Promise<boolean>;
+  distributeBags(warehouseId: string, batchCode: string, quantity: number, buyerId: string): Promise<boolean>;
+  returnBags(warehouseId: string, batchCode: string, quantity: number, reason: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3211,6 +3254,212 @@ export class DatabaseStorage implements IStorage {
       status: data.status,
       completedAt: new Date()
     };
+  }
+
+  // QR Code Batch Tracking System implementations
+  async getQrBatches(): Promise<QrBatch[]> {
+    return await db.select().from(qrBatches).orderBy(desc(qrBatches.createdAt));
+  }
+
+  async getQrBatch(batchCode: string): Promise<QrBatch | undefined> {
+    const [batch] = await db.select().from(qrBatches).where(eq(qrBatches.batchCode, batchCode));
+    return batch || undefined;
+  }
+
+  async getQrBatchesByWarehouse(warehouseId: string): Promise<QrBatch[]> {
+    return await db.select().from(qrBatches)
+      .where(eq(qrBatches.warehouseId, warehouseId))
+      .orderBy(desc(qrBatches.createdAt));
+  }
+
+  async getQrBatchesByBuyer(buyerId: string): Promise<QrBatch[]> {
+    return await db.select().from(qrBatches)
+      .where(eq(qrBatches.buyerId, buyerId))
+      .orderBy(desc(qrBatches.createdAt));
+  }
+
+  async createQrBatch(batch: InsertQrBatch): Promise<QrBatch> {
+    const [newBatch] = await db.insert(qrBatches).values(batch).returning();
+    return newBatch;
+  }
+
+  async updateQrBatch(batchCode: string, updates: Partial<QrBatch>): Promise<QrBatch | undefined> {
+    const [updated] = await db.update(qrBatches)
+      .set(updates)
+      .where(eq(qrBatches.batchCode, batchCode))
+      .returning();
+    return updated || undefined;
+  }
+
+  // QR Scan tracking implementations
+  async getQrScans(): Promise<QrScan[]> {
+    return await db.select().from(qrScans).orderBy(desc(qrScans.timestamp));
+  }
+
+  async getQrScansByBatch(batchCode: string): Promise<QrScan[]> {
+    return await db.select().from(qrScans)
+      .where(eq(qrScans.batchCode, batchCode))
+      .orderBy(desc(qrScans.timestamp));
+  }
+
+  async createQrScan(scan: InsertQrScan): Promise<QrScan> {
+    const [newScan] = await db.insert(qrScans).values(scan).returning();
+    return newScan;
+  }
+
+  // Warehouse Bag Inventory implementations
+  async getWarehouseBagInventory(): Promise<WarehouseBagInventory[]> {
+    return await db.select().from(warehouseBagInventory)
+      .orderBy(desc(warehouseBagInventory.updatedAt));
+  }
+
+  async getWarehouseBagInventoryByWarehouse(warehouseId: string): Promise<WarehouseBagInventory[]> {
+    return await db.select().from(warehouseBagInventory)
+      .where(eq(warehouseBagInventory.warehouseId, warehouseId))
+      .orderBy(desc(warehouseBagInventory.updatedAt));
+  }
+
+  async getWarehouseBagInventoryByBatch(batchCode: string): Promise<WarehouseBagInventory | undefined> {
+    const [inventory] = await db.select().from(warehouseBagInventory)
+      .where(eq(warehouseBagInventory.batchCode, batchCode));
+    return inventory || undefined;
+  }
+
+  async createWarehouseBagInventory(inventory: InsertWarehouseBagInventory): Promise<WarehouseBagInventory> {
+    const [newInventory] = await db.insert(warehouseBagInventory).values(inventory).returning();
+    return newInventory;
+  }
+
+  async updateWarehouseBagInventory(id: number, updates: Partial<WarehouseBagInventory>): Promise<WarehouseBagInventory | undefined> {
+    const [updated] = await db.update(warehouseBagInventory)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(warehouseBagInventory.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  // Bag Movement tracking implementations
+  async getBagMovements(): Promise<BagMovement[]> {
+    return await db.select().from(bagMovements).orderBy(desc(bagMovements.timestamp));
+  }
+
+  async getBagMovementsByWarehouse(warehouseId: string): Promise<BagMovement[]> {
+    return await db.select().from(bagMovements)
+      .where(eq(bagMovements.warehouseId, warehouseId))
+      .orderBy(desc(bagMovements.timestamp));
+  }
+
+  async getBagMovementsByBatch(batchCode: string): Promise<BagMovement[]> {
+    return await db.select().from(bagMovements)
+      .where(eq(bagMovements.batchCode, batchCode))
+      .orderBy(desc(bagMovements.timestamp));
+  }
+
+  async createBagMovement(movement: InsertBagMovement): Promise<BagMovement> {
+    const [newMovement] = await db.insert(bagMovements).values(movement).returning();
+    return newMovement;
+  }
+
+  // Warehouse inventory operations
+  async reserveBags(warehouseId: string, batchCode: string, quantity: number, buyerId: string): Promise<boolean> {
+    try {
+      // Get current inventory
+      const inventory = await this.getWarehouseBagInventoryByBatch(batchCode);
+      if (!inventory) return false;
+
+      // Check if enough bags available
+      if (inventory.availableBags < quantity) return false;
+
+      // Update inventory
+      await this.updateWarehouseBagInventory(inventory.id, {
+        availableBags: inventory.availableBags - quantity,
+        reservedBags: inventory.reservedBags + quantity,
+        status: inventory.availableBags - quantity <= inventory.reorderLevel ? 'low_stock' : 'available'
+      });
+
+      // Create movement record
+      await this.createBagMovement({
+        warehouseId,
+        batchCode,
+        movementType: 'reserve',
+        quantity,
+        buyerId,
+        authorizedBy: 'WH-INS-001',
+        reason: 'Bags reserved for buyer',
+        notes: `Reserved ${quantity} bags for buyer ${buyerId}`
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error reserving bags:', error);
+      return false;
+    }
+  }
+
+  async distributeBags(warehouseId: string, batchCode: string, quantity: number, buyerId: string): Promise<boolean> {
+    try {
+      // Get current inventory
+      const inventory = await this.getWarehouseBagInventoryByBatch(batchCode);
+      if (!inventory) return false;
+
+      // Check if enough reserved bags
+      if (inventory.reservedBags < quantity) return false;
+
+      // Update inventory
+      await this.updateWarehouseBagInventory(inventory.id, {
+        reservedBags: inventory.reservedBags - quantity,
+        distributedBags: inventory.distributedBags + quantity,
+        status: inventory.availableBags <= inventory.reorderLevel ? 'low_stock' : 'available'
+      });
+
+      // Create movement record
+      await this.createBagMovement({
+        warehouseId,
+        batchCode,
+        movementType: 'out',
+        quantity,
+        buyerId,
+        authorizedBy: 'WH-INS-001',
+        reason: 'Bags distributed to buyer',
+        notes: `Distributed ${quantity} bags to buyer ${buyerId}`
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error distributing bags:', error);
+      return false;
+    }
+  }
+
+  async returnBags(warehouseId: string, batchCode: string, quantity: number, reason: string): Promise<boolean> {
+    try {
+      // Get current inventory
+      const inventory = await this.getWarehouseBagInventoryByBatch(batchCode);
+      if (!inventory) return false;
+
+      // Update inventory
+      await this.updateWarehouseBagInventory(inventory.id, {
+        availableBags: inventory.availableBags + quantity,
+        reservedBags: Math.max(0, inventory.reservedBags - quantity),
+        status: 'available'
+      });
+
+      // Create movement record
+      await this.createBagMovement({
+        warehouseId,
+        batchCode,
+        movementType: 'in',
+        quantity,
+        authorizedBy: 'WH-INS-001',
+        reason: reason || 'Bags returned to inventory',
+        notes: `Returned ${quantity} bags to inventory`
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error returning bags:', error);
+      return false;
+    }
   }
 }
 

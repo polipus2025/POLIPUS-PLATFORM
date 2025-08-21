@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { registerFarmerRoutes } from "./farmer-routes";
 import { paymentService } from "./payment-service";
+import { QrBatchService } from "./qr-batch-service";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
@@ -304,6 +305,330 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting soft commodity:", error);
       res.status(500).json({ message: "Failed to delete commodity price" });
+    }
+  });
+
+  // ================================
+  // QR Code Batch Tracking System API Routes
+  // ================================
+
+  // Get all QR batches
+  app.get("/api/qr-batches", async (req, res) => {
+    try {
+      const batches = await storage.getQrBatches();
+      res.json({ success: true, data: batches });
+    } catch (error) {
+      console.error("Error fetching QR batches:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch QR batches" });
+    }
+  });
+
+  // Get QR batches by warehouse
+  app.get("/api/qr-batches/warehouse/:warehouseId", async (req, res) => {
+    try {
+      const batches = await storage.getQrBatchesByWarehouse(req.params.warehouseId);
+      res.json({ success: true, data: batches });
+    } catch (error) {
+      console.error("Error fetching warehouse QR batches:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch warehouse QR batches" });
+    }
+  });
+
+  // Get QR batches by buyer
+  app.get("/api/qr-batches/buyer/:buyerId", async (req, res) => {
+    try {
+      const batches = await storage.getQrBatchesByBuyer(req.params.buyerId);
+      res.json({ success: true, data: batches });
+    } catch (error) {
+      console.error("Error fetching buyer QR batches:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch buyer QR batches" });
+    }
+  });
+
+  // Get specific QR batch
+  app.get("/api/qr-batches/:batchCode", async (req, res) => {
+    try {
+      const batch = await storage.getQrBatch(req.params.batchCode);
+      if (!batch) {
+        return res.status(404).json({ success: false, message: "QR batch not found" });
+      }
+      res.json({ success: true, data: batch });
+    } catch (error) {
+      console.error("Error fetching QR batch:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch QR batch" });
+    }
+  });
+
+  // Create new QR batch with inventory
+  app.post("/api/qr-batches/create", async (req, res) => {
+    try {
+      const {
+        warehouseId,
+        warehouseName,
+        buyerId,
+        buyerName,
+        farmerId,
+        farmerName,
+        commodityType,
+        commodityId,
+        totalBags,
+        bagWeight,
+        bagType,
+        qualityGrade,
+        harvestDate,
+        inspectionData,
+        eudrCompliance,
+        gpsCoordinates,
+        storageLocation
+      } = req.body;
+
+      // Validate required fields
+      if (!warehouseId || !buyerId || !farmerId || !commodityType || !totalBags || !bagWeight) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: warehouseId, buyerId, farmerId, commodityType, totalBags, bagWeight" 
+        });
+      }
+
+      const result = await QrBatchService.createQrBatchWithInventory({
+        warehouseId,
+        warehouseName,
+        buyerId,
+        buyerName,
+        farmerId,
+        farmerName,
+        commodityType,
+        commodityId,
+        totalBags: parseInt(totalBags),
+        bagWeight: parseFloat(bagWeight),
+        bagType,
+        qualityGrade,
+        harvestDate: new Date(harvestDate),
+        inspectionData: inspectionData || {
+          inspector: 'WH-INS-001',
+          inspectionDate: new Date().toISOString(),
+          moisture: '7.2%',
+          defects: '2.1%',
+          foreignMatter: '0.8%',
+          gradeScore: 'A',
+          complianceStatus: 'compliant',
+          certifications: ['LACRA-CERT', 'EUDR-COMPLIANT']
+        },
+        eudrCompliance: eudrCompliance || {
+          compliant: true,
+          riskLevel: 'low',
+          deforestationRisk: 'none',
+          traceabilityScore: 95,
+          geoLocation: gpsCoordinates,
+          landRights: 'verified',
+          certificationBodies: ['FSC', 'LACRA']
+        },
+        gpsCoordinates,
+        storageLocation: storageLocation || 'Section A'
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating QR batch:", error);
+      res.status(500).json({ success: false, message: "Failed to create QR batch" });
+    }
+  });
+
+  // Verify QR code
+  app.post("/api/qr-batches/:batchCode/verify", async (req, res) => {
+    try {
+      const { batchCode } = req.params;
+      const { scannedBy, scannerType, scanLocation, scanCoordinates, deviceInfo } = req.body;
+
+      if (!scannerType) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Scanner type is required (buyer, inspector, exporter, customs)" 
+        });
+      }
+
+      const result = await QrBatchService.verifyQrCode(batchCode, {
+        scannedBy,
+        scannerType,
+        scanLocation,
+        scanCoordinates,
+        deviceInfo
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error verifying QR code:", error);
+      res.status(500).json({ success: false, message: "Failed to verify QR code" });
+    }
+  });
+
+  // Get warehouse bag inventory
+  app.get("/api/warehouse-inventory", async (req, res) => {
+    try {
+      const inventory = await storage.getWarehouseBagInventory();
+      res.json({ success: true, data: inventory });
+    } catch (error) {
+      console.error("Error fetching warehouse inventory:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch warehouse inventory" });
+    }
+  });
+
+  // Get warehouse inventory by warehouse
+  app.get("/api/warehouse-inventory/warehouse/:warehouseId", async (req, res) => {
+    try {
+      const inventory = await storage.getWarehouseBagInventoryByWarehouse(req.params.warehouseId);
+      res.json({ success: true, data: inventory });
+    } catch (error) {
+      console.error("Error fetching warehouse inventory:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch warehouse inventory" });
+    }
+  });
+
+  // Get bag movements
+  app.get("/api/bag-movements", async (req, res) => {
+    try {
+      const movements = await storage.getBagMovements();
+      res.json({ success: true, data: movements });
+    } catch (error) {
+      console.error("Error fetching bag movements:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch bag movements" });
+    }
+  });
+
+  // Get bag movements by warehouse
+  app.get("/api/bag-movements/warehouse/:warehouseId", async (req, res) => {
+    try {
+      const movements = await storage.getBagMovementsByWarehouse(req.params.warehouseId);
+      res.json({ success: true, data: movements });
+    } catch (error) {
+      console.error("Error fetching warehouse bag movements:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch warehouse bag movements" });
+    }
+  });
+
+  // Get bag movements by batch
+  app.get("/api/bag-movements/batch/:batchCode", async (req, res) => {
+    try {
+      const movements = await storage.getBagMovementsByBatch(req.params.batchCode);
+      res.json({ success: true, data: movements });
+    } catch (error) {
+      console.error("Error fetching batch movements:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch batch movements" });
+    }
+  });
+
+  // Reserve bags for buyer
+  app.post("/api/warehouse-inventory/reserve", async (req, res) => {
+    try {
+      const { warehouseId, batchCode, quantity, buyerId } = req.body;
+
+      if (!warehouseId || !batchCode || !quantity || !buyerId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: warehouseId, batchCode, quantity, buyerId" 
+        });
+      }
+
+      const success = await storage.reserveBags(warehouseId, batchCode, parseInt(quantity), buyerId);
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: `Successfully reserved ${quantity} bags from batch ${batchCode}` 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: "Failed to reserve bags - insufficient inventory or batch not found" 
+        });
+      }
+    } catch (error) {
+      console.error("Error reserving bags:", error);
+      res.status(500).json({ success: false, message: "Failed to reserve bags" });
+    }
+  });
+
+  // Distribute bags to buyer
+  app.post("/api/warehouse-inventory/distribute", async (req, res) => {
+    try {
+      const { warehouseId, batchCode, quantity, buyerId } = req.body;
+
+      if (!warehouseId || !batchCode || !quantity || !buyerId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: warehouseId, batchCode, quantity, buyerId" 
+        });
+      }
+
+      const success = await storage.distributeBags(warehouseId, batchCode, parseInt(quantity), buyerId);
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: `Successfully distributed ${quantity} bags from batch ${batchCode} to buyer ${buyerId}` 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: "Failed to distribute bags - insufficient reserved bags or batch not found" 
+        });
+      }
+    } catch (error) {
+      console.error("Error distributing bags:", error);
+      res.status(500).json({ success: false, message: "Failed to distribute bags" });
+    }
+  });
+
+  // Return bags to inventory
+  app.post("/api/warehouse-inventory/return", async (req, res) => {
+    try {
+      const { warehouseId, batchCode, quantity, reason } = req.body;
+
+      if (!warehouseId || !batchCode || !quantity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: warehouseId, batchCode, quantity" 
+        });
+      }
+
+      const success = await storage.returnBags(warehouseId, batchCode, parseInt(quantity), reason || 'Returned to inventory');
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: `Successfully returned ${quantity} bags to batch ${batchCode}` 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: "Failed to return bags - batch not found" 
+        });
+      }
+    } catch (error) {
+      console.error("Error returning bags:", error);
+      res.status(500).json({ success: false, message: "Failed to return bags" });
+    }
+  });
+
+  // Get QR scan history
+  app.get("/api/qr-scans", async (req, res) => {
+    try {
+      const scans = await storage.getQrScans();
+      res.json({ success: true, data: scans });
+    } catch (error) {
+      console.error("Error fetching QR scans:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch QR scans" });
+    }
+  });
+
+  // Get QR scans by batch
+  app.get("/api/qr-scans/batch/:batchCode", async (req, res) => {
+    try {
+      const scans = await storage.getQrScansByBatch(req.params.batchCode);
+      res.json({ success: true, data: scans });
+    } catch (error) {
+      console.error("Error fetching batch scans:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch batch scans" });
     }
   });
   

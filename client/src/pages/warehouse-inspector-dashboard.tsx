@@ -333,7 +333,7 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Main Navigation Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
@@ -345,6 +345,10 @@ export default function WarehouseInspectorDashboard() {
             <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Warehouse className="w-4 h-4 mr-2" />
               Inventory
+            </TabsTrigger>
+            <TabsTrigger value="qr-batches" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              QR Batches
             </TabsTrigger>
             <TabsTrigger value="compliance" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Shield className="w-4 h-4 mr-2" />
@@ -558,6 +562,247 @@ export default function WarehouseInspectorDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* QR Batch Management Tab */}
+          <TabsContent value="qr-batches" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-blue-600" />
+                      QR Batch Tracking & Management
+                    </CardTitle>
+                    <CardDescription>
+                      Create and manage QR-coded bag batches for complete traceability from warehouse to buyer
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Create New QR Batch Section */}
+                      <div className="border rounded-lg p-4 bg-blue-50">
+                        <h3 className="font-medium mb-3 flex items-center">
+                          <Package className="w-4 h-4 mr-2 text-blue-600" />
+                          Create New QR Batch
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Buyer ID</label>
+                            <Input placeholder="BUY-001" className="mt-1" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Farmer ID</label>
+                            <Input placeholder="FRM-001" className="mt-1" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Commodity Type</label>
+                            <Input placeholder="Cocoa" className="mt-1" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Total Bags</label>
+                            <Input placeholder="100" type="number" className="mt-1" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Bag Weight (kg)</label>
+                            <Input placeholder="60" type="number" className="mt-1" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Quality Grade</label>
+                            <Input placeholder="Grade A" className="mt-1" />
+                          </div>
+                        </div>
+                        <Button className="mt-4 w-full">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Generate QR Batch & Print Labels
+                        </Button>
+                      </div>
+
+                      {/* Recent QR Batches */}
+                      <div>
+                        <h3 className="font-medium mb-3">Recent QR Batches</h3>
+                        <div className="space-y-3">
+                          <div className="border rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-green-100 text-green-800">WH-BATCH-20250821-A4B2</Badge>
+                                <Badge variant="outline">100 bags</Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button size="sm" variant="outline">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View QR
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  <Download className="w-4 h-4 mr-1" />
+                                  Print
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                              <div>
+                                <span className="font-medium">Buyer:</span>
+                                <p className="text-gray-600">Monrovia Trading Co.</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Commodity:</span>
+                                <p className="text-gray-600">Premium Cocoa</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Total Weight:</span>
+                                <p className="text-gray-600">6,000 kg</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Status:</span>
+                                <p className="text-green-600">Distributed</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="border rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-blue-100 text-blue-800">WH-BATCH-20250821-C7D9</Badge>
+                                <Badge variant="outline">75 bags</Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button size="sm" variant="outline">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View QR
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  <Download className="w-4 h-4 mr-1" />
+                                  Print
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                              <div>
+                                <span className="font-medium">Buyer:</span>
+                                <p className="text-gray-600">Atlantic Coffee Ltd.</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Commodity:</span>
+                                <p className="text-gray-600">Robusta Coffee</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Total Weight:</span>
+                                <p className="text-gray-600">4,500 kg</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Status:</span>
+                                <p className="text-yellow-600">Reserved</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="border rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-purple-100 text-purple-800">WH-BATCH-20250820-F3G8</Badge>
+                                <Badge variant="outline">120 bags</Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button size="sm" variant="outline">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View QR
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  <Download className="w-4 h-4 mr-1" />
+                                  Print
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                              <div>
+                                <span className="font-medium">Buyer:</span>
+                                <p className="text-gray-600">West Africa Exports</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Commodity:</span>
+                                <p className="text-gray-600">Palm Oil</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Total Weight:</span>
+                                <p className="text-gray-600">7,200 kg</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Status:</span>
+                                <p className="text-blue-600">Generated</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                      QR Batch Statistics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <CheckCircle className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                        <p className="text-2xl font-bold text-green-600">23</p>
+                        <p className="text-sm text-gray-600">Active QR Batches</p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <Package className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                        <p className="text-2xl font-bold text-blue-600">2,847</p>
+                        <p className="text-sm text-gray-600">Total Bags Tracked</p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <FileText className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                        <p className="text-2xl font-bold text-purple-600">156</p>
+                        <p className="text-sm text-gray-600">QR Codes Scanned</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Truck className="w-5 h-5 mr-2 text-orange-600" />
+                      Recent Scan Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-2 border rounded">
+                        <div className="text-sm">
+                          <p className="font-medium">WH-BATCH-20250821-A4B2</p>
+                          <p className="text-gray-600">Scanned by buyer</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800 text-xs">2 min ago</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 border rounded">
+                        <div className="text-sm">
+                          <p className="font-medium">WH-BATCH-20250821-C7D9</p>
+                          <p className="text-gray-600">Scanned by exporter</p>
+                        </div>
+                        <Badge className="bg-blue-100 text-blue-800 text-xs">15 min ago</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 border rounded">
+                        <div className="text-sm">
+                          <p className="font-medium">WH-BATCH-20250820-F3G8</p>
+                          <p className="text-gray-600">Scanned by customs</p>
+                        </div>
+                        <Badge className="bg-purple-100 text-purple-800 text-xs">1 hour ago</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Inventory Control Tab */}

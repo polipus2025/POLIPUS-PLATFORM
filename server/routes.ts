@@ -5,6 +5,7 @@ import { registerFarmerRoutes } from "./farmer-routes";
 import { paymentService } from "./payment-service";
 import { QrBatchService } from "./qr-batch-service";
 import { productConfigurationData } from "./product-config-data";
+import cropSchedulingRoutes from "./crop-scheduling-routes";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
@@ -170,6 +171,9 @@ import path from 'path';
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register farmer routes
   registerFarmerRoutes(app);
+  
+  // Register crop scheduling routes
+  app.use('/api', cropSchedulingRoutes);
 
   // Test farmer creation endpoint
   app.get("/api/create-test-farmer", async (req, res) => {

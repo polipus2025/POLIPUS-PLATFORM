@@ -25,6 +25,7 @@ const FarmerLogin = lazy(() => import("@/pages/auth/farmer-login"));
 const FarmerLoginPortal = lazy(() => import("@/pages/farmer-login-portal"));
 const FarmerDashboard = lazy(() => import("@/pages/farmer-dashboard"));
 const FarmerTestDemo = lazy(() => import("@/pages/farmer-test-demo"));
+const CropScheduling = lazy(() => import("@/pages/farmer/crop-scheduling"));
 const FieldAgentLogin = lazy(() => import("@/pages/auth/field-agent-login"));
 const TestFieldAgentLogin = lazy(() => import("@/pages/auth/test-field-agent-login"));
 const MobileFieldAgentLogin = lazy(() => import("@/pages/auth/mobile-field-agent-login"));
@@ -276,6 +277,7 @@ function Router() {
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
       <Route path="/farmer-dashboard" component={FarmerDashboard} />
+      <Route path="/farmer/crop-scheduling" component={CropScheduling} />
       <Route path="/farmer-test-demo" component={FarmerTestDemo} />
       <Route path="/field-agent-login" component={FieldAgentLogin} />
       <Route path="/inspector-login" component={InspectorPortal} />

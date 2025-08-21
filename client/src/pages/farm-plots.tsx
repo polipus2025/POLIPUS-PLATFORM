@@ -47,20 +47,24 @@ export default function FarmPlotsPage() {
             <h1 className="text-3xl font-bold text-neutral">Farm Plot Mapping</h1>
             <p className="text-gray-600 mt-2">Digital mapping and management of agricultural land plots</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-lacra-green hover:bg-green-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Map New Plot
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Digital Farm Plot Mapping</DialogTitle>
-                <DialogDescription>
-                  Create a new farm plot with GPS coordinates and boundary mapping
-                </DialogDescription>
-              </DialogHeader>
+          {/* Map New Plot functionality removed - Only Land Inspectors can map new plots */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center text-blue-700">
+              <AlertCircle className="h-5 w-5 mr-2" />
+              <p className="text-sm font-medium">
+                New plot mapping is handled by Land Inspectors through the official land mapping system.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Plot Management Section */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Existing Farm Plots</h2>
+              <p className="text-sm text-gray-600 mt-1">View and manage your mapped farm plots</p>
+            </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
                 <div className="space-y-4">
                   <div>

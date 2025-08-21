@@ -10,7 +10,7 @@ import {
   MapPin, Calendar, Clock, Sprout, DollarSign, Bell, 
   TrendingUp, BarChart3, Users, Phone, Mail, Settings,
   LogOut, Home, Leaf, AlertCircle, CheckCircle,
-  MessageSquare, Package, Star, Eye, User
+  MessageSquare, Package, Star, Eye, User, Plus
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -434,7 +434,7 @@ export default function FarmerDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-gray-100 rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-8 bg-gray-100 rounded-lg p-1">
             <TabsTrigger 
               value="overview" 
               className="transition-all duration-200 ease-in-out hover:bg-white"
@@ -446,6 +446,12 @@ export default function FarmerDashboard() {
               className="transition-all duration-200 ease-in-out hover:bg-white"
             >
               Land Mappings
+            </TabsTrigger>
+            <TabsTrigger 
+              value="crop-scheduling" 
+              className="transition-all duration-200 ease-in-out hover:bg-white"
+            >
+              Crop Scheduling
             </TabsTrigger>
             <TabsTrigger 
               value="schedules" 
@@ -614,6 +620,158 @@ export default function FarmerDashboard() {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Crop Scheduling Tab */}
+          <TabsContent value="crop-scheduling" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="flex items-center">
+                    <Sprout className="w-5 h-5 mr-2" />
+                    Crop Scheduling & Management
+                  </CardTitle>
+                  <Link href="/farmer/crop-scheduling">
+                    <Button className="bg-green-600 hover:bg-green-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Advanced Crop Management
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <Card className="border-l-4 border-l-green-500">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Active Crops</p>
+                          <p className="text-2xl font-bold text-gray-900">3</p>
+                        </div>
+                        <Sprout className="w-8 h-8 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-l-4 border-l-yellow-500">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Ready to Harvest</p>
+                          <p className="text-2xl font-bold text-gray-900">1</p>
+                        </div>
+                        <Calendar className="w-8 h-8 text-yellow-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-l-4 border-l-blue-500">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Listed for Sale</p>
+                          <p className="text-2xl font-bold text-gray-900">2</p>
+                        </div>
+                        <DollarSign className="w-8 h-8 text-blue-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Crop Schedule</h3>
+                    <div className="grid gap-4">
+                      {/* Sample crop schedule items */}
+                      <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <Leaf className="w-6 h-6 text-green-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">Cocoa - Trinitario</h4>
+                            <p className="text-sm text-gray-600">North Plot • 2.5 hectares</p>
+                            <p className="text-xs text-green-600">Ready for harvest in 15 days</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Badge className="bg-green-100 text-green-800">Ready Soon</Badge>
+                          <Button size="sm" variant="outline">
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Leaf className="w-6 h-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">Coffee - Arabica</h4>
+                            <p className="text-sm text-gray-600">South Plot • 1.8 hectares</p>
+                            <p className="text-xs text-blue-600">Growing stage • 45 days to harvest</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Badge className="bg-blue-100 text-blue-800">Growing</Badge>
+                          <Button size="sm" variant="outline">
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <Leaf className="w-6 h-6 text-yellow-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">Palm Oil - Tenera</h4>
+                            <p className="text-sm text-gray-600">West Plot • 3.2 hectares</p>
+                            <p className="text-xs text-yellow-600">Recently planted • 180 days to harvest</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Badge className="bg-yellow-100 text-yellow-800">Planted</Badge>
+                          <Button size="sm" variant="outline">
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-gray-900">Quick Actions</h4>
+                          <p className="text-sm text-gray-600">Manage your crops and connect with buyers</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Link href="/farmer/crop-scheduling">
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                              <Plus className="w-4 h-4 mr-1" />
+                              Schedule New Crop
+                            </Button>
+                          </Link>
+                          <Button size="sm" variant="outline">
+                            <Package className="w-4 h-4 mr-1" />
+                            Create Listing
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Users className="w-4 h-4 mr-1" />
+                            Find Buyers
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

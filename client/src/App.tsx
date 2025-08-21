@@ -288,6 +288,7 @@ function Router() {
       
       {/* Inspector Portal Routes */}
       <Route path="/inspector-portal" component={InspectorPortal} />
+      <Route path="/inspector-dashboard" component={InspectorDashboard} />
       <Route path="/auth/land-inspector-login" component={LandInspectorLogin} />
       <Route path="/auth/port-inspector-login" component={PortInspectorLogin} />
       <Route path="/land-inspector-login" component={LandInspectorLogin} />

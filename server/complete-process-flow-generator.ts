@@ -16,6 +16,8 @@ router.get('/generate-complete-process-flow-pdf', async (req, res) => {
     // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="AgriTrace360_Complete_Process_Flow.pdf"');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'no-cache');
 
     // Pipe the PDF to response
     doc.pipe(res);

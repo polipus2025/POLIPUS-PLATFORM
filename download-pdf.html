@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download AgriTrace360 Process Flow PDF</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            color: #e0e7ff;
+        }
+        .download-buttons {
+            margin: 30px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .file-info {
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AgriTrace360™</h1>
+        <p class="subtitle">Complete Process Flow Documentation</p>
+        <p>🌿 LIBERIA AGRICULTURE COMMODITY REGULATORY AUTHORITY</p>
+        
+        <div class="file-info">
+            <strong>File:</strong> AgriTrace360_Complete_Process_Flow_FINAL.pdf<br>
+            <strong>Size:</strong> 26KB<br>
+            <strong>Status:</strong> ✅ Ready for Download
+        </div>
+
+        <div class="download-buttons">
+            <a href="./AgriTrace360_Complete_Process_Flow_FINAL.pdf" class="btn" download="AgriTrace360_Complete_Process_Flow.pdf">
+                📄 Download Static PDF
+            </a>
+            <br>
+            <a href="/api/generate-complete-process-flow-pdf" class="btn" download="AgriTrace360_Complete_Process_Flow.pdf">
+                🔄 Generate Fresh PDF
+            </a>
+        </div>
+
+        <div class="info">
+            <h3>📋 Documentation Contents:</h3>
+            <ul>
+                <li>System Overview & Architecture</li>
+                <li>User Registration & Portal Access (8 portals)</li>
+                <li><strong>Detailed User Responsibilities by Portal</strong></li>
+                <li>Land Mapping & EUDR Compliance</li>
+                <li>Crop Scheduling & Harvest Management</li>
+                <li>Warehouse Operations & QR System</li>
+                <li>Buyer Marketplace & Transactions</li>
+                <li>Exporter Integration & Negotiations</li>
+                <li>Export Payment & Port Inspection</li>
+                <li>Document Release & Certification</li>
+                <li>Portal Responsibilities Matrix</li>
+                <li>Complete 18-Point Integration Flow</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h3>👤 User Responsibilities Included:</h3>
+            <ul>
+                <li><strong>Farmer Portal:</strong> Registration, crop scheduling, harvest completion</li>
+                <li><strong>Land Inspector:</strong> EUDR compliance, GPS mapping, export authorization</li>
+                <li><strong>Warehouse Inspector:</strong> QR scanning, quality inspection, 30-day monitoring</li>
+                <li><strong>Buyer Portal:</strong> Lot proposals, payment processing, marketplace listings</li>
+                <li><strong>Exporter Portal:</strong> Export negotiations, 7-day payment window, document access</li>
+                <li><strong>DDGOTS Regulatory:</strong> Port inspection, fee calculation, document approval</li>
+                <li><strong>DDG-AF Audit:</strong> Payment verification, audit trail, financial oversight</li>
+                <li><strong>Port Inspector:</strong> Final quality checks, fumigation validation, export compliance</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Check if file exists and show appropriate download option
+        function checkFileAccess() {
+            fetch('./AgriTrace360_Complete_Process_Flow_FINAL.pdf', { method: 'HEAD' })
+                .then(response => {
+                    if (!response.ok) {
+                        console.log('Static file not accessible, using API endpoint');
+                        document.querySelector('a[href="./AgriTrace360_Complete_Process_Flow_FINAL.pdf"]').style.display = 'none';
+                    }
+                })
+                .catch(() => {
+                    console.log('Static file check failed, API endpoint available');
+                    document.querySelector('a[href="./AgriTrace360_Complete_Process_Flow_FINAL.pdf"]').style.display = 'none';
+                });
+        }
+        
+        checkFileAccess();
+    </script>
+</body>
+</html>

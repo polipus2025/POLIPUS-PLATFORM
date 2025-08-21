@@ -71,14 +71,11 @@ export default function FarmerBuyerLogin() {
     setError("");
 
     try {
-      const result = await apiRequest("/api/auth/farmer-login", {
+      const result = await apiRequest("/api/farmers/login", {
         method: "POST",
         body: JSON.stringify({
-          farmerId: data.farmerId,
-          password: data.password,
-          county: data.county,
-          phoneNumber: data.phoneNumber,
-          userType: "farmer"
+          credentialId: data.farmerId,
+          password: data.password
         })
       });
 

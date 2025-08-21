@@ -13,6 +13,10 @@ import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
+import SystemAdminLogin from "@/pages/auth/system-admin-login";
+import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
+import SystemAdminPortal from "@/pages/system-admin-portal";
+import RegulatoryPortalClassic from "@/pages/regulatory-portal-classic";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
 import FarmerDashboard from "@/pages/farmer-dashboard";
@@ -239,6 +243,16 @@ function Router() {
       {/* Authentication Routes - Public */}
       <Route path="/regulatory-login" component={RegulatoryLogin} />
       <Route path="/auth/regulatory-login" component={RegulatoryLogin} />
+      
+      {/* Independent Portal Authentication */}
+      <Route path="/system-admin-login" component={SystemAdminLogin} />
+      <Route path="/auth/system-admin-login" component={SystemAdminLogin} />
+      <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
+      <Route path="/auth/regulatory-classic-login" component={RegulatoryClassicLogin} />
+      
+      {/* Independent Portal Dashboards */}
+      <Route path="/system-admin-portal" component={SystemAdminPortal} />
+      <Route path="/regulatory-portal-classic" component={RegulatoryPortalClassic} />
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
       <Route path="/farmer-dashboard" component={FarmerDashboard} />

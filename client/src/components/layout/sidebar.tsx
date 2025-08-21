@@ -101,7 +101,6 @@ const regulatoryNavigation = [
 const farmerNavigation = [
   { name: "Farm Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "My Farm Plots", href: "/farm-plots", icon: MapPin },
-  { name: "Batch Code Generator", href: "/batch-code-generator", icon: QrCode },
   { name: "Document Verification", href: "/verification", icon: Shield },
 ];
 

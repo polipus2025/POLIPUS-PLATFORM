@@ -6,6 +6,7 @@ import { paymentService } from "./payment-service";
 import { QrBatchService } from "./qr-batch-service";
 import { productConfigurationData } from "./product-config-data";
 import cropSchedulingRoutes from "./crop-scheduling-routes";
+import cropWorkflowPdfRoutes from "./crop-workflow-pdf-generator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
@@ -174,6 +175,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register crop scheduling routes
   app.use('/api', cropSchedulingRoutes);
+  
+  // Register crop workflow PDF documentation routes
+  app.use('/api', cropWorkflowPdfRoutes);
 
   // Test farmer creation endpoint
   app.get("/api/create-test-farmer", async (req, res) => {

@@ -1,0 +1,568 @@
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+
+const router = express.Router();
+
+// Generate Crop Workflow Documentation PDF
+router.get('/generate-crop-workflow-pdf', async (req, res) => {
+  try {
+    console.log('🔄 Generating Crop Scheduling Workflow PDF...');
+
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>AgriTrace360™ Crop Scheduling Workflow Documentation</title>
+        <style>
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .header {
+                text-align: center;
+                border-bottom: 3px solid #22c55e;
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+            }
+            .logo {
+                color: #22c55e;
+                font-size: 28px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            .subtitle {
+                color: #666;
+                font-size: 18px;
+                margin-bottom: 5px;
+            }
+            .date {
+                color: #888;
+                font-size: 14px;
+            }
+            h1 {
+                color: #1f2937;
+                font-size: 24px;
+                border-left: 5px solid #22c55e;
+                padding-left: 15px;
+                margin: 30px 0 20px 0;
+            }
+            h2 {
+                color: #374151;
+                font-size: 20px;
+                margin: 25px 0 15px 0;
+                border-bottom: 2px solid #e5e7eb;
+                padding-bottom: 5px;
+            }
+            h3 {
+                color: #4b5563;
+                font-size: 16px;
+                margin: 20px 0 10px 0;
+            }
+            .phase {
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                position: relative;
+            }
+            .phase-number {
+                position: absolute;
+                top: -15px;
+                left: 20px;
+                background: #22c55e;
+                color: white;
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            .phase-title {
+                color: #1f2937;
+                font-size: 18px;
+                font-weight: bold;
+                margin: 0 0 10px 0;
+                padding-left: 40px;
+            }
+            .phase-responsibility {
+                background: #dbeafe;
+                color: #1e40af;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                display: inline-block;
+                margin-bottom: 15px;
+            }
+            .steps {
+                margin: 15px 0;
+            }
+            .step {
+                margin: 10px 0;
+                padding-left: 20px;
+                position: relative;
+            }
+            .step::before {
+                content: "→";
+                position: absolute;
+                left: 0;
+                color: #22c55e;
+                font-weight: bold;
+            }
+            .example-box {
+                background: #fef3c7;
+                border-left: 4px solid #f59e0b;
+                padding: 15px;
+                margin: 15px 0;
+                border-radius: 0 8px 8px 0;
+            }
+            .example-title {
+                font-weight: bold;
+                color: #92400e;
+                margin-bottom: 10px;
+            }
+            .timeline {
+                background: #f0f9ff;
+                border: 1px solid #0ea5e9;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+            }
+            .timeline-item {
+                margin: 8px 0;
+                padding: 5px 0;
+                border-bottom: 1px solid #e0f2fe;
+            }
+            .timeline-item:last-child {
+                border-bottom: none;
+            }
+            .benefits {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin: 20px 0;
+            }
+            .benefit {
+                background: #ecfdf5;
+                border: 1px solid #22c55e;
+                border-radius: 6px;
+                padding: 12px;
+                font-size: 14px;
+            }
+            .benefit-title {
+                font-weight: bold;
+                color: #166534;
+                margin-bottom: 5px;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 2px solid #e5e7eb;
+                color: #6b7280;
+                font-size: 12px;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 15px 0;
+            }
+            th, td {
+                border: 1px solid #e5e7eb;
+                padding: 8px 12px;
+                text-align: left;
+            }
+            th {
+                background: #f9fafb;
+                font-weight: 600;
+                color: #374151;
+            }
+            .highlight {
+                background: #fef2f2;
+                border-left: 4px solid #ef4444;
+                padding: 12px;
+                margin: 10px 0;
+                border-radius: 0 6px 6px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="logo">AgriTrace360™</div>
+            <div class="subtitle">Crop Planting & Harvest Schedule Workflow</div>
+            <div class="subtitle">Complete Documentation</div>
+            <div class="date">Generated: ${new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })}</div>
+        </div>
+
+        <h1>Executive Summary</h1>
+        <p>This document outlines the complete crop planting and harvest scheduling workflow for the AgriTrace360™ platform, from farmer onboarding through international market sales. The system ensures complete traceability while separating land mapping (Land Inspector responsibility) from crop management (Farmer responsibility).</p>
+
+        <div class="highlight">
+            <strong>Key Innovation:</strong> Farmers focus exclusively on agricultural productivity while Land Inspectors handle professional land mapping, creating an efficient division of responsibilities.
+        </div>
+
+        <h1>Complete Workflow Process</h1>
+
+        <div class="phase">
+            <div class="phase-number">1</div>
+            <div class="phase-title">Farmer Onboarding & Land Mapping</div>
+            <div class="phase-responsibility">Responsibility: Land Inspector</div>
+            
+            <div class="steps">
+                <div class="step"><strong>Farmer Registration</strong><br>
+                Land Inspector creates farmer account with unique Farmer ID (e.g., FARM-1755271600707-BQA7R4QFP) and records basic farmer information including name, location, and contact details.</div>
+                
+                <div class="step"><strong>Professional Land Mapping</strong><br>
+                Inspector visits farmer's property using GPS technology to map plot boundaries. Records comprehensive details including plot name and size (hectares), soil type and quality, water sources and irrigation, GPS coordinates and boundaries, EUDR compliance assessment, and deforestation risk analysis.</div>
+                
+                <div class="step"><strong>Land Verification</strong><br>
+                Inspector validates land ownership, checks legal compliance, creates official land mapping record, and links mapped plots to farmer account in the system.</div>
+            </div>
+        </div>
+
+        <div class="phase">
+            <div class="phase-number">2</div>
+            <div class="phase-title">Farmer Crop Planning & Scheduling</div>
+            <div class="phase-responsibility">Responsibility: Farmer</div>
+            
+            <div class="steps">
+                <div class="step"><strong>Access Farmer Dashboard</strong><br>
+                Login with provided credentials, navigate to "Crop Scheduling" tab, and view mapped land plots available for planting.</div>
+                
+                <div class="step"><strong>Create Crop Schedule</strong><br>
+                Select mapped plot for planting from dropdown menu. Choose crop type (Cocoa, Coffee, Palm Oil, Rubber, Rice, Cassava) and select crop variety (e.g., Trinitario Cocoa, Arabica Coffee). Set planting details including planting area (within mapped plot), planting date, expected harvest date, and expected yield (kg).</div>
+                
+                <div class="step"><strong>Schedule Validation</strong><br>
+                System validates against mapped plot capacity, checks crop suitability for land type, confirms planting schedule feasibility, and creates unique Schedule ID.</div>
+            </div>
+        </div>
+
+        <div class="phase">
+            <div class="phase-number">3</div>
+            <div class="phase-title">Crop Growth & Monitoring</div>
+            <div class="phase-responsibility">Responsibility: Farmer + System</div>
+            
+            <div class="steps">
+                <div class="step"><strong>Growth Tracking</strong><br>
+                Farmer updates crop status progression: Planned → Planted → Growing. System tracks growth timeline, sends harvest readiness alerts, and monitors expected vs actual timelines.</div>
+                
+                <div class="step"><strong>Pre-Harvest Preparation</strong><br>
+                System notifies when crop approaches harvest date, farmer receives "Ready for Harvest" alerts, quality assessment preparation begins, and storage location planning is initiated.</div>
+            </div>
+        </div>
+
+        <div class="phase">
+            <div class="phase-number">4</div>
+            <div class="phase-title">Harvest Management</div>
+            <div class="phase-responsibility">Responsibility: Farmer</div>
+            
+            <div class="steps">
+                <div class="step"><strong>Harvest Execution</strong><br>
+                Farmer marks crop as "Ready for Harvest" and records actual harvest details including actual yield (kg), quality grade (Grade I, Grade II, Premium, etc.), harvest completion date, and storage location.</div>
+                
+                <div class="step"><strong>Harvest Validation</strong><br>
+                System updates crop status to "Harvested", calculates yield efficiency vs expectations, and triggers marketplace listing eligibility.</div>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <div class="phase">
+            <div class="phase-number">5</div>
+            <div class="phase-title">Marketplace & Buyer Connection</div>
+            <div class="phase-responsibility">Responsibility: Farmer + Buyers</div>
+            
+            <div class="steps">
+                <div class="step"><strong>Create Marketplace Listing</strong><br>
+                Farmer creates listing from harvested crop, setting quantity available for sale, price per kg, quality specifications, storage location, and harvest date verification.</div>
+                
+                <div class="step"><strong>Buyer Discovery</strong><br>
+                Listing appears in buyer marketplace where buyers can view crop details and farmer profile. System tracks listing views and interest while buyers submit purchase inquiries.</div>
+                
+                <div class="step"><strong>Transaction Negotiation</strong><br>
+                Buyers send price offers and quantity requests, farmer receives inquiry notifications, negotiation occurs through platform messaging, and terms agreement (price, quantity, delivery) is reached.</div>
+                
+                <div class="step"><strong>Sale Completion</strong><br>
+                Buyer and farmer agree on terms, system generates unique transaction code, DDGOTS receives notification for export oversight, and QR batch code generation for traceability begins.</div>
+            </div>
+        </div>
+
+        <div class="phase">
+            <div class="phase-number">6</div>
+            <div class="phase-title">Traceability & Compliance</div>
+            <div class="phase-responsibility">Responsibility: System + Regulatory</div>
+            
+            <div class="steps">
+                <div class="step"><strong>QR Batch Generation</strong><br>
+                System creates QR batch code for sold crop linking to complete history: farm plot GPS coordinates, planting and harvest dates, quality assessments, transaction details, and buyer information.</div>
+                
+                <div class="step"><strong>Regulatory Compliance</strong><br>
+                EUDR compliance documentation, export permit processing (if applicable), international standards verification, and chain of custody documentation are processed.</div>
+                
+                <div class="step"><strong>Supply Chain Visibility</strong><br>
+                Complete farm-to-market traceability, real-time tracking updates, quality assurance records, and compliance certification are maintained.</div>
+            </div>
+        </div>
+
+        <h1>Sample Timeline Example</h1>
+        <div class="timeline">
+            <div class="example-title">Cocoa Crop Cycle (12-Month Process)</div>
+            <div class="timeline-item"><strong>Month 1:</strong> Land mapping by Inspector - GPS boundary mapping and soil assessment</div>
+            <div class="timeline-item"><strong>Month 2:</strong> Farmer creates crop schedule for Trinitario cocoa planting</div>
+            <div class="timeline-item"><strong>Month 2-8:</strong> Crop growth and monitoring with regular status updates</div>
+            <div class="timeline-item"><strong>Month 8:</strong> Harvest completion and quality assessment (Grade I, 1,200kg yield)</div>
+            <div class="timeline-item"><strong>Month 8:</strong> Marketplace listing creation at $2.50/kg competitive pricing</div>
+            <div class="timeline-item"><strong>Month 8-9:</strong> Buyer discovery and price negotiation phase</div>
+            <div class="timeline-item"><strong>Month 9:</strong> Sale completion and QR batch generation for traceability</div>
+            <div class="timeline-item"><strong>Month 9+:</strong> Export processing and international delivery coordination</div>
+        </div>
+
+        <h1>System Features by User Type</h1>
+
+        <h2>For Farmers</h2>
+        <div class="benefits">
+            <div class="benefit">
+                <div class="benefit-title">No Land Mapping Required</div>
+                Focus exclusively on crop management and agricultural productivity
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Automated Alerts</div>
+                Harvest readiness and buyer activity notifications
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Marketplace Integration</div>
+                Direct buyer connections eliminating middleman costs
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Transaction Support</div>
+                Built-in negotiation and sale management tools
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Performance Analytics</div>
+                Yield tracking and improvement insights over time
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Quality Reputation</div>
+                Build buyer trust through consistent quality tracking
+            </div>
+        </div>
+
+        <h2>For Buyers</h2>
+        <div class="benefits">
+            <div class="benefit">
+                <div class="benefit-title">Verified Crop Sources</div>
+                GPS-mapped farm origins with complete transparency
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Quality Assurance</div>
+                Professional graded crop specifications and certifications
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Direct Farmer Access</div>
+                Eliminate intermediary costs and build direct relationships
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Complete Traceability</div>
+                Full supply chain transparency from farm to market
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Bulk Purchase Options</div>
+                Connect with multiple farmers for large volume orders
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">EUDR Compliance</div>
+                Automated deforestation-free certification for EU markets
+            </div>
+        </div>
+
+        <h2>For Regulators</h2>
+        <div class="benefits">
+            <div class="benefit">
+                <div class="benefit-title">Complete Oversight</div>
+                All transactions monitored and recorded in real-time
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">EUDR Compliance</div>
+                Automated deforestation checks and compliance reporting
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Export Control</div>
+                Integrated permit and certification management
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Quality Standards</div>
+                International compliance verification and monitoring
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Audit Trail</div>
+                Complete transaction history and compliance documentation
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Fraud Prevention</div>
+                GPS verification and blockchain-secured records
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h1>Technical Implementation</h1>
+
+        <h2>Authentication & Access</h2>
+        <table>
+            <tr>
+                <th>User Type</th>
+                <th>Login Credentials</th>
+                <th>Access Level</th>
+                <th>Primary Functions</th>
+            </tr>
+            <tr>
+                <td>Farmer</td>
+                <td>FARM-1755271600707-BQA7R4QFP / farmer123</td>
+                <td>Crop Management</td>
+                <td>Scheduling, Harvesting, Marketplace</td>
+            </tr>
+            <tr>
+                <td>Land Inspector</td>
+                <td>Land Inspector Portal</td>
+                <td>Land Mapping</td>
+                <td>GPS Mapping, Plot Creation, Verification</td>
+            </tr>
+            <tr>
+                <td>Buyer</td>
+                <td>Buyer Portal Registration</td>
+                <td>Marketplace Access</td>
+                <td>Browse, Inquire, Purchase, Track</td>
+            </tr>
+            <tr>
+                <td>Regulatory Staff</td>
+                <td>LACRA Authentication</td>
+                <td>Full Oversight</td>
+                <td>Monitoring, Compliance, Export Control</td>
+            </tr>
+        </table>
+
+        <h2>Data Flow & Integration</h2>
+        <div class="steps">
+            <div class="step">Land Inspector maps plots → GPS coordinates stored → Linked to farmer account</div>
+            <div class="step">Farmer creates schedule → Validates against mapped plots → Schedule ID generated</div>
+            <div class="step">Harvest completion → Quality assessment → Marketplace listing eligibility</div>
+            <div class="step">Buyer inquiry → Negotiation platform → Transaction completion</div>
+            <div class="step">Sale finalization → QR batch generation → Regulatory notification</div>
+            <div class="step">Export processing → International compliance → Supply chain completion</div>
+        </div>
+
+        <h1>Quality Assurance Framework</h1>
+
+        <h2>Crop Quality Grades</h2>
+        <table>
+            <tr>
+                <th>Grade</th>
+                <th>Quality Standards</th>
+                <th>Market Premium</th>
+                <th>Export Eligibility</th>
+            </tr>
+            <tr>
+                <td>Grade I</td>
+                <td>Premium quality, minimal defects</td>
+                <td>High market value</td>
+                <td>International export ready</td>
+            </tr>
+            <tr>
+                <td>Grade II</td>
+                <td>Good quality, minor defects</td>
+                <td>Standard market value</td>
+                <td>Regional and export markets</td>
+            </tr>
+            <tr>
+                <td>Premium</td>
+                <td>Specialty grade, exceptional quality</td>
+                <td>Maximum premium pricing</td>
+                <td>Specialty international markets</td>
+            </tr>
+            <tr>
+                <td>Standard</td>
+                <td>Acceptable quality, some defects</td>
+                <td>Base market pricing</td>
+                <td>Domestic and regional markets</td>
+            </tr>
+        </table>
+
+        <h1>Compliance & Regulatory Framework</h1>
+
+        <h2>EUDR Compliance Integration</h2>
+        <div class="steps">
+            <div class="step">GPS coordinates verify deforestation-free status</div>
+            <div class="step">Satellite monitoring tracks land use changes</div>
+            <div class="step">Automated compliance reporting for EU markets</div>
+            <div class="step">Risk assessment and mitigation protocols</div>
+            <div class="step">Documentation package for export certification</div>
+        </div>
+
+        <h2>International Standards Support</h2>
+        <div class="benefits">
+            <div class="benefit">
+                <div class="benefit-title">Fair Trade Certification</div>
+                Integrated verification and premium tracking
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">Rainforest Alliance</div>
+                Sustainability compliance and certification
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">UTZ Standards</div>
+                Quality and sustainability verification
+            </div>
+            <div class="benefit">
+                <div class="benefit-title">GlobalGAP</div>
+                Good Agricultural Practices certification
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>AgriTrace360™ Crop Scheduling Workflow Documentation</strong></p>
+            <p>Generated on ${new Date().toLocaleDateString()} | LACRA - Liberia Agriculture Commodity Regulatory Authority</p>
+            <p>This document outlines the complete crop management workflow ensuring transparency, traceability, and regulatory compliance from farm to international markets.</p>
+        </div>
+    </body>
+    </html>
+    `;
+
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="AgriTrace360_Crop_Scheduling_Workflow_Documentation.pdf"');
+    
+    // For this demo, we'll return the HTML content that can be converted to PDF
+    // In a real implementation, you would use a library like puppeteer or wkhtmltopdf
+    res.setHeader('Content-Type', 'text/html');
+    res.send(htmlContent);
+    
+    console.log('✅ Crop Scheduling Workflow PDF documentation generated successfully');
+    
+  } catch (error) {
+    console.error('❌ Error generating crop workflow PDF:', error);
+    res.status(500).json({ error: 'Failed to generate PDF documentation' });
+  }
+});
+
+export default router;

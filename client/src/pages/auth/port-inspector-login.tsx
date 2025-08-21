@@ -63,8 +63,8 @@ export default function PortInspectorLogin() {
           description: `Welcome back, ${data.inspector.firstName}!`,
         });
         
-        // Navigate to port inspector dashboard
-        navigate("/inspector-dashboard?type=port");
+        // Navigate to specialized port inspector dashboard
+        navigate("/port-inspector-dashboard");
       } else {
         toast({
           title: "Login Failed",

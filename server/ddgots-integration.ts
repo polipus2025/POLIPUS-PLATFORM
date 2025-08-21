@@ -310,4 +310,56 @@ export class DDGOTSIntegrationService {
       timestamp: new Date().toISOString()
     };
   }
+
+  // POINT 7: Buyer product registration notifications
+  static async notifyBuyerProductRegistration(registrationData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`📧 DDGOTS: Sending buyer product registration notifications...`);
+    
+    // Simulate notification to Buyer
+    console.log(`🛒 NOTIFYING BUYER: Product registered in warehouse`);
+    console.log(`📦 Registration ID: ${registrationData.registrationId}`);
+    console.log(`🏢 Warehouse Storage: ${registrationData.storageDetails.location}`);
+    console.log(`⏰ Storage Expires: ${registrationData.storageDetails.storageExpiryDate}`);
+    console.log(`📱 SMS/Email: "${registrationData.message}"`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        buyer: true,
+        sms: true,
+        email: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // POINT 8: Exporter marketplace listing notifications
+  static async notifyExportersNewListing(listingData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`📢 DDGOTS: Notifying exporters about new marketplace listing...`);
+    
+    // Simulate notifications to registered exporters
+    const targetExporters = ['EXPORTER-001', 'EXPORTER-002', 'EXPORTER-003', 'EXPORTER-004'];
+    
+    console.log(`🌍 NOTIFYING EXPORTERS: New ${listingData.productDetails.cropType} listing available`);
+    console.log(`📋 Listing ID: ${listingData.listingId}`);
+    console.log(`⚖️ Quantity: ${listingData.productDetails.quantity}kg`);
+    console.log(`💰 Price: $${listingData.pricingInfo.basePrice}/${listingData.pricingInfo.priceUnit}`);
+    console.log(`⭐ Quality: ${listingData.productDetails.qualityGrade}`);
+    
+    // Log individual exporter notifications
+    targetExporters.forEach(exporterId => {
+      console.log(`🔔 EXPORTER ALERT: ${exporterId} - ${listingData.message}`);
+    });
+    
+    return {
+      success: true,
+      notificationsSent: {
+        exporters: targetExporters.length,
+        sms: true,
+        email: true,
+        platformNotifications: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
 }

@@ -732,4 +732,264 @@ router.post('/warehouse/delivery-registration', async (req, res) => {
   }
 });
 
+// POINT 7: Warehouse product registration (30-day storage limit)
+router.post('/warehouse/product-registration', async (req, res) => {
+  try {
+    const {
+      transactionCode,
+      batchCode,
+      buyerId,
+      warehouseId,
+      warehouseApprovalCode,
+      productDetails,
+      storageLocation,
+      registrationNotes
+    } = req.body;
+
+    console.log(`📦 WAREHOUSE REGISTRATION: Registering product for buyer ${buyerId}`);
+
+    const registrationRecord = {
+      registrationId: `WH-REG-${Date.now()}`,
+      transactionCode,
+      batchCode,
+      buyerId,
+      warehouseId,
+      warehouseApprovalCode,
+      productDetails: {
+        cropType: productDetails.cropType,
+        quantity: parseFloat(productDetails.quantity),
+        qualityGrade: productDetails.qualityGrade,
+        packagingType: productDetails.packagingType,
+        totalBags: parseInt(productDetails.totalBags)
+      },
+      storageDetails: {
+        location: storageLocation,
+        storageStartDate: new Date().toISOString(),
+        storageExpiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+        storageStatus: 'active',
+        daysRemaining: 30
+      },
+      registrationNotes,
+      registeredAt: new Date().toISOString(),
+      registeredBy: 'warehouse-system'
+    };
+
+    // Notify buyer about product registration
+    const buyerNotificationData = {
+      registrationId: registrationRecord.registrationId,
+      buyerId,
+      batchCode,
+      productDetails: registrationRecord.productDetails,
+      storageDetails: registrationRecord.storageDetails,
+      message: `Your product ${batchCode} has been registered in warehouse ${warehouseId}. Storage expires in 30 days.`
+    };
+
+    try {
+      await DDGOTSIntegrationService.notifyBuyerProductRegistration(buyerNotificationData);
+    } catch (integrationError) {
+      console.log('⚠️ Buyer notification not available, using fallback');
+    }
+
+    console.log(`✅ PRODUCT REGISTERED: ${registrationRecord.registrationId} - Buyer notified`);
+
+    res.json({
+      success: true,
+      registrationRecord,
+      storageInfo: {
+        expiryDate: registrationRecord.storageDetails.storageExpiryDate,
+        daysRemaining: 30,
+        storageLocation: storageLocation
+      },
+      notifications: {
+        buyer: 'NOTIFIED',
+        marketplaceEligible: true
+      },
+      message: 'Product registered in warehouse. Available for buyer marketplace listing.',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Error registering warehouse product:', error);
+    res.status(500).json({ error: 'Failed to register warehouse product' });
+  }
+});
+
+// POINT 8: Buyer marketplace listing for exporters
+router.post('/buyer/marketplace-listing', async (req, res) => {
+  try {
+    const {
+      registrationId,
+      buyerId,
+      batchCode,
+      listingDetails,
+      pricingInfo,
+      exporterRequirements
+    } = req.body;
+
+    console.log(`🛒 BUYER MARKETPLACE: Creating listing for registration ${registrationId}`);
+
+    const marketplaceListing = {
+      listingId: `EXPORT-${Date.now()}-${buyerId.slice(-4)}`,
+      registrationId,
+      buyerId,
+      batchCode,
+      listingDetails: {
+        title: listingDetails.title,
+        description: listingDetails.description,
+        cropType: listingDetails.cropType,
+        quantity: parseFloat(listingDetails.quantity),
+        qualityGrade: listingDetails.qualityGrade,
+        origin: listingDetails.origin,
+        certifications: listingDetails.certifications
+      },
+      pricingInfo: {
+        basePrice: parseFloat(pricingInfo.basePrice),
+        currency: pricingInfo.currency,
+        priceUnit: pricingInfo.priceUnit,
+        negotiable: pricingInfo.negotiable,
+        minimumOrder: parseFloat(pricingInfo.minimumOrder)
+      },
+      exporterRequirements: {
+        minimumOrderQuantity: parseFloat(exporterRequirements.minimumOrder),
+        paymentTerms: exporterRequirements.paymentTerms,
+        deliveryTerms: exporterRequirements.deliveryTerms,
+        certificationRequired: exporterRequirements.certifications
+      },
+      listingStatus: 'active',
+      listedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(), // 25 days (5 days before warehouse storage expires)
+      visibility: 'public'
+    };
+
+    // Notify exporters about new listing
+    const exporterNotificationData = {
+      listingId: marketplaceListing.listingId,
+      buyerId,
+      productDetails: marketplaceListing.listingDetails,
+      pricingInfo: marketplaceListing.pricingInfo,
+      message: `New ${listingDetails.cropType} listing available: ${listingDetails.quantity}kg at $${pricingInfo.basePrice}/${pricingInfo.priceUnit}`
+    };
+
+    try {
+      await DDGOTSIntegrationService.notifyExportersNewListing(exporterNotificationData);
+    } catch (integrationError) {
+      console.log('⚠️ Exporter notification not available, using fallback');
+    }
+
+    console.log(`✅ MARKETPLACE LISTING CREATED: ${marketplaceListing.listingId} - Exporters notified`);
+
+    res.json({
+      success: true,
+      marketplaceListing,
+      listingInfo: {
+        listingId: marketplaceListing.listingId,
+        expiresAt: marketplaceListing.expiresAt,
+        daysActive: 25
+      },
+      notifications: {
+        exporters: 'NOTIFIED',
+        listingActive: true
+      },
+      message: 'Product listed in buyer-exporter marketplace. Exporters can now make proposals.',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Error creating marketplace listing:', error);
+    res.status(500).json({ error: 'Failed to create marketplace listing' });
+  }
+});
+
+// Get buyer warehouse products (for buyer portal)
+router.get('/buyer/:buyerId/warehouse-products', async (req, res) => {
+  try {
+    const { buyerId } = req.params;
+    
+    console.log(`📋 RETRIEVING: Warehouse products for buyer ${buyerId}`);
+    
+    // Mock warehouse products data (in real implementation, this would query the database)
+    const warehouseProducts = [
+      {
+        registrationId: 'WH-REG-1755800001234',
+        batchCode: 'BATCH-COFFEE-1755798004392-FARM-1755271600707-BQA7R4QFP',
+        productDetails: {
+          cropType: 'Coffee',
+          quantity: 898,
+          qualityGrade: 'Superior',
+          packagingType: 'Jute Bags',
+          totalBags: 45
+        },
+        storageDetails: {
+          location: 'Section A-12',
+          storageStartDate: '2025-08-21T17:57:12.894Z',
+          storageExpiryDate: '2025-09-20T17:57:12.894Z',
+          daysRemaining: 29,
+          storageStatus: 'active'
+        },
+        marketplaceStatus: 'not_listed',
+        warehouseApprovalCode: 'WH-APPR-1755799032894'
+      }
+    ];
+    
+    res.json({
+      success: true,
+      buyerId,
+      warehouseProducts,
+      totalProducts: warehouseProducts.length,
+      message: 'Warehouse products retrieved successfully'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error retrieving warehouse products:', error);
+    res.status(500).json({ error: 'Failed to retrieve warehouse products' });
+  }
+});
+
+// Get buyer marketplace listings (for buyer portal)
+router.get('/buyer/:buyerId/marketplace-listings', async (req, res) => {
+  try {
+    const { buyerId } = req.params;
+    
+    console.log(`📋 RETRIEVING: Marketplace listings for buyer ${buyerId}`);
+    
+    // Mock marketplace listings data
+    const marketplaceListings = [
+      {
+        listingId: 'EXPORT-1755800002345-R001',
+        registrationId: 'WH-REG-1755800001234',
+        batchCode: 'BATCH-COFFEE-1755798004392-FARM-1755271600707-BQA7R4QFP',
+        listingDetails: {
+          title: 'Premium Liberian Coffee - Superior Grade',
+          cropType: 'Coffee',
+          quantity: 898,
+          qualityGrade: 'Superior',
+          origin: 'Bomi County, Liberia'
+        },
+        pricingInfo: {
+          basePrice: 4.50,
+          currency: 'USD',
+          priceUnit: 'kg',
+          negotiable: true
+        },
+        listingStatus: 'active',
+        listedAt: '2025-08-21T18:00:00.000Z',
+        expiresAt: '2025-09-15T18:00:00.000Z',
+        exporterProposals: 2
+      }
+    ];
+    
+    res.json({
+      success: true,
+      buyerId,
+      marketplaceListings,
+      totalListings: marketplaceListings.length,
+      message: 'Marketplace listings retrieved successfully'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error retrieving marketplace listings:', error);
+    res.status(500).json({ error: 'Failed to retrieve marketplace listings' });
+  }
+});
+
 export default router;

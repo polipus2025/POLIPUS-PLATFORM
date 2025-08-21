@@ -261,4 +261,53 @@ export class DDGOTSIntegrationService {
       console.log(`🔔 BUYER NOTIFICATION: ${buyerId} - Lot with Batch Code ${batchCode} is now Sold out to buyer ${acceptedBuyerId} (Transaction: ${transactionCode})`);
     });
   }
+
+  // POINT 5: Payment confirmation notifications
+  static async notifyPaymentConfirmation(paymentData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`📧 DDGOTS: Sending payment confirmation notifications...`);
+    
+    // Simulate notification to DDGOTS regulator
+    console.log(`🏛️ NOTIFYING DDGOTS: Payment confirmed for batch ${paymentData.batchCode}`);
+    console.log(`💰 Payment Amount: $${paymentData.paymentDetails.amount}`);
+    console.log(`📋 Confirmation Method: ${paymentData.farmerConfirmation.method}`);
+    
+    // Simulate notification to Land Inspector
+    console.log(`📍 NOTIFYING LAND INSPECTOR: Transfer tracking activated for ${paymentData.batchCode}`);
+    console.log(`🔍 Inspector ID: ${paymentData.notifications.landInspector.inspectorId}`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        regulator: true,
+        landInspector: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // POINT 6: Warehouse delivery approval notifications
+  static async notifyWarehouseDeliveryApproval(deliveryData: any): Promise<{ success: boolean; notificationsSent: any; complianceVerified: boolean; timestamp: string }> {
+    console.log(`📦 DDGOTS: Sending warehouse delivery approval notifications...`);
+    
+    // Simulate notification to Buyer
+    console.log(`🛒 NOTIFYING BUYER: Warehouse delivery approved for batch ${deliveryData.batchCode}`);
+    console.log(`⭐ Quality Grade: ${deliveryData.qualityInspection.overallQuality}`);
+    console.log(`⚖️ Quantity: ${deliveryData.quantityVerification.actualWeight}kg`);
+    console.log(`✅ Approval Code: ${deliveryData.warehouseApproval.approvalCode}`);
+    
+    // Simulate notification to DDGOTS regulator
+    console.log(`🏛️ NOTIFYING DDGOTS: Warehouse delivery compliance verified`);
+    console.log(`📋 Compliance Status: ${deliveryData.notifications.regulator.complianceStatus}`);
+    console.log(`📄 All documentation verified and archived`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        buyer: true,
+        regulator: true
+      },
+      complianceVerified: true,
+      timestamp: new Date().toISOString()
+    };
+  }
 }

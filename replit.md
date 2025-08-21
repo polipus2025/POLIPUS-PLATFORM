@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 Maintenance Page Preference: Always use the generic maintenance page template (red gradient background, "Website Maintenance" title, no specific branding) for any maintenance page requests. This template is stored in server/index.ts as inline HTML.
 Module Development Strategy: Ready to simultaneously develop all 7 new modules (Live Trace, Land Map360, Mine Watch, Forest Guard, Aqua Trace, Blue Carbon 360, Carbon Trace) with complete functionality, maintaining consistent ISMS.online-inspired design system and professional standards from AgriTrace360. Will create full database schemas, backend APIs, frontend interfaces, and cross-module integration for each portal.
 PDF Report Design Preference: User confirmed satisfaction with enhanced professional design approach featuring comprehensive charts, graphs, and visual elements. Prefers clean synchronized formatting with advanced data visualizations including radar charts, 3D pie charts, bar charts with benchmarks, and timeline flow diagrams across all 6 certificates. Recently updated to use UniDOC-inspired professional style with dashboard-style metrics, color-coded risk indicators, progress bars, and network diagrams as shown in reference image.
+Land Mapping Restriction: Farmers cannot map new plots - this functionality is exclusively restricted to Land Inspectors through the official land mapping system.
+Crop Scheduling Focus: Farmers should focus on crop scheduling, harvest management, and buyer connections rather than land mapping activities.
 
 ## System Architecture
 The application employs a modern full-stack architecture with a clear separation of concerns.
@@ -37,6 +39,8 @@ The design system is ISMS.online-inspired, featuring a modern slate/blue color p
 - **Three-Tier Regulatory Portal**: Implemented comprehensive departmental separation (DG, DDGOTS, DDGAF) with specialized authentication and permissions, including departmental dashboards and oversight functionalities.
 - **Buyer & Exporter Management System**: Fully functional registration, approval, and credential generation with proper error handling and database integrity.
 - **Agricultural Buyer Portal Redesign**: Redesigned buyer portal focusing on agricultural commerce functionality, farmer-harvest connections, exporter networks, and transaction dashboards.
+- **Comprehensive Crop Scheduling System**: Complete farmer-focused crop management system with planting schedules, harvest tracking, marketplace listing creation, and buyer connection workflows. Includes dedicated "Crop Scheduling" tab in farmer dashboard with advanced management features.
+- **Farmer Portal Land Mapping Restriction**: Removed "Map New Plot" functionality from farmer portal, restricting land mapping exclusively to Land Inspector portal through official land mapping system.
 
 ### Feature Specifications
 Core modules include export order management, LACRA compliance, farmer partnerships, analytics, inspection management, and certification issuance. Features also include real-time compliance status tracking, EUDR compliance dashboard, farmer onboarding with interactive land mapping, GIS mapping with satellite monitoring and deforestation alerts, supply chain visibility (GPS tracking, QR scanning), international standards integration, comprehensive role-based access control (RBAC), offline data synchronization, mobile app alert system, export permit submission, and integrated system testing.

@@ -166,6 +166,16 @@ export default function WarehouseInspectorDashboard() {
               <Download className="w-4 h-4 mr-1" />
               Export Report
             </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                localStorage.removeItem("warehouseInspectorData");
+                window.location.href = "/inspector-portal";
+              }}
+            >
+              Logout
+            </Button>
           </div>
         </div>
 
@@ -321,15 +331,121 @@ export default function WarehouseInspectorDashboard() {
           </Card>
         </div>
 
-        {/* Main Tabs */}
+        {/* Main Navigation Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="inspections">Storage Inspections</TabsTrigger>
-            <TabsTrigger value="inventory">Inventory Control</TabsTrigger>
-            <TabsTrigger value="compliance">Compliance</TabsTrigger>
-            <TabsTrigger value="quality">Quality Control</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-white shadow-sm rounded-lg p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Package className="w-4 h-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="inspections" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <ClipboardCheck className="w-4 h-4 mr-2" />
+              Inspections
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Warehouse className="w-4 h-4 mr-2" />
+              Inventory
+            </TabsTrigger>
+            <TabsTrigger value="compliance" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Shield className="w-4 h-4 mr-2" />
+              Compliance
+            </TabsTrigger>
+            <TabsTrigger value="quality" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Quality
+            </TabsTrigger>
           </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Thermometer className="w-5 h-5 mr-2 text-orange-600" />
+                    Storage Environment Monitor
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Temperature Range</span>
+                      <span className="text-sm text-green-600">18.1°C - 19.2°C ✓</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Humidity Levels</span>
+                      <span className="text-sm text-green-600">60-68% ✓</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Ventilation Status</span>
+                      <span className="text-sm text-green-600">Normal ✓</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Pest Control</span>
+                      <span className="text-sm text-green-600">Active ✓</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MapPin className="w-5 h-5 mr-2 text-blue-600" />
+                    Facility Operations Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Active Storage Units</span>
+                      <span className="text-sm font-bold">{dashboardStats.storageUnits}/50</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Daily Inspections</span>
+                      <span className="text-sm font-bold">{dashboardStats.pendingInspections} pending</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Compliance Rate</span>
+                      <span className="text-sm text-green-600">{dashboardStats.complianceRate}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Active Warehouses</span>
+                      <span className="text-sm font-bold">{dashboardStats.warehousesActive}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-purple-600" />
+                  Recent Activity Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <ClipboardCheck className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                    <p className="text-2xl font-bold text-blue-600">{dashboardStats.completedInspections}</p>
+                    <p className="text-sm text-gray-600">Completed This Month</p>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <CheckCircle className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                    <p className="text-2xl font-bold text-green-600">{dashboardStats.avgInspectionTime}</p>
+                    <p className="text-sm text-gray-600">Avg Inspection Time</p>
+                  </div>
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <AlertTriangle className="w-8 h-8 mx-auto text-red-600 mb-2" />
+                    <p className="text-2xl font-bold text-red-600">{dashboardStats.criticalIssues}</p>
+                    <p className="text-sm text-gray-600">Critical Issues</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Storage Inspections Tab */}
           <TabsContent value="inspections" className="space-y-6">
@@ -444,71 +560,175 @@ export default function WarehouseInspectorDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Today's Inspection Schedule</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Cold Storage Unit A</p>
-                        <p className="text-sm text-gray-600">Cocoa Beans • Temperature Check</p>
+          {/* Inventory Control Tab */}
+          <TabsContent value="inventory" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Package className="w-5 h-5 mr-2 text-blue-600" />
+                  Warehouse Inventory Management
+                </CardTitle>
+                <CardDescription>
+                  Real-time inventory tracking and storage monitoring for {warehouseFacility}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {loadingInventory ? (
+                    <p className="text-center text-gray-500">Loading inventory data...</p>
+                  ) : inventoryStatus && inventoryStatus.length > 0 ? (
+                    inventoryStatus.map((item: any) => (
+                      <div key={item.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">{item.commodity}</h4>
+                            <p className="text-sm text-gray-600">Storage Unit: {item.storageUnit}</p>
+                          </div>
+                          <Badge className={item.status === 'stored' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {item.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium">Quantity:</span>
+                            <p className="text-gray-600">{item.quantity}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Temperature:</span>
+                            <p className="text-gray-600">{item.temperature}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Humidity:</span>
+                            <p className="text-gray-600">{item.humidity}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Last Inspection:</span>
+                            <p className="text-gray-600">{item.lastInspection}</p>
+                          </div>
+                        </div>
                       </div>
-                      <Badge className="bg-blue-100 text-blue-800">09:00 AM</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Dry Storage Section B</p>
-                        <p className="text-sm text-gray-600">Coffee Beans • Quality Inspection</p>
-                      </div>
-                      <Badge className="bg-yellow-100 text-yellow-800">11:30 AM</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Loading Bay 3</p>
-                        <p className="text-sm text-gray-600">Palm Oil • Pre-shipment Check</p>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">02:00 PM</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No inventory data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Environmental Monitoring</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Thermometer className="w-4 h-4 mr-2 text-blue-600" />
-                        <span className="text-sm">Average Temperature</span>
+          {/* Compliance Tab */}
+          <TabsContent value="compliance" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="w-5 h-5 mr-2 text-green-600" />
+                  Storage Compliance Monitoring
+                </CardTitle>
+                <CardDescription>
+                  Regulatory compliance status and monitoring for storage facilities
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {loadingCompliance ? (
+                    <p className="text-center text-gray-500 col-span-2">Loading compliance data...</p>
+                  ) : storageCompliance && storageCompliance.length > 0 ? (
+                    storageCompliance.map((compliance: any) => (
+                      <Card key={compliance.category}>
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-medium">{compliance.category}</h3>
+                            <Badge className="bg-green-100 text-green-800">
+                              {compliance.rate}%
+                            </Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Compliant Units:</span>
+                              <span className="font-medium">{compliance.compliant}/{compliance.total}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Last Check:</span>
+                              <span className="text-gray-600">{compliance.lastCheck}</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-green-600 h-2 rounded-full" 
+                                style={{ width: `${compliance.rate}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500 col-span-2">No compliance data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Quality Control Tab */}
+          <TabsContent value="quality" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
+                  Quality Control & Testing
+                </CardTitle>
+                <CardDescription>
+                  Quality assurance tests and batch monitoring for stored commodities
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {loadingQuality ? (
+                    <p className="text-center text-gray-500">Loading quality control data...</p>
+                  ) : qualityControls && qualityControls.length > 0 ? (
+                    qualityControls.map((control: any) => (
+                      <div key={control.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">{control.testType}</h4>
+                            <p className="text-sm text-gray-600">Batch: {control.batchNumber} • {control.commodity}</p>
+                          </div>
+                          <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {control.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <h5 className="font-medium mb-2">Test Details</h5>
+                            <p className="text-sm text-gray-600">Inspector: {control.inspector}</p>
+                            <p className="text-sm text-gray-600">Test Date: {control.testDate}</p>
+                          </div>
+                          <div>
+                            <h5 className="font-medium mb-2">Test Results</h5>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span>Moisture:</span>
+                                <span className="font-medium">{control.results.moisture}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Defects:</span>
+                                <span className="font-medium">{control.results.defects}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Foreign Matter:</span>
+                                <span className="font-medium">{control.results.foreign_matter}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <span className="font-medium">18.5°C</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Package className="w-4 h-4 mr-2 text-green-600" />
-                        <span className="text-sm">Humidity Level</span>
-                      </div>
-                      <span className="font-medium">65%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-2 text-orange-600" />
-                        <span className="text-sm">Air Quality Index</span>
-                      </div>
-                      <span className="font-medium">Good</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No quality control data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

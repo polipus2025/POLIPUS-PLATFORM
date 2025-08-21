@@ -71,28 +71,86 @@ export const alerts = pgTable("alerts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// QR Code Batch Tracking System for Warehouse Bags
+// Transaction Integration - Links buyer accepts to QR generation
+export const transactionQrLinks = pgTable("transaction_qr_links", {
+  id: serial("id").primaryKey(),
+  transactionId: text("transaction_id").notNull().unique(), // From buyer-farmer transaction
+  buyerId: text("buyer_id").notNull(),
+  buyerName: text("buyer_name").notNull(),
+  farmerId: text("farmer_id").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  offerAcceptedAt: timestamp("offer_accepted_at").notNull(),
+  transactionData: jsonb("transaction_data").notNull(), // Complete transaction details
+  qrBatchGenerated: boolean("qr_batch_generated").default(false),
+  batchCode: text("batch_code"), // Link to generated QR batch
+  status: text("status").notNull().default("pending"), // pending, qr_generated, completed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Product Configuration for different commodities with packaging options
+export const productConfigurations = pgTable("product_configurations", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava
+  subCategory: text("sub_category").notNull(), // premium_cocoa, robusta_coffee, etc.
+  productName: text("product_name").notNull(),
+  description: text("description"),
+  packagingOptions: jsonb("packaging_options").notNull(), // Available packaging types
+  standardWeights: jsonb("standard_weights").notNull(), // Standard weights per package type
+  qualityGrades: jsonb("quality_grades").notNull(), // Available grades
+  certificationRequirements: jsonb("certification_requirements").notNull(),
+  storageRequirements: jsonb("storage_requirements").notNull(),
+  shelfLife: integer("shelf_life"), // Days
+  hsCode: text("hs_code"), // Harmonized System code for exports
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// QR Code Batch Tracking System for Warehouse Bags - Enhanced
 export const qrBatches = pgTable("qr_batches", {
   id: serial("id").primaryKey(),
   batchCode: text("batch_code").notNull().unique(), // WH-BATCH-YYYYMMDD-XXXX
+  transactionId: text("transaction_id").references(() => transactionQrLinks.transactionId), // Link to transaction
   warehouseId: text("warehouse_id").notNull(),
   warehouseName: text("warehouse_name").notNull(),
   buyerId: text("buyer_id").notNull(),
   buyerName: text("buyer_name").notNull(),
   farmerId: text("farmer_id").notNull(),
   farmerName: text("farmer_name").notNull(),
+  
+  // Enhanced Product Information
   commodityType: text("commodity_type").notNull(), // cocoa, coffee, palm_oil, etc.
+  commoditySubType: text("commodity_sub_type"), // premium_cocoa, robusta_coffee, etc.
   commodityId: integer("commodity_id").references(() => commodities.id),
-  totalBags: integer("total_bags").notNull(),
-  bagWeight: decimal("bag_weight", { precision: 10, scale: 2 }).notNull(), // kg per bag
+  productConfigId: integer("product_config_id").references(() => productConfigurations.id),
+  
+  // Enhanced Packaging Information
+  packagingType: text("packaging_type").notNull(), // bags, pallets, containers, boxes
+  packageDetails: jsonb("package_details").notNull(), // Specific package information
+  totalPackages: integer("total_packages").notNull(), // Total number of packages
+  packageWeight: decimal("package_weight", { precision: 10, scale: 2 }).notNull(), // Weight per package
   totalWeight: decimal("total_weight", { precision: 10, scale: 2 }).notNull(),
+  
   qualityGrade: text("quality_grade").notNull(),
   harvestDate: timestamp("harvest_date").notNull(),
+  processingDate: timestamp("processing_date"),
+  expiryDate: timestamp("expiry_date"),
+  
+  // Comprehensive Traceability Data
   inspectionData: jsonb("inspection_data").notNull(), // Complete inspection details
   eudrCompliance: jsonb("eudr_compliance").notNull(), // EUDR compliance data
+  certificationData: jsonb("certification_data").notNull(), // All certifications
+  complianceData: jsonb("compliance_data").notNull(), // Full compliance information
+  
+  // Location and GPS Data
   gpsCoordinates: text("gps_coordinates").notNull(), // Farm location
+  warehouseLocation: text("warehouse_location"),
+  farmPlotData: jsonb("farm_plot_data"), // Farm plot information
+  
+  // QR Code Data
   qrCodeData: jsonb("qr_code_data").notNull(), // Complete QR code payload
   qrCodeUrl: text("qr_code_url"), // Generated QR code image URL
+  digitalSignature: text("digital_signature"), // Security signature
+  
   status: text("status").notNull().default("generated"), // generated, printed, distributed, scanned
   createdAt: timestamp("created_at").defaultNow(),
   printedAt: timestamp("printed_at"),

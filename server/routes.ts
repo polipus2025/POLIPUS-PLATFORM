@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { registerFarmerRoutes } from "./farmer-routes";
 import { paymentService } from "./payment-service";
 import { QrBatchService } from "./qr-batch-service";
+import { productConfigurationData } from "./product-config-data";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
@@ -309,6 +310,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ================================
+  // Product Configuration API Routes
+  // ================================
+
+  // Get all product categories
+  app.get("/api/product-categories", async (req, res) => {
+    try {
+      const categories = Object.keys(productConfigurationData).map(key => ({
+        category: key,
+        name: key.replace('_', ' ').toUpperCase(),
+        products: productConfigurationData[key as keyof typeof productConfigurationData].products.length
+      }));
+      res.json({ success: true, data: categories });
+    } catch (error) {
+      console.error("Error fetching product categories:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch product categories" });
+    }
+  });
+
+  // Get products for a category
+  app.get("/api/product-categories/:category", async (req, res) => {
+    try {
+      const category = req.params.category;
+      const categoryData = productConfigurationData[category as keyof typeof productConfigurationData];
+      
+      if (!categoryData) {
+        return res.status(404).json({ success: false, message: "Category not found" });
+      }
+
+      res.json({ success: true, data: categoryData });
+    } catch (error) {
+      console.error("Error fetching category products:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch category products" });
+    }
+  });
+
+  // Get packaging options for a specific product
+  app.get("/api/packaging-options/:category/:subCategory", async (req, res) => {
+    try {
+      const { category, subCategory } = req.params;
+      const packagingOptions = QrBatchService.getPackagingOptions(category, subCategory);
+      res.json({ success: true, data: packagingOptions });
+    } catch (error) {
+      console.error("Error fetching packaging options:", error);
+      res.status(404).json({ success: false, message: error.message });
+    }
+  });
+
+  // Validate packaging selection
+  app.post("/api/validate-packaging", async (req, res) => {
+    try {
+      const { category, subCategory, packagingType, weight } = req.body;
+      const validation = QrBatchService.validatePackaging(category, subCategory, packagingType, weight);
+      res.json({ success: validation.valid, ...validation });
+    } catch (error) {
+      console.error("Error validating packaging:", error);
+      res.status(400).json({ success: false, message: error.message });
+    }
+  });
+
+  // ================================
+  // Transaction Integration API Routes
+  // ================================
+
+  // Create transaction link (called when buyer accepts farmer offer)
+  app.post("/api/transaction-qr-link", async (req, res) => {
+    try {
+      const {
+        transactionId,
+        buyerId,
+        buyerName,
+        farmerId,
+        farmerName,
+        offerAcceptedAt,
+        transactionData
+      } = req.body;
+
+      if (!transactionId || !buyerId || !farmerId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: transactionId, buyerId, farmerId" 
+        });
+      }
+
+      // Here we would normally call storage.createTransactionQrLink()
+      // For now, return success response
+      const link = {
+        transactionId,
+        buyerId,
+        buyerName,
+        farmerId,
+        farmerName,
+        offerAcceptedAt: new Date(offerAcceptedAt),
+        transactionData,
+        qrBatchGenerated: false,
+        status: 'pending',
+        createdAt: new Date()
+      };
+
+      res.json({ 
+        success: true, 
+        data: link,
+        message: `Transaction ${transactionId} linked successfully - ready for QR batch generation` 
+      });
+    } catch (error) {
+      console.error("Error creating transaction QR link:", error);
+      res.status(500).json({ success: false, message: "Failed to create transaction link" });
+    }
+  });
+
+  // Get pending transactions ready for QR generation
+  app.get("/api/pending-transactions", async (req, res) => {
+    try {
+      // Mock data for demonstration - replace with actual storage query
+      const pendingTransactions = [
+        {
+          transactionId: "TXN-20250821-001",
+          buyerId: "BUY-001",
+          buyerName: "Monrovia Trading Company",
+          farmerId: "FRM-434923",
+          farmerName: "John Konneh",
+          commodityType: "cocoa",
+          commoditySubType: "premium_cocoa",
+          quantity: "6000 kg",
+          offerAcceptedAt: "2025-08-21T10:30:00Z",
+          status: "pending"
+        },
+        {
+          transactionId: "TXN-20250821-002",
+          buyerId: "BUY-002",
+          buyerName: "Atlantic Coffee Ltd",
+          farmerId: "FRM-002",
+          farmerName: "Mary Kollie",
+          commodityType: "coffee",
+          commoditySubType: "arabica_coffee",
+          quantity: "4500 kg",
+          offerAcceptedAt: "2025-08-21T14:15:00Z",
+          status: "pending"
+        },
+        {
+          transactionId: "TXN-20250820-003",
+          buyerId: "BUY-003",
+          buyerName: "West Africa Exports",
+          farmerId: "FRM-003",
+          farmerName: "David Toe",
+          commodityType: "palm_oil",
+          commoditySubType: "crude_palm_oil",
+          quantity: "7200 kg",
+          offerAcceptedAt: "2025-08-20T16:45:00Z",
+          status: "pending"
+        }
+      ];
+
+      res.json({ success: true, data: pendingTransactions });
+    } catch (error) {
+      console.error("Error fetching pending transactions:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch pending transactions" });
+    }
+  });
+
+  // ================================
   // QR Code Batch Tracking System API Routes
   // ================================
 
@@ -359,7 +520,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new QR batch with inventory
+  // Create QR batch from transaction (enhanced method)
+  app.post("/api/qr-batches/create-from-transaction", async (req, res) => {
+    try {
+      const {
+        transactionId,
+        warehouseId,
+        warehouseName,
+        commodityType,
+        commoditySubType,
+        packagingType,
+        totalPackages,
+        packageWeight,
+        qualityGrade,
+        harvestDate,
+        processingDate,
+        storageLocation
+      } = req.body;
+
+      // Validate required fields
+      if (!transactionId || !warehouseId || !commodityType || !packagingType || !totalPackages || !packageWeight) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: transactionId, warehouseId, commodityType, packagingType, totalPackages, packageWeight" 
+        });
+      }
+
+      // Mock transaction data - replace with actual transaction lookup
+      const mockTransactionData = {
+        transactionId,
+        warehouseId: warehouseId || "WH-001",
+        warehouseName: warehouseName || "Central Warehouse Monrovia",
+        buyerId: "BUY-001",
+        buyerName: "Monrovia Trading Company",
+        farmerId: "FRM-434923",
+        farmerName: "John Konneh",
+        commodityType,
+        commoditySubType: commoditySubType || "premium_cocoa",
+        packagingType,
+        totalPackages: parseInt(totalPackages),
+        packageWeight: parseFloat(packageWeight),
+        qualityGrade: qualityGrade || "Grade I",
+        harvestDate: new Date(harvestDate || "2025-08-15"),
+        processingDate: processingDate ? new Date(processingDate) : new Date(),
+        inspectionData: {
+          inspector: 'WH-INS-001',
+          inspectionDate: new Date().toISOString(),
+          moisture: '6.8%',
+          defects: '1.5%',
+          foreignMatter: '0.5%',
+          gradeScore: 'A',
+          complianceStatus: 'compliant',
+          certifications: ['LACRA-CERT', 'EUDR-COMPLIANT', 'Fair-Trade'],
+          laboratoryResults: {
+            tested: true,
+            testDate: new Date().toISOString(),
+            results: 'All parameters within acceptable limits'
+          }
+        },
+        eudrCompliance: {
+          compliant: true,
+          riskLevel: 'low',
+          deforestationRisk: 'none',
+          traceabilityScore: 98,
+          geoLocation: "6.3156, -10.8074",
+          landRights: 'verified',
+          certificationBodies: ['FSC', 'LACRA', 'RSPO'],
+          dueDiligenceStatement: 'Comprehensive due diligence completed with no risk factors identified'
+        },
+        certificationData: {
+          primary: ['LACRA-CERT-2025', 'EXPORT-PERMIT-2025'],
+          secondary: ['QUALITY-CERT', 'ORGANIC-CERT'],
+          organic: { certified: true, body: 'Organic Liberia', validUntil: '2025-12-31' },
+          fairTrade: { certified: true, body: 'Fair Trade USA', validUntil: '2025-11-30' },
+          issuedBy: 'LACRA Certification Authority',
+          validUntil: '2025-12-31'
+        },
+        complianceData: {
+          lacra: { status: 'fully_compliant', verifiedBy: 'LACRA-SYSTEM', verifiedAt: new Date().toISOString() },
+          eudr: { status: 'compliant', verifiedAt: new Date().toISOString(), riskAssessment: 'low_risk' },
+          international: ['ISO-22000', 'HACCP', 'BRC'],
+          customsCompliance: { status: 'approved', hsCode: '1801.00', tariffClassification: 'verified' },
+          phytosanitaryCompliance: { status: 'certified', certificate: 'PHYTO-2025-001', validUntil: '2025-09-21' }
+        },
+        gpsCoordinates: "6.3156, -10.8074",
+        warehouseLocation: "Central Storage Facility, Monrovia",
+        farmPlotData: {
+          plotId: 'PLOT-001',
+          area: '5.2 hectares',
+          soilType: 'clay-loam',
+          elevation: '250m',
+          lastSoilTest: '2025-01-15'
+        },
+        storageLocation: storageLocation || 'Section A-1'
+      };
+
+      const result = await QrBatchService.createQrBatchFromTransaction(mockTransactionData);
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating QR batch from transaction:", error);
+      res.status(500).json({ success: false, message: "Failed to create QR batch from transaction" });
+    }
+  });
+
+  // Create new QR batch with inventory (legacy method)
   app.post("/api/qr-batches/create", async (req, res) => {
     try {
       const {

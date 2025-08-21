@@ -580,42 +580,113 @@ export default function WarehouseInspectorDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {/* Create New QR Batch Section */}
-                      <div className="border rounded-lg p-4 bg-blue-50">
+                      {/* Transaction-Based QR Batch Generation */}
+                      <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-green-50">
                         <h3 className="font-medium mb-3 flex items-center">
-                          <Package className="w-4 h-4 mr-2 text-blue-600" />
-                          Create New QR Batch
+                          <FileText className="w-4 h-4 mr-2 text-blue-600" />
+                          Generate QR Batch from Transaction
                         </h3>
+                        <div className="mb-4 p-3 bg-white rounded border">
+                          <p className="text-sm text-gray-600 mb-2">Select completed buyer-farmer transaction:</p>
+                          <select className="w-full p-2 border rounded">
+                            <option value="">Select Transaction...</option>
+                            <option value="TXN-20250821-001">TXN-20250821-001 - Monrovia Trading (Cocoa) - John Konneh</option>
+                            <option value="TXN-20250821-002">TXN-20250821-002 - Atlantic Coffee (Coffee) - Mary Kollie</option>
+                            <option value="TXN-20250820-003">TXN-20250820-003 - West Africa Exports (Palm Oil) - David Toe</option>
+                          </select>
+                        </div>
+                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-sm font-medium">Buyer ID</label>
-                            <Input placeholder="BUY-001" className="mt-1" />
+                            <label className="text-sm font-medium">Commodity Category</label>
+                            <select className="w-full mt-1 p-2 border rounded">
+                              <option value="">Select Category...</option>
+                              <option value="cocoa">Cocoa</option>
+                              <option value="coffee">Coffee</option>
+                              <option value="palm_oil">Palm Oil</option>
+                              <option value="rubber">Rubber</option>
+                              <option value="rice">Rice</option>
+                              <option value="cassava">Cassava</option>
+                            </select>
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Farmer ID</label>
-                            <Input placeholder="FRM-001" className="mt-1" />
+                            <label className="text-sm font-medium">Product Type</label>
+                            <select className="w-full mt-1 p-2 border rounded">
+                              <option value="">Select Product...</option>
+                              <option value="premium_cocoa">Premium Trinitario Cocoa</option>
+                              <option value="standard_cocoa">Standard Forastero Cocoa</option>
+                              <option value="arabica_coffee">Arabica Coffee</option>
+                              <option value="robusta_coffee">Robusta Coffee</option>
+                            </select>
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Commodity Type</label>
-                            <Input placeholder="Cocoa" className="mt-1" />
+                            <label className="text-sm font-medium">Packaging Type</label>
+                            <select className="w-full mt-1 p-2 border rounded">
+                              <option value="">Select Packaging...</option>
+                              <option value="jute_bags">Jute Bags</option>
+                              <option value="polypropylene_bags">Polypropylene Bags</option>
+                              <option value="wooden_pallets">Wooden Pallets</option>
+                              <option value="export_containers">Export Containers</option>
+                            </select>
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Total Bags</label>
+                            <label className="text-sm font-medium">Package Weight (kg)</label>
+                            <select className="w-full mt-1 p-2 border rounded">
+                              <option value="">Select Weight...</option>
+                              <option value="50">50 kg</option>
+                              <option value="60">60 kg</option>
+                              <option value="80">80 kg</option>
+                              <option value="100">100 kg</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Total Packages</label>
                             <Input placeholder="100" type="number" className="mt-1" />
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Bag Weight (kg)</label>
-                            <Input placeholder="60" type="number" className="mt-1" />
-                          </div>
-                          <div>
                             <label className="text-sm font-medium">Quality Grade</label>
-                            <Input placeholder="Grade A" className="mt-1" />
+                            <select className="w-full mt-1 p-2 border rounded">
+                              <option value="">Select Grade...</option>
+                              <option value="Grade I">Grade I (Premium)</option>
+                              <option value="Grade II">Grade II (Standard)</option>
+                              <option value="Fine Flavor">Fine Flavor</option>
+                              <option value="Bulk">Bulk Grade</option>
+                            </select>
                           </div>
                         </div>
-                        <Button className="mt-4 w-full">
-                          <FileText className="w-4 h-4 mr-2" />
-                          Generate QR Batch & Print Labels
-                        </Button>
+                        
+                        <div className="mt-4 p-3 bg-white rounded border">
+                          <h4 className="font-medium mb-2 text-sm">Compliance & Certification Verification</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              LACRA Certified
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              EUDR Compliant
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              Quality Inspected
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              GPS Verified
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2 mt-4">
+                          <Button className="flex-1">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Generate QR Batch
+                          </Button>
+                          <Button variant="outline">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Recent QR Batches */}

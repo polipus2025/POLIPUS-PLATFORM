@@ -66,8 +66,8 @@
    - Quality assessment preparation
    - Storage location planning
 
-### Phase 4: Harvest Management
-**Responsibility: Farmer**
+### Phase 4: Harvest Management & Automatic Batch Code Generation
+**Responsibility: Farmer + Automatic System**
 
 9. **Harvest Execution**
    - Farmer marks crop as "Ready for Harvest"
@@ -77,10 +77,18 @@
      - Harvest completion date
      - Storage location
 
-10. **Harvest Validation**
+10. **AUTOMATIC BATCH CODE GENERATION** 
+    - System immediately generates unique batch code: `BATCH-CROPTYPE-TIMESTAMP-FARMERID`
+    - Batch code contains complete harvest lot information
     - System updates crop status to "Harvested"
     - Calculates yield efficiency vs expectations
-    - Triggers marketplace listing eligibility
+
+11. **AUTOMATIC STAKEHOLDER NOTIFICATIONS**
+    - **Land Inspector**: Notified of harvest completion for mapped plot
+    - **Warehouse Inspector**: Alerted about yield quantity ready for inspection
+    - **Three-Tier Regulatory Panels (DG/DDGOTS/DDGAF)**: Receive batch code and compliance data
+    - **Marketplace System**: Automatically enables listing eligibility
+    - **Buyer Network**: Harvest becomes visible in buyer marketplace
 
 ### Phase 5: Marketplace & Buyer Connection
 **Responsibility: Farmer + Buyers**

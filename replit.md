@@ -10,6 +10,7 @@ Module Development Strategy: Ready to simultaneously develop all 7 new modules (
 PDF Report Design Preference: User confirmed satisfaction with enhanced professional design approach featuring comprehensive charts, graphs, and visual elements. Prefers clean synchronized formatting with advanced data visualizations including radar charts, 3D pie charts, bar charts with benchmarks, and timeline flow diagrams across all 6 certificates. Recently updated to use UniDOC-inspired professional style with dashboard-style metrics, color-coded risk indicators, progress bars, and network diagrams as shown in reference image.
 Land Mapping Restriction: Farmers cannot map new plots - this functionality is exclusively restricted to Land Inspectors through the official land mapping system.
 Crop Scheduling Focus: Farmers should focus on crop scheduling, harvest management, and buyer connections rather than land mapping activities.
+Automatic Batch Code Generation: When farmers mark crops as harvested, the system automatically generates batch codes and notifies all stakeholders (Land Inspector, Warehouse Inspector, three-tier regulatory panels). Farmers do NOT manually generate batch codes - this is completely automated upon harvest completion.
 
 ## System Architecture
 The application employs a modern full-stack architecture with a clear separation of concerns.

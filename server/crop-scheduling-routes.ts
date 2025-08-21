@@ -583,14 +583,14 @@ router.post('/farmers/payment-confirmation', async (req, res) => {
       status: 'payment_confirmed'
     };
 
-    // Notify Regulator and Land Inspector about payment confirmation
+    // Notify DDG-AF Regulator (for audit) and Land Inspector about payment confirmation
     const paymentNotificationData = {
       ...paymentRecord,
       notifications: {
         regulator: {
-          department: 'DDGOTS',
-          notificationType: 'PAYMENT_CONFIRMED',
-          message: `Payment confirmed for batch ${batchCode}. Amount: $${paymentAmount}. Crop transfer approved.`
+          department: 'DDG-AF',
+          notificationType: 'PAYMENT_AUDIT',
+          message: `Payment confirmed for audit tracking - batch ${batchCode}. Amount: $${paymentAmount}. Crop transfer approved.`
         },
         landInspector: {
           inspectorId: 'INS-001', // Would be retrieved from batch records
@@ -600,14 +600,14 @@ router.post('/farmers/payment-confirmation', async (req, res) => {
       }
     };
 
-    // Send notifications via DDGOTS integration
+    // Send notifications via DDG-AF integration for audit purposes
     try {
       await DDGOTSIntegrationService.notifyPaymentConfirmation(paymentNotificationData);
     } catch (integrationError) {
-      console.log('⚠️ DDGOTS payment notification not available, using fallback');
+      console.log('⚠️ DDG-AF audit notification not available, using fallback');
     }
 
-    console.log(`✅ PAYMENT CONFIRMED: ${transactionCode} - Regulators and Land Inspector notified`);
+    console.log(`✅ PAYMENT CONFIRMED: ${transactionCode} - DDG-AF Audit System and Land Inspector notified`);
 
     res.json({
       success: true,

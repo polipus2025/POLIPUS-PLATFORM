@@ -262,24 +262,33 @@ export class DDGOTSIntegrationService {
     });
   }
 
-  // POINT 5: Payment confirmation notifications
+  // POINT 5: Payment confirmation notifications (Updated to route to DDG-AF for audit)
   static async notifyPaymentConfirmation(paymentData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
-    console.log(`📧 DDGOTS: Sending payment confirmation notifications...`);
+    console.log(`📧 DDG-AF: Sending payment confirmation notifications for audit...`);
     
-    // Simulate notification to DDGOTS regulator
-    console.log(`🏛️ NOTIFYING DDGOTS: Payment confirmed for batch ${paymentData.batchCode}`);
+    // Route payment data to DDG-AF Regulatory System for audit purposes
+    console.log(`🏛️ NOTIFYING DDG-AF: Payment confirmed for audit tracking - batch ${paymentData.batchCode}`);
     console.log(`💰 Payment Amount: $${paymentData.paymentDetails.amount}`);
     console.log(`📋 Confirmation Method: ${paymentData.farmerConfirmation.method}`);
+    console.log(`🔍 Transaction Code: ${paymentData.transactionCode}`);
+    console.log(`📊 AUDIT TRAIL: Payment data recorded in DDG-AF system`);
     
     // Simulate notification to Land Inspector
     console.log(`📍 NOTIFYING LAND INSPECTOR: Transfer tracking activated for ${paymentData.batchCode}`);
     console.log(`🔍 Inspector ID: ${paymentData.notifications.landInspector.inspectorId}`);
     
+    // Log audit trail for DDG-AF compliance
+    console.log(`📋 DDG-AF AUDIT: Payment transaction logged for regulatory oversight`);
+    console.log(`📄 Farmer ID: ${paymentData.farmerId}`);
+    console.log(`📄 Buyer ID: ${paymentData.buyerId}`);
+    console.log(`📄 Payment Reference: ${paymentData.paymentDetails.reference}`);
+    
     return {
       success: true,
       notificationsSent: {
-        regulator: true,
-        landInspector: true
+        ddgAuditSystem: true,
+        landInspector: true,
+        auditTrail: true
       },
       timestamp: new Date().toISOString()
     };

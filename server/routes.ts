@@ -2295,6 +2295,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Warehouse Inspector Login endpoint
+  app.post("/api/auth/warehouse-inspector/login", async (req, res) => {
+    try {
+      const { username, password, warehouseFacility } = req.body;
+      
+      // Validate input
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username and password are required" 
+        });
+      }
+
+      // Demo credentials for warehouse inspector
+      const demoCredentials = {
+        'WH-INS-001': { password: 'warehouse123', name: 'Warehouse Inspector 001' },
+        'WH-INS-002': { password: 'warehouse123', name: 'Warehouse Inspector 002' },
+        'WH-INS-003': { password: 'warehouse123', name: 'Warehouse Inspector 003' }
+      };
+
+      if (demoCredentials[username] && demoCredentials[username].password === password) {
+        const token = jwt.sign(
+          { 
+            userId: username,
+            username: username,
+            userType: 'warehouse_inspector',
+            warehouseFacility: warehouseFacility
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          inspector: {
+            id: username,
+            username: username,
+            name: demoCredentials[username].name,
+            userType: 'warehouse_inspector',
+            warehouseFacility: warehouseFacility
+          }
+        });
+      }
+
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid warehouse inspector credentials" 
+      });
+
+    } catch (error) {
+      console.error("Warehouse inspector login error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Generic Inspector Portal Login endpoint (for backward compatibility)
   app.post("/api/auth/inspector-login", async (req, res) => {
     try {
@@ -11102,6 +11161,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, data: result });
     } catch (error) {
       console.error("Error completing inspection:", error);
+      res.status(500).json({ success: false, message: "Failed to complete inspection" });
+    }
+  });
+
+  // Warehouse Inspector API Endpoints
+  app.get("/api/warehouse-inspector/pending-inspections", async (req, res) => {
+    try {
+      const inspections = await storage.getWarehouseInspectorPendingInspections();
+      res.json({ success: true, data: inspections });
+    } catch (error) {
+      console.error("Error fetching pending warehouse inspections:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch inspections" });
+    }
+  });
+
+  app.get("/api/warehouse-inspector/storage-compliance", async (req, res) => {
+    try {
+      const compliance = await storage.getStorageComplianceData();
+      res.json({ success: true, data: compliance });
+    } catch (error) {
+      console.error("Error fetching storage compliance:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch compliance data" });
+    }
+  });
+
+  app.get("/api/warehouse-inspector/inventory-status", async (req, res) => {
+    try {
+      const inventory = await storage.getWarehouseInventoryStatus();
+      res.json({ success: true, data: inventory });
+    } catch (error) {
+      console.error("Error fetching inventory status:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch inventory status" });
+    }
+  });
+
+  app.get("/api/warehouse-inspector/quality-controls", async (req, res) => {
+    try {
+      const qualityControls = await storage.getWarehouseQualityControls();
+      res.json({ success: true, data: qualityControls });
+    } catch (error) {
+      console.error("Error fetching quality controls:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch quality controls" });
+    }
+  });
+
+  app.post("/api/warehouse-inspector/start-inspection/:inspectionId", async (req, res) => {
+    try {
+      const { inspectionId } = req.params;
+      const result = await storage.startWarehouseInspection(inspectionId);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error starting warehouse inspection:", error);
+      res.status(500).json({ success: false, message: "Failed to start inspection" });
+    }
+  });
+
+  app.post("/api/warehouse-inspector/complete-inspection/:inspectionId", async (req, res) => {
+    try {
+      const { inspectionId } = req.params;
+      const { status, notes, violations } = req.body;
+      const result = await storage.completeWarehouseInspection(inspectionId, { status, notes, violations });
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error completing warehouse inspection:", error);
       res.status(500).json({ success: false, message: "Failed to complete inspection" });
     }
   });

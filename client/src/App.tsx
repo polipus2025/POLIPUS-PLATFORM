@@ -210,6 +210,7 @@ const ExporterManagement = lazy(() => import("@/pages/exporter-management"));
 const InspectorPortal = lazy(() => import("@/pages/inspector-portal"));
 const LandInspectorLogin = lazy(() => import("@/pages/auth/land-inspector-login"));
 const PortInspectorLogin = lazy(() => import("@/pages/auth/port-inspector-login"));
+const WarehouseInspectorLogin = lazy(() => import("@/pages/auth/warehouse-inspector-login"));
 const LandMappingDashboard = lazy(() => import("@/pages/land-mapping-dashboard"));
 const InspectorFarmerLandManagement = lazy(() => import("@/pages/inspector-farmer-land-management"));
 const LandMappingManager = lazy(() => import("@/pages/landmap360/land-mapping-manager"));
@@ -223,6 +224,7 @@ const GenerateReports = lazy(() => import("@/pages/generate-reports"));
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const PortInspectorDashboard = lazy(() => import("@/pages/port-inspector-dashboard"));
+const WarehouseInspectorDashboard = lazy(() => import("@/pages/warehouse-inspector-dashboard"));
 
 // Helper component to check user access to routes
 function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: any) {
@@ -291,10 +293,13 @@ function Router() {
       <Route path="/inspector-portal" component={InspectorPortal} />
       <Route path="/inspector-dashboard" component={InspectorDashboard} />
       <Route path="/port-inspector-dashboard" component={PortInspectorDashboard} />
+      <Route path="/warehouse-inspector-dashboard" component={WarehouseInspectorDashboard} />
       <Route path="/auth/land-inspector-login" component={LandInspectorLogin} />
       <Route path="/auth/port-inspector-login" component={PortInspectorLogin} />
+      <Route path="/auth/warehouse-inspector-login" component={WarehouseInspectorLogin} />
       <Route path="/land-inspector-login" component={LandInspectorLogin} />
       <Route path="/port-inspector-login" component={PortInspectorLogin} />
+      <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
       <Route path="/inspector-onboarding" component={InspectorOnboarding} />
       <Route path="/land-mapping-dashboard" component={LandMappingDashboard} />
       <Route path="/inspector-farmer-land-management" component={InspectorFarmerLandManagement} />

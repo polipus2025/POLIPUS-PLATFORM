@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Ship, Users, Shield, ArrowRight } from "lucide-react";
+import { MapPin, Ship, Warehouse, Users, Shield, ArrowRight } from "lucide-react";
 
 export default function InspectorPortal() {
   const [, navigate] = useLocation();
@@ -22,7 +22,7 @@ export default function InspectorPortal() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           {/* Land Inspector Card */}
           <Card className="shadow-xl border-0 hover:shadow-2xl transition-shadow duration-300">
             <CardHeader className="text-center pb-4">
@@ -109,6 +109,52 @@ export default function InspectorPortal() {
               >
                 <div className="flex items-center space-x-2">
                   <span>Access Port Inspector Portal</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Warehouse Inspector Card */}
+          <Card className="shadow-xl border-0 hover:shadow-2xl transition-shadow duration-300">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center">
+                <Warehouse className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-xl font-bold text-gray-900">
+                Warehouse Inspector
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Storage Facility & Warehouse Compliance System
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center space-x-3 text-sm text-gray-700">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span>Storage facility compliance</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm text-gray-700">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span>Inventory quality control</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm text-gray-700">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span>Temperature monitoring</span>
+                </div>
+                <div className="flex items-center space-x-3 text-sm text-gray-700">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span>Regulatory documentation</span>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => navigate("/warehouse-inspector-login")}
+                className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+                data-testid="button-warehouse-inspector"
+              >
+                <div className="flex items-center space-x-2">
+                  <span>Access Warehouse Portal</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </Button>

@@ -1,14 +1,16 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Link } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense, memo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { Package } from "lucide-react";
 
 // ⚡ INSTANT LOADING - Core pages (preloaded)
 import FrontPage from "@/pages/front-page";
@@ -673,10 +675,23 @@ function Router() {
             />
           </Route>
           <Route path="/batch-code-generator">
-            <ProtectedRoute 
-              component={BatchCodeGenerator} 
-              allowedUserTypes={['farmer']} 
-            />
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 max-w-md text-center">
+                <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-8 h-8 text-amber-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-4">Batch Codes Auto-Generated</h2>
+                <p className="text-gray-300 mb-6">
+                  Batch codes are now automatically generated when farmers mark crops as harvested. 
+                  Manual batch generation is no longer needed.
+                </p>
+                <Link href="/farmer-dashboard">
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                    Back to Dashboard
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </Route>
           
           {/* LACRA Commodity Pricing - Available to all users */}

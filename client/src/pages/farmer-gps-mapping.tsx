@@ -217,12 +217,10 @@ export default function FarmerGPSMapping() {
                       View All Farm Plots
                     </Button>
                   </Link>
-                  <Link href="/batch-code-generator">
-                    <Button className="w-full justify-start" variant="outline">
-                      <Target className="h-4 w-4 mr-2" />
-                      Generate Batch Code
-                    </Button>
-                  </Link>
+                  <Button className="w-full justify-start" variant="outline" disabled>
+                    <Target className="h-4 w-4 mr-2" />
+                    Batch Codes (Auto-Generated)
+                  </Button>
                   <Button className="w-full justify-start" variant="outline" disabled>
                     <Satellite className="h-4 w-4 mr-2" />
                     Satellite Monitoring (Coming Soon)

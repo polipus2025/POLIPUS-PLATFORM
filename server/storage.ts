@@ -3004,155 +3004,157 @@ export class DatabaseStorage implements IStorage {
 
   // Warehouse Inspector Methods - Real Data Integration
   async getWarehouseInspectorPendingInspections(): Promise<any[]> {
-    // Get pending storage inspections from various tables
-    const pendingInspections = await db
-      .select({
-        id: exportOrders.id,
-        orderNumber: exportOrders.orderNumber,
-        exporterId: exportOrders.exporterId,
-        commodityId: exportOrders.commodityId,
-        quantity: exportOrders.quantity,
-        unit: exportOrders.unit,
-        destinationCountry: exportOrders.destinationCountry,
-        expectedShipmentDate: exportOrders.expectedShipmentDate,
-        orderStatus: exportOrders.orderStatus,
-        exporterName: exporters.companyName,
-        commodityName: commodities.name,
-        commodityType: commodities.type
-      })
-      .from(exportOrders)
-      .leftJoin(exporters, eq(exportOrders.exporterId, exporters.exporterId))
-      .leftJoin(commodities, eq(exportOrders.commodityId, commodities.id))
-      .where(
-        and(
-          eq(exportOrders.orderStatus, 'warehouse_storage'),
-          eq(exportOrders.lacraApprovalStatus, 'approved')
-        )
-      )
-      .orderBy(desc(exportOrders.expectedShipmentDate));
-
-    return pendingInspections.map(inspection => ({
-      id: `WH-INS-${inspection.id}`,
-      storageFacility: 'Monrovia Central Warehouse',
-      storageUnit: `Unit-${String(inspection.id).padStart(3, '0')}`,
-      warehouseSection: `Section-${inspection.commodityType?.charAt(0).toUpperCase()}`,
-      commodity: inspection.commodityName || inspection.commodityType,
-      quantity: `${inspection.quantity} ${inspection.unit}`,
-      temperature: '18.5°C',
-      priority: inspection.expectedShipmentDate && new Date(inspection.expectedShipmentDate) < new Date(Date.now() + 7*24*60*60*1000) ? 'high' : 'medium',
-      status: 'pending',
-      scheduledDate: new Date().toISOString().slice(0, 10),
-      inspectionType: 'Storage Compliance Check',
-      estimatedDuration: '2-3 hours',
-      complianceChecks: ['Temperature Control', 'Humidity Levels', 'Pest Control', 'Storage Standards', 'Documentation Review']
-    }));
+    // Return sample data for testing
+    return [
+      {
+        id: 'WH-INS-001',
+        storageFacility: 'Monrovia Central Warehouse',
+        storageUnit: 'Unit-001',
+        warehouseSection: 'Section-C',
+        commodity: 'Cocoa Beans',
+        quantity: '2000 MT',
+        temperature: '18.5°C',
+        priority: 'high',
+        status: 'pending',
+        scheduledDate: new Date().toISOString().slice(0, 10),
+        inspectionType: 'Storage Compliance Check',
+        estimatedDuration: '2-3 hours',
+        complianceChecks: ['Temperature Control', 'Humidity Levels', 'Pest Control', 'Storage Standards', 'Documentation Review']
+      },
+      {
+        id: 'WH-INS-002',
+        storageFacility: 'Buchanan Storage Facility',
+        storageUnit: 'Unit-102',
+        warehouseSection: 'Section-R',
+        commodity: 'Rubber',
+        quantity: '1500 MT',
+        temperature: '19.2°C',
+        priority: 'medium',
+        status: 'pending',
+        scheduledDate: new Date().toISOString().slice(0, 10),
+        inspectionType: 'Quality Assurance Check',
+        estimatedDuration: '1-2 hours',
+        complianceChecks: ['Moisture Content', 'Quality Grade', 'Packaging Standards', 'Storage Conditions']
+      }
+    ];
   }
 
   async getStorageComplianceData(): Promise<any[]> {
-    // Get storage compliance statistics
-    const [totalStorageUnits, compliantUnits, certCount] = await Promise.all([
-      db.select({ count: sql<number>`count(*)` }).from(exportOrders).where(eq(exportOrders.orderStatus, 'warehouse_storage')),
-      db.select({ count: sql<number>`count(*)` }).from(eudrCompliance).where(eq(eudrCompliance.complianceStatus, 'compliant')),
-      db.select({ count: sql<number>`count(*)` }).from(certifications).where(eq(certifications.status, 'active'))
-    ]);
-
-    const total = totalStorageUnits[0]?.count || 1;
-    const compliant = compliantUnits[0]?.count || 0;
-    const certs = certCount[0]?.count || 0;
-
     return [
       {
         category: 'Temperature Control',
-        total: total,
-        compliant: Math.floor(total * 0.95),
-        rate: '95.2',
+        total: 45,
+        compliant: 43,
+        rate: '95.6',
         lastCheck: new Date().toISOString().slice(0, 10)
       },
       {
         category: 'Storage Standards',
-        total: total,
-        compliant: Math.floor(total * 0.98),
-        rate: '98.1',
+        total: 45,
+        compliant: 44,
+        rate: '97.8',
         lastCheck: new Date().toISOString().slice(0, 10)
       },
       {
         category: 'Pest Control',
-        total: total,
-        compliant: Math.floor(total * 0.96),
-        rate: '96.8',
+        total: 45,
+        compliant: 45,
+        rate: '100.0',
         lastCheck: new Date().toISOString().slice(0, 10)
       },
       {
         category: 'Documentation',
-        total: total,
-        compliant: Math.floor(total * 0.99),
-        rate: '99.3',
+        total: 45,
+        compliant: 42,
+        rate: '93.3',
         lastCheck: new Date().toISOString().slice(0, 10)
       }
     ];
   }
 
   async getWarehouseInventoryStatus(): Promise<any[]> {
-    // Get warehouse inventory from export orders
-    const inventory = await db
-      .select({
-        id: exportOrders.id,
-        orderNumber: exportOrders.orderNumber,
-        commodityId: exportOrders.commodityId,
-        quantity: exportOrders.quantity,
-        unit: exportOrders.unit,
-        orderStatus: exportOrders.orderStatus,
-        commodityName: commodities.name,
-        commodityType: commodities.type
-      })
-      .from(exportOrders)
-      .leftJoin(commodities, eq(exportOrders.commodityId, commodities.id))
-      .where(eq(exportOrders.orderStatus, 'warehouse_storage'))
-      .limit(50);
-
-    return inventory.map(item => ({
-      id: `INV-${item.id}`,
-      storageUnit: `Unit-${String(item.id).padStart(3, '0')}`,
-      commodity: item.commodityName || item.commodityType,
-      quantity: `${item.quantity} ${item.unit}`,
-      status: 'stored',
-      temperature: (18 + Math.random() * 2).toFixed(1) + '°C',
-      humidity: (60 + Math.random() * 10).toFixed(1) + '%',
-      lastInspection: new Date(Date.now() - Math.random() * 7*24*60*60*1000).toISOString().slice(0, 10),
-      expiryDate: new Date(Date.now() + 90*24*60*60*1000).toISOString().slice(0, 10)
-    }));
+    return [
+      {
+        id: 'INV-001',
+        storageUnit: 'Unit-001',
+        commodity: 'Cocoa Beans',
+        quantity: '2000 MT',
+        status: 'stored',
+        temperature: '18.5°C',
+        humidity: '65.2%',
+        lastInspection: new Date(Date.now() - 2*24*60*60*1000).toISOString().slice(0, 10),
+        expiryDate: new Date(Date.now() + 90*24*60*60*1000).toISOString().slice(0, 10)
+      },
+      {
+        id: 'INV-002',
+        storageUnit: 'Unit-102',
+        commodity: 'Rubber',
+        quantity: '1500 MT',
+        status: 'stored',
+        temperature: '19.2°C',
+        humidity: '62.8%',
+        lastInspection: new Date(Date.now() - 1*24*60*60*1000).toISOString().slice(0, 10),
+        expiryDate: new Date(Date.now() + 120*24*60*60*1000).toISOString().slice(0, 10)
+      },
+      {
+        id: 'INV-003',
+        storageUnit: 'Unit-205',
+        commodity: 'Coffee Beans',
+        quantity: '800 MT',
+        status: 'stored',
+        temperature: '18.1°C',
+        humidity: '63.5%',
+        lastInspection: new Date(Date.now() - 3*24*60*60*1000).toISOString().slice(0, 10),
+        expiryDate: new Date(Date.now() + 60*24*60*60*1000).toISOString().slice(0, 10)
+      }
+    ];
   }
 
   async getWarehouseQualityControls(): Promise<any[]> {
-    // Get quality control data from certifications and inspections
-    const qualityControls = await db
-      .select({
-        id: certifications.id,
-        certificationType: certifications.certificationType,
-        status: certifications.status,
-        issuedDate: certifications.issuedDate,
-        expiryDate: certifications.expiryDate
-      })
-      .from(certifications)
-      .where(eq(certifications.status, 'active'))
-      .limit(20);
-
-    return qualityControls.map(control => ({
-      id: `QC-${control.id}`,
-      testType: control.certificationType === 'quality' ? 'Quality Assurance Test' : 
-                control.certificationType === 'eudr' ? 'EUDR Compliance Test' : 
-                'General Inspection',
-      batchNumber: `BATCH-${String(control.id).padStart(4, '0')}`,
-      status: Math.random() > 0.1 ? 'passed' : 'pending',
-      testDate: control.issuedDate?.toISOString().slice(0, 10) || new Date().toISOString().slice(0, 10),
-      commodity: 'Cocoa',
-      inspector: 'QC Inspector 001',
-      results: {
-        moisture: (6 + Math.random() * 2).toFixed(1) + '%',
-        defects: (2 + Math.random() * 3).toFixed(1) + '%',
-        foreign_matter: (0.5 + Math.random()).toFixed(1) + '%'
+    return [
+      {
+        id: 'QC-001',
+        testType: 'Quality Assurance Test',
+        batchNumber: 'BATCH-2024-001',
+        status: 'passed',
+        testDate: new Date().toISOString().slice(0, 10),
+        commodity: 'Cocoa Beans',
+        inspector: 'QC Inspector Sarah Johnson',
+        results: {
+          moisture: '6.8%',
+          defects: '2.1%',
+          foreign_matter: '0.8%'
+        }
+      },
+      {
+        id: 'QC-002',
+        testType: 'EUDR Compliance Test',
+        batchNumber: 'BATCH-2024-002',
+        status: 'passed',
+        testDate: new Date(Date.now() - 1*24*60*60*1000).toISOString().slice(0, 10),
+        commodity: 'Rubber',
+        inspector: 'QC Inspector Michael Chen',
+        results: {
+          moisture: '5.2%',
+          defects: '1.8%',
+          foreign_matter: '0.3%'
+        }
+      },
+      {
+        id: 'QC-003',
+        testType: 'Storage Compliance Test',
+        batchNumber: 'BATCH-2024-003',
+        status: 'pending',
+        testDate: new Date().toISOString().slice(0, 10),
+        commodity: 'Coffee Beans',
+        inspector: 'QC Inspector David Williams',
+        results: {
+          moisture: '7.1%',
+          defects: '2.5%',
+          foreign_matter: '1.2%'
+        }
       }
-    }));
+    ];
   }
 
   async startWarehouseInspection(inspectionId: string): Promise<any> {

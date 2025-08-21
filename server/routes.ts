@@ -11229,5 +11229,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Warehouse Inspector Authentication
+  app.post("/api/warehouse-inspector/login", async (req, res) => {
+    try {
+      const { username, password, facility } = req.body;
+      
+      if (username === "warehouse001" && password === "lacra123") {
+        res.json({
+          success: true,
+          inspector: {
+            id: "WH-INS-001",
+            name: "Warehouse Inspector Sarah Johnson",
+            department: "Warehouse Operations",
+            facility: facility || "Monrovia Central Warehouse",
+            credentials: "WH-CERT-2024-001",
+            clearanceLevel: "Level 3",
+            specializations: ["Storage Compliance", "Quality Control", "Temperature Management", "Pest Control"],
+            contact: {
+              phone: "+231-77-555-0103",
+              email: "warehouse.inspector@lacra.gov.lr"
+            }
+          }
+        });
+      } else {
+        res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error("Warehouse inspector login error:", error);
+      res.status(500).json({ success: false, message: "Login failed" });
+    }
+  });
+
   return httpServer;
 }

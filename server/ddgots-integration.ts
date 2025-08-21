@@ -595,6 +595,7 @@ export class DDGOTSIntegrationService {
     console.log(`🏆 Quality Certificate: AVAILABLE`);
     console.log(`🔬 Fumigation Certificate: AVAILABLE`);
     console.log(`🌍 EUDR Compliance Certificate: AVAILABLE`);
+    console.log(`📍 Product Origin Certificate: AVAILABLE`);
     console.log(`📋 Traceability Documents: AVAILABLE`);
     console.log(`🔍 Inspection Report: AVAILABLE`);
     console.log(`💻 Dashboard Access: ENABLED`);

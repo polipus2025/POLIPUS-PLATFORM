@@ -1815,6 +1815,7 @@ router.post('/ddgaf-ddgots/approve-document-release', async (req, res) => {
         qualityCertificate: true,
         fumigationCertificate: true,
         eudrComplianceCertificate: true,
+        productOriginCertificate: true,
         traceabilityDocuments: true,
         inspectionReport: true
       },

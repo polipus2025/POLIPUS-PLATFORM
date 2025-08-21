@@ -1098,7 +1098,22 @@ export class DatabaseStorage implements IStorage {
     return newReport;
   }
 
-  // Legacy mock methods removed - replaced with proper implementations below
+  // Exporter methods - Mock implementations for now
+  async getExporters(): Promise<any[]> {
+    return [
+      { id: 1, name: "Liberia Agri Export Ltd", status: "active", exports: 45 },
+      { id: 2, name: "West Africa Commodities", status: "active", exports: 32 }
+    ];
+  }
+
+  async getExporter(id: number): Promise<any | undefined> {
+    const exporters = await this.getExporters();
+    return exporters.find(e => e.id === id);
+  }
+
+  async createExporter(exporter: any): Promise<any> {
+    return { id: Date.now(), ...exporter, createdAt: new Date() };
+  }
 
   async getExportOrdersByExporter(exporterId: number): Promise<any[]> {
     return [
@@ -2012,6 +2027,11 @@ export class DatabaseStorage implements IStorage {
     return credentials || undefined;
   }
 
+  async getInspectorByInspectorId(inspectorId: string): Promise<Inspector | undefined> {
+    const [inspector] = await db.select().from(inspectors).where(eq(inspectors.inspectorId, inspectorId));
+    return inspector || undefined;
+  }
+
   async incrementFailedLoginAttempts(inspectorId: string): Promise<void> {
     const credentials = await this.getInspectorCredentials(inspectorId);
     if (!credentials) return;
@@ -2092,6 +2112,25 @@ export class DatabaseStorage implements IStorage {
     return newAssignment;
   }
 
+  async getInspectorCredentials(inspectorId: string): Promise<InspectorCredentials | undefined> {
+    const [credentials] = await db.select().from(inspectorCredentials)
+      .where(eq(inspectorCredentials.inspectorId, inspectorId));
+    return credentials || undefined;
+  }
+
+  async createInspectorCredentials(credentials: InsertInspectorCredentials): Promise<InspectorCredentials> {
+    const [newCredentials] = await db.insert(inspectorCredentials).values(credentials).returning();
+    return newCredentials;
+  }
+
+  async updateInspectorCredentials(inspectorId: string, credentials: Partial<InspectorCredentials>): Promise<InspectorCredentials | undefined> {
+    const [updatedCredentials] = await db.update(inspectorCredentials)
+      .set({ ...credentials, updatedAt: new Date() })
+      .where(eq(inspectorCredentials.inspectorId, inspectorId))
+      .returning();
+    return updatedCredentials || undefined;
+  }
+
   async getInspectorActivities(): Promise<InspectorActivity[]> {
     return await db.select().from(inspectorActivities).orderBy(desc(inspectorActivities.timestamp));
   }
@@ -2100,6 +2139,11 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(inspectorActivities)
       .where(eq(inspectorActivities.inspectorId, inspectorId))
       .orderBy(desc(inspectorActivities.timestamp));
+  }
+
+  async createInspectorActivity(activity: InsertInspectorActivity): Promise<InspectorActivity> {
+    const [newActivity] = await db.insert(inspectorActivities).values(activity).returning();
+    return newActivity;
   }
 
   // Buyer Management System implementations

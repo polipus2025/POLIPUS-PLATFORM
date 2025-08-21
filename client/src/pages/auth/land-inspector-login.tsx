@@ -34,6 +34,7 @@ export default function LandInspectorLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
+      console.log("Attempting login with:", { ...data, password: "***" });
       const result = await apiRequest("/api/auth/land-inspector-login", {
         method: "POST",
         body: JSON.stringify({
@@ -44,9 +45,11 @@ export default function LandInspectorLogin() {
           'Content-Type': 'application/json'
         }
       });
+      console.log("Login response:", result);
       return result;
     },
     onSuccess: (data) => {
+      console.log("Login onSuccess data:", data);
       if (data && data.success) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("userType", "land_inspector");

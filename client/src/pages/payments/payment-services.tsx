@@ -66,6 +66,7 @@ export default function PaymentServices() {
         }
         
         const data = await response.json();
+        console.log("Direct fetch data:", data);
         setServices(data || []);
         setError(null);
       } catch (err) {
@@ -80,6 +81,9 @@ export default function PaymentServices() {
     fetchServices();
   }, []);
 
+  console.log("Current services state:", services);
+  console.log("Loading state:", isLoading);
+  console.log("Error state:", error);
 
   // Force show services if we have data but still loading
   const hasData = services && Array.isArray(services) && services.length > 0;

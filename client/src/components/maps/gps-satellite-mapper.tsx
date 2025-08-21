@@ -44,6 +44,7 @@ export default function GPSSatelliteMapper({
     const areaInSquareMeters = Math.abs(area) * 111320 * 111320 / 2;
     const areaInHectares = areaInSquareMeters / 10000; // 1 hectare = 10,000 m²
     
+    console.log(`📐 Land Area Calculation: ${areaInSquareMeters.toFixed(0)} m² = ${areaInHectares.toFixed(3)} hectares`);
     return areaInHectares;
   };
 
@@ -90,6 +91,8 @@ export default function GPSSatelliteMapper({
       const tileX = Math.floor((centerLng + 180) / 360 * Math.pow(2, zoom));
       const tileY = Math.floor((1 - Math.log(Math.tan(centerLat * Math.PI / 180) + 1 / Math.cos(centerLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
       
+      console.log(`📍 GPS Location: ${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}`);
+      console.log(`🛰️ Loading satellite tile: x=${tileX}, y=${tileY}, zoom=${zoom}`);
       
       // Create map with location-specific satellite imagery
       mapContainer.innerHTML = `
@@ -150,6 +153,7 @@ export default function GPSSatelliteMapper({
         
         setPoints(prev => {
           const nextLetter = String.fromCharCode(65 + prev.length);
+          console.log(`Added point ${nextLetter} by click: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
           return [...prev, newPoint];
         });
       });
@@ -164,6 +168,7 @@ export default function GPSSatelliteMapper({
           initializeMap(position.coords.latitude, position.coords.longitude);
         },
         () => {
+          console.log('📍 GPS unavailable, using Liberia default coordinates');
           initializeMap(6.4281, -9.4295);
         }
       );
@@ -191,6 +196,7 @@ export default function GPSSatelliteMapper({
 
     if (points.length === 0) return;
 
+    console.log(`Rendering ${points.length} boundary markers on satellite view`);
 
     // Add markers for each point
     points.forEach((point, index) => {
@@ -397,6 +403,7 @@ export default function GPSSatelliteMapper({
       }
 
       const perimeter = calculatePerimeter(points);
+      console.log(`🌍 EUDR & DEFORESTATION ANALYSIS: ${overallRisk} risk, ${area.toFixed(3)} hectares, ${perimeter.toFixed(1)}m perimeter, ${deforestationRisk} deforestation risk, ${complianceStatus}`);
       setStatus(`🌍 BOUNDARY READY: ${points.length} connected points, ${area.toFixed(3)}Ha area, ${perimeter.toFixed(0)}m perimeter, ${overallRisk.toUpperCase()} risk`);
     } else if (points.length >= 2) {
       const partialPerimeter = points.length > 1 ? calculatePerimeter([...points, points[0]]) : 0;
@@ -428,10 +435,12 @@ export default function GPSSatelliteMapper({
           
           setPoints(prev => {
             const nextLetter = String.fromCharCode(65 + prev.length);
+            console.log(`Added GPS point ${nextLetter}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
             return [...prev, newPoint];
           });
         },
         (error) => {
+          console.log('GPS error:', error);
           setStatus('GPS failed - Check location permissions');
         },
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 1000 }
@@ -467,6 +476,7 @@ export default function GPSSatelliteMapper({
       onBoundaryComplete(landData);
       setStatus(`✅ BOUNDARY COMPLETED! ${points.length} connected points forming ${area.toFixed(3)} hectares of mapped land with full GPS data`);
       
+      console.log('🎯 Complete Land Area Data:', landData);
     }
   };
 
@@ -575,6 +585,7 @@ export default function GPSSatelliteMapper({
     };
     
     pdfGenerator.generateEUDRReport(reportData);
+    console.log('📄 Professional EUDR Compliance Report generated with LACRA letterhead');
   };
 
   const generateDeforestationReport = () => {
@@ -625,6 +636,7 @@ export default function GPSSatelliteMapper({
     };
     
     pdfGenerator.generateDeforestationReport(reportData);
+    console.log('🌳 Professional Deforestation Risk Report generated with colorful charts');
   };
 
   const downloadEUDRReport = () => {
@@ -664,6 +676,7 @@ export default function GPSSatelliteMapper({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
+    console.log('🌍 EUDR Analysis Report downloaded');
   };
 
   return (

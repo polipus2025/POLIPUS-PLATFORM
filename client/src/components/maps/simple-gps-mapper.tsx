@@ -113,6 +113,7 @@ export default function SimpleGPSMapper({
         const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
         setPoints(prev => [...prev, newPoint]);
         
+        console.log(`Added point ${String.fromCharCode(65 + points.length)}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       });
     };
 

@@ -215,6 +215,10 @@ export default function BuyerManagement() {
   });
 
   const onSubmit = (data: BuyerFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
+    console.log("Selected commodities:", selectedCommodities);
+    console.log("Selected regions:", selectedRegions);
     
     const formattedData = {
       ...data,
@@ -224,6 +228,7 @@ export default function BuyerManagement() {
       creditLimit: data.creditLimit ? parseFloat(data.creditLimit) : null,
     };
 
+    console.log("Formatted data being sent:", formattedData);
     createBuyerMutation.mutate(formattedData);
   };
 
@@ -849,6 +854,11 @@ export default function BuyerManagement() {
                     disabled={createBuyerMutation.isPending}
                     data-testid="button-register-buyer"
                     onClick={() => {
+                      console.log("Button clicked");
+                      console.log("Form valid:", form.formState.isValid);
+                      console.log("Form errors:", form.formState.errors);
+                      console.log("Selected commodities:", selectedCommodities);
+                      console.log("Selected regions:", selectedRegions);
                     }}
                   >
                     {createBuyerMutation.isPending ? "Registering..." : "Register Buyer"}

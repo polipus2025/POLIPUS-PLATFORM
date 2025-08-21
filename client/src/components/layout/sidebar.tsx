@@ -208,7 +208,17 @@ export default function Sidebar() {
   // Get the appropriate navigation items based on user type
   const navigationItems = getNavigationItems(userType, role);
   
-  // Debug logging for buyer navigation was removed
+  // Debug logging for buyer navigation
+  if (userType === 'buyer') {
+    console.log('Buyer navigation debug:', {
+      userType,
+      role,
+      navigationItems,
+      dgToken: localStorage.getItem('dgToken'),
+      ddgotsToken: localStorage.getItem('ddgotsToken'),
+      ddgafToken: localStorage.getItem('ddgafToken')
+    });
+  }
 
   return (
     <aside className="hidden lg:block w-64 bg-white shadow-lg h-[calc(100vh-73px)] sticky top-[73px] overflow-y-auto shrink-0">
@@ -234,6 +244,7 @@ export default function Sidebar() {
                   <button 
                     onClick={(e) => {
                       e.preventDefault();
+                      console.log('Sidebar button clicked:', item.href, item.name);
                       window.location.href = item.href;
                     }}
                     className={cn(

@@ -500,6 +500,7 @@ export default function EnhancedSatelliteMapper({
         }
       };
       
+      console.log('Capturing map with satellite background...');
       const canvas = await html2canvas.default(mapRef.current, options);
       
       // Verify canvas has content
@@ -508,6 +509,7 @@ export default function EnhancedSatelliteMapper({
         return null;
       }
       
+      console.log(`✓ Map captured successfully: ${canvas.width}x${canvas.height}`);
       return canvas.toDataURL('image/jpeg', 0.9);
     } catch (error) {
       console.error('Screenshot capture error:', error);

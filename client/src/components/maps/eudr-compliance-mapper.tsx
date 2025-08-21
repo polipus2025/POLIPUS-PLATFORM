@@ -123,6 +123,7 @@ export default function EUDRComplianceMapper({
         createEUDRMapWithRealData(lat, lng);
       },
       (error) => {
+        console.log('GPS not available, using default location for EUDR data');
         // Default to Liberia coordinates
         const lat = 6.4281;
         const lng = -9.4295;

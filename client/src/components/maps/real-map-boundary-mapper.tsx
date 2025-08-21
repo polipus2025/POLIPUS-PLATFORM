@@ -115,6 +115,7 @@ export default function RealMapBoundaryMapper({
         initMapWithCoordinates(lat, lng);
       },
       (error) => {
+        console.log('GPS not available, using default location');
         setStatus('Loading satellite imagery for default location...');
         initMapWithCoordinates(mapCenter.lat, mapCenter.lng);
       },
@@ -223,6 +224,7 @@ export default function RealMapBoundaryMapper({
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
+        console.log(`Enhanced map clicked at pixel: ${x}, ${y}`);
         
         // Convert pixel coordinates to precise GPS coordinates
         const latRange = 0.002; // Approximately 200m
@@ -231,6 +233,7 @@ export default function RealMapBoundaryMapper({
         const lat = centerLat + (latRange / 2) - (y / rect.height) * latRange;
         const lng = centerLng - (lngRange / 2) + (x / rect.width) * lngRange;
         
+        console.log(`Precise GPS conversion: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         
         const newPoint: BoundaryPoint = { 
           latitude: lat, 
@@ -242,6 +245,7 @@ export default function RealMapBoundaryMapper({
         
         setPoints(prev => {
           const updated = [...prev, newPoint];
+          console.log(`✓ Persistent points total: ${updated.length} - Point will remain visible on map`);
           
           // Points will be rendered persistently by the useEffect hook
           return updated;
@@ -343,15 +347,19 @@ export default function RealMapBoundaryMapper({
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
+        console.log(`Fallback map clicked at pixel: ${x}, ${y}`);
         
         const lat = 6.4281 + (200 - y) / 5000;
         const lng = -9.4295 + (x - 200) / 5000;
         
+        console.log(`Fallback converted to GPS: ${lat}, ${lng}`);
         
         const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
+        console.log(`Adding fallback point:`, newPoint);
         
         setPoints(prev => {
           const updated = [...prev, newPoint];
+          console.log(`Fallback total points: ${updated.length}`);
           return updated;
         });
       });
@@ -405,6 +413,7 @@ export default function RealMapBoundaryMapper({
             };
           };
           
+          console.log(`Loading enhanced satellite tile with CORS: ${zoom}/${tileY}/${tileX}`);
           
           tilesContainer.appendChild(img);
         }
@@ -526,6 +535,7 @@ export default function RealMapBoundaryMapper({
     mapElement.querySelectorAll('.map-marker, .area-label, .risk-label').forEach(el => el.remove());
     
     // Force immediate persistent display for all points
+    console.log(`Rendering persistent boundary display for ${points.length} points`);
     
     // The persistent boundary display logic is handled in the main render loop below
     
@@ -557,6 +567,7 @@ export default function RealMapBoundaryMapper({
     }
 
     // PERSISTENT MARKERS: All points stay visible as you walk and map
+    console.log(`Rendering ${points.length} persistent markers on map`);
     
     points.forEach((point, index) => {
       // Convert lat/lng to pixels with proper coordinate system
@@ -577,6 +588,7 @@ export default function RealMapBoundaryMapper({
       x = Math.max(15, Math.min(385, x));
       y = Math.max(15, Math.min(385, y));
       
+      console.log(`Creating persistent marker ${String.fromCharCode(65 + index)} at pixel ${x}, ${y}`);
       
       // Calculate EUDR risk for each point
       const pointRisk = calculatePointRisk(point.latitude, point.longitude);
@@ -614,10 +626,12 @@ export default function RealMapBoundaryMapper({
       marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
       
       mapElement.appendChild(marker);
+      console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
     });
 
     // ENHANCED BOUNDARY CONNECTIONS: Draw connecting lines immediately when 2+ points exist
     if (points.length >= 2) {
+      console.log(`Drawing boundary connections for ${points.length} points`);
       
       // Draw connecting lines between consecutive points (like in the image you showed)
       for (let i = 0; i < points.length - 1; i++) {
@@ -643,6 +657,7 @@ export default function RealMapBoundaryMapper({
         line.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
         svg.appendChild(line);
         
+        console.log(`✓ Connected point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
       }
       
       // If we have 6+ points, close the polygon with a line back to the first point
@@ -668,11 +683,13 @@ export default function RealMapBoundaryMapper({
         closingLine.setAttribute('opacity', '0.9');
         svg.appendChild(closingLine);
         
+        console.log(`✓ Polygon completed - closing line from ${String.fromCharCode(65 + points.length - 1)} back to A`);
       }
     }
 
     // CRITICAL: Create filled polygon with EUDR risk visualization when 6+ points exist
     if (points.length >= 6) {
+      console.log(`Creating polygon boundary with ${points.length} points and risk overlay`);
       
       const pointsStr = points.map(point => {
         let x, y;
@@ -690,6 +707,7 @@ export default function RealMapBoundaryMapper({
       
       // Calculate overall area risk for coloring
       const areaRisk = calculateAreaRisk(points);
+      console.log(`Area risk level: ${areaRisk.level}`);
       
       // Create main boundary polygon with risk-based styling
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
@@ -710,6 +728,7 @@ export default function RealMapBoundaryMapper({
       polygon.setAttribute('stroke-dasharray', '8,4');
       polygon.setAttribute('opacity', '0.9');
       
+      console.log(`✓ EUDR Risk polygon created with ${areaRisk.level} risk level and crosshatch pattern overlay`);
       
       svg.appendChild(polygon);
       
@@ -717,6 +736,7 @@ export default function RealMapBoundaryMapper({
       polygon.style.display = 'block';
       polygon.style.visibility = 'visible';
       
+      console.log(`✓ Risk overlay now visible on map with ${areaRisk.level} risk styling`);
       
       // Add area measurement and risk label
       const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 5000 + 200, 0) / points.length;
@@ -1100,6 +1120,7 @@ export default function RealMapBoundaryMapper({
     if (!mapRef.current) return null;
 
     try {
+      console.log('Creating HIGH-RESOLUTION composite satellite map with boundaries...');
       
       // Create a high-resolution canvas (4x scale for crisp output)
       const canvas = document.createElement('canvas');
@@ -1162,6 +1183,7 @@ export default function RealMapBoundaryMapper({
       
       // Draw boundary points and connections
       if (points.length > 0) {
+        console.log(`Drawing ${points.length} boundary points on satellite background`);
         
         // Draw high-resolution connecting lines
         if (points.length >= 2) {
@@ -1276,6 +1298,7 @@ export default function RealMapBoundaryMapper({
         ctx.restore();
       }
       
+      console.log(`✓ HIGH-RESOLUTION satellite map created: ${canvas.width}x${canvas.height}px (${scale}x scale)`);
       return canvas.toDataURL('image/jpeg', 0.95); // Higher quality for high-res
       
     } catch (error) {

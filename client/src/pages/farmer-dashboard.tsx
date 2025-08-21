@@ -363,7 +363,7 @@ export default function FarmerDashboard() {
               <Badge variant="outline" className="text-green-600 border-green-600">
                 ID: {farmerId}
               </Badge>
-              <Button variant="outline"  onClick={handleLogout}>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -491,7 +491,7 @@ export default function FarmerDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {farmer && typeof farmer === 'object' && (
+                  {farmer && (
                     <>
                       <div className="flex items-center space-x-4">
                         {farmer.profilePicture ? (
@@ -550,7 +550,7 @@ export default function FarmerDashboard() {
                         <div className="flex-1">
                           <p className="text-sm font-medium">{alert.title}</p>
                           <p className="text-xs text-gray-600">{alert.message}</p>
-                          <Badge  className={getPriorityColor(alert.priority)}>
+                          <Badge size="sm" className={getPriorityColor(alert.priority)}>
                             {alert.priority}
                           </Badge>
                         </div>
@@ -600,7 +600,7 @@ export default function FarmerDashboard() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Status:</span>
-                            <Badge className={mapping.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                            <Badge size="sm" className={mapping.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
                               {mapping.isActive ? "Active" : "Inactive"}
                             </Badge>
                           </div>
@@ -681,7 +681,7 @@ export default function FarmerDashboard() {
                               </p>
                               <div className="flex flex-wrap gap-2">
                                 <Button 
-                                   
+                                  size="sm" 
                                   className="bg-orange-600 hover:bg-orange-700 text-white"
                                   onClick={() => handleStartHarvest(schedule)}
                                   data-testid={`start-harvest-${schedule.id}`}
@@ -690,7 +690,7 @@ export default function FarmerDashboard() {
                                   Start Harvest
                                 </Button>
                                 <Button 
-                                   
+                                  size="sm" 
                                   variant="outline"
                                   onClick={() => handleCreateMarketplaceListing(schedule)}
                                   data-testid={`create-listing-${schedule.id}`}
@@ -699,7 +699,7 @@ export default function FarmerDashboard() {
                                   Create Listing
                                 </Button>
                                 <Button 
-                                   
+                                  size="sm" 
                                   variant="outline"
                                   onClick={() => handleFindBuyers(schedule)}
                                   data-testid={`find-buyers-${schedule.id}`}
@@ -722,7 +722,7 @@ export default function FarmerDashboard() {
                                 <p className="text-blue-700 text-xs">Started: {new Date().toLocaleDateString()}</p>
                               </div>
                               <Button 
-                                 
+                                size="sm" 
                                 className="bg-green-600 hover:bg-green-700"
                                 onClick={() => handleCompleteHarvest(schedule)}
                                 data-testid={`complete-harvest-${schedule.id}`}
@@ -744,7 +744,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                   
+                                  size="sm" 
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleSellToBuyers(schedule)}
                                   data-testid={`sell-to-buyers-${schedule.id}`}
@@ -753,7 +753,7 @@ export default function FarmerDashboard() {
                                   Sell Now
                                 </Button>
                                 <Button 
-                                   
+                                  size="sm" 
                                   variant="outline"
                                   onClick={() => handleViewTransactions(schedule)}
                                   data-testid={`view-transactions-${schedule.id}`}
@@ -920,7 +920,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                   
+                                  size="sm" 
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleApproveTransaction(transaction)}
                                   data-testid={`approve-transaction-${transaction.id}`}
@@ -928,7 +928,7 @@ export default function FarmerDashboard() {
                                   ✓ Approve
                                 </Button>
                                 <Button 
-                                   
+                                  size="sm" 
                                   variant="outline"
                                   onClick={() => handleNegotiateTransaction(transaction)}
                                   data-testid={`negotiate-transaction-${transaction.id}`}
@@ -952,7 +952,7 @@ export default function FarmerDashboard() {
                                 </p>
                               </div>
                               <Button 
-                                 
+                                size="sm" 
                                 variant="outline"
                                 onClick={() => handleViewTransactionDetails(transaction)}
                                 data-testid={`view-details-${transaction.id}`}
@@ -1032,7 +1032,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                   
+                                  size="sm" 
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleAcceptInquiry(message)}
                                   data-testid={`accept-inquiry-${message.id}`}
@@ -1040,7 +1040,7 @@ export default function FarmerDashboard() {
                                   Accept Offer
                                 </Button>
                                 <Button 
-                                   
+                                  size="sm" 
                                   variant="outline"
                                   onClick={() => handleNegotiateOffer(message)}
                                   data-testid={`negotiate-inquiry-${message.id}`}
@@ -1062,7 +1062,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                   
+                                  size="sm" 
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleAcceptNegotiation(message)}
                                   data-testid={`accept-negotiation-${message.id}`}
@@ -1070,7 +1070,7 @@ export default function FarmerDashboard() {
                                   Accept Terms
                                 </Button>
                                 <Button 
-                                   
+                                  size="sm" 
                                   variant="outline"
                                   onClick={() => handleCounterOffer(message)}
                                   data-testid={`counter-offer-${message.id}`}
@@ -1121,7 +1121,7 @@ export default function FarmerDashboard() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <Badge className={getPriorityColor(alert.priority)}>
+                            <Badge size="sm" className={getPriorityColor(alert.priority)}>
                               {alert.priority}
                             </Badge>
                             <p className="text-xs text-gray-500 mt-1">
@@ -1136,7 +1136,7 @@ export default function FarmerDashboard() {
                               🌾 Your crop is ready for harvest! Consider creating a marketplace listing.
                             </p>
                             <Button 
-                               
+                              size="sm" 
                               className="mt-2"
                               onClick={() => toast({
                                 title: "Feature Coming Soon",

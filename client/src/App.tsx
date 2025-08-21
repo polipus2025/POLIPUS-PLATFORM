@@ -183,7 +183,6 @@ import MangroveManagementPage from "@/pages/blue-carbon360/mangrove-management-p
 import MarineProtectionPage from "@/pages/blue-carbon360/marine-protection-page";
 import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
 import IntegratedDashboard from "@/pages/integrated-dashboard";
-import SystemGeneralOverview from "@/pages/system-general-overview";
 
 // Payment Pages
 import PaymentServices from "@/pages/payments/payment-services";
@@ -236,9 +235,6 @@ function Router() {
     <Switch>
       {/* GPS Testing - Public Access */}
       <Route path="/gps-test" component={GPSTest} />
-      
-      {/* System General Overview - LACRA Administrator Portal */}
-      <Route path="/system-general-overview" component={SystemGeneralOverview} />
       
       {/* Authentication Routes - Public */}
       <Route path="/regulatory-login" component={RegulatoryLogin} />

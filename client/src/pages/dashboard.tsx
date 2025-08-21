@@ -495,6 +495,7 @@ export default function Dashboard() {
         {/* GPS Permission Handler - Always show for testing */}
         <GPSPermissionHandler 
           onPermissionGranted={(position) => {
+            console.log('GPS enabled for dashboard operations:', position.coords);
             toast({
               title: "Geolocation Services Enabled",
               description: "Precision mapping and compliance monitoring activated",

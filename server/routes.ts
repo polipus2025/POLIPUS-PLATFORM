@@ -11041,5 +11041,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Port Inspector Dashboard APIs - Real Data Integration
+  app.get("/api/port-inspector/pending-inspections", async (req, res) => {
+    try {
+      // Get pending export inspections for port
+      const inspections = await storage.getPortInspectorPendingInspections();
+      res.json({ success: true, data: inspections });
+    } catch (error) {
+      console.error("Error fetching pending inspections:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch inspections" });
+    }
+  });
+
+  app.get("/api/port-inspector/active-shipments", async (req, res) => {
+    try {
+      const shipments = await storage.getActiveShipments();
+      res.json({ success: true, data: shipments });
+    } catch (error) {
+      console.error("Error fetching active shipments:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch shipments" });
+    }
+  });
+
+  app.get("/api/port-inspector/compliance-stats", async (req, res) => {
+    try {
+      const stats = await storage.getComplianceStatistics();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error fetching compliance stats:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch compliance statistics" });
+    }
+  });
+
+  app.get("/api/port-inspector/regulatory-sync", async (req, res) => {
+    try {
+      const syncStatus = await storage.getRegulatoryDepartmentSync();
+      res.json({ success: true, data: syncStatus });
+    } catch (error) {
+      console.error("Error fetching regulatory sync:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch regulatory sync" });
+    }
+  });
+
+  app.post("/api/port-inspector/start-inspection/:inspectionId", async (req, res) => {
+    try {
+      const { inspectionId } = req.params;
+      const result = await storage.startPortInspection(inspectionId);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error starting inspection:", error);
+      res.status(500).json({ success: false, message: "Failed to start inspection" });
+    }
+  });
+
+  app.post("/api/port-inspector/complete-inspection/:inspectionId", async (req, res) => {
+    try {
+      const { inspectionId } = req.params;
+      const { status, notes, violations } = req.body;
+      const result = await storage.completePortInspection(inspectionId, { status, notes, violations });
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error completing inspection:", error);
+      res.status(500).json({ success: false, message: "Failed to complete inspection" });
+    }
+  });
+
   return httpServer;
 }

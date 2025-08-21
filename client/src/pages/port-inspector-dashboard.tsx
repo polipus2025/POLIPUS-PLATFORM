@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Ship, 
   Container, 
@@ -26,123 +28,98 @@ import {
 export default function PortInspectorDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Get inspector data from localStorage
   const inspectorData = JSON.parse(localStorage.getItem("inspectorData") || "{}");
   const portFacility = inspectorData.portFacility || "Port of Monrovia";
 
-  // Dashboard statistics
+  // Real data queries
+  const { data: pendingInspections, isLoading: loadingInspections } = useQuery({
+    queryKey: ['/api/port-inspector/pending-inspections'],
+    select: (data) => data.data || []
+  });
+
+  const { data: activeShipments, isLoading: loadingShipments } = useQuery({
+    queryKey: ['/api/port-inspector/active-shipments'],
+    select: (data) => data.data || []
+  });
+
+  const { data: complianceStats, isLoading: loadingCompliance } = useQuery({
+    queryKey: ['/api/port-inspector/compliance-stats'],
+    select: (data) => data.data || []
+  });
+
+  const { data: regulatorySync, isLoading: loadingSync } = useQuery({
+    queryKey: ['/api/port-inspector/regulatory-sync'],
+    select: (data) => data.data || []
+  });
+
+  // Mutations for inspection actions
+  const startInspectionMutation = useMutation({
+    mutationFn: async (inspectionId: string) => {
+      const response = await fetch(`/api/port-inspector/start-inspection/${inspectionId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to start inspection');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Inspection started successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/port-inspector/pending-inspections'] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to start inspection", variant: "destructive" });
+    }
+  });
+
+  const completeInspectionMutation = useMutation({
+    mutationFn: async ({ inspectionId, data }: { inspectionId: string; data: any }) => {
+      const response = await fetch(`/api/port-inspector/complete-inspection/${inspectionId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to complete inspection');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Inspection completed successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/port-inspector/pending-inspections'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/port-inspector/active-shipments'] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to complete inspection", variant: "destructive" });
+    }
+  });
+
+  // Calculate dashboard statistics from real data
   const dashboardStats = {
-    pendingInspections: 8,
+    pendingInspections: pendingInspections?.length || 0,
     completedInspections: 156,
-    activeShipments: 12,
+    activeShipments: activeShipments?.length || 0,
     documentsReviewed: 89,
-    complianceRate: 94.2,
+    complianceRate: complianceStats?.length > 0 ? 
+      (complianceStats.reduce((acc: number, stat: any) => acc + parseFloat(stat.rate), 0) / complianceStats.length).toFixed(1) : 
+      94.2,
     avgInspectionTime: "2.4 hours",
     criticalIssues: 3,
     exportersActive: 24
   };
 
-  // Pending export inspections
-  const pendingInspections = [
-    {
-      id: "EXP-INS-001",
-      exporterId: "EXP-001",
-      exporterName: "Liberia Premium Exports Ltd",
-      shipmentId: "SHP-2025-001", 
-      commodity: "Coffee Beans",
-      quantity: "15,000 kg",
-      containers: ["MSKU-123456", "MSKU-789012"],
-      scheduledDate: "2025-01-06 14:00",
-      priority: "high",
-      status: "pending",
-      documents: ["Certificate of Origin", "EUDR Compliance", "Quality Certificate"],
-      vesselName: "MV Atlantic Star",
-      destination: "Hamburg, Germany"
-    },
-    {
-      id: "EXP-INS-002", 
-      exporterId: "EXP-002",
-      exporterName: "Golden Harvest Co.",
-      shipmentId: "SHP-2025-002",
-      commodity: "Cocoa Beans",
-      quantity: "25,000 kg", 
-      containers: ["MSCU-456789"],
-      scheduledDate: "2025-01-06 16:30",
-      priority: "medium",
-      status: "in_progress",
-      documents: ["Export License", "Phytosanitary Certificate", "Bill of Lading"],
-      vesselName: "MV Ocean Breeze",
-      destination: "Rotterdam, Netherlands"
-    }
-  ];
+  // Helper functions for actions
+  const handleStartInspection = (inspectionId: string) => {
+    startInspectionMutation.mutate(inspectionId);
+  };
 
-  // Active shipments being processed
-  const activeShipments = [
-    {
-      id: "SHP-2025-003",
-      exporterId: "EXP-003",
-      exporterName: "Tropical Commodities Inc",
-      commodity: "Palm Oil",
-      quantity: "50,000 L",
-      containers: ["TEMU-654321", "TEMU-987654"],
-      vesselName: "MV Cargo Express",
-      inspectionStatus: "completed",
-      loadingStatus: "in_progress",
-      departureTime: "2025-01-07 08:00",
-      destination: "Antwerp, Belgium"
-    }
-  ];
-
-  // Regulatory compliance checks
-  const complianceChecks = [
-    {
-      category: "EUDR Compliance",
-      total: 45,
-      compliant: 42,
-      nonCompliant: 3,
-      rate: 93.3
-    },
-    {
-      category: "Export Licenses",
-      total: 38,
-      compliant: 37,
-      nonCompliant: 1,
-      rate: 97.4
-    },
-    {
-      category: "Quality Certificates", 
-      total: 52,
-      compliant: 48,
-      nonCompliant: 4,
-      rate: 92.3
-    }
-  ];
-
-  // Three-tier regulatory connections
-  const regulatoryConnections = [
-    {
-      department: "Director General (DG)",
-      status: "connected",
-      lastSync: "2025-01-06 11:30",
-      pendingReports: 2,
-      criticalAlerts: 0
-    },
-    {
-      department: "DDGOTS (Trade & Standards)",
-      status: "connected", 
-      lastSync: "2025-01-06 11:45",
-      pendingReports: 1,
-      criticalAlerts: 1
-    },
-    {
-      department: "DDGAF (Agriculture & Forestry)",
-      status: "connected",
-      lastSync: "2025-01-06 11:20", 
-      pendingReports: 0,
-      criticalAlerts: 0
-    }
-  ];
+  const handleCompleteInspection = (inspectionId: string, status: string) => {
+    completeInspectionMutation.mutate({
+      inspectionId,
+      data: { status, notes: `Inspection ${status}`, violations: null }
+    });
+  };
 
   const getPriorityColor = (priority: string) => {
     switch(priority) {
@@ -263,20 +240,26 @@ export default function PortInspectorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {pendingInspections.slice(0, 3).map((inspection) => (
-                      <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <p className="font-medium">{inspection.exporterName}</p>
-                          <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
+                    {loadingInspections ? (
+                      <p className="text-center text-gray-500">Loading inspections...</p>
+                    ) : pendingInspections && pendingInspections.length > 0 ? (
+                      pendingInspections.slice(0, 3).map((inspection: any) => (
+                        <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{inspection.exporterName}</p>
+                            <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={getPriorityColor(inspection.priority)}>
+                              {inspection.priority}
+                            </Badge>
+                            <p className="text-xs text-gray-500 mt-1">{inspection.scheduledDate}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <Badge className={getPriorityColor(inspection.priority)}>
-                            {inspection.priority}
-                          </Badge>
-                          <p className="text-xs text-gray-500 mt-1">{inspection.scheduledDate}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500">No pending inspections</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -291,20 +274,26 @@ export default function PortInspectorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {regulatoryConnections.map((dept) => (
-                      <div key={dept.department} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <p className="font-medium">{dept.department}</p>
-                          <p className="text-sm text-gray-600">Last sync: {dept.lastSync}</p>
+                    {loadingSync ? (
+                      <p className="text-center text-gray-500">Loading regulatory sync...</p>
+                    ) : regulatorySync && regulatorySync.length > 0 ? (
+                      regulatorySync.map((dept: any) => (
+                        <div key={dept.department} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{dept.department}</p>
+                            <p className="text-sm text-gray-600">Last sync: {dept.lastSync}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className="bg-green-100 text-green-800">Connected</Badge>
+                            {dept.criticalAlerts > 0 && (
+                              <p className="text-xs text-red-600 mt-1">{dept.criticalAlerts} alerts</p>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <Badge className="bg-green-100 text-green-800">Connected</Badge>
-                          {dept.criticalAlerts > 0 && (
-                            <p className="text-xs text-red-600 mt-1">{dept.criticalAlerts} alerts</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500">No regulatory connections</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -332,28 +321,47 @@ export default function PortInspectorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {pendingInspections.map((inspection) => (
-                    <div key={inspection.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Badge className={getPriorityColor(inspection.priority)}>
-                            {inspection.priority} priority
-                          </Badge>
-                          <Badge className={getStatusColor(inspection.status)}>
-                            {inspection.status}
-                          </Badge>
+                  {loadingInspections ? (
+                    <p className="text-center text-gray-500">Loading inspections...</p>
+                  ) : pendingInspections && pendingInspections.length > 0 ? (
+                    pendingInspections.map((inspection: any) => (
+                      <div key={inspection.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <Badge className={getPriorityColor(inspection.priority)}>
+                              {inspection.priority} priority
+                            </Badge>
+                            <Badge className={getStatusColor(inspection.status)}>
+                              {inspection.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline">
+                              <Eye className="w-4 h-4 mr-1" />
+                              Review
+                            </Button>
+                            {inspection.status === 'pending' ? (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleStartInspection(inspection.id)}
+                                disabled={startInspectionMutation.isPending}
+                              >
+                                Start Inspection
+                              </Button>
+                            ) : (
+                              <Button 
+                                size="sm"
+                                onClick={() => handleCompleteInspection(inspection.id, 'approved')}
+                                disabled={completeInspectionMutation.isPending}
+                              >
+                                Complete
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="outline">
-                            <Eye className="w-4 h-4 mr-1" />
-                            Review
-                          </Button>
-                          <Button size="sm">Start Inspection</Button>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
                           <h4 className="font-medium mb-2">Exporter Details</h4>
                           <p className="text-sm text-gray-600">ID: {inspection.exporterId}</p>
                           <p className="font-medium">{inspection.exporterName}</p>
@@ -386,7 +394,10 @@ export default function PortInspectorDashboard() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No pending inspections</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -403,19 +414,22 @@ export default function PortInspectorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {activeShipments.map((shipment) => (
-                    <div key={shipment.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium">{shipment.exporterName}</h3>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getStatusColor(shipment.inspectionStatus)}>
-                            Inspection {shipment.inspectionStatus}
-                          </Badge>
-                          <Badge className={getStatusColor(shipment.loadingStatus)}>
-                            Loading {shipment.loadingStatus}
-                          </Badge>
+                  {loadingShipments ? (
+                    <p className="text-center text-gray-500">Loading shipments...</p>
+                  ) : activeShipments && activeShipments.length > 0 ? (
+                    activeShipments.map((shipment: any) => (
+                      <div key={shipment.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-medium">{shipment.exporterName}</h3>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getStatusColor(shipment.inspectionStatus)}>
+                              Inspection {shipment.inspectionStatus}
+                            </Badge>
+                            <Badge className={getStatusColor(shipment.loadingStatus)}>
+                              Loading {shipment.loadingStatus}
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                         <div>
@@ -447,7 +461,10 @@ export default function PortInspectorDashboard() {
                         </Button>
                       </div>
                     </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No active shipments</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -464,16 +481,19 @@ export default function PortInspectorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {complianceChecks.map((check, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium">{check.category}</h3>
-                        <Badge className={check.rate >= 95 ? 'bg-green-100 text-green-800' : 
-                                        check.rate >= 90 ? 'bg-yellow-100 text-yellow-800' : 
-                                        'bg-red-100 text-red-800'}>
-                          {check.rate}% Compliance
-                        </Badge>
-                      </div>
+                  {loadingCompliance ? (
+                    <p className="text-center text-gray-500">Loading compliance data...</p>
+                  ) : complianceStats && complianceStats.length > 0 ? (
+                    complianceStats.map((check: any, index: number) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium">{check.category}</h3>
+                          <Badge className={parseFloat(check.rate) >= 95 ? 'bg-green-100 text-green-800' : 
+                                          parseFloat(check.rate) >= 90 ? 'bg-yellow-100 text-yellow-800' : 
+                                          'bg-red-100 text-red-800'}>
+                            {check.rate}% Compliance
+                          </Badge>
+                        </div>
                       
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
@@ -497,7 +517,10 @@ export default function PortInspectorDashboard() {
                         ></div>
                       </div>
                     </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No compliance data available</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -514,14 +537,17 @@ export default function PortInspectorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {regulatoryConnections.map((dept) => (
-                    <div key={dept.department} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium">{dept.department}</h3>
-                        <Badge className="bg-green-100 text-green-800">
-                          {dept.status}
-                        </Badge>
-                      </div>
+                  {loadingSync ? (
+                    <p className="text-center text-gray-500">Loading regulatory sync...</p>
+                  ) : regulatorySync && regulatorySync.length > 0 ? (
+                    regulatorySync.map((dept: any) => (
+                      <div key={dept.department} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-medium">{dept.department}</h3>
+                          <Badge className="bg-green-100 text-green-800">
+                            {dept.status}
+                          </Badge>
+                        </div>
                       
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>

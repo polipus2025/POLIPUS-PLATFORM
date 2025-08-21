@@ -34,13 +34,22 @@ export default function PortInspectorLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      const response = await apiRequest("/api/auth/port-inspector-login", {
+      const response = await fetch("/api/auth/port-inspector-login", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           ...data,
           inspectorType: "port"
         })
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+      
       return response.json();
     },
     onSuccess: (data) => {

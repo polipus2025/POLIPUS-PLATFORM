@@ -471,4 +471,143 @@ export class DDGOTSIntegrationService {
       timestamp: new Date().toISOString()
     };
   }
+
+  // Export payment confirmation notifications
+  static async notifyExportPaymentConfirmed(paymentData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`💰 DDG-AF/DDGOTS: Processing export payment confirmation notifications...`);
+    
+    console.log(`🏛️ NOTIFYING DDG-AF: Export payment confirmed for audit tracking`);
+    console.log(`📊 Payment Amount: $${paymentData.paymentRecord.paymentDetails.amount}`);
+    console.log(`📋 Transaction: ${paymentData.transactionCode}`);
+    console.log(`📄 Audit Trail: Exporter-to-buyer payment recorded`);
+    
+    console.log(`🚢 NOTIFYING DDGOTS: Export payment confirmed - Port Inspector assignment required`);
+    console.log(`📋 Next Step: Assign Port Inspector for final inspection and export permit processing`);
+    
+    console.log(`🏭 NOTIFYING EXPORTER WAREHOUSE: Payment confirmed - Product ready for port inspection`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        ddgAF: true,
+        ddgots: true,
+        exporterWarehouse: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Port inspection assignment notifications
+  static async notifyPortInspectionAssigned(inspectionData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`🚢 DDGOTS: Processing Port Inspector assignment notifications...`);
+    
+    console.log(`🔍 NOTIFYING PORT INSPECTOR: ${inspectionData.inspectionAssignment.portInspectorId}`);
+    console.log(`📅 Inspection Schedule: ${inspectionData.inspectionAssignment.inspectionSchedule.scheduledDate} at ${inspectionData.inspectionAssignment.inspectionSchedule.scheduledTime}`);
+    console.log(`📍 Location: ${inspectionData.inspectionAssignment.inspectionSchedule.location}`);
+    console.log(`📋 Requirements: Final quality check, fumigation validation, export compliance`);
+    
+    console.log(`🌍 NOTIFYING EXPORTER: Port inspection scheduled for ${inspectionData.inspectionAssignment.transactionCode}`);
+    console.log(`🔖 Permit Tracking Code: ${inspectionData.inspectionAssignment.permitTrackingCode}`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        portInspector: true,
+        exporter: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Inspection report submission notifications
+  static async notifyInspectionReportSubmitted(reportData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`📋 DDGOTS: Processing inspection report submission notifications...`);
+    
+    console.log(`🏛️ NOTIFYING DDGOTS: Final inspection report submitted for verification`);
+    console.log(`📄 Report ID: ${reportData.finalInspectionReport.inspectionReport.reportId}`);
+    console.log(`✅ Quality Check: ${reportData.finalInspectionReport.inspectionReport.finalQualityCheck.passed ? 'PASSED' : 'FAILED'}`);
+    console.log(`🔬 Fumigation: ${reportData.finalInspectionReport.inspectionReport.fumigationValidation.passed ? 'PASSED' : 'FAILED'}`);
+    console.log(`📋 Compliance: ${reportData.finalInspectionReport.inspectionReport.exportComplianceCheck.passed ? 'PASSED' : 'FAILED'}`);
+    
+    console.log(`🌍 NOTIFYING EXPORTER: Final inspection completed - Report submitted to DDGOTS for verification and fee calculation`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        ddgots: true,
+        exporter: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Fee intimation notifications
+  static async notifyFeeIntimation(feeData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`💳 DDGOTS: Processing fee intimation notifications...`);
+    
+    console.log(`🌍 NOTIFYING EXPORTER: Inspection verified - Fee intimation issued`);
+    console.log(`💰 Processing Fee: $${feeData.verificationAndFees.feeCalculation.processingFee}`);
+    console.log(`📊 Export Fee: $${feeData.verificationAndFees.feeCalculation.exportFee}`);
+    console.log(`🔍 Inspection Fee: $${feeData.verificationAndFees.feeCalculation.inspectionFee}`);
+    console.log(`📄 Documentation Fee: $${feeData.verificationAndFees.feeCalculation.documentationFee}`);
+    console.log(`💵 TOTAL FEES: $${feeData.verificationAndFees.feeCalculation.totalFees}`);
+    console.log(`⏰ Payment Due: ${feeData.verificationAndFees.feeIntimation.dueDate}`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        exporter: true,
+        feeIntimation: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Processing fee payment notifications
+  static async notifyProcessingFeePayment(paymentData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`💳 DDG-AF: Processing fee payment verification notifications...`);
+    
+    console.log(`🏛️ NOTIFYING DDG-AF: Processing fee payment received for verification`);
+    console.log(`💰 Amount: $${paymentData.feePaymentRecord.feePayment.amount}`);
+    console.log(`📄 Payment Reference: ${paymentData.feePaymentRecord.feePayment.reference}`);
+    console.log(`📋 Receipt Uploaded: ${paymentData.feePaymentRecord.feePayment.receiptUploaded ? 'YES' : 'NO'}`);
+    console.log(`🔍 Action Required: Verify payment and approve document release`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        ddgAF: true,
+        paymentVerificationRequired: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Document release notifications
+  static async notifyDocumentsReleased(documentData: any): Promise<{ success: boolean; notificationsSent: any; timestamp: string }> {
+    console.log(`📄 DDG-AF/DDGOTS: Processing document release notifications...`);
+    
+    console.log(`✅ DDG-AF: Payment verification completed and confirmed`);
+    console.log(`📋 DDGOTS: Document release approved for ${documentData.documentReleaseRecord.exporterId}`);
+    
+    console.log(`🌍 NOTIFYING EXPORTER: All export documents ready for download`);
+    console.log(`📄 Export Permit: AVAILABLE`);
+    console.log(`🏆 Quality Certificate: AVAILABLE`);
+    console.log(`🔬 Fumigation Certificate: AVAILABLE`);
+    console.log(`🌍 EUDR Compliance Certificate: AVAILABLE`);
+    console.log(`📋 Traceability Documents: AVAILABLE`);
+    console.log(`🔍 Inspection Report: AVAILABLE`);
+    console.log(`💻 Dashboard Access: ENABLED`);
+    console.log(`⏰ Download Access Expires: ${documentData.documentReleaseRecord.downloadAccess.accessExpiresAt}`);
+    
+    return {
+      success: true,
+      notificationsSent: {
+        exporter: true,
+        documentsReleased: true,
+        dashboardAccess: true
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
 }

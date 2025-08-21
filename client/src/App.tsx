@@ -1,7 +1,7 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, memo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/layout/header";
@@ -9,215 +9,219 @@ import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import ErrorBoundary from "@/components/ErrorBoundary";
+
+// ⚡ INSTANT LOADING - Core pages (preloaded)
 import FrontPage from "@/pages/front-page";
-import Landing from "@/pages/landing";
-import GPSTest from "@/pages/gps-test";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
-import SystemAdminLogin from "@/pages/auth/system-admin-login";
-import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
-import SystemAdminPortal from "@/pages/system-admin-portal";
-import RegulatoryPortalClassic from "@/pages/regulatory-portal-classic";
-import FarmerLogin from "@/pages/auth/farmer-login";
-import FarmerLoginPortal from "@/pages/farmer-login-portal";
-import FarmerDashboard from "@/pages/farmer-dashboard";
-import FarmerTestDemo from "@/pages/farmer-test-demo";
-import FieldAgentLogin from "@/pages/auth/field-agent-login";
-import TestFieldAgentLogin from "@/pages/auth/test-field-agent-login";
-import MobileFieldAgentLogin from "@/pages/auth/mobile-field-agent-login";
-import ExporterLogin from "@/pages/auth/exporter-login";
-import MonitoringLogin from "@/pages/auth/monitoring-login";
 
-// Three-Tier Regulatory Department Authentication
-import DGLogin from "@/pages/auth/dg-login";
-import DDGOTSLogin from "@/pages/auth/ddgots-login";
-import DDGAFLogin from "@/pages/auth/ddgaf-login";
+// ⚡ LAZY LOADING - All other components for speed
+const Landing = lazy(() => import("@/pages/landing"));
+const GPSTest = lazy(() => import("@/pages/gps-test"));
+const SystemAdminLogin = lazy(() => import("@/pages/auth/system-admin-login"));
+const RegulatoryClassicLogin = lazy(() => import("@/pages/auth/regulatory-classic-login"));
+const SystemAdminPortal = lazy(() => import("@/pages/system-admin-portal"));
+const RegulatoryPortalClassic = lazy(() => import("@/pages/regulatory-portal-classic"));
+const FarmerLogin = lazy(() => import("@/pages/auth/farmer-login"));
+const FarmerLoginPortal = lazy(() => import("@/pages/farmer-login-portal"));
+const FarmerDashboard = lazy(() => import("@/pages/farmer-dashboard"));
+const FarmerTestDemo = lazy(() => import("@/pages/farmer-test-demo"));
+const FieldAgentLogin = lazy(() => import("@/pages/auth/field-agent-login"));
+const TestFieldAgentLogin = lazy(() => import("@/pages/auth/test-field-agent-login"));
+const MobileFieldAgentLogin = lazy(() => import("@/pages/auth/mobile-field-agent-login"));
+const ExporterLogin = lazy(() => import("@/pages/auth/exporter-login"));
+const MonitoringLogin = lazy(() => import("@/pages/auth/monitoring-login"));
 
-// Three-Tier Regulatory Department Dashboards
-import DGDashboard from "@/pages/dg-dashboard";
-import DDGOTSDashboard from "@/pages/ddgots-dashboard";
-import DDGAFDashboard from "@/pages/ddgaf-dashboard";
+// Three-Tier Regulatory Department Authentication (Lazy)
+const DGLogin = lazy(() => import("@/pages/auth/dg-login"));
+const DDGOTSLogin = lazy(() => import("@/pages/auth/ddgots-login"));
+const DDGAFLogin = lazy(() => import("@/pages/auth/ddgaf-login"));
 
-// LiveTrace Authentication
-import LiveTraceRegulatoryLogin from "@/pages/auth/live-trace-regulatory-login";
-import LiveTraceFarmerLogin from "@/pages/auth/live-trace-farmer-login";
-import LiveTraceFieldAgentLogin from "@/pages/auth/live-trace-field-agent-login";
-import LiveTraceExporterLogin from "@/pages/auth/live-trace-exporter-login";
+// Three-Tier Regulatory Department Dashboards (Lazy)
+const DGDashboard = lazy(() => import("@/pages/dg-dashboard"));
+const DDGOTSDashboard = lazy(() => import("@/pages/ddgots-dashboard"));
+const DDGAFDashboard = lazy(() => import("@/pages/ddgaf-dashboard"));
 
-// Land Map360 Authentication
-import LandMap360Login from "@/pages/auth/landmap360-login";
+// LiveTrace Authentication (Lazy)
+const LiveTraceRegulatoryLogin = lazy(() => import("@/pages/auth/live-trace-regulatory-login"));
+const LiveTraceFarmerLogin = lazy(() => import("@/pages/auth/live-trace-farmer-login"));
+const LiveTraceFieldAgentLogin = lazy(() => import("@/pages/auth/live-trace-field-agent-login"));
+const LiveTraceExporterLogin = lazy(() => import("@/pages/auth/live-trace-exporter-login"));
 
-// Mine Watch Authentication
-import MineWatchRegulatoryLogin from "@/pages/auth/mine-watch-regulatory-login";
-import MineWatchMiningEngineerLogin from "@/pages/auth/mine-watch-mining-engineer-login";
-import MineWatchMineOperatorLogin from "@/pages/auth/mine-watch-mine-operator-login";
-import MineWatchEnvironmentalPortalLogin from "@/pages/auth/mine-watch-environmental-portal-login";
-import MineWatchTransportCoordinatorLogin from "@/pages/auth/mine-watch-transport-coordinator-login";
+// Land Map360 Authentication (Lazy)
+const LandMap360Login = lazy(() => import("@/pages/auth/landmap360-login"));
 
-// Forest Guard Authentication
-import ForestGuardRegulatoryLogin from "@/pages/auth/forest-guard-regulatory-login";
-import ForestGuardRangerLogin from "@/pages/auth/forest-guard-ranger-login";
-import ForestGuardConservationOfficerLogin from "@/pages/auth/forest-guard-conservation-officer-login";
-import ForestGuardWildlifeBiologistLogin from "@/pages/auth/forest-guard-wildlife-biologist-login";
-import ForestGuardCommunityLiaisonLogin from "@/pages/auth/forest-guard-community-liaison-login";
+// Mine Watch Authentication (Lazy)
+const MineWatchRegulatoryLogin = lazy(() => import("@/pages/auth/mine-watch-regulatory-login"));
+const MineWatchMiningEngineerLogin = lazy(() => import("@/pages/auth/mine-watch-mining-engineer-login"));
+const MineWatchMineOperatorLogin = lazy(() => import("@/pages/auth/mine-watch-mine-operator-login"));
+const MineWatchEnvironmentalPortalLogin = lazy(() => import("@/pages/auth/mine-watch-environmental-portal-login"));
+const MineWatchTransportCoordinatorLogin = lazy(() => import("@/pages/auth/mine-watch-transport-coordinator-login"));
 
-// Aqua Trace Authentication
-import AquaTraceRegulatoryLogin from "@/pages/auth/aqua-trace-regulatory-login";
-import AquaTraceMarineBiologistLogin from "@/pages/auth/aqua-trace-marine-biologist-login";
-import AquaTraceCoastGuardLogin from "@/pages/auth/aqua-trace-coast-guard-login";
-import AquaTraceHarborMasterLogin from "@/pages/auth/aqua-trace-harbor-master-login";
+// Forest Guard Authentication (Lazy)
+const ForestGuardRegulatoryLogin = lazy(() => import("@/pages/auth/forest-guard-regulatory-login"));
+const ForestGuardRangerLogin = lazy(() => import("@/pages/auth/forest-guard-ranger-login"));
+const ForestGuardConservationOfficerLogin = lazy(() => import("@/pages/auth/forest-guard-conservation-officer-login"));
+const ForestGuardWildlifeBiologistLogin = lazy(() => import("@/pages/auth/forest-guard-wildlife-biologist-login"));
+const ForestGuardCommunityLiaisonLogin = lazy(() => import("@/pages/auth/forest-guard-community-liaison-login"));
 
-// Blue Carbon 360 Authentication
-import BlueCarbon360RegulatoryLogin from "@/pages/auth/blue-carbon360-regulatory-login";
-import BlueCarbonConservationEconomistLogin from "@/pages/auth/blue-carbon-conservation-economist-login";
-import BlueCarbonMarineConservationLogin from "@/pages/auth/blue-carbon-marine-conservation-login";
-import BlueCarbonPolicyAdvisoryLogin from "@/pages/auth/blue-carbon-policy-advisory-login";
+// Aqua Trace Authentication (Lazy)
+const AquaTraceRegulatoryLogin = lazy(() => import("@/pages/auth/aqua-trace-regulatory-login"));
+const AquaTraceMarineBiologistLogin = lazy(() => import("@/pages/auth/aqua-trace-marine-biologist-login"));
+const AquaTraceCoastGuardLogin = lazy(() => import("@/pages/auth/aqua-trace-coast-guard-login"));
+const AquaTraceHarborMasterLogin = lazy(() => import("@/pages/auth/aqua-trace-harbor-master-login"));
 
-// Carbon Trace Authentication
-import CarbonTraceRegulatoryLogin from "@/pages/auth/carbon-trace-regulatory-login";
-import CarbonTraceSustainabilityManagerLogin from "@/pages/auth/carbon-trace-sustainability-manager-login";
-import CarbonTraceCarbonAuditorLogin from "@/pages/auth/carbon-trace-carbon-auditor-login";
-import CarbonTraceClimatePolicyAnalystLogin from "@/pages/auth/carbon-trace-climate-policy-analyst-login";
+// Blue Carbon 360 Authentication (Lazy)
+const BlueCarbon360RegulatoryLogin = lazy(() => import("@/pages/auth/blue-carbon360-regulatory-login"));
+const BlueCarbonConservationEconomistLogin = lazy(() => import("@/pages/auth/blue-carbon-conservation-economist-login"));
+const BlueCarbonMarineConservationLogin = lazy(() => import("@/pages/auth/blue-carbon-marine-conservation-login"));
+const BlueCarbonPolicyAdvisoryLogin = lazy(() => import("@/pages/auth/blue-carbon-policy-advisory-login"));
 
-// LiveTrace Portal Pages
-import LiveTraceMainDashboard from "@/pages/livetrace/live-trace-main-dashboard";
-import SystemOverview from "@/pages/livetrace/system-overview";
-import PolicyManagement from "@/pages/livetrace/policy-management";
-import LiveTraceMessaging from "@/pages/livetrace/messaging";
-import FarmRegistrations from "@/pages/livetrace/farm-registrations";
-import VeterinaryDashboard from "@/pages/livetrace/veterinary-dashboard";
-import HealthMonitoring from "@/pages/livetrace/health-monitoring";
-import DiseaseTracking from "@/pages/livetrace/disease-tracking";
-import VaccinationRecords from "@/pages/livetrace/vaccination-records";
-import TreatmentPlans from "@/pages/livetrace/treatment-plans";
-import RancherDashboard from "@/pages/livetrace/rancher-dashboard";
-import LiveTraceFarmerDashboard from "@/pages/livetrace/farmer-dashboard";
-import LiveTraceFieldAgentDashboard from "@/pages/livetrace/field-agent-dashboard";
-import TransportDashboard from "@/pages/livetrace/transport-dashboard";
+// Carbon Trace Authentication (Lazy)
+const CarbonTraceRegulatoryLogin = lazy(() => import("@/pages/auth/carbon-trace-regulatory-login"));
+const CarbonTraceSustainabilityManagerLogin = lazy(() => import("@/pages/auth/carbon-trace-sustainability-manager-login"));
+const CarbonTraceCarbonAuditorLogin = lazy(() => import("@/pages/auth/carbon-trace-carbon-auditor-login"));
+const CarbonTraceClimatePolicyAnalystLogin = lazy(() => import("@/pages/auth/carbon-trace-climate-policy-analyst-login"));
 
-// LandMap360 Dashboard Pages  
-import LandMap360MainDashboard from "@/pages/landmap360/main-dashboard";
-import SurveyorDashboard from "@/pages/landmap360/surveyor-dashboard";
-import AdministratorDashboard from "@/pages/landmap360/administrator-dashboard";
-import RegistrarDashboard from "@/pages/landmap360/registrar-dashboard";
-import InspectorDashboard from "@/pages/landmap360/inspector-dashboard";
+// ⚡ ALL DASHBOARD PAGES (LAZY) - Massive Performance Boost
+const LiveTraceMainDashboard = lazy(() => import("@/pages/livetrace/live-trace-main-dashboard"));
+const SystemOverview = lazy(() => import("@/pages/livetrace/system-overview"));
+const PolicyManagement = lazy(() => import("@/pages/livetrace/policy-management"));
+const LiveTraceMessaging = lazy(() => import("@/pages/livetrace/messaging"));
+const FarmRegistrations = lazy(() => import("@/pages/livetrace/farm-registrations"));
+const VeterinaryDashboard = lazy(() => import("@/pages/livetrace/veterinary-dashboard"));
+const HealthMonitoring = lazy(() => import("@/pages/livetrace/health-monitoring"));
+const DiseaseTracking = lazy(() => import("@/pages/livetrace/disease-tracking"));
+const VaccinationRecords = lazy(() => import("@/pages/livetrace/vaccination-records"));
+const TreatmentPlans = lazy(() => import("@/pages/livetrace/treatment-plans"));
+const RancherDashboard = lazy(() => import("@/pages/livetrace/rancher-dashboard"));
+const LiveTraceFarmerDashboard = lazy(() => import("@/pages/livetrace/farmer-dashboard"));
+const LiveTraceFieldAgentDashboard = lazy(() => import("@/pages/livetrace/field-agent-dashboard"));
+const TransportDashboard = lazy(() => import("@/pages/livetrace/transport-dashboard"));
 
-import MonitoringDashboard from "@/pages/monitoring-dashboard";
-import Dashboard from "@/pages/dashboard";
+const LandMap360MainDashboard = lazy(() => import("@/pages/landmap360/main-dashboard"));
+const SurveyorDashboard = lazy(() => import("@/pages/landmap360/surveyor-dashboard"));
+const AdministratorDashboard = lazy(() => import("@/pages/landmap360/administrator-dashboard"));
+const RegistrarDashboard = lazy(() => import("@/pages/landmap360/registrar-dashboard"));
+const InspectorDashboard = lazy(() => import("@/pages/landmap360/inspector-dashboard"));
 
-import Commodities from "@/pages/commodities";
-import ExporterDashboard from "@/pages/exporter-dashboard";
-import WorldMarketPricing from "@/pages/world-market-pricing";
-import ExporterOrders from "@/pages/exporter/orders";
-import ExporterMarketplace from "@/pages/exporter/marketplace";
-import ExporterCertificates from "@/pages/exporter/certificates";
-import ExporterMessages from "@/pages/exporter/messages";
-import ExportLicense from "@/pages/export-license";
-import Inspections from "@/pages/inspections";
-import Certifications from "@/pages/certifications";
-import Reports from "@/pages/reports";
-import EudrCompliancePage from "@/pages/eudr-compliance";
-import EudrAutoCompliancePage from "@/pages/eudr-auto-compliance";
-import Analytics from "@/pages/analytics";
-import AuditSystem from "@/pages/audit-system";
-import DataEntry from "@/pages/data-entry";
-import Farmers from "@/pages/farmers";
-import FarmPlots from "@/pages/farm-plots";
-import CropPlanning from "@/pages/crop-planning";
+const MonitoringDashboard = lazy(() => import("@/pages/monitoring-dashboard"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
 
-import GovernmentIntegration from "@/pages/government-integration";
-import GISMapping from "@/pages/gis-mapping";
-import FarmerGPSMapping from "@/pages/farmer-gps-mapping";
-import InternationalStandards from "@/pages/international-standards";
-import Verification from "@/pages/verification";
-import BatchCodeGenerator from "@/pages/batch-code-generator";
+// ⚡ CORE FUNCTIONALITY PAGES (LAZY) - Speed Optimization  
+const Commodities = lazy(() => import("@/pages/commodities"));
+const ExporterDashboard = lazy(() => import("@/pages/exporter-dashboard"));
+const WorldMarketPricing = lazy(() => import("@/pages/world-market-pricing"));
+const ExporterOrders = lazy(() => import("@/pages/exporter/orders"));
+const ExporterMarketplace = lazy(() => import("@/pages/exporter/marketplace"));
+const ExporterCertificates = lazy(() => import("@/pages/exporter/certificates"));
+const ExporterMessages = lazy(() => import("@/pages/exporter/messages"));
+const ExportLicense = lazy(() => import("@/pages/export-license"));
+const Inspections = lazy(() => import("@/pages/inspections"));
+const Certifications = lazy(() => import("@/pages/certifications"));
+const Reports = lazy(() => import("@/pages/reports"));
+const EudrCompliancePage = lazy(() => import("@/pages/eudr-compliance"));
+const EudrAutoCompliancePage = lazy(() => import("@/pages/eudr-auto-compliance"));
+const Analytics = lazy(() => import("@/pages/analytics"));
+const AuditSystem = lazy(() => import("@/pages/audit-system"));
+const DataEntry = lazy(() => import("@/pages/data-entry"));
+const Farmers = lazy(() => import("@/pages/farmers"));
+const FarmPlots = lazy(() => import("@/pages/farm-plots"));
+const CropPlanning = lazy(() => import("@/pages/crop-planning"));
+const GovernmentIntegration = lazy(() => import("@/pages/government-integration"));
+const GISMapping = lazy(() => import("@/pages/gis-mapping"));
+// ⚡ REMAINING CORE PAGES (LAZY) - Performance Critical
+const FarmerGPSMapping = lazy(() => import("@/pages/farmer-gps-mapping"));
+const InternationalStandards = lazy(() => import("@/pages/international-standards"));
+const Verification = lazy(() => import("@/pages/verification"));
+const BatchCodeGenerator = lazy(() => import("@/pages/batch-code-generator"));
+const DirectorDashboard = lazy(() => import("@/pages/director-dashboard"));
+const FieldAgentDashboard = lazy(() => import("@/pages/field-agent-dashboard"));
+const FieldAgentFarmMapping = lazy(() => import("@/pages/field-agent-farm-mapping"));
+const BuyerDashboard = lazy(() => import("@/pages/agricultural-buyer-dashboard"));
+const BuyerFarmerConnections = lazy(() => import("@/pages/buyer-farmer-connections"));
+const BuyerExporterNetwork = lazy(() => import("@/pages/buyer-exporter-network"));
+const BuyerTransactionDashboard = lazy(() => import("@/pages/buyer-transaction-dashboard"));
+const BuyerHarvestTracking = lazy(() => import("@/pages/buyer-harvest-tracking"));
+const BuyerBusinessMetrics = lazy(() => import("@/pages/buyer-business-metrics"));
+const PlatformDocumentation = lazy(() => import("@/pages/platform-documentation"));
+const Messaging = lazy(() => import("@/pages/messaging"));
 
-import DirectorDashboard from "@/pages/director-dashboard";
+// ⚡ MOBILE & PORTAL PAGES (LAZY) - Final Performance Boost
+const ExportPermitSubmission = lazy(() => import("@/pages/export-permit-submission"));
+const RealTimeVerificationDashboard = lazy(() => import("@/pages/verification-dashboard"));
+const EconomicReportingPage = lazy(() => import("@/pages/economic-reporting"));
+const MobileAppDashboard = lazy(() => import("@/pages/mobile-app-dashboard"));
+const MobileDemo = lazy(() => import("@/pages/mobile-demo"));
+const MobileAppSimulator = lazy(() => import("@/pages/mobile-app-simulator"));
+const MobileQRDisplay = lazy(() => import("@/pages/mobile-qr-display"));
+const MobileAppDownload = lazy(() => import("@/pages/mobile-app-download"));
+const PWATest = lazy(() => import("@/pages/pwa-test"));
 
-import FieldAgentDashboard from "@/pages/field-agent-dashboard";
-import FieldAgentFarmMapping from "@/pages/field-agent-farm-mapping";
-import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
-import BuyerFarmerConnections from "@/pages/buyer-farmer-connections";
-import BuyerExporterNetwork from "@/pages/buyer-exporter-network";
-import BuyerTransactionDashboard from "@/pages/buyer-transaction-dashboard";
-import BuyerHarvestTracking from "@/pages/buyer-harvest-tracking";
-import BuyerBusinessMetrics from "@/pages/buyer-business-metrics";
-import PlatformDocumentation from "@/pages/platform-documentation";
-import Messaging from "@/pages/messaging";
+const LiveTracePortal = lazy(() => import("@/pages/portals/live-trace-portal"));
+const LandMap360Portal = lazy(() => import("@/pages/portals/land-map360-portal"));
+const MineWatchPortal = lazy(() => import("@/pages/portals/mine-watch-portal"));
+const ForestGuardPortal = lazy(() => import("@/pages/portals/forest-guard-portal"));
+const AquaTracePortal = lazy(() => import("@/pages/portals/aqua-trace-portal"));
+const BlueCarbon360Portal = lazy(() => import("@/pages/portals/blue-carbon360-portal"));
+const SatelliteMonitoring = lazy(() => import("@/pages/satellite-monitoring"));
+const CarbonTracePortal = lazy(() => import("@/pages/portals/carbon-trace-portal"));
 
-import ExportPermitSubmission from "@/pages/export-permit-submission";
-import RealTimeVerificationDashboard from "@/pages/verification-dashboard";
-import EconomicReportingPage from "@/pages/economic-reporting";
-import MobileAppDashboard from "@/pages/mobile-app-dashboard";
-import MobileDemo from "@/pages/mobile-demo";
-import MobileAppSimulator from "@/pages/mobile-app-simulator";
-import MobileQRDisplay from "@/pages/mobile-qr-display";
-import MobileAppDownload from "@/pages/mobile-app-download";
-import PWATest from "@/pages/pwa-test";
+// ⚡ MODULE DASHBOARDS (LAZY) - Maximum Performance
+const LiveTraceDashboard = lazy(() => import("@/pages/portals/live-trace-dashboard"));
+const LandMap360Dashboard = lazy(() => import("@/pages/portals/land-map360-dashboard"));
+const MineWatchDashboard = lazy(() => import("@/pages/portals/mine-watch-dashboard"));
+const ForestGuardDashboard = lazy(() => import("@/pages/portals/forest-guard-dashboard"));
+const AquaTraceDashboard = lazy(() => import("@/pages/portals/aqua-trace-dashboard"));
+const BlueCarbon360Dashboard = lazy(() => import("@/pages/portals/blue-carbon360-dashboard"));
+const EcosystemMonitoringPage = lazy(() => import("@/pages/blue-carbon360/ecosystem-monitoring-page"));
+// ⚡ BLUE CARBON 360 PAGES (LAZY) - Performance Critical
+const ConservationProjectsPage = lazy(() => import("@/pages/blue-carbon360/conservation-projects-page"));
+const CarbonMarketplacePage = lazy(() => import("@/pages/blue-carbon360/carbon-marketplace-page"));
+const EconomicImpactPage = lazy(() => import("@/pages/blue-carbon360/economic-impact-page"));
+const ConservationEconomicsPage = lazy(() => import("@/pages/blue-carbon360/conservation-economics-page"));
+const ImpactReportsPage = lazy(() => import("@/pages/blue-carbon360/impact-reports-page"));
+const ConservationNetworkPage = lazy(() => import("@/pages/blue-carbon360/conservation-network-page"));
+const GlobalStandardsPage = lazy(() => import("@/pages/blue-carbon360/global-standards-page"));
+const ConservationMessagingPage = lazy(() => import("@/pages/blue-carbon360/conservation-messaging-page"));
+const EPAInspectorPage = lazy(() => import("@/pages/blue-carbon360/epa-inspector-page"));
+const ConservationMetricsPage = lazy(() => import("@/pages/blue-carbon360/conservation-metrics-page"));
+const CarbonTradingPage = lazy(() => import("@/pages/blue-carbon360/carbon-trading-page"));
+const MangroveManagementPage = lazy(() => import("@/pages/blue-carbon360/mangrove-management-page"));
+const MarineProtectionPage = lazy(() => import("@/pages/blue-carbon360/marine-protection-page"));
+const CarbonTraceDashboard = lazy(() => import("@/pages/portals/carbon-trace-dashboard"));
+const IntegratedDashboard = lazy(() => import("@/pages/integrated-dashboard"));
 
-// New Portal Pages
-import LiveTracePortal from "@/pages/portals/live-trace-portal";
-import LandMap360Portal from "@/pages/portals/land-map360-portal";
-import MineWatchPortal from "@/pages/portals/mine-watch-portal";
-import ForestGuardPortal from "@/pages/portals/forest-guard-portal";
-import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
-import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
-import SatelliteMonitoring from "@/pages/satellite-monitoring";
-import CarbonTracePortal from "@/pages/portals/carbon-trace-portal";
+// ⚡ PAYMENT PAGES (LAZY) - Speed Boost
+const PaymentServices = lazy(() => import("@/pages/payments/payment-services"));
+const PaymentCheckout = lazy(() => import("@/pages/payments/payment-checkout"));
+const PaymentSuccess = lazy(() => import("@/pages/payments/payment-success"));
+const FarmerPaymentServices = lazy(() => import("@/pages/farmer/farmer-payment-services"));
+const ExporterPaymentServices = lazy(() => import("@/pages/exporter/exporter-payment-services"));
+const RegulatoryPaymentServices = lazy(() => import("@/pages/regulatory-payment-services"));
+// ⚡ FINAL PAGES (LAZY) - Ultimate Performance
+const AgriTraceDashboard = lazy(() => import("@/pages/agritrace-dashboard"));
+const CertificateApprovals = lazy(() => import("@/pages/certificate-approvals"));
+const InspectorOnboarding = lazy(() => import("@/pages/inspector-onboarding"));
+const TestInspector = lazy(() => import("@/pages/test-inspector"));
+const MinimalTest = lazy(() => import("@/pages/minimal-test"));
+const InspectorManagement = lazy(() => import("@/pages/inspector-management"));
+const BuyerManagement = lazy(() => import("@/pages/buyer-management"));
+const ExporterManagement = lazy(() => import("@/pages/exporter-management"));
+const InspectorPortal = lazy(() => import("@/pages/inspector-portal"));
+const LandInspectorLogin = lazy(() => import("@/pages/auth/land-inspector-login"));
+const PortInspectorLogin = lazy(() => import("@/pages/auth/port-inspector-login"));
+const LandMappingDashboard = lazy(() => import("@/pages/land-mapping-dashboard"));
+const InspectorFarmerLandManagement = lazy(() => import("@/pages/inspector-farmer-land-management"));
+const LandMappingManager = lazy(() => import("@/pages/landmap360/land-mapping-manager"));
+const UnifiedLandInspectorDashboard = lazy(() => import("@/pages/unified-land-inspector-dashboard"));
+const OnboardFarmer = lazy(() => import("@/pages/onboard-farmer"));
+const CreateLandPlot = lazy(() => import("@/pages/create-land-plot"));
+const FarmersList = lazy(() => import("@/pages/farmers-list"));
+const LandPlotsList = lazy(() => import("@/pages/land-plots-list"));
+const EUDRAssessment = lazy(() => import("@/pages/eudr-assessment"));
+const GenerateReports = lazy(() => import("@/pages/generate-reports"));
 
-// New Module Dashboards
-import LiveTraceDashboard from "@/pages/portals/live-trace-dashboard";
-import LandMap360Dashboard from "@/pages/portals/land-map360-dashboard";
-import MineWatchDashboard from "@/pages/portals/mine-watch-dashboard";
-import ForestGuardDashboard from "@/pages/portals/forest-guard-dashboard";
-import AquaTraceDashboard from "@/pages/portals/aqua-trace-dashboard";
-import BlueCarbon360Dashboard from "@/pages/portals/blue-carbon360-dashboard";
-import EcosystemMonitoringPage from "@/pages/blue-carbon360/ecosystem-monitoring-page";
-import ConservationProjectsPage from "@/pages/blue-carbon360/conservation-projects-page";
-import CarbonMarketplacePage from "@/pages/blue-carbon360/carbon-marketplace-page";
-import EconomicImpactPage from "@/pages/blue-carbon360/economic-impact-page";
-import ConservationEconomicsPage from "@/pages/blue-carbon360/conservation-economics-page";
-import ImpactReportsPage from "@/pages/blue-carbon360/impact-reports-page";
-import ConservationNetworkPage from "@/pages/blue-carbon360/conservation-network-page";
-import GlobalStandardsPage from "@/pages/blue-carbon360/global-standards-page";
-import ConservationMessagingPage from "@/pages/blue-carbon360/conservation-messaging-page";
-import EPAInspectorPage from "@/pages/blue-carbon360/epa-inspector-page";
-import ConservationMetricsPage from "@/pages/blue-carbon360/conservation-metrics-page";
-import CarbonTradingPage from "@/pages/blue-carbon360/carbon-trading-page";
-import MangroveManagementPage from "@/pages/blue-carbon360/mangrove-management-page";
-import MarineProtectionPage from "@/pages/blue-carbon360/marine-protection-page";
-import CarbonTraceDashboard from "@/pages/portals/carbon-trace-dashboard";
-import IntegratedDashboard from "@/pages/integrated-dashboard";
-
-// Payment Pages
-import PaymentServices from "@/pages/payments/payment-services";
-import PaymentCheckout from "@/pages/payments/payment-checkout";
-import PaymentSuccess from "@/pages/payments/payment-success";
-import FarmerPaymentServices from "@/pages/farmer/farmer-payment-services";
-import ExporterPaymentServices from "@/pages/exporter/exporter-payment-services";
-import RegulatoryPaymentServices from "@/pages/regulatory-payment-services";
-import AgriTraceDashboard from "@/pages/agritrace-dashboard";
-import CertificateApprovals from "@/pages/certificate-approvals";
-import InspectorOnboarding from "@/pages/inspector-onboarding";
-import TestInspector from "@/pages/test-inspector";
-import MinimalTest from "@/pages/minimal-test";
-import InspectorManagement from "@/pages/inspector-management";
-import BuyerManagement from "@/pages/buyer-management";
-import ExporterManagement from "@/pages/exporter-management";
-import InspectorPortal from "@/pages/inspector-portal";
-import LandInspectorLogin from "@/pages/auth/land-inspector-login";
-import PortInspectorLogin from "@/pages/auth/port-inspector-login";
-import LandMappingDashboard from "@/pages/land-mapping-dashboard";
-import InspectorFarmerLandManagement from "@/pages/inspector-farmer-land-management";
-import LandMappingManager from "@/pages/landmap360/land-mapping-manager";
-import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashboard";
-import OnboardFarmer from "@/pages/onboard-farmer";
-import CreateLandPlot from "@/pages/create-land-plot";
-import FarmersList from "@/pages/farmers-list";
-import LandPlotsList from "@/pages/land-plots-list";
-import EUDRAssessment from "@/pages/eudr-assessment";
-import GenerateReports from "@/pages/generate-reports";
-
-import NotFound from "@/pages/not-found";
+const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Helper component to check user access to routes
 function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: any) {
@@ -228,6 +232,19 @@ function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: an
   }
   
   return <Component {...props} />;
+}
+
+// ⚡ LIGHTNING FAST LOADING COMPONENT - Optimized Performance
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-slate-600 text-lg font-medium">Loading...</p>
+        <p className="text-slate-500 text-sm mt-2">Optimized for speed</p>
+      </div>
+    </div>
+  );
 }
 
 function Router() {

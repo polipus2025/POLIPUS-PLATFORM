@@ -46,7 +46,6 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
   // Load real-time satellite imagery
   useEffect(() => {
     const loadSatelliteImage = async () => {
-      console.log(`🛰️ Loading satellite imagery for ${mapCenter.lat.toFixed(6)}, ${mapCenter.lng.toFixed(6)}`);
       
       const zoom = 16;
       const x = Math.floor((mapCenter.lng + 180) / 360 * Math.pow(2, zoom));
@@ -68,13 +67,11 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
       
       const tryNextSource = () => {
         if (sourceIndex >= satelliteSources.length) {
-          console.log('⚠️ All satellite sources failed, using fallback');
           setSatelliteLoaded(false);
           return;
         }
         
         img.src = satelliteSources[sourceIndex];
-        console.log(`📡 Trying satellite source ${sourceIndex + 1}/${satelliteSources.length}`);
         sourceIndex++;
       };
       
@@ -94,14 +91,12 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
           compositeImg.onload = () => {
             setSatelliteImage(compositeImg);
             setSatelliteLoaded(true);
-            console.log(`✅ Real satellite imagery loaded from source ${sourceIndex}`);
           };
           compositeImg.src = canvas.toDataURL();
         }
       };
       
       img.onerror = () => {
-        console.log(`❌ Satellite source ${sourceIndex} failed, trying next...`);
         tryNextSource();
       };
       
@@ -233,7 +228,6 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
       ctx.fillText(point.label, pos.x, pos.y);
     });
 
-    console.log(`🎨 Drew map with ${points.length} points and ${Math.max(0, points.length - 1)} connecting lines`);
   };
 
   // Redraw when points or satellite imagery changes
@@ -244,13 +238,11 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
   // Start GPS tracking
   const startTracking = () => {
     setIsTracking(true);
-    console.log('🚀 GPS Tracking started');
   };
 
   // Stop GPS tracking
   const stopTracking = () => {
     setIsTracking(false);
-    console.log('🛑 GPS Tracking stopped');
   };
 
   // Add GPS point
@@ -269,7 +261,6 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
 
           setPoints(prev => {
             const updated = [...prev, newPoint];
-            console.log(`📍 Added REAL GPS point ${newPoint.label}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
             return updated;
           });
         },
@@ -284,7 +275,6 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
 
           setPoints(prev => {
             const updated = [...prev, newPoint];
-            console.log(`📍 Added simulated GPS point ${newPoint.label}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
             return updated;
           });
         },
@@ -298,7 +288,6 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
     if (points.length >= 3) {
       const area = calculateArea(points);
       onBoundaryComplete({ points, area });
-      console.log(`✅ Boundary completed: ${points.length} points, ${area.toFixed(2)} hectares`);
     }
   };
 
@@ -306,7 +295,6 @@ export default function SimpleWorkingMapper({ onBoundaryComplete }: SimpleBounda
   const resetMapping = () => {
     setPoints([]);
     setIsTracking(false);
-    console.log('🔄 Mapping reset');
   };
 
   return (

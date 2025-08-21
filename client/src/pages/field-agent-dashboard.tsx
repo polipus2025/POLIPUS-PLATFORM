@@ -102,7 +102,6 @@ export default function FieldAgentDashboard() {
 
   const newFarmerMutation = useMutation({
     mutationFn: async (farmerData: any) => {
-      console.log("Field agent farmer data:", farmerData);
       
       // Create farmer directly using the /api/farmers endpoint
       const farmerRequest = {
@@ -119,7 +118,6 @@ export default function FieldAgentDashboard() {
         status: 'active'
       };
       
-      console.log("Sending farmer request:", farmerRequest);
       
       const response = await fetch('/api/farmers', {
         method: 'POST',
@@ -475,7 +473,6 @@ export default function FieldAgentDashboard() {
                         <div className="flex gap-2">
                           <Button 
                             onClick={async () => {
-                              console.log("Current form state:", newFarmerForm);
                               // Test with sample data first
                               const testData = {
                                 firstName: 'Test',
@@ -485,7 +482,6 @@ export default function FieldAgentDashboard() {
                                 farmSize: '2.5',
                                 primaryCrop: 'Coffee'
                               };
-                              console.log("Sending test data:", testData);
                               
                               try {
                                 // Direct test without mutation wrapper
@@ -504,11 +500,9 @@ export default function FieldAgentDashboard() {
                                 
                                 if (directResponse.ok) {
                                   const result = await directResponse.json();
-                                  console.log("Direct test success:", result);
                                   alert(`Success! Farmer created: ${result.farmerId}`);
                                 } else {
                                   const error = await directResponse.text();
-                                  console.log("Direct test failed:", error);
                                   alert(`Direct test failed: ${error}`);
                                 }
                               } catch (error) {
@@ -522,7 +516,6 @@ export default function FieldAgentDashboard() {
                           </Button>
                           <Button 
                             onClick={() => {
-                              console.log("Current form state:", newFarmerForm);
                               if (!newFarmerForm.firstName || !newFarmerForm.lastName) {
                                 alert("Please fill in first name and last name");
                                 return;
@@ -754,7 +747,6 @@ Registration: ${farmer.registeredBy || 'Unknown'}`;
             <div className="max-w-2xl mx-auto">
               <ExactBoundaryMapper
                 onBoundaryComplete={(boundary) => {
-                  console.log('Farm boundary completed:', boundary);
                   toast({
                     title: "Farm Boundary Mapped Successfully",
                     description: `Mapped ${boundary.points.length} GPS points covering ${boundary.area.toFixed(2)} hectares with connected boundary lines`,

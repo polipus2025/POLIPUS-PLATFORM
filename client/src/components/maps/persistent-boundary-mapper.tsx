@@ -223,7 +223,6 @@ export default function PersistentBoundaryMapper({
         });
       },
       (error) => {
-        console.log('Using default location');
       },
       { timeout: 5000, enableHighAccuracy: true }
     );

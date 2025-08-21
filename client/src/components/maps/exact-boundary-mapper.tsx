@@ -78,7 +78,6 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
       setMapCenter({ lat: location.latitude, lng: location.longitude });
       setIsTracking(true);
       setStatus(`🟢 GPS Tracking Active - Walk to each corner/boundary point and press "Add GPS Point"`);
-      console.log(`🚀 GPS Tracking started at ${location.latitude}, ${location.longitude}`);
     } catch (error) {
       console.error('GPS Error:', error);
       setStatus('⚠️ GPS unavailable - using map location');
@@ -105,7 +104,6 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
       };
 
       setPoints(prev => [...prev, newPoint]);
-      console.log(`📍 Added GPS point ${newPoint.label}: ${location.latitude}, ${location.longitude}`);
       
       const newPointCount = points.length + 1;
       setStatus(`📍 Point ${newPoint.label} added (${newPointCount} total) - Walk to next boundary corner`);
@@ -136,7 +134,6 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
     const mapElement = mapRef.current;
     if (!mapElement) return;
 
-    console.log('🗺️ Initializing map element');
 
     // Clear existing content safely
     try {
@@ -144,7 +141,6 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
         mapElement.removeChild(mapElement.firstChild);
       }
     } catch (error) {
-      console.log('Map clearing error (non-critical):', error);
       // Fallback: set innerHTML if removeChild fails
       mapElement.innerHTML = '';
     }
@@ -239,22 +235,17 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
 
     function renderPointsAndLines() {
       if (!mapElement) {
-        console.log('❌ No map element for rendering');
         return;
       }
       
-      console.log('🎯 Starting renderPointsAndLines with', points.length, 'points');
       
       // Safely clear existing points and lines using modern remove() method
       const existingMarkers = mapElement.querySelectorAll('.boundary-marker, .boundary-marker-persistent');
-      console.log('🧹 Found', existingMarkers.length, 'existing markers to remove');
       
       existingMarkers.forEach((marker, index) => {
         try {
           marker.remove(); // Modern approach - safer than removeChild
-          console.log(`🗑️ Removed marker ${index + 1}`);
         } catch (e) {
-          console.log('Marker removal error (non-critical):', e);
         }
       });
       
@@ -262,15 +253,12 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
       try {
         if (svg && svg.parentNode) {
           svg.innerHTML = '';
-          console.log('🧹 SVG cleared');
         }
       } catch (e) {
-        console.log('SVG clearing error (non-critical):', e);
       }
 
       if (points.length === 0) return;
 
-      console.log(`🎯 Rendering ${points.length} boundary points with connecting lines`);
 
       // Add PERSISTENT markers for each point that STAY on the map
       points.forEach((point, index) => {
@@ -311,12 +299,10 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
           mapElement.appendChild(marker);
         }
 
-        console.log(`🔴 PERSISTENT Point ${point.label} LOCKED at pixel ${pixelPos.x}, ${pixelPos.y}`);
       });
 
       // Draw PERSISTENT connecting lines that STAY VISIBLE
       if (points.length >= 2) {
-        console.log(`🔗 Drawing ${points.length - 1} PERSISTENT connecting lines`);
         
         for (let i = 0; i < points.length - 1; i++) {
           const start = coordToPixel(points[i].latitude, points[i].longitude);
@@ -336,7 +322,6 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
           line.setAttribute('data-line-id', `line-${i}`);
           svg.appendChild(line);
 
-          console.log(`🔗 PERSISTENT Line ${i + 1}: ${points[i].label} → ${points[i + 1].label}`);
         }
 
         // Add PERSISTENT closing line for complete polygon
@@ -358,7 +343,6 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
           closingLine.setAttribute('data-line-id', 'closing-line');
           svg.appendChild(closingLine);
 
-          console.log(`🔗 PERSISTENT Closing Line: ${points[points.length - 1].label} → ${points[0].label}`);
         }
       }
 

@@ -165,7 +165,6 @@ export default function TrulyPersistentMapper({
       mapElement.appendChild(marker);
       markersRef.current.push(marker);
       
-      console.log(`✅ PERSISTENT marker ${letter} added at ${pixelPos.x}, ${pixelPos.y}`);
     }
 
     // Clear existing lines and redraw all
@@ -191,7 +190,6 @@ export default function TrulyPersistentMapper({
         svg.appendChild(line);
         linesRef.current.push(line);
         
-        console.log(`🔗 Line ${String.fromCharCode(65 + i)} → ${String.fromCharCode(65 + i + 1)} drawn`);
       }
       
       // Closing line for polygon
@@ -212,7 +210,6 @@ export default function TrulyPersistentMapper({
         svg.appendChild(closingLine);
         linesRef.current.push(closingLine);
         
-        console.log(`🔗 Closing line drawn`);
       }
     }
 

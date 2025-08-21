@@ -561,7 +561,6 @@ export default function FarmersPage() {
 
   const createFarmerMutation = useMutation({
     mutationFn: async (data: FarmerFormData) => {
-      console.log("Form data received:", data);
       
       const farmerData = {
         ...data,
@@ -570,7 +569,6 @@ export default function FarmersPage() {
         landMapData: landMapData,
       };
       
-      console.log("Final farmer data being sent to API:", farmerData);
       
       // Create farmer record
       const farmer = await apiRequest("/api/farmers", {
@@ -648,14 +646,12 @@ export default function FarmersPage() {
       {/* GPS Permission Handler for farmer registration and mapping */}
       <GPSPermissionHandler 
         onPermissionGranted={(position) => {
-          console.log('GPS enabled for farmer management:', position.coords);
           // Auto-fill coordinates if registration form is active
           if (form && !form.getValues("gpsCoordinates")) {
             form.setValue("gpsCoordinates", `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
           }
         }}
         onPermissionDenied={() => {
-          console.log('GPS access denied - limited mapping features');
         }}
         showCard={true}
         autoRequest={true}

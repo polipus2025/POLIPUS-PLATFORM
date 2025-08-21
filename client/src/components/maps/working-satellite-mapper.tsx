@@ -164,7 +164,6 @@ export default function WorkingSatelliteMapper({ onBoundaryComplete }: WorkingSa
       img.onload = () => {
         tilesLoaded++;
         if (tilesLoaded === totalTiles) {
-          console.log('🛰️ All satellite tiles loaded successfully');
         }
       };
       
@@ -282,7 +281,6 @@ export default function WorkingSatelliteMapper({ onBoundaryComplete }: WorkingSa
         mapElement.appendChild(marker);
       });
 
-      console.log(`🎯 Rendered ${points.length} boundary points with connecting lines`);
     };
 
     // Initial render

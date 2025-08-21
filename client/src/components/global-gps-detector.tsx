@@ -38,7 +38,6 @@ export default function GlobalGPSDetector() {
           });
         }
       } catch (error) {
-        console.log('Error parsing saved GPS status:', error);
       }
     }
   }, []);

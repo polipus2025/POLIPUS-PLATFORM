@@ -71,12 +71,10 @@ export default function AgriculturalBuyerDashboard() {
 
   const connectWithFarmer = (farmerId: string) => {
     // API call to initiate connection with farmer
-    console.log('Connecting with farmer:', farmerId);
   };
 
   const contactExporter = (exporterId: string) => {
     // API call to contact exporter for selling
-    console.log('Contacting exporter:', exporterId);
   };
 
   return (

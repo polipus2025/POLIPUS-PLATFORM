@@ -30,7 +30,7 @@ interface CleanExporterLayoutProps {
 }
 
 const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) => {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   
   // Time, Date, and Weather State
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -90,6 +90,37 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
 
   const isActiveRoute = (href: string) => {
     return location === href || (href !== '/exporter-dashboard' && location.startsWith(href));
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Show loading state briefly
+      const button = document.querySelector('button');
+      if (button) button.textContent = 'Logging out...';
+      
+      // Clear any local storage data first
+      localStorage.removeItem('exporter_token');
+      localStorage.removeItem('exporter_data');
+      localStorage.removeItem('exporter_session');
+      
+      // Attempt to call logout endpoint
+      await fetch('/api/auth/exporter/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      }).catch(() => {
+        // Ignore errors, we'll redirect anyway
+      });
+      
+      // Always redirect to login page regardless of API response
+      window.location.href = '/exporter-login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect to login
+      window.location.href = '/exporter-login';
+    }
   };
 
   return (
@@ -228,9 +259,13 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
 
           {/* Footer */}
           <div className="p-4 border-t border-gray-200">
-            <Button variant="outline" className="w-full justify-start" onClick={() => window.location.href = '/api/logout'}>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" 
+              onClick={handleLogout}
+            >
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Exit Portal
             </Button>
           </div>
         </div>

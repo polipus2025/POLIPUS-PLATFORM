@@ -1,81 +1,63 @@
-import { useState } from 'react';
+import { memo, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Award, Download, FileText, Calendar, CheckCircle } from 'lucide-react';
+import { ArrowLeft, FileText, Download, Shield, Calendar } from 'lucide-react';
 import { Link } from 'wouter';
 
-export default function ExporterCertificates() {
-  const mockCertificates = [
+// ⚡ MEMOIZED CERTIFICATES COMPONENT FOR SPEED
+const ExporterCertificates = memo(() => {
+  // ⚡ MEMOIZED CERTIFICATES DATA
+  const certificates = useMemo(() => [
     {
       id: 'CERT-2025-001',
-      type: 'EUDR Compliance Certificate',
+      type: 'Export License',
       commodity: 'Cocoa Beans',
-      issueDate: '2025-08-15',
-      expiryDate: '2025-12-15',
-      status: 'Valid',
-      authority: 'LACRA',
-      documentNumber: 'EUDR-COC-2025-001'
+      issueDate: '2025-01-15',
+      expiryDate: '2025-12-31',
+      status: 'Active',
+      downloadUrl: '/certificates/export-license-001.pdf'
     },
     {
       id: 'CERT-2025-002',
-      type: 'Export Eligibility Certificate',
+      type: 'EUDR Compliance',
       commodity: 'Coffee Beans',
-      issueDate: '2025-08-10',
-      expiryDate: '2026-02-10',
-      status: 'Valid',
-      authority: 'LACRA',
-      documentNumber: 'EXP-COF-2025-002'
+      issueDate: '2025-02-01',
+      expiryDate: '2026-01-31',
+      status: 'Active',
+      downloadUrl: '/certificates/eudr-compliance-002.pdf'
     },
     {
       id: 'CERT-2025-003',
-      type: 'Quality Assurance Certificate',
+      type: 'Quality Certificate',
       commodity: 'Palm Oil',
-      issueDate: '2025-07-25',
-      expiryDate: '2025-10-25',
+      issueDate: '2025-01-20',
+      expiryDate: '2025-06-20',
       status: 'Expiring Soon',
-      authority: 'LACRA',
-      documentNumber: 'QA-PAL-2025-003'
-    },
-    {
-      id: 'CERT-2025-004',
-      type: 'Phytosanitary Certificate',
-      commodity: 'Rubber',
-      issueDate: '2025-06-15',
-      expiryDate: '2025-09-15',
-      status: 'Expired',
-      authority: 'LACRA',
-      documentNumber: 'PHY-RUB-2025-004'
+      downloadUrl: '/certificates/quality-cert-003.pdf'
     }
-  ];
+  ], []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Valid': return 'bg-green-100 text-green-800';
-      case 'Expiring Soon': return 'bg-yellow-100 text-yellow-800';
-      case 'Expired': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Valid': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'Expiring Soon': return <Calendar className="h-4 w-4 text-yellow-600" />;
-      case 'Expired': return <Calendar className="h-4 w-4 text-red-600" />;
-      default: return <FileText className="h-4 w-4 text-gray-600" />;
-    }
-  };
+  // ⚡ MEMOIZED STATUS COLOR FUNCTION
+  const getStatusColor = useMemo(() => {
+    const statusColors = {
+      'Active': 'bg-green-100 text-green-800',
+      'Expiring Soon': 'bg-yellow-100 text-yellow-800',
+      'Expired': 'bg-red-100 text-red-800',
+      'default': 'bg-gray-100 text-gray-800'
+    };
+    return (status: string) => statusColors[status as keyof typeof statusColors] || statusColors.default;
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Helmet>
-        <title>Certificates - Exporter Portal</title>
-        <meta name="description" content="Manage your export certificates and compliance documents" />
+        <title>Export Certificates - Exporter Portal</title>
+        <meta name="description" content="Download and manage your export certificates and compliance documents" />
       </Helmet>
 
-      {/* Header with Back Button */}
+      {/* Header */}
       <div className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
@@ -87,30 +69,28 @@ export default function ExporterCertificates() {
                 </Button>
               </Link>
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                <Award className="w-6 h-6 text-white" />
+                <FileText className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Certificates & Documents</h1>
-                <p className="text-sm text-slate-600">Manage your export certificates and compliance documents</p>
+                <h1 className="text-2xl font-bold text-slate-900">Export Certificates</h1>
+                <p className="text-sm text-slate-600">Download and manage compliance documents</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Certificate Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Valid Certificates</p>
+                  <p className="text-sm font-medium text-green-600">Active Certificates</p>
                   <p className="text-3xl font-bold text-green-900">2</p>
                 </div>
-                <CheckCircle className="h-12 w-12 text-green-600" />
+                <Shield className="h-12 w-12 text-green-600" />
               </div>
             </CardContent>
           </Card>
@@ -127,26 +107,14 @@ export default function ExporterCertificates() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-red-50 to-red-100 border-red-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-red-600">Expired</p>
-                  <p className="text-3xl font-bold text-red-900">1</p>
-                </div>
-                <FileText className="h-12 w-12 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total Certificates</p>
-                  <p className="text-3xl font-bold text-blue-900">4</p>
+                  <p className="text-sm font-medium text-blue-600">Total Documents</p>
+                  <p className="text-3xl font-bold text-blue-900">{certificates.length}</p>
                 </div>
-                <Award className="h-12 w-12 text-blue-600" />
+                <FileText className="h-12 w-12 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -155,80 +123,76 @@ export default function ExporterCertificates() {
         {/* Certificates List */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-purple-600" />
-                Your Certificates
-              </CardTitle>
-              <Button>
-                <FileText className="h-4 w-4 mr-2" />
-                Request New Certificate
-              </Button>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-purple-600" />
+              Your Certificates
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockCertificates.map((certificate) => (
-                <div key={certificate.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+              {certificates.map((cert) => (
+                <div key={cert.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-start gap-3">
-                      {getStatusIcon(certificate.status)}
-                      <div>
-                        <h3 className="font-semibold text-lg">{certificate.type}</h3>
-                        <p className="text-gray-600">Document: {certificate.documentNumber}</p>
-                        <p className="text-sm text-gray-500">Commodity: {certificate.commodity}</p>
-                      </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{cert.type}</h3>
+                      <p className="text-gray-600">{cert.commodity}</p>
+                      <p className="text-sm text-gray-500">Certificate ID: {cert.id}</p>
                     </div>
-                    <Badge className={getStatusColor(certificate.status)}>
-                      {certificate.status}
+                    <Badge className={getStatusColor(cert.status)}>
+                      {cert.status}
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                     <div>
-                      <span className="text-gray-500">Issue Date:</span>
-                      <p className="font-medium">{certificate.issueDate}</p>
+                      <span className="text-sm text-gray-500">Issue Date:</span>
+                      <p className="font-medium">{cert.issueDate}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Expiry Date:</span>
-                      <p className="font-medium">{certificate.expiryDate}</p>
+                      <span className="text-sm text-gray-500">Expiry Date:</span>
+                      <p className="font-medium">{cert.expiryDate}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Authority:</span>
-                      <p className="font-medium">{certificate.authority}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Certificate ID:</span>
-                      <p className="font-medium">{certificate.id}</p>
+                      <span className="text-sm text-gray-500">Status:</span>
+                      <p className="font-medium">{cert.status}</p>
                     </div>
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
+                    <Button size="sm" className="flex items-center gap-2">
+                      <Download className="w-4 h-4" />
                       Download PDF
                     </Button>
-                    <Button size="sm" variant="outline">
-                      <FileText className="h-4 w-4 mr-2" />
-                      View Details
-                    </Button>
-                    {certificate.status === 'Expired' && (
-                      <Button size="sm">
-                        Renew Certificate
-                      </Button>
-                    )}
-                    {certificate.status === 'Expiring Soon' && (
-                      <Button size="sm" variant="outline">
-                        Renew Early
-                      </Button>
-                    )}
+                    <Button size="sm" variant="outline">View Details</Button>
+                    <Button size="sm" variant="outline">Share</Button>
                   </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+
+        {/* Important Notice */}
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="flex items-start space-x-3">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <Shield className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-blue-900 mb-2">Certificate Compliance Notice</h3>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>• Always ensure certificates are valid before shipping</p>
+                <p>• Renew expiring certificates at least 30 days before expiry</p>
+                <p>• Keep digital copies accessible for customs verification</p>
+                <p>• Contact LACRA for certificate renewal or updates</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+});
+
+ExporterCertificates.displayName = 'ExporterCertificates';
+export default ExporterCertificates;

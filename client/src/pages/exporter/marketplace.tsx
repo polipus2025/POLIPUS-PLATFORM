@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useMemo, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, ShoppingCart, Users, Globe, Search, Star } from 'lucide-react';
 import { Link } from 'wouter';
 
-export default function ExporterMarketplace() {
+// ⚡ MEMOIZED MARKETPLACE COMPONENT FOR SPEED
+const ExporterMarketplace = memo(() => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const mockBuyers = [
+  // ⚡ MEMOIZED BUYERS DATA
+  const mockBuyers = useMemo(() => [
     {
       id: 'BUY-001',
       name: 'European Chocolate Ltd.',
@@ -51,20 +53,29 @@ export default function ExporterMarketplace() {
       lastOrder: '2025-06-30',
       status: 'Active'
     }
-  ];
+  ], []);
 
-  const filteredBuyers = mockBuyers.filter(buyer =>
-    buyer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    buyer.commodities.some(commodity => commodity.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // ⚡ MEMOIZED SEARCH FILTER
+  const filteredBuyers = useMemo(() => 
+    mockBuyers.filter(buyer =>
+      buyer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      buyer.commodities.some(commodity => commodity.toLowerCase().includes(searchTerm.toLowerCase()))
+    ), [mockBuyers, searchTerm]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Premium': return 'bg-purple-100 text-purple-800';
-      case 'Active': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // ⚡ MEMOIZED STATUS COLOR FUNCTION
+  const getStatusColor = useMemo(() => {
+    const statusColors = {
+      'Premium': 'bg-purple-100 text-purple-800',
+      'Active': 'bg-green-100 text-green-800',
+      'default': 'bg-gray-100 text-gray-800'
+    };
+    return (status: string) => statusColors[status as keyof typeof statusColors] || statusColors.default;
+  }, []);
+
+  // ⚡ MEMOIZED SEARCH HANDLER
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -107,7 +118,7 @@ export default function ExporterMarketplace() {
               type="text"
               placeholder="Search buyers or commodities..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               className="pl-10"
             />
           </div>
@@ -230,4 +241,7 @@ export default function ExporterMarketplace() {
       </div>
     </div>
   );
-}
+});
+
+ExporterMarketplace.displayName = 'ExporterMarketplace';
+export default ExporterMarketplace;

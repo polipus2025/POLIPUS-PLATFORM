@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Package, Calendar, DollarSign, Truck } from 'lucide-react';
 import { Link } from 'wouter';
 
-export default function ExporterOrders() {
-  const mockOrders = [
+// ⚡ MEMOIZED ORDER COMPONENT FOR PERFORMANCE
+const ExporterOrders = memo(() => {
+  // ⚡ MEMOIZED ORDERS DATA - No recalculation
+  const mockOrders = useMemo(() => [
     {
       id: 'ORD-2025-001',
       commodity: 'Cocoa Beans',
@@ -38,16 +40,18 @@ export default function ExporterOrders() {
       deliveryDate: '2025-09-10',
       value: '$135,000'
     }
-  ];
+  ], []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Shipped': return 'bg-green-100 text-green-800';
-      case 'Processing': return 'bg-blue-100 text-blue-800';
-      case 'Pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // ⚡ MEMOIZED STATUS COLOR FUNCTION
+  const getStatusColor = useMemo(() => {
+    const statusColors = {
+      'Shipped': 'bg-green-100 text-green-800',
+      'Processing': 'bg-blue-100 text-blue-800',
+      'Pending': 'bg-yellow-100 text-yellow-800',
+      'default': 'bg-gray-100 text-gray-800'
+    };
+    return (status: string) => statusColors[status as keyof typeof statusColors] || statusColors.default;
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -187,4 +191,7 @@ export default function ExporterOrders() {
       </div>
     </div>
   );
-}
+});
+
+ExporterOrders.displayName = 'ExporterOrders';
+export default ExporterOrders;

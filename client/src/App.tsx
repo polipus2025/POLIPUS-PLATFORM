@@ -882,6 +882,8 @@ function App() {
   
   // EXPORTER PORTAL - Uses CleanExporterLayout with its own header
   const isExporterPage = window.location.pathname.startsWith("/exporter") || 
+                         window.location.pathname === "/world-market-pricing" ||
+                         window.location.pathname === "/lacra-commodity-pricing" ||
                          window.location.pathname.startsWith("/exporter-portal");
   
   // STANDALONE ADMIN PORTALS - No layout wrapper

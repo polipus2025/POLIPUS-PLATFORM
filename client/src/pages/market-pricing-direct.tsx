@@ -1,3 +1,5 @@
+import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
+
 export default function MarketPricingDirect() {
   const currentTime = new Date().toLocaleTimeString();
   
@@ -17,8 +19,9 @@ export default function MarketPricingDirect() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <CleanExporterLayout>
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white mb-8 rounded-lg p-6">
           <div className="flex justify-between items-center">
@@ -274,7 +277,8 @@ export default function MarketPricingDirect() {
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </CleanExporterLayout>
   );
 }

@@ -6,9 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Ship, MapPin, Clock, Package, Truck, Search } from 'lucide-react';
 import { Link } from 'wouter';
+import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 
 const ExporterShipments = memo(() => {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
 
   const shipments = useMemo(() => [
     {
@@ -85,7 +94,7 @@ const ExporterShipments = memo(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <CleanExporterLayout user={user}>
       <Helmet>
         <title>Shipment Tracking - Exporter Portal</title>
         <meta name="description" content="Track your export shipments in real-time" />
@@ -254,7 +263,7 @@ const ExporterShipments = memo(() => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </CleanExporterLayout>
   );
 });
 

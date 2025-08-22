@@ -4,8 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BarChart3, TrendingUp, DollarSign, Package, Globe, Users } from 'lucide-react';
 import { Link } from 'wouter';
+import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 
 const ExporterAnalytics = memo(() => {
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
   const analyticsData = useMemo(() => ({
     revenue: {
       current: 2450000,
@@ -69,7 +77,7 @@ const ExporterAnalytics = memo(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <CleanExporterLayout user={user}>
       <Helmet>
         <title>Analytics & Reports - Exporter Portal</title>
         <meta name="description" content="Comprehensive analytics and performance metrics for your export business" />
@@ -251,7 +259,7 @@ const ExporterAnalytics = memo(() => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </CleanExporterLayout>
   );
 });
 

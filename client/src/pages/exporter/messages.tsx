@@ -7,10 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, MessageSquare, Send, Search, Users, Clock } from 'lucide-react';
 import { Link } from 'wouter';
+import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 
 const ExporterMessages = memo(() => {
   const [selectedConversation, setSelectedConversation] = useState('');
   const [newMessage, setNewMessage] = useState('');
+
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
 
   const conversations = useMemo(() => [
     {
@@ -66,7 +75,7 @@ const ExporterMessages = memo(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <CleanExporterLayout user={user}>
       <Helmet>
         <title>Messages - Exporter Portal</title>
         <meta name="description" content="Secure messaging with buyers, officials, and logistics partners" />
@@ -197,7 +206,7 @@ const ExporterMessages = memo(() => {
           </Card>
         </div>
       </div>
-    </div>
+    </CleanExporterLayout>
   );
 });
 

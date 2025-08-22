@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +55,13 @@ export default function ExporterPaymentServices() {
   const [services, setServices] = useState<PaymentService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
+
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
 
   // Check authentication
   const authToken = localStorage.getItem("authToken");
@@ -135,7 +144,7 @@ export default function ExporterPaymentServices() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4">
+    <CleanExporterLayout user={user}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -355,6 +364,6 @@ export default function ExporterPaymentServices() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </CleanExporterLayout>
   );
 }

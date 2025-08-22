@@ -145,7 +145,7 @@ export default function RealMapBoundaryMapper({
         const y2 = ((centerLat + latRange / 2 - point2.latitude) / latRange) * rect.height;
 
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.className = 'interactive-line';
+        line.setAttribute('class', 'interactive-line');
         line.setAttribute('x1', x1.toString());
         line.setAttribute('y1', y1.toString());
         line.setAttribute('x2', x2.toString());

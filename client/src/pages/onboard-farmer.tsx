@@ -119,7 +119,8 @@ export default function OnboardFarmer() {
           ...data,
           farmSize: data.boundaryData?.area || (data.farmSize ? parseFloat(data.farmSize) : null),
           farmingExperience: data.farmingExperience ? parseInt(data.farmingExperience) : null,
-          boundaryData: data.boundaryData ? JSON.stringify(data.boundaryData) : null,
+          farmBoundaries: data.boundaryData ? data.boundaryData : null, // Use farmBoundaries instead of boundaryData
+          landMapData: data.boundaryData ? data.boundaryData : null, // Also send as landMapData for comprehensive mapping
           isActive: true,
           onboardedBy: inspectorName,
           onboardedAt: new Date(),

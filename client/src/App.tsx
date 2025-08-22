@@ -16,6 +16,9 @@ import { Package } from "lucide-react";
 import FrontPage from "@/pages/front-page";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 
+// ⚡ INSTANT LOADING - Market pricing (preloaded for performance)
+import MarketPricingDirect from "@/pages/market-pricing-direct";
+
 // ⚡ LAZY LOADING - All other components for speed
 const Landing = lazy(() => import("@/pages/landing"));
 const GPSTest = lazy(() => import("@/pages/gps-test"));
@@ -263,9 +266,9 @@ function Router() {
   
   return (
     <Switch>
-      {/* Market Pricing - Public Access - No auth required */}
-      <Route path="/world-market-pricing" component={lazy(() => import('./pages/simple-market-pricing'))} />
-      <Route path="/lacra-commodity-pricing" component={lazy(() => import('./pages/simple-market-pricing'))} />
+      {/* Market Pricing - Public Access - No auth required - INSTANT LOAD */}
+      <Route path="/world-market-pricing" component={MarketPricingDirect} />
+      <Route path="/lacra-commodity-pricing" component={MarketPricingDirect} />
       
       {/* GPS Testing - Public Access */}
       <Route path="/gps-test" component={GPSTest} />

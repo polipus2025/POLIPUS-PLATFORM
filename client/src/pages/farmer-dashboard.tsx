@@ -64,6 +64,22 @@ export default function FarmerDashboard() {
   const [farmerName] = useState(() => localStorage.getItem("farmerName") || "Farmer");
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Product offer form state
+  const [productOffer, setProductOffer] = useState({
+    commodityType: '',
+    quantityAvailable: '',
+    unit: '',
+    pricePerUnit: '',
+    qualityGrade: '',
+    farmLocation: '',
+    harvestDate: '',
+    availableFromDate: '',
+    paymentTerms: '',
+    deliveryTerms: '',
+    description: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Only fetch farmer data initially (needed for overview) with proper defaults
   const { data: farmer = {} as any } = useQuery({
     queryKey: [`/api/farmers/${farmerId}`],
@@ -111,6 +127,97 @@ export default function FarmerDashboard() {
     localStorage.removeItem("farmerName");
     localStorage.removeItem("farmerToken");
     window.location.href = "/";
+  };
+
+  // Submit product offer mutation
+  const submitProductOfferMutation = useMutation({
+    mutationFn: async (offerData: any) => {
+      return apiRequest('/api/farmer-product-offers', {
+        method: 'POST',
+        body: JSON.stringify(offerData),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Product Offer Submitted Successfully!",
+        description: `${data.notificationsSent} buyers in your county have been notified. They will compete for your product - first to confirm wins!`,
+      });
+      // Reset form
+      setProductOffer({
+        commodityType: '',
+        quantityAvailable: '',
+        unit: '',
+        pricePerUnit: '',
+        qualityGrade: '',
+        farmLocation: '',
+        harvestDate: '',
+        availableFromDate: '',
+        paymentTerms: '',
+        deliveryTerms: '',
+        description: ''
+      });
+      setIsSubmitting(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Submitting Offer",
+        description: error.message || "Failed to submit product offer. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
+  });
+
+  // Handle form submission
+  const handleSubmitProductOffer = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!productOffer.commodityType || !productOffer.quantityAvailable || !productOffer.unit || 
+        !productOffer.pricePerUnit || !productOffer.qualityGrade || !productOffer.farmLocation ||
+        !productOffer.harvestDate || !productOffer.availableFromDate || !productOffer.paymentTerms ||
+        !productOffer.deliveryTerms) {
+      toast({
+        title: "Please fill all required fields",
+        description: "All fields marked with * are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    // Calculate total value
+    const totalValue = parseFloat(productOffer.quantityAvailable) * parseFloat(productOffer.pricePerUnit);
+    
+    const offerData = {
+      farmerId: parseInt(farmerId),
+      farmerName: farmerName,
+      commodityType: productOffer.commodityType,
+      quantityAvailable: parseFloat(productOffer.quantityAvailable),
+      unit: productOffer.unit,
+      pricePerUnit: parseFloat(productOffer.pricePerUnit),
+      totalValue: totalValue,
+      qualityGrade: productOffer.qualityGrade,
+      farmLocation: productOffer.farmLocation,
+      harvestDate: new Date(productOffer.harvestDate),
+      availableFromDate: new Date(productOffer.availableFromDate),
+      paymentTerms: productOffer.paymentTerms,
+      deliveryTerms: productOffer.deliveryTerms,
+      description: productOffer.description,
+      county: farmer?.county || "Nimba", // Use farmer's county
+    };
+
+    submitProductOfferMutation.mutate(offerData);
+  };
+
+  // Handle form field changes
+  const handleOfferChange = (field: string, value: string) => {
+    setProductOffer(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const getStatusColor = (status: string) => {
@@ -1150,15 +1257,18 @@ export default function FarmerDashboard() {
                   The first buyer to confirm gets the transaction!
                 </p>
                 
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmitProductOffer}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Commodity Type *
                       </label>
                       <select 
+                        value={productOffer.commodityType}
+                        onChange={(e) => handleOfferChange('commodityType', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="select-commodity-type"
+                        required
                       >
                         <option value="">Select Commodity</option>
                         <option value="cocoa">Cocoa</option>
@@ -1180,8 +1290,11 @@ export default function FarmerDashboard() {
                         type="number" 
                         step="0.01"
                         placeholder="e.g., 500"
+                        value={productOffer.quantityAvailable}
+                        onChange={(e) => handleOfferChange('quantityAvailable', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="input-quantity"
+                        required
                       />
                     </div>
 
@@ -1190,8 +1303,11 @@ export default function FarmerDashboard() {
                         Unit *
                       </label>
                       <select 
+                        value={productOffer.unit}
+                        onChange={(e) => handleOfferChange('unit', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="select-unit"
+                        required
                       >
                         <option value="">Select Unit</option>
                         <option value="MT">Metric Tons (MT)</option>
@@ -1208,8 +1324,11 @@ export default function FarmerDashboard() {
                         type="number" 
                         step="0.01"
                         placeholder="e.g., 1500"
+                        value={productOffer.pricePerUnit}
+                        onChange={(e) => handleOfferChange('pricePerUnit', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="input-price"
+                        required
                       />
                     </div>
 
@@ -1218,8 +1337,11 @@ export default function FarmerDashboard() {
                         Quality Grade *
                       </label>
                       <select 
+                        value={productOffer.qualityGrade}
+                        onChange={(e) => handleOfferChange('qualityGrade', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="select-quality-grade"
+                        required
                       >
                         <option value="">Select Grade</option>
                         <option value="Premium Grade">Premium Grade</option>
@@ -1237,8 +1359,11 @@ export default function FarmerDashboard() {
                       <input 
                         type="text" 
                         placeholder="e.g., Karnplay Village, Saclepea District"
+                        value={productOffer.farmLocation}
+                        onChange={(e) => handleOfferChange('farmLocation', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="input-farm-location"
+                        required
                       />
                     </div>
 
@@ -1248,8 +1373,11 @@ export default function FarmerDashboard() {
                       </label>
                       <input 
                         type="date" 
+                        value={productOffer.harvestDate}
+                        onChange={(e) => handleOfferChange('harvestDate', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="input-harvest-date"
+                        required
                       />
                     </div>
 
@@ -1259,8 +1387,11 @@ export default function FarmerDashboard() {
                       </label>
                       <input 
                         type="date" 
+                        value={productOffer.availableFromDate}
+                        onChange={(e) => handleOfferChange('availableFromDate', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="input-available-from"
+                        required
                       />
                     </div>
 
@@ -1269,8 +1400,11 @@ export default function FarmerDashboard() {
                         Payment Terms *
                       </label>
                       <select 
+                        value={productOffer.paymentTerms}
+                        onChange={(e) => handleOfferChange('paymentTerms', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="select-payment-terms"
+                        required
                       >
                         <option value="">Select Payment Terms</option>
                         <option value="cash">Cash Payment</option>
@@ -1284,8 +1418,11 @@ export default function FarmerDashboard() {
                         Delivery Terms *
                       </label>
                       <select 
+                        value={productOffer.deliveryTerms}
+                        onChange={(e) => handleOfferChange('deliveryTerms', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         data-testid="select-delivery-terms"
+                        required
                       >
                         <option value="">Select Delivery Terms</option>
                         <option value="farm_pickup">Farm Pickup</option>
@@ -1302,6 +1439,8 @@ export default function FarmerDashboard() {
                     <textarea 
                       rows={3}
                       placeholder="Add any additional details about your product..."
+                      value={productOffer.description}
+                      onChange={(e) => handleOfferChange('description', e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       data-testid="textarea-description"
                     />
@@ -1320,10 +1459,11 @@ export default function FarmerDashboard() {
 
                   <button 
                     type="submit" 
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-semibold"
+                    disabled={isSubmitting}
+                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
                     data-testid="button-submit-offer"
                   >
-                    Submit Product Offer & Notify Buyers
+                    {isSubmitting ? "Submitting..." : "Submit Product Offer & Notify Buyers"}
                   </button>
                 </form>
               </CardContent>

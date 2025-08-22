@@ -145,20 +145,19 @@ export default function ExporterPaymentServices() {
 
   return (
     <CleanExporterLayout user={user}>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-              <Truck className="h-6 w-6 text-white" />
+              <CreditCard className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900">
-              Exporter Payment Portal
+            <h1 className="text-3xl font-bold text-gray-900">
+              Payment Services
             </h1>
           </div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Welcome {username}! Secure export permits, EUDR compliance certificates, and licensing services 
-            for international agricultural commodity exports from Liberia.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Export permits, EUDR compliance certificates, and licensing services for international agricultural exports.
           </p>
         </div>
 

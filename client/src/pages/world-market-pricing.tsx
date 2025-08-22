@@ -128,37 +128,24 @@ export default function WorldMarketPricing() {
       </Helmet>
 
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-blue-200">
+      <div className="bg-white shadow-sm border-b border-blue-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
                 <Globe className="w-7 h-7 text-white" />
               </div>
-              <div>
+              <div className="text-center">
                 <h1 className="text-3xl font-bold text-slate-900">World Market Intelligence</h1>
                 <p className="text-sm text-slate-600">Real-time global commodity prices, statistics & market projections</p>
               </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                <Activity className="w-3 h-3 mr-1" />
-                Live Markets
-              </Badge>
-              <Link href="/exporter-dashboard">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Market Alert Banner */}
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-6 mb-8">

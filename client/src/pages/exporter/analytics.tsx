@@ -83,32 +83,23 @@ const ExporterAnalytics = memo(() => {
         <meta name="description" content="Comprehensive analytics and performance metrics for your export business" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200">
+      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
-              <Link href="/exporter-dashboard">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
-              <div>
+              <div className="text-center">
                 <h1 className="text-2xl font-bold text-slate-900">Analytics & Reports</h1>
                 <p className="text-sm text-slate-600">Performance insights and business intelligence</p>
               </div>
             </div>
-            <Button>
-              Export Report
-            </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">

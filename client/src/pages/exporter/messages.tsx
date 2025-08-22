@@ -81,20 +81,14 @@ const ExporterMessages = memo(() => {
         <meta name="description" content="Secure messaging with buyers, officials, and logistics partners" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200">
+      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
-              <Link href="/exporter-dashboard">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                 <MessageSquare className="w-6 h-6 text-white" />
               </div>
-              <div>
+              <div className="text-center">
                 <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
                 <p className="text-sm text-slate-600">Secure communication portal</p>
               </div>
@@ -103,7 +97,7 @@ const ExporterMessages = memo(() => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
           {/* Conversations List */}
           <Card className="lg:col-span-1">

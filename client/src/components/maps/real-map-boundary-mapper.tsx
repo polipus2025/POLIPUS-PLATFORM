@@ -65,6 +65,8 @@ export default function RealMapBoundaryMapper({
   const [eudrReport, setEudrReport] = useState<EUDRComplianceReport | null>(null);
   const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showInteractiveView, setShowInteractiveView] = useState(false);
+  const [boundaryCompleted, setBoundaryCompleted] = useState(false);
 
   // Enhanced function to get location-specific high-resolution satellite imagery
   const getSatelliteTiles = (lat: number, lng: number, zoom: number = 18) => {
@@ -1322,6 +1324,9 @@ export default function RealMapBoundaryMapper({
         deforestationReport: deforestationReport
       };
       
+      setBoundaryCompleted(true);
+      setStatus(`Boundary mapping complete! ${points.length} points connected. Interactive view available.`);
+      
       onBoundaryComplete({ 
         points, 
         area, 
@@ -1402,7 +1407,12 @@ export default function RealMapBoundaryMapper({
               Stop Tracking
             </Button>
             <Button
-              onClick={addCurrentGPSPoint}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                addCurrentGPSPoint();
+              }}
               disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
               size="sm"
               variant="default"
@@ -1619,18 +1629,87 @@ export default function RealMapBoundaryMapper({
             Reset
           </Button>
           <Button
-            onClick={handleComplete}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleComplete();
+            }}
             disabled={!canComplete}
             size="sm"
           >
             <Check className="h-4 w-4 mr-1" />
             Complete ({points.length}/{minPoints}+)
           </Button>
+          {boundaryCompleted && (
+            <Button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowInteractiveView(true);
+              }}
+              size="sm"
+              variant="outline"
+              className="bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100"
+            >
+              <MapPin className="h-4 w-4 mr-1" />
+              View Interactive Map
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Map Container */}
       <div ref={mapRef} />
+      
+      {/* Interactive Map View Modal */}
+      {showInteractiveView && boundaryCompleted && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Interactive Boundary Map - Connected Points</h3>
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowInteractiveView(false);
+                }}
+                variant="outline"
+                size="sm"
+              >
+                Close
+              </Button>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg mb-4">
+              <h4 className="font-medium text-blue-800 mb-2">Connected Boundary Points:</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                {points.map((point, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
+                      index === 0 ? 'bg-green-600' : 
+                      index === points.length - 1 ? 'bg-red-600' : 'bg-blue-600'
+                    }`}>
+                      {String.fromCharCode(65 + index)}
+                    </div>
+                    <span className="text-gray-700">
+                      {point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600 font-medium">Interactive Boundary Map</p>
+                <p className="text-sm text-gray-500">All {points.length} GPS points connected: {points.map((_, i) => String.fromCharCode(65 + i)).join(' → ')}</p>
+                <p className="text-sm text-green-600 mt-2">✓ Boundary mapping complete with {calculateArea(points).toFixed(2)} hectares</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

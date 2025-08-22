@@ -285,7 +285,10 @@ export default function OnboardFarmer() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(e);
+        }}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* Left Column - Farmer Information */}

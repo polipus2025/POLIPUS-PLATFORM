@@ -9,6 +9,47 @@ export default function MarketPricingDirect() {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
+  // Funzione per controllare se un mercato è aperto
+  const isMarketOpen = (exchange: string): boolean => {
+    const now = new Date();
+    const utcHour = now.getUTCHours();
+    const dayOfWeek = now.getUTCDay(); // 0 = Domenica, 6 = Sabato
+    
+    // Weekend - tutti i mercati chiusi
+    if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+    
+    switch (exchange) {
+      case 'ICE': // ICE (New York) - 14:30-21:00 UTC
+        return utcHour >= 14 && utcHour < 21;
+      case 'Bursa Malaysia': // Bursa Malaysia - 01:30-09:00 UTC  
+        return utcHour >= 1 && utcHour < 9;
+      case 'TOCOM': // Tokyo - 00:00-15:15 UTC (con pausa 06:00-07:30)
+        return (utcHour >= 0 && utcHour < 6) || (utcHour >= 7 && utcHour < 15);
+      case 'Regional': // Mercati regionali - considera aperti durante ore lavorative globali
+        return utcHour >= 8 && utcHour < 20;
+      default:
+        return false;
+    }
+  };
+
+  // Funzione per ottenere lo status del mercato
+  const getMarketStatus = (exchange: string): { status: string; color: string; bgColor: string } => {
+    const isOpen = isMarketOpen(exchange);
+    if (isOpen) {
+      return { 
+        status: 'LIVE', 
+        color: 'text-green-600', 
+        bgColor: 'bg-green-500' 
+      };
+    } else {
+      return { 
+        status: 'CLOSED', 
+        color: 'text-red-600', 
+        bgColor: 'bg-red-500' 
+      };
+    }
+  };
+
   // ⚡ REAL-TIME COMMODITY DATA - connessione API reali
   const { data: commodityData, refetch: refetchCommodities, isLoading } = useQuery({
     queryKey: ['/api/commodity-prices'],
@@ -44,10 +85,11 @@ export default function MarketPricingDirect() {
   
   const marketMetrics = {
     totalTracked: commodityPrices.length || 6,
-    bullishCount: commodityPrices.filter(c => c.changePercent > 0).length || 0,
-    bearishCount: commodityPrices.filter(c => c.changePercent < 0).length || 0,
+    bullishCount: commodityPrices.filter((c: any) => c.changePercent > 0).length || 0,
+    bearishCount: commodityPrices.filter((c: any) => c.changePercent < 0).length || 0,
     avgVolatility: 2.4,
-    highAlerts: commodityPrices.filter(c => Math.abs(c.changePercent) > 3).length || 0
+    highAlerts: commodityPrices.filter((c: any) => Math.abs(c.changePercent) > 3).length || 0,
+    openMarkets: commodityPrices.filter((c: any) => isMarketOpen(c.exchange)).length || 0
   };
 
   const tradingRecommendations = [
@@ -90,8 +132,12 @@ export default function MarketPricingDirect() {
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               <div>
-                <h2 className="text-xl font-bold">🔴 LIVE Market Intelligence - DATI REALI</h2>
-                <p className="text-blue-100">Alpha Vantage & Nasdaq Data Link • Aggiornamento ogni 60 secondi • Ultimo: {commodityData?.lastUpdated || 'Caricamento...'}</p>
+                <h2 className="text-xl font-bold">
+                  {marketMetrics.openMarkets > 0 ? '🔴 LIVE' : '🔴 CLOSED'} Market Intelligence - DATI REALI
+                </h2>
+                <p className="text-blue-100">
+                  Alpha Vantage & Nasdaq Data Link • Mercati aperti: {marketMetrics.openMarkets}/{marketMetrics.totalTracked} • Ultimo: {commodityData?.lastUpdated || 'Caricamento...'}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -154,11 +200,11 @@ export default function MarketPricingDirect() {
           <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Avg Volatility</p>
-                <p className="text-3xl font-bold text-purple-900">{marketMetrics.avgVolatility}%</p>
+                <p className="text-sm font-medium text-purple-600">Mercati Aperti</p>
+                <p className="text-3xl font-bold text-purple-900">{marketMetrics.openMarkets}/{marketMetrics.totalTracked}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">⚡</span>
+                <span className="text-2xl">🕒</span>
               </div>
             </div>
           </div>
@@ -193,8 +239,15 @@ export default function MarketPricingDirect() {
                       <p className="text-sm text-slate-600">{commodity.exchange}</p>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-green-600 font-medium">REAL-TIME</span>
+                      {(() => {
+                        const status = getMarketStatus(commodity.exchange);
+                        return (
+                          <>
+                            <div className={`w-2 h-2 rounded-full ${status.bgColor} ${status.status === 'LIVE' ? 'animate-pulse' : ''}`}></div>
+                            <span className={`text-xs font-medium ${status.color}`}>{status.status}</span>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                   
@@ -316,12 +369,12 @@ export default function MarketPricingDirect() {
               </div>
               
               <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-4">
-                <h4 className="font-semibold text-purple-900 mb-2">⚡ Dati di Mercato Reali</h4>
-                <div className="text-sm text-purple-700">
-                  • <strong>Fonti:</strong> Alpha Vantage & Nasdaq Data Link<br/>
-                  • <strong>Automatico:</strong> Ogni 60 secondi<br/>
-                  • <strong>Manuale:</strong> Pulsante "Aggiorna Dati Reali"<br/>
-                  • <strong>Tipo:</strong> Prezzi live dal mercato globale
+                <h4 className="font-semibold text-purple-900 mb-2">🕒 Status Mercati in Tempo Reale</h4>
+                <div className="text-sm text-purple-700 space-y-1">
+                  • <strong>ICE (NY):</strong> {getMarketStatus('ICE').status} • 14:30-21:00 UTC<br/>
+                  • <strong>Bursa Malaysia:</strong> {getMarketStatus('Bursa Malaysia').status} • 01:30-09:00 UTC<br/>
+                  • <strong>TOCOM (Tokyo):</strong> {getMarketStatus('TOCOM').status} • 00:00-15:15 UTC<br/>
+                  • <strong>Mercati Regionali:</strong> {getMarketStatus('Regional').status} • 08:00-20:00 UTC
                 </div>
               </div>
             </div>

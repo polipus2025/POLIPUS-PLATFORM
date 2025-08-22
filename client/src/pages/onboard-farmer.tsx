@@ -236,10 +236,10 @@ export default function OnboardFarmer() {
         return;
       }
 
-      if (!farmerData.boundaryData || !farmerData.boundaryData.points || farmerData.boundaryData.points.length < 3) {
+      if (!farmerData.boundaryData || !farmerData.boundaryData.points || farmerData.boundaryData.points.length < 6) {
         toast({
-          title: "Incomplete Boundary Mapping",
-          description: "Please complete the farm boundary mapping with at least 3 GPS points",
+          title: "Incomplete Boundary Mapping", 
+          description: "Please complete the farm boundary mapping with at least 6 GPS points",
           variant: "destructive",
         });
         return;
@@ -654,6 +654,7 @@ export default function OnboardFarmer() {
 
                     <RealMapBoundaryMapper
                       onBoundaryComplete={(boundary) => {
+                        // Update farmer data with boundary information
                         setFarmerData(prev => ({
                           ...prev,
                           boundaryData: boundary,
@@ -663,14 +664,12 @@ export default function OnboardFarmer() {
                             prev.gpsCoordinates
                         }));
                         
-                        // Show interactive boundary completed view with all connected points
+                        // Show interactive boundary completed view - NO automatic saving here
                         toast({
-                          title: "✅ Interactive Boundary Map Complete!",
-                          description: `All ${boundary.points.length} GPS points connected and mapped on real land. Ready for farmer onboarding completion.`,
+                          title: "✅ Interactive Boundary View Complete!",
+                          description: `All ${boundary.points.length} GPS points connected and mapped. You can see the interactive boundary view. Click 'Save Farm Data & Continue' when ready.`,
                           duration: 5000,
                         });
-                        
-                        // Boundary is ready for onboarding - no status update needed
                       }}
                       minPoints={6}
                       maxPoints={20}

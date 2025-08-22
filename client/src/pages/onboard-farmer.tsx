@@ -663,12 +663,18 @@ export default function OnboardFarmer() {
                             prev.gpsCoordinates
                         }));
                         
-                        // Show boundary completion message but don't save yet
+                        // Show interactive boundary completed view with all connected points
                         toast({
-                          title: "Farm Boundary Mapped Successfully",
-                          description: `Farm mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares). Now click 'Complete Farmer Onboarding' to finalize.`,
+                          title: "✅ Interactive Boundary Map Complete!",
+                          description: `All ${boundary.points.length} GPS points connected and mapped on real land. Ready for farmer onboarding completion.`,
+                          duration: 5000,
                         });
+                        
+                        // Boundary is ready for onboarding - no status update needed
                       }}
+                      minPoints={6}
+                      maxPoints={20}
+                      enableRealTimeGPS={true}
                     />
                   </div>
                 </CardContent>

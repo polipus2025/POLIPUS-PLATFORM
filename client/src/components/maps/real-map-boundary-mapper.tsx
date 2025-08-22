@@ -1056,6 +1056,7 @@ export default function RealMapBoundaryMapper({
     setDeforestationReport(null);
   };
 
+
   // Professional PDF Report Generation with AgriTrace LACRA Letterhead
   const generateProfessionalEUDRReport = () => {
     if (points.length < 6 || !eudrReport) return;

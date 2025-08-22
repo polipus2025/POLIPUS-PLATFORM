@@ -687,11 +687,11 @@ export default function OnboardFarmer() {
                         enableRealTimeGPS={true}
                       />
                     ) : (
-                      <div className="p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center">
-                        <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-600 mb-2">GPS Location Required</h3>
-                        <p className="text-gray-500 mb-4">Please click "Get Location" first to detect GPS coordinates before mapping farm boundaries.</p>
-                        <p className="text-sm text-blue-600 font-medium">Step 2: Get Real GPS Coordinates → Step 3: Start GPS Tracking</p>
+                      <div className="p-4 sm:p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center">
+                        <MapPin className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                        <h3 className="text-base sm:text-lg font-medium text-gray-600 mb-2">GPS Location Required</h3>
+                        <p className="text-sm sm:text-base text-gray-500 mb-3 sm:mb-4 px-2">Please click "Get Location" first to detect GPS coordinates before mapping farm boundaries.</p>
+                        <p className="text-xs sm:text-sm text-blue-600 font-medium px-2">Step 2: Get Real GPS Coordinates → Step 3: Start GPS Tracking</p>
                       </div>
                     )}
                   </div>
@@ -700,18 +700,18 @@ export default function OnboardFarmer() {
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="mt-8 flex justify-end">
+          {/* Submit Button - Mobile Optimized */}
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-0">
             {isFormComplete && savedFarmer ? (
-              <div className="flex items-center space-x-4">
-                <div className="text-green-600 font-medium">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <div className="text-green-600 font-medium text-center sm:text-left text-sm sm:text-base">
                   ✓ Farm data saved successfully
                 </div>
                 <Button 
                   type="submit" 
                   size="lg" 
                   disabled={completeOnboarding.isPending}
-                  className="min-w-48 bg-green-600 hover:bg-green-700"
+                  className="w-full sm:min-w-48 bg-green-600 hover:bg-green-700 py-3 text-sm sm:text-base"
                 >
                   {completeOnboarding.isPending ? "Generating Credentials..." : "Complete Farmer Onboarding"}
                 </Button>
@@ -721,7 +721,7 @@ export default function OnboardFarmer() {
                 type="submit" 
                 size="lg" 
                 disabled={saveFarmerData.isPending || !farmerData.boundaryData}
-                className="min-w-48"
+                className="w-full sm:min-w-48 py-3 text-sm sm:text-base"
               >
                 {saveFarmerData.isPending ? "Saving Farm Data..." : "Save Farm Data & Continue"}
               </Button>
@@ -732,8 +732,8 @@ export default function OnboardFarmer() {
 
       {/* Farmer Credentials Modal */}
       {showCredentialsModal.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md bg-green-50 border-green-200">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
+          <Card className="w-full max-w-sm sm:max-w-md bg-green-50 border-green-200 mx-2 sm:mx-0">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">

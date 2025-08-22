@@ -735,4 +735,24 @@
   .fadeInUp {
     animation: fadeInUp 0.6s ease-out forwards;
   }
+
+  /* GPS Boundary Mapping - Touch optimizations */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .interactive-marker {
+    min-width: 32px !important;
+    min-height: 32px !important;
+    touch-action: manipulation;
+  }
+  
+  .real-map, .fallback-map {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
 }

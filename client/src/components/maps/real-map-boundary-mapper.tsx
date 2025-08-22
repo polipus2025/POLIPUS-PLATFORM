@@ -119,21 +119,23 @@ export default function RealMapBoundaryMapper({
         position: absolute;
         left: ${x}px;
         top: ${y}px;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         background: ${index === 0 ? '#22c55e' : index === currentPoints.length - 1 ? '#ff6b35' : '#3b82f6'};
-        border: 2px solid white;
+        border: 3px solid white;
         transform: translate(-50%, -50%);
         z-index: 100;
-        cursor: grab;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: bold;
         color: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+        touch-action: manipulation;
+        user-select: none;
       `;
       marker.textContent = String.fromCharCode(65 + index);
       marker.title = `Point ${String.fromCharCode(65 + index)} - ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
@@ -166,7 +168,7 @@ export default function RealMapBoundaryMapper({
         line.setAttribute('x2', x2.toString());
         line.setAttribute('y2', y2.toString());
         line.setAttribute('stroke', i === currentPoints.length - 2 ? '#ff6b35' : '#22c55e'); // Latest line orange, others green
-        line.setAttribute('stroke-width', '4'); // Make lines thicker and more visible
+        line.setAttribute('stroke-width', '5'); // Make lines thicker for mobile visibility
         line.setAttribute('stroke-opacity', '0.9');
         line.setAttribute('fill', 'none');
         line.style.pointerEvents = 'none';
@@ -198,7 +200,7 @@ export default function RealMapBoundaryMapper({
         closingLine.setAttribute('x2', x2.toString());
         closingLine.setAttribute('y2', y2.toString());
         closingLine.setAttribute('stroke', '#10b981'); // Bright green for closing line
-        closingLine.setAttribute('stroke-width', '5'); // Thicker closing line
+        closingLine.setAttribute('stroke-width', '6'); // Extra thick closing line for mobile
         closingLine.setAttribute('stroke-dasharray', '10,5');
         closingLine.setAttribute('stroke-opacity', '1');
         closingLine.setAttribute('fill', 'none');
@@ -1534,14 +1536,15 @@ export default function RealMapBoundaryMapper({
 
       {/* Controls */}
       <div className="flex justify-between items-center">
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 sm:flex gap-2">
           <Button
             onClick={handleReset}
             variant="outline"
             size="sm"
             disabled={points.length === 0}
+            className="py-2 px-3 text-xs sm:text-sm touch-manipulation"
           >
-            <RotateCcw className="h-4 w-4 mr-1" />
+            <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Reset
           </Button>
           <Button
@@ -1553,8 +1556,9 @@ export default function RealMapBoundaryMapper({
             }}
             disabled={!canComplete}
             size="sm"
+            className="py-2 px-3 text-xs sm:text-sm touch-manipulation"
           >
-            <Check className="h-4 w-4 mr-1" />
+            <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Complete ({points.length}/{minPoints}+)
           </Button>
           {boundaryCompleted && (
@@ -1581,8 +1585,8 @@ export default function RealMapBoundaryMapper({
       
       {/* Interactive Map View Modal */}
       {showInteractiveView && boundaryCompleted && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg p-3 sm:p-6 w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Interactive Boundary Map - Connected Points</h3>
               <Button
@@ -1599,7 +1603,7 @@ export default function RealMapBoundaryMapper({
             </div>
             <div className="bg-blue-50 p-4 rounded-lg mb-4">
               <h4 className="font-medium text-blue-800 mb-2">Connected Boundary Points:</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs sm:text-sm">
                 {points.map((point, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
@@ -1615,7 +1619,7 @@ export default function RealMapBoundaryMapper({
                 ))}
               </div>
             </div>
-            <div className="relative h-96 bg-gray-900 rounded-lg overflow-hidden border-2 border-blue-300">
+            <div className="relative h-64 sm:h-96 bg-gray-900 rounded-lg overflow-hidden border-2 border-blue-300">
               <div 
                 className="w-full h-full bg-cover bg-center relative"
                 style={{

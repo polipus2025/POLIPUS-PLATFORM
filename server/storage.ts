@@ -9,6 +9,7 @@ import {
   userSessions,
   userPermissions,
   farmers,
+  farmerCredentials,
   farmPlots,
   cropPlanning,
   harvestRecords,

@@ -121,6 +121,8 @@ import {
   type InsertUserSession,
   type InsertUserPermission,
   type InsertFarmer,
+  type FarmerCredentials,
+  type InsertFarmerCredentials,
   type InsertFarmPlot,
   type InsertCropPlan,
   type InsertHarvestRecord,
@@ -1393,6 +1395,42 @@ export class DatabaseStorage implements IStorage {
   async createFarmer(farmer: InsertFarmer): Promise<Farmer> {
     const [newFarmer] = await db.insert(farmers).values(farmer).returning();
     return newFarmer;
+  }
+
+  // Farmer credentials management
+  async createFarmerCredentials(credentials: InsertFarmerCredentials): Promise<FarmerCredentials> {
+    const [newCredentials] = await db.insert(farmerCredentials).values(credentials).returning();
+    return newCredentials;
+  }
+
+  async getFarmerCredentials(farmerId: number): Promise<FarmerCredentials | undefined> {
+    const [credentials] = await db.select().from(farmerCredentials).where(eq(farmerCredentials.farmerId, farmerId));
+    return credentials || undefined;
+  }
+
+  async getFarmerCredentialsByUsername(username: string): Promise<FarmerCredentials | undefined> {
+    const [credentials] = await db.select().from(farmerCredentials).where(eq(farmerCredentials.username, username));
+    return credentials || undefined;
+  }
+
+  async incrementFailedLoginAttempts(credentialsId: number): Promise<void> {
+    const credentials = await db.select().from(farmerCredentials).where(eq(farmerCredentials.id, credentialsId));
+    if (credentials.length === 0) return;
+
+    const current = credentials[0];
+    const failedAttempts = (current.failedLoginAttempts || 0) + 1;
+    const updates: any = {
+      failedLoginAttempts: failedAttempts
+    };
+
+    // Lock account after 5 failed attempts for 30 minutes
+    if (failedAttempts >= 5) {
+      updates.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
+    }
+
+    await db.update(farmerCredentials)
+      .set(updates)
+      .where(eq(farmerCredentials.id, credentialsId));
   }
 
   async updateFarmer(id: number, farmer: Partial<Farmer>): Promise<Farmer | undefined> {

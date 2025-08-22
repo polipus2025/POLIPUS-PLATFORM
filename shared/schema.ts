@@ -3928,6 +3928,10 @@ export type InsertCertificateApproval = typeof certificateApprovals.$inferInsert
 export type CertificateType = typeof certificateTypes.$inferSelect;
 export type InsertCertificateType = typeof certificateTypes.$inferInsert;
 
+// Farmer Credentials Types
+export type FarmerCredentials = typeof farmerCredentials.$inferSelect;
+export type InsertFarmerCredentials = z.infer<typeof insertFarmerCredentialSchema>;
+
 // Additional buyer and exporter schema types already defined above
 
 

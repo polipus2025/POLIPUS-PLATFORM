@@ -37,8 +37,8 @@ export function registerFarmerRoutes(app: Express) {
         dependents: farmerData.dependents ? parseInt(farmerData.dependents) : null,
         farmingExperience: farmerData.farmingExperience ? parseInt(farmerData.farmingExperience) : null,
         irrigationAccess: farmerData.irrigationAccess === "true" || farmerData.irrigationAccess === true,
-        farmBoundaries: farmerData.boundaryData ? JSON.parse(farmerData.boundaryData) : null,
-        landMapData: farmerData.boundaryData ? JSON.parse(farmerData.boundaryData) : null
+        farmBoundaries: farmerData.farmBoundaries || null,
+        landMapData: farmerData.landMapData || null
       });
 
       // Generate login credentials

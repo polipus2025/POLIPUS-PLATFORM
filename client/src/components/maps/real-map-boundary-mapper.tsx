@@ -76,8 +76,23 @@ export default function RealMapBoundaryMapper({
     // Clear ALL previous markers/lines for fresh rendering
     mapContainer.querySelectorAll('.interactive-marker, .interactive-line, .area-display').forEach(el => el.remove());
     
-    const svg = mapContainer.querySelector('svg');
-    if (svg) svg.innerHTML = '';
+    // Ensure SVG exists and is properly set up for line rendering
+    let svg = mapContainer.querySelector('svg');
+    if (!svg) {
+      svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', '100%');
+      svg.style.position = 'absolute';
+      svg.style.top = '0';
+      svg.style.left = '0';
+      svg.style.pointerEvents = 'none';
+      svg.style.zIndex = '5';
+      mapContainer.appendChild(svg);
+      console.log('🔧 Created new SVG for line rendering');
+    } else {
+      svg.innerHTML = '';
+      console.log('🔧 Cleared existing SVG for fresh line rendering');
+    }
 
     if (currentPoints.length === 0) return;
 
@@ -150,12 +165,15 @@ export default function RealMapBoundaryMapper({
         line.setAttribute('y1', y1.toString());
         line.setAttribute('x2', x2.toString());
         line.setAttribute('y2', y2.toString());
-        line.setAttribute('stroke', i === currentPoints.length - 2 ? '#ff6b35' : '#3b82f6'); // Latest line orange
-        line.setAttribute('stroke-width', i === currentPoints.length - 2 ? '3' : '2'); // Latest line thicker
-        line.setAttribute('stroke-dasharray', '5,5');
+        line.setAttribute('stroke', i === currentPoints.length - 2 ? '#ff6b35' : '#22c55e'); // Latest line orange, others green
+        line.setAttribute('stroke-width', '4'); // Make lines thicker and more visible
+        line.setAttribute('stroke-opacity', '0.9');
+        line.setAttribute('fill', 'none');
+        line.style.pointerEvents = 'none';
+        line.style.zIndex = '10';
         svg.appendChild(line);
         
-        console.log(`🔗 REAL CONNECTION: Point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)} - GPS distance calculated`);
+        console.log(`🔗 VISIBLE LINE: Point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)} at pixels (${x1.toFixed(0)},${y1.toFixed(0)}) → (${x2.toFixed(0)},${y2.toFixed(0)})`);
       }
 
       // Close polygon with REAL coordinates when 6+ points
@@ -179,12 +197,15 @@ export default function RealMapBoundaryMapper({
         closingLine.setAttribute('y1', y1.toString());
         closingLine.setAttribute('x2', x2.toString());
         closingLine.setAttribute('y2', y2.toString());
-        closingLine.setAttribute('stroke', '#22c55e');
-        closingLine.setAttribute('stroke-width', '3');
-        closingLine.setAttribute('stroke-dasharray', '8,4');
+        closingLine.setAttribute('stroke', '#10b981'); // Bright green for closing line
+        closingLine.setAttribute('stroke-width', '5'); // Thicker closing line
+        closingLine.setAttribute('stroke-dasharray', '10,5');
+        closingLine.setAttribute('stroke-opacity', '1');
+        closingLine.setAttribute('fill', 'none');
+        closingLine.style.pointerEvents = 'none';
         svg.appendChild(closingLine);
         
-        console.log(`🔗 REAL POLYGON CLOSED: Last point (${lastPoint.latitude.toFixed(6)}, ${lastPoint.longitude.toFixed(6)}) connected to first point (${firstPoint.latitude.toFixed(6)}, ${firstPoint.longitude.toFixed(6)})`);
+        console.log(`🔗 POLYGON CLOSED: Closing line from (${x1.toFixed(0)},${y1.toFixed(0)}) to (${x2.toFixed(0)},${y2.toFixed(0)}) - SHOULD BE VISIBLE`);
       }
     }
 

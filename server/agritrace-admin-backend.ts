@@ -261,23 +261,43 @@ export class AgriTraceAdminController {
     ]);
 
     return {
+      systemInfo: {
+        platform: 'AgriTrace360™ Control Center',
+        module: 'Agricultural Traceability System',
+        scope: 'AgriTrace Module Only',
+        adminType: 'Limited Administrative Activity',
+        version: '1.0.0',
+        lastUpdated: new Date().toISOString()
+      },
       systemHealth: {
         status: 'healthy',
         uptime: process.uptime(),
         memory: process.memoryUsage(),
         cpu: os.loadavg(),
-        moduleSpecific: 'agritrace'
+        moduleSpecific: 'agritrace_only'
       },
       recentActivity: health.slice(0, 10),
       activeFeatures: features.filter(f => f.isEnabled),
       activeControls: controls,
       performanceOverview: {
-        avgResponseTime: metrics.reduce((acc, m) => acc + parseFloat(m.responseTime || '0'), 0) / metrics.length,
-        errorRate: metrics.filter(m => m.errorCount && m.errorCount > 0).length / metrics.length,
+        avgResponseTime: metrics.reduce((acc, m) => acc + parseFloat(m.responseTime || '0'), 0) / metrics.length || 0,
+        errorRate: metrics.length > 0 ? metrics.filter(m => m.errorCount && m.errorCount > 0).length / metrics.length : 0,
         throughput: metrics.reduce((acc, m) => acc + (m.throughput || 0), 0)
       },
-      module: 'AgriTrace360™',
-      scope: 'limited_admin_activity'
+      restrictions: {
+        platformAccess: false,
+        otherModules: false,
+        globalControls: false,
+        crossModuleData: false
+      },
+      capabilities: [
+        'AgriTrace Configuration Management',
+        'Agricultural Feature Controls', 
+        'Farm System Monitoring',
+        'LACRA Compliance Oversight',
+        'Farmer Portal Administration',
+        'Export System Controls'
+      ]
     };
   }
 }

@@ -1071,7 +1071,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName: agriTraceAdminCredentials[username].firstName,
           lastName: agriTraceAdminCredentials[username].lastName,
           scope: 'AgriTrace360™ Module Only',
-          platform: 'AgriTrace (Limited Admin Activity)'
+          platform: 'AgriTrace360™ System Administrator',
+          systemName: 'AgriTrace Control Center',
+          moduleScope: 'Agricultural Traceability Only'
         }
       });
     } catch (error) {

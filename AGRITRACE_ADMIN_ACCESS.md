@@ -1,7 +1,7 @@
 # AgriTrace360™ System Administrator Access
 
 ## Overview
-The AgriTrace360™ module now has its own dedicated system administrator with limited administrative activity, separate from the broader Polipus platform. This modular approach ensures each module maintains its own controlled administrative scope.
+AgriTrace360™ has its own dedicated system administrator with limited administrative activity. This is NOT the Polipus Platform Control Center - this system is exclusively for AgriTrace agricultural traceability management only.
 
 ## AgriTrace System Administrator Credentials
 
@@ -31,10 +31,11 @@ The AgriTrace360™ module now has its own dedicated system administrator with l
 - **Activity Logging** - AgriTrace administrative actions
 
 ### **❌ Restricted Functions:**
-- **No Polipus Platform Access** - Cannot control other modules
-- **No Cross-Module Administration** - Limited to AgriTrace only
-- **No Global System Changes** - Cannot affect platform-wide settings
-- **No Other Module Data** - Cannot access Live Trace, Land Map360, etc.
+- **No Polipus Platform Control** - This is NOT Polipus Platform Control Center
+- **No Cross-Module Administration** - AgriTrace agricultural system only
+- **No Global System Changes** - Cannot affect other systems
+- **No Other Module Data** - Cannot access any non-agricultural modules
+- **No Platform-Wide Controls** - Limited to agricultural traceability only
 
 ## API Endpoints
 

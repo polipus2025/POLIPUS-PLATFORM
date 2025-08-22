@@ -42,22 +42,34 @@ export default function SystemAdminLogin() {
     setError("");
 
     try {
-      // For demonstration purposes, using simple validation
-      // In production, this would authenticate against a secure system
-      if (data.username === "sysadmin" && data.password === "Admin2025!" && data.accessCode === "POLIPUS-SYS") {
+      // Use the new AgriTrace admin API
+      const response = await apiRequest('/api/agritrace-admin/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: data.username,
+          password: data.password,
+          accessCode: data.accessCode
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.success) {
         toast({
           title: "Login Successful",
-          description: "Welcome to System Administrator Portal",
+          description: `Welcome to ${response.user.platform}`,
         });
         
-        localStorage.setItem("authToken", "sys-admin-token");
-        localStorage.setItem("userRole", "system_administrator");
-        localStorage.setItem("userType", "system_admin");
-        localStorage.setItem("username", data.username);
+        localStorage.setItem("authToken", response.token);
+        localStorage.setItem("userRole", response.user.role);
+        localStorage.setItem("userType", response.user.userType);
+        localStorage.setItem("username", response.user.username);
+        localStorage.setItem("adminScope", response.user.scope);
         
-        window.location.href = "/system-admin-portal";
+        window.location.href = "/agritrace-admin-portal";
       } else {
-        throw new Error("Invalid credentials or access code");
+        throw new Error(response.message || "Authentication failed");
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";
@@ -75,8 +87,8 @@ export default function SystemAdminLogin() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <Helmet>
-        <title>System Administrator Login - Polipus Platform</title>
-        <meta name="description" content="Secure login portal for system administrators" />
+        <title>AgriTrace System Administrator Login</title>
+        <meta name="description" content="Secure login portal for AgriTrace system administrators" />
       </Helmet>
 
       <div className="w-full max-w-md">
@@ -101,10 +113,10 @@ export default function SystemAdminLogin() {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">
-              System Administrator
+              AgriTrace System Administrator
             </CardTitle>
             <p className="text-gray-600 mt-2">
-              Polipus Platform Control Center
+              AgriTrace360™ Control Center
             </p>
             <div className="flex items-center justify-center gap-2 mt-3">
               <Database className="h-4 w-4 text-slate-500" />
@@ -190,12 +202,12 @@ export default function SystemAdminLogin() {
             <div className="mt-6 pt-4 border-t border-gray-200">
               <div className="text-center">
                 <p className="text-sm text-gray-600 mb-2">
-                  Demo Credentials (for testing):
+                  AgriTrace Admin Credentials:
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
-                  <p>Username: <span className="font-mono">sysadmin</span></p>
-                  <p>Password: <span className="font-mono">Admin2025!</span></p>
-                  <p>Access Code: <span className="font-mono">POLIPUS-SYS</span></p>
+                  <p>Username: <span className="font-mono">agritrace.admin</span></p>
+                  <p>Password: <span className="font-mono">agritrace123</span></p>
+                  <p>Access Code: <span className="font-mono">AGRITRACE2025</span></p>
                 </div>
               </div>
             </div>

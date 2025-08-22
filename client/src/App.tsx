@@ -855,6 +855,11 @@ function App() {
   const isLandMap360Page = window.location.pathname.startsWith("/landmap360") || window.location.pathname === "/land-map360";
   const isBlueCarbon360Page = window.location.pathname.startsWith("/blue-carbon360");
   
+  // STANDALONE ADMIN PORTALS - No layout wrapper
+  const isAgriTraceAdminPortal = window.location.pathname === "/agritrace-admin-portal";
+  const isSystemAdminPortal = window.location.pathname === "/system-admin-portal";
+  const isRegulatoryPortalClassic = window.location.pathname === "/regulatory-portal-classic";
+  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -867,8 +872,8 @@ function App() {
               </div>
             </div>
           }>
-            {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page) ? (
-              // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, or Blue Carbon 360 pages without AgriTrace layout
+            {(isAuthPage || isLandingPage || isFrontPage || (isMonitoringDashboard && !isDashboardPage) || isLiveTracePage || isLandMap360Page || isBlueCarbon360Page || isAgriTraceAdminPortal || isSystemAdminPortal || isRegulatoryPortalClassic) ? (
+              // Render auth/landing pages, special dashboards, LiveTrace, LandMap360, Blue Carbon 360, or standalone admin portals without layout
               <div className="min-h-screen">
                 <Router />
               </div>

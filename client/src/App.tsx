@@ -263,6 +263,10 @@ function Router() {
   
   return (
     <Switch>
+      {/* Market Pricing - Public Access - No auth required */}
+      <Route path="/world-market-pricing" component={lazy(() => import('./pages/simple-market-pricing'))} />
+      <Route path="/lacra-commodity-pricing" component={lazy(() => import('./pages/simple-market-pricing'))} />
+      
       {/* GPS Testing - Public Access */}
       <Route path="/gps-test" component={GPSTest} />
       
@@ -710,8 +714,8 @@ function Router() {
           </Route>
           
           {/* LACRA Commodity Pricing - Available to all users */}
-          <Route path="/world-market-pricing" component={WorldMarketPricing} />
-          <Route path="/lacra-commodity-pricing" component={WorldMarketPricing} />
+          <Route path="/world-market-pricing" component={lazy(() => import('./pages/simple-market-pricing'))} />
+          <Route path="/lacra-commodity-pricing" component={lazy(() => import('./pages/simple-market-pricing'))} />
           
           {/* Exporter Portal World Market Pricing */}
           <Route path="/exporter-portal/world-market-pricing" component={WorldMarketPricing} />
@@ -875,7 +879,6 @@ function App() {
   
   // EXPORTER PORTAL - Uses CleanExporterLayout with its own header
   const isExporterPage = window.location.pathname.startsWith("/exporter") || 
-                         window.location.pathname === "/world-market-pricing" ||
                          window.location.pathname.startsWith("/exporter-portal");
   
   // STANDALONE ADMIN PORTALS - No layout wrapper

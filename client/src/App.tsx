@@ -714,7 +714,7 @@ function Router() {
           <Route path="/lacra-commodity-pricing" component={WorldMarketPricing} />
           
           {/* Exporter Portal World Market Pricing */}
-          <Route path="/exporter-portal/world-market-pricing" component={lazy(() => import("@/pages/world-market-pricing"))} />
+          <Route path="/exporter-portal/world-market-pricing" component={WorldMarketPricing} />
           
           {/* Exporter Portal Pages */}
           <Route path="/exporter/orders" component={ExporterOrders} />

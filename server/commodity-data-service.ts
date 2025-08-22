@@ -68,8 +68,8 @@ export class CommodityDataService {
       const response = await fetch(url);
       const data = await response.json();
       
-      if (data['Error Message'] || data['Note']) {
-        throw new Error(data['Error Message'] || data['Note']);
+      if ((data as any)['Error Message'] || (data as any)['Note']) {
+        throw new Error((data as any)['Error Message'] || (data as any)['Note']);
       }
 
       this.setCachedData(cacheKey, data);
@@ -92,8 +92,8 @@ export class CommodityDataService {
       const response = await fetch(url);
       const data = await response.json();
       
-      if (data.quandl_error) {
-        throw new Error(data.quandl_error.message);
+      if ((data as any).quandl_error) {
+        throw new Error((data as any).quandl_error.message);
       }
 
       this.setCachedData(cacheKey, data);
@@ -409,6 +409,64 @@ export class CommodityDataService {
     } catch (error) {
       console.error('Error generating trading recommendations:', error);
       return [];
+    }
+  }
+
+  // Get comprehensive commodity analytics
+  async getCommodityAnalytics(): Promise<any> {
+    try {
+      const [prices, indicators, alerts] = await Promise.all([
+        this.getCommodityPrices(),
+        this.getMarketIndicators(),
+        this.getPriceAlerts()
+      ]);
+
+      return {
+        commodityPrices: prices,
+        marketIndicators: indicators,
+        priceAlerts: alerts,
+        marketSummary: {
+          totalCommodities: prices.length,
+          avgVolatility: indicators.find(i => i.name === 'Volatility Index')?.value || 0,
+          marketSentiment: indicators.find(i => i.name === 'Market Sentiment')?.status || 'neutral',
+          highAlerts: alerts.filter(a => a.severity === 'high').length
+        },
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error generating commodity analytics:', error);
+      return {};
+    }
+  }
+
+  // Get comprehensive market intelligence
+  async getMarketIntelligence(): Promise<any> {
+    try {
+      const [prices, indicators, alerts, recommendations] = await Promise.all([
+        this.getCommodityPrices(),
+        this.getMarketIndicators(),
+        this.getPriceAlerts(),
+        this.getTradingRecommendations()
+      ]);
+
+      return {
+        marketOverview: {
+          totalCommodities: prices.length,
+          bullishCount: prices.filter(p => p.changePercent > 0).length,
+          bearishCount: prices.filter(p => p.changePercent < 0).length,
+          avgVolatility: indicators.find(i => i.name === 'Volatility Index')?.value || 0,
+          marketSentiment: indicators.find(i => i.name === 'Market Sentiment')?.status || 'neutral'
+        },
+        commodityPrices: prices,
+        marketIndicators: indicators,
+        priceAlerts: alerts,
+        tradingRecommendations: recommendations,
+        lastUpdated: new Date().toISOString(),
+        dataSource: 'Alpha Vantage & Nasdaq Data Link APIs'
+      };
+    } catch (error) {
+      console.error('Error generating market intelligence:', error);
+      return {};
     }
   }
 }

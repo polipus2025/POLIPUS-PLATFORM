@@ -401,21 +401,28 @@ export default function RealMapBoundaryMapper({
         
         const newPoints = [...points, newPoint];
         
-        // Order points in clockwise sequence for clean polygon
-        const orderedPoints = orderPointsClockwise(newPoints);
-        setPoints(orderedPoints);
+        // Always apply clockwise ordering when 3+ points exist
+        if (newPoints.length >= 3) {
+          const orderedPoints = orderPointsClockwise(newPoints);
+          setPoints(orderedPoints);
+          console.log(`✅ CLICK MAPPING: Applied clockwise ordering to ${orderedPoints.length} points`);
+        } else {
+          setPoints(newPoints);
+          console.log(`➕ CLICK MAPPING: Added point ${newPoints.length} (ordering applies at 3+ points)`);
+        }
         
-        console.log(`🎯 INTERACTIVE POINT ADDED: Point ${orderedPoints.length} at ${lat.toFixed(6)}, ${lng.toFixed(6)} (ordered clockwise)`);
+        const finalPoints = newPoints.length >= 3 ? orderPointsClockwise(newPoints) : newPoints;
+        console.log(`🎯 INTERACTIVE POINT ADDED: Point ${finalPoints.length} at ${lat.toFixed(6)}, ${lng.toFixed(6)} ${finalPoints.length >= 3 ? '(ordered clockwise)' : ''}`);
         
-        // Real-time feedback with ordered point count
-        if (orderedPoints.length === 1) {
+        // Real-time feedback with final point count
+        if (finalPoints.length === 1) {
           setStatus(`🎯 Boundary mapping started - Click to add more points`);
-        } else if (orderedPoints.length >= 2) {
-          const area = calculateArea(orderedPoints);
+        } else if (finalPoints.length >= 2) {
+          const area = calculateArea(finalPoints);
           const areaText = area >= 10000 ? `${(area/10000).toFixed(3)} hectares` : 
                          area >= 1000 ? `${(area/1000).toFixed(1)}k sq meters` : 
                          `${area.toFixed(0)} sq meters`;
-          setStatus(`🎯 ${orderedPoints.length} points mapped clockwise - Area: ${areaText}`);
+          setStatus(`🎯 ${finalPoints.length} points mapped ${finalPoints.length >= 3 ? 'clockwise' : ''} - Area: ${areaText}`);
         }
       });
 
@@ -664,14 +671,26 @@ export default function RealMapBoundaryMapper({
     const centerLat = pointsToOrder.reduce((sum, p) => sum + p.latitude, 0) / pointsToOrder.length;
     const centerLng = pointsToOrder.reduce((sum, p) => sum + p.longitude, 0) / pointsToOrder.length;
     
-    // Sort points by angle from center (clockwise)
+    // Sort points by angle from center (clockwise - corrected for coordinate system)
     const sortedPoints = [...pointsToOrder].sort((a, b) => {
+      // Calculate angle from center to each point (in radians)
       const angleA = Math.atan2(a.latitude - centerLat, a.longitude - centerLng);
       const angleB = Math.atan2(b.latitude - centerLat, b.longitude - centerLng);
-      return angleA - angleB;
+      
+      // Convert to 0-2π range for proper clockwise sorting
+      const normalizedA = angleA < 0 ? angleA + 2 * Math.PI : angleA;
+      const normalizedB = angleB < 0 ? angleB + 2 * Math.PI : angleB;
+      
+      return normalizedA - normalizedB;
     });
     
-    console.log(`🔄 GPS POINTS ORDERED: ${sortedPoints.length} points arranged clockwise around center (${centerLat.toFixed(6)}, ${centerLng.toFixed(6)})`);
+    console.log(`🔄 GPS POINTS REORDERED: ${sortedPoints.length} points arranged clockwise around center (${centerLat.toFixed(6)}, ${centerLng.toFixed(6)})`);
+    
+    // Log the ordering for debugging
+    sortedPoints.forEach((point, index) => {
+      console.log(`  Point ${String.fromCharCode(65 + index)}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`);
+    });
+    
     return sortedPoints;
   };
 
@@ -693,25 +712,34 @@ export default function RealMapBoundaryMapper({
 
     const newPoints = [...points, newPoint];
     
-    // Order points in clockwise sequence for clean polygon
-    const orderedPoints = orderPointsClockwise(newPoints);
-    setPoints(orderedPoints);
+    // Always apply clockwise ordering when 3+ points exist
+    if (newPoints.length >= 3) {
+      const orderedPoints = orderPointsClockwise(newPoints);
+      setPoints(orderedPoints);
+      console.log(`✅ APPLIED CLOCKWISE ORDERING: ${orderedPoints.length} points reordered`);
+    } else {
+      setPoints(newPoints);
+      console.log(`➕ ADDED POINT: ${newPoints.length} points (ordering applies at 3+ points)`);
+    }
     
-    // Real-time walking feedback with ordered sequence
-    if (orderedPoints.length === 1) {
+    // Get final points (ordered or not) for feedback
+    const finalPoints = newPoints.length >= 3 ? orderPointsClockwise(newPoints) : newPoints;
+    
+    // Real-time walking feedback with final points
+    if (finalPoints.length === 1) {
       setStatus(`🚀 Starting boundary mapping - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
-    } else if (orderedPoints.length >= 2) {
+    } else if (finalPoints.length >= 2) {
       const distance = Math.sqrt(
-        Math.pow(orderedPoints[orderedPoints.length - 1].latitude - orderedPoints[orderedPoints.length - 2].latitude, 2) + 
-        Math.pow(orderedPoints[orderedPoints.length - 1].longitude - orderedPoints[orderedPoints.length - 2].longitude, 2)
+        Math.pow(finalPoints[finalPoints.length - 1].latitude - finalPoints[finalPoints.length - 2].latitude, 2) + 
+        Math.pow(finalPoints[finalPoints.length - 1].longitude - finalPoints[finalPoints.length - 2].longitude, 2)
       ) * 111000; // Convert to meters
       
-      setStatus(`🚶‍♂️ ${orderedPoints.length} points mapped clockwise - Distance: ${distance.toFixed(1)}m`);
+      setStatus(`🚶‍♂️ ${finalPoints.length} points mapped ${finalPoints.length >= 3 ? 'clockwise' : ''} - Distance: ${distance.toFixed(1)}m`);
     }
     
     // Trigger EUDR analysis if we have enough points
-    if (orderedPoints.length >= 6) {
-      setTimeout(() => analyzeEUDRCompliance(orderedPoints), 500);
+    if (finalPoints.length >= 6) {
+      setTimeout(() => analyzeEUDRCompliance(finalPoints), 500);
     }
   };
 

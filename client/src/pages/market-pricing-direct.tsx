@@ -8,62 +8,32 @@ import { Button } from '@/components/ui/button';
 export default function MarketPricingDirect() {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [commodityPrices, setCommodityPrices] = useState([
-    { name: 'Cocoa', price: 7823, unit: 'USD/MT', change: -0.8, exchange: 'ICE', volume: '245K MT', marketCap: '12.4B', yearChange: -15.86 },
-    { name: 'Coffee (Arabica)', price: 338.73, unit: 'USD/lb', change: 1.85, exchange: 'ICE', volume: '180K bags', marketCap: '8.7B', yearChange: 41.70 },
-    { name: 'Palm Oil', price: 906, unit: 'USD/MT', change: 0.13, exchange: 'Bursa Malaysia', volume: '3.56M MT', marketCap: '7.2B', yearChange: 22.91 },
-    { name: 'Natural Rubber', price: 1676, unit: 'USD/MT', change: 0.29, exchange: 'TOCOM', volume: '2.1M MT', marketCap: '5.8B', yearChange: 12.45 },
-    { name: 'Cassava', price: 1.03, unit: 'USD/kg', change: 0.97, exchange: 'Regional', volume: '3.56M MT', marketCap: '6.8B', yearChange: 8.32 },
-    { name: 'Coconut Oil', price: 2525, unit: 'USD/MT', change: 2.18, exchange: 'Regional', volume: '1.8M MT', marketCap: '4.5B', yearChange: 18.76 }
-  ]);
 
-  // Auto-update dei prezzi ogni 30 secondi
+  // ⚡ REAL-TIME COMMODITY DATA - connessione API reali
+  const { data: commodityData, refetch: refetchCommodities, isLoading } = useQuery({
+    queryKey: ['/api/commodity-prices'],
+    refetchInterval: 60000, // Aggiorna ogni 60 secondi per non superare i limiti API
+    staleTime: 30000,
+    retry: 3
+  });
+
+  // Update del tempo ogni secondo
   useEffect(() => {
-    const updatePrices = () => {
-      setCommodityPrices(prev => prev.map(commodity => {
-        // Variazione casuale tra -0.5% e +0.5%
-        const variation = (Math.random() - 0.5) * 1; // da -0.5 a +0.5
-        const newPrice = commodity.price * (1 + variation / 100);
-        const newChange = variation;
-        
-        return {
-          ...commodity,
-          price: Math.round(newPrice * 100) / 100,
-          change: Math.round(newChange * 100) / 100
-        };
-      }));
-      setLastUpdate(new Date());
-    };
-
-    // Update ogni 30 secondi
-    const priceInterval = setInterval(updatePrices, 30000);
-    
-    // Update time ogni secondo
     const timeInterval = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
 
-    return () => {
-      clearInterval(priceInterval);
-      clearInterval(timeInterval);
-    };
+    return () => clearInterval(timeInterval);
   }, []);
 
-  // Funzione per aggiornamento manuale
+  // Funzione per aggiornamento manuale - dati reali
   const handleManualRefresh = () => {
-    setCommodityPrices(prev => prev.map(commodity => {
-      const variation = (Math.random() - 0.5) * 2; // Variazione più ampia per refresh manuale
-      const newPrice = commodity.price * (1 + variation / 100);
-      const newChange = variation;
-      
-      return {
-        ...commodity,
-        price: Math.round(newPrice * 100) / 100,
-        change: Math.round(newChange * 100) / 100
-      };
-    }));
+    refetchCommodities();
     setLastUpdate(new Date());
   };
+
+  // Estrai i dati reali dalle API
+  const commodityPrices = commodityData?.success && commodityData?.data ? commodityData.data : [];
   
   // ⚡ GET USER DATA
   const { data: user } = useQuery({
@@ -73,11 +43,11 @@ export default function MarketPricingDirect() {
   });
   
   const marketMetrics = {
-    totalTracked: commodityPrices.length,
-    bullishCount: commodityPrices.filter(c => c.change > 0).length,
-    bearishCount: commodityPrices.filter(c => c.change < 0).length,
+    totalTracked: commodityPrices.length || 6,
+    bullishCount: commodityPrices.filter(c => c.changePercent > 0).length || 0,
+    bearishCount: commodityPrices.filter(c => c.changePercent < 0).length || 0,
     avgVolatility: 2.4,
-    highAlerts: 1
+    highAlerts: commodityPrices.filter(c => Math.abs(c.changePercent) > 3).length || 0
   };
 
   const tradingRecommendations = [
@@ -120,8 +90,8 @@ export default function MarketPricingDirect() {
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               <div>
-                <h2 className="text-xl font-bold">🔴 LIVE Market Intelligence</h2>
-                <p className="text-blue-100">Aggiornamento automatico ogni 30 secondi • Ultimo: {lastUpdate.toLocaleTimeString()}</p>
+                <h2 className="text-xl font-bold">🔴 LIVE Market Intelligence - DATI REALI</h2>
+                <p className="text-blue-100">Alpha Vantage & Nasdaq Data Link • Aggiornamento ogni 60 secondi • Ultimo: {commodityData?.lastUpdated || 'Caricamento...'}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -129,10 +99,11 @@ export default function MarketPricingDirect() {
                 variant="ghost"
                 size="sm"
                 onClick={handleManualRefresh}
+                disabled={isLoading}
                 className="text-white hover:bg-white/10 border border-white/20"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Aggiorna Ora
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                {isLoading ? 'Aggiornamento...' : 'Aggiorna Dati Reali'}
               </Button>
               <div className="text-right">
                 <div className="text-blue-100 text-sm">Ora Corrente</div>
@@ -205,59 +176,77 @@ export default function MarketPricingDirect() {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {commodityPrices.map((commodity, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-xl border-l-4 border-l-green-500 hover:shadow-2xl transition-all duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900">{commodity.name}</h3>
-                    <p className="text-sm text-slate-600">{commodity.exchange}</p>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-600 font-medium">LIVE</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-3xl font-bold text-slate-900">
-                      ${typeof commodity.price === 'string' ? commodity.price : commodity.price.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-slate-500">{commodity.unit}</p>
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-center">
+                <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+                <p className="text-slate-600">Caricamento dati reali dal mercato...</p>
+              </div>
+            </div>
+          ) : commodityPrices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {commodityPrices.map((commodity, index) => (
+                <div key={index} className="bg-white p-6 rounded-lg shadow-xl border-l-4 border-l-green-500 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-900">{commodity.name}</h3>
+                      <p className="text-sm text-slate-600">{commodity.exchange}</p>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-green-600 font-medium">REAL-TIME</span>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div className={`flex items-center space-x-1 ${
-                      commodity.change > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      <span className="text-lg">{commodity.change > 0 ? '📈' : '📉'}</span>
-                      <span className="font-semibold">
-                        {commodity.change > 0 ? '+' : ''}{commodity.change}%
-                      </span>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-3xl font-bold text-slate-900">
+                        ${commodity.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-sm text-slate-500">{commodity.unit}</p>
                     </div>
-                    <div className="text-right text-sm">
-                      <div className="text-slate-600">YTD</div>
-                      <div className={`font-medium ${commodity.yearChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {commodity.yearChange > 0 ? '+' : ''}{commodity.yearChange}%
+                    
+                    <div className="flex items-center justify-between">
+                      <div className={`flex items-center space-x-1 ${
+                        commodity.changePercent > 0 ? 'text-green-600' : commodity.changePercent < 0 ? 'text-red-600' : 'text-gray-600'
+                      }`}>
+                        <span className="text-lg">{commodity.changePercent > 0 ? '📈' : commodity.changePercent < 0 ? '📉' : '📊'}</span>
+                        <span className="font-semibold">
+                          {commodity.changePercent > 0 ? '+' : ''}{commodity.changePercent.toFixed(2)}%
+                        </span>
+                      </div>
+                      <div className="text-right text-sm">
+                        <div className="text-slate-600">Last Update</div>
+                        <div className="font-medium text-slate-900">{commodity.lastUpdated}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-600">Volume:</span>
+                        <span className="font-medium">{commodity.volume}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-600">Market Cap:</span>
+                        <span className="font-medium text-blue-600">${commodity.marketCap}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-600">Fonte:</span>
+                        <span className="font-medium text-green-600">API Reale</span>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="pt-3 border-t border-slate-100 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Volume:</span>
-                      <span className="font-medium">{commodity.volume}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Market Cap:</span>
-                      <span className="font-medium text-blue-600">${commodity.marketCap}</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-slate-600">Nessun dato disponibile. Controlla la connessione alle API.</p>
+              <Button onClick={handleManualRefresh} className="mt-4">
+                Riprova
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Trading Recommendations & Market Intelligence */}
@@ -327,12 +316,12 @@ export default function MarketPricingDirect() {
               </div>
               
               <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-4">
-                <h4 className="font-semibold text-purple-900 mb-2">⚡ Frequenza Aggiornamenti</h4>
+                <h4 className="font-semibold text-purple-900 mb-2">⚡ Dati di Mercato Reali</h4>
                 <div className="text-sm text-purple-700">
-                  • <strong>Automatico:</strong> Ogni 30 secondi<br/>
-                  • <strong>Manuale:</strong> Pulsante "Aggiorna Ora"<br/>
-                  • <strong>Variazione:</strong> ±0.5% automatico, ±1% manuale<br/>
-                  • <strong>Fonti:</strong> Alpha Vantage & Nasdaq Data Link
+                  • <strong>Fonti:</strong> Alpha Vantage & Nasdaq Data Link<br/>
+                  • <strong>Automatico:</strong> Ogni 60 secondi<br/>
+                  • <strong>Manuale:</strong> Pulsante "Aggiorna Dati Reali"<br/>
+                  • <strong>Tipo:</strong> Prezzi live dal mercato globale
                 </div>
               </div>
             </div>

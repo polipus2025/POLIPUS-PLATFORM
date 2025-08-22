@@ -55,12 +55,20 @@ export function registerFarmerRoutes(app: Express) {
   // Generate credentials for completed farmer onboarding
   app.post("/api/farmers/:farmerId/complete-onboarding", async (req, res) => {
     try {
-      const farmerId = parseInt(req.params.farmerId);
-      const farmer = await storage.getFarmer(farmerId);
+      const farmerIdParam = req.params.farmerId;
+      console.log(`🔍 Completing onboarding for farmer parameter: ${farmerIdParam}`);
+      
+      // Handle both numeric ID and farmerId string formats
+      const farmer = isNaN(parseInt(farmerIdParam)) 
+        ? await storage.getFarmerByFarmerId(farmerIdParam)  // Use farmerId string like "FARMER-1755883520291-288"
+        : await storage.getFarmer(parseInt(farmerIdParam));  // Use numeric ID
       
       if (!farmer) {
+        console.log(`❌ Farmer not found for parameter: ${farmerIdParam}`);
         return res.status(404).json({ error: "Farmer not found" });
       }
+      
+      console.log(`✅ Found farmer: ${farmer.firstName} ${farmer.lastName} (DB ID: ${farmer.id}, Farmer ID: ${farmer.farmerId})`);
 
       // Generate login credentials
       const credentialId = generateFarmerCredentialId();
@@ -89,6 +97,7 @@ export function registerFarmerRoutes(app: Express) {
       );
 
       console.log(`📧 Email sent: ${notifications.emailSent ? '✅' : '❌'} | 📱 SMS sent: ${notifications.smsSent ? '✅' : '❌'} for ${farmerFullName}`);
+      console.log(`🎯 CREDENTIAL GENERATED: ${credentialId} for farmer ${farmer.farmerId} (${farmerFullName})`);
 
       res.json({
         farmer,
@@ -112,6 +121,7 @@ export function registerFarmerRoutes(app: Express) {
   app.post("/api/farmers/login", async (req, res) => {
     try {
       const { credentialId, password } = req.body;
+      console.log(`🔐 Login attempt for credential ID: ${credentialId}`);
 
       // Test account fallback
       if (credentialId === "FRM434923" && password === "Test2025!") {
@@ -147,7 +157,10 @@ export function registerFarmerRoutes(app: Express) {
 
       try {
         const credentials = await storage.getFarmerCredentialsByUsername(credentialId);
+        console.log(`🔍 Credential lookup result: ${credentials ? `Found (ID: ${credentials.id}, Active: ${credentials.isActive})` : 'Not found'}`);
+        
         if (!credentials || !credentials.isActive) {
+          console.log(`❌ Login failed: ${!credentials ? 'Credentials not found' : 'Account inactive'}`);
           return res.status(401).json({ error: "Invalid credentials" });
         }
 
@@ -159,12 +172,16 @@ export function registerFarmerRoutes(app: Express) {
 
         // Get farmer data
         const farmer = await storage.getFarmer(credentials.farmerId);
+        console.log(`🔍 Farmer lookup by credentials.farmerId (${credentials.farmerId}): ${farmer ? `Found ${farmer.firstName} ${farmer.lastName}` : 'Not found'}`);
+        
         if (!farmer) {
+          console.log(`❌ Login failed: Farmer not found for farmerId ${credentials.farmerId}`);
           return res.status(401).json({ error: "Farmer not found" });
         }
 
         // Update last login
         await storage.updateFarmerLastLogin(credentials.id);
+        console.log(`✅ Login successful for ${farmer.firstName} ${farmer.lastName} using credential: ${credentialId}`);
 
         res.json({
           success: true,

@@ -232,6 +232,19 @@ export class CommodityDataService {
         volume: '180K bags'
       },
       {
+        symbol: 'ROBUSTA',
+        name: 'Coffee (Robusta)',
+        price: Math.round(192 * (1 + variance * 1.8) * 100) / 100,
+        currency: 'USD',
+        unit: 'per lb',
+        change: 4.15,
+        changePercent: 2.27,
+        lastUpdated: now.toISOString().split('T')[0],
+        exchange: 'ICE',
+        marketCap: '6.2B',
+        volume: '125K MT'
+      },
+      {
         symbol: 'PALM_OIL',
         name: 'Palm Oil',
         price: Math.round(934.00 * (1 + variance * 1.5)),

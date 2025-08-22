@@ -464,58 +464,146 @@ export default function RealMapBoundaryMapper({
         `;
         
         marker.textContent = String.fromCharCode(65 + index); // A, B, C, etc.
+        
+        // Add walking sequence indicator
+        if (index === 0) {
+          marker.style.backgroundColor = '#22c55e'; // Start point - green
+          marker.style.border = '3px solid white';
+        } else if (index === currentPoints.length - 1) {
+          marker.style.backgroundColor = '#ff6b35'; // Current position - orange
+          marker.style.border = '3px solid white';
+          marker.style.animation = 'pulse 2s ease-in-out infinite';
+        } else {
+          marker.style.backgroundColor = '#3b82f6'; // Walking path - blue
+          marker.style.border = '3px solid white';
+        }
         mapContainer.appendChild(marker);
       });
 
-      // Draw connecting lines if we have multiple points
+      // Draw REAL-TIME walking path - connect points as inspector walks
       if (currentPoints.length >= 2) {
         const svg = mapContainer.querySelector('svg');
         if (svg) {
           // Clear existing lines
           svg.innerHTML = '';
 
-          // Create path for boundary lines
-          const pathData = currentPoints.map((point, index) => {
+          // Draw the ACTUAL walking path point by point (A→B→C→D→E→F...)
+          for (let i = 0; i < currentPoints.length - 1; i++) {
+            const currentPoint = currentPoints[i];
+            const nextPoint = currentPoints[i + 1];
+            
             const rect = mapContainer.getBoundingClientRect();
             const latRange = 0.002;
             const lngRange = 0.002;
             
-            const x = ((point.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
+            const x1 = ((currentPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y1 = ((centerLat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
+            const x2 = ((nextPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y2 = ((centerLat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
+
+            // Create walking path line with different styles based on sequence
+            const walkingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            walkingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+            walkingLine.setAttribute('stroke', i === currentPoints.length - 2 ? '#ff6b35' : '#3b82f6'); // Latest line is orange, others blue
+            walkingLine.setAttribute('stroke-width', i === currentPoints.length - 2 ? '4' : '3'); // Latest line is thicker
+            walkingLine.setAttribute('fill', 'none');
+            walkingLine.setAttribute('stroke-dasharray', i === currentPoints.length - 2 ? '12,6' : '8,4'); // Latest line has different dash
+            walkingLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
             
-            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-          }).join(' ');
+            // Add animation for the latest line
+            if (i === currentPoints.length - 2) {
+              walkingLine.style.animation = 'dashMove 2s linear infinite';
+              // Add CSS for animation
+              const style = document.createElement('style');
+              style.textContent = `
+                @keyframes dashMove {
+                  0% { stroke-dashoffset: 0; }
+                  100% { stroke-dashoffset: 18; }
+                }
+              `;
+              if (!document.head.querySelector('style[data-walking-animation]')) {
+                style.setAttribute('data-walking-animation', 'true');
+                document.head.appendChild(style);
+              }
+            }
+            
+            svg.appendChild(walkingLine);
+          }
 
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          path.setAttribute('d', pathData);
-          path.setAttribute('stroke', '#3b82f6');
-          path.setAttribute('stroke-width', '3');
-          path.setAttribute('fill', 'none');
-          path.setAttribute('stroke-dasharray', '8,4');
-          path.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
-          svg.appendChild(path);
+          // Add directional arrows to show walking direction
+          for (let i = 0; i < currentPoints.length - 1; i++) {
+            const currentPoint = currentPoints[i];
+            const nextPoint = currentPoints[i + 1];
+            
+            const rect = mapContainer.getBoundingClientRect();
+            const latRange = 0.002;
+            const lngRange = 0.002;
+            
+            const x1 = ((currentPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y1 = ((centerLat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
+            const x2 = ((nextPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y2 = ((centerLat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
+            
+            // Calculate arrow position (midpoint of line)
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            
+            // Calculate angle for arrow direction
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            // Create directional arrow
+            const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            arrow.setAttribute('points', '0,-3 8,0 0,3');
+            arrow.setAttribute('fill', '#ff6b35');
+            arrow.setAttribute('transform', `translate(${midX},${midY}) rotate(${angle})`);
+            arrow.setAttribute('style', 'filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));');
+            svg.appendChild(arrow);
+          }
 
-          // Close polygon if we have enough points
-          if (currentPoints.length >= 3) {
+          // Only close polygon when inspector returns near starting point (auto-complete boundary)
+          if (currentPoints.length >= 6) {
             const firstPoint = currentPoints[0];
             const lastPoint = currentPoints[currentPoints.length - 1];
             
-            const rect = mapContainer.getBoundingClientRect();
-            const latRange = 0.002;
-            const lngRange = 0.002;
+            // Calculate distance between first and last point
+            const distance = Math.sqrt(
+              Math.pow(firstPoint.latitude - lastPoint.latitude, 2) + 
+              Math.pow(firstPoint.longitude - lastPoint.longitude, 2)
+            );
             
-            const x1 = ((lastPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y1 = ((centerLat + latRange / 2 - lastPoint.latitude) / latRange) * rect.height;
-            const x2 = ((firstPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y2 = ((centerLat + latRange / 2 - firstPoint.latitude) / latRange) * rect.height;
+            // If inspector is close to starting point (within ~50 meters), suggest completion
+            if (distance < 0.0005) {
+              const rect = mapContainer.getBoundingClientRect();
+              const latRange = 0.002;
+              const lngRange = 0.002;
+              
+              const x1 = ((lastPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+              const y1 = ((centerLat + latRange / 2 - lastPoint.latitude) / latRange) * rect.height;
+              const x2 = ((firstPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+              const y2 = ((centerLat + latRange / 2 - firstPoint.latitude) / latRange) * rect.height;
 
-            const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            closingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-            closingLine.setAttribute('stroke', '#22c55e');
-            closingLine.setAttribute('stroke-width', '3');
-            closingLine.setAttribute('fill', 'none');
-            closingLine.setAttribute('stroke-dasharray', '4,2');
-            svg.appendChild(closingLine);
+              const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+              closingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+              closingLine.setAttribute('stroke', '#22c55e');
+              closingLine.setAttribute('stroke-width', '4');
+              closingLine.setAttribute('fill', 'none');
+              closingLine.setAttribute('stroke-dasharray', '6,3');
+              closingLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); animation: pulse 1.5s ease-in-out infinite;');
+              svg.appendChild(closingLine);
+              
+              // Add pulsing completion indicator
+              const completionStyle = document.createElement('style');
+              completionStyle.textContent = `
+                @keyframes pulse {
+                  0%, 100% { opacity: 1; }
+                  50% { opacity: 0.5; }
+                }
+              `;
+              if (!document.head.querySelector('style[data-completion-pulse]')) {
+                completionStyle.setAttribute('data-completion-pulse', 'true');
+                document.head.appendChild(completionStyle);
+              }
+            }
           }
         }
       }
@@ -860,12 +948,27 @@ export default function RealMapBoundaryMapper({
       longitude: currentGPSPosition.lng
     };
 
-    setPoints(prev => [...prev, newPoint]);
-    setStatus(`Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
+    const newPoints = [...points, newPoint];
+    setPoints(newPoints);
+    
+    // Real-time walking feedback
+    if (newPoints.length === 1) {
+      setStatus(`🚀 Starting boundary mapping - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
+    } else if (newPoints.length >= 2) {
+      const distance = Math.sqrt(
+        Math.pow(newPoints[newPoints.length - 1].latitude - newPoints[newPoints.length - 2].latitude, 2) + 
+        Math.pow(newPoints[newPoints.length - 1].longitude - newPoints[newPoints.length - 2].longitude, 2)
+      ) * 111000; // Convert to meters
+      
+      setStatus(`🚶‍♂️ Point ${newPoints.length} mapped - Distance: ${distance.toFixed(1)}m - Walking path updated`);
+    }
+    
+    // Update boundary display immediately with real-time walking path
+    updatePersistentBoundaryDisplay(newPoints, mapCenter.lat, mapCenter.lng);
     
     // Trigger EUDR analysis if we have enough points
-    if (points.length + 1 >= 6) {
-      setTimeout(() => analyzeEUDRCompliance([...points, newPoint]), 500);
+    if (newPoints.length >= 6) {
+      setTimeout(() => analyzeEUDRCompliance(newPoints), 500);
     }
   };
 

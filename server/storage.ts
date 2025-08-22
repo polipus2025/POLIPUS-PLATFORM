@@ -2439,23 +2439,21 @@ export class DatabaseStorage implements IStorage {
     return newTransaction;
   }
 
-  // Exporter authentication methods for portal access - simplified version
+  // Exporter authentication methods for portal access - fixed version
   async authenticateExporter(username: string, password: string): Promise<{ success: boolean; exporter?: Exporter; credentials?: any; message?: string }> {
     try {
-      // Try to find exporter by exporterId (username can be exporterId)
-      let exporter = await this.getExporterByExporterId(username);
+      // First, find credentials by username
+      const credentials = await this.getExporterCredentialsByUsername(username);
       
-      // Also try to find by exporterId if username looks like an exporter ID
-      if (!exporter && username.toUpperCase().startsWith('EXP-')) {
-        exporter = await this.getExporterByExporterId(username.toUpperCase());
-      }
-
-      if (!exporter) {
+      if (!credentials) {
         return { success: false, message: 'Invalid credentials' };
       }
 
-      if (!exporter.passwordHash) {
-        return { success: false, message: 'Account not set up for login' };
+      // Get the exporter record
+      const exporter = await this.getExporter(credentials.exporterId);
+      
+      if (!exporter) {
+        return { success: false, message: 'Exporter account not found' };
       }
 
       if (exporter.complianceStatus !== 'approved') {
@@ -2466,15 +2464,36 @@ export class DatabaseStorage implements IStorage {
         return { success: false, message: 'Portal access not enabled' };
       }
 
-      const isValidPassword = await bcrypt.compare(password, exporter.passwordHash);
+      // Check if account is locked
+      if (credentials.isLocked && credentials.lockedUntil && new Date() < credentials.lockedUntil) {
+        return { success: false, message: 'Account is temporarily locked' };
+      }
+
+      // Check password - use temporary password if available, otherwise use hashed password
+      let isValidPassword = false;
+      if (credentials.temporaryPassword && password === credentials.temporaryPassword) {
+        isValidPassword = true;
+      } else if (credentials.passwordHash) {
+        isValidPassword = await bcrypt.compare(password, credentials.passwordHash);
+      }
+
       if (!isValidPassword) {
+        await this.incrementExporterFailedLoginAttempts(credentials.exporterId);
         return { success: false, message: 'Invalid credentials' };
       }
+
+      // Reset failed login attempts on successful login
+      await db.update(exporterCredentials)
+        .set({ loginAttempts: 0, lockedUntil: null })
+        .where(eq(exporterCredentials.id, credentials.id));
 
       return { 
         success: true, 
         exporter, 
-        credentials: { passwordChangeRequired: false },
+        credentials: { 
+          passwordChangeRequired: credentials.passwordChangeRequired,
+          username: credentials.username
+        },
         message: 'Login successful'
       };
     } catch (error) {

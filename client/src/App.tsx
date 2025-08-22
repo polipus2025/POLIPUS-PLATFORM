@@ -22,6 +22,7 @@ const GPSTest = lazy(() => import("@/pages/gps-test"));
 const SystemAdminLogin = lazy(() => import("@/pages/auth/system-admin-login"));
 const RegulatoryClassicLogin = lazy(() => import("@/pages/auth/regulatory-classic-login"));
 const SystemAdminPortal = lazy(() => import("@/pages/system-admin-portal"));
+const AgriTraceAdminPortal = lazy(() => import("@/pages/agritrace-admin-portal"));
 const RegulatoryPortalClassic = lazy(() => import("@/pages/regulatory-portal-classic"));
 const FarmerLogin = lazy(() => import("@/pages/auth/farmer-login"));
 const FarmerLoginPortal = lazy(() => import("@/pages/farmer-login-portal"));
@@ -275,6 +276,7 @@ function Router() {
       
       {/* Independent Portal Dashboards */}
       <Route path="/system-admin-portal" component={SystemAdminPortal} />
+      <Route path="/agritrace-admin-portal" component={AgriTraceAdminPortal} />
       <Route path="/regulatory-portal-classic" component={RegulatoryPortalClassic} />
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/farmer-login-portal" component={FarmerLoginPortal} />

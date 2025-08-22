@@ -661,29 +661,39 @@ export default function OnboardFarmer() {
                       </ul>
                     </div>
 
-                    <RealMapBoundaryMapper
-                      onBoundaryComplete={(boundary) => {
-                        // Update farmer data with boundary information
-                        setFarmerData(prev => ({
-                          ...prev,
-                          boundaryData: boundary,
-                          farmSize: boundary.area ? (boundary.area / 10000).toFixed(4) : prev.farmSize, // Convert sq meters to hectares for storage
-                          gpsCoordinates: boundary.points.length > 0 ? 
-                            `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
-                            prev.gpsCoordinates
-                        }));
-                        
-                        // Show interactive boundary completed view - NO automatic saving here
-                        toast({
-                          title: "✅ Interactive Boundary View Complete!",
-                          description: `All ${boundary.points.length} GPS points connected and mapped. You can see the interactive boundary view. Click 'Save Farm Data & Continue' when ready.`,
-                          duration: 5000,
-                        });
-                      }}
-                      minPoints={6}
-                      maxPoints={20}
-                      enableRealTimeGPS={true}
-                    />
+                    {/* STEP 3: Show map ONLY after GPS location is detected (Step 2 complete) */}
+                    {farmerData.gpsCoordinates ? (
+                      <RealMapBoundaryMapper
+                        onBoundaryComplete={(boundary) => {
+                          // Update farmer data with boundary information
+                          setFarmerData(prev => ({
+                            ...prev,
+                            boundaryData: boundary,
+                            farmSize: boundary.area ? (boundary.area / 10000).toFixed(4) : prev.farmSize, // Convert sq meters to hectares for storage
+                            gpsCoordinates: boundary.points.length > 0 ? 
+                              `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
+                              prev.gpsCoordinates
+                          }));
+                          
+                          // Show interactive boundary completed view - NO automatic saving here
+                          toast({
+                            title: "✅ Interactive Boundary View Complete!",
+                            description: `All ${boundary.points.length} GPS points connected and mapped. You can see the interactive boundary view. Click 'Save Farm Data & Continue' when ready.`,
+                            duration: 5000,
+                          });
+                        }}
+                        minPoints={6}
+                        maxPoints={20}
+                        enableRealTimeGPS={true}
+                      />
+                    ) : (
+                      <div className="p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center">
+                        <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-600 mb-2">GPS Location Required</h3>
+                        <p className="text-gray-500 mb-4">Please click "Get Location" first to detect GPS coordinates before mapping farm boundaries.</p>
+                        <p className="text-sm text-blue-600 font-medium">Step 2: Get Real GPS Coordinates → Step 3: Start GPS Tracking</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

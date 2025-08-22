@@ -594,18 +594,334 @@ export default function AgriTraceAdminPortal() {
                 </div>
               )}
 
-              {(activeTab === 'features' || activeTab === 'controls') && (
-                <div style={{ textAlign: 'center', padding: '64px 0' }}>
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    backgroundColor: '#e5e7eb',
-                    borderRadius: '50%',
-                    margin: '0 auto 16px'
-                  }}></div>
-                  <p style={{ color: '#6b7280' }}>
-                    No active AgriTrace {activeTab} to display
-                  </p>
+              {activeTab === 'features' && (
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '24px' }}>
+                    AgriTrace360™ Administrative Features
+                  </h3>
+                  
+                  {/* Agricultural Module Controls */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
+                      Agricultural Module Controls
+                    </h4>
+                    <div style={{ display: 'grid', gap: '16px' }}>
+                      {[
+                        { name: 'Farmer Registration Management', description: 'Enable/disable new farmer registrations', enabled: true },
+                        { name: 'Crop Scheduling Override', description: 'Manually adjust crop schedules system-wide', enabled: true },
+                        { name: 'Harvest Validation Controls', description: 'Set automated vs manual harvest approval', enabled: false },
+                        { name: 'Batch Code Generation', description: 'Configure automatic batch code formats', enabled: true }
+                      ].map((feature, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          backgroundColor: '#fafafa'
+                        }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827', marginBottom: '4px' }}>
+                              {feature.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {feature.description}
+                            </div>
+                          </div>
+                          <div style={{
+                            width: '40px',
+                            height: '20px',
+                            borderRadius: '10px',
+                            backgroundColor: feature.enabled ? '#10b981' : '#d1d5db',
+                            position: 'relative',
+                            cursor: 'pointer'
+                          }}>
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white',
+                              position: 'absolute',
+                              top: '2px',
+                              left: feature.enabled ? '22px' : '2px',
+                              transition: 'left 0.2s'
+                            }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Compliance & Monitoring Features */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
+                      Compliance & Monitoring Features
+                    </h4>
+                    <div style={{ display: 'grid', gap: '16px' }}>
+                      {[
+                        { name: 'EUDR Compliance Monitoring', description: 'Real-time environmental compliance tracking', enabled: true },
+                        { name: 'Quality Assurance Settings', description: 'Configure quality thresholds and standards', enabled: true },
+                        { name: 'GPS Boundary Validation', description: 'Enable/disable strict GPS coordinate checking', enabled: false },
+                        { name: 'Document Verification Rules', description: 'Set requirements for farm documentation', enabled: true }
+                      ].map((feature, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          backgroundColor: '#fafafa'
+                        }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827', marginBottom: '4px' }}>
+                              {feature.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {feature.description}
+                            </div>
+                          </div>
+                          <div style={{
+                            width: '40px',
+                            height: '20px',
+                            borderRadius: '10px',
+                            backgroundColor: feature.enabled ? '#10b981' : '#d1d5db',
+                            position: 'relative',
+                            cursor: 'pointer'
+                          }}>
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white',
+                              position: 'absolute',
+                              top: '2px',
+                              left: feature.enabled ? '22px' : '2px',
+                              transition: 'left 0.2s'
+                            }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Data Management Controls */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
+                      Data Management Controls
+                    </h4>
+                    <div style={{ display: 'grid', gap: '16px' }}>
+                      {[
+                        { name: 'Export Report Automation', description: 'Schedule automated PDF report generation', enabled: true },
+                        { name: 'Database Backup Controls', description: 'Configure AgriTrace data backup schedules', enabled: true },
+                        { name: 'Audit Trail Management', description: 'Set retention periods for audit logs', enabled: true },
+                        { name: 'Performance Optimization', description: 'Enable/disable resource-intensive features', enabled: false }
+                      ].map((feature, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          backgroundColor: '#fafafa'
+                        }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827', marginBottom: '4px' }}>
+                              {feature.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {feature.description}
+                            </div>
+                          </div>
+                          <div style={{
+                            width: '40px',
+                            height: '20px',
+                            borderRadius: '10px',
+                            backgroundColor: feature.enabled ? '#10b981' : '#d1d5db',
+                            position: 'relative',
+                            cursor: 'pointer'
+                          }}>
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white',
+                              position: 'absolute',
+                              top: '2px',
+                              left: feature.enabled ? '22px' : '2px',
+                              transition: 'left 0.2s'
+                            }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* User Access Controls */}
+                  <div>
+                    <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
+                      User Access Controls
+                    </h4>
+                    <div style={{ display: 'grid', gap: '16px' }}>
+                      {[
+                        { name: 'Farmer Portal Restrictions', description: 'Control which features farmers can access', enabled: true },
+                        { name: 'Inspector Assignment Rules', description: 'Configure automatic inspector assignments', enabled: true },
+                        { name: 'Communication Settings', description: 'Enable/disable messaging between user types', enabled: true },
+                        { name: 'Role-Based Permissions', description: 'Fine-tune access levels for different user roles', enabled: false }
+                      ].map((feature, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          backgroundColor: '#fafafa'
+                        }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827', marginBottom: '4px' }}>
+                              {feature.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {feature.description}
+                            </div>
+                          </div>
+                          <div style={{
+                            width: '40px',
+                            height: '20px',
+                            borderRadius: '10px',
+                            backgroundColor: feature.enabled ? '#10b981' : '#d1d5db',
+                            position: 'relative',
+                            cursor: 'pointer'
+                          }}>
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white',
+                              position: 'absolute',
+                              top: '2px',
+                              left: feature.enabled ? '22px' : '2px',
+                              transition: 'left 0.2s'
+                            }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'controls' && (
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '24px' }}>
+                    AgriTrace360™ System Controls
+                  </h3>
+                  
+                  {/* Emergency Controls */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#dc2626', marginBottom: '16px' }}>
+                      Emergency Controls
+                    </h4>
+                    <div style={{
+                      backgroundColor: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      marginBottom: '16px'
+                    }}>
+                      <p style={{ fontSize: '14px', color: '#dc2626', margin: 0 }}>
+                        These controls should only be used in emergency situations. All actions are logged and audited.
+                      </p>
+                    </div>
+                    <div style={{ display: 'grid', gap: '16px' }}>
+                      {[
+                        { name: 'Suspend All Farmer Registrations', description: 'Temporarily halt new farmer onboarding', action: 'Suspend', color: '#dc2626' },
+                        { name: 'Freeze Harvest Processing', description: 'Stop all harvest validation and batch generation', action: 'Freeze', color: '#dc2626' },
+                        { name: 'Enable Maintenance Mode', description: 'Put AgriTrace in maintenance mode', action: 'Enable', color: '#f59e0b' },
+                        { name: 'Reset System Cache', description: 'Clear all cached data and restart services', action: 'Reset', color: '#3b82f6' }
+                      ].map((control, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          backgroundColor: 'white'
+                        }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827', marginBottom: '4px' }}>
+                              {control.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {control.description}
+                            </div>
+                          </div>
+                          <button style={{
+                            padding: '8px 16px',
+                            backgroundColor: control.color,
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            cursor: 'pointer'
+                          }}>
+                            {control.action}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* System Operations */}
+                  <div>
+                    <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
+                      System Operations
+                    </h4>
+                    <div style={{ display: 'grid', gap: '16px' }}>
+                      {[
+                        { name: 'Generate System Report', description: 'Create comprehensive AgriTrace status report', action: 'Generate', color: '#10b981' },
+                        { name: 'Backup Database', description: 'Create manual backup of AgriTrace data', action: 'Backup', color: '#3b82f6' },
+                        { name: 'Refresh Configurations', description: 'Reload all system configurations', action: 'Refresh', color: '#6b7280' },
+                        { name: 'Test Integrations', description: 'Verify all external service connections', action: 'Test', color: '#f59e0b' }
+                      ].map((operation, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          backgroundColor: 'white'
+                        }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827', marginBottom: '4px' }}>
+                              {operation.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {operation.description}
+                            </div>
+                          </div>
+                          <button style={{
+                            padding: '8px 16px',
+                            backgroundColor: operation.color,
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            cursor: 'pointer'
+                          }}>
+                            {operation.action}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

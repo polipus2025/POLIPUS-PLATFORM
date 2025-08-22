@@ -312,12 +312,22 @@ export class AgriTraceAdminController {
         crossModuleData: false
       },
       capabilities: [
-        'AgriTrace Configuration Management',
-        'Agricultural Feature Controls', 
-        'Farm System Monitoring',
-        'LACRA Compliance Oversight',
-        'Farmer Portal Administration',
-        'Export System Controls'
+        'Farmer Registration Management',
+        'Crop Scheduling Administration', 
+        'Harvest Validation Controls',
+        'EUDR Compliance Monitoring',
+        'Agricultural Data Analytics',
+        'Farm Plot GPS Validation',
+        'Batch Code Generation',
+        'Quality Assurance Settings',
+        'Document Verification Rules',
+        'Performance Optimization Controls',
+        'User Access Management',
+        'Emergency System Controls',
+        'Automated Report Generation',
+        'Database Backup Management',
+        'Audit Trail Administration',
+        'Communication Settings Control'
       ]
     };
   }

@@ -489,7 +489,7 @@ function Router() {
               allowedUserTypes={['buyer']} 
             />
           </Route>
-          <Route path="/buyer-exporter-network">
+          <Route path="/buyer-marketplace">
             <ProtectedRoute 
               component={BuyerExporterNetwork} 
               allowedUserTypes={['buyer']} 

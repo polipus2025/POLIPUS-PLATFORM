@@ -1838,7 +1838,7 @@ export default function RealMapBoundaryMapper({
                     />
                   )}
                   
-                  {/* Connected Boundary Lines A→B→C→D→...→A */}
+                  {/* Clean Green Perimeter Lines Only */}
                   {points.length >= 2 && points.map((point, index) => {
                     // Convert REAL GPS coordinates to pixel positions using accurate scaling
                     const metersPerDegreeLat = 111320;
@@ -1861,76 +1861,21 @@ export default function RealMapBoundaryMapper({
                     const safeNextY = Math.max(10, Math.min(374, nextY));
                     
                     return (
-                      <g key={`line-${index}`}>
-                        {/* Connecting line */}
-                        <line
-                          x1={safeCurrentX}
-                          y1={safeCurrentY}
-                          x2={safeNextX}
-                          y2={safeNextY}
-                          stroke="#22c55e"
-                          strokeWidth="4"
-                          className="drop-shadow-lg"
-                        />
-                        
-                        {/* Direction arrow */}
-                        <polygon
-                          points={`${safeNextX - 5},${safeNextY - 3} ${safeNextX + 3},${safeNextY} ${safeNextX - 5},${safeNextY + 3}`}
-                          fill="#22c55e"
-                          transform={`rotate(${Math.atan2(safeNextY - safeCurrentY, safeNextX - safeCurrentX) * 180 / Math.PI} ${safeNextX} ${safeNextY})`}
-                        />
-                        
-                        {/* Connection label */}
-                        <text
-                          x={(safeCurrentX + safeNextX) / 2}
-                          y={(safeCurrentY + safeNextY) / 2 - 8}
-                          textAnchor="middle"
-                          fontSize="8"
-                          fontWeight="bold"
-                          fill="#059669"
-                          className="drop-shadow-lg"
-                        >
-                          {String.fromCharCode(65 + index)}→{String.fromCharCode(65 + nextIndex)}
-                        </text>
-                      </g>
-                    );
-                  })}
-                  
-                  {/* GPS Point Markers */}
-                  {points.map((point, index) => {
-                    // Convert REAL GPS coordinates to pixel positions using accurate scaling
-                    const metersPerDegreeLat = 111320;
-                    const metersPerDegreeLng = 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
-                    const meterRange = 200;
-                    const latRange = meterRange / metersPerDegreeLat;
-                    const lngRange = meterRange / metersPerDegreeLng;
-                    const x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
-                    const y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * 384;
-                    const safeX = Math.max(10, Math.min(390, x));
-                    const safeY = Math.max(10, Math.min(374, y));
-                    
-                    return (
-                      <g key={index}>
-                        <circle
-                          cx={safeX}
-                          cy={safeY}
-                          r="10"
-                          fill={index === 0 ? '#22c55e' : index === points.length - 1 ? '#ef4444' : '#3b82f6'}
-                          stroke="white"
-                          strokeWidth="3"
-                          className="drop-shadow-lg"
-                        />
-                        <text
-                          x={safeX}
-                          y={safeY + 1}
-                          textAnchor="middle"
-                          fontSize="12"
-                          fontWeight="bold"
-                          fill="white"
-                        >
-                          {String.fromCharCode(65 + index)}
-                        </text>
-                      </g>
+                      <line
+                        key={`perimeter-${index}`}
+                        x1={safeCurrentX}
+                        y1={safeCurrentY}
+                        x2={safeNextX}
+                        y2={safeNextY}
+                        stroke="#22c55e"
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="drop-shadow-lg"
+                        style={{
+                          filter: 'drop-shadow(0 2px 6px rgba(34, 197, 94, 0.5))'
+                        }}
+                      />
                     );
                   })}
                 </svg>

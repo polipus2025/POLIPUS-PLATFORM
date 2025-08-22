@@ -1,286 +1,224 @@
-import { useState } from 'react';
+import { memo, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  BarChart3, 
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Package,
-  MapPin,
-  Calendar,
-  Download,
-  Eye,
-  Filter
-} from 'lucide-react';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import ExporterNavbar from '@/components/layout/exporter-navbar';
+import { ArrowLeft, BarChart3, TrendingUp, DollarSign, Package, Globe, Users } from 'lucide-react';
+import { Link } from 'wouter';
 
-export default function ExporterAnalytics() {
-  const [timeRange, setTimeRange] = useState('6months');
-  const [commodityFilter, setCommodityFilter] = useState('all');
+const ExporterAnalytics = memo(() => {
+  const analyticsData = useMemo(() => ({
+    revenue: {
+      current: 2450000,
+      previous: 2280000,
+      growth: 7.4
+    },
+    volume: {
+      current: 1250,
+      previous: 1180,
+      growth: 5.9
+    },
+    orders: {
+      current: 147,
+      previous: 132,
+      growth: 11.4
+    },
+    markets: {
+      current: 12,
+      previous: 10,
+      growth: 20
+    }
+  }), []);
 
-  // Fetch user data
-  const { data: user } = useQuery({
-    queryKey: ['/api/auth/user'],
-    retry: false,
-  });
+  const monthlyData = useMemo(() => [
+    { month: 'Jan', revenue: 180000, volume: 95, orders: 12 },
+    { month: 'Feb', revenue: 195000, volume: 102, orders: 14 },
+    { month: 'Mar', revenue: 210000, volume: 115, orders: 16 },
+    { month: 'Apr', revenue: 205000, volume: 108, orders: 15 },
+    { month: 'May', revenue: 225000, volume: 125, orders: 18 },
+    { month: 'Jun', revenue: 240000, volume: 130, orders: 19 },
+    { month: 'Jul', revenue: 235000, volume: 128, orders: 17 },
+    { month: 'Aug', revenue: 260000, volume: 142, orders: 21 }
+  ], []);
 
-  // Mock analytics data
-  const monthlyRevenue = [
-    { month: 'Jul 2024', revenue: 850000, orders: 5, volume: 1200 },
-    { month: 'Aug 2024', revenue: 1200000, orders: 8, volume: 1800 },
-    { month: 'Sep 2024', revenue: 950000, orders: 6, volume: 1400 },
-    { month: 'Oct 2024', revenue: 1600000, orders: 10, volume: 2200 },
-    { month: 'Nov 2024', revenue: 1100000, orders: 7, volume: 1600 },
-    { month: 'Dec 2024', revenue: 1800000, orders: 12, volume: 2800 },
-    { month: 'Jan 2025', revenue: 2100000, orders: 14, volume: 3200 }
-  ];
+  const topCommodities = useMemo(() => [
+    { name: 'Cocoa Beans', revenue: 980000, percentage: 40 },
+    { name: 'Coffee Beans', revenue: 735000, percentage: 30 },
+    { name: 'Palm Oil', revenue: 490000, percentage: 20 },
+    { name: 'Cashew Nuts', revenue: 245000, percentage: 10 }
+  ], []);
 
-  const commodityBreakdown = [
-    { name: 'Coffee', value: 45, revenue: 2800000, color: '#8B4513' },
-    { name: 'Cocoa', value: 30, revenue: 1900000, color: '#D2691E' },
-    { name: 'Rubber', value: 20, revenue: 1200000, color: '#696969' },
-    { name: 'Palm Oil', value: 5, revenue: 300000, color: '#FF8C00' }
-  ];
+  const topMarkets = useMemo(() => [
+    { country: 'Belgium', revenue: 620000, orders: 45 },
+    { country: 'USA', revenue: 560000, orders: 38 },
+    { country: 'Germany', revenue: 485000, orders: 32 },
+    { country: 'Netherlands', revenue: 425000, orders: 28 },
+    { country: 'Singapore', revenue: 360000, orders: 24 }
+  ], []);
 
-  const destinationAnalytics = [
-    { region: 'Europe', orders: 18, revenue: 3200000, avgPrice: 2850 },
-    { region: 'North America', orders: 12, revenue: 2100000, avgPrice: 3100 },
-    { region: 'Asia', orders: 8, revenue: 1400000, avgPrice: 2200 },
-    { region: 'Africa', orders: 5, revenue: 500000, avgPrice: 1800 }
-  ];
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
 
-  const complianceMetrics = [
-    { metric: 'EUDR Compliance Rate', value: 98, target: 100 },
-    { metric: 'On-time Delivery', value: 92, target: 95 },
-    { metric: 'Quality Pass Rate', value: 96, target: 98 },
-    { metric: 'Documentation Accuracy', value: 94, target: 100 }
-  ];
-
-  const currentYearStats = {
-    totalRevenue: 6200000,
-    totalOrders: 43,
-    totalVolume: 8500,
-    avgOrderValue: 144186,
-    growthRate: 23.5,
-    topCommodity: 'Coffee',
-    topDestination: 'Europe'
+  const formatGrowth = (growth: number) => {
+    return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Helmet>
-        <title>Analytics - Exporter Portal</title>
-        <meta name="description" content="View detailed analytics and insights for your export business" />
+        <title>Analytics & Reports - Exporter Portal</title>
+        <meta name="description" content="Comprehensive analytics and performance metrics for your export business" />
       </Helmet>
 
-      <ExporterNavbar user={user} />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                <BarChart3 className="h-6 w-6 text-blue-600" />
-                Export Analytics
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Comprehensive insights into your export business performance and trends
-              </p>
+      <div className="bg-white shadow-sm border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-4">
+              <Link href="/exporter-dashboard">
+                <Button variant="outline" size="sm">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Analytics & Reports</h1>
+                <p className="text-sm text-slate-600">Performance insights and business intelligence</p>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Select value={timeRange} onValueChange={setTimeRange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Time range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3months">Last 3 Months</SelectItem>
-                  <SelectItem value="6months">Last 6 Months</SelectItem>
-                  <SelectItem value="1year">Last Year</SelectItem>
-                  <SelectItem value="2years">Last 2 Years</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
-            </div>
+            <Button>
+              Export Report
+            </Button>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    ${currentYearStats.totalRevenue.toLocaleString()}
-                  </p>
-                  <div className="flex items-center mt-1">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-sm text-green-600">+{currentYearStats.growthRate}%</span>
-                  </div>
+                  <p className="text-sm font-medium text-green-600">Total Revenue</p>
+                  <p className="text-2xl font-bold text-green-900">{formatCurrency(analyticsData.revenue.current)}</p>
+                  <p className="text-sm text-green-600">{formatGrowth(analyticsData.revenue.growth)} vs last year</p>
                 </div>
-                <DollarSign className="h-8 w-8 text-green-500" />
+                <DollarSign className="h-12 w-12 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {currentYearStats.totalOrders}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Avg: ${currentYearStats.avgOrderValue.toLocaleString()}
-                  </p>
+                  <p className="text-sm font-medium text-blue-600">Export Volume</p>
+                  <p className="text-2xl font-bold text-blue-900">{analyticsData.volume.current} MT</p>
+                  <p className="text-sm text-blue-600">{formatGrowth(analyticsData.volume.growth)} vs last year</p>
                 </div>
-                <Package className="h-8 w-8 text-blue-500" />
+                <Package className="h-12 w-12 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Volume Exported</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {currentYearStats.totalVolume.toLocaleString()} MT
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Top: {currentYearStats.topCommodity}
-                  </p>
+                  <p className="text-sm font-medium text-purple-600">Total Orders</p>
+                  <p className="text-2xl font-bold text-purple-900">{analyticsData.orders.current}</p>
+                  <p className="text-sm text-purple-600">{formatGrowth(analyticsData.orders.growth)} vs last year</p>
                 </div>
-                <BarChart3 className="h-8 w-8 text-purple-500" />
+                <TrendingUp className="h-12 w-12 text-purple-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Top Destination</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {currentYearStats.topDestination}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    18 orders this year
-                  </p>
+                  <p className="text-sm font-medium text-orange-600">Active Markets</p>
+                  <p className="text-2xl font-bold text-orange-900">{analyticsData.markets.current}</p>
+                  <p className="text-sm text-orange-600">{formatGrowth(analyticsData.markets.growth)} vs last year</p>
                 </div>
-                <MapPin className="h-8 w-8 text-orange-500" />
+                <Globe className="h-12 w-12 text-orange-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Revenue Trend */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Top Commodities */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                Revenue Trend
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={monthlyRevenue}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, 'Revenue']} />
-                  <Area type="monotone" dataKey="revenue" stroke="#10B981" fill="#D1FAE5" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Commodity Breakdown */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-blue-600" />
-                Commodity Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={commodityBreakdown}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}%`}
-                  >
-                    {commodityBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Share']} />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Orders & Volume */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
-                Orders & Volume Trends
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyRevenue}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="orders" fill="#3B82F6" name="Orders" />
-                  <Bar yAxisId="right" dataKey="volume" fill="#8B5CF6" name="Volume (MT)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Destination Performance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-orange-600" />
-                Destination Performance
+                <Package className="h-5 w-5 text-green-600" />
+                Top Commodities by Revenue
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {destinationAnalytics.map((dest) => (
-                  <div key={dest.region} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{dest.region}</h4>
-                      <p className="text-sm text-gray-600">{dest.orders} orders</p>
+                {topCommodities.map((commodity, index) => (
+                  <div key={commodity.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                        index === 0 ? 'bg-green-500' :
+                        index === 1 ? 'bg-blue-500' :
+                        index === 2 ? 'bg-purple-500' : 'bg-gray-500'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium">{commodity.name}</p>
+                        <p className="text-sm text-gray-600">{commodity.percentage}% of total</p>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-gray-900">${dest.revenue.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600">Avg: ${dest.avgPrice}/MT</p>
+                      <p className="font-semibold">{formatCurrency(commodity.revenue)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top Markets */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-blue-600" />
+                Top Markets by Revenue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {topMarkets.map((market, index) => (
+                  <div key={market.country} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                        index === 0 ? 'bg-green-500' :
+                        index === 1 ? 'bg-blue-500' :
+                        index === 2 ? 'bg-purple-500' :
+                        index === 3 ? 'bg-orange-500' : 'bg-gray-500'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium">{market.country}</p>
+                        <p className="text-sm text-gray-600">{market.orders} orders</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{formatCurrency(market.revenue)}</p>
                     </div>
                   </div>
                 ))}
@@ -289,107 +227,33 @@ export default function ExporterAnalytics() {
           </Card>
         </div>
 
-        {/* Compliance Metrics */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-green-600" />
-              Compliance & Performance Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {complianceMetrics.map((metric) => (
-                <div key={metric.metric} className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">{metric.metric}</span>
-                    <span className="text-sm text-gray-500">{metric.value}% / {metric.target}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div 
-                      className={`h-3 rounded-full ${
-                        metric.value >= metric.target ? 'bg-green-500' : 
-                        metric.value >= metric.target * 0.8 ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${Math.min(metric.value, 100)}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {metric.value >= metric.target ? (
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-red-500" />
-                    )}
-                    <span className={`text-sm ${
-                      metric.value >= metric.target ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {metric.value >= metric.target ? 'Target Met' : 'Below Target'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Performance Insights */}
+        {/* Monthly Performance Chart */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600" />
-              Performance Insights
+              <BarChart3 className="h-5 w-5 text-purple-600" />
+              Monthly Performance Overview
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Key Achievements</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                    <div>
-                      <p className="text-sm font-medium text-green-900">Revenue Growth</p>
-                      <p className="text-xs text-green-700">23.5% increase compared to last period</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <Package className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm font-medium text-blue-900">Order Volume</p>
-                      <p className="text-xs text-blue-700">43 successful exports completed</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                    <Eye className="h-5 w-5 text-purple-600" />
-                    <div>
-                      <p className="text-sm font-medium text-purple-900">EUDR Compliance</p>
-                      <p className="text-xs text-purple-700">98% compliance rate maintained</p>
-                    </div>
-                  </div>
+            <div className="h-64 flex items-end justify-between gap-2">
+              {monthlyData.map((data, index) => (
+                <div key={data.month} className="flex-1 flex flex-col items-center">
+                  <div
+                    className="w-full bg-gradient-to-t from-blue-500 to-blue-300 rounded-t mb-2"
+                    style={{ height: `${(data.revenue / 260000) * 200}px` }}
+                  />
+                  <p className="text-xs font-medium text-gray-600">{data.month}</p>
+                  <p className="text-xs text-gray-500">{formatCurrency(data.revenue)}</p>
                 </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Recommendations</h4>
-                <div className="space-y-3">
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm font-medium text-yellow-900">Market Opportunity</p>
-                    <p className="text-xs text-yellow-700">Consider expanding coffee exports to Asia - growing demand detected</p>
-                  </div>
-                  <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                    <p className="text-sm font-medium text-orange-900">Quality Improvement</p>
-                    <p className="text-xs text-orange-700">Focus on quality metrics to achieve 100% compliance target</p>
-                  </div>
-                  <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
-                    <p className="text-sm font-medium text-indigo-900">Documentation</p>
-                    <p className="text-xs text-indigo-700">Streamline documentation process to improve accuracy rate</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
   );
-}
+});
+
+ExporterAnalytics.displayName = 'ExporterAnalytics';
+export default ExporterAnalytics;

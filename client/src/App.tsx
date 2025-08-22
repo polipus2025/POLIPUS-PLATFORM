@@ -119,6 +119,9 @@ const ExporterOrders = lazy(() => import("@/pages/exporter/orders"));
 const ExporterMarketplace = lazy(() => import("@/pages/exporter/marketplace"));
 const ExporterCertificates = lazy(() => import("@/pages/exporter/certificates"));
 const ExporterMessages = lazy(() => import("@/pages/exporter/messages"));
+const ExporterShipments = lazy(() => import("@/pages/exporter/shipments"));
+const ExporterAnalytics = lazy(() => import("@/pages/exporter/analytics"));
+const ExporterPaymentServices = lazy(() => import("@/pages/exporter/exporter-payment-services"));
 const ExportLicense = lazy(() => import("@/pages/export-license"));
 const Inspections = lazy(() => import("@/pages/inspections"));
 const Certifications = lazy(() => import("@/pages/certifications"));
@@ -200,7 +203,6 @@ const PaymentServices = lazy(() => import("@/pages/payments/payment-services"));
 const PaymentCheckout = lazy(() => import("@/pages/payments/payment-checkout"));
 const PaymentSuccess = lazy(() => import("@/pages/payments/payment-success"));
 const FarmerPaymentServices = lazy(() => import("@/pages/farmer/farmer-payment-services"));
-const ExporterPaymentServices = lazy(() => import("@/pages/exporter/exporter-payment-services"));
 const RegulatoryPaymentServices = lazy(() => import("@/pages/regulatory-payment-services"));
 // ⚡ FINAL PAGES (LAZY) - Ultimate Performance
 const AgriTraceDashboard = lazy(() => import("@/pages/agritrace-dashboard"));
@@ -545,6 +547,18 @@ function Router() {
           <Route path="/exporter/analytics">
             <ProtectedRoute 
               component={lazy(() => import("@/pages/exporter/analytics"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/exporter-payment-services">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/exporter-payment-services"))} 
+              allowedUserTypes={['exporter']} 
+            />
+          </Route>
+          <Route path="/world-market-pricing">
+            <ProtectedRoute 
+              component={lazy(() => import("@/pages/exporter/world-market"))} 
               allowedUserTypes={['exporter']} 
             />
           </Route>

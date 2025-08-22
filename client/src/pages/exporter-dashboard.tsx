@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Link } from "wouter";
 import ExporterNavbar from '@/components/layout/exporter-navbar';
+import ExporterSidebar from '@/components/layout/exporter-sidebar';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 // ⚡ LAZY LOAD COMPONENTS - Instant performance boost
@@ -108,7 +109,12 @@ const ExporterDashboard = memo(() => {
           <meta name="description" content="High-performance export management dashboard for licensed agricultural commodity exporters" />
         </Helmet>
 
-        <ExporterNavbar user={user} />
+        <div className="flex">
+          {/* Sidebar Navigation */}
+          <ExporterSidebar user={user} />
+
+          {/* Main Content */}
+          <div className="flex-1">
         
         {/* ⚡ OPTIMIZED USER PROFILE SECTION */}
         <div className="bg-white shadow-sm border-b border-gray-100">
@@ -288,6 +294,8 @@ const ExporterDashboard = memo(() => {
               </div>
             </div>
           </div>
+          </div>
+        </div>
         </div>
       </div>
     </ErrorBoundary>

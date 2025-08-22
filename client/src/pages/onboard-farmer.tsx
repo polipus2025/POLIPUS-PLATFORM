@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, Copy, Eye, EyeOff } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
 const LIBERIAN_COUNTIES = [
@@ -21,6 +21,7 @@ const LIBERIAN_COUNTIES = [
 
 export default function OnboardFarmer() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isDetectingGPS, setIsDetectingGPS] = useState(false);
   
   const [farmerData, setFarmerData] = useState({
@@ -780,10 +781,20 @@ export default function OnboardFarmer() {
 
               <Button
                 className="w-full"
-                onClick={() => setShowCredentialsModal({ show: false, farmerName: "", credentialId: "", temporaryPassword: "" })}
+                onClick={() => {
+                  setShowCredentialsModal({ show: false, farmerName: "", credentialId: "", temporaryPassword: "" });
+                  // Navigate to Farmer Management Dashboard
+                  toast({
+                    title: "Redirecting to Farmer Management Dashboard",
+                    description: "Taking you to the farmer management dashboard...",
+                  });
+                  setTimeout(() => {
+                    setLocation('/inspector-farmer-land-management');
+                  }, 1000);
+                }}
                 data-testid="close-credentials-modal"
               >
-                Close
+                Close & Go to Farmer Management
               </Button>
             </CardContent>
           </Card>

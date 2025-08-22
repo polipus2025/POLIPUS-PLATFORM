@@ -68,6 +68,193 @@ export default function RealMapBoundaryMapper({
   const [showInteractiveView, setShowInteractiveView] = useState(false);
   const [boundaryCompleted, setBoundaryCompleted] = useState(false);
 
+  // Update persistent boundary display - moved outside useEffect for global access
+  const updatePersistentBoundaryDisplay = (currentPoints: BoundaryPoint[], centerLat: number, centerLng: number) => {
+    const mapContainer = mapRef.current?.querySelector('.real-map') as HTMLElement;
+    if (!mapContainer) return;
+
+    // Remove existing markers
+    mapContainer.querySelectorAll('.persistent-marker').forEach(marker => marker.remove());
+
+    // Add persistent markers for all points
+    currentPoints.forEach((point, index) => {
+      const marker = document.createElement('div');
+      marker.className = `persistent-marker ${index === 0 ? 'marker-start' : index === currentPoints.length - 1 ? 'marker-end' : 'marker-middle'}`;
+      
+      // Convert GPS to pixel coordinates
+      const rect = mapContainer.getBoundingClientRect();
+      const latRange = 0.002;
+      const lngRange = 0.002;
+      
+      const x = ((point.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+      const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
+      
+      marker.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 3px solid white;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+      `;
+      
+      marker.textContent = String.fromCharCode(65 + index); // A, B, C, etc.
+      
+      // Add walking sequence indicator
+      if (index === 0) {
+        marker.style.backgroundColor = '#22c55e'; // Start point - green
+        marker.style.border = '3px solid white';
+      } else if (index === currentPoints.length - 1) {
+        marker.style.backgroundColor = '#ff6b35'; // Current position - orange
+        marker.style.border = '3px solid white';
+        marker.style.animation = 'pulse 2s ease-in-out infinite';
+      } else {
+        marker.style.backgroundColor = '#3b82f6'; // Walking path - blue
+        marker.style.border = '3px solid white';
+      }
+      mapContainer.appendChild(marker);
+    });
+
+    // Draw REAL-TIME walking path - connect points as inspector walks
+    if (currentPoints.length >= 2) {
+      const svg = mapContainer.querySelector('svg');
+      if (svg) {
+        // Clear existing lines
+        svg.innerHTML = '';
+
+        // Draw the ACTUAL walking path point by point (A→B→C→D→E→F...)
+        for (let i = 0; i < currentPoints.length - 1; i++) {
+          const currentPoint = currentPoints[i];
+          const nextPoint = currentPoints[i + 1];
+          
+          const rect = mapContainer.getBoundingClientRect();
+          const latRange = 0.002;
+          const lngRange = 0.002;
+          
+          const x1 = ((currentPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+          const y1 = ((centerLat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
+          const x2 = ((nextPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+          const y2 = ((centerLat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
+
+          // Create walking path line with different styles based on sequence
+          const walkingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          walkingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+          walkingLine.setAttribute('stroke', i === currentPoints.length - 2 ? '#ff6b35' : '#3b82f6'); // Latest line is orange, others blue
+          walkingLine.setAttribute('stroke-width', i === currentPoints.length - 2 ? '4' : '3'); // Latest line is thicker
+          walkingLine.setAttribute('fill', 'none');
+          walkingLine.setAttribute('stroke-dasharray', i === currentPoints.length - 2 ? '12,6' : '8,4'); // Latest line has different dash
+          walkingLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
+          
+          // Add animation for the latest line
+          if (i === currentPoints.length - 2) {
+            walkingLine.style.animation = 'dashMove 2s linear infinite';
+            // Add CSS for animation
+            const style = document.createElement('style');
+            style.textContent = `
+              @keyframes dashMove {
+                0% { stroke-dashoffset: 0; }
+                100% { stroke-dashoffset: 18; }
+              }
+            `;
+            if (!document.head.querySelector('style[data-walking-animation]')) {
+              style.setAttribute('data-walking-animation', 'true');
+              document.head.appendChild(style);
+            }
+          }
+          
+          svg.appendChild(walkingLine);
+        }
+
+        // Add directional arrows to show walking direction
+        for (let i = 0; i < currentPoints.length - 1; i++) {
+          const currentPoint = currentPoints[i];
+          const nextPoint = currentPoints[i + 1];
+          
+          const rect = mapContainer.getBoundingClientRect();
+          const latRange = 0.002;
+          const lngRange = 0.002;
+          
+          const x1 = ((currentPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+          const y1 = ((centerLat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
+          const x2 = ((nextPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+          const y2 = ((centerLat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
+          
+          // Calculate arrow position (midpoint of line)
+          const midX = (x1 + x2) / 2;
+          const midY = (y1 + y2) / 2;
+          
+          // Calculate angle for arrow direction
+          const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+          
+          // Create directional arrow
+          const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          arrow.setAttribute('points', '0,-3 8,0 0,3');
+          arrow.setAttribute('fill', '#ff6b35');
+          arrow.setAttribute('transform', `translate(${midX},${midY}) rotate(${angle})`);
+          arrow.setAttribute('style', 'filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));');
+          svg.appendChild(arrow);
+        }
+
+        // Only close polygon when inspector returns near starting point (auto-complete boundary)
+        if (currentPoints.length >= 6) {
+          const firstPoint = currentPoints[0];
+          const lastPoint = currentPoints[currentPoints.length - 1];
+          
+          // Calculate distance between first and last point
+          const distance = Math.sqrt(
+            Math.pow(firstPoint.latitude - lastPoint.latitude, 2) + 
+            Math.pow(firstPoint.longitude - lastPoint.longitude, 2)
+          );
+          
+          // If inspector is close to starting point (within ~50 meters), suggest completion
+          if (distance < 0.0005) {
+            const rect = mapContainer.getBoundingClientRect();
+            const latRange = 0.002;
+            const lngRange = 0.002;
+            
+            const x1 = ((lastPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y1 = ((centerLat + latRange / 2 - lastPoint.latitude) / latRange) * rect.height;
+            const x2 = ((firstPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+            const y2 = ((centerLat + latRange / 2 - firstPoint.latitude) / latRange) * rect.height;
+
+            const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            closingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+            closingLine.setAttribute('stroke', '#22c55e');
+            closingLine.setAttribute('stroke-width', '4');
+            closingLine.setAttribute('fill', 'none');
+            closingLine.setAttribute('stroke-dasharray', '6,3');
+            closingLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); animation: pulse 1.5s ease-in-out infinite;');
+            svg.appendChild(closingLine);
+            
+            // Add pulsing completion indicator
+            const completionStyle = document.createElement('style');
+            completionStyle.textContent = `
+              @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+              }
+            `;
+            if (!document.head.querySelector('style[data-completion-pulse]')) {
+              completionStyle.setAttribute('data-completion-pulse', 'true');
+              document.head.appendChild(completionStyle);
+            }
+          }
+        }
+      }
+    }
+  };
+
   // Enhanced function to get location-specific high-resolution satellite imagery
   const getSatelliteTiles = (lat: number, lng: number, zoom: number = 18) => {
     // Convert lat/lng to tile coordinates with higher precision
@@ -418,193 +605,6 @@ export default function RealMapBoundaryMapper({
           console.log(`Loading enhanced satellite tile with CORS: ${zoom}/${tileY}/${tileX}`);
           
           tilesContainer.appendChild(img);
-        }
-      }
-    };
-
-    // Update persistent boundary display
-    const updatePersistentBoundaryDisplay = (currentPoints: BoundaryPoint[], centerLat: number, centerLng: number) => {
-      const mapContainer = mapRef.current?.querySelector('.real-map') as HTMLElement;
-      if (!mapContainer) return;
-
-      // Remove existing markers
-      mapContainer.querySelectorAll('.persistent-marker').forEach(marker => marker.remove());
-
-      // Add persistent markers for all points
-      currentPoints.forEach((point, index) => {
-        const marker = document.createElement('div');
-        marker.className = `persistent-marker ${index === 0 ? 'marker-start' : index === currentPoints.length - 1 ? 'marker-end' : 'marker-middle'}`;
-        
-        // Convert GPS to pixel coordinates
-        const rect = mapContainer.getBoundingClientRect();
-        const latRange = 0.002;
-        const lngRange = 0.002;
-        
-        const x = ((point.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-        const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
-        
-        marker.style.cssText = `
-          position: absolute;
-          left: ${x}px;
-          top: ${y}px;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          border: 3px solid white;
-          transform: translate(-50%, -50%);
-          z-index: 20;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: bold;
-          color: white;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-          box-shadow: 0 3px 8px rgba(0,0,0,0.6);
-        `;
-        
-        marker.textContent = String.fromCharCode(65 + index); // A, B, C, etc.
-        
-        // Add walking sequence indicator
-        if (index === 0) {
-          marker.style.backgroundColor = '#22c55e'; // Start point - green
-          marker.style.border = '3px solid white';
-        } else if (index === currentPoints.length - 1) {
-          marker.style.backgroundColor = '#ff6b35'; // Current position - orange
-          marker.style.border = '3px solid white';
-          marker.style.animation = 'pulse 2s ease-in-out infinite';
-        } else {
-          marker.style.backgroundColor = '#3b82f6'; // Walking path - blue
-          marker.style.border = '3px solid white';
-        }
-        mapContainer.appendChild(marker);
-      });
-
-      // Draw REAL-TIME walking path - connect points as inspector walks
-      if (currentPoints.length >= 2) {
-        const svg = mapContainer.querySelector('svg');
-        if (svg) {
-          // Clear existing lines
-          svg.innerHTML = '';
-
-          // Draw the ACTUAL walking path point by point (A→B→C→D→E→F...)
-          for (let i = 0; i < currentPoints.length - 1; i++) {
-            const currentPoint = currentPoints[i];
-            const nextPoint = currentPoints[i + 1];
-            
-            const rect = mapContainer.getBoundingClientRect();
-            const latRange = 0.002;
-            const lngRange = 0.002;
-            
-            const x1 = ((currentPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y1 = ((centerLat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
-            const x2 = ((nextPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y2 = ((centerLat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
-
-            // Create walking path line with different styles based on sequence
-            const walkingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            walkingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-            walkingLine.setAttribute('stroke', i === currentPoints.length - 2 ? '#ff6b35' : '#3b82f6'); // Latest line is orange, others blue
-            walkingLine.setAttribute('stroke-width', i === currentPoints.length - 2 ? '4' : '3'); // Latest line is thicker
-            walkingLine.setAttribute('fill', 'none');
-            walkingLine.setAttribute('stroke-dasharray', i === currentPoints.length - 2 ? '12,6' : '8,4'); // Latest line has different dash
-            walkingLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
-            
-            // Add animation for the latest line
-            if (i === currentPoints.length - 2) {
-              walkingLine.style.animation = 'dashMove 2s linear infinite';
-              // Add CSS for animation
-              const style = document.createElement('style');
-              style.textContent = `
-                @keyframes dashMove {
-                  0% { stroke-dashoffset: 0; }
-                  100% { stroke-dashoffset: 18; }
-                }
-              `;
-              if (!document.head.querySelector('style[data-walking-animation]')) {
-                style.setAttribute('data-walking-animation', 'true');
-                document.head.appendChild(style);
-              }
-            }
-            
-            svg.appendChild(walkingLine);
-          }
-
-          // Add directional arrows to show walking direction
-          for (let i = 0; i < currentPoints.length - 1; i++) {
-            const currentPoint = currentPoints[i];
-            const nextPoint = currentPoints[i + 1];
-            
-            const rect = mapContainer.getBoundingClientRect();
-            const latRange = 0.002;
-            const lngRange = 0.002;
-            
-            const x1 = ((currentPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y1 = ((centerLat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
-            const x2 = ((nextPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y2 = ((centerLat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
-            
-            // Calculate arrow position (midpoint of line)
-            const midX = (x1 + x2) / 2;
-            const midY = (y1 + y2) / 2;
-            
-            // Calculate angle for arrow direction
-            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-            
-            // Create directional arrow
-            const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            arrow.setAttribute('points', '0,-3 8,0 0,3');
-            arrow.setAttribute('fill', '#ff6b35');
-            arrow.setAttribute('transform', `translate(${midX},${midY}) rotate(${angle})`);
-            arrow.setAttribute('style', 'filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));');
-            svg.appendChild(arrow);
-          }
-
-          // Only close polygon when inspector returns near starting point (auto-complete boundary)
-          if (currentPoints.length >= 6) {
-            const firstPoint = currentPoints[0];
-            const lastPoint = currentPoints[currentPoints.length - 1];
-            
-            // Calculate distance between first and last point
-            const distance = Math.sqrt(
-              Math.pow(firstPoint.latitude - lastPoint.latitude, 2) + 
-              Math.pow(firstPoint.longitude - lastPoint.longitude, 2)
-            );
-            
-            // If inspector is close to starting point (within ~50 meters), suggest completion
-            if (distance < 0.0005) {
-              const rect = mapContainer.getBoundingClientRect();
-              const latRange = 0.002;
-              const lngRange = 0.002;
-              
-              const x1 = ((lastPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-              const y1 = ((centerLat + latRange / 2 - lastPoint.latitude) / latRange) * rect.height;
-              const x2 = ((firstPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-              const y2 = ((centerLat + latRange / 2 - firstPoint.latitude) / latRange) * rect.height;
-
-              const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              closingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-              closingLine.setAttribute('stroke', '#22c55e');
-              closingLine.setAttribute('stroke-width', '4');
-              closingLine.setAttribute('fill', 'none');
-              closingLine.setAttribute('stroke-dasharray', '6,3');
-              closingLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); animation: pulse 1.5s ease-in-out infinite;');
-              svg.appendChild(closingLine);
-              
-              // Add pulsing completion indicator
-              const completionStyle = document.createElement('style');
-              completionStyle.textContent = `
-                @keyframes pulse {
-                  0%, 100% { opacity: 1; }
-                  50% { opacity: 0.5; }
-                }
-              `;
-              if (!document.head.querySelector('style[data-completion-pulse]')) {
-                completionStyle.setAttribute('data-completion-pulse', 'true');
-                document.head.appendChild(completionStyle);
-              }
-            }
-          }
         }
       }
     };
@@ -963,7 +963,7 @@ export default function RealMapBoundaryMapper({
       setStatus(`🚶‍♂️ Point ${newPoints.length} mapped - Distance: ${distance.toFixed(1)}m - Walking path updated`);
     }
     
-    // Update boundary display immediately with real-time walking path
+    // Update boundary display immediately with real-time walking path  
     updatePersistentBoundaryDisplay(newPoints, mapCenter.lat, mapCenter.lng);
     
     // Trigger EUDR analysis if we have enough points

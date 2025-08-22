@@ -67,11 +67,6 @@ export default function MarketPricingDirect() {
     return () => clearInterval(timeInterval);
   }, []);
 
-  // Funzione per aggiornamento manuale - dati reali
-  const handleManualRefresh = () => {
-    refetchCommodities();
-    setLastUpdate(new Date());
-  };
 
   // Estrai i dati reali dalle API
   const commodityPrices = commodityData?.success && commodityData?.data ? commodityData.data : [];
@@ -133,28 +128,16 @@ export default function MarketPricingDirect() {
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               <div>
                 <h2 className="text-xl font-bold">
-                  {marketMetrics.openMarkets > 0 ? '🔴 LIVE' : '🔴 CLOSED'} Market Intelligence - DATI REALI
+                  {marketMetrics.openMarkets > 0 ? '🔴 LIVE' : '🔴 CLOSED'} Market Intelligence - REAL DATA
                 </h2>
                 <p className="text-blue-100">
-                  Alpha Vantage & Nasdaq Data Link • Mercati aperti: {marketMetrics.openMarkets}/{marketMetrics.totalTracked} • Ultimo: {commodityData?.lastUpdated || 'Caricamento...'}
+                  Alpha Vantage & Nasdaq Data Link • Open Markets: {marketMetrics.openMarkets}/{marketMetrics.totalTracked} • Last Update: {commodityData?.lastUpdated || 'Loading...'}
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleManualRefresh}
-                disabled={isLoading}
-                className="text-white hover:bg-white/10 border border-white/20"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                {isLoading ? 'Aggiornamento...' : 'Aggiorna Dati Reali'}
-              </Button>
-              <div className="text-right">
-                <div className="text-blue-100 text-sm">Ora Corrente</div>
-                <div className="text-white font-bold">{currentTime}</div>
-              </div>
+            <div className="text-right">
+              <div className="text-blue-100 text-sm">Current Time</div>
+              <div className="text-white font-bold">{currentTime}</div>
             </div>
           </div>
         </div>
@@ -200,7 +183,7 @@ export default function MarketPricingDirect() {
           <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Mercati Aperti</p>
+                <p className="text-sm font-medium text-purple-600">Open Markets</p>
                 <p className="text-3xl font-bold text-purple-900">{marketMetrics.openMarkets}/{marketMetrics.totalTracked}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
@@ -226,7 +209,7 @@ export default function MarketPricingDirect() {
             <div className="flex justify-center items-center py-12">
               <div className="text-center">
                 <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-                <p className="text-slate-600">Caricamento dati reali dal mercato...</p>
+                <p className="text-slate-600">Loading real market data...</p>
               </div>
             </div>
           ) : commodityPrices.length > 0 ? (
@@ -284,8 +267,8 @@ export default function MarketPricingDirect() {
                         <span className="font-medium text-blue-600">${commodity.marketCap}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-600">Fonte:</span>
-                        <span className="font-medium text-green-600">API Reale</span>
+                        <span className="text-slate-600">Source:</span>
+                        <span className="font-medium text-green-600">Real API</span>
                       </div>
                     </div>
                   </div>
@@ -294,10 +277,7 @@ export default function MarketPricingDirect() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-slate-600">Nessun dato disponibile. Controlla la connessione alle API.</p>
-              <Button onClick={handleManualRefresh} className="mt-4">
-                Riprova
-              </Button>
+              <p className="text-slate-600">No data available. Check API connection.</p>
             </div>
           )}
         </div>
@@ -369,12 +349,12 @@ export default function MarketPricingDirect() {
               </div>
               
               <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-4">
-                <h4 className="font-semibold text-purple-900 mb-2">🕒 Status Mercati in Tempo Reale</h4>
+                <h4 className="font-semibold text-purple-900 mb-2">🕒 Real-Time Market Status</h4>
                 <div className="text-sm text-purple-700 space-y-1">
                   • <strong>ICE (NY):</strong> {getMarketStatus('ICE').status} • 14:30-21:00 UTC<br/>
                   • <strong>Bursa Malaysia:</strong> {getMarketStatus('Bursa Malaysia').status} • 01:30-09:00 UTC<br/>
                   • <strong>TOCOM (Tokyo):</strong> {getMarketStatus('TOCOM').status} • 00:00-15:15 UTC<br/>
-                  • <strong>Mercati Regionali:</strong> {getMarketStatus('Regional').status} • 08:00-20:00 UTC
+                  • <strong>Regional Markets:</strong> {getMarketStatus('Regional').status} • 08:00-20:00 UTC
                 </div>
               </div>
             </div>

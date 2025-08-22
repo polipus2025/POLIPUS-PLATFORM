@@ -388,6 +388,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ================================
+  // Commodity Data API Routes (Real-time Market Data)
+  // ================================
+
+  // Get real-time commodity prices
+  app.get("/api/commodity-prices", async (req, res) => {
+    try {
+      const prices = await commodityDataService.getCommodityPrices();
+      res.json({ success: true, data: prices });
+    } catch (error) {
+      console.error("Error fetching commodity prices:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch commodity prices" });
+    }
+  });
+
+  // Get commodity analytics data
+  app.get("/api/commodity-analytics", async (req, res) => {
+    try {
+      const analytics = await commodityDataService.getCommodityAnalytics();
+      res.json({ success: true, data: analytics });
+    } catch (error) {
+      console.error("Error fetching commodity analytics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch commodity analytics" });
+    }
+  });
+
+  // Get trading recommendations
+  app.get("/api/commodity-recommendations", async (req, res) => {
+    try {
+      const recommendations = await commodityDataService.getTradingRecommendations();
+      res.json({ success: true, data: recommendations });
+    } catch (error) {
+      console.error("Error fetching trading recommendations:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch trading recommendations" });
+    }
+  });
+
+  // Get market intelligence data
+  app.get("/api/commodity/market-intelligence", async (req, res) => {
+    try {
+      const intelligence = await commodityDataService.getMarketIntelligence();
+      res.json({ success: true, data: intelligence });
+    } catch (error) {
+      console.error("Error fetching market intelligence:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch market intelligence" });
+    }
+  });
+
+  // Get commodity price data
+  app.get("/api/commodity/prices", async (req, res) => {
+    try {
+      const prices = await commodityDataService.getCommodityPrices();
+      res.json({ success: true, data: prices });
+    } catch (error) {
+      console.error("Error fetching commodity prices:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch commodity prices" });
+    }
+  });
+
+  // Get market indicators
+  app.get("/api/commodity/indicators", async (req, res) => {
+    try {
+      const indicators = await commodityDataService.getMarketIndicators();
+      res.json({ success: true, data: indicators });
+    } catch (error) {
+      console.error("Error fetching market indicators:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch market indicators" });
+    }
+  });
+
+  // Get price alerts
+  app.get("/api/commodity/alerts", async (req, res) => {
+    try {
+      const alerts = await commodityDataService.getPriceAlerts();
+      res.json({ success: true, data: alerts });
+    } catch (error) {
+      console.error("Error fetching price alerts:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch price alerts" });
+    }
+  });
+
+  // Get commodity trading recommendations
+  app.get("/api/commodity/recommendations", async (req, res) => {
+    try {
+      const recommendations = await commodityDataService.getTradingRecommendations();
+      res.json({ success: true, data: recommendations });
+    } catch (error) {
+      console.error("Error fetching trading recommendations:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch trading recommendations" });
+    }
+  });
+
+  // ================================
   // Transaction Integration API Routes
   // ================================
 

@@ -426,13 +426,17 @@ export default function RealMapBoundaryMapper({
         </style>
         <div class="real-map" id="real-map">
           <div class="map-overlay"></div>
-          <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+          <div id="satellite-tiles" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;"></div>
+          <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;">
           </svg>
         </div>
       `;
 
       const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
+
+      // Load premium satellite tiles for enhanced coverage
+      loadPremiumRealTimeSatelliteTiles(centerLat, centerLng, 19);
 
       // REAL-TIME INTERACTIVE CLICK MAPPING - Add points instantly
       mapElement.addEventListener('click', (e) => {

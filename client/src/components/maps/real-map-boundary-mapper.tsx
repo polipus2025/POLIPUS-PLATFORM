@@ -265,6 +265,19 @@ export default function RealMapBoundaryMapper({
     }
   };
 
+  // Helper function for premium Bing Maps tiles - defined at component level
+  const tileXYToQuadKey = (tileX: number, tileY: number, zoom: number): string => {
+    let quadkey = '';
+    for (let i = zoom; i > 0; i--) {
+      let digit = 0;
+      const mask = 1 << (i - 1);
+      if ((tileX & mask) !== 0) digit++;
+      if ((tileY & mask) !== 0) digit += 2;
+      quadkey += digit.toString();
+    }
+    return quadkey;
+  };
+
   // PREMIUM REAL-TIME SATELLITE SYSTEM - Agricultural Grade Ultra-HD Imagery
   const getSatelliteTiles = (lat: number, lng: number, zoom: number = 19) => {
     // Convert lat/lng to tile coordinates with maximum precision
@@ -668,18 +681,6 @@ export default function RealMapBoundaryMapper({
       }
     };
 
-    // Helper function for premium Bing Maps tiles
-    const tileXYToQuadKey = (tileX: number, tileY: number, zoom: number): string => {
-      let quadkey = '';
-      for (let i = zoom; i > 0; i--) {
-        let digit = 0;
-        const mask = 1 << (i - 1);
-        if ((tileX & mask) !== 0) digit++;
-        if ((tileY & mask) !== 0) digit += 2;
-        quadkey += digit.toString();
-      }
-      return quadkey;
-    };
 
     // Map initialization handled by initMapWithCoordinates function
   }, []);

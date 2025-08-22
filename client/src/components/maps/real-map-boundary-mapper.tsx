@@ -1747,44 +1747,58 @@ export default function RealMapBoundaryMapper({
               <div 
                 className="w-full h-full relative"
                 style={{
-                  backgroundColor: '#1f2937'
+                  backgroundColor: '#1f2937',
+                  backgroundImage: `url('${getSatelliteTiles(mapCenter.lat, mapCenter.lng, 18)[0].url}'), url('${getSatelliteTiles(mapCenter.lat, mapCenter.lng, 17)[1].url}')`,
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  filter: 'contrast(1.15) brightness(1.1) saturate(1.2)'
                 }}
                 onMouseMove={(e) => e.preventDefault()}
                 onScroll={(e) => e.preventDefault()}
               >
-                {/* Premium Satellite Imagery Background - Multiple Tiles */}
-                <div className="absolute inset-0 w-full h-full z-0" style={{ overflow: 'hidden' }}>
-                  {(() => {
-                    const satellites = getSatelliteTiles(mapCenter.lat, mapCenter.lng, 19);
-                    return satellites.map((satellite, index) => (
-                      <div
-                        key={index}
-                        className="absolute inset-0 w-full h-full"
-                        style={{
-                          backgroundImage: `url('${satellite.url}')`,
-                          backgroundPosition: 'center center',
-                          backgroundSize: 'cover',
-                          backgroundRepeat: 'no-repeat',
-                          filter: 'contrast(1.15) brightness(1.1) saturate(1.2)',
-                          imageRendering: '-webkit-optimize-contrast',
-                          opacity: index === 0 ? 1 : 0,
-                          transition: 'opacity 0.3s ease-in-out'
-                        }}
-                        onLoad={(e) => {
-                          console.log(`🛰️ Interactive Map: Premium satellite tile ${index + 1} loaded`);
-                        }}
-                        onError={(e) => {
-                          console.log(`⚠️ Interactive Map: Satellite tile ${index + 1} failed, trying next...`);
-                          if (satellites[index + 1]) {
-                            e.currentTarget.style.opacity = '0';
-                            const nextTile = e.currentTarget.nextElementSibling as HTMLElement;
-                            if (nextTile) nextTile.style.opacity = '1';
-                          }
-                        }}
-                      />
-                    ));
-                  })()}
-                </div>
+                {/* Premium Satellite Imagery Background - Direct Implementation */}
+                <div 
+                  className="absolute inset-0 w-full h-full z-0" 
+                  style={{
+                    backgroundImage: `url('${getSatelliteTiles(mapCenter.lat, mapCenter.lng, 19)[0].url}')`,
+                    backgroundPosition: 'center center',
+                    backgroundSize: 'cover',
+                    backgroundRepeat: 'no-repeat',
+                    filter: 'contrast(1.15) brightness(1.1) saturate(1.2)',
+                    imageRendering: '-webkit-optimize-contrast',
+                    minHeight: '100%',
+                    minWidth: '100%'
+                  }}
+                />
+                
+                {/* Fallback satellite tile if primary fails */}
+                <div 
+                  className="absolute inset-0 w-full h-full z-0" 
+                  style={{
+                    backgroundImage: `url('${getSatelliteTiles(mapCenter.lat, mapCenter.lng, 18)[1].url}')`,
+                    backgroundPosition: 'center center',
+                    backgroundSize: 'cover',
+                    backgroundRepeat: 'no-repeat',
+                    filter: 'contrast(1.15) brightness(1.1) saturate(1.2)',
+                    imageRendering: '-webkit-optimize-contrast',
+                    zIndex: -1
+                  }}
+                />
+                
+                {/* Secondary fallback satellite tile */}
+                <div 
+                  className="absolute inset-0 w-full h-full z-0" 
+                  style={{
+                    backgroundImage: `url('${getSatelliteTiles(mapCenter.lat, mapCenter.lng, 17)[2].url}')`,
+                    backgroundPosition: 'center center',
+                    backgroundSize: 'cover',
+                    backgroundRepeat: 'no-repeat',
+                    filter: 'contrast(1.1) brightness(1.05) saturate(1.1)',
+                    imageRendering: '-webkit-optimize-contrast',
+                    zIndex: -2
+                  }}
+                />
                 
                 {/* Subtle Grid Overlay - Reduced opacity */}
                 <div 

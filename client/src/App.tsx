@@ -725,7 +725,6 @@ function Router() {
           
           {/* Exporter Portal Pages */}
           <Route path="/exporter/orders" component={ExporterOrders} />
-          <Route path="/exporter/marketplace" component={ExporterMarketplace} />
           <Route path="/exporter/certificates" component={ExporterCertificates} />
           <Route path="/exporter/messages" component={ExporterMessages} />
           

@@ -69,7 +69,7 @@ export default function MarketPricingDirect() {
 
 
   // Estrai i dati reali dalle API
-  const commodityPrices = commodityData?.success && commodityData?.data ? commodityData.data : [];
+  const commodityPrices = (commodityData as any)?.success && (commodityData as any)?.data ? (commodityData as any).data : [];
   
   // ⚡ GET USER DATA
   const { data: user } = useQuery({
@@ -131,7 +131,7 @@ export default function MarketPricingDirect() {
                   {marketMetrics.openMarkets > 0 ? '🔴 LIVE' : '🔴 CLOSED'} Market Intelligence - REAL DATA
                 </h2>
                 <p className="text-blue-100">
-                  Alpha Vantage & Nasdaq Data Link • Open Markets: {marketMetrics.openMarkets}/{marketMetrics.totalTracked} • Last Update: {commodityData?.lastUpdated || 'Loading...'}
+                  Alpha Vantage & Nasdaq Data Link • Open Markets: {marketMetrics.openMarkets}/{marketMetrics.totalTracked} • Last Update: {(commodityData as any)?.lastUpdated || 'Loading...'}
                 </p>
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function MarketPricingDirect() {
             </div>
           ) : commodityPrices.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {commodityPrices.map((commodity, index) => (
+              {commodityPrices.map((commodity: any, index: number) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-xl border-l-4 border-l-green-500 hover:shadow-2xl transition-all duration-300">
                   <div className="flex items-center justify-between mb-4">
                     <div>

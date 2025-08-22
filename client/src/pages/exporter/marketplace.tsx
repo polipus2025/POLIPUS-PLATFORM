@@ -321,7 +321,7 @@ const ExporterMarketplace = memo(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">Countries</p>
-                  <p className="text-3xl font-bold text-green-900">{[...new Set(realBuyers.map(b => b.country))].length}</p>
+                  <p className="text-3xl font-bold text-green-900">{Array.from(new Set(realBuyers.map(b => b.country))).length}</p>
                 </div>
                 <Globe className="h-12 w-12 text-green-600" />
               </div>

@@ -186,29 +186,42 @@ export default function FarmerDashboard() {
       return;
     }
 
+    // Validate farmerId
+    if (!farmerId || farmerId === "" || isNaN(parseInt(farmerId))) {
+      toast({
+        title: "Invalid farmer ID",
+        description: "Please log out and log back in to fix your session",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
-    // Calculate total value
-    const totalValue = parseFloat(productOffer.quantityAvailable) * parseFloat(productOffer.pricePerUnit);
+    // Calculate total value as string to match schema
+    const quantity = parseFloat(productOffer.quantityAvailable);
+    const price = parseFloat(productOffer.pricePerUnit);
+    const totalValue = (quantity * price).toFixed(2);
     
     const offerData = {
       farmerId: parseInt(farmerId),
       farmerName: farmerName,
       commodityType: productOffer.commodityType,
-      quantityAvailable: parseFloat(productOffer.quantityAvailable),
+      quantityAvailable: productOffer.quantityAvailable, // Keep as string for decimal field
       unit: productOffer.unit,
-      pricePerUnit: parseFloat(productOffer.pricePerUnit),
-      totalValue: totalValue,
+      pricePerUnit: productOffer.pricePerUnit, // Keep as string for decimal field
+      totalValue: totalValue, // String for decimal field
       qualityGrade: productOffer.qualityGrade,
       farmLocation: productOffer.farmLocation,
-      harvestDate: new Date(productOffer.harvestDate),
-      availableFromDate: new Date(productOffer.availableFromDate),
+      harvestDate: productOffer.harvestDate, // Keep as string, backend will convert
+      availableFromDate: productOffer.availableFromDate, // Keep as string, backend will convert
       paymentTerms: productOffer.paymentTerms,
       deliveryTerms: productOffer.deliveryTerms,
-      description: productOffer.description,
+      description: productOffer.description || "",
       county: farmer?.county || "Nimba", // Use farmer's county
     };
 
+    console.log("Submitting offer data:", offerData); // Debug log
     submitProductOfferMutation.mutate(offerData);
   };
 

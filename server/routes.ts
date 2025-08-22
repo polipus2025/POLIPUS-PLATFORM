@@ -227,7 +227,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 1. Farmer submits product offer
   app.post("/api/farmer-product-offers", async (req, res) => {
     try {
-      const validatedData = insertFarmerProductOfferSchema.parse(req.body);
+      console.log("Received offer data:", req.body); // Debug log
+      
+      // Transform data to match schema expectations
+      const transformedData = {
+        ...req.body,
+        harvestDate: new Date(req.body.harvestDate),
+        availableFromDate: new Date(req.body.availableFromDate),
+      };
+      
+      console.log("Transformed data:", transformedData); // Debug log
+      
+      const validatedData = insertFarmerProductOfferSchema.parse(transformedData);
       
       // Generate unique offer ID
       const offerId = generateOfferId();

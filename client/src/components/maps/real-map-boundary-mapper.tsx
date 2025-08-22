@@ -413,6 +413,7 @@ export default function RealMapBoundaryMapper({
           .risk-standard { background-color: #f59e0b !important; border-color: #92400e !important; }
           .risk-high { background-color: #dc2626 !important; border-color: #7f1d1d !important; animation: pulse 2s infinite; }
           @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+          @keyframes markerPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.15); } }
           .area-risk-label { pointer-events: none; z-index: 15; }
           .map-polygon {
             position: absolute;
@@ -493,7 +494,7 @@ export default function RealMapBoundaryMapper({
       });
 
       // Load high-resolution satellite tile grid
-      loadSatelliteTilesGrid(centerLat, centerLng, tileInfo.coordinates.zoom);
+      loadPremiumRealTimeSatelliteTiles(centerLat, centerLng, tileInfo.coordinates.zoom);
       
       setStatus(`${tileInfo.name} loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to create persistent boundaries`);
       setMapReady(true);
@@ -699,10 +700,64 @@ export default function RealMapBoundaryMapper({
       mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .persistent-marker').forEach(el => el.remove());
     }
     
+    // CREATE COLORED GPS MARKERS FOR EACH POINT
+    points.forEach((point, index) => {
+      if (mapElement) {
+        // Convert GPS coordinates to pixel positions
+        const rect = mapElement.getBoundingClientRect();
+        const mapWidth = mapElement.offsetWidth;
+        const mapHeight = mapElement.offsetHeight;
+        
+        // Use the same conversion logic as the click handler
+        const metersPerDegreeLat = 111320;
+        const metersPerDegreeLng = 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
+        const meterRange = 200;
+        const latRange = meterRange / metersPerDegreeLat;
+        const lngRange = meterRange / metersPerDegreeLng;
+        
+        const x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * mapWidth;
+        const y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * mapHeight;
+        
+        // Create colored marker element
+        const marker = document.createElement('div');
+        marker.className = 'map-marker';
+        marker.style.cssText = `
+          position: absolute;
+          left: ${x}px;
+          top: ${y}px;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+          transform: translate(-50%, -50%);
+          z-index: 20;
+          animation: markerPulse 2s infinite;
+        `;
+        
+        // Color coding: Start=Green, Middle=Blue, End=Red
+        if (index === 0) {
+          marker.style.backgroundColor = '#22c55e'; // Green for start
+          marker.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.3), 0 2px 8px rgba(0,0,0,0.4)';
+        } else if (index === points.length - 1 && points.length > 1) {
+          marker.style.backgroundColor = '#ef4444'; // Red for end  
+          marker.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.3), 0 2px 8px rgba(0,0,0,0.4)';
+        } else {
+          marker.style.backgroundColor = '#3b82f6'; // Blue for middle points
+          marker.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.3), 0 2px 8px rgba(0,0,0,0.4)';
+        }
+        
+        // Add GPS coordinates tooltip
+        marker.title = `Point ${index + 1}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
+        
+        mapElement.appendChild(marker);
+      }
+    });
+    
     // Update interactive display with real-time points
     updateInteractiveBoundaryDisplay(points);
     
-    console.log(`✓ Single display updated: ${points.length} points rendered once`);
+    console.log(`✓ GPS MARKERS DISPLAYED: ${points.length} colored markers rendered`);
   }, [points, mapReady, mapCenter]);
 
   // Real-time GPS tracking functions

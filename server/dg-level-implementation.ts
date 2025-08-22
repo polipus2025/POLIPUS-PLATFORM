@@ -11,7 +11,6 @@ import {
   exporters,
   buyers,
   farmers,
-  warehouseInspections,
   harvestSchedules,
   landMappingInspections,
   softCommodities
@@ -147,7 +146,7 @@ router.post('/dg-level/auth/login', async (req, res) => {
         userType: 'dg_director_general',
         firstName: dgRegulator.firstName,
         lastName: dgRegulator.lastName,
-        department: dgRegulator.department,
+        departmentName: dgRegulator.departmentName,
         permissions: ['final_approval', 'full_oversight', 'read_only_all_portals']
       },
       message: "DG Level access granted"
@@ -217,6 +216,197 @@ router.get('/dg-level/pending-approvals', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Failed to fetch pending approvals' 
+    });
+  }
+});
+
+// ============================================================================
+// DG LEVEL ITEM DETAILS - For review before approval/rejection
+// ============================================================================
+
+// Get detailed information for export permit review
+router.get('/dg-level/export-permit-details/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`🔍 DG LEVEL: Fetching export permit details for ID: ${id}`);
+
+    // Get export permit with full details
+    const [permit] = await db.select()
+      .from(certifications)
+      .where(eq(certifications.id, parseInt(id)));
+
+    if (!permit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Export permit not found'
+      });
+    }
+
+    // Get related commodity information
+    const [commodity] = await db.select()
+      .from(commodities)
+      .where(eq(commodities.id, permit.commodityId));
+
+    // Get related farmer information if available
+    let farmer = null;
+    if (commodity?.farmerId) {
+      const farmerResult = await db.select()
+        .from(farmers)
+        .where(eq(farmers.farmerId, commodity.farmerId));
+      farmer = farmerResult[0] || null;
+    }
+
+    // Get inspection history
+    const inspections = await db.select()
+      .from(inspections)
+      .where(eq(inspections.commodityId, permit.commodityId))
+      .orderBy(desc(inspections.createdAt));
+
+    const permitDetails = {
+      permit,
+      commodity,
+      farmer,
+      inspections,
+      ddgotsReview: {
+        reviewDate: permit.ddgotsReviewDate,
+        reviewNotes: permit.ddgotsReviewNotes,
+        reviewer: permit.ddgotsReviewer
+      },
+      readyForDgApproval: permit.status === 'ddgots_reviewed'
+    };
+
+    res.json({
+      success: true,
+      data: permitDetails,
+      message: 'Export permit details for DG review'
+    });
+
+  } catch (error) {
+    console.error('❌ DG LEVEL ERROR fetching permit details:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch permit details' 
+    });
+  }
+});
+
+// Get detailed information for exporter license review
+router.get('/dg-level/exporter-license-details/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`🔍 DG LEVEL: Fetching exporter license details for ID: ${id}`);
+
+    // Get exporter with full details
+    const [exporter] = await db.select()
+      .from(exporters)
+      .where(eq(exporters.id, parseInt(id)));
+
+    if (!exporter) {
+      return res.status(404).json({
+        success: false,
+        message: 'Exporter not found'
+      });
+    }
+
+    // Get exporter's transaction history
+    const transactions = await db.select()
+      .from(commodities)
+      .where(eq(commodities.buyerId, exporter.id))
+      .orderBy(desc(commodities.createdAt));
+
+    // Get related certifications
+    const certifications = await db.select()
+      .from(certifications)
+      .where(eq(certifications.exporterName, exporter.companyName))
+      .orderBy(desc(certifications.createdAt));
+
+    const exporterDetails = {
+      exporter,
+      transactions,
+      certifications,
+      ddgotsReview: {
+        approvalDate: exporter.ddgotsApprovalDate,
+        approvalNotes: exporter.ddgotsApprovalNotes,
+        reviewer: exporter.ddgotsReviewer
+      },
+      readyForDgApproval: exporter.complianceStatus === 'ddgots_approved'
+    };
+
+    res.json({
+      success: true,
+      data: exporterDetails,
+      message: 'Exporter license details for DG review'
+    });
+
+  } catch (error) {
+    console.error('❌ DG LEVEL ERROR fetching exporter details:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch exporter details' 
+    });
+  }
+});
+
+// Get detailed information for compliance report review
+router.get('/dg-level/compliance-report-details/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`🔍 DG LEVEL: Fetching compliance report details for ID: ${id}`);
+
+    // Get inspection with full details
+    const [inspection] = await db.select()
+      .from(inspections)
+      .where(eq(inspections.id, parseInt(id)));
+
+    if (!inspection) {
+      return res.status(404).json({
+        success: false,
+        message: 'Compliance report not found'
+      });
+    }
+
+    // Get related commodity information
+    const [commodity] = await db.select()
+      .from(commodities)
+      .where(eq(commodities.id, inspection.commodityId));
+
+    // Get related farmer information
+    let farmer = null;
+    if (commodity?.farmerId) {
+      [farmer] = await db.select()
+        .from(farmers)
+        .where(eq(farmers.id, commodity.farmerId));
+    }
+
+    // Get inspector information
+    const [inspector] = await db.select()
+      .from(regulatoryStaff)
+      .where(eq(regulatoryStaff.id, inspection.inspectorId));
+
+    const complianceDetails = {
+      inspection,
+      commodity,
+      farmer,
+      inspector,
+      ddgotsReview: {
+        verificationDate: inspection.ddgotsVerificationDate,
+        verificationNotes: inspection.ddgotsVerificationNotes,
+        verifier: inspection.ddgotsVerifier
+      },
+      readyForDgApproval: inspection.complianceStatus === 'ddgots_verified'
+    };
+
+    res.json({
+      success: true,
+      data: complianceDetails,
+      message: 'Compliance report details for DG review'
+    });
+
+  } catch (error) {
+    console.error('❌ DG LEVEL ERROR fetching compliance details:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch compliance details' 
     });
   }
 });

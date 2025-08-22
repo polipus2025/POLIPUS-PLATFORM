@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from './db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { 
   regulatoryDepartments, 
   commodities, 
@@ -314,46 +314,73 @@ router.post('/dg-level/approve-exporter-license/:exporterId', async (req, res) =
 // DG LEVEL FULL OVERSIGHT - READ-ONLY ACCESS TO ALL PORTALS
 // ============================================================================
 
-// DG Dashboard with complete system oversight
+// DG Dashboard - Final Approval Authority & Read-Only Oversight Only
 router.get('/dg-level/dashboard', async (req, res) => {
   try {
-    console.log('📊 DG LEVEL: Loading complete system dashboard...');
+    console.log('📊 DG LEVEL: Loading DG authority dashboard...');
 
-    // Get overview statistics from all portals
-    const farmerStats = await db.select().from(farmers);
-    const buyerStats = await db.select().from(buyers);
-    const exporterStats = await db.select().from(exporters);
-    const commodityStats = await db.select().from(commodities);
-    const inspectionStats = await db.select().from(inspections);
-    const certificationStats = await db.select().from(certifications);
+    // Count pending items requiring DG final approval
+    const pendingExportPermits = await db.select()
+      .from(certifications)
+      .where(and(
+        eq(certifications.certificateType, 'export'),
+        eq(certifications.status, 'ddgots_reviewed')
+      ));
 
-    const dashboard = {
-      systemOverview: {
-        totalFarmers: farmerStats.length,
-        totalBuyers: buyerStats.length,
-        totalExporters: exporterStats.length,
-        totalCommodities: commodityStats.length,
-        totalInspections: inspectionStats.length,
-        totalCertifications: certificationStats.length
+    const pendingExporterLicenses = await db.select()
+      .from(exporters)
+      .where(eq(exporters.complianceStatus, 'ddgots_approved'));
+
+    const pendingComplianceReports = await db.select()
+      .from(inspections)
+      .where(eq(inspections.complianceStatus, 'ddgots_verified'));
+
+    // DG approved items statistics
+    const dgApprovedPermits = await db.select()
+      .from(certifications)
+      .where(eq(certifications.status, 'dg_approved'));
+
+    const dgApprovedExporters = await db.select()
+      .from(exporters)
+      .where(eq(exporters.complianceStatus, 'dg_approved'));
+
+    // Basic system overview counts (read-only oversight)
+    const [farmerCount] = await db.select({ count: sql`count(*)` }).from(farmers);
+    const [buyerCount] = await db.select({ count: sql`count(*)` }).from(buyers);
+    const [exporterCount] = await db.select({ count: sql`count(*)` }).from(exporters);
+    const [inspectionCount] = await db.select({ count: sql`count(*)` }).from(inspections);
+
+    const dgDashboard = {
+      // Final Approval Authority Section
+      finalApprovalQueue: {
+        pendingExportPermits: pendingExportPermits.length,
+        pendingExporterLicenses: pendingExporterLicenses.length,
+        pendingComplianceReports: pendingComplianceReports.length,
+        totalPendingApprovals: pendingExportPermits.length + pendingExporterLicenses.length + pendingComplianceReports.length
       },
-      farmerPortalData: farmerStats.slice(0, 10), // Latest 10 farmers
-      buyerPortalData: buyerStats.slice(0, 10), // Latest 10 buyers  
-      exporterPortalData: exporterStats.slice(0, 10), // Latest 10 exporters
-      recentInspections: inspectionStats.slice(0, 15), // Latest 15 inspections
-      recentCertifications: certificationStats.slice(0, 15), // Latest 15 certifications
-      systemHealth: {
-        pendingApprovals: certificationStats.filter(c => c.status === 'ddgots_reviewed').length,
-        activeExports: exporterStats.filter(e => e.complianceStatus === 'dg_approved').length,
-        complianceIssues: inspectionStats.filter(i => i.complianceStatus === 'review_required').length
+      
+      // DG Approved Items
+      dgApprovals: {
+        approvedExportPermits: dgApprovedPermits.length,
+        approvedExporterLicenses: dgApprovedExporters.length,
+        totalDgApprovals: dgApprovedPermits.length + dgApprovedExporters.length
+      },
+
+      // Read-Only System Oversight 
+      systemOversight: {
+        totalFarmers: farmerCount.count,
+        totalBuyers: buyerCount.count,
+        totalExporters: exporterCount.count,
+        totalInspections: inspectionCount.count
       }
     };
 
-    console.log('✅ DG LEVEL: Dashboard loaded with full system oversight');
+    console.log('✅ DG LEVEL: Authority dashboard loaded');
 
     res.json({
       success: true,
-      data: dashboard,
-      message: 'DG Level dashboard with complete system oversight'
+      data: dgDashboard,
+      message: 'DG Level authority dashboard - Final approval and oversight only'
     });
 
   } catch (error) {

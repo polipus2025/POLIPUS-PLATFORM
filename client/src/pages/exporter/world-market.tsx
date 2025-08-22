@@ -5,8 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, TrendingUp, TrendingDown, Globe, DollarSign, BarChart3 } from 'lucide-react';
 import { Link } from 'wouter';
+import ExporterLayout from '@/components/layout/exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 
 const ExporterWorldMarket = memo(() => {
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
   // ⚡ MEMOIZED MARKET DATA
   const marketData = useMemo(() => [
     {
@@ -82,7 +90,7 @@ const ExporterWorldMarket = memo(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <ExporterLayout user={user}>
       <Helmet>
         <title>World Market Prices - Exporter Portal</title>
         <meta name="description" content="Real-time global commodity prices and market analysis for agricultural exports" />
@@ -258,7 +266,7 @@ const ExporterWorldMarket = memo(() => {
           </div>
         </div>
       </div>
-    </div>
+    </ExporterLayout>
   );
 });
 

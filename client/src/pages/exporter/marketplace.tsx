@@ -6,10 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, ShoppingCart, Users, Globe, Search, Star } from 'lucide-react';
 import { Link } from 'wouter';
+import ExporterLayout from '@/components/layout/exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 
 // ⚡ MEMOIZED MARKETPLACE COMPONENT FOR SPEED
 const ExporterMarketplace = memo(() => {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
 
   // ⚡ MEMOIZED BUYERS DATA
   const mockBuyers = useMemo(() => [
@@ -78,7 +87,7 @@ const ExporterMarketplace = memo(() => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <ExporterLayout user={user}>
       <Helmet>
         <title>Buyer Marketplace - Exporter Portal</title>
         <meta name="description" content="Connect with verified buyers and explore new market opportunities" />
@@ -239,7 +248,7 @@ const ExporterMarketplace = memo(() => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </ExporterLayout>
   );
 });
 

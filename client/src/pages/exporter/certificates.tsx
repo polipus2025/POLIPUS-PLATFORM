@@ -5,9 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, FileText, Download, Shield, Calendar } from 'lucide-react';
 import { Link } from 'wouter';
+import ExporterLayout from '@/components/layout/exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 
 // ⚡ MEMOIZED CERTIFICATES COMPONENT FOR SPEED
 const ExporterCertificates = memo(() => {
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
   // ⚡ MEMOIZED CERTIFICATES DATA
   const certificates = useMemo(() => [
     {
@@ -51,7 +59,7 @@ const ExporterCertificates = memo(() => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <ExporterLayout user={user}>
       <Helmet>
         <title>Export Certificates - Exporter Portal</title>
         <meta name="description" content="Download and manage your export certificates and compliance documents" />
@@ -190,7 +198,7 @@ const ExporterCertificates = memo(() => {
           </div>
         </div>
       </div>
-    </div>
+    </ExporterLayout>
   );
 });
 

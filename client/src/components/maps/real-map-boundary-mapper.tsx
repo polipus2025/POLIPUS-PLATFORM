@@ -400,19 +400,22 @@ export default function RealMapBoundaryMapper({
         };
         
         const newPoints = [...points, newPoint];
-        setPoints(newPoints);
         
-        console.log(`🎯 INTERACTIVE POINT ADDED: ${String.fromCharCode(65 + points.length)} at ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        // Order points in clockwise sequence for clean polygon
+        const orderedPoints = orderPointsClockwise(newPoints);
+        setPoints(orderedPoints);
         
-        // Real-time feedback
-        if (newPoints.length === 1) {
+        console.log(`🎯 INTERACTIVE POINT ADDED: Point ${orderedPoints.length} at ${lat.toFixed(6)}, ${lng.toFixed(6)} (ordered clockwise)`);
+        
+        // Real-time feedback with ordered point count
+        if (orderedPoints.length === 1) {
           setStatus(`🎯 Boundary mapping started - Click to add more points`);
-        } else if (newPoints.length >= 2) {
-          const area = calculateArea(newPoints);
+        } else if (orderedPoints.length >= 2) {
+          const area = calculateArea(orderedPoints);
           const areaText = area >= 10000 ? `${(area/10000).toFixed(3)} hectares` : 
                          area >= 1000 ? `${(area/1000).toFixed(1)}k sq meters` : 
                          `${area.toFixed(0)} sq meters`;
-          setStatus(`🎯 Point ${String.fromCharCode(65 + points.length)} added - Area: ${areaText} - ${newPoints.length} points`);
+          setStatus(`🎯 ${orderedPoints.length} points mapped clockwise - Area: ${areaText}`);
         }
       });
 
@@ -653,6 +656,25 @@ export default function RealMapBoundaryMapper({
     setStatus('GPS tracking stopped');
   };
 
+  // Order GPS points in clockwise sequence around polygon center
+  const orderPointsClockwise = (pointsToOrder: BoundaryPoint[]): BoundaryPoint[] => {
+    if (pointsToOrder.length < 3) return pointsToOrder;
+    
+    // Calculate centroid (center) of all points
+    const centerLat = pointsToOrder.reduce((sum, p) => sum + p.latitude, 0) / pointsToOrder.length;
+    const centerLng = pointsToOrder.reduce((sum, p) => sum + p.longitude, 0) / pointsToOrder.length;
+    
+    // Sort points by angle from center (clockwise)
+    const sortedPoints = [...pointsToOrder].sort((a, b) => {
+      const angleA = Math.atan2(a.latitude - centerLat, a.longitude - centerLng);
+      const angleB = Math.atan2(b.latitude - centerLat, b.longitude - centerLng);
+      return angleA - angleB;
+    });
+    
+    console.log(`🔄 GPS POINTS ORDERED: ${sortedPoints.length} points arranged clockwise around center (${centerLat.toFixed(6)}, ${centerLng.toFixed(6)})`);
+    return sortedPoints;
+  };
+
   const addCurrentGPSPoint = () => {
     if (!currentGPSPosition) {
       setStatus('No GPS position available');
@@ -670,25 +692,26 @@ export default function RealMapBoundaryMapper({
     };
 
     const newPoints = [...points, newPoint];
-    setPoints(newPoints);
     
-    // Real-time walking feedback
-    if (newPoints.length === 1) {
+    // Order points in clockwise sequence for clean polygon
+    const orderedPoints = orderPointsClockwise(newPoints);
+    setPoints(orderedPoints);
+    
+    // Real-time walking feedback with ordered sequence
+    if (orderedPoints.length === 1) {
       setStatus(`🚀 Starting boundary mapping - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
-    } else if (newPoints.length >= 2) {
+    } else if (orderedPoints.length >= 2) {
       const distance = Math.sqrt(
-        Math.pow(newPoints[newPoints.length - 1].latitude - newPoints[newPoints.length - 2].latitude, 2) + 
-        Math.pow(newPoints[newPoints.length - 1].longitude - newPoints[newPoints.length - 2].longitude, 2)
+        Math.pow(orderedPoints[orderedPoints.length - 1].latitude - orderedPoints[orderedPoints.length - 2].latitude, 2) + 
+        Math.pow(orderedPoints[orderedPoints.length - 1].longitude - orderedPoints[orderedPoints.length - 2].longitude, 2)
       ) * 111000; // Convert to meters
       
-      setStatus(`🚶‍♂️ Point ${newPoints.length} mapped - Distance: ${distance.toFixed(1)}m - Walking path updated`);
+      setStatus(`🚶‍♂️ ${orderedPoints.length} points mapped clockwise - Distance: ${distance.toFixed(1)}m`);
     }
     
-    // No need to call here - useEffect will handle the update automatically
-    
     // Trigger EUDR analysis if we have enough points
-    if (newPoints.length >= 6) {
-      setTimeout(() => analyzeEUDRCompliance(newPoints), 500);
+    if (orderedPoints.length >= 6) {
+      setTimeout(() => analyzeEUDRCompliance(orderedPoints), 500);
     }
   };
 

@@ -276,7 +276,6 @@ function Router() {
       
       {/* Independent Portal Dashboards */}
       <Route path="/system-admin-portal" component={SystemAdminPortal} />
-      <Route path="/agritrace-admin-portal" component={AgriTraceAdminPortal} />
       <Route path="/regulatory-portal-classic" component={RegulatoryPortalClassic} />
       <Route path="/farmer-login" component={FarmerLogin} />
       <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
@@ -769,6 +768,9 @@ function Router() {
       <Route path="/aqua-trace" component={AquaTracePortal} />
       <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
       <Route path="/carbon-trace" component={CarbonTracePortal} />
+      
+      {/* STANDALONE AGRITRACE ADMIN PORTAL - No Layout Wrapper */}
+      <Route path="/agritrace-admin-portal" component={AgriTraceAdminPortal} />
       
       {/* New Module Dashboard Routes - Fully Functional */}
       <Route path="/agritrace-dashboard" component={AgriTraceDashboard} />

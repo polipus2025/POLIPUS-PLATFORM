@@ -572,7 +572,10 @@ export default function PortInspectorDashboard() {
                         <Button size="sm" variant="outline">Send Alert</Button>
                       </div>
                     </div>
-                  ))}
+                  ))
+                  ) : (
+                    <p className="text-center text-gray-500">No regulatory sync data available</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

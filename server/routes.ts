@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { commodityDataService } from "./commodity-data-service";
 import { registerFarmerRoutes } from "./farmer-routes";
 import { paymentService } from "./payment-service";
 import { QrBatchService } from "./qr-batch-service";
@@ -11175,6 +11176,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error logging out:", error);
       res.status(500).json({ message: "Failed to logout" });
+    }
+  });
+
+  // ========================================================================================
+  // REAL-TIME COMMODITY DATA & MARKET INTELLIGENCE API
+  // ========================================================================================
+
+  // Get real-time commodity prices
+  app.get("/api/commodity/prices", async (req, res) => {
+    try {
+      const commodityPrices = await commodityDataService.getCommodityPrices();
+      res.json({
+        success: true,
+        data: commodityPrices,
+        lastUpdated: new Date().toISOString(),
+        source: "Alpha Vantage & Nasdaq Data Link"
+      });
+    } catch (error) {
+      console.error("Error fetching commodity prices:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch commodity prices",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get market indicators and analysis
+  app.get("/api/commodity/indicators", async (req, res) => {
+    try {
+      const indicators = await commodityDataService.getMarketIndicators();
+      res.json({
+        success: true,
+        data: indicators,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error fetching market indicators:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch market indicators" 
+      });
+    }
+  });
+
+  // Get price alerts
+  app.get("/api/commodity/alerts", async (req, res) => {
+    try {
+      const alerts = await commodityDataService.getPriceAlerts();
+      res.json({
+        success: true,
+        data: alerts,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error fetching price alerts:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch price alerts" 
+      });
+    }
+  });
+
+  // Get trading recommendations
+  app.get("/api/commodity/recommendations", async (req, res) => {
+    try {
+      const recommendations = await commodityDataService.getTradingRecommendations();
+      res.json({
+        success: true,
+        data: recommendations,
+        lastUpdated: new Date().toISOString(),
+        disclaimer: "This is not financial advice. Please consult a qualified financial advisor."
+      });
+    } catch (error) {
+      console.error("Error fetching trading recommendations:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch trading recommendations" 
+      });
+    }
+  });
+
+  // Get comprehensive market intelligence report
+  app.get("/api/commodity/market-intelligence", async (req, res) => {
+    try {
+      const [prices, indicators, alerts, recommendations] = await Promise.all([
+        commodityDataService.getCommodityPrices(),
+        commodityDataService.getMarketIndicators(),
+        commodityDataService.getPriceAlerts(),
+        commodityDataService.getTradingRecommendations()
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          commodityPrices: prices,
+          marketIndicators: indicators,
+          priceAlerts: alerts,
+          tradingRecommendations: recommendations,
+          marketSummary: {
+            totalCommoditiesTracked: prices.length,
+            bullishCommodities: prices.filter(c => c.changePercent > 0).length,
+            bearishCommodities: prices.filter(c => c.changePercent < 0).length,
+            highVolatilityAlerts: alerts.filter(a => a.severity === 'high').length,
+            avgVolatility: prices.reduce((sum, c) => sum + Math.abs(c.changePercent), 0) / prices.length
+          }
+        },
+        lastUpdated: new Date().toISOString(),
+        dataSources: ["Alpha Vantage API", "Nasdaq Data Link API"]
+      });
+    } catch (error) {
+      console.error("Error fetching market intelligence:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch market intelligence report" 
+      });
     }
   });
 

@@ -2,6 +2,7 @@ import type { Express } from "express";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { buyerAlertService } from "./buyer-alert-system";
+import { notificationService } from "./notification-service";
 
 // Farmer credential generation utility
 function generateFarmerCredentialId(): string {
@@ -77,11 +78,27 @@ export function registerFarmerRoutes(app: Express) {
         isActive: true
       });
 
+      // Send credentials via email and SMS
+      const farmerFullName = `${farmer.firstName} ${farmer.lastName}`;
+      const notifications = await notificationService.sendCredentialsNotifications(
+        farmer.email,
+        farmer.phone,
+        farmerFullName,
+        credentialId,
+        temporaryPassword
+      );
+
+      console.log(`📧 Email sent: ${notifications.emailSent ? '✅' : '❌'} | 📱 SMS sent: ${notifications.smsSent ? '✅' : '❌'} for ${farmerFullName}`);
+
       res.json({
         farmer,
         credentials: {
           credentialId,
           temporaryPassword
+        },
+        notifications: {
+          emailSent: notifications.emailSent,
+          smsSent: notifications.smsSent
         },
         message: "Farmer onboarding completed successfully!"
       });

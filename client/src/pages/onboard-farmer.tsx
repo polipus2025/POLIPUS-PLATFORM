@@ -165,7 +165,7 @@ export default function OnboardFarmer() {
       });
     },
     onSuccess: (response: any) => {
-      const { farmer, credentials } = response;
+      const { farmer, credentials, notifications } = response;
       
       // Show credentials modal
       setShowCredentialsModal({
@@ -175,9 +175,14 @@ export default function OnboardFarmer() {
         temporaryPassword: credentials.temporaryPassword
       });
       
+      // Show notification status in toast
+      const notificationStatus = [];
+      if (notifications?.emailSent) notificationStatus.push("📧 Email sent");
+      if (notifications?.smsSent) notificationStatus.push("📱 SMS sent");
+      
       toast({
         title: "Farmer Onboarded Successfully!",
-        description: `Login credentials generated: ${credentials.credentialId}`,
+        description: `Credentials generated: ${credentials.credentialId}${notificationStatus.length > 0 ? ' | ' + notificationStatus.join(' | ') : ''}`,
       });
       
       // Reset form

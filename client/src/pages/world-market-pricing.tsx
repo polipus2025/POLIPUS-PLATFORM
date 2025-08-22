@@ -75,8 +75,8 @@ const WorldMarketPricing = memo(() => {
 
   // Memoized data processing
   const commodityPrices = useMemo(() => {
-    if (commodityPricesQuery.data?.success) {
-      return commodityPricesQuery.data.data;
+    if (commodityPricesQuery.data && typeof commodityPricesQuery.data === 'object' && 'success' in commodityPricesQuery.data && commodityPricesQuery.data.success) {
+      return (commodityPricesQuery.data as any).data || [];
     }
     return [];
   }, [commodityPricesQuery.data]);
@@ -180,6 +180,62 @@ const WorldMarketPricing = memo(() => {
     { name: 'Neutral', value: 40, color: '#F59E0B' },
     { name: 'Bearish', value: 25, color: '#EF4444' }
   ], []);
+
+  // Market indicators data for radar chart
+  const marketIndicators = [
+    { name: 'Supply', value: 78 },
+    { name: 'Demand', value: 85 },
+    { name: 'Volatility', value: 62 },
+    { name: 'Liquidity', value: 91 },
+    { name: 'Sentiment', value: 74 },
+    { name: 'Technical', value: 68 }
+  ];
+
+  // Trading recommendations data
+  const tradingRecommendations = [
+    {
+      commodity: 'Coffee (Arabica)',
+      recommendation: 'Strong Buy',
+      reasoning: 'Brazilian drought conditions persist, driving supply constraints. Strong demand from emerging markets.',
+      targetPrice: 420,
+      confidence: 89
+    },
+    {
+      commodity: 'Palm Oil',
+      recommendation: 'Buy',
+      reasoning: 'Indonesia export restrictions and biodiesel demand create bullish fundamentals.',
+      targetPrice: 1050,
+      confidence: 76
+    },
+    {
+      commodity: 'Cocoa',
+      recommendation: 'Hold',
+      reasoning: 'West African political instability offset by lower global demand. Neutral position recommended.',
+      targetPrice: 8200,
+      confidence: 65
+    },
+    {
+      commodity: 'Natural Rubber',
+      recommendation: 'Buy',
+      reasoning: 'Auto industry recovery and EV tire demand boost rubber requirements.',
+      targetPrice: 1850,
+      confidence: 72
+    },
+    {
+      commodity: 'Cassava',
+      recommendation: 'Hold',
+      reasoning: 'Stable regional demand with moderate supply growth. Fair value pricing.',
+      targetPrice: 1.10,
+      confidence: 58
+    },
+    {
+      commodity: 'Coconut Oil',
+      recommendation: 'Strong Buy',
+      reasoning: 'Health trend adoption and food industry applications drive strong demand.',
+      targetPrice: 2850,
+      confidence: 82
+    }
+  ];
 
   // Processing real-time data
   const processedCommodityData = useMemo(() => {
@@ -513,13 +569,14 @@ const WorldMarketPricing = memo(() => {
                       ) : (
                         <Activity className="w-3 h-3 text-gray-500" />
                       )}
-                    <span className={`text-xs font-medium ${
-                      data.change > 0 ? 'text-green-600' : 
-                      data.change < 0 ? 'text-red-600' : 
-                      'text-gray-600'
-                    }`}>
-                      {Math.abs(data.change).toFixed(2)}%
-                    </span>
+                      <span className={`text-xs font-medium ${
+                        data.change > 0 ? 'text-green-600' : 
+                        data.change < 0 ? 'text-red-600' : 
+                        'text-gray-600'
+                      }`}>
+                        {Math.abs(data.change).toFixed(2)}%
+                      </span>
+                    </div>
                   </div>
                   <div className="mt-2">
                     <Badge 
@@ -540,10 +597,9 @@ const WorldMarketPricing = memo(() => {
                       </p>
                     )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
         </div>
 
         {/* Advanced Analytics and Advisory Services Tabs */}
@@ -850,6 +906,7 @@ const WorldMarketPricing = memo(() => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </CleanExporterLayout>
   );

@@ -1140,8 +1140,200 @@ export default function FarmerDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
+                  <Package className="w-5 h-5 mr-2" />
+                  Submit Product Offer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-6">
+                  Submit your product details below and all buyers in your county will be automatically notified. 
+                  The first buyer to confirm gets the transaction!
+                </p>
+                
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Commodity Type *
+                      </label>
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="select-commodity-type"
+                      >
+                        <option value="">Select Commodity</option>
+                        <option value="cocoa">Cocoa</option>
+                        <option value="coffee">Coffee</option>
+                        <option value="palm_oil">Palm Oil</option>
+                        <option value="rubber">Rubber</option>
+                        <option value="cassava">Cassava</option>
+                        <option value="coconut_oil">Coconut Oil</option>
+                        <option value="tobacco">Tobacco</option>
+                        <option value="robusta_coffee">Robusta Coffee</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Quantity Available *
+                      </label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        placeholder="e.g., 500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="input-quantity"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Unit *
+                      </label>
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="select-unit"
+                      >
+                        <option value="">Select Unit</option>
+                        <option value="MT">Metric Tons (MT)</option>
+                        <option value="kg">Kilograms (kg)</option>
+                        <option value="tons">Tons</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Price per Unit (USD) *
+                      </label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        placeholder="e.g., 1500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="input-price"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Quality Grade *
+                      </label>
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="select-quality-grade"
+                      >
+                        <option value="">Select Grade</option>
+                        <option value="Premium Grade">Premium Grade</option>
+                        <option value="Grade 1">Grade 1</option>
+                        <option value="Grade 2">Grade 2</option>
+                        <option value="Standard">Standard</option>
+                        <option value="Export Quality">Export Quality</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Farm Location *
+                      </label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g., Karnplay Village, Saclepea District"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="input-farm-location"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Harvest Date *
+                      </label>
+                      <input 
+                        type="date" 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="input-harvest-date"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Available From Date *
+                      </label>
+                      <input 
+                        type="date" 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="input-available-from"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Payment Terms *
+                      </label>
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="select-payment-terms"
+                      >
+                        <option value="">Select Payment Terms</option>
+                        <option value="cash">Cash Payment</option>
+                        <option value="installment">Installment</option>
+                        <option value="credit">Credit Terms</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Delivery Terms *
+                      </label>
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        data-testid="select-delivery-terms"
+                      >
+                        <option value="">Select Delivery Terms</option>
+                        <option value="farm_pickup">Farm Pickup</option>
+                        <option value="delivery_available">Delivery Available</option>
+                        <option value="port_delivery">Port Delivery</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Additional Description
+                    </label>
+                    <textarea 
+                      rows={3}
+                      placeholder="Add any additional details about your product..."
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      data-testid="textarea-description"
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-2">How it works:</h4>
+                    <ol className="text-sm text-blue-800 space-y-1">
+                      <li>1. Submit your product offer above</li>
+                      <li>2. All buyers in your county get notified instantly</li>
+                      <li>3. First buyer to confirm gets the transaction</li>
+                      <li>4. You receive a unique verification code</li>
+                      <li>5. Complete the transaction with the winning buyer</li>
+                    </ol>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-semibold"
+                    data-testid="button-submit-offer"
+                  >
+                    Submit Product Offer & Notify Buyers
+                  </button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
                   <Users className="w-5 h-5 mr-2" />
-                  Available Buyers
+                  Available Buyers in Your County
                 </CardTitle>
               </CardHeader>
               <CardContent>

@@ -75,6 +75,16 @@ import {
   // Buyer Management System Schemas
   insertBuyerSchema,
   
+  // County-Based Farmer-Buyer Notification System Schemas
+  insertFarmerProductOfferSchema,
+  insertBuyerNotificationSchema,
+  insertFarmerBuyerTransactionSchema,
+  farmerProductOffers,
+  buyerNotifications,
+  farmerBuyerTransactions,
+  farmers,
+  buyers,
+  
   // Blue Carbon 360 Schemas
   insertBlueCarbon360ProjectSchema,
   insertCarbonMarketplaceListingSchema,
@@ -106,7 +116,7 @@ import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { db } from './db';
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, ne } from "drizzle-orm";
 import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables
@@ -178,6 +188,441 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register crop scheduling routes
   app.use('/api', cropSchedulingRoutes);
+
+  // ========================================
+  // COUNTY-BASED FARMER-BUYER NOTIFICATION SYSTEM
+  // ========================================
+
+  // Helper function to generate unique verification code
+  const generateVerificationCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  // Helper function to generate unique offer ID
+  const generateOfferId = () => {
+    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+    return `FPO-${date}-${random}`;
+  };
+
+  // Helper function to generate notification ID
+  const generateNotificationId = () => {
+    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+    return `BN-${date}-${random}`;
+  };
+
+  // Helper function to generate transaction ID
+  const generateTransactionId = () => {
+    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+    return `FBT-${date}-${random}`;
+  };
+
+  // 1. Farmer submits product offer
+  app.post("/api/farmer-product-offers", async (req, res) => {
+    try {
+      const validatedData = insertFarmerProductOfferSchema.parse(req.body);
+      
+      // Generate unique offer ID
+      const offerId = generateOfferId();
+      
+      // Create the farmer product offer
+      const [offer] = await db.insert(farmerProductOffers).values({
+        ...validatedData,
+        offerId,
+      }).returning();
+
+      // Get all buyers in the same county
+      const countyBuyers = await db
+        .select({
+          id: buyers.id,
+          buyerId: buyers.buyerId,
+          businessName: buyers.businessName,
+          contactPersonFirstName: buyers.contactPersonFirstName,
+          contactPersonLastName: buyers.contactPersonLastName,
+          primaryEmail: buyers.primaryEmail,
+          county: buyers.county,
+        })
+        .from(buyers)
+        .where(eq(buyers.county, validatedData.county))
+        .where(eq(buyers.isActive, true))
+        .where(eq(buyers.portalAccess, true));
+
+      // Create notifications for all buyers in the county
+      const notifications = [];
+      for (const buyer of countyBuyers) {
+        const notificationId = generateNotificationId();
+        const buyerName = `${buyer.contactPersonFirstName} ${buyer.contactPersonLastName}`;
+        
+        const [notification] = await db.insert(buyerNotifications).values({
+          notificationId,
+          offerId: offer.offerId,
+          buyerId: buyer.id,
+          buyerName,
+          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
+          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for ${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
+          commodityType: validatedData.commodityType,
+          quantityAvailable: validatedData.quantityAvailable,
+          pricePerUnit: validatedData.pricePerUnit,
+          county: validatedData.county,
+          farmerName: validatedData.farmerName,
+        }).returning();
+        
+        notifications.push(notification);
+      }
+
+      // Mark notifications as sent
+      await db.update(farmerProductOffers)
+        .set({ 
+          notificationsSent: true, 
+          totalNotificationsSent: countyBuyers.length 
+        })
+        .where(eq(farmerProductOffers.offerId, offerId));
+
+      res.status(201).json({
+        success: true,
+        message: `Product offer submitted successfully! ${countyBuyers.length} buyers in ${validatedData.county} have been notified.`,
+        offer,
+        notificationsSent: countyBuyers.length,
+      });
+
+    } catch (error) {
+      console.error("Error creating farmer product offer:", error);
+      res.status(400).json({ 
+        success: false, 
+        message: "Failed to create product offer", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
+  // 2. Get notifications for a specific buyer
+  app.get("/api/buyer-notifications/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+
+      const notifications = await db
+        .select()
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.buyerId, parseInt(buyerId)))
+        .orderBy(desc(buyerNotifications.createdAt));
+
+      res.json({
+        success: true,
+        notifications,
+      });
+
+    } catch (error) {
+      console.error("Error fetching buyer notifications:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch notifications" 
+      });
+    }
+  });
+
+  // 3. Buyer confirms/rejects notification (First-Click-Wins Logic)
+  app.post("/api/buyer-notifications/:notificationId/respond", async (req, res) => {
+    try {
+      const { notificationId } = req.params;
+      const { response } = req.body; // response: "confirmed" or "rejected"
+
+      if (!["confirmed", "rejected"].includes(response)) {
+        return res.status(400).json({
+          success: false,
+          message: "Response must be 'confirmed' or 'rejected'",
+        });
+      }
+
+      // Get the notification
+      const [notification] = await db
+        .select()
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.notificationId, notificationId));
+
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          message: "Notification not found",
+        });
+      }
+
+      // Check if offer is still available
+      const [offer] = await db
+        .select()
+        .from(farmerProductOffers)
+        .where(eq(farmerProductOffers.offerId, notification.offerId));
+
+      if (!offer) {
+        return res.status(404).json({
+          success: false,
+          message: "Product offer not found",
+        });
+      }
+
+      if (offer.status !== "available") {
+        return res.status(400).json({
+          success: false,
+          message: "This product is no longer available",
+        });
+      }
+
+      // First-Click-Wins Logic: Check if anyone has already confirmed
+      const existingConfirmations = await db
+        .select()
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.offerId, notification.offerId))
+        .where(eq(buyerNotifications.response, "confirmed"));
+
+      if (response === "confirmed") {
+        if (existingConfirmations.length > 0) {
+          // Someone already confirmed - this buyer was too late
+          await db.update(buyerNotifications)
+            .set({ 
+              response: "rejected",
+              responseDate: new Date(),
+              clickOrder: existingConfirmations.length + 1,
+              isWinner: false,
+            })
+            .where(eq(buyerNotifications.notificationId, notificationId));
+
+          return res.status(400).json({
+            success: false,
+            message: "Sorry! Another buyer has already confirmed this offer. You were too late.",
+            clickOrder: existingConfirmations.length + 1,
+          });
+        }
+
+        // First buyer to confirm - they win!
+        await db.update(buyerNotifications)
+          .set({ 
+            response: "confirmed",
+            responseDate: new Date(),
+            clickOrder: 1,
+            isWinner: true,
+          })
+          .where(eq(buyerNotifications.notificationId, notificationId));
+
+        // Mark offer as reserved
+        await db.update(farmerProductOffers)
+          .set({ status: "reserved" })
+          .where(eq(farmerProductOffers.offerId, notification.offerId));
+
+        // Get buyer information
+        const [buyer] = await db
+          .select()
+          .from(buyers)
+          .where(eq(buyers.id, notification.buyerId));
+
+        // Create transaction with unique verification code
+        const transactionId = generateTransactionId();
+        const verificationCode = generateVerificationCode();
+
+        const [transaction] = await db.insert(farmerBuyerTransactions).values({
+          transactionId,
+          verificationCode,
+          offerId: notification.offerId,
+          notificationId,
+          farmerId: offer.farmerId,
+          buyerId: notification.buyerId,
+          farmerName: offer.farmerName,
+          buyerName: notification.buyerName,
+          buyerCompany: buyer?.businessName || "N/A",
+          commodityType: offer.commodityType,
+          quantityPurchased: offer.quantityAvailable,
+          agreedPricePerUnit: offer.pricePerUnit,
+          totalTransactionValue: offer.totalValue,
+          county: offer.county,
+          expectedDeliveryDate: offer.availableFromDate,
+          paymentDueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+          deliveryLocation: offer.farmLocation,
+        }).returning();
+
+        // Mark all other notifications for this offer as rejected (auto-reject losers)
+        await db.update(buyerNotifications)
+          .set({ 
+            response: "rejected",
+            responseDate: new Date(),
+            isWinner: false,
+          })
+          .where(eq(buyerNotifications.offerId, notification.offerId))
+          .where(ne(buyerNotifications.notificationId, notificationId));
+
+        res.json({
+          success: true,
+          message: "Congratulations! You won the offer!",
+          transaction,
+          verificationCode,
+          isWinner: true,
+          clickOrder: 1,
+        });
+
+      } else {
+        // Buyer rejected the offer
+        await db.update(buyerNotifications)
+          .set({ 
+            response: "rejected",
+            responseDate: new Date(),
+            isWinner: false,
+          })
+          .where(eq(buyerNotifications.notificationId, notificationId));
+
+        res.json({
+          success: true,
+          message: "Offer rejected successfully",
+          isWinner: false,
+        });
+      }
+
+    } catch (error) {
+      console.error("Error responding to notification:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to respond to notification" 
+      });
+    }
+  });
+
+  // 4. Get farmer's product offers and their status
+  app.get("/api/farmer-product-offers/:farmerId", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+
+      const offers = await db
+        .select()
+        .from(farmerProductOffers)
+        .where(eq(farmerProductOffers.farmerId, parseInt(farmerId)))
+        .orderBy(desc(farmerProductOffers.createdAt));
+
+      // Get transaction details for confirmed offers
+      const offersWithTransactions = await Promise.all(
+        offers.map(async (offer) => {
+          if (offer.status === "reserved" || offer.status === "sold") {
+            const [transaction] = await db
+              .select()
+              .from(farmerBuyerTransactions)
+              .where(eq(farmerBuyerTransactions.offerId, offer.offerId));
+            return { ...offer, transaction };
+          }
+          return offer;
+        })
+      );
+
+      res.json({
+        success: true,
+        offers: offersWithTransactions,
+      });
+
+    } catch (error) {
+      console.error("Error fetching farmer offers:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch offers" 
+      });
+    }
+  });
+
+  // 5. Get all active transactions for a buyer
+  app.get("/api/buyer-transactions/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+
+      const transactions = await db
+        .select()
+        .from(farmerBuyerTransactions)
+        .where(eq(farmerBuyerTransactions.buyerId, parseInt(buyerId)))
+        .orderBy(desc(farmerBuyerTransactions.createdAt));
+
+      res.json({
+        success: true,
+        transactions,
+      });
+
+    } catch (error) {
+      console.error("Error fetching buyer transactions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch transactions" 
+      });
+    }
+  });
+
+  // 6. Verify transaction code
+  app.get("/api/verify-transaction/:verificationCode", async (req, res) => {
+    try {
+      const { verificationCode } = req.params;
+
+      const [transaction] = await db
+        .select()
+        .from(farmerBuyerTransactions)
+        .where(eq(farmerBuyerTransactions.verificationCode, verificationCode));
+
+      if (!transaction) {
+        return res.status(404).json({
+          success: false,
+          message: "Invalid verification code",
+        });
+      }
+
+      res.json({
+        success: true,
+        transaction,
+        isValid: true,
+      });
+
+    } catch (error) {
+      console.error("Error verifying transaction:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to verify transaction" 
+      });
+    }
+  });
+
+  // 7. Get available buyers in farmer's county (for farmer dashboard)
+  app.get("/api/available-buyers/:county", async (req, res) => {
+    try {
+      const { county } = req.params;
+
+      const availableBuyers = await db
+        .select({
+          id: buyers.id,
+          buyerId: buyers.buyerId,
+          businessName: buyers.businessName,
+          contactPersonFirstName: buyers.contactPersonFirstName,
+          contactPersonLastName: buyers.contactPersonLastName,
+          businessType: buyers.businessType,
+          county: buyers.county,
+          interestedCommodities: buyers.interestedCommodities,
+          purchaseVolume: buyers.purchaseVolume,
+          paymentTerms: buyers.paymentTerms,
+        })
+        .from(buyers)
+        .where(eq(buyers.county, county))
+        .where(eq(buyers.isActive, true))
+        .where(eq(buyers.portalAccess, true))
+        .orderBy(buyers.businessName);
+
+      res.json({
+        success: true,
+        buyers: availableBuyers,
+        totalBuyers: availableBuyers.length,
+      });
+
+    } catch (error) {
+      console.error("Error fetching available buyers:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch available buyers" 
+      });
+    }
+  });
   
   // Register crop workflow PDF documentation routes
   app.use('/api', cropWorkflowPdfRoutes);

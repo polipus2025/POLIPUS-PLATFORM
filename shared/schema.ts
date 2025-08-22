@@ -2335,6 +2335,114 @@ export const insertBuyerSchema = createInsertSchema(buyers).omit({
 
 export type Buyer = typeof buyers.$inferSelect;
 
+// County-Based Farmer-Buyer Notification System
+export const farmerProductOffers = pgTable("farmer_product_offers", {
+  id: serial("id").primaryKey(),
+  offerId: text("offer_id").notNull().unique(), // FPO-YYYYMMDD-XXX format
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  farmerName: text("farmer_name").notNull(),
+  
+  // Product Details
+  commodityType: text("commodity_type").notNull(), // cocoa, coffee, palm_oil, rubber, cassava, coconut_oil, tobacco, robusta_coffee
+  quantityAvailable: decimal("quantity_available", { precision: 10, scale: 2 }).notNull(),
+  unit: text("unit").notNull(), // MT, tons, kg
+  qualityGrade: text("quality_grade").notNull(),
+  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
+  
+  // Location & Timing
+  county: text("county").notNull(), // For county-based buyer notifications
+  farmLocation: text("farm_location").notNull(),
+  harvestDate: timestamp("harvest_date").notNull(),
+  availableFromDate: timestamp("available_from_date").notNull(),
+  expirationDate: timestamp("expiration_date").notNull(),
+  
+  // Additional Details
+  description: text("description"),
+  paymentTerms: text("payment_terms").notNull(), // cash, installment, credit
+  deliveryTerms: text("delivery_terms").notNull(), // farm_pickup, delivery_available, port_delivery
+  
+  // System Status
+  status: text("status").notNull().default("available"), // available, reserved, sold, expired, cancelled
+  notificationsSent: boolean("notifications_sent").default(false),
+  totalNotificationsSent: integer("total_notifications_sent").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const buyerNotifications = pgTable("buyer_notifications", {
+  id: serial("id").primaryKey(),
+  notificationId: text("notification_id").notNull().unique(), // BN-YYYYMMDD-XXX format
+  offerId: text("offer_id").references(() => farmerProductOffers.offerId).notNull(),
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  buyerName: text("buyer_name").notNull(),
+  
+  // Notification Details
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  commodityType: text("commodity_type").notNull(),
+  quantityAvailable: decimal("quantity_available", { precision: 10, scale: 2 }).notNull(),
+  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }).notNull(),
+  county: text("county").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  
+  // Response Status
+  isRead: boolean("is_read").default(false),
+  response: text("response").default("pending"), // pending, confirmed, rejected
+  responseDate: timestamp("response_date"),
+  
+  // First-Click-Wins Logic
+  clickOrder: integer("click_order"), // Order in which buyer responded (1 = first, 2 = second, etc.)
+  isWinner: boolean("is_winner").default(false), // Only first clicker gets true
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const farmerBuyerTransactions = pgTable("farmer_buyer_transactions", {
+  id: serial("id").primaryKey(),
+  transactionId: text("transaction_id").notNull().unique(), // FBT-YYYYMMDD-XXX format
+  verificationCode: text("verification_code").notNull().unique(), // Unique alphanumeric code
+  
+  // Linked Records
+  offerId: text("offer_id").references(() => farmerProductOffers.offerId).notNull(),
+  notificationId: text("notification_id").references(() => buyerNotifications.notificationId).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  
+  // Parties Information
+  farmerName: text("farmer_name").notNull(),
+  buyerName: text("buyer_name").notNull(),
+  buyerCompany: text("buyer_company").notNull(),
+  
+  // Transaction Details
+  commodityType: text("commodity_type").notNull(),
+  quantityPurchased: decimal("quantity_purchased", { precision: 10, scale: 2 }).notNull(),
+  agreedPricePerUnit: decimal("agreed_price_per_unit", { precision: 10, scale: 2 }).notNull(),
+  totalTransactionValue: decimal("total_transaction_value", { precision: 12, scale: 2 }).notNull(),
+  county: text("county").notNull(),
+  
+  // Transaction Status
+  status: text("status").notNull().default("confirmed"), // confirmed, in_progress, completed, cancelled
+  paymentStatus: text("payment_status").notNull().default("pending"), // pending, paid, overdue
+  deliveryStatus: text("delivery_status").notNull().default("pending"), // pending, in_transit, delivered
+  
+  // Important Dates
+  confirmedAt: timestamp("confirmed_at").defaultNow(),
+  expectedDeliveryDate: timestamp("expected_delivery_date"),
+  actualDeliveryDate: timestamp("actual_delivery_date"),
+  paymentDueDate: timestamp("payment_due_date"),
+  paymentDate: timestamp("payment_date"),
+  
+  // Additional Data
+  deliveryLocation: text("delivery_location"),
+  notes: text("notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Buyer-Exporter Marketplace System
 // CORRECTED: Buyer Offers - Buyers offer commodities they purchased from farmers FOR SALE to exporters
 export const buyerOffers = pgTable("buyer_offers", {
@@ -2498,6 +2606,49 @@ export type InsertExporterPurchaseRequest = z.infer<typeof insertExporterPurchas
 
 export type MarketplaceCoordination = typeof marketplaceCoordination.$inferSelect;
 export type InsertMarketplaceCoordination = z.infer<typeof insertMarketplaceCoordinationSchema>;
+
+// County-Based Farmer-Buyer Notification System Types
+export const insertFarmerProductOfferSchema = createInsertSchema(farmerProductOffers).omit({
+  id: true,
+  offerId: true,
+  notificationsSent: true,
+  totalNotificationsSent: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBuyerNotificationSchema = createInsertSchema(buyerNotifications).omit({
+  id: true,
+  notificationId: true,
+  isRead: true,
+  response: true,
+  responseDate: true,
+  clickOrder: true,
+  isWinner: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFarmerBuyerTransactionSchema = createInsertSchema(farmerBuyerTransactions).omit({
+  id: true,
+  transactionId: true,
+  verificationCode: true,
+  status: true,
+  paymentStatus: true,
+  deliveryStatus: true,
+  confirmedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type FarmerProductOffer = typeof farmerProductOffers.$inferSelect;
+export type InsertFarmerProductOffer = z.infer<typeof insertFarmerProductOfferSchema>;
+
+export type BuyerNotification = typeof buyerNotifications.$inferSelect;
+export type InsertBuyerNotification = z.infer<typeof insertBuyerNotificationSchema>;
+
+export type FarmerBuyerTransaction = typeof farmerBuyerTransactions.$inferSelect;
+export type InsertFarmerBuyerTransaction = z.infer<typeof insertFarmerBuyerTransactionSchema>;
 export type InsertBuyer = z.infer<typeof insertBuyerSchema>;
 
 // Exporter schema types and validation

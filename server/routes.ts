@@ -1014,7 +1014,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.resolve('./central-control-dashboard.html'));
   });
 
-  // ==================== SUPER BACKEND CONTROL SYSTEM ====================
+  // ==================== AGRITRACE SYSTEM ADMINISTRATOR ====================
+  
+  // Import AgriTrace Admin Controller
+  const { agriTraceAdmin } = await import('./agritrace-admin-backend');
+
+  // AgriTrace Admin Authentication
+  app.post('/api/agritrace-admin/login', async (req, res) => {
+    try {
+      const { username, password, accessCode } = req.body;
+      
+      // AgriTrace-specific admin credentials
+      const agriTraceAdminCredentials = {
+        'agritrace.admin': { password: 'agritrace123', firstName: 'AgriTrace', lastName: 'Administrator' },
+        'admin.agritrace': { password: 'admin2025', firstName: 'System', lastName: 'Admin' },
+        'lacra.admin': { password: 'lacra2025', firstName: 'LACRA', lastName: 'Admin' }
+      };
+
+      // Check access code
+      if (accessCode !== 'AGRITRACE2025') {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid access code for AgriTrace administration" 
+        });
+      }
+
+      // Validate credentials
+      if (!agriTraceAdminCredentials[username] || agriTraceAdminCredentials[username].password !== password) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid AgriTrace admin credentials" 
+        });
+      }
+
+      const token = jwt.sign(
+        { 
+          userId: 'agritrace_admin',
+          username: username,
+          userType: 'agritrace_admin',
+          role: 'system_administrator',
+          scope: 'agritrace_module_only'
+        },
+        JWT_SECRET,
+        { expiresIn: '8h' }
+      );
+
+      await agriTraceAdmin.logAgriTraceAction('admin_login', `AgriTrace admin ${username} logged in`, username);
+
+      res.json({
+        success: true,
+        token,
+        user: {
+          username,
+          userType: 'agritrace_admin',
+          role: 'system_administrator',
+          firstName: agriTraceAdminCredentials[username].firstName,
+          lastName: agriTraceAdminCredentials[username].lastName,
+          scope: 'AgriTrace360™ Module Only',
+          platform: 'AgriTrace (Limited Admin Activity)'
+        }
+      });
+    } catch (error) {
+      console.error('AgriTrace admin login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error during authentication'
+      });
+    }
+  });
+
+  // AgriTrace Admin Authentication Middleware
+  const authenticateAgriTraceAdmin = (req: any, res: any, next: any) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: "No authorization token provided" });
+    }
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      if (decoded.userType !== 'agritrace_admin') {
+        return res.status(403).json({ message: "Access denied - AgriTrace admin required" });
+      }
+      req.user = decoded;
+      next();
+    } catch (error) {
+      res.status(403).json({ message: "Invalid or expired token" });
+    }
+  };
+
+  // AgriTrace Admin Dashboard
+  app.get('/api/agritrace-admin/dashboard', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const dashboardData = await agriTraceAdmin.getAgriTraceDashboardData();
+      res.json(dashboardData);
+    } catch (error) {
+      console.error('AgriTrace dashboard error:', error);
+      res.status(500).json({ message: 'Failed to fetch AgriTrace dashboard data' });
+    }
+  });
+
+  // AgriTrace System Configuration
+  app.get('/api/agritrace-admin/configurations', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const configurations = await agriTraceAdmin.getAgriTraceConfigurations(req.query.category as string);
+      res.json(configurations);
+    } catch (error) {
+      console.error('Error fetching AgriTrace configurations:', error);
+      res.status(500).json({ message: 'Failed to fetch configurations' });
+    }
+  });
+
+  app.post('/api/agritrace-admin/configurations', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const { configKey, configValue } = req.body;
+      await agriTraceAdmin.updateAgriTraceConfiguration(configKey, configValue, req.user.username);
+      res.json({ success: true, message: 'AgriTrace configuration updated' });
+    } catch (error) {
+      console.error('Error updating AgriTrace configuration:', error);
+      res.status(500).json({ message: error.message || 'Failed to update configuration' });
+    }
+  });
+
+  // AgriTrace Feature Flags
+  app.get('/api/agritrace-admin/features', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const features = await agriTraceAdmin.getAgriTraceFeatureFlags();
+      res.json(features);
+    } catch (error) {
+      console.error('Error fetching AgriTrace features:', error);
+      res.status(500).json({ message: 'Failed to fetch feature flags' });
+    }
+  });
+
+  app.post('/api/agritrace-admin/features/toggle', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const { flagName, isEnabled } = req.body;
+      await agriTraceAdmin.toggleAgriTraceFeature(flagName, isEnabled, req.user.username);
+      res.json({ success: true, message: 'AgriTrace feature toggled' });
+    } catch (error) {
+      console.error('Error toggling AgriTrace feature:', error);
+      res.status(500).json({ message: error.message || 'Failed to toggle feature' });
+    }
+  });
+
+  // AgriTrace System Health
+  app.get('/api/agritrace-admin/health', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const hours = parseInt(req.query.hours as string) || 24;
+      const health = await agriTraceAdmin.getAgriTraceHealth(hours);
+      res.json(health);
+    } catch (error) {
+      console.error('Error fetching AgriTrace health:', error);
+      res.status(500).json({ message: 'Failed to fetch system health' });
+    }
+  });
+
+  // AgriTrace Real-time Controls
+  app.get('/api/agritrace-admin/controls', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const controls = await agriTraceAdmin.getAgriTraceControls();
+      res.json(controls);
+    } catch (error) {
+      console.error('Error fetching AgriTrace controls:', error);
+      res.status(500).json({ message: 'Failed to fetch controls' });
+    }
+  });
+
+  app.post('/api/agritrace-admin/controls', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const control = {
+        ...req.body,
+        appliedBy: req.user.username
+      };
+      
+      const newControl = await agriTraceAdmin.applyAgriTraceControl(control);
+      res.json(newControl);
+    } catch (error) {
+      console.error('Error applying AgriTrace control:', error);
+      res.status(500).json({ message: 'Failed to apply control' });
+    }
+  });
+
+  // AgriTrace Performance Metrics
+  app.get('/api/agritrace-admin/metrics', authenticateAgriTraceAdmin, async (req, res) => {
+    try {
+      const hours = parseInt(req.query.hours as string) || 24;
+      const metrics = await agriTraceAdmin.getAgriTracePerformanceMetrics(hours);
+      res.json(metrics);
+    } catch (error) {
+      console.error('Error fetching AgriTrace metrics:', error);
+      res.status(500).json({ message: 'Failed to fetch performance metrics' });
+    }
+  });
+
+  // ==================== SUPER BACKEND CONTROL SYSTEM (Legacy Polipus) ====================
   
   // Super Backend Authentication Middleware (more permissive for demo)
   const authenticateSuperBackend = (req: any, res: any, next: any) => {

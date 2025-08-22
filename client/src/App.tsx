@@ -713,6 +713,9 @@ function Router() {
           <Route path="/world-market-pricing" component={WorldMarketPricing} />
           <Route path="/lacra-commodity-pricing" component={WorldMarketPricing} />
           
+          {/* Exporter Portal World Market Pricing */}
+          <Route path="/exporter-portal/world-market-pricing" component={lazy(() => import("@/pages/world-market-pricing"))} />
+          
           {/* Exporter Portal Pages */}
           <Route path="/exporter/orders" component={ExporterOrders} />
           <Route path="/exporter/marketplace" component={ExporterMarketplace} />
@@ -871,7 +874,8 @@ function App() {
   
   // EXPORTER PORTAL - Uses CleanExporterLayout with its own header
   const isExporterPage = window.location.pathname.startsWith("/exporter") || 
-                         window.location.pathname === "/world-market-pricing";
+                         window.location.pathname === "/world-market-pricing" ||
+                         window.location.pathname.startsWith("/exporter-portal");
   
   // STANDALONE ADMIN PORTALS - No layout wrapper
   const isAgriTraceAdminPortal = window.location.pathname === "/agritrace-admin-portal";

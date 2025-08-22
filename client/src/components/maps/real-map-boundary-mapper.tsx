@@ -1736,6 +1736,55 @@ export default function RealMapBoundaryMapper({
                     />
                   )}
                   
+                  {/* Connected Boundary Lines A→B→C→D→...→A */}
+                  {points.length >= 2 && points.map((point, index) => {
+                    const currentX = 50 + (index % 3) * 100 + Math.sin(index * 0.8) * 80;
+                    const currentY = 50 + Math.floor(index / 3) * 80 + Math.cos(index * 0.6) * 60;
+                    const nextIndex = (index + 1) % points.length;
+                    const nextX = 50 + (nextIndex % 3) * 100 + Math.sin(nextIndex * 0.8) * 80;
+                    const nextY = 50 + Math.floor(nextIndex / 3) * 80 + Math.cos(nextIndex * 0.6) * 60;
+                    
+                    const safeCurrentX = Math.max(50, Math.min(350, currentX));
+                    const safeCurrentY = Math.max(50, Math.min(320, currentY));
+                    const safeNextX = Math.max(50, Math.min(350, nextX));
+                    const safeNextY = Math.max(50, Math.min(320, nextY));
+                    
+                    return (
+                      <g key={`line-${index}`}>
+                        {/* Connecting line */}
+                        <line
+                          x1={safeCurrentX}
+                          y1={safeCurrentY}
+                          x2={safeNextX}
+                          y2={safeNextY}
+                          stroke="#22c55e"
+                          strokeWidth="4"
+                          className="drop-shadow-lg"
+                        />
+                        
+                        {/* Direction arrow */}
+                        <polygon
+                          points={`${safeNextX - 5},${safeNextY - 3} ${safeNextX + 3},${safeNextY} ${safeNextX - 5},${safeNextY + 3}`}
+                          fill="#22c55e"
+                          transform={`rotate(${Math.atan2(safeNextY - safeCurrentY, safeNextX - safeCurrentX) * 180 / Math.PI} ${safeNextX} ${safeNextY})`}
+                        />
+                        
+                        {/* Connection label */}
+                        <text
+                          x={(safeCurrentX + safeNextX) / 2}
+                          y={(safeCurrentY + safeNextY) / 2 - 8}
+                          textAnchor="middle"
+                          fontSize="8"
+                          fontWeight="bold"
+                          fill="#059669"
+                          className="drop-shadow-lg"
+                        >
+                          {String.fromCharCode(65 + index)}→{String.fromCharCode(65 + nextIndex)}
+                        </text>
+                      </g>
+                    );
+                  })}
+                  
                   {/* GPS Point Markers */}
                   {points.map((point, index) => {
                     const x = 50 + (index % 3) * 100 + Math.sin(index * 0.8) * 80;
@@ -1748,17 +1797,17 @@ export default function RealMapBoundaryMapper({
                         <circle
                           cx={safeX}
                           cy={safeY}
-                          r="8"
+                          r="10"
                           fill={index === 0 ? '#22c55e' : index === points.length - 1 ? '#ef4444' : '#3b82f6'}
                           stroke="white"
-                          strokeWidth="2"
+                          strokeWidth="3"
                           className="drop-shadow-lg"
                         />
                         <text
                           x={safeX}
                           y={safeY + 1}
                           textAnchor="middle"
-                          fontSize="10"
+                          fontSize="12"
                           fontWeight="bold"
                           fill="white"
                         >

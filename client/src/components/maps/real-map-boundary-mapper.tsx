@@ -444,13 +444,20 @@ export default function RealMapBoundaryMapper({
       mapElement.parentNode?.replaceChild(existingHandlers, mapElement);
       const cleanMapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
 
-      // REAL-TIME INTERACTIVE CLICK MAPPING - Add points instantly
+      // REAL-TIME INTERACTIVE CLICK MAPPING - Add points instantly with GPS accuracy check
       cleanMapElement.addEventListener('click', (e) => {
         console.log(`Current points: ${points.length}, Max points: ${maxPoints}`);
         
         if (points.length >= maxPoints) {
           setStatus(`Maximum ${maxPoints} points reached`);
           console.log(`Max points reached: ${points.length}/${maxPoints}`);
+          return;
+        }
+
+        // GPS ACCURACY CHECK - Only allow point placement with high precision
+        if (isTrackingGPS && trackingAccuracy && trackingAccuracy > 2.5) {
+          setStatus(`⚠️ GPS accuracy too low (${trackingAccuracy.toFixed(1)}m) - Need ≤2.5m for precise mapping`);
+          console.log(`🚫 POINT BLOCKED: GPS accuracy ${trackingAccuracy.toFixed(1)}m > 2.5m threshold`);
           return;
         }
 
@@ -474,23 +481,25 @@ export default function RealMapBoundaryMapper({
           longitude: lng
         };
         
-        console.log(`🎯 ADDING GPS POINT ${points.length + 1}/${maxPoints}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        const accuracyText = trackingAccuracy ? `(±${trackingAccuracy.toFixed(1)}m)` : '';
+        console.log(`🎯 ADDING HIGH-PRECISION GPS POINT ${points.length + 1}/${maxPoints}: ${lat.toFixed(6)}, ${lng.toFixed(6)} ${accuracyText}`);
         
         setPoints(prev => {
           const newPoints = [...prev, newPoint];
-          console.log(`✅ GPS POINT ADDED: ${newPoints.length}/${maxPoints} total points`);
+          console.log(`✅ HIGH-PRECISION GPS POINT ADDED: ${newPoints.length}/${maxPoints} total points ${accuracyText}`);
           
-          // Status updates
+          // Status updates with precision info
+          const precisionText = trackingAccuracy ? ` (±${trackingAccuracy.toFixed(1)}m precision)` : '';
           if (newPoints.length === 1) {
-            setStatus(`🎯 Point 1 added - Click to add more GPS boundary points (need 6 minimum)`);
+            setStatus(`🎯 Point 1 added${precisionText} - Click to add more GPS boundary points (need 6 minimum)`);
           } else if (newPoints.length < 6) {
-            setStatus(`🎯 ${newPoints.length}/6+ points mapped - Click ${6 - newPoints.length} more locations`);
+            setStatus(`🎯 ${newPoints.length}/6+ points mapped${precisionText} - Click ${6 - newPoints.length} more locations`);
           } else {
             const area = calculateArea(newPoints);
             const areaText = area >= 10000 ? `${(area/10000).toFixed(3)} hectares` : 
                            area >= 1000 ? `${(area/1000).toFixed(1)}k sq meters` : 
                            `${area.toFixed(0)} sq meters`;
-            setStatus(`✅ ${newPoints.length} GPS points mapped - Area: ${areaText} - Ready to complete!`);
+            setStatus(`✅ ${newPoints.length} GPS points mapped${precisionText} - Area: ${areaText} - Ready to complete!`);
           }
           
           return newPoints;
@@ -764,7 +773,7 @@ export default function RealMapBoundaryMapper({
     console.log(`✓ GPS MARKERS DISPLAYED: ${points.length} colored markers rendered`);
   }, [points, mapReady, mapCenter]);
 
-  // Real-time GPS tracking functions
+  // Real-time GPS tracking functions with 2.5m accuracy requirement
   const startGPSTracking = () => {
     if (!navigator.geolocation) {
       setStatus('GPS not available on this device');
@@ -788,10 +797,18 @@ export default function RealMapBoundaryMapper({
         
         setCurrentGPSPosition({lat, lng});
         setTrackingAccuracy(accuracy);
-        setStatus(`GPS tracking active - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints}`);
         
-        // Update map center to follow user
-        setMapCenter({lat, lng});
+        // GPS ACCURACY CONTROL - Only allow high precision (≤2.5m)
+        if (accuracy > 2.5) {
+          setStatus(`⚠️ GPS Accuracy: ${accuracy.toFixed(1)}m (need ≤2.5m for mapping) - Move to open area`);
+          console.log(`🚫 GPS ACCURACY TOO LOW: ${accuracy.toFixed(1)}m > 2.5m threshold`);
+        } else {
+          setStatus(`✅ GPS Ready - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints} - Click to add point`);
+          console.log(`✅ GPS ACCURACY GOOD: ${accuracy.toFixed(1)}m ≤ 2.5m threshold`);
+          
+          // Update map center to follow user only when accuracy is good
+          setMapCenter({lat, lng});
+        }
       },
       (error) => {
         console.error('GPS Error:', error);
@@ -1410,7 +1427,7 @@ export default function RealMapBoundaryMapper({
         </p>
         {enableRealTimeGPS && (
           <div className="text-xs text-green-700 bg-green-100 p-2 rounded">
-            💡 Walk to each corner/boundary point and press "Add GPS Point" for real-time field mapping
+            💡 <strong>High-precision mapping:</strong> Points can only be placed when GPS accuracy is ≤2.5 meters. Move to open areas for best GPS signal.
           </div>
         )}
       </div>
@@ -1423,9 +1440,15 @@ export default function RealMapBoundaryMapper({
               {isTrackingGPS ? '📍 GPS Tracking Active' : '📍 GPS Tracking Inactive'}
             </span>
             {trackingAccuracy && (
-              <span className="text-xs text-gray-600">
-                Accuracy: {trackingAccuracy.toFixed(1)}m
-              </span>
+              <div className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${
+                trackingAccuracy <= 2.5 
+                  ? 'text-green-700 bg-green-100 border border-green-300' 
+                  : 'text-orange-700 bg-orange-100 border border-orange-300'
+              }`}>
+                {trackingAccuracy <= 2.5 ? '✅' : '⚠️'} 
+                {trackingAccuracy.toFixed(1)}m 
+                {trackingAccuracy <= 2.5 ? '(Ready)' : '(Need ≤2.5m)'}
+              </div>
             )}
           </div>
           {currentGPSPosition && (
@@ -1459,10 +1482,12 @@ export default function RealMapBoundaryMapper({
                 e.stopPropagation();
                 addCurrentGPSPoint();
               }}
-              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > 2.5)}
               size="sm"
               variant="default"
-              className="flex-1 sm:flex-none"
+              className={`flex-1 sm:flex-none ${
+                trackingAccuracy && trackingAccuracy > 2.5 ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <span className="hidden sm:inline">Add GPS Point ({points.length}/{maxPoints})</span>
               <span className="sm:hidden">Add Point ({points.length}/{maxPoints})</span>

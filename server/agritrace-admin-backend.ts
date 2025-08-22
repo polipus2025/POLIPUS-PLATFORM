@@ -199,7 +199,7 @@ export class AgriTraceAdminController {
   async recordAgriTraceMetric(metric: InsertPerformanceMetric) {
     const agriTraceMetric = {
       ...metric,
-      serviceName: metric.serviceName.startsWith('agritrace_') ? metric.serviceName : `agritrace_${metric.serviceName}`,
+      serviceName: metric.serviceName?.startsWith('agritrace_') ? metric.serviceName : `agritrace_${metric.serviceName || 'service'}`,
       tags: { ...metric.tags, module: 'agritrace' }
     };
 
@@ -236,8 +236,8 @@ export class AgriTraceAdminController {
   async logAgriTraceAction(actionType: string, description: string, performedBy: string) {
     const logEntry: InsertBackendLog = {
       logLevel: 'info',
+      service: 'agritrace_admin', // Fix: use 'service' instead of 'serviceName'
       message: `[AgriTrace Admin] ${description}`,
-      serviceName: 'agritrace_admin',
       userId: performedBy,
       requestId: `agritrace_${Date.now()}`,
       metadata: {

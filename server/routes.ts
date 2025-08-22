@@ -1059,7 +1059,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { expiresIn: '8h' }
       );
 
-      await agriTraceAdmin.logAgriTraceAction('admin_login', `AgriTrace admin ${username} logged in`, username);
+      // Log admin login (simplified for now)
+      console.log(`[AgriTrace Admin] ${username} logged in successfully`);
 
       res.json({
         success: true,

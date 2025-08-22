@@ -127,7 +127,7 @@ const exporterNavigation = [
 const buyerNavigation = [
   { name: "Business Overview", href: "/buyer-dashboard", icon: BarChart3 },
   { name: "Farmer Connections", href: "/buyer-farmer-connections", icon: Leaf },
-  { name: "Exporter Network", href: "/buyer-exporter-network", icon: Building2 },
+  { name: "Product Marketplace", href: "/buyer-marketplace", icon: Building2 },
   { name: "Transaction Dashboard", href: "/buyer-transactions", icon: DollarSign },
   { name: "Available Harvests", href: "/buyer-harvests", icon: Calendar },
   { name: "Business Metrics", href: "/buyer-metrics", icon: TrendingUp },

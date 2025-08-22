@@ -53,7 +53,7 @@ const getMobileNavItems = (userType: string | null, role: string | null) => {
     return [
       { name: "Home", href: "/", icon: Home },
       { name: "Farmers", href: "/buyer-farmer-connections", icon: Leaf },
-      { name: "Exports", href: "/buyer-exporter-network", icon: Users },
+      { name: "Market", href: "/buyer-marketplace", icon: Users },
       { name: "Trades", href: "/buyer-transactions", icon: BarChart3 },
     ];
   }

@@ -48,10 +48,10 @@ export default function AgriculturalBuyerDashboard() {
     queryFn: () => apiRequest('/api/buyer/transactions'),
   });
 
-  // Fetch connected exporters for selling
-  const { data: exporters, isLoading: exportersLoading } = useQuery({
-    queryKey: ['/api/buyer/connected-exporters'],
-    queryFn: () => apiRequest('/api/buyer/connected-exporters'),
+  // Fetch marketplace data
+  const { data: marketplace, isLoading: marketplaceLoading } = useQuery({
+    queryKey: ['/api/buyer/marketplace'],
+    queryFn: () => apiRequest('/api/buyer/marketplace'),
   });
 
   // Fetch buyer business metrics
@@ -74,9 +74,9 @@ export default function AgriculturalBuyerDashboard() {
     console.log('Connecting with farmer:', farmerId);
   };
 
-  const contactExporter = (exporterId: string) => {
-    // API call to contact exporter for selling
-    console.log('Contacting exporter:', exporterId);
+  const accessMarketplace = () => {
+    // Navigate to buyer marketplace
+    navigate('/buyer-marketplace');
   };
 
   return (
@@ -107,7 +107,7 @@ export default function AgriculturalBuyerDashboard() {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Business Overview</TabsTrigger>
             <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>
-            <TabsTrigger value="exporters">Exporter Network</TabsTrigger>
+            <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
             <TabsTrigger value="transactions">Transaction Dashboard</TabsTrigger>
           </TabsList>
 
@@ -121,7 +121,7 @@ export default function AgriculturalBuyerDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">28</div>
-                  <p className="text-xs text-gray-600">Farmers & Exporters</p>
+                  <p className="text-xs text-gray-600">Farmers Only</p>
                 </CardContent>
               </Card>
 
@@ -346,12 +346,12 @@ export default function AgriculturalBuyerDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Exporter Network Tab */}
-          <TabsContent value="exporters" className="space-y-6">
+          {/* Marketplace Tab */}
+          <TabsContent value="marketplace" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Connected Exporters</CardTitle>
-                <CardDescription>Network of exporters available for selling your purchased commodities</CardDescription>
+                <CardTitle>Product Marketplace</CardTitle>
+                <CardDescription>Browse available agricultural products directly from farmers</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -359,31 +359,31 @@ export default function AgriculturalBuyerDashboard() {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg">Global Trading Ltd</CardTitle>
-                          <p className="text-sm text-gray-600">EST-2024-012</p>
+                          <CardTitle className="text-lg">Premium Cocoa - John Doe Farm</CardTitle>
+                          <p className="text-sm text-gray-600">Harvest: January 2024</p>
                         </div>
-                        <Badge className="bg-blue-100 text-blue-800">Active</Badge>
+                        <Badge className="bg-green-100 text-green-800">Available</Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
                         <div className="flex items-center text-sm">
                           <Package2 className="h-4 w-4 mr-2 text-blue-600" />
-                          <span>Specializes in: Cocoa, Coffee</span>
+                          <span>Product: Grade I Cocoa Beans</span>
                         </div>
                         <div className="flex items-center text-sm">
                           <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
-                          <span>Price Range: $2.80 - $3.50/kg</span>
+                          <span>Price: $2.80/kg - 500kg available</span>
                         </div>
                         <div className="flex items-center text-sm">
-                          <Truck className="h-4 w-4 mr-2 text-orange-600" />
-                          <span>Ships to: EU, USA, Asia</span>
+                          <MapPin className="h-4 w-4 mr-2 text-orange-600" />
+                          <span>Location: Bong County</span>
                         </div>
                       </div>
                       <div className="flex space-x-2 mt-4">
-                        <Button size="sm" className="flex-1" onClick={() => contactExporter('EST-2024-012')}>
+                        <Button size="sm" className="flex-1" onClick={() => connectWithFarmer('FARM-001')}>
                           <MessageCircle className="h-4 w-4 mr-1" />
-                          Contact
+                          Contact Farmer
                         </Button>
                         <Button size="sm" variant="outline">
                           <FileText className="h-4 w-4 mr-1" />
@@ -397,31 +397,31 @@ export default function AgriculturalBuyerDashboard() {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg">International Export Co.</CardTitle>
-                          <p className="text-sm text-gray-600">EST-2024-008</p>
+                          <CardTitle className="text-lg">Organic Coffee - Mary's Farm</CardTitle>
+                          <p className="text-sm text-gray-600">Harvest: December 2023</p>
                         </div>
-                        <Badge className="bg-green-100 text-green-800">Premium</Badge>
+                        <Badge className="bg-blue-100 text-blue-800">Premium</Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
                         <div className="flex items-center text-sm">
                           <Package2 className="h-4 w-4 mr-2 text-blue-600" />
-                          <span>Specializes in: All commodities</span>
+                          <span>Product: Arabica Coffee Beans</span>
                         </div>
                         <div className="flex items-center text-sm">
                           <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
-                          <span>Price Range: $3.00 - $4.20/kg</span>
+                          <span>Price: $3.50/kg - 300kg available</span>
                         </div>
                         <div className="flex items-center text-sm">
-                          <Truck className="h-4 w-4 mr-2 text-orange-600" />
-                          <span>Ships to: Global markets</span>
+                          <MapPin className="h-4 w-4 mr-2 text-orange-600" />
+                          <span>Location: Grand Bassa County</span>
                         </div>
                       </div>
                       <div className="flex space-x-2 mt-4">
-                        <Button size="sm" className="flex-1" onClick={() => contactExporter('EST-2024-008')}>
+                        <Button size="sm" className="flex-1" onClick={() => connectWithFarmer('FARM-002')}>
                           <MessageCircle className="h-4 w-4 mr-1" />
-                          Contact
+                          Contact Farmer
                         </Button>
                         <Button size="sm" variant="outline">
                           <FileText className="h-4 w-4 mr-1" />

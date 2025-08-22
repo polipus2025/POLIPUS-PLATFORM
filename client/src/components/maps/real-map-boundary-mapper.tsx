@@ -1567,10 +1567,13 @@ export default function RealMapBoundaryMapper({
                 <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
                   {points.length >= 3 && (
                     <polygon
-                      points={points.map((point, i) => {
-                        const x = 50 + (i % 3) * 100 + Math.sin(i * 0.8) * 80;
-                        const y = 50 + Math.floor(i / 3) * 80 + Math.cos(i * 0.6) * 60;
-                        return `${Math.max(50, Math.min(350, x))},${Math.max(50, Math.min(320, y))}`;
+                      points={points.map((point) => {
+                        // Convert REAL GPS coordinates to pixel positions
+                        const latRange = 0.001;
+                        const lngRange = 0.001;
+                        const x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
+                        const y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * 384;
+                        return `${Math.max(10, Math.min(390, x))},${Math.max(10, Math.min(374, y))}`;
                       }).join(' ')}
                       fill="rgba(34, 197, 94, 0.2)"
                       stroke="#22c55e"
@@ -1582,16 +1585,22 @@ export default function RealMapBoundaryMapper({
                   
                   {/* Connected Boundary Lines A→B→C→D→...→A */}
                   {points.length >= 2 && points.map((point, index) => {
-                    const currentX = 50 + (index % 3) * 100 + Math.sin(index * 0.8) * 80;
-                    const currentY = 50 + Math.floor(index / 3) * 80 + Math.cos(index * 0.6) * 60;
+                    // Convert REAL GPS coordinates to pixel positions for connecting lines
+                    const latRange = 0.001;
+                    const lngRange = 0.001;
+                    const currentPoint = points[index];
                     const nextIndex = (index + 1) % points.length;
-                    const nextX = 50 + (nextIndex % 3) * 100 + Math.sin(nextIndex * 0.8) * 80;
-                    const nextY = 50 + Math.floor(nextIndex / 3) * 80 + Math.cos(nextIndex * 0.6) * 60;
+                    const nextPoint = points[nextIndex];
                     
-                    const safeCurrentX = Math.max(50, Math.min(350, currentX));
-                    const safeCurrentY = Math.max(50, Math.min(320, currentY));
-                    const safeNextX = Math.max(50, Math.min(350, nextX));
-                    const safeNextY = Math.max(50, Math.min(320, nextY));
+                    const currentX = ((currentPoint.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
+                    const currentY = ((mapCenter.lat + latRange / 2 - currentPoint.latitude) / latRange) * 384;
+                    const nextX = ((nextPoint.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
+                    const nextY = ((mapCenter.lat + latRange / 2 - nextPoint.latitude) / latRange) * 384;
+                    
+                    const safeCurrentX = Math.max(10, Math.min(390, currentX));
+                    const safeCurrentY = Math.max(10, Math.min(374, currentY));
+                    const safeNextX = Math.max(10, Math.min(390, nextX));
+                    const safeNextY = Math.max(10, Math.min(374, nextY));
                     
                     return (
                       <g key={`line-${index}`}>
@@ -1631,10 +1640,13 @@ export default function RealMapBoundaryMapper({
                   
                   {/* GPS Point Markers */}
                   {points.map((point, index) => {
-                    const x = 50 + (index % 3) * 100 + Math.sin(index * 0.8) * 80;
-                    const y = 50 + Math.floor(index / 3) * 80 + Math.cos(index * 0.6) * 60;
-                    const safeX = Math.max(50, Math.min(350, x));
-                    const safeY = Math.max(50, Math.min(320, y));
+                    // Convert REAL GPS coordinates to pixel positions for markers
+                    const latRange = 0.001;
+                    const lngRange = 0.001;
+                    const x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
+                    const y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * 384;
+                    const safeX = Math.max(10, Math.min(390, x));
+                    const safeY = Math.max(10, Math.min(374, y));
                     
                     return (
                       <g key={index}>

@@ -1607,8 +1607,8 @@ export default function RealMapBoundaryMapper({
       
       {/* Interactive Map View Modal */}
       {showInteractiveView && boundaryCompleted && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-lg p-3 sm:p-6 w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg p-3 sm:p-6 w-full max-w-4xl h-[95vh] sm:h-[90vh] flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Interactive Boundary Map - Connected Points</h3>
               <Button
@@ -1641,14 +1641,18 @@ export default function RealMapBoundaryMapper({
                 ))}
               </div>
             </div>
-            <div className="relative h-64 sm:h-96 bg-gray-900 rounded-lg overflow-hidden border-2 border-blue-300">
+            <div className="relative flex-1 bg-gray-900 rounded-lg overflow-hidden border-2 border-blue-300 min-h-0">
               <div 
-                className="w-full h-full bg-cover bg-center relative"
+                className="w-full h-full relative"
                 style={{
                   backgroundImage: `url('${getSatelliteTiles(mapCenter.lat, mapCenter.lng, 18)[0].url}')`,
-                  backgroundPosition: 'center',
-                  backgroundSize: 'cover'
+                  backgroundPosition: 'center center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundAttachment: 'local'
                 }}
+                onMouseMove={(e) => e.preventDefault()}
+                onScroll={(e) => e.preventDefault()}
               >
                 {/* Satellite imagery overlay with grid */}
                 <div 
@@ -1661,14 +1665,17 @@ export default function RealMapBoundaryMapper({
                   }}
                 />
                 
-                {/* GPS Boundary Overlay */}
-                <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
+                {/* GPS Boundary Overlay - Static Display */}
+                <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none', position: 'absolute', top: 0, left: 0 }}>
                   {points.length >= 3 && (
                     <polygon
                       points={points.map((point) => {
-                        // Convert REAL GPS coordinates to pixel positions
-                        const latRange = 0.001;
-                        const lngRange = 0.001;
+                        // Use accurate scaling for static display
+                        const metersPerDegreeLat = 111320;
+                        const metersPerDegreeLng = 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
+                        const meterRange = 200;
+                        const latRange = meterRange / metersPerDegreeLat;
+                        const lngRange = meterRange / metersPerDegreeLng;
                         const x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
                         const y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * 384;
                         return `${Math.max(10, Math.min(390, x))},${Math.max(10, Math.min(374, y))}`;
@@ -1745,7 +1752,7 @@ export default function RealMapBoundaryMapper({
                     const metersPerDegreeLat = 111320;
                     const metersPerDegreeLng = 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
                     const meterRange = 200;
-                    const latRange = meterRange / metersPerDegreeLng;
+                    const latRange = meterRange / metersPerDegreeLat;
                     const lngRange = meterRange / metersPerDegreeLng;
                     const x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
                     const y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * 384;
@@ -1779,13 +1786,13 @@ export default function RealMapBoundaryMapper({
                 </svg>
                 
                 {/* Geo-reference Information Overlay */}
-                <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                  <div>📡 Geo-Referenced Satellite Image</div>
+                <div className="absolute top-2 left-2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded pointer-events-none">
+                  <div>📡 Static Boundary View</div>
                   <div>{mapCenter.lat.toFixed(6)}, {mapCenter.lng.toFixed(6)}</div>
                 </div>
                 
-                <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                  <div>🛰️ High-Accuracy GPS Trace</div>
+                <div className="absolute top-2 right-2 bg-black bg-opacity-90 text-white text-xs px-2 py-1 rounded pointer-events-none">
+                  <div>🛰️ GPS Mapped Area</div>
                   <div>{points.length} Boundary Points</div>
                 </div>
                 

@@ -439,14 +439,22 @@ export default function RealMapBoundaryMapper({
       // Load premium satellite tiles for enhanced coverage
       loadPremiumRealTimeSatelliteTiles(centerLat, centerLng, 19);
 
+      // Remove any existing click handlers first
+      const existingHandlers = mapElement.cloneNode(true);
+      mapElement.parentNode?.replaceChild(existingHandlers, mapElement);
+      const cleanMapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
+
       // REAL-TIME INTERACTIVE CLICK MAPPING - Add points instantly
-      mapElement.addEventListener('click', (e) => {
+      cleanMapElement.addEventListener('click', (e) => {
+        console.log(`Current points: ${points.length}, Max points: ${maxPoints}`);
+        
         if (points.length >= maxPoints) {
           setStatus(`Maximum ${maxPoints} points reached`);
+          console.log(`Max points reached: ${points.length}/${maxPoints}`);
           return;
         }
 
-        const rect = mapElement.getBoundingClientRect();
+        const rect = cleanMapElement.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
@@ -466,31 +474,27 @@ export default function RealMapBoundaryMapper({
           longitude: lng
         };
         
-        const newPoints = [...points, newPoint];
+        console.log(`🎯 ADDING GPS POINT ${points.length + 1}/${maxPoints}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         
-        // Always apply clockwise ordering when 3+ points exist
-        if (newPoints.length >= 3) {
-          const orderedPoints = orderPointsClockwise(newPoints);
-          setPoints(orderedPoints);
-          console.log(`✅ CLICK MAPPING: Applied clockwise ordering to ${orderedPoints.length} points`);
-        } else {
-          setPoints(newPoints);
-          console.log(`➕ CLICK MAPPING: Added point ${newPoints.length} (ordering applies at 3+ points)`);
-        }
-        
-        const finalPoints = newPoints.length >= 3 ? orderPointsClockwise(newPoints) : newPoints;
-        console.log(`🎯 INTERACTIVE POINT ADDED: Point ${finalPoints.length} at ${lat.toFixed(6)}, ${lng.toFixed(6)} ${finalPoints.length >= 3 ? '(ordered clockwise)' : ''}`);
-        
-        // Real-time feedback with final point count
-        if (finalPoints.length === 1) {
-          setStatus(`🎯 Boundary mapping started - Click to add more points`);
-        } else if (finalPoints.length >= 2) {
-          const area = calculateArea(finalPoints);
-          const areaText = area >= 10000 ? `${(area/10000).toFixed(3)} hectares` : 
-                         area >= 1000 ? `${(area/1000).toFixed(1)}k sq meters` : 
-                         `${area.toFixed(0)} sq meters`;
-          setStatus(`🎯 ${finalPoints.length} points mapped ${finalPoints.length >= 3 ? 'clockwise' : ''} - Area: ${areaText}`);
-        }
+        setPoints(prev => {
+          const newPoints = [...prev, newPoint];
+          console.log(`✅ GPS POINT ADDED: ${newPoints.length}/${maxPoints} total points`);
+          
+          // Status updates
+          if (newPoints.length === 1) {
+            setStatus(`🎯 Point 1 added - Click to add more GPS boundary points (need 6 minimum)`);
+          } else if (newPoints.length < 6) {
+            setStatus(`🎯 ${newPoints.length}/6+ points mapped - Click ${6 - newPoints.length} more locations`);
+          } else {
+            const area = calculateArea(newPoints);
+            const areaText = area >= 10000 ? `${(area/10000).toFixed(3)} hectares` : 
+                           area >= 1000 ? `${(area/1000).toFixed(1)}k sq meters` : 
+                           `${area.toFixed(0)} sq meters`;
+            setStatus(`✅ ${newPoints.length} GPS points mapped - Area: ${areaText} - Ready to complete!`);
+          }
+          
+          return newPoints;
+        });
       });
 
       // Load high-resolution satellite tile grid

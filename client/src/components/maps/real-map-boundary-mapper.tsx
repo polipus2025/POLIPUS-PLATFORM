@@ -870,16 +870,43 @@ export default function RealMapBoundaryMapper({
   };
 
   const calculateArea = (points: BoundaryPoint[]): number => {
-    if (points.length < 6) return 0;
+    if (points.length < 3) return 0;
     
+    // Enhanced GPS-based area calculation using spherical method for accuracy
     let area = 0;
+    const earthRadius = 6371000; // Earth's radius in meters
+    
     for (let i = 0; i < points.length; i++) {
       const j = (i + 1) % points.length;
-      area += points[i].latitude * points[j].longitude;
-      area -= points[j].latitude * points[i].longitude;
+      const lat1 = points[i].latitude * Math.PI / 180;
+      const lat2 = points[j].latitude * Math.PI / 180;
+      const lon1 = points[i].longitude * Math.PI / 180;
+      const lon2 = points[j].longitude * Math.PI / 180;
+      
+      area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
-    area = Math.abs(area) / 2;
-    return area * 12100; // Convert to hectares
+    
+    // Calculate area in square meters first
+    const areaInSquareMeters = Math.abs(area * earthRadius * earthRadius / 2);
+    
+    // Convert to appropriate unit based on size
+    const areaInHectares = areaInSquareMeters / 10000; // 1 hectare = 10,000 m²
+    const areaInAcres = areaInSquareMeters / 4047; // 1 acre = 4,047 m²
+    
+    console.log(`📐 LAND AREA CALCULATED:
+      - Square Meters: ${areaInSquareMeters.toFixed(2)} m²
+      - Hectares: ${areaInHectares.toFixed(4)} ha
+      - Acres: ${areaInAcres.toFixed(4)} acres
+      - GPS Points Used: ${points.length}`);
+    
+    // Return most appropriate unit based on size
+    if (areaInHectares >= 1) {
+      return parseFloat(areaInHectares.toFixed(4)); // Return in hectares
+    } else if (areaInAcres >= 0.1) {
+      return parseFloat(areaInAcres.toFixed(4)); // Return in acres for smaller areas
+    } else {
+      return parseFloat((areaInSquareMeters / 1000).toFixed(2)); // Return in thousand sq meters
+    }
   };
 
   // EUDR Compliance Analysis
@@ -1830,7 +1857,17 @@ export default function RealMapBoundaryMapper({
                 </div>
                 
                 <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                  <div>📏 Area: {calculateArea(points).toFixed(2)} hectares</div>
+                  <div>📏 Area: {points.length < 3 ? '0.00' : (() => {
+                    const area = calculateArea(points);
+                    const areaInSquareMeters = area * 10000; // Convert back to sq meters for unit determination
+                    if (areaInSquareMeters >= 10000) {
+                      return `${area.toFixed(4)} hectares`;
+                    } else if (areaInSquareMeters >= 4047) {
+                      return `${(areaInSquareMeters / 4047).toFixed(4)} acres`;
+                    } else {
+                      return `${areaInSquareMeters.toFixed(2)} sq meters`;
+                    }
+                  })()}</div>
                   <div>📐 Perimeter: {(calculatePerimeter(points) / 1000).toFixed(2)} km</div>
                 </div>
               </div>

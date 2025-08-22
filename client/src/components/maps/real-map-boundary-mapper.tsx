@@ -73,8 +73,8 @@ export default function RealMapBoundaryMapper({
     const mapContainer = mapRef.current?.querySelector('.real-map') as HTMLElement;
     if (!mapContainer) return;
 
-    // Remove existing markers
-    mapContainer.querySelectorAll('.persistent-marker').forEach(marker => marker.remove());
+    // Remove ALL existing markers to prevent duplicates
+    mapContainer.querySelectorAll('.persistent-marker, .map-marker, .area-label, .risk-label').forEach(marker => marker.remove());
 
     // Add persistent markers for all points
     currentPoints.forEach((point, index) => {
@@ -612,275 +612,21 @@ export default function RealMapBoundaryMapper({
     // Map initialization handled by initMapWithCoordinates function
   }, []);
 
-  // Update visual markers when points change - IMMEDIATE PERSISTENT DISPLAY
+  // Update visual markers when points change - SINGLE POINT DISPLAY ONLY
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
 
+    // Clear ALL existing markers to prevent duplicates
     const mapElement = mapRef.current.querySelector('#real-map, #fallback-map') as HTMLElement;
-    const svg = mapRef.current.querySelector('svg') as SVGElement;
-    
-    if (!mapElement || !svg) return;
-
-    // Clear existing markers but preserve points
-    mapElement.querySelectorAll('.map-marker, .area-label, .risk-label').forEach(el => el.remove());
-    
-    // Force immediate persistent display for all points
-    console.log(`Rendering persistent boundary display for ${points.length} points`);
-    
-    // The persistent boundary display logic is handled in the main render loop below
-    
-    // Clear SVG content but preserve defs for patterns
-    const existingDefs = svg.querySelector('defs');
-    svg.innerHTML = '';
-    
-    // Re-add or create crosshatch patterns
-    const defs = existingDefs || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    if (!existingDefs) {
-      const patterns = ['red', 'yellow', 'green'];
-      const colors = ['#dc2626', '#f59e0b', '#22c55e'];
-      
-      patterns.forEach((pattern, idx) => {
-        const patternEl = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-        patternEl.setAttribute('id', `crosshatch-${pattern}`);
-        patternEl.setAttribute('patternUnits', 'userSpaceOnUse');
-        patternEl.setAttribute('width', '8');
-        patternEl.setAttribute('height', '8');
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', 'M0,0 L8,8 M0,8 L8,0');
-        path.setAttribute('stroke', colors[idx]);
-        path.setAttribute('stroke-width', '1.5');
-        path.setAttribute('opacity', '0.6');
-        patternEl.appendChild(path);
-        defs.appendChild(patternEl);
-      });
-      svg.appendChild(defs);
+    if (mapElement) {
+      mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .persistent-marker').forEach(el => el.remove());
     }
-
-    // PERSISTENT MARKERS: All points stay visible as you walk and map
-    console.log(`Rendering ${points.length} persistent markers on map`);
     
-    points.forEach((point, index) => {
-      // Convert lat/lng to pixels with proper coordinate system
-      let x, y;
-      
-      // Check if we're using satellite imagery or fallback
-      if (mapElement.id === 'real-map') {
-        // For satellite imagery - use map center coordinates
-        x = (point.longitude - mapCenter.lng) * 5000 + 200;
-        y = 200 - (point.latitude - mapCenter.lat) * 5000;
-      } else {
-        // For fallback terrain map
-        x = (point.longitude + 9.4295) * 5000 + 200;
-        y = 200 - (point.latitude - 6.4281) * 5000;
-      }
-      
-      // Ensure markers stay within map bounds
-      x = Math.max(15, Math.min(385, x));
-      y = Math.max(15, Math.min(385, y));
-      
-      console.log(`Creating persistent marker ${String.fromCharCode(65 + index)} at pixel ${x}, ${y}`);
-      
-      // Calculate EUDR risk for each point
-      const pointRisk = calculatePointRisk(point.latitude, point.longitude);
-      
-      // Create highly visible persistent marker that stays on map (like in your image)
-      const marker = document.createElement('div');
-      marker.className = `map-marker persistent-marker marker-${index}`;
-      marker.id = `marker-${index}`;
-      marker.style.cssText = `
-        position: absolute;
-        left: ${x}px;
-        top: ${y}px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        font-weight: bold;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-        border: 3px solid white;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.6);
-        z-index: 25;
-        transform: translate(-50%, -50%);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background-color: ${index === 0 ? '#22c55e' : index === points.length - 1 && points.length >= 6 ? '#ef4444' : '#3b82f6'};
-        ${index === points.length - 1 && points.length >= 6 ? 'animation: pulse 2s infinite;' : ''}
-      `;
-      
-      // Add alphabetical label (A, B, C, D, etc.)
-      marker.textContent = String.fromCharCode(65 + index);
-      marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
-      
-      mapElement.appendChild(marker);
-      console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
-    });
-
-    // ENHANCED BOUNDARY CONNECTIONS: Draw connecting lines immediately when 2+ points exist
-    if (points.length >= 2) {
-      console.log(`Drawing boundary connections for ${points.length} points`);
-      
-      // Draw connecting lines between consecutive points (like in the image you showed)
-      for (let i = 0; i < points.length - 1; i++) {
-        const currentPoint = points[i];
-        const nextPoint = points[i + 1];
-        
-        // Calculate pixel coordinates for both points
-        const x1 = Math.max(12, Math.min(388, (currentPoint.longitude + 9.4295) * 5000 + 200));
-        const y1 = Math.max(12, Math.min(388, 200 - (currentPoint.latitude - 6.4281) * 5000));
-        const x2 = Math.max(12, Math.min(388, (nextPoint.longitude + 9.4295) * 5000 + 200));
-        const y2 = Math.max(12, Math.min(388, 200 - (nextPoint.latitude - 6.4281) * 5000));
-        
-        // Create solid connecting line (like the red/orange lines in your image)
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', x1.toString());
-        line.setAttribute('y1', y1.toString());
-        line.setAttribute('x2', x2.toString());
-        line.setAttribute('y2', y2.toString());
-        line.setAttribute('stroke', '#ef4444'); // Red color like in your image
-        line.setAttribute('stroke-width', '4');
-        line.setAttribute('stroke-linecap', 'round');
-        line.setAttribute('opacity', '0.9');
-        line.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
-        svg.appendChild(line);
-        
-        console.log(`✓ Connected point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
-      }
-      
-      // If we have 6+ points, close the polygon with a line back to the first point
-      if (points.length >= 6) {
-        const firstPoint = points[0];
-        const lastPoint = points[points.length - 1];
-        
-        const x1 = Math.max(12, Math.min(388, (lastPoint.longitude + 9.4295) * 5000 + 200));
-        const y1 = Math.max(12, Math.min(388, 200 - (lastPoint.latitude - 6.4281) * 5000));
-        const x2 = Math.max(12, Math.min(388, (firstPoint.longitude + 9.4295) * 5000 + 200));
-        const y2 = Math.max(12, Math.min(388, 200 - (firstPoint.latitude - 6.4281) * 5000));
-        
-        // Closing line to complete the polygon (green color for completion)
-        const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        closingLine.setAttribute('x1', x1.toString());
-        closingLine.setAttribute('y1', y1.toString());
-        closingLine.setAttribute('x2', x2.toString());
-        closingLine.setAttribute('y2', y2.toString());
-        closingLine.setAttribute('stroke', '#22c55e'); // Green for completed polygon
-        closingLine.setAttribute('stroke-width', '4');
-        closingLine.setAttribute('stroke-dasharray', '8,4'); // Dashed to show it's the closing line
-        closingLine.setAttribute('stroke-linecap', 'round');
-        closingLine.setAttribute('opacity', '0.9');
-        svg.appendChild(closingLine);
-        
-        console.log(`✓ Polygon completed - closing line from ${String.fromCharCode(65 + points.length - 1)} back to A`);
-      }
-    }
-
-    // CRITICAL: Create filled polygon with EUDR risk visualization when 6+ points exist
-    if (points.length >= 6) {
-      console.log(`Creating polygon boundary with ${points.length} points and risk overlay`);
-      
-      const pointsStr = points.map(point => {
-        let x, y;
-        if (mapElement.id === 'real-map') {
-          x = (point.longitude - mapCenter.lng) * 5000 + 200;
-          y = 200 - (point.latitude - mapCenter.lat) * 5000;
-        } else {
-          x = (point.longitude + 9.4295) * 5000 + 200;
-          y = 200 - (point.latitude - 6.4281) * 5000;
-        }
-        x = Math.max(12, Math.min(388, x));
-        y = Math.max(12, Math.min(388, y));
-        return `${x},${y}`;
-      }).join(' ');
-      
-      // Calculate overall area risk for coloring
-      const areaRisk = calculateAreaRisk(points);
-      console.log(`Area risk level: ${areaRisk.level}`);
-      
-      // Create main boundary polygon with risk-based styling
-      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-      polygon.setAttribute('points', pointsStr);
-      polygon.setAttribute('class', `farm-boundary risk-${areaRisk.level}`);
-      
-      // Apply EUDR risk-based visual styling with crosshatch patterns
-      const riskColors = {
-        high: { fill: 'url(#crosshatch-red)', stroke: '#dc2626', bgColor: 'rgba(220, 38, 38, 0.4)' },
-        standard: { fill: 'url(#crosshatch-yellow)', stroke: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.4)' },
-        low: { fill: 'url(#crosshatch-green)', stroke: '#22c55e', bgColor: 'rgba(34, 197, 94, 0.4)' }
-      };
-      
-      const riskStyle = riskColors[areaRisk.level];
-      polygon.setAttribute('fill', riskStyle.fill);
-      polygon.setAttribute('stroke', riskStyle.stroke);
-      polygon.setAttribute('stroke-width', '4');
-      polygon.setAttribute('stroke-dasharray', '8,4');
-      polygon.setAttribute('opacity', '0.9');
-      
-      console.log(`✓ EUDR Risk polygon created with ${areaRisk.level} risk level and crosshatch pattern overlay`);
-      
-      svg.appendChild(polygon);
-      
-      // Force immediate display of risk overlay
-      polygon.style.display = 'block';
-      polygon.style.visibility = 'visible';
-      
-      console.log(`✓ Risk overlay now visible on map with ${areaRisk.level} risk styling`);
-      
-      // Add area measurement and risk label
-      const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 5000 + 200, 0) / points.length;
-      const centerY = points.reduce((sum, p) => sum + (200 - (p.latitude - 6.4281) * 5000), 0) / points.length;
-      const area = calculateArea(points);
-      
-      // Area measurement label
-      const areaLabel = document.createElement('div');
-      areaLabel.style.position = 'absolute';
-      areaLabel.style.left = `${centerX - 35}px`;
-      areaLabel.style.top = `${centerY - 25}px`;
-      areaLabel.style.width = '70px';
-      areaLabel.style.padding = '6px 8px';
-      areaLabel.style.borderRadius = '6px';
-      areaLabel.style.fontSize = '11px';
-      areaLabel.style.fontWeight = 'bold';
-      areaLabel.style.textAlign = 'center';
-      areaLabel.style.color = 'white';
-      areaLabel.style.backgroundColor = 'rgba(0,0,0,0.8)';
-      areaLabel.style.border = '2px solid white';
-      areaLabel.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
-      areaLabel.textContent = `${area.toFixed(1)}Ha`;
-      
-      // Risk level label  
-      const riskLabel = document.createElement('div');
-      riskLabel.className = `area-risk-label risk-${areaRisk.level}`;
-      riskLabel.style.position = 'absolute';
-      riskLabel.style.left = `${centerX - 45}px`;
-      riskLabel.style.top = `${centerY + 5}px`;
-      riskLabel.style.width = '90px';
-      riskLabel.style.padding = '3px 6px';
-      riskLabel.style.borderRadius = '8px';
-      riskLabel.style.fontSize = '9px';
-      riskLabel.style.fontWeight = 'bold';
-      riskLabel.style.textAlign = 'center';
-      riskLabel.style.color = 'white';
-      riskLabel.style.border = '1px solid white';
-      riskLabel.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
-      
-      if (areaRisk.level === 'high') {
-        riskLabel.style.backgroundColor = '#dc2626';
-        riskLabel.textContent = 'HIGH RISK';
-      } else if (areaRisk.level === 'standard') {
-        riskLabel.style.backgroundColor = '#f59e0b';
-        riskLabel.textContent = 'STANDARD RISK';
-      } else {
-        riskLabel.style.backgroundColor = '#10b981';
-        riskLabel.textContent = 'LOW RISK';
-      }
-      
-      mapElement.appendChild(areaLabel);
-      mapElement.appendChild(riskLabel);
-    }
-  }, [points, mapReady]);
+    // Update display with current points - single source of truth
+    updatePersistentBoundaryDisplay(points, mapCenter.lat, mapCenter.lng);
+    
+    console.log(`✓ Single display updated: ${points.length} points rendered once`);
+  }, [points, mapReady, mapCenter]);
 
   // Real-time GPS tracking functions
   const startGPSTracking = () => {
@@ -963,8 +709,7 @@ export default function RealMapBoundaryMapper({
       setStatus(`🚶‍♂️ Point ${newPoints.length} mapped - Distance: ${distance.toFixed(1)}m - Walking path updated`);
     }
     
-    // Update boundary display immediately with real-time walking path  
-    updatePersistentBoundaryDisplay(newPoints, mapCenter.lat, mapCenter.lng);
+    // No need to call here - useEffect will handle the update automatically
     
     // Trigger EUDR analysis if we have enough points
     if (newPoints.length >= 6) {

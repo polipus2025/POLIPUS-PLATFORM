@@ -198,10 +198,10 @@ export default function MarketPricingDirect() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-slate-900 flex items-center">
               <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-3"></span>
-              📊 Complete Commodity Price Grid (6 Live Feeds)
+              📊 Complete Commodity Price Grid (7 Live Feeds)
             </h2>
             <div className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-              ✅ All 6 Feeds Active
+              ✅ All 7 Feeds Active
             </div>
           </div>
           
@@ -370,7 +370,7 @@ export default function MarketPricingDirect() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Commodity Feeds:</span>
-                <span className="font-medium text-green-600">6/6 Active ✅</span>
+                <span className="font-medium text-green-600">7/7 Active ✅</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Market Data Quality:</span>

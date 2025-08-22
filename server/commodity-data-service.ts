@@ -282,6 +282,19 @@ export class CommodityDataService {
         exchange: 'Regional',
         marketCap: '4.5B',
         volume: '1.8M MT'
+      },
+      {
+        symbol: 'TOBACCO',
+        name: 'Tobacco',
+        price: Math.round(4850 * (1 + variance * 1.1)),
+        currency: 'USD',
+        unit: 'per MT',
+        change: -23.5,
+        changePercent: -0.48,
+        lastUpdated: now.toISOString().split('T')[0],
+        exchange: 'Regional',
+        marketCap: '28.3B',
+        volume: '6.2M MT'
       }
     ];
   }

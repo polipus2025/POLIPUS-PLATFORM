@@ -1,28 +1,5 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Settings, 
-  Database, 
-  Shield, 
-  Activity, 
-  BarChart3, 
-  Users, 
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Wheat,
-  LogOut,
-  Cpu,
-  HardDrive,
-  Monitor
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 interface AgriTraceDashboardData {
@@ -62,7 +39,7 @@ export default function AgriTraceAdminPortal() {
   const [dashboardData, setDashboardData] = useState<AgriTraceDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("overview");
 
   const userInfo = {
     username: localStorage.getItem("username") || "agritrace.admin",
@@ -83,7 +60,7 @@ export default function AgriTraceAdminPortal() {
         throw new Error("No authentication token found");
       }
 
-      const response = await apiRequest('/api/agritrace-admin/dashboard', {
+      const response = await fetch('/api/agritrace-admin/dashboard', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -91,15 +68,15 @@ export default function AgriTraceAdminPortal() {
         }
       });
 
-      setDashboardData(response);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setDashboardData(data);
     } catch (error: any) {
       const errorMessage = error.message || "Failed to fetch dashboard data";
       setError(errorMessage);
-      toast({
-        title: "Dashboard Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -111,11 +88,6 @@ export default function AgriTraceAdminPortal() {
     localStorage.removeItem("userType");
     localStorage.removeItem("username");
     localStorage.removeItem("adminScope");
-    
-    toast({
-      title: "Logged Out",
-      description: "Successfully logged out of AgriTrace Admin Portal",
-    });
     
     window.location.href = "/";
   };
@@ -132,316 +104,511 @@ export default function AgriTraceAdminPortal() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-700">Loading AgriTrace Control Center...</h2>
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            border: '4px solid #10b981',
+            borderTop: '4px solid transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', margin: '0 0 8px' }}>
+            Loading AgriTrace Control Center...
+          </h2>
         </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}>
       <Helmet>
         <title>AgriTrace System Administrator - Control Center</title>
         <meta name="description" content="AgriTrace360™ agricultural traceability system administration" />
       </Helmet>
 
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg overflow-hidden">
-                <img 
-                  src={lacraLogo} 
-                  alt="LACRA Official Logo" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">AgriTrace Control Center</h1>
-                <p className="text-sm text-gray-600">Agricultural Traceability System Administration</p>
-              </div>
+      <div style={{
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e2e8f0',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '16px 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '8px',
+              overflow: 'hidden'
+            }}>
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{userInfo.username}</p>
-                <p className="text-xs text-gray-500">{userInfo.scope}</p>
-              </div>
-              <Button 
-                onClick={handleLogout}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
+            <div>
+              <h1 style={{ 
+                fontSize: '24px', 
+                fontWeight: 'bold', 
+                color: '#111827', 
+                margin: '0 0 4px' 
+              }}>
+                AgriTrace Control Center
+              </h1>
+              <p style={{ 
+                fontSize: '14px', 
+                color: '#6b7280', 
+                margin: 0 
+              }}>
+                Agricultural Traceability System Administration
+              </p>
             </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ 
+                fontSize: '14px', 
+                fontWeight: '500', 
+                color: '#111827', 
+                margin: '0 0 2px' 
+              }}>
+                {userInfo.username}
+              </p>
+              <p style={{ 
+                fontSize: '12px', 
+                color: '#6b7280', 
+                margin: 0 
+              }}>
+                {userInfo.scope}
+              </p>
+            </div>
+            <button 
+              onClick={handleLogout}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                backgroundColor: 'white',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                color: '#374151',
+                fontSize: '14px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f9fafb'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
+            >
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 24px' }}>
         {error && (
-          <Alert className="mb-6 border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">{error}</AlertDescription>
-          </Alert>
+          <div style={{
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '24px',
+            color: '#dc2626'
+          }}>
+            {error}
+          </div>
         )}
 
         {/* System Information Cards */}
         {dashboardData && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">System Status</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-emerald-600">Healthy</div>
-                  <p className="text-xs text-muted-foreground">AgriTrace Module Only</p>
-                </CardContent>
-              </Card>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '24px',
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                padding: '24px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start',
+                  marginBottom: '16px'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    margin: 0 
+                  }}>
+                    System Status
+                  </h3>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    backgroundColor: '#10b981',
+                    borderRadius: '50%'
+                  }}></div>
+                </div>
+                <div style={{ 
+                  fontSize: '32px', 
+                  fontWeight: 'bold', 
+                  color: '#10b981',
+                  marginBottom: '4px'
+                }}>
+                  Healthy
+                </div>
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#6b7280', 
+                  margin: 0 
+                }}>
+                  AgriTrace Module Only
+                </p>
+              </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Uptime</CardTitle>
-                  <Clock className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatUptime(dashboardData.systemHealth.uptime)}</div>
-                  <p className="text-xs text-muted-foreground">Continuous operation</p>
-                </CardContent>
-              </Card>
+              <div style={{
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                padding: '24px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start',
+                  marginBottom: '16px'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    margin: 0 
+                  }}>
+                    Uptime
+                  </h3>
+                </div>
+                <div style={{ 
+                  fontSize: '32px', 
+                  fontWeight: 'bold', 
+                  color: '#3b82f6',
+                  marginBottom: '4px'
+                }}>
+                  {formatUptime(dashboardData.systemHealth.uptime)}
+                </div>
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#6b7280', 
+                  margin: 0 
+                }}>
+                  Continuous operation
+                </p>
+              </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-                  <Cpu className="h-4 w-4 text-orange-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatMemory(dashboardData.systemHealth.memory.heapUsed)}</div>
-                  <p className="text-xs text-muted-foreground">of {formatMemory(dashboardData.systemHealth.memory.heapTotal)}</p>
-                </CardContent>
-              </Card>
+              <div style={{
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                padding: '24px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start',
+                  marginBottom: '16px'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    margin: 0 
+                  }}>
+                    Memory Usage
+                  </h3>
+                </div>
+                <div style={{ 
+                  fontSize: '32px', 
+                  fontWeight: 'bold', 
+                  color: '#f59e0b',
+                  marginBottom: '4px'
+                }}>
+                  {formatMemory(dashboardData.systemHealth.memory.heapUsed)}
+                </div>
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#6b7280', 
+                  margin: 0 
+                }}>
+                  of {formatMemory(dashboardData.systemHealth.memory.heapTotal)}
+                </p>
+              </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Admin Scope</CardTitle>
-                  <Wheat className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">Limited</div>
-                  <p className="text-xs text-muted-foreground">AgriTrace Only</p>
-                </CardContent>
-              </Card>
+              <div style={{
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                padding: '24px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start',
+                  marginBottom: '16px'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    margin: 0 
+                  }}>
+                    Admin Scope
+                  </h3>
+                </div>
+                <div style={{ 
+                  fontSize: '32px', 
+                  fontWeight: 'bold', 
+                  color: '#10b981',
+                  marginBottom: '4px'
+                }}>
+                  Limited
+                </div>
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#6b7280', 
+                  margin: 0 
+                }}>
+                  AgriTrace Only
+                </p>
+              </div>
             </div>
 
-            {/* Main Content Tabs */}
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="system">System Health</TabsTrigger>
-                <TabsTrigger value="features">Features</TabsTrigger>
-                <TabsTrigger value="controls">Controls</TabsTrigger>
-                <TabsTrigger value="restrictions">Restrictions</TabsTrigger>
-              </TabsList>
+            {/* Navigation Tabs */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '24px',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{
+                display: 'flex',
+                borderBottom: '1px solid #e5e7eb',
+                marginBottom: '24px'
+              }}>
+                {['overview', 'system', 'features', 'controls', 'restrictions'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                      padding: '12px 24px',
+                      borderBottom: activeTab === tab ? '2px solid #3b82f6' : '2px solid transparent',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: activeTab === tab ? '#3b82f6' : '#6b7280',
+                      fontWeight: activeTab === tab ? '600' : '400',
+                      cursor: 'pointer',
+                      textTransform: 'capitalize',
+                      fontSize: '14px'
+                    }}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
 
-              <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Database className="h-5 w-5 text-blue-500" />
-                        System Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Platform:</span>
-                        <span className="text-sm">{dashboardData.systemInfo.platform}</span>
+              {/* Tab Content */}
+              {activeTab === 'overview' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                      System Information
+                    </h3>
+                    <div style={{ space: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '500' }}>Platform:</span>
+                        <span style={{ fontSize: '14px' }}>{dashboardData.systemInfo.platform}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Module:</span>
-                        <span className="text-sm">{dashboardData.systemInfo.module}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '500' }}>Module:</span>
+                        <span style={{ fontSize: '14px' }}>{dashboardData.systemInfo.module}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Admin Type:</span>
-                        <Badge variant="secondary">{dashboardData.systemInfo.adminType}</Badge>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '500' }}>Admin Type:</span>
+                        <span style={{ 
+                          fontSize: '12px', 
+                          padding: '2px 8px', 
+                          backgroundColor: '#f3f4f6', 
+                          borderRadius: '4px' 
+                        }}>
+                          {dashboardData.systemInfo.adminType}
+                        </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Version:</span>
-                        <span className="text-sm">{dashboardData.systemInfo.version}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '500' }}>Version:</span>
+                        <span style={{ fontSize: '14px' }}>{dashboardData.systemInfo.version}</span>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5 text-green-500" />
-                        AgriTrace Capabilities
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {dashboardData.capabilities.map((capability, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-emerald-500" />
-                            <span className="text-sm">{capability}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                      AgriTrace Capabilities
+                    </h3>
+                    <div style={{ space: '8px' }}>
+                      {dashboardData.capabilities.map((capability, index) => (
+                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
+                          <div style={{
+                            width: '16px',
+                            height: '16px',
+                            backgroundColor: '#10b981',
+                            borderRadius: '50%'
+                          }}></div>
+                          <span style={{ fontSize: '14px' }}>{capability}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </TabsContent>
+              )}
 
-              <TabsContent value="system" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Monitor className="h-5 w-5 text-blue-500" />
-                      AgriTrace System Health
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-emerald-600 mb-2">
-                          {dashboardData.systemHealth.status.toUpperCase()}
-                        </div>
-                        <p className="text-sm text-gray-600">Overall Status</p>
+              {activeTab === 'restrictions' && (
+                <div>
+                  <div style={{
+                    backgroundColor: '#fef3c7',
+                    border: '1px solid #f59e0b',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    marginBottom: '24px',
+                    color: '#92400e'
+                  }}>
+                    This administrator has limited scope - AgriTrace agricultural module only.
+                  </div>
+
+                  <div style={{ space: '16px' }}>
+                    {[
+                      { label: 'Polipus Platform Access', status: 'Restricted', color: '#dc2626' },
+                      { label: 'Other Module Access', status: 'Restricted', color: '#dc2626' },
+                      { label: 'Global System Controls', status: 'Restricted', color: '#dc2626' },
+                      { label: 'Cross-Module Data', status: 'Restricted', color: '#dc2626' },
+                      { label: 'AgriTrace Administration', status: 'Allowed', color: '#10b981' }
+                    ].map((item, index) => (
+                      <div key={index} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '16px',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        marginBottom: '8px'
+                      }}>
+                        <span style={{ fontSize: '14px', fontWeight: '500' }}>{item.label}</span>
+                        <span style={{
+                          fontSize: '12px',
+                          padding: '4px 12px',
+                          backgroundColor: item.color,
+                          color: 'white',
+                          borderRadius: '4px',
+                          fontWeight: '500'
+                        }}>
+                          {item.status}
+                        </span>
                       </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-blue-600 mb-2">
-                          {dashboardData.systemHealth.cpu[0]?.toFixed(2) || "0.00"}
-                        </div>
-                        <p className="text-sm text-gray-600">CPU Load</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'system' && (
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                    AgriTrace System Health
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ 
+                        fontSize: '48px', 
+                        fontWeight: 'bold', 
+                        color: '#10b981', 
+                        marginBottom: '8px' 
+                      }}>
+                        {dashboardData.systemHealth.status.toUpperCase()}
                       </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-orange-600 mb-2">
-                          {formatMemory(dashboardData.systemHealth.memory.heapUsed)}
-                        </div>
-                        <p className="text-sm text-gray-600">Memory Used</p>
-                      </div>
+                      <p style={{ fontSize: '14px', color: '#6b7280' }}>Overall Status</p>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="features" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5 text-purple-500" />
-                      AgriTrace Features
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {dashboardData.activeFeatures.length > 0 ? (
-                      <div className="space-y-4">
-                        {dashboardData.activeFeatures.map((feature, index) => (
-                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <h4 className="font-medium">{feature.flagName || `Feature ${index + 1}`}</h4>
-                              <p className="text-sm text-gray-600">{feature.description || "AgriTrace feature control"}</p>
-                            </div>
-                            <Badge variant="outline" className="text-emerald-600 border-emerald-200">
-                              Active
-                            </Badge>
-                          </div>
-                        ))}
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ 
+                        fontSize: '48px', 
+                        fontWeight: 'bold', 
+                        color: '#3b82f6', 
+                        marginBottom: '8px' 
+                      }}>
+                        {dashboardData.systemHealth.cpu[0]?.toFixed(2) || "0.00"}
                       </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No active AgriTrace features to display</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="controls" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-red-500" />
-                      AgriTrace System Controls
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {dashboardData.activeControls.length > 0 ? (
-                      <div className="space-y-4">
-                        {dashboardData.activeControls.map((control, index) => (
-                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <h4 className="font-medium">{control.controlType || `Control ${index + 1}`}</h4>
-                              <p className="text-sm text-gray-600">AgriTrace system control</p>
-                            </div>
-                            <Badge variant="outline" className="text-blue-600 border-blue-200">
-                              Active
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No active AgriTrace controls</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="restrictions" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-amber-500" />
-                      Administrative Restrictions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Alert className="mb-6 border-amber-200 bg-amber-50">
-                      <AlertTriangle className="h-4 w-4 text-amber-600" />
-                      <AlertDescription className="text-amber-800">
-                        This administrator has limited scope - AgriTrace agricultural module only.
-                      </AlertDescription>
-                    </Alert>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <span className="font-medium">Polipus Platform Access</span>
-                        <Badge variant="destructive">Restricted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <span className="font-medium">Other Module Access</span>
-                        <Badge variant="destructive">Restricted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <span className="font-medium">Global System Controls</span>
-                        <Badge variant="destructive">Restricted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <span className="font-medium">Cross-Module Data</span>
-                        <Badge variant="destructive">Restricted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <span className="font-medium">AgriTrace Administration</span>
-                        <Badge variant="default" className="bg-emerald-600">Allowed</Badge>
-                      </div>
+                      <p style={{ fontSize: '14px', color: '#6b7280' }}>CPU Load</p>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ 
+                        fontSize: '48px', 
+                        fontWeight: 'bold', 
+                        color: '#f59e0b', 
+                        marginBottom: '8px' 
+                      }}>
+                        {formatMemory(dashboardData.systemHealth.memory.heapUsed)}
+                      </div>
+                      <p style={{ fontSize: '14px', color: '#6b7280' }}>Memory Used</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(activeTab === 'features' || activeTab === 'controls') && (
+                <div style={{ textAlign: 'center', padding: '64px 0' }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '50%',
+                    margin: '0 auto 16px'
+                  }}></div>
+                  <p style={{ color: '#6b7280' }}>
+                    No active AgriTrace {activeTab} to display
+                  </p>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

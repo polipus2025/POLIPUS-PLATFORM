@@ -895,18 +895,12 @@ export default function RealMapBoundaryMapper({
     
     console.log(`📐 LAND AREA CALCULATED:
       - Square Meters: ${areaInSquareMeters.toFixed(2)} m²
+      - Acres: ${areaInAcres.toFixed(4)} acres  
       - Hectares: ${areaInHectares.toFixed(4)} ha
-      - Acres: ${areaInAcres.toFixed(4)} acres
       - GPS Points Used: ${points.length}`);
     
-    // Return most appropriate unit based on size
-    if (areaInHectares >= 1) {
-      return parseFloat(areaInHectares.toFixed(4)); // Return in hectares
-    } else if (areaInAcres >= 0.1) {
-      return parseFloat(areaInAcres.toFixed(4)); // Return in acres for smaller areas
-    } else {
-      return parseFloat((areaInSquareMeters / 1000).toFixed(2)); // Return in thousand sq meters
-    }
+    // Always return area in square meters for flexible unit conversion
+    return areaInSquareMeters;
   };
 
   // EUDR Compliance Analysis
@@ -1857,15 +1851,18 @@ export default function RealMapBoundaryMapper({
                 </div>
                 
                 <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                  <div>📏 Area: {points.length < 3 ? '0.00' : (() => {
-                    const area = calculateArea(points);
-                    const areaInSquareMeters = area * 10000; // Convert back to sq meters for unit determination
-                    if (areaInSquareMeters >= 10000) {
-                      return `${area.toFixed(4)} hectares`;
-                    } else if (areaInSquareMeters >= 4047) {
-                      return `${(areaInSquareMeters / 4047).toFixed(4)} acres`;
-                    } else {
+                  <div>📏 Area: {points.length < 3 ? '0.00 sq meters' : (() => {
+                    const areaInSquareMeters = calculateArea(points);
+                    const areaInAcres = areaInSquareMeters / 4047;
+                    const areaInHectares = areaInSquareMeters / 10000;
+                    
+                    // Display priority: square meters → acres → hectares
+                    if (areaInSquareMeters < 1000) {
                       return `${areaInSquareMeters.toFixed(2)} sq meters`;
+                    } else if (areaInSquareMeters < 10000) {
+                      return `${areaInSquareMeters.toFixed(0)} sq meters | ${areaInAcres.toFixed(3)} acres`;
+                    } else {
+                      return `${areaInSquareMeters.toFixed(0)} sq meters | ${areaInAcres.toFixed(2)} acres | ${areaInHectares.toFixed(3)} hectares`;
                     }
                   })()}</div>
                   <div>📐 Perimeter: {(calculatePerimeter(points) / 1000).toFixed(2)} km</div>

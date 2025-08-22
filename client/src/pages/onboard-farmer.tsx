@@ -667,7 +667,7 @@ export default function OnboardFarmer() {
                         setFarmerData(prev => ({
                           ...prev,
                           boundaryData: boundary,
-                          farmSize: boundary.area ? boundary.area.toFixed(2) : prev.farmSize,
+                          farmSize: boundary.area ? (boundary.area / 10000).toFixed(4) : prev.farmSize, // Convert sq meters to hectares for storage
                           gpsCoordinates: boundary.points.length > 0 ? 
                             `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
                             prev.gpsCoordinates

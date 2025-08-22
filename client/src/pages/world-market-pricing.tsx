@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import { Helmet } from 'react-helmet';
-import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
+// import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -285,7 +285,7 @@ const WorldMarketPricing = memo(() => {
   const isLoading = commodityPricesQuery.isLoading;
 
   return (
-    <CleanExporterLayout>
+    <div className="min-h-screen bg-gray-50">
       <Helmet>
         <title>🔴 LIVE Market Intelligence - AgriTrace360™</title>
         <meta name="description" content="🚨 REAL-TIME Global Commodity Market Pricing with AI-Powered Analytics, Live Trading Recommendations, and Professional Market Intelligence powered by Alpha Vantage & Nasdaq Data Link APIs" />
@@ -908,7 +908,7 @@ const WorldMarketPricing = memo(() => {
         </div>
       </div>
       </div>
-    </CleanExporterLayout>
+    </div>
   );
 });
 

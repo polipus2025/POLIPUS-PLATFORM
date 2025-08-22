@@ -1,7 +1,17 @@
 import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
+import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet';
+import { BarChart3, Globe, TrendingUp } from 'lucide-react';
 
 export default function MarketPricingDirect() {
   const currentTime = new Date().toLocaleTimeString();
+  
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
   
   const marketMetrics = {
     totalTracked: 6,
@@ -19,18 +29,41 @@ export default function MarketPricingDirect() {
   ];
 
   return (
-    <CleanExporterLayout>
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <CleanExporterLayout user={user}>
+      <Helmet>
+        <title>World Market Pricing - Exporter Portal</title>
+        <meta name="description" content="Real-time commodity pricing dashboard with AI analytics and trading recommendations" />
+      </Helmet>
+
+      {/* Standard Exporter Header */}
+      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center py-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">World Market Pricing</h1>
+                <p className="text-slate-600">Real-time commodity intelligence & analytics</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        
+        {/* Live Status Banner */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white mb-8 rounded-lg p-6">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold flex items-center">
-                <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-3"></span>
-                🔴 LIVE Market Intelligence
-              </h1>
-              <p className="text-blue-100">Real-time commodity pricing dashboard with AI analytics</p>
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+              <div>
+                <h2 className="text-xl font-bold">🔴 LIVE Market Intelligence</h2>
+                <p className="text-blue-100">AI-powered commodity analytics and trading recommendations</p>
+              </div>
             </div>
             <div className="text-right">
               <div className="text-blue-100 text-sm">Last Update</div>
@@ -277,7 +310,7 @@ export default function MarketPricingDirect() {
             </div>
           </div>
         </div>
-        </div>
+        
       </div>
     </CleanExporterLayout>
   );

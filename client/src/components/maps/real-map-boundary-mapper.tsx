@@ -1747,30 +1747,58 @@ export default function RealMapBoundaryMapper({
               <div 
                 className="w-full h-full relative"
                 style={{
-                  backgroundImage: `url('${getSatelliteTiles(mapCenter.lat, mapCenter.lng, 19)[0].url}')`,
-                  backgroundPosition: 'center center',
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundAttachment: 'local',
-                  filter: 'contrast(1.15) brightness(1.1) saturate(1.2)',
-                  imageRendering: '-webkit-optimize-contrast'
+                  backgroundColor: '#1f2937'
                 }}
                 onMouseMove={(e) => e.preventDefault()}
                 onScroll={(e) => e.preventDefault()}
               >
-                {/* Satellite imagery overlay with grid */}
+                {/* Premium Satellite Imagery Background - Multiple Tiles */}
+                <div className="absolute inset-0 w-full h-full z-0" style={{ overflow: 'hidden' }}>
+                  {(() => {
+                    const satellites = getSatelliteTiles(mapCenter.lat, mapCenter.lng, 19);
+                    return satellites.map((satellite, index) => (
+                      <div
+                        key={index}
+                        className="absolute inset-0 w-full h-full"
+                        style={{
+                          backgroundImage: `url('${satellite.url}')`,
+                          backgroundPosition: 'center center',
+                          backgroundSize: 'cover',
+                          backgroundRepeat: 'no-repeat',
+                          filter: 'contrast(1.15) brightness(1.1) saturate(1.2)',
+                          imageRendering: '-webkit-optimize-contrast',
+                          opacity: index === 0 ? 1 : 0,
+                          transition: 'opacity 0.3s ease-in-out'
+                        }}
+                        onLoad={(e) => {
+                          console.log(`🛰️ Interactive Map: Premium satellite tile ${index + 1} loaded`);
+                        }}
+                        onError={(e) => {
+                          console.log(`⚠️ Interactive Map: Satellite tile ${index + 1} failed, trying next...`);
+                          if (satellites[index + 1]) {
+                            e.currentTarget.style.opacity = '0';
+                            const nextTile = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (nextTile) nextTile.style.opacity = '1';
+                          }
+                        }}
+                      />
+                    ));
+                  })()}
+                </div>
+                
+                {/* Subtle Grid Overlay - Reduced opacity */}
                 <div 
-                  className="absolute inset-0 opacity-30"
+                  className="absolute inset-0 opacity-10 pointer-events-none z-1"
                   style={{
-                    background: `linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%),
-                                linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%)`,
+                    background: `linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%),
+                                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%)`,
                     backgroundSize: '20px 20px',
                     backgroundPosition: '0 0, 10px 10px'
                   }}
                 />
                 
                 {/* GPS Boundary Overlay - Static Display */}
-                <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none', position: 'absolute', top: 0, left: 0 }}>
+                <svg className="absolute inset-0 w-full h-full z-10" style={{ pointerEvents: 'none', position: 'absolute', top: 0, left: 0 }}>
                   {points.length >= 3 && (
                     <polygon
                       points={points.map((point) => {
@@ -1890,22 +1918,22 @@ export default function RealMapBoundaryMapper({
                 </svg>
                 
                 {/* Geo-reference Information Overlay */}
-                <div className="absolute top-2 left-2 bg-gradient-to-r from-blue-900 to-green-900 bg-opacity-95 text-white text-xs px-3 py-2 rounded-lg border border-white/20 pointer-events-none backdrop-blur-sm">
+                <div className="absolute top-2 left-2 bg-gradient-to-r from-blue-900 to-green-900 bg-opacity-95 text-white text-xs px-3 py-2 rounded-lg border border-white/20 pointer-events-none backdrop-blur-sm z-20">
                   <div className="flex items-center gap-1">
                     <span>🛰️</span>
-                    <span className="font-semibold">Premium Real-Time Satellite</span>
+                    <span className="font-semibold">Interactive Premium Satellite View</span>
                   </div>
                   <div className="text-xs opacity-90">{mapCenter.lat.toFixed(6)}, {mapCenter.lng.toFixed(6)}</div>
-                  <div className="text-xs text-green-300">Sub-meter Agricultural Imagery</div>
+                  <div className="text-xs text-green-300">Real-Time Agricultural Ultra-HD Imagery</div>
                 </div>
                 
-                <div className="absolute top-2 right-2 bg-gradient-to-r from-green-900 to-blue-900 bg-opacity-95 text-white text-xs px-3 py-2 rounded-lg border border-white/20 pointer-events-none backdrop-blur-sm">
+                <div className="absolute top-2 right-2 bg-gradient-to-r from-green-900 to-blue-900 bg-opacity-95 text-white text-xs px-3 py-2 rounded-lg border border-white/20 pointer-events-none backdrop-blur-sm z-20">
                   <div className="flex items-center gap-1">
                     <span>📐</span>
-                    <span className="font-semibold">GPS Boundary</span>
+                    <span className="font-semibold">Connected Boundary</span>
                   </div>
-                  <div className="text-xs opacity-90">{points.length} Connected Points</div>
-                  <div className="text-xs text-green-300">Ultra-HD Precision Mapping</div>
+                  <div className="text-xs opacity-90">{points.length} GPS Points Mapped</div>
+                  <div className="text-xs text-green-300">Complete Farm Perimeter</div>
                 </div>
                 
                 <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">

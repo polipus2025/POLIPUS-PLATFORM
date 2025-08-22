@@ -11,7 +11,9 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, Copy, Eye, EyeOff } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
+// Lazy load the boundary mapper for better performance
+import { lazy, Suspense } from 'react';
+const RealMapBoundaryMapper = lazy(() => import('@/components/maps/real-map-boundary-mapper'));
 
 const LIBERIAN_COUNTIES = [
   "Bomi", "Bong", "Gbarpolu", "Grand Bassa", "Grand Cape Mount", "Grand Gedeh",

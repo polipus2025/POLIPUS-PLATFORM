@@ -75,22 +75,22 @@ export default function CropScheduling() {
   const [isCreateListingOpen, setIsCreateListingOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<CropSchedule | null>(null);
 
-  // Fetch crop schedules
+  // Fetch crop schedules only when on schedules tab for better performance
   const { data: cropSchedules, isLoading: loadingSchedules } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/crop-schedules`],
-    enabled: !!farmerId
+    enabled: !!farmerId && activeTab === "schedules"
   });
 
-  // Fetch crop listings
+  // Fetch crop listings only when on marketplace tab
   const { data: cropListings, isLoading: loadingListings } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/crop-listings`],
-    enabled: !!farmerId
+    enabled: !!farmerId && activeTab === "marketplace"
   });
 
-  // Fetch land plots for dropdown
+  // Fetch land plots only when creating schedule
   const { data: landPlots } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/land-mappings`],
-    enabled: !!farmerId
+    enabled: !!farmerId && (isCreateScheduleOpen || isCreateListingOpen)
   });
 
   // Mutations

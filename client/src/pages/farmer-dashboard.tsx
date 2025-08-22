@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { 
   MapPin, Calendar, Clock, Sprout, DollarSign, Bell, 
@@ -59,48 +59,49 @@ interface MarketplaceListing {
 
 export default function FarmerDashboard() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [farmerId] = useState(() => localStorage.getItem("farmerId") || "");
   const [farmerName] = useState(() => localStorage.getItem("farmerName") || "Farmer");
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Only fetch farmer data initially (needed for overview)
-  const { data: farmer } = useQuery({
+  // Only fetch farmer data initially (needed for overview) with proper defaults
+  const { data: farmer = {} as any } = useQuery({
     queryKey: [`/api/farmers/${farmerId}`],
     enabled: !!farmerId
   });
 
-  // Fetch data only when relevant tabs are active with loading states
-  const { data: landMappings, isLoading: loadingMappings } = useQuery({
+  // Fetch data only when relevant tabs are active with proper defaults
+  const { data: landMappings = [], isLoading: loadingMappings } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/land-mappings`],
     enabled: !!farmerId && activeTab === "mappings"
   });
 
-  const { data: harvestSchedules, isLoading: loadingSchedules } = useQuery({
+  const { data: harvestSchedules = [], isLoading: loadingSchedules } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/harvest-schedules`],
     enabled: !!farmerId && (activeTab === "schedules" || activeTab === "overview")
   });
 
-  const { data: marketplaceListings, isLoading: loadingListings } = useQuery({
+  const { data: marketplaceListings = [], isLoading: loadingListings } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/marketplace-listings`],
     enabled: !!farmerId && (activeTab === "marketplace" || activeTab === "overview")
   });
 
-  const { data: buyerInquiries, isLoading: loadingInquiries } = useQuery({
+  const { data: buyerInquiries = [], isLoading: loadingInquiries } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/buyer-inquiries`],
     enabled: !!farmerId && (activeTab === "inquiries" || activeTab === "overview")
   });
 
-  const { data: harvestAlerts, isLoading: loadingAlerts } = useQuery({
+  const { data: harvestAlerts = [], isLoading: loadingAlerts } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/harvest-alerts`],
     enabled: !!farmerId && activeTab === "alerts"
   });
 
-  const { data: transactions, isLoading: loadingTransactions } = useQuery({
+  const { data: transactions = [], isLoading: loadingTransactions } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/transactions`],
     enabled: !!farmerId && activeTab === "transactions"
   });
 
-  const { data: messages, isLoading: loadingMessages } = useQuery({
+  const { data: messages = [], isLoading: loadingMessages } = useQuery({
     queryKey: [`/api/farmers/${farmerId}/messages`],
     enabled: !!farmerId && activeTab === "inquiries"
   });
@@ -149,8 +150,8 @@ export default function FarmerDashboard() {
           title: "Harvest Started",
           description: `Harvest process initiated for ${schedule.cropType}. Regional buyers will be notified when ready.`,
         });
-        // Refresh data
-        window.location.reload();
+        // Refresh data efficiently
+        queryClient.invalidateQueries({ queryKey: [`/api/farmers/${farmerId}/harvest-schedules`] });
       }
     } catch (error) {
       toast({
@@ -188,7 +189,7 @@ export default function FarmerDashboard() {
           title: "Harvest Completed & Buyers Alerted",
           description: `${schedule.cropType} harvest completed. Regional buyers have been notified via SMS and platform alerts.`,
         });
-        window.location.reload();
+        queryClient.invalidateQueries({ queryKey: [`/api/farmers/${farmerId}/harvest-schedules`] });
       }
     } catch (error) {
       toast({
@@ -363,7 +364,7 @@ export default function FarmerDashboard() {
               <Badge variant="outline" className="text-green-600 border-green-600">
                 ID: {farmerId}
               </Badge>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -556,7 +557,7 @@ export default function FarmerDashboard() {
                         <div className="flex-1">
                           <p className="text-sm font-medium">{alert.title}</p>
                           <p className="text-xs text-gray-600">{alert.message}</p>
-                          <Badge size="sm" className={getPriorityColor(alert.priority)}>
+                          <Badge className={getPriorityColor(alert.priority)}>
                             {alert.priority}
                           </Badge>
                         </div>
@@ -606,7 +607,7 @@ export default function FarmerDashboard() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Status:</span>
-                            <Badge size="sm" className={mapping.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                            <Badge className={mapping.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
                               {mapping.isActive ? "Active" : "Inactive"}
                             </Badge>
                           </div>
@@ -698,7 +699,7 @@ export default function FarmerDashboard() {
                         </div>
                         <div className="flex space-x-2">
                           <Badge className="bg-green-100 text-green-800">Ready Soon</Badge>
-                          <Button size="sm" variant="outline">
+                          <Button variant="outline">
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
@@ -718,7 +719,7 @@ export default function FarmerDashboard() {
                         </div>
                         <div className="flex space-x-2">
                           <Badge className="bg-blue-100 text-blue-800">Growing</Badge>
-                          <Button size="sm" variant="outline">
+                          <Button variant="outline">
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
@@ -738,7 +739,7 @@ export default function FarmerDashboard() {
                         </div>
                         <div className="flex space-x-2">
                           <Badge className="bg-yellow-100 text-yellow-800">Planted</Badge>
-                          <Button size="sm" variant="outline">
+                          <Button variant="outline">
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
@@ -754,16 +755,16 @@ export default function FarmerDashboard() {
                         </div>
                         <div className="flex space-x-2">
                           <Link href="/farmer/crop-scheduling">
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            <Button className="bg-green-600 hover:bg-green-700">
                               <Plus className="w-4 h-4 mr-1" />
                               Schedule New Crop
                             </Button>
                           </Link>
-                          <Button size="sm" variant="outline">
+                          <Button variant="outline">
                             <Package className="w-4 h-4 mr-1" />
                             Create Listing
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button variant="outline">
                             <Users className="w-4 h-4 mr-1" />
                             Find Buyers
                           </Button>
@@ -839,7 +840,7 @@ export default function FarmerDashboard() {
                               </p>
                               <div className="flex flex-wrap gap-2">
                                 <Button 
-                                  size="sm" 
+                                  
                                   className="bg-orange-600 hover:bg-orange-700 text-white"
                                   onClick={() => handleStartHarvest(schedule)}
                                   data-testid={`start-harvest-${schedule.id}`}
@@ -848,7 +849,7 @@ export default function FarmerDashboard() {
                                   Start Harvest
                                 </Button>
                                 <Button 
-                                  size="sm" 
+                                  
                                   variant="outline"
                                   onClick={() => handleCreateMarketplaceListing(schedule)}
                                   data-testid={`create-listing-${schedule.id}`}
@@ -857,7 +858,7 @@ export default function FarmerDashboard() {
                                   Create Listing
                                 </Button>
                                 <Button 
-                                  size="sm" 
+                                  
                                   variant="outline"
                                   onClick={() => handleFindBuyers(schedule)}
                                   data-testid={`find-buyers-${schedule.id}`}
@@ -880,7 +881,7 @@ export default function FarmerDashboard() {
                                 <p className="text-blue-700 text-xs">Started: {new Date().toLocaleDateString()}</p>
                               </div>
                               <Button 
-                                size="sm" 
+                                
                                 className="bg-green-600 hover:bg-green-700"
                                 onClick={() => handleCompleteHarvest(schedule)}
                                 data-testid={`complete-harvest-${schedule.id}`}
@@ -902,7 +903,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                  size="sm" 
+                                  
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleSellToBuyers(schedule)}
                                   data-testid={`sell-to-buyers-${schedule.id}`}
@@ -911,7 +912,7 @@ export default function FarmerDashboard() {
                                   Sell Now
                                 </Button>
                                 <Button 
-                                  size="sm" 
+                                  
                                   variant="outline"
                                   onClick={() => handleViewTransactions(schedule)}
                                   data-testid={`view-transactions-${schedule.id}`}
@@ -1078,7 +1079,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                  size="sm" 
+                                  
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleApproveTransaction(transaction)}
                                   data-testid={`approve-transaction-${transaction.id}`}
@@ -1086,7 +1087,7 @@ export default function FarmerDashboard() {
                                   ✓ Approve
                                 </Button>
                                 <Button 
-                                  size="sm" 
+                                  
                                   variant="outline"
                                   onClick={() => handleNegotiateTransaction(transaction)}
                                   data-testid={`negotiate-transaction-${transaction.id}`}
@@ -1110,7 +1111,7 @@ export default function FarmerDashboard() {
                                 </p>
                               </div>
                               <Button 
-                                size="sm" 
+                                
                                 variant="outline"
                                 onClick={() => handleViewTransactionDetails(transaction)}
                                 data-testid={`view-details-${transaction.id}`}
@@ -1190,7 +1191,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                  size="sm" 
+                                  
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleAcceptInquiry(message)}
                                   data-testid={`accept-inquiry-${message.id}`}
@@ -1198,7 +1199,7 @@ export default function FarmerDashboard() {
                                   Accept Offer
                                 </Button>
                                 <Button 
-                                  size="sm" 
+                                  
                                   variant="outline"
                                   onClick={() => handleNegotiateOffer(message)}
                                   data-testid={`negotiate-inquiry-${message.id}`}
@@ -1220,7 +1221,7 @@ export default function FarmerDashboard() {
                               </div>
                               <div className="flex gap-2">
                                 <Button 
-                                  size="sm" 
+                                  
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => handleAcceptNegotiation(message)}
                                   data-testid={`accept-negotiation-${message.id}`}
@@ -1228,7 +1229,7 @@ export default function FarmerDashboard() {
                                   Accept Terms
                                 </Button>
                                 <Button 
-                                  size="sm" 
+                                  
                                   variant="outline"
                                   onClick={() => handleCounterOffer(message)}
                                   data-testid={`counter-offer-${message.id}`}
@@ -1279,7 +1280,7 @@ export default function FarmerDashboard() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <Badge size="sm" className={getPriorityColor(alert.priority)}>
+                            <Badge className={getPriorityColor(alert.priority)}>
                               {alert.priority}
                             </Badge>
                             <p className="text-xs text-gray-500 mt-1">
@@ -1294,7 +1295,7 @@ export default function FarmerDashboard() {
                               🌾 Your crop is ready for harvest! Consider creating a marketplace listing.
                             </p>
                             <Button 
-                              size="sm" 
+                              
                               className="mt-2"
                               onClick={() => toast({
                                 title: "Feature Coming Soon",

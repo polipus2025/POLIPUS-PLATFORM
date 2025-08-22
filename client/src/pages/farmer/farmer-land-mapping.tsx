@@ -137,16 +137,16 @@ export default function FarmerLandMapping() {
     contingencyPlans: ""
   });
 
-  // Fetch farmer's land mappings
+  // Fetch farmer's land mappings - removed auto-refresh for better performance
   const { data: landMappings = [], isLoading: loadingMappings, refetch: refetchMappings } = useQuery<FarmerLandMapping[]>({
     queryKey: ["/api/farmer-land-mappings", farmerId],
-    refetchInterval: 30000,
+    enabled: !!farmerId && activeTab === "my-lands",
   });
 
-  // Fetch harvest schedules for farmer's lands
+  // Fetch harvest schedules only when needed
   const { data: harvestSchedules = [], isLoading: loadingSchedules } = useQuery<HarvestSchedule[]>({
     queryKey: ["/api/harvest-schedules", farmerId],
-    refetchInterval: 30000,
+    enabled: !!farmerId && activeTab === "schedules",
   });
 
   // Auto-detect GPS coordinates
@@ -190,15 +190,19 @@ export default function FarmerLandMapping() {
   // Create new land mapping
   const createMapping = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/farmer-land-mappings", {}, {
-        ...data,
-        farmerId,
-        farmerName,
-        totalAreaHectares: parseFloat(data.totalAreaHectares),
-        elevationMeters: data.elevationMeters ? parseFloat(data.elevationMeters) : null,
-        complianceStatus: "pending",
-        inspectionStatus: "pending",
-        isActive: true
+      return await apiRequest("/api/farmer-land-mappings", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          farmerId,
+          farmerName,
+          totalAreaHectares: parseFloat(data.totalAreaHectares),
+          elevationMeters: data.elevationMeters ? parseFloat(data.elevationMeters) : null,
+          complianceStatus: "pending",
+          inspectionStatus: "pending",
+          isActive: true
+        })
       });
     },
     onSuccess: () => {
@@ -239,17 +243,21 @@ export default function FarmerLandMapping() {
   // Create harvest schedule
   const createSchedule = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/harvest-schedules", {}, {
-        ...data,
-        farmerId,
-        landMappingId: selectedMappingForSchedule,
-        estimatedYieldKg: parseFloat(data.estimatedYieldKg),
-        laborRequirements: parseInt(data.laborRequirements),
-        pricePerKg: data.pricePerKg ? parseFloat(data.pricePerKg) : null,
-        totalEstimatedValue: data.pricePerKg && data.estimatedYieldKg ? 
-          parseFloat(data.pricePerKg) * parseFloat(data.estimatedYieldKg) : null,
-        status: "pending",
-        isActive: true
+      return await apiRequest("/api/harvest-schedules", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          farmerId,
+          landMappingId: selectedMappingForSchedule,
+          estimatedYieldKg: parseFloat(data.estimatedYieldKg),
+          laborRequirements: parseInt(data.laborRequirements),
+          pricePerKg: data.pricePerKg ? parseFloat(data.pricePerKg) : null,
+          totalEstimatedValue: data.pricePerKg && data.estimatedYieldKg ? 
+            parseFloat(data.pricePerKg) * parseFloat(data.estimatedYieldKg) : null,
+          status: "pending",
+          isActive: true
+        })
       });
     },
     onSuccess: () => {
@@ -660,7 +668,7 @@ export default function FarmerLandMapping() {
                     <SelectItem value="gentle">Gentle (3-8%)</SelectItem>
                     <SelectItem value="moderate">Moderate (8-15%)</SelectItem>
                     <SelectItem value="steep">Steep (15-25%)</SelectItem>
-                    <SelectItem value="very_steep">Very Steep (>25%)</SelectItem>
+                    <SelectItem value="very_steep">Very Steep (&gt;25%)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

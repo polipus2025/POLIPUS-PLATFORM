@@ -25,8 +25,7 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import { Link } from "wouter";
-import ExporterNavbar from '@/components/layout/exporter-navbar';
-import ExporterSidebar from '@/components/layout/exporter-sidebar';
+import ExporterLayout from '@/components/layout/exporter-layout';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 // ⚡ LAZY LOAD COMPONENTS - Instant performance boost
@@ -103,18 +102,11 @@ const ExporterDashboard = memo(() => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <ExporterLayout user={user}>
         <Helmet>
           <title>Exporter Dashboard - AgriTrace360™</title>
           <meta name="description" content="High-performance export management dashboard for licensed agricultural commodity exporters" />
         </Helmet>
-
-        <div className="flex">
-          {/* Sidebar Navigation */}
-          <ExporterSidebar user={user} />
-
-          {/* Main Content */}
-          <div className="flex-1">
         
         {/* ⚡ OPTIMIZED USER PROFILE SECTION */}
         <div className="bg-white shadow-sm border-b border-gray-100">
@@ -294,10 +286,8 @@ const ExporterDashboard = memo(() => {
               </div>
             </div>
           </div>
-          </div>
         </div>
-        </div>
-      </div>
+      </ExporterLayout>
     </ErrorBoundary>
   );
 });

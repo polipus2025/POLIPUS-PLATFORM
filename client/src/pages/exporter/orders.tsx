@@ -5,9 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Package, Calendar, DollarSign, Truck } from 'lucide-react';
 import { Link } from 'wouter';
+import ExporterLayout from '@/components/layout/exporter-layout';
+import { useQuery } from '@tanstack/react-query';
 
 // ⚡ MEMOIZED ORDER COMPONENT FOR PERFORMANCE
 const ExporterOrders = memo(() => {
+  // ⚡ GET USER DATA
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000,
+  });
   // ⚡ MEMOIZED ORDERS DATA - No recalculation
   const mockOrders = useMemo(() => [
     {
@@ -54,7 +62,7 @@ const ExporterOrders = memo(() => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <ExporterLayout user={user}>
       <Helmet>
         <title>Export Orders - Exporter Portal</title>
         <meta name="description" content="Manage and track your export orders and shipments" />
@@ -189,7 +197,7 @@ const ExporterOrders = memo(() => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </ExporterLayout>
   );
 });
 

@@ -21,7 +21,7 @@ function generateTemporaryPassword(): string {
 }
 
 export function registerFarmerRoutes(app: Express) {
-  // Create farmer with automatic credential generation
+  // Create farmer data only (no credentials yet)
   app.post("/api/farmers", async (req, res) => {
     try {
       const farmerData = req.body;
@@ -40,6 +40,26 @@ export function registerFarmerRoutes(app: Express) {
         farmBoundaries: farmerData.farmBoundaries || null,
         landMapData: farmerData.landMapData || null
       });
+
+      res.json({
+        farmer,
+        message: "Farmer data saved successfully. Boundary mapping complete."
+      });
+    } catch (error) {
+      console.error("Error creating farmer:", error);
+      res.status(500).json({ error: "Failed to create farmer" });
+    }
+  });
+
+  // Generate credentials for completed farmer onboarding
+  app.post("/api/farmers/:farmerId/complete-onboarding", async (req, res) => {
+    try {
+      const farmerId = parseInt(req.params.farmerId);
+      const farmer = await storage.getFarmer(farmerId);
+      
+      if (!farmer) {
+        return res.status(404).json({ error: "Farmer not found" });
+      }
 
       // Generate login credentials
       const credentialId = generateFarmerCredentialId();
@@ -62,11 +82,12 @@ export function registerFarmerRoutes(app: Express) {
         credentials: {
           credentialId,
           temporaryPassword
-        }
+        },
+        message: "Farmer onboarding completed successfully!"
       });
     } catch (error) {
-      console.error("Error creating farmer:", error);
-      res.status(500).json({ error: "Failed to create farmer" });
+      console.error("Error completing farmer onboarding:", error);
+      res.status(500).json({ error: "Failed to complete farmer onboarding" });
     }
   });
 

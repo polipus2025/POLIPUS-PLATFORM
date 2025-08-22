@@ -110,8 +110,12 @@ export default function OnboardFarmer() {
     temporaryPassword: ""
   });
 
-  // Create farmer mutation
-  const createFarmer = useMutation({
+  // States for the two-step process
+  const [savedFarmer, setSavedFarmer] = useState<any>(null);
+  const [isFormComplete, setIsFormComplete] = useState(false);
+
+  // Step 1: Save farmer data (called during boundary completion)
+  const saveFarmerData = useMutation({
     mutationFn: async (data: any) => {
       return await apiRequest("/api/farmers", {
         method: "POST",
@@ -119,12 +123,43 @@ export default function OnboardFarmer() {
           ...data,
           farmSize: data.boundaryData?.area || (data.farmSize ? parseFloat(data.farmSize) : null),
           farmingExperience: data.farmingExperience ? parseInt(data.farmingExperience) : null,
-          farmBoundaries: data.boundaryData ? data.boundaryData : null, // Use farmBoundaries instead of boundaryData
-          landMapData: data.boundaryData ? data.boundaryData : null, // Also send as landMapData for comprehensive mapping
+          farmBoundaries: data.boundaryData ? data.boundaryData : null,
+          landMapData: data.boundaryData ? data.boundaryData : null,
           isActive: true,
           onboardedBy: inspectorName,
           onboardedAt: new Date(),
-          approvalStatus: "approved" // Inspector can directly approve
+          approvalStatus: "approved"
+        })
+      });
+    },
+    onSuccess: (response: any) => {
+      const { farmer } = response;
+      setSavedFarmer(farmer);
+      setIsFormComplete(true);
+      
+      toast({
+        title: "Boundary Mapping Complete!",
+        description: "Farm boundary saved successfully. Click 'Complete Farmer Onboarding' to generate credentials.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save farmer data",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Step 2: Complete onboarding and generate credentials
+  const completeOnboarding = useMutation({
+    mutationFn: async () => {
+      if (!savedFarmer?.id) throw new Error("No saved farmer found");
+      
+      return await apiRequest(`/api/farmers/${savedFarmer.id}/complete-onboarding`, {
+        method: "POST",
+        body: JSON.stringify({
+          onboardedBy: inspectorName
         })
       });
     },
@@ -172,11 +207,13 @@ export default function OnboardFarmer() {
         emergencyPhone: "",
         familyMembers: ""
       });
+      setSavedFarmer(null);
+      setIsFormComplete(false);
     },
     onError: (error: any) => {
       toast({
-        title: "Registration Failed",
-        description: error.message || "Failed to register farmer",
+        title: "Onboarding Failed",
+        description: error.message || "Failed to complete farmer onboarding",
         variant: "destructive",
       });
     }
@@ -185,17 +222,31 @@ export default function OnboardFarmer() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!farmerData.firstName || !farmerData.lastName || !farmerData.phone) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (isFormComplete && savedFarmer) {
+      // Step 2: Complete onboarding and generate credentials
+      completeOnboarding.mutate();
+    } else {
+      // Step 1: Basic validation and save farmer data
+      if (!farmerData.firstName || !farmerData.lastName || !farmerData.phone) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    createFarmer.mutate(farmerData);
+      if (!farmerData.boundaryData || !farmerData.boundaryData.points || farmerData.boundaryData.points.length < 3) {
+        toast({
+          title: "Incomplete Boundary Mapping",
+          description: "Please complete the farm boundary mapping with at least 3 GPS points",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      saveFarmerData.mutate(farmerData);
+    }
   };
 
   return (
@@ -611,9 +662,11 @@ export default function OnboardFarmer() {
                             `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
                             prev.gpsCoordinates
                         }));
+                        
+                        // Show boundary completion message but don't save yet
                         toast({
                           title: "Farm Boundary Mapped Successfully",
-                          description: `Farm mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
+                          description: `Farm mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares). Now click 'Complete Farmer Onboarding' to finalize.`,
                         });
                       }}
                     />
@@ -625,14 +678,30 @@ export default function OnboardFarmer() {
 
           {/* Submit Button */}
           <div className="mt-8 flex justify-end">
-            <Button 
-              type="submit" 
-              size="lg" 
-              disabled={createFarmer.isPending}
-              className="min-w-48"
-            >
-              {createFarmer.isPending ? "Onboarding Farmer..." : "Complete Farmer Onboarding"}
-            </Button>
+            {isFormComplete && savedFarmer ? (
+              <div className="flex items-center space-x-4">
+                <div className="text-green-600 font-medium">
+                  ✓ Farm data saved successfully
+                </div>
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  disabled={completeOnboarding.isPending}
+                  className="min-w-48 bg-green-600 hover:bg-green-700"
+                >
+                  {completeOnboarding.isPending ? "Generating Credentials..." : "Complete Farmer Onboarding"}
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                type="submit" 
+                size="lg" 
+                disabled={saveFarmerData.isPending || !farmerData.boundaryData}
+                className="min-w-48"
+              >
+                {saveFarmerData.isPending ? "Saving Farm Data..." : "Save Farm Data & Continue"}
+              </Button>
+            )}
           </div>
         </form>
       </div>

@@ -8,6 +8,7 @@ import { productConfigurationData } from "./product-config-data";
 import cropSchedulingRoutes from "./crop-scheduling-routes";
 import cropWorkflowPdfRoutes from "./crop-workflow-pdf-generator";
 import completeProcessFlowRoutes from "./complete-process-flow-generator";
+import dgLevelRoutes from "./dg-level-implementation";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
@@ -182,6 +183,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register complete process flow PDF generator
   app.use('/api', completeProcessFlowRoutes);
+  
+  // Register DG Level (Director General) routes
+  app.use('/api', dgLevelRoutes);
 
   // Test farmer creation endpoint
   app.get("/api/create-test-farmer", async (req, res) => {

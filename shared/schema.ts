@@ -46,9 +46,14 @@ export const certifications = pgTable("certifications", {
   issuedBy: text("issued_by").notNull(),
   issuedDate: timestamp("issued_date").notNull(),
   expiryDate: timestamp("expiry_date").notNull(),
-  status: text("status").notNull().default("active"), // active, expired, revoked
+  status: text("status").notNull().default("active"), // active, expired, revoked, ddgots_reviewed, dg_approved
   exportDestination: text("export_destination"),
   exporterName: text("exporter_name"),
+  // DG Level approval fields
+  dgApprovalDate: timestamp("dg_approval_date"),
+  dgApprovalNotes: text("dg_approval_notes"),
+  dgApprovalConditions: text("dg_approval_conditions"),
+  finalApproval: boolean("final_approval").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

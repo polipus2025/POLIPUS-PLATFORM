@@ -67,7 +67,10 @@ export default function SystemAdminLogin() {
         localStorage.setItem("username", response.user.username);
         localStorage.setItem("adminScope", response.user.scope);
         
-        window.location.href = "/agritrace-admin-portal";
+        // Force immediate redirect to AgriTrace admin portal
+        setTimeout(() => {
+          window.location.replace("/agritrace-admin-portal");
+        }, 100);
       } else {
         throw new Error(response.message || "Authentication failed");
       }

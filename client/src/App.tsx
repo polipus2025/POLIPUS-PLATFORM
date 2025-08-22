@@ -767,6 +767,7 @@ function Router() {
       )}
       
       {/* ALWAYS AVAILABLE - Primary Polipus Main Landing Page Routes */}
+      <Route path="/" component={FrontPage} />
       <Route path="/front-page" component={FrontPage} />
       <Route path="/home" component={FrontPage} />
       <Route path="/main" component={FrontPage} />

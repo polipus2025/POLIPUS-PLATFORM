@@ -102,15 +102,23 @@ export default function RealMapBoundaryMapper({
     currentPoints.forEach((point, index) => {
       const rect = mapContainer.getBoundingClientRect();
       
-      // REAL GPS to pixel conversion using map bounds
-      const latRange = 0.001; // Precise mapping range
-      const lngRange = 0.001;
-      
+      // ACCURATE GPS to pixel conversion using proper geographic scaling
       const centerLat = mapCenter?.lat || 6.4281;
       const centerLng = mapCenter?.lng || -9.4295;
       
+      // Calculate actual meter ranges based on geographic location
+      const metersPerDegreeLat = 111320; // meters per degree latitude (constant)
+      const metersPerDegreeLng = 111320 * Math.cos(centerLat * Math.PI / 180); // longitude varies by latitude
+      
+      // Use 200 meters range for accurate proportional mapping
+      const meterRange = 200;
+      const latRange = meterRange / metersPerDegreeLat; // degrees
+      const lngRange = meterRange / metersPerDegreeLng; // degrees
+      
       const x = ((point.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
       const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
+      
+      console.log(`📐 ACCURATE SCALING: Point ${String.fromCharCode(65 + index)} - LatRange: ${latRange.toFixed(6)}°, LngRange: ${lngRange.toFixed(6)}°, Position: (${x.toFixed(1)}, ${y.toFixed(1)})`);
       
       // Create interactive draggable marker
       const marker = document.createElement('div');
@@ -143,14 +151,19 @@ export default function RealMapBoundaryMapper({
       mapContainer.appendChild(marker);
     });
 
-    // REAL-TIME CONNECTIVITY LINES - Connect actual GPS coordinates  
+    // REAL-TIME CONNECTIVITY LINES - Connect actual GPS coordinates with accurate scaling
     if (currentPoints.length >= 2 && svg) {
       for (let i = 0; i < currentPoints.length - 1; i++) {
         const rect = mapContainer.getBoundingClientRect();
-        const latRange = 0.001;
-        const lngRange = 0.001;
         const centerLat = mapCenter?.lat || 6.4281;
         const centerLng = mapCenter?.lng || -9.4295;
+        
+        // Use same accurate geographic scaling for lines
+        const metersPerDegreeLat = 111320;
+        const metersPerDegreeLng = 111320 * Math.cos(centerLat * Math.PI / 180);
+        const meterRange = 200;
+        const latRange = meterRange / metersPerDegreeLat;
+        const lngRange = meterRange / metersPerDegreeLng;
         
         // Convert REAL GPS coordinates to screen positions for lines
         const point1 = currentPoints[i];
@@ -178,13 +191,18 @@ export default function RealMapBoundaryMapper({
         console.log(`🔗 VISIBLE LINE: Point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)} at pixels (${x1.toFixed(0)},${y1.toFixed(0)}) → (${x2.toFixed(0)},${y2.toFixed(0)})`);
       }
 
-      // Close polygon with REAL coordinates when 6+ points
+      // Close polygon with REAL coordinates when 6+ points - using accurate scaling
       if (currentPoints.length >= 6) {
         const rect = mapContainer.getBoundingClientRect();
-        const latRange = 0.001;
-        const lngRange = 0.001;
         const centerLat = mapCenter?.lat || 6.4281;
         const centerLng = mapCenter?.lng || -9.4295;
+        
+        // Use same accurate scaling for polygon closure
+        const metersPerDegreeLat = 111320;
+        const metersPerDegreeLng = 111320 * Math.cos(centerLat * Math.PI / 180);
+        const meterRange = 200;
+        const latRange = meterRange / metersPerDegreeLat;
+        const lngRange = meterRange / metersPerDegreeLng;
         
         const firstPoint = currentPoints[0];
         const lastPoint = currentPoints[currentPoints.length - 1];
@@ -207,7 +225,7 @@ export default function RealMapBoundaryMapper({
         closingLine.style.pointerEvents = 'none';
         svg.appendChild(closingLine);
         
-        console.log(`🔗 POLYGON CLOSED: Closing line from (${x1.toFixed(0)},${y1.toFixed(0)}) to (${x2.toFixed(0)},${y2.toFixed(0)}) - SHOULD BE VISIBLE`);
+        console.log(`🔗 ACCURATE POLYGON CLOSED: Closing line from (${x1.toFixed(0)},${y1.toFixed(0)}) to (${x2.toFixed(0)},${y2.toFixed(0)}) - Meter range: ${meterRange}m, LatRange: ${latRange.toFixed(6)}°, LngRange: ${lngRange.toFixed(6)}°`);
       }
     }
 
@@ -411,8 +429,12 @@ export default function RealMapBoundaryMapper({
         const y = e.clientY - rect.top;
         
         // Convert click position to REAL GPS coordinates
-        const latRange = 0.001; // More precise mapping  
-        const lngRange = 0.001;
+        // Use accurate geographic scaling for click-to-GPS conversion
+        const metersPerDegreeLat = 111320;
+        const metersPerDegreeLng = 111320 * Math.cos(centerLat * Math.PI / 180);
+        const meterRange = 200;
+        const latRange = meterRange / metersPerDegreeLat;
+        const lngRange = meterRange / metersPerDegreeLng;
         
         const lat = centerLat + (latRange / 2) - (y / rect.height) * latRange;
         const lng = centerLng - (lngRange / 2) + (x / rect.width) * lngRange;
@@ -1661,9 +1683,12 @@ export default function RealMapBoundaryMapper({
                   
                   {/* Connected Boundary Lines A→B→C→D→...→A */}
                   {points.length >= 2 && points.map((point, index) => {
-                    // Convert REAL GPS coordinates to pixel positions for connecting lines
-                    const latRange = 0.001;
-                    const lngRange = 0.001;
+                    // Convert REAL GPS coordinates to pixel positions using accurate scaling
+                    const metersPerDegreeLat = 111320;
+                    const metersPerDegreeLng = 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
+                    const meterRange = 200;
+                    const latRange = meterRange / metersPerDegreeLat;
+                    const lngRange = meterRange / metersPerDegreeLng;
                     const currentPoint = points[index];
                     const nextIndex = (index + 1) % points.length;
                     const nextPoint = points[nextIndex];
@@ -1716,9 +1741,12 @@ export default function RealMapBoundaryMapper({
                   
                   {/* GPS Point Markers */}
                   {points.map((point, index) => {
-                    // Convert REAL GPS coordinates to pixel positions for markers
-                    const latRange = 0.001;
-                    const lngRange = 0.001;
+                    // Convert REAL GPS coordinates to pixel positions using accurate scaling
+                    const metersPerDegreeLat = 111320;
+                    const metersPerDegreeLng = 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
+                    const meterRange = 200;
+                    const latRange = meterRange / metersPerDegreeLng;
+                    const lngRange = meterRange / metersPerDegreeLng;
                     const x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * 400;
                     const y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * 384;
                     const safeX = Math.max(10, Math.min(390, x));

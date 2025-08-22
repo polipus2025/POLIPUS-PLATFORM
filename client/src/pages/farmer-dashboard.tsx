@@ -425,7 +425,7 @@ export default function FarmerDashboard() {
                   <Users className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Buyer Inquiries</p>
+                  <p className="text-sm font-medium text-gray-600">Available Buyers</p>
                   <p className="text-2xl font-bold text-gray-900">{Array.isArray(buyerInquiries) ? buyerInquiries.length : 0}</p>
                 </div>
               </div>
@@ -476,7 +476,7 @@ export default function FarmerDashboard() {
               value="inquiries" 
               className="transition-all duration-200 ease-in-out hover:bg-white"
             >
-              Messages
+              Available Buyers
             </TabsTrigger>
             <TabsTrigger 
               value="alerts" 
@@ -1135,120 +1135,135 @@ export default function FarmerDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Messages Tab */}
+          {/* Available Buyers Tab */}
           <TabsContent value="inquiries" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  Messages from Buyers
+                  <Users className="w-5 h-5 mr-2" />
+                  Available Buyers
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {messages?.map((message: any) => (
-                    <Card key={message.id} className="border border-gray-200">
+                  {/* Sample available buyers - English only as requested */}
+                  {[
+                    {
+                      id: 1,
+                      name: "Michael Johnson",
+                      company: "Johnson Agricultural Trading Co.",
+                      specialties: ["Cocoa", "Coffee"],
+                      location: "Monrovia, Liberia",
+                      rating: 4.8,
+                      status: "Active",
+                      contact: "m.johnson@jatrading.com"
+                    },
+                    {
+                      id: 2,
+                      name: "Sarah Williams",
+                      company: "Global Commodity Buyers LLC",
+                      specialties: ["Palm Oil", "Rubber"],
+                      location: "Buchanan, Liberia",
+                      rating: 4.9,
+                      status: "Premium",
+                      contact: "s.williams@gcbuyers.com"
+                    },
+                    {
+                      id: 3,
+                      name: "David Chen",
+                      company: "African Harvest Solutions",
+                      specialties: ["Rice", "Cassava"],
+                      location: "Gbarnga, Liberia",
+                      rating: 4.7,
+                      status: "Active",
+                      contact: "d.chen@ahsolutions.com"
+                    },
+                    {
+                      id: 4,
+                      name: "Emily Rodriguez",
+                      company: "Premium Agro Exports",
+                      specialties: ["Cocoa", "Coffee", "Palm Oil"],
+                      location: "Harper, Liberia",
+                      rating: 4.6,
+                      status: "Active",
+                      contact: "e.rodriguez@premiumagro.com"
+                    },
+                    {
+                      id: 5,
+                      name: "James Thompson",
+                      company: "Liberian Commodity Partners",
+                      specialties: ["All Commodities"],
+                      location: "Kakata, Liberia",
+                      rating: 4.8,
+                      status: "Premium",
+                      contact: "j.thompson@lcpartners.com"
+                    }
+                  ].map((buyer: any) => (
+                    <Card key={buyer.id} className="border border-gray-200 hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h4 className="font-semibold">{message.subject}</h4>
-                            <p className="text-sm text-gray-600">From: {message.buyerId} • {message.messageType}</p>
+                            <h4 className="font-semibold text-lg">{buyer.name}</h4>
+                            <p className="text-sm text-gray-600">{buyer.company}</p>
+                            <p className="text-sm text-gray-500">{buyer.location}</p>
                           </div>
                           <div className="flex items-center space-x-2">
-                            {!message.isRead && (
-                              <Badge className="bg-blue-100 text-blue-800">New</Badge>
-                            )}
-                            <Badge variant="outline" className="text-xs">
-                              {new Date(message.sentAt).toLocaleDateString()}
+                            <Badge 
+                              className={buyer.status === 'Premium' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}
+                            >
+                              {buyer.status}
                             </Badge>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                              <span className="font-medium text-sm">{buyer.rating}</span>
+                            </div>
                           </div>
                         </div>
                         
-                        <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                          <p className="text-sm">{message.message}</p>
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-600 mb-2">Specializes in:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {buyer.specialties.map((specialty: string, index: number) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {specialty}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
 
-                        {(message.proposedPrice || message.proposedQuantity) && (
-                          <div className="grid grid-cols-2 gap-4 text-sm mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <div>
-                              <p className="text-gray-600">Proposed Price</p>
-                              <p className="font-medium text-green-800">${message.proposedPrice}/kg</p>
-                            </div>
-                            <div>
-                              <p className="text-gray-600">Proposed Quantity</p>
-                              <p className="font-medium text-green-800">{message.proposedQuantity} kg</p>
-                            </div>
-                          </div>
-                        )}
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-600">Contact:</p>
+                          <p className="text-sm font-medium">{buyer.contact}</p>
+                        </div>
 
-                        {message.messageType === "inquiry" && (
-                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <p className="text-blue-800 text-sm font-medium">
-                                  💬 Buyer inquiry received - respond to start negotiation
-                                </p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button 
-                                  
-                                  className="bg-green-600 hover:bg-green-700"
-                                  onClick={() => handleAcceptInquiry(message)}
-                                  data-testid={`accept-inquiry-${message.id}`}
-                                >
-                                  Accept Offer
-                                </Button>
-                                <Button 
-                                  
-                                  variant="outline"
-                                  onClick={() => handleNegotiateOffer(message)}
-                                  data-testid={`negotiate-inquiry-${message.id}`}
-                                >
-                                  Negotiate
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {message.messageType === "negotiation" && (
-                          <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <p className="text-orange-800 text-sm font-medium">
-                                  🔄 Negotiation in progress - review the latest offer
-                                </p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button 
-                                  
-                                  className="bg-green-600 hover:bg-green-700"
-                                  onClick={() => handleAcceptNegotiation(message)}
-                                  data-testid={`accept-negotiation-${message.id}`}
-                                >
-                                  Accept Terms
-                                </Button>
-                                <Button 
-                                  
-                                  variant="outline"
-                                  onClick={() => handleCounterOffer(message)}
-                                  data-testid={`counter-offer-${message.id}`}
-                                >
-                                  Counter Offer
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => toast({
+                              title: "Contact Buyer",
+                              description: `Connecting you with ${buyer.name} from ${buyer.company}`
+                            })}
+                          >
+                            <Phone className="w-4 h-4 mr-1" />
+                            Contact
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => toast({
+                              title: "Send Message",
+                              description: `Message sent to ${buyer.name}`
+                            })}
+                          >
+                            <Mail className="w-4 h-4 mr-1" />
+                            Message
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
-                  )) || (
-                    <div className="text-center py-8 text-gray-500">
-                      <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                      <p>No messages from buyers yet.</p>
-                      <p className="text-sm">Complete your harvest to start receiving buyer inquiries.</p>
-                    </div>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>

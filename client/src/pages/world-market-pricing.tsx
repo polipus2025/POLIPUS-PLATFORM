@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet';
+import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -121,7 +122,7 @@ export default function WorldMarketPricing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <CleanExporterLayout>
       <Helmet>
         <title>World Market Intelligence - Exporter Portal</title>
         <meta name="description" content="Comprehensive global commodity market data, statistics, and projections for agricultural exporters" />
@@ -583,6 +584,6 @@ export default function WorldMarketPricing() {
           </div>
         </div>
       </div>
-    </div>
+    </CleanExporterLayout>
   );
 }

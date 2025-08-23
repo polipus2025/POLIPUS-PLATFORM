@@ -375,131 +375,77 @@ export default function AgriculturalBuyerDashboard() {
                   ) : (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <Card className="border-2 border-green-200">
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <CardTitle className="text-lg">Mary Johnson</CardTitle>
-                                <p className="text-sm text-gray-600">Farmer ID: FRM-2024-045</p>
-                              </div>
-                              <Badge className="bg-green-100 text-green-800">Ready</Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              <div className="flex items-center text-sm">
-                                <Package2 className="h-4 w-4 mr-2 text-green-600" />
-                                <span className="font-medium">Cocoa Beans - 750kg</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                                <span>Nimba County, Ganta District</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                                <span>Harvested: Jan 15, 2024</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <DollarSign className="h-4 w-4 mr-2 text-green-500" />
-                                <span className="font-medium">$2.50/kg</span>
-                              </div>
-                            </div>
-                            <div className="flex space-x-2 mt-4">
-                              <Button size="sm" className="flex-1" onClick={() => connectWithFarmer('FRM-2024-045')}>
-                                <Handshake className="h-4 w-4 mr-1" />
-                                Connect
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <PhoneCall className="h-4 w-4 mr-1" />
-                                Call
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="border-2 border-green-200">
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <CardTitle className="text-lg">David Wilson</CardTitle>
-                                <p className="text-sm text-gray-600">Farmer ID: FRM-2024-067</p>
-                              </div>
-                              <Badge className="bg-green-100 text-green-800">Ready</Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              <div className="flex items-center text-sm">
-                                <Package2 className="h-4 w-4 mr-2 text-green-600" />
-                                <span className="font-medium">Coffee Beans - 450kg</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                                <span>Bong County, Gbarnga District</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                                <span>Harvested: Jan 12, 2024</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <DollarSign className="h-4 w-4 mr-2 text-green-500" />
-                                <span className="font-medium">$3.20/kg</span>
-                              </div>
-                            </div>
-                            <div className="flex space-x-2 mt-4">
-                              <Button size="sm" className="flex-1" onClick={() => connectWithFarmer('FRM-2024-067')}>
-                                <Handshake className="h-4 w-4 mr-1" />
-                                Connect
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <PhoneCall className="h-4 w-4 mr-1" />
-                                Call
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="border-2 border-yellow-200">
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <CardTitle className="text-lg">Sarah Brown</CardTitle>
-                                <p className="text-sm text-gray-600">Farmer ID: FRM-2024-089</p>
-                              </div>
-                              <Badge className="bg-yellow-100 text-yellow-800">Processing</Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              <div className="flex items-center text-sm">
-                                <Package2 className="h-4 w-4 mr-2 text-green-600" />
-                                <span className="font-medium">Palm Oil - 200L</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                                <span>Grand Bassa County</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                                <span>Expected: Jan 20, 2024</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <DollarSign className="h-4 w-4 mr-2 text-green-500" />
-                                <span className="font-medium">$1.80/L</span>
-                              </div>
-                            </div>
-                            <div className="flex space-x-2 mt-4">
-                              <Button size="sm" className="flex-1" variant="outline" disabled>
-                                <Clock className="h-4 w-4 mr-1" />
-                                Pending
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <MessageCircle className="h-4 w-4 mr-1" />
-                                Message
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
+                        {availableHarvests && Array.isArray(availableHarvests) && availableHarvests.length > 0 ? (
+                          availableHarvests.map((harvest: any, index: number) => (
+                            <Card key={harvest.id || index} className={`border-2 ${harvest.farmerName === 'Paolo' ? 'border-blue-200 bg-blue-50' : 'border-green-200'}`}>
+                              <CardHeader>
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <CardTitle className="text-lg">{harvest.farmerName}</CardTitle>
+                                    <p className="text-sm text-gray-600">Farmer ID: {harvest.farmerId}</p>
+                                    {harvest.farmerName === 'Paolo' && (
+                                      <Badge className="bg-blue-100 text-blue-800 mt-1">🎯 Margibi County</Badge>
+                                    )}
+                                  </div>
+                                  <Badge className={`${harvest.status === 'Ready' || harvest.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                    {harvest.status || 'Ready'}
+                                  </Badge>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-2">
+                                  <div className="flex items-center text-sm">
+                                    <Package2 className="h-4 w-4 mr-2 text-green-600" />
+                                    <span className="font-medium">
+                                      {harvest.commodity || harvest.commodityType} - {harvest.quantity || harvest.quantityAvailable}{harvest.unit ? ` ${harvest.unit}` : ''}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center text-sm">
+                                    <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+                                    <span>{harvest.county}{harvest.farmLocation ? `, ${harvest.farmLocation}` : ''}</span>
+                                  </div>
+                                  <div className="flex items-center text-sm">
+                                    <Calendar className="h-4 w-4 mr-2 text-blue-500" />
+                                    <span>Harvested: {harvest.harvestDate ? new Date(harvest.harvestDate).toLocaleDateString() : 'Recently'}</span>
+                                  </div>
+                                  <div className="flex items-center text-sm">
+                                    <DollarSign className="h-4 w-4 mr-2 text-green-500" />
+                                    <span className="font-medium">
+                                      ${harvest.pricePerUnit || harvest.pricePerKg}/{harvest.unit || 'kg'}
+                                      {harvest.totalValue && (
+                                        <span className="text-blue-600 ml-2">(Total: ${harvest.totalValue})</span>
+                                      )}
+                                    </span>
+                                  </div>
+                                  {harvest.qualityGrade && (
+                                    <div className="flex items-center text-sm">
+                                      <CheckCircle className="h-4 w-4 mr-2 text-purple-500" />
+                                      <span className="font-medium text-purple-700">Quality: {harvest.qualityGrade}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex space-x-2 mt-4">
+                                  <Button 
+                                    size="sm" 
+                                    className={`flex-1 ${harvest.farmerName === 'Paolo' ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                                    onClick={() => connectWithFarmer(harvest.farmerId)}
+                                  >
+                                    <Handshake className="h-4 w-4 mr-1" />
+                                    {harvest.farmerName === 'Paolo' ? 'Connect with Paolo Jr!' : 'Connect'}
+                                  </Button>
+                                  <Button size="sm" variant="outline">
+                                    <PhoneCall className="h-4 w-4 mr-1" />
+                                    Call
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))
+                        ) : (
+                          <div className="col-span-full text-center py-8">
+                            <p className="text-gray-500">No harvests available at the moment</p>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}

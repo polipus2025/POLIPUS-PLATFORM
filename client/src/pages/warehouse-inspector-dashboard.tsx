@@ -60,6 +60,24 @@ export default function WarehouseInspectorDashboard() {
     select: (data) => data.data || []
   });
 
+  // Fetch warehouse transaction archives
+  const { data: warehouseTransactions, isLoading: warehouseTransactionsLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/transactions'],
+    select: (data) => data.data || []
+  });
+
+  // Fetch warehouse verification codes archive
+  const { data: warehouseCodes, isLoading: warehouseCodesLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/verification-codes'],
+    select: (data) => data.data || []
+  });
+
+  // Fetch bag collection tracking
+  const { data: bagCollections, isLoading: bagCollectionsLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/bag-collections'],
+    select: (data) => data.data || []
+  });
+
   // Mutations for inspection actions
   const startInspectionMutation = useMutation({
     mutationFn: async (inspectionId: string) => {
@@ -96,6 +114,52 @@ export default function WarehouseInspectorDashboard() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to complete inspection", variant: "destructive" });
+    }
+  });
+
+  // Validation mutations for dual codes
+  const validateCodeMutation = useMutation({
+    mutationFn: async ({ codeType, verificationCode }: { codeType: string; verificationCode: string }) => {
+      const response = await fetch(`/api/warehouse-inspector/validate-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codeType, verificationCode })
+      });
+      if (!response.ok) throw new Error('Failed to validate code');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: "✅ Codice Validato!", 
+        description: `Codice ${data.verificationCode} validato con successo. Tipo: ${data.codeType}` 
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/verification-codes'] });
+    },
+    onError: () => {
+      toast({ title: "❌ Errore", description: "Codice non valido o già utilizzato", variant: "destructive" });
+    }
+  });
+
+  // Generate bag collection batch
+  const generateBatchMutation = useMutation({
+    mutationFn: async (bagData: any) => {
+      const response = await fetch(`/api/warehouse-inspector/generate-batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bagData)
+      });
+      if (!response.ok) throw new Error('Failed to generate batch');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: "🎯 Batch Generato!", 
+        description: `Batch Code: ${data.batchCode} | QR Code generato con successo` 
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-collections'] });
+    },
+    onError: () => {
+      toast({ title: "❌ Errore", description: "Impossibile generare batch", variant: "destructive" });
     }
   });
 
@@ -333,7 +397,7 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Main Navigation Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
@@ -342,17 +406,25 @@ export default function WarehouseInspectorDashboard() {
               <ClipboardCheck className="w-4 h-4 mr-2" />
               Inspections
             </TabsTrigger>
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Transazioni
+            </TabsTrigger>
+            <TabsTrigger value="codes" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              Codici
+            </TabsTrigger>
+            <TabsTrigger value="bags" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Package className="w-4 h-4 mr-2" />
+              Borse
+            </TabsTrigger>
+            <TabsTrigger value="validation" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Shield className="w-4 h-4 mr-2" />
+              Validazione
+            </TabsTrigger>
             <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Warehouse className="w-4 h-4 mr-2" />
               Inventory
-            </TabsTrigger>
-            <TabsTrigger value="qr-batches" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileText className="w-4 h-4 mr-2" />
-              QR Batches
-            </TabsTrigger>
-            <TabsTrigger value="compliance" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Shield className="w-4 h-4 mr-2" />
-              Compliance
             </TabsTrigger>
             <TabsTrigger value="quality" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4 mr-2" />

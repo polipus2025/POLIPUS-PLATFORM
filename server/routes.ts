@@ -13103,5 +13103,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===============================
+  // WAREHOUSE INSPECTOR ARCHIVES & TRACEABILITY APIs
+  // ===============================
+
+  // Get warehouse transactions archive
+  app.get("/api/warehouse-inspector/transactions", async (req, res) => {
+    try {
+      console.log("Fetching warehouse transactions archive");
+      
+      // Mock warehouse transactions with dual verification codes
+      const warehouseTransactions = [
+        {
+          id: "wh-trans-001",
+          transactionId: "OFFER-ABC123",
+          farmerId: "FRM-2024-001",
+          farmerName: "Moses Williams",
+          farmLocation: "Williams Farm, Monrovia County",
+          buyerId: 1,
+          buyerName: "Michael Johnson",
+          buyerCompany: "Johnson Agriculture Trading",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          totalValue: 62475.00,
+          verificationCode1: "X0R27R24", // Buyer acceptance code
+          verificationCode2: "B7K94X31", // Bag usage code
+          processedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+          status: "warehouse_processed"
+        },
+        {
+          id: "wh-trans-002",
+          transactionId: "OFFER-DEF456",
+          farmerId: "FRM-2024-002",
+          farmerName: "Grace Johnson",
+          farmLocation: "Johnson Agricultural Estate, Monrovia County",
+          buyerId: 2,
+          buyerName: "Sarah Williams",
+          buyerCompany: "Williams Export Ltd",
+          commodityType: "Coffee",
+          quantityAvailable: 18.2,
+          unit: "tons",
+          totalValue: 58240.00,
+          verificationCode1: "M3P58N92",
+          verificationCode2: null, // Second code not yet generated
+          processedAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+          status: "warehouse_processed"
+        }
+      ];
+
+      console.log(`Returning ${warehouseTransactions.length} warehouse transactions`);
+      res.json({ data: warehouseTransactions });
+    } catch (error) {
+      console.error("Error fetching warehouse transactions:", error);
+      res.status(500).json({ error: "Failed to fetch warehouse transactions" });
+    }
+  });
+
+  // Get warehouse verification codes archive
+  app.get("/api/warehouse-inspector/verification-codes", async (req, res) => {
+    try {
+      console.log("Fetching warehouse verification codes archive");
+      
+      // Mock verification codes with dual type system
+      const warehouseCodes = [
+        {
+          id: "wh-code-001",
+          verificationCode: "X0R27R24",
+          codeType: "buyer-acceptance",
+          farmerId: "FRM-2024-001",
+          farmerName: "Moses Williams",
+          buyerId: 1,
+          buyerName: "Michael Johnson",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          totalValue: 62475.00,
+          validated: true,
+          generatedAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+          validatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000)  // 3 hours ago
+        },
+        {
+          id: "wh-code-002",
+          verificationCode: "B7K94X31",
+          codeType: "bag-usage",
+          farmerId: "FRM-2024-001",
+          farmerName: "Moses Williams",
+          buyerId: 1,
+          buyerName: "Michael Johnson",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          totalValue: 62475.00,
+          validated: false,
+          generatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+          validatedAt: null
+        },
+        {
+          id: "wh-code-003",
+          verificationCode: "M3P58N92",
+          codeType: "buyer-acceptance",
+          farmerId: "FRM-2024-002",
+          farmerName: "Grace Johnson",
+          buyerId: 2,
+          buyerName: "Sarah Williams",
+          commodityType: "Coffee",
+          quantityAvailable: 18.2,
+          unit: "tons",
+          totalValue: 58240.00,
+          validated: true,
+          generatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+          validatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000)  // 5 hours ago
+        }
+      ];
+
+      console.log(`Returning ${warehouseCodes.length} warehouse verification codes`);
+      res.json({ data: warehouseCodes });
+    } catch (error) {
+      console.error("Error fetching warehouse verification codes:", error);
+      res.status(500).json({ error: "Failed to fetch warehouse verification codes" });
+    }
+  });
+
+  // Get bag collections tracking
+  app.get("/api/warehouse-inspector/bag-collections", async (req, res) => {
+    try {
+      console.log("Fetching bag collections tracking data");
+      
+      // Mock bag collections with batch codes and QR codes
+      const bagCollections = [
+        {
+          id: "bag-001",
+          batchCode: "BCH-COC-240823-001",
+          qrCode: "QR-COC-X0R27R24-001",
+          productType: "Cocoa",
+          bagQuantity: 50,
+          transactionCode: "X0R27R24",
+          status: "active",
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          usedBags: 0,
+          remainingBags: 50
+        },
+        {
+          id: "bag-002",
+          batchCode: "BCH-COF-240823-002",
+          qrCode: "QR-COF-M3P58N92-002",
+          productType: "Coffee",
+          bagQuantity: 35,
+          transactionCode: "M3P58N92",
+          status: "active",
+          createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+          usedBags: 12,
+          remainingBags: 23
+        },
+        {
+          id: "bag-003",
+          batchCode: "BCH-PLM-240822-003",
+          qrCode: "QR-PLM-H8W16T45-003",
+          productType: "Palm Oil",
+          bagQuantity: 80,
+          transactionCode: "H8W16T45",
+          status: "completed",
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+          usedBags: 80,
+          remainingBags: 0
+        }
+      ];
+
+      console.log(`Returning ${bagCollections.length} bag collections`);
+      res.json({ data: bagCollections });
+    } catch (error) {
+      console.error("Error fetching bag collections:", error);
+      res.status(500).json({ error: "Failed to fetch bag collections" });
+    }
+  });
+
+  // Validate verification code (dual code system)
+  app.post("/api/warehouse-inspector/validate-code", async (req, res) => {
+    try {
+      const { codeType, verificationCode } = req.body;
+      console.log(`Validating ${codeType} code: ${verificationCode}`);
+
+      // Mock validation logic - in real system, check database and update status
+      const isValidCode = verificationCode && verificationCode.length === 8;
+      
+      if (!isValidCode) {
+        return res.status(400).json({ 
+          error: "Codice non valido", 
+          message: "Il codice deve essere di 8 caratteri alfanumerici" 
+        });
+      }
+
+      // Mock successful validation
+      const validationResult = {
+        success: true,
+        verificationCode: verificationCode,
+        codeType: codeType,
+        validatedAt: new Date().toISOString(),
+        validatedBy: "WH-INS-001",
+        transactionDetails: {
+          commodityType: codeType === "buyer-acceptance" ? "Cocoa" : "Coffee",
+          quantityAvailable: codeType === "buyer-acceptance" ? 25.5 : 18.2,
+          totalValue: codeType === "buyer-acceptance" ? 62475.00 : 58240.00
+        }
+      };
+
+      console.log("Code validation successful");
+      res.json(validationResult);
+    } catch (error) {
+      console.error("Error validating code:", error);
+      res.status(500).json({ error: "Failed to validate code" });
+    }
+  });
+
+  // Generate bag collection batch with QR code
+  app.post("/api/warehouse-inspector/generate-batch", async (req, res) => {
+    try {
+      const { productType, bagQuantity, transactionCode } = req.body;
+      console.log(`Generating batch for ${productType}: ${bagQuantity} bags, transaction: ${transactionCode}`);
+
+      // Generate unique batch code and QR code
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '').slice(2); // YYMMDD
+      const productCode = productType.substring(0, 3).toUpperCase();
+      const batchNumber = Math.floor(Math.random() * 999) + 1;
+      
+      const batchCode = `BCH-${productCode}-${timestamp}-${batchNumber.toString().padStart(3, '0')}`;
+      const qrCode = `QR-${productCode}-${transactionCode}-${batchNumber.toString().padStart(3, '0')}`;
+
+      // Mock batch creation result
+      const batchResult = {
+        success: true,
+        batchCode: batchCode,
+        qrCode: qrCode,
+        productType: productType,
+        bagQuantity: parseInt(bagQuantity),
+        transactionCode: transactionCode,
+        createdAt: new Date().toISOString(),
+        createdBy: "WH-INS-001",
+        status: "active"
+      };
+
+      console.log("Batch generation successful:", batchCode);
+      res.json(batchResult);
+    } catch (error) {
+      console.error("Error generating batch:", error);
+      res.status(500).json({ error: "Failed to generate batch" });
+    }
+  });
+
   return httpServer;
 }

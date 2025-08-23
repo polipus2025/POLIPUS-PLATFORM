@@ -42,7 +42,7 @@ export default function FarmerDashboard() {
   console.log("🔍 Dashboard Farmer ID:", farmerId);
   
   // Fetch farmer-specific data
-  const { data: farmerLandData } = useQuery({ 
+  const { data: farmerLandData, isLoading: landDataLoading, error: landDataError } = useQuery({ 
     queryKey: ["/api/farmer-land-data", farmerId],
     queryFn: () => apiRequest(`/api/farmer-land-data/${farmerId}`),
     enabled: !!farmerId,
@@ -64,6 +64,11 @@ export default function FarmerDashboard() {
     enabled: !!farmerId,
   });
 
+  // Debug logging for farmer land data
+  console.log("🔍 farmerLandData:", farmerLandData);
+  console.log("🔍 farmPlots exist:", !!farmerLandData?.farmPlots);
+  console.log("🔍 farmPlots length:", farmerLandData?.farmPlots?.length);
+  
   // Real data for dashboard stats  
   const totalPlots = farmerLandData?.totalPlots || 0;
   const activeCropPlans = Array.isArray(cropPlans) ? cropPlans.filter((plan: any) => plan.status === 'active').length : 2;
@@ -368,6 +373,27 @@ export default function FarmerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Debug information */}
+              <div className="mb-4 p-2 bg-blue-50 rounded text-xs">
+                <strong>Debug:</strong> Loading: {landDataLoading ? 'YES' : 'NO'}, 
+                Error: {landDataError ? 'YES' : 'NO'}, 
+                Total Plots: {farmerLandData?.totalPlots}, 
+                FarmPlots Array: {farmerLandData?.farmPlots ? `${farmerLandData.farmPlots.length} plots` : 'null'}, 
+                Farmer ID: {farmerId}
+              </div>
+              
+              {landDataLoading && (
+                <div className="text-center py-8">
+                  <p>Loading your land plots...</p>
+                </div>
+              )}
+              
+              {landDataError && (
+                <div className="text-center py-8 text-red-600">
+                  <p>Error loading land data: {landDataError.message}</p>
+                </div>
+              )}
+              
               {farmerLandData?.farmPlots && farmerLandData.farmPlots.length > 0 ? (
                 <div className="space-y-6">
                   {/* Individual Farm Plots */}

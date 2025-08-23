@@ -5923,6 +5923,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/farm-plots/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid plot ID" });
+      }
+      const farmPlot = await storage.getFarmPlot(id);
+      if (!farmPlot) {
+        return res.status(404).json({ message: "Land plot not found" });
+      }
+      res.json(farmPlot);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch land plot" });
+    }
+  });
+
   // Crop Plan routes
   app.get("/api/crop-plans", async (req, res) => {
     try {

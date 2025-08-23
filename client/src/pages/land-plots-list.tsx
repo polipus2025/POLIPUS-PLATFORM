@@ -139,10 +139,12 @@ export default function LandPlotsList() {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
-                          View Details
-                        </Button>
-                        <Button size="sm" variant="outline">
+                        <Link href={`/land-plot-details/${plot.id}`}>
+                          <Button size="sm" variant="outline" data-testid={`button-view-details-${plot.id}`}>
+                            View Details
+                          </Button>
+                        </Link>
+                        <Button size="sm" variant="outline" data-testid={`button-edit-${plot.id}`}>
                           Edit
                         </Button>
                       </div>

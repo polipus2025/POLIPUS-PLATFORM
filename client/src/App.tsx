@@ -63,6 +63,7 @@ import EudrAssessment from "@/pages/eudr-assessment";
 import GenerateReports from "@/pages/generate-reports";
 import FarmersList from "@/pages/farmers-list";
 import LandPlotsList from "@/pages/land-plots-list";
+import LandPlotDetails from "@/pages/land-plot-details";
 
 // ADDITIONAL AGRICULTURAL PAGES
 import EudrCompliance from "@/pages/eudr-compliance";
@@ -162,6 +163,7 @@ function App() {
             <Route path="/generate-reports" component={GenerateReports} />
             <Route path="/farmers-list" component={FarmersList} />
             <Route path="/land-plots-list" component={LandPlotsList} />
+            <Route path="/land-plot-details/:id" component={LandPlotDetails} />
             
             {/* ADDITIONAL AGRICULTURAL PAGES */}
             <Route path="/eudr-compliance" component={EudrCompliance} />

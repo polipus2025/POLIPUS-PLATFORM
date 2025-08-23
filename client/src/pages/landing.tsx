@@ -214,13 +214,25 @@ export default function Landing() {
 
         {/* Access Portals - ISMS Style */}
         <div className="isms-card mb-12">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
-              <Shield className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-between gap-3 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">Access Portals</h2>
+                <p className="text-slate-600">Role-based authentication for agricultural compliance management</p>
+              </div>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Access Portals</h2>
-              <p className="text-slate-600">Role-based authentication for agricultural compliance management</p>
+              <Button 
+                asChild 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                <a href="/">
+                  ← Back to Polipus Platform
+                </a>
+              </Button>
             </div>
           </div>
           

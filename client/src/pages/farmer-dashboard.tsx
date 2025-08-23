@@ -181,43 +181,43 @@ export default function FarmerDashboard() {
         </div>
       </div>
 
-      {/* Tabbed Navigation Interface */}
+      {/* Balanced Tabbed Navigation Interface */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-7 bg-slate-100">
-          <TabsTrigger value="overview" className="flex items-center gap-2 text-xs sm:text-sm">
-            <Home className="h-4 w-4" />
-            <span className="hidden sm:inline">Overview</span>
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 bg-slate-100 h-auto sm:h-10">
+          <TabsTrigger value="overview" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
+            <Home className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-[10px] sm:text-sm">Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="land-mappings" className="flex items-center gap-2 text-xs sm:text-sm">
-            <MapPin className="h-4 w-4" />
-            <span className="hidden sm:inline">Land</span>
+          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-[10px] sm:text-sm">Land</span>
           </TabsTrigger>
-          <TabsTrigger value="harvest-schedules" className="flex items-center gap-2 text-xs sm:text-sm">
-            <Calendar className="h-4 w-4" />
-            <span className="hidden sm:inline">Harvest</span>
+          <TabsTrigger value="harvest-schedules" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-[10px] sm:text-sm">Harvest</span>
           </TabsTrigger>
-          <TabsTrigger value="marketplace" className="flex items-center gap-2 text-xs sm:text-sm">
-            <ShoppingCart className="h-4 w-4" />
-            <span className="hidden sm:inline">Market</span>
+          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-[10px] sm:text-sm">Market</span>
           </TabsTrigger>
-          <TabsTrigger value="transactions" className="flex items-center gap-2 text-xs sm:text-sm">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">Transactions</span>
+          <TabsTrigger value="transactions" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
+            <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-[10px] sm:text-sm">Transactions</span>
           </TabsTrigger>
-          <TabsTrigger value="buyer-inquiries" className="flex items-center gap-2 text-xs sm:text-sm">
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">Inquiries</span>
+          <TabsTrigger value="buyer-inquiries" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-[10px] sm:text-sm">Inquiries</span>
           </TabsTrigger>
-          <TabsTrigger value="alerts" className="flex items-center gap-2 text-xs sm:text-sm">
-            <Bell className="h-4 w-4" />
-            <span className="hidden sm:inline">Alerts</span>
+          <TabsTrigger value="alerts" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
+            <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-[10px] sm:text-sm">Alerts</span>
           </TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Mobile-Responsive Statistics Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          {/* Perfectly Balanced Statistics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
@@ -271,8 +271,8 @@ export default function FarmerDashboard() {
             </Card>
           </div>
 
-          {/* Recent Activities and Quick Actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Balanced Recent Activities and Quick Actions */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Recent Farm Activities */}
             <Card>
               <CardHeader>
@@ -322,7 +322,7 @@ export default function FarmerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Link href="/farm-plots">
                     <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
                       <MapPin className="h-6 w-6 text-green-600" />

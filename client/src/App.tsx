@@ -237,7 +237,7 @@ const WarehouseInspectorDashboard = lazy(() => import("@/pages/warehouse-inspect
 
 // Helper component to check user access to routes
 function ProtectedRoute({ component: Component, allowedUserTypes, ...props }: any) {
-  const userType = localStorage.getItem("userType");
+  const userType = typeof window !== 'undefined' ? localStorage.getItem("userType") : null;
   
   if (!allowedUserTypes.includes(userType)) {
     return <NotFound />;
@@ -261,8 +261,8 @@ function LoadingSpinner() {
 
 function Router() {
   // Check if user is logged in and has valid role
-  const authToken = localStorage.getItem("authToken");
-  const userType = localStorage.getItem("userType");
+  const authToken = typeof window !== 'undefined' ? localStorage.getItem("authToken") : null;
+  const userType = typeof window !== 'undefined' ? localStorage.getItem("userType") : null;
   
   return (
     <Switch>
@@ -860,8 +860,9 @@ function Router() {
 }
 
 function App() {
-  const authToken = localStorage.getItem("authToken");
-  const userType = localStorage.getItem("userType");
+  // Optimize localStorage calls to prevent render blocking
+  const authToken = typeof window !== 'undefined' ? localStorage.getItem("authToken") : null;
+  const userType = typeof window !== 'undefined' ? localStorage.getItem("userType") : null;
   
   // Check if user is on authentication pages, landing page, or front page
   const isAuthPage = window.location.pathname.includes("-login");

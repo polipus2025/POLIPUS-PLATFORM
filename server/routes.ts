@@ -12727,5 +12727,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===============================
+  // DEMOCRATIC COUNTY-BASED BUYER NOTIFICATION SYSTEM
+  // ===============================
+
+  // 1. Farmer submits product offer and automatically notifies all county buyers
+  app.post("/api/farmer/submit-product-offer", async (req, res) => {
+    try {
+      const {
+        farmerId,
+        commodityType,
+        quantityAvailable,
+        unit,
+        pricePerUnit,
+        qualityGrade,
+        harvestDate,
+        paymentTerms,
+        deliveryTerms,
+        description,
+        farmLocation,
+        farmerName,
+        farmerCounty
+      } = req.body;
+
+      // Calculate total value
+      const totalValue = (parseFloat(quantityAvailable) * parseFloat(pricePerUnit)).toFixed(2);
+
+      // Create the product offer
+      const offer = {
+        id: Math.random().toString(36).substring(2, 9),
+        farmerId: parseInt(farmerId),
+        commodityType,
+        quantityAvailable: parseFloat(quantityAvailable),
+        unit,
+        pricePerUnit: parseFloat(pricePerUnit),
+        totalValue: parseFloat(totalValue),
+        qualityGrade,
+        harvestDate: new Date(harvestDate),
+        paymentTerms,
+        deliveryTerms,
+        description: description || '',
+        farmLocation: farmLocation || 'Farm Location',
+        farmerName: farmerName || 'Farmer',
+        farmerCounty: farmerCounty || 'Monrovia',
+        status: 'pending',
+        createdAt: new Date()
+      };
+
+      // Generate unique notification ID for this offer
+      const notificationId = Math.random().toString(36).substring(2, 15).toUpperCase();
+
+      // Find all buyers in the same county
+      const countyBuyers = [
+        { id: 1, name: "Michael Johnson", company: "Johnson Agriculture Trading", county: "Monrovia" },
+        { id: 2, name: "Sarah Williams", company: "Global Commodity Buyers LLC", county: "Buchanan" },
+        { id: 3, name: "David Chen", company: "African Harvest Solutions", county: "Gbarnga" },
+        { id: 4, name: "Emily Rodriguez", company: "Premium Agro Exports", county: "Harper" },
+        { id: 5, name: "James Thompson", company: "Liberian Commodity Partners", county: "Kakata" },
+        { id: 6, name: "Maria Santos", company: "Santos Trading Co", county: "Monrovia" },
+        { id: 7, name: "Robert Kim", company: "Asia-Africa Commodities", county: "Monrovia" },
+        { id: 8, name: "Lisa Anderson", company: "Anderson Export Group", county: "Buchanan" }
+      ].filter(buyer => buyer.county === farmerCounty);
+
+      // Create notifications for all buyers in the county
+      const buyerNotifications = countyBuyers.map(buyer => ({
+        id: Math.random().toString(36).substring(2, 9),
+        notificationId,
+        buyerId: buyer.id,
+        buyerName: buyer.name,
+        buyerCompany: buyer.company,
+        farmerId: parseInt(farmerId),
+        farmerName,
+        farmLocation,
+        commodityType,
+        quantityAvailable: parseFloat(quantityAvailable),
+        unit,
+        pricePerUnit: parseFloat(pricePerUnit),
+        totalValue: parseFloat(totalValue),
+        qualityGrade,
+        harvestDate: new Date(harvestDate),
+        paymentTerms,
+        deliveryTerms,
+        description: description || '',
+        status: 'pending',
+        createdAt: new Date(),
+        county: farmerCounty
+      }));
+
+      // In a real system, save notifications to database
+      // For now, we'll return success with the count
+      console.log(`Created ${buyerNotifications.length} notifications for buyers in ${farmerCounty} county`);
+
+      res.json({
+        message: "Farmer product offer submitted successfully",
+        offer,
+        notificationsSent: buyerNotifications.length,
+        totalNotificationsSent: buyerNotifications.length,
+        notificationId,
+        buyersNotified: countyBuyers.map(b => b.name)
+      });
+    } catch (error) {
+      console.error("Error submitting farmer product offer:", error);
+      res.status(500).json({ error: "Failed to submit product offer" });
+    }
+  });
+
+  // 2. Get buyer notifications
+  app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      
+      // Mock notifications for demo - in real system, fetch from database
+      const mockNotifications = [
+        {
+          id: "not-001",
+          notificationId: "OFFER-ABC123",
+          buyerId: parseInt(buyerId),
+          farmerId: 101,
+          farmerName: "Moses Williams",
+          farmLocation: "Williams Farm, Monrovia County",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          pricePerUnit: 2450.00,
+          totalValue: 62475.00,
+          qualityGrade: "Grade A",
+          harvestDate: "2024-08-15",
+          paymentTerms: "50% Advance, 50% on Delivery",
+          deliveryTerms: "FOB Farm Gate",
+          description: "Premium quality cocoa beans, organic certified",
+          status: "pending",
+          createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+          county: "Monrovia"
+        },
+        {
+          id: "not-002",
+          notificationId: "OFFER-DEF456",
+          buyerId: parseInt(buyerId),
+          farmerId: 102,
+          farmerName: "Grace Johnson",
+          farmLocation: "Johnson Agricultural Estate, Monrovia County",
+          commodityType: "Coffee",
+          quantityAvailable: 18.2,
+          unit: "tons",
+          pricePerUnit: 3200.00,
+          totalValue: 58240.00,
+          qualityGrade: "Grade A",
+          harvestDate: "2024-08-20",
+          paymentTerms: "Cash on Delivery",
+          deliveryTerms: "Delivered to Warehouse",
+          description: "Arabica coffee beans, shade-grown and sustainably harvested",
+          status: "pending",
+          createdAt: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+          county: "Monrovia"
+        },
+        {
+          id: "not-003",
+          notificationId: "OFFER-GHI789",
+          buyerId: parseInt(buyerId),
+          farmerId: 103,
+          farmerName: "Samuel Brown",
+          farmLocation: "Brown Family Farm, Monrovia County",
+          commodityType: "Palm Oil",
+          quantityAvailable: 45.0,
+          unit: "tons",
+          pricePerUnit: 1850.00,
+          totalValue: 83250.00,
+          qualityGrade: "Grade B",
+          harvestDate: "2024-08-18",
+          paymentTerms: "30 Days Net",
+          deliveryTerms: "Ex-Works",
+          description: "Fresh palm oil, cold-pressed and filtered",
+          status: "expired",
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          county: "Monrovia"
+        }
+      ];
+      
+      res.json(mockNotifications);
+    } catch (error) {
+      console.error("Error fetching buyer notifications:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // 3. Buyer accepts the offer - first come, first served
+  app.post("/api/buyer/accept-offer", async (req, res) => {
+    try {
+      const { notificationId, buyerId, buyerName, company } = req.body;
+
+      // Check if the notification is still pending (mock check)
+      // In real system, this would update database status atomically
+      const mockCheck = Math.random() > 0.2; // 80% success rate for demo
+      
+      if (!mockCheck) {
+        return res.status(400).json({ 
+          error: "Offer no longer available. Another buyer was faster!" 
+        });
+      }
+
+      // Generate unique verification code
+      const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      // In real system:
+      // 1. Update all notifications for this offer to 'expired'
+      // 2. Update the winner's notification to 'accepted'
+      // 3. Create transaction record
+      // 4. Notify farmer of successful match
+
+      console.log(`Buyer ${buyerName} (${company}) accepted offer ${notificationId}`);
+      console.log(`Verification code generated: ${verificationCode}`);
+
+      res.json({
+        message: "Offer accepted successfully!",
+        verificationCode,
+        buyerName,
+        company,
+        notificationId,
+        instructions: [
+          "Contact the farmer using the provided details",
+          "Use your verification code when arranging pickup",
+          "Complete payment according to agreed terms",
+          "Arrange logistics for product delivery"
+        ]
+      });
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+      res.status(500).json({ error: "Failed to accept offer" });
+    }
+  });
+
   return httpServer;
 }

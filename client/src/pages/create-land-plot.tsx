@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, MapPin, Globe, TreePine, Target, Users } from "lucide-react";
+import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair } from "lucide-react";
 import { Link } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
@@ -30,6 +30,9 @@ export default function CreateLandPlot() {
     totalAreaHectares: "",
     coordinates: ""
   });
+
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
 
   const inspectorId = localStorage.getItem("inspectorId") || "land_inspector";
   const inspectorName = localStorage.getItem("inspectorName") || "Land Inspector";
@@ -142,6 +145,65 @@ export default function CreateLandPlot() {
     }
 
     createLandPlot.mutate(landPlotData);
+  };
+
+  const getCurrentLocation = () => {
+    setIsGettingLocation(true);
+    
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation Not Supported",
+        description: "Your browser doesn't support location services",
+        variant: "destructive",
+      });
+      setIsGettingLocation(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const location = { lat: latitude, lng: longitude };
+        
+        setCurrentLocation(location);
+        setLandPlotData(prev => ({
+          ...prev,
+          coordinates: `${latitude}, ${longitude}`
+        }));
+        
+        toast({
+          title: "Location Acquired",
+          description: `GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+        });
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        let errorMessage = "Failed to get location";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Please enable location services.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out.";
+            break;
+        }
+        
+        toast({
+          title: "Location Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        setIsGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
   };
 
   return (
@@ -404,6 +466,51 @@ export default function CreateLandPlot() {
                         <li>• PDF report generation for EU documentation</li>
                         <li>• Real-time compliance status monitoring</li>
                       </ul>
+                    </div>
+
+                    {/* Get Current Location Button */}
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Crosshair className="h-4 w-4 text-yellow-600 mr-2" />
+                          <h4 className="font-medium text-yellow-800">Current Location</h4>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={getCurrentLocation}
+                          disabled={isGettingLocation}
+                          data-testid="button-get-location"
+                          className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                        >
+                          {isGettingLocation ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-600 mr-1"></div>
+                              Getting Location...
+                            </>
+                          ) : (
+                            <>
+                              <Crosshair className="h-3 w-3 mr-1" />
+                              Get My Location
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      
+                      <div className="text-sm text-yellow-700">
+                        {currentLocation ? (
+                          <div className="space-y-1">
+                            <p className="font-medium">📍 Current GPS Coordinates:</p>
+                            <p className="font-mono bg-white px-2 py-1 rounded text-xs">
+                              {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+                            </p>
+                            <p className="text-xs">Use this as a reference point before mapping the plot boundaries</p>
+                          </div>
+                        ) : (
+                          <p>Click "Get My Location" to acquire your current GPS coordinates as a reference point for mapping.</p>
+                        )}
+                      </div>
                     </div>
 
                     <RealMapBoundaryMapper 

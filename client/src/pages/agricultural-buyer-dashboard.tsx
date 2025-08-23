@@ -167,7 +167,7 @@ export default function AgriculturalBuyerDashboard() {
             <TabsTrigger value="overview">Business Overview</TabsTrigger>
             <TabsTrigger value="notifications">Product Offers</TabsTrigger>
             <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>
-            <TabsTrigger value="confirmed">Transazioni Confermate</TabsTrigger>
+            <TabsTrigger value="confirmed">Confirmed Transactions</TabsTrigger>
             <TabsTrigger value="codes">Verification Codes</TabsTrigger>
             <TabsTrigger value="transactions">Transaction Dashboard</TabsTrigger>
           </TabsList>

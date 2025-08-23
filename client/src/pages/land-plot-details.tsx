@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Globe, TreePine, Target, Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Map, FileText, Eye, Download } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function LandPlotDetails() {
   const { id } = useParams();
+  const [showMap, setShowMap] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   // Get specific land plot details
   const { data: plot, isLoading } = useQuery({
@@ -15,7 +20,15 @@ export default function LandPlotDetails() {
     retry: false
   });
 
+  // Get farmer details to access boundary points
+  const { data: farmerData } = useQuery({
+    queryKey: [`/api/farmers/${plot?.farmerId}`],
+    enabled: !!plot?.farmerId,
+    retry: false
+  });
+
   const plotData = plot as any;
+  const boundaryPoints = farmerData?.farmBoundaries?.points || [];
 
   if (isLoading) {
     return (
@@ -89,6 +102,17 @@ export default function LandPlotDetails() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label className="text-sm font-medium text-gray-500">Farmer ID</label>
+                    <p className="text-sm font-mono bg-blue-50 px-2 py-1 rounded text-blue-800">{plotData.farmerId}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Farmer Name</label>
+                    <p className="text-lg">{plotData.farmerName}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label className="text-sm font-medium text-gray-500">Farmer</label>
                     <p className="text-lg">{plotData.farmerName || plotData.farmerId}</p>
                   </div>
@@ -137,11 +161,25 @@ export default function LandPlotDetails() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-500">GPS Coordinates</label>
+                  <label className="text-sm font-medium text-gray-500">GPS Coordinates (Primary)</label>
                   <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
                     {plotData.gpsCoordinates || plotData.coordinates || 'N/A'}
                   </p>
                 </div>
+
+                {boundaryPoints.length > 0 && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Boundary Coordinates ({boundaryPoints.length} points)</label>
+                    <div className="mt-2 max-h-32 overflow-y-auto bg-gray-50 rounded p-3">
+                      {boundaryPoints.map((point: any, index: number) => (
+                        <div key={index} className="text-xs font-mono mb-1">
+                          <span className="text-blue-600">Point {index + 1}:</span> {point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Total boundary area: {farmerData?.farmBoundaries?.area?.toFixed(4)} hectares</p>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -196,18 +234,123 @@ export default function LandPlotDetails() {
                 <CardTitle>Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <Button className="w-full" variant="outline">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    View on Map
-                  </Button>
-                  <Button className="w-full" variant="outline">
-                    Edit Plot Details
-                  </Button>
-                  <Button className="w-full" variant="outline">
-                    Generate Report
-                  </Button>
-                </div>
+                <Tabs defaultValue="view" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="view">View</TabsTrigger>
+                    <TabsTrigger value="edit">Edit</TabsTrigger>
+                    <TabsTrigger value="reports">Reports</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="view" className="space-y-2 mt-4">
+                    <Dialog open={showMap} onOpenChange={setShowMap}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" variant="outline">
+                          <Map className="w-4 h-4 mr-2" />
+                          Interactive Map View
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh]">
+                        <DialogHeader>
+                          <DialogTitle>Interactive Map - {plotData.plotName}</DialogTitle>
+                        </DialogHeader>
+                        <div className="h-96 bg-gray-100 rounded flex items-center justify-center">
+                          <div className="text-center">
+                            <Map className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                            <p className="text-gray-600">Interactive Map Loading...</p>
+                            <p className="text-sm text-gray-500 mt-2">Boundary: {boundaryPoints.length} GPS points mapped</p>
+                            {boundaryPoints.length > 0 && (
+                              <div className="mt-3 text-xs bg-blue-50 p-2 rounded">
+                                <strong>Coordinates:</strong><br/>
+                                {boundaryPoints.slice(0, 3).map((point: any, i: number) => (
+                                  <div key={i}>{point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}</div>
+                                ))}
+                                {boundaryPoints.length > 3 && <div>... and {boundaryPoints.length - 3} more points</div>}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <Button className="w-full" variant="outline">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Satellite View
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="edit" className="space-y-2 mt-4">
+                    <Button className="w-full" variant="outline">
+                      <TreePine className="w-4 h-4 mr-2" />
+                      Edit Plot Details
+                    </Button>
+                    <Button className="w-full" variant="outline">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Update GPS Boundaries
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="reports" className="space-y-2 mt-4">
+                    <Dialog open={showReport} onOpenChange={setShowReport}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" variant="outline">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Generate Compliance Report
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>EUDR Compliance Report - {plotData.plotName}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          {farmerData?.complianceReports ? (
+                            <div className="space-y-3">
+                              <div className="bg-green-50 border border-green-200 rounded p-3">
+                                <h4 className="font-semibold text-green-800 mb-2">EUDR Compliance Status</h4>
+                                <p><strong>Risk Level:</strong> <span className="capitalize">{farmerData.complianceReports.eudrCompliance.riskLevel}</span></p>
+                                <p><strong>Compliance Score:</strong> {farmerData.complianceReports.eudrCompliance.complianceScore}/100</p>
+                                <p><strong>Last Forest Date:</strong> {farmerData.complianceReports.eudrCompliance.lastForestDate}</p>
+                                <p><strong>Deforestation Risk:</strong> {farmerData.complianceReports.eudrCompliance.deforestationRisk}%</p>
+                              </div>
+                              
+                              <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                                <h4 className="font-semibold text-blue-800 mb-2">Recommendations</h4>
+                                <ul className="list-disc list-inside text-sm space-y-1">
+                                  {farmerData.complianceReports.eudrCompliance.recommendations.map((rec: string, i: number) => (
+                                    <li key={i}>{rec}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                              
+                              <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                                <h4 className="font-semibold text-yellow-800 mb-2">Required Documentation</h4>
+                                <ul className="list-disc list-inside text-sm space-y-1">
+                                  {farmerData.complianceReports.eudrCompliance.documentationRequired.map((doc: string, i: number) => (
+                                    <li key={i}>{doc}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-center py-6">
+                              <FileText className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                              <p className="text-gray-600">No compliance data available</p>
+                            </div>
+                          )}
+                          
+                          <Button className="w-full">
+                            <Download className="w-4 h-4 mr-2" />
+                            Download PDF Report
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <Button className="w-full" variant="outline">
+                      <Target className="w-4 h-4 mr-2" />
+                      Inspection Report
+                    </Button>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>

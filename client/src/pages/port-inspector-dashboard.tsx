@@ -252,6 +252,18 @@ export default function PortInspectorDashboard() {
               <Badge variant="outline" className="bg-blue-50 text-blue-700">
                 {inspectorData.certificationLevel || "Senior"} Level
               </Badge>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  localStorage.removeItem("inspectorData");
+                  localStorage.removeItem("inspectorToken");
+                  window.location.href = "/port-inspector-login";
+                }}
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                Logout
+              </Button>
             </div>
           </div>
         </div>

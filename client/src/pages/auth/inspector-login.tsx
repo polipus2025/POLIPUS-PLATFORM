@@ -62,8 +62,8 @@ export default function InspectorLogin() {
 
         <div className="mt-8 text-center">
           <Link href="/">
-            <button className="text-slate-500 hover:text-slate-700 text-sm font-medium">
-              ← Back to Main Platform
+            <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors">
+              ← Back to AgriTrace LACRA Platform
             </button>
           </Link>
         </div>

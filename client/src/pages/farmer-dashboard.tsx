@@ -591,7 +591,35 @@ export default function FarmerDashboard() {
         </TabsContent>
 
         {/* TRANSACTIONS TAB */}
-        <TabsContent value="transactions" className="space-y-6 mt-6">
+        <TabsContent value="transactions" className="space-y-3 mt-6">
+          {/* Pending Offers Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Package className="w-5 h-5 mr-2 text-orange-600" />
+                Pending Product Offers
+              </CardTitle>
+              <CardDescription>
+                Your submitted offers waiting for buyer acceptance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="font-semibold text-orange-900">Recently Submitted Offer</p>
+                    <p className="text-sm text-gray-600">3 buyers in Monrovia County notified</p>
+                  </div>
+                  <Badge className="bg-orange-600 text-white">Pending</Badge>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>Status: <span className="font-medium text-orange-600">Waiting for buyer acceptance</span></p>
+                  <p className="text-xs mt-1">First buyer to accept wins the offer</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Confirmed Transactions Archive */}
           <Card>
             <CardHeader>

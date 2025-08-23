@@ -227,6 +227,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new farm plot
+  app.post("/api/farm-plots", async (req, res) => {
+    try {
+      const plotData = req.body;
+      console.log("🔄 Creating new farm plot:", plotData);
+      
+      // Insert new farm plot into database
+      const [newPlot] = await db
+        .insert(farmPlots)
+        .values({
+          plotId: plotData.plotId,
+          farmerId: plotData.farmerId,
+          farmerName: plotData.farmerName,
+          plotNumber: plotData.plotNumber,
+          plotName: plotData.plotName,
+          cropType: plotData.cropType,
+          primaryCrop: plotData.primaryCrop,
+          secondaryCrops: plotData.secondaryCrops,
+          plotSize: plotData.plotSize.toString(),
+          plotSizeUnit: plotData.plotSizeUnit,
+          county: plotData.county,
+          district: plotData.district || "",
+          village: plotData.village,
+          gpsCoordinates: plotData.gpsCoordinates,
+          farmBoundaries: plotData.farmBoundaries,
+          landMapData: plotData.landMapData,
+          soilType: plotData.soilType,
+          plantingDate: plotData.plantingDate,
+          expectedHarvestDate: plotData.expectedHarvestDate,
+          isActive: plotData.isActive,
+          status: plotData.status,
+          irrigationAccess: plotData.irrigationAccess,
+          landOwnership: plotData.landOwnership,
+          certifications: plotData.certifications
+        })
+        .returning();
+
+      console.log("✅ Farm plot created successfully:", newPlot);
+      
+      res.json({
+        success: true,
+        message: "Farm plot created successfully",
+        plot: newPlot
+      });
+      
+    } catch (error) {
+      console.error("❌ Error creating farm plot:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create farm plot",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Get farmer land mapping data with unique plot numbering
   app.get("/api/farmer-land-data/:farmerId", async (req, res) => {
     try {
@@ -4768,20 +4823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVED: Demo farm plots endpoint - now using real database data
 
-  app.post('/api/farm-plots', async (req, res) => {
-    try {
-      const plotData = req.body;
-      const newPlot = {
-        id: Date.now(),
-        ...plotData,
-        createdAt: new Date().toISOString()
-      };
-      res.status(201).json(newPlot);
-    } catch (error) {
-      console.error("Error creating farm plot:", error);
-      res.status(500).json({ message: "Failed to create farm plot" });
-    }
-  });
+  // REMOVED: Duplicate endpoint - using database-saving endpoint above
 
   app.patch('/api/farm-plots/:id', async (req, res) => {
     try {
@@ -4811,20 +4853,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVED: Another duplicate demo farm-plots endpoint that was intercepting requests
 
-  app.post('/api/farm-plots', async (req, res) => {
-    try {
-      // In a real implementation, this would save to database
-      const plot = {
-        id: Date.now(),
-        ...req.body,
-        createdAt: new Date()
-      };
-      res.json(plot);
-    } catch (error) {
-      console.error("Error creating farm plot:", error);
-      res.status(500).json({ message: "Failed to create farm plot" });
-    }
-  });
+  // REMOVED: Another duplicate endpoint - using database-saving endpoint above
 
   app.patch('/api/farm-plots/:id', async (req, res) => {
     try {
@@ -5875,18 +5904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/farm-plots", async (req, res) => {
-    try {
-      const validatedData = insertFarmPlotSchema.parse(req.body);
-      const farmPlot = await storage.createFarmPlot(validatedData);
-      res.status(201).json(farmPlot);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to create farm plot" });
-    }
-  });
+  // REMOVED: Storage-based endpoint - using direct database endpoint above for better compatibility
 
   app.get("/api/farm-plots/:id", async (req, res) => {
     try {

@@ -53,56 +53,69 @@ export default function CreateLandPlot() {
   // Create land plot mutation
   const createLandPlot = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/farm-plots", {
-        method: "POST",
-        body: JSON.stringify({
-          // Required fields matching farmPlots schema
-          plotId: `PLOT-${selectedFarmerId}-${Date.now()}`, // Generate unique plot ID
-          farmerId: selectedFarmerId,
-          farmerName: selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}` : "",
-          plotNumber: 1, // TODO: Get actual next plot number for this farmer
-          plotName: data.plotName,
-          
-          // Agricultural data
-          cropType: data.plotType || "cocoa", // Map plotType to cropType
-          primaryCrop: data.plotType,
-          plotSize: data.boundaryData?.area || parseFloat(data.totalAreaHectares || "0"),
-          plotSizeUnit: "hectares",
-          
-          // Location data  
-          county: selectedFarmer?.county || "Monrovia",
-          district: selectedFarmer?.district || "",
-          gpsCoordinates: data.boundaryData ? 
-            `${data.boundaryData.points[0]?.lat},${data.boundaryData.points[0]?.lng}` : 
-            data.coordinates,
-          farmBoundaries: data.boundaryData,
-          landMapData: {
-            soilType: data.soilType,
-            elevation: data.elevation,
-            slope: data.slope,
-            landUse: data.landUse,
-            irrigationType: data.irrigationType,
-            description: data.plotDescription,
-            approvedBy: inspectorName,
-            approvedAt: new Date()
-          },
+      console.log("🔄 Creating land plot for farmer:", selectedFarmerId);
+      console.log("📋 Plot data:", data);
+      
+      const plotPayload = {
+        // Required fields matching farmPlots schema
+        plotId: `PLOT-${selectedFarmerId}-${Date.now()}`, // Generate unique plot ID
+        farmerId: selectedFarmerId,
+        farmerName: selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}` : "",
+        plotNumber: 1, // TODO: Get actual next plot number for this farmer
+        plotName: data.plotName,
+        
+        // Agricultural data
+        cropType: data.plotType || "cocoa", // Map plotType to cropType
+        primaryCrop: data.plotType,
+        plotSize: data.boundaryData?.area || parseFloat(data.totalAreaHectares || "0"),
+        plotSizeUnit: "hectares",
+        
+        // Location data  
+        county: selectedFarmer?.county || "Monrovia",
+        district: selectedFarmer?.district || "",
+        gpsCoordinates: data.boundaryData ? 
+          `${data.boundaryData.points[0]?.lat},${data.boundaryData.points[0]?.lng}` : 
+          data.coordinates,
+        farmBoundaries: data.boundaryData,
+        landMapData: {
           soilType: data.soilType,
-          
-          // Status
-          isActive: true,
-          status: "active",
-          landOwnership: "owned",
-          irrigationAccess: data.irrigationType !== "none"
-        })
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Land Plot Created Successfully",
-        description: "Land plot has been mapped and approved by inspector. Redirecting to dashboard...",
+          elevation: data.elevation,
+          slope: data.slope,
+          landUse: data.landUse,
+          irrigationType: data.irrigationType,
+          description: data.plotDescription,
+          approvedBy: inspectorName,
+          approvedAt: new Date(),
+          satelliteAnalysis: satelliteAnalysis // Include satellite data
+        },
+        soilType: data.soilType,
+        
+        // Status
+        isActive: true,
+        status: "active",
+        landOwnership: "owned",
+        irrigationAccess: data.irrigationType !== "none"
+      };
+      
+      console.log("📤 Sending plot payload:", plotPayload);
+      
+      const result = await apiRequest("/api/farm-plots", {
+        method: "POST",
+        body: JSON.stringify(plotPayload)
       });
       
-      // Reset form
+      console.log("✅ Plot creation result:", result);
+      return result;
+    },
+    onSuccess: (result) => {
+      console.log("🎉 Plot created successfully!", result);
+      
+      toast({
+        title: "✅ Land Plot Created Successfully",
+        description: `Plot "${landPlotData.plotName}" has been mapped and approved by inspector. Auto-synchronized to farmer portal.`,
+      });
+      
+      // Reset form and satellite analysis
       setLandPlotData({
         plotName: "",
         plotType: "",
@@ -117,11 +130,10 @@ export default function CreateLandPlot() {
         coordinates: ""
       });
       setSelectedFarmerId("");
+      setSatelliteAnalysis(null);
 
-      // Redirect to Inspector Dashboard after successful creation
-      setTimeout(() => {
-        setLocation("/unified-land-inspector-dashboard");
-      }, 1500);
+      // Force refresh of all related data
+      window.location.reload();
     },
     onError: (error: any) => {
       toast({

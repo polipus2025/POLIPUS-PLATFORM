@@ -196,14 +196,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { plotId } = req.params;
       const { plantingDate } = req.body;
       
+      // Calculate expected harvest date (6 months from planting for most crops)
+      const plantingDateObj = new Date(plantingDate);
+      const expectedHarvestDate = new Date(plantingDateObj);
+      expectedHarvestDate.setMonth(expectedHarvestDate.getMonth() + 6);
+      
       await db.execute(sql`
         UPDATE farm_plots 
-        SET planting_date = ${new Date(plantingDate)}, created_at = ${new Date()}
+        SET 
+          planting_date = ${plantingDateObj}, 
+          expected_harvest_date = ${expectedHarvestDate},
+          status = 'planted',
+          created_at = ${new Date()}
         WHERE plot_id = ${plotId}
       `);
       
-      console.log(`✅ Updated planting date for plot ${plotId}`);
-      res.json({ success: true, message: "Planting date updated successfully" });
+      console.log(`✅ Updated planting date for plot ${plotId} - Status reset to 'planted'`);
+      res.json({ 
+        success: true, 
+        message: "Planting date updated successfully", 
+        newStatus: "planted",
+        expectedHarvestDate: expectedHarvestDate.toISOString().split('T')[0]
+      });
     } catch (error) {
       console.error("Error updating planting date:", error);
       res.status(500).json({ message: "Failed to update planting date" });

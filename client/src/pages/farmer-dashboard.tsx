@@ -141,7 +141,8 @@ export default function FarmerDashboard() {
         ? { plantingDate: dateValue }
         : { expectedHarvestDate: dateValue };
 
-      await apiRequest(endpoint, {
+
+      const updateResult = await apiRequest(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -149,7 +150,9 @@ export default function FarmerDashboard() {
 
       toast({
         title: "Schedule Updated Successfully!",
-        description: `${scheduleType === 'planting' ? 'Planting' : 'Harvest'} date updated for ${plotName}`
+        description: scheduleType === 'planting' 
+          ? `Planting date set - Status reset to 'planted'. Expected harvest: ${updateResult.expectedHarvestDate || 'TBD'}`
+          : `Harvest date updated for ${plotName}`
       });
 
       // Refresh land data

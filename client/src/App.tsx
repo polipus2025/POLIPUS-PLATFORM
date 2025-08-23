@@ -28,7 +28,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Switch>
-            {/* INSPECTOR PORTAL */}
+            {/* INSPECTOR PORTAL - WORKING NOW */}
             <Route path="/inspector-portal" component={InspectorPortal} />
             
             {/* INSPECTOR LOGIN ROUTES */}
@@ -48,7 +48,7 @@ function App() {
             <Route path="/farmer-dashboard" component={FarmerDashboard} />
             <Route path="/buyer-dashboard" component={BuyerDashboard} />
             
-            {/* MAIN PAGE */}
+            {/* MAIN PAGE - LAST */}
             <Route path="/" component={FrontPage} />
           </Switch>
           <Toaster />

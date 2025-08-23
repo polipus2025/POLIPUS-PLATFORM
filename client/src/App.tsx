@@ -56,6 +56,14 @@ import ExporterShipments from "@/pages/exporter/shipments";
 import ExporterAnalytics from "@/pages/exporter/analytics";
 import ExporterPaymentServices from "@/pages/exporter/exporter-payment-services";
 
+// AGRICULTURAL PORTAL PAGES
+import OnboardFarmer from "@/pages/onboard-farmer";
+import CreateLandPlot from "@/pages/create-land-plot";
+import EudrAssessment from "@/pages/eudr-assessment";
+import GenerateReports from "@/pages/generate-reports";
+import FarmersList from "@/pages/farmers-list";
+import LandPlotsList from "@/pages/land-plots-list";
+
 function App() {
   return (
     <ErrorBoundary>
@@ -122,6 +130,14 @@ function App() {
             
             {/* SYSTEM ADMIN PORTAL */}
             <Route path="/agritrace-admin-portal" component={AgriTraceAdminPortal} />
+            
+            {/* AGRICULTURAL PORTAL PAGES */}
+            <Route path="/onboard-farmer" component={OnboardFarmer} />
+            <Route path="/create-land-plot" component={CreateLandPlot} />
+            <Route path="/eudr-assessment" component={EudrAssessment} />
+            <Route path="/generate-reports" component={GenerateReports} />
+            <Route path="/farmers-list" component={FarmersList} />
+            <Route path="/land-plots-list" component={LandPlotsList} />
             
             {/* Default fallback */}
             <Route component={FrontPage} />

@@ -31,6 +31,8 @@ export default function FarmerLoginPortal() {
     onSuccess: (response: any) => {
       // Store farmer login data
       localStorage.setItem("farmerId", response.farmer.farmerId);
+      localStorage.setItem("farmerFirstName", response.farmer.firstName);
+      localStorage.setItem("farmerLastName", response.farmer.lastName);
       localStorage.setItem("farmerName", `${response.farmer.firstName} ${response.farmer.lastName}`);
       localStorage.setItem("farmerToken", response.token);
       localStorage.setItem("userType", "farmer");

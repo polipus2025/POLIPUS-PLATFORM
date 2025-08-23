@@ -35,9 +35,11 @@ export default function FarmerDashboard() {
   const [confirmingPayment, setConfirmingPayment] = useState<string | null>(null);
 
   // Get farmer ID from localStorage (authenticated user's actual ID)
-  const farmerId = localStorage.getItem("farmerId") || localStorage.getItem("credentialId") || "FRM-2024-001";
-  const farmerName = localStorage.getItem("farmerFirstName") || "Moses";
-  const farmerCounty = localStorage.getItem("farmerCounty") || "Monrovia";
+  const farmerId = localStorage.getItem("farmerId") || "FARMER-1755883520291-288";
+  const farmerName = localStorage.getItem("farmerFirstName") || "Paolo";
+  const farmerCounty = localStorage.getItem("farmerCounty") || "Margibi";
+  
+  console.log("🔍 Dashboard Farmer ID:", farmerId);
   
   // Fetch farmer-specific data
   const { data: farmerLandData } = useQuery({ 

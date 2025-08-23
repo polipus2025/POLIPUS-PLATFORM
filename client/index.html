@@ -26,24 +26,6 @@
   </head>
   <body>
     <div id="root">
-      <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; font-family: system-ui;">
-        <div style="text-align: center;">
-          <div style="width: 64px; height: 64px; border: 4px solid #059669; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
-          <h2 style="margin: 0; font-size: 24px;">Polipus Platform</h2>
-          <p style="margin: 8px 0 0; opacity: 0.8;">Loading Environmental Intelligence...</p>
-        </div>
-      </div>
-      <style>
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-      </style>
-    </div>
-    <script>
-      // Bypass React issues - load original Polipus front page directly
-      setTimeout(() => {
-        const root = document.getElementById('root');
-        if (root && root.innerHTML.includes('Loading Environmental Intelligence')) {
-          // Original Polipus Platform with corrected AgriTrace route
-          root.innerHTML = `
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Header with Logos -->
@@ -221,10 +203,7 @@
     </div>
   </div>
 </div>
-          `;
-        }
-      }, 2000);
-    </script>
+    </div>
     
     <!-- Service Worker Registration -->
     <script>

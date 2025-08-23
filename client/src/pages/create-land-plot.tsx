@@ -10,11 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
 export default function CreateLandPlot() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [selectedFarmerId, setSelectedFarmerId] = useState("");
   
   const [landPlotData, setLandPlotData] = useState({
@@ -95,7 +96,7 @@ export default function CreateLandPlot() {
     onSuccess: () => {
       toast({
         title: "Land Plot Created Successfully",
-        description: "Land plot has been mapped and approved by inspector",
+        description: "Land plot has been mapped and approved by inspector. Redirecting to dashboard...",
       });
       
       // Reset form
@@ -113,6 +114,11 @@ export default function CreateLandPlot() {
         coordinates: ""
       });
       setSelectedFarmerId("");
+
+      // Redirect to Inspector Dashboard after successful creation
+      setTimeout(() => {
+        setLocation("/unified-land-inspector-dashboard");
+      }, 1500);
     },
     onError: (error: any) => {
       toast({

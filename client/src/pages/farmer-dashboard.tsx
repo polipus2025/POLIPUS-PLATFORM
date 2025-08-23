@@ -384,14 +384,14 @@ export default function FarmerDashboard() {
                       <div className="mt-4">
                         <h4 className="font-medium">Land Analysis</h4>
                         <div className="text-sm space-y-1">
-                          <div><strong>Soil Type:</strong> {JSON.parse(farmerLandData.farmer.landMapData).soilType}</div>
-                          <div><strong>Water Sources:</strong> {JSON.parse(farmerLandData.farmer.landMapData).waterSources?.join(', ')}</div>
+                          <div><strong>Soil Type:</strong> {farmerLandData.farmer.landMapData.soilType}</div>
+                          <div><strong>Water Sources:</strong> {farmerLandData.farmer.landMapData.waterSources?.join(', ')}</div>
                           <div><strong>EUDR Risk Level:</strong> 
-                            <Badge variant={JSON.parse(farmerLandData.farmer.landMapData).eudrCompliance?.riskLevel === 'low' ? 'default' : 'destructive'} className="ml-2">
-                              {JSON.parse(farmerLandData.farmer.landMapData).eudrCompliance?.riskLevel}
+                            <Badge variant={farmerLandData.farmer.landMapData.eudrCompliance?.riskLevel === 'low' ? 'default' : 'destructive'} className="ml-2">
+                              {farmerLandData.farmer.landMapData.eudrCompliance?.riskLevel}
                             </Badge>
                           </div>
-                          <div><strong>Compliance Score:</strong> {JSON.parse(farmerLandData.farmer.landMapData).eudrCompliance?.complianceScore}%</div>
+                          <div><strong>Compliance Score:</strong> {farmerLandData.farmer.landMapData.eudrCompliance?.complianceScore}%</div>
                         </div>
                       </div>
                     )}
@@ -404,7 +404,7 @@ export default function FarmerDashboard() {
                       <div className="text-sm">
                         <div className="bg-gray-50 p-3 rounded border">
                           <strong>Boundary Points:</strong>
-                          {JSON.parse(farmerLandData.farmer.farmBoundaries).map((point: any, index: number) => (
+                          {farmerLandData.farmer.farmBoundaries.map((point: any, index: number) => (
                             <div key={index} className="mt-1">
                               Point {point.point}: {point.lat}, {point.lng}
                             </div>

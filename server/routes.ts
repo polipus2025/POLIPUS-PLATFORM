@@ -470,10 +470,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         AND portal_access = true
       `);
       
-      const countyBuyers = countyBuyersResult.rows || countyBuyersResult;
+      // Safe parsing of database result
+      let countyBuyers = [];
+      if (countyBuyersResult.rows && Array.isArray(countyBuyersResult.rows)) {
+        countyBuyers = countyBuyersResult.rows;
+      } else if (Array.isArray(countyBuyersResult)) {
+        countyBuyers = countyBuyersResult;
+      }
+      
+      console.log(`Found ${countyBuyers.length} buyers in ${validatedData.county} county`);
 
       // Create notifications for all buyers in the county
       const notifications = [];
+      
+      // Ensure countyBuyers is an array before iterating
+      if (!Array.isArray(countyBuyers)) {
+        console.error("countyBuyers is not an array:", typeof countyBuyers, countyBuyers);
+        countyBuyers = [];
+      }
+      
       for (const buyer of countyBuyers) {
         const notificationId = generateNotificationId();
         const buyerName = `${buyer.contactPersonFirstName} ${buyer.contactPersonLastName}`;

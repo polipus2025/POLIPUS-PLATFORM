@@ -116,7 +116,7 @@ import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { db } from './db';
-import { eq, desc, ne } from "drizzle-orm";
+import { eq, desc, ne, sql } from "drizzle-orm";
 import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables
@@ -318,7 +318,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
 
       const notifications = await db
-        .select()
+        .select({
+          notificationId: buyerNotifications.notificationId,
+          id: buyerNotifications.notificationId,
+          offerId: buyerNotifications.offerId,
+          buyerId: buyerNotifications.buyerId,
+          buyerName: buyerNotifications.buyerName,
+          title: buyerNotifications.title,
+          message: buyerNotifications.message,
+          commodityType: buyerNotifications.commodityType,
+          quantityAvailable: buyerNotifications.quantityAvailable,
+          pricePerUnit: buyerNotifications.pricePerUnit,
+          county: buyerNotifications.county,
+          farmerName: buyerNotifications.farmerName,
+          status: sql`CASE WHEN ${buyerNotifications.response} IS NULL THEN 'pending' ELSE ${buyerNotifications.response} END`.as('status'),
+          unit: sql`'tons'`.as('unit'),
+          totalValue: sql`(${buyerNotifications.quantityAvailable} * ${buyerNotifications.pricePerUnit})`.as('totalValue'),
+          qualityGrade: sql`'Grade A'`.as('qualityGrade'),
+          paymentTerms: sql`'Payment within 7 days of delivery'`.as('paymentTerms'),
+          deliveryTerms: sql`'Pickup at farm location'`.as('deliveryTerms'),
+          farmLocation: sql`CONCAT(${buyerNotifications.county}, ' County')`.as('farmLocation'),
+          description: sql`${buyerNotifications.message}`.as('description'),
+          createdAt: buyerNotifications.createdAt,
+        })
         .from(buyerNotifications)
         .where(eq(buyerNotifications.buyerId, parseInt(buyerId)))
         .orderBy(desc(buyerNotifications.createdAt));

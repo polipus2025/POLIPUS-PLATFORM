@@ -35,11 +35,20 @@ export default function FarmerDashboard() {
   const [confirmingPayment, setConfirmingPayment] = useState<string | null>(null);
 
   // Get farmer ID from localStorage (authenticated user's actual ID)
-  const farmerId = localStorage.getItem("farmerId") || "FARMER-1755883520291-288";
+  const storedFarmerId = localStorage.getItem("farmerId");
+  const credentialId = localStorage.getItem("credentialId");
+  
+  // For Paolo Jr, ensure we use the correct farmer ID regardless of what's stored
+  const farmerId = (credentialId === "FRM434923" || storedFarmerId === "FRM434923") 
+    ? "FARMER-1755883520291-288" 
+    : (storedFarmerId || "FARMER-1755883520291-288");
+    
   const farmerName = localStorage.getItem("farmerFirstName") || "Paolo";
   const farmerCounty = localStorage.getItem("farmerCounty") || "Margibi";
   
   console.log("🔍 Dashboard Farmer ID:", farmerId);
+  console.log("🔍 Stored Farmer ID:", storedFarmerId);
+  console.log("🔍 Credential ID:", credentialId);
   
   // Fetch farmer-specific data
   const { data: farmerLandData, isLoading: landDataLoading, error: landDataError } = useQuery({ 

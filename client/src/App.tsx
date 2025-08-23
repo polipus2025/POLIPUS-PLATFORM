@@ -46,6 +46,16 @@ import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
 import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
 import CarbonTracePortal from "@/pages/portals/carbon-trace-portal";
 
+// EXPORTER PAGES
+import WorldMarketPricing from "@/pages/world-market-pricing";
+import ExporterOrders from "@/pages/exporter/orders";
+import ExporterMarketplace from "@/pages/exporter/marketplace";
+import ExporterCertificates from "@/pages/exporter/certificates";
+import ExporterMessages from "@/pages/exporter/messages";
+import ExporterShipments from "@/pages/exporter/shipments";
+import ExporterAnalytics from "@/pages/exporter/analytics";
+import ExporterPaymentServices from "@/pages/exporter/exporter-payment-services";
+
 function App() {
   return (
     <ErrorBoundary>
@@ -101,6 +111,14 @@ function App() {
             
             {/* EXPORTER PORTAL */}
             <Route path="/exporter-dashboard" component={ExporterDashboard} />
+            <Route path="/world-market-pricing" component={WorldMarketPricing} />
+            <Route path="/exporter/orders" component={ExporterOrders} />
+            <Route path="/exporter/marketplace" component={ExporterMarketplace} />
+            <Route path="/exporter/certificates" component={ExporterCertificates} />
+            <Route path="/exporter/messages" component={ExporterMessages} />
+            <Route path="/exporter/shipments" component={ExporterShipments} />
+            <Route path="/exporter/analytics" component={ExporterAnalytics} />
+            <Route path="/exporter-payment-services" component={ExporterPaymentServices} />
             
             {/* SYSTEM ADMIN PORTAL */}
             <Route path="/agritrace-admin-portal" component={AgriTraceAdminPortal} />

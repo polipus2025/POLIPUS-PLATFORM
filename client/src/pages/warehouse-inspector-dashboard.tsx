@@ -331,109 +331,108 @@ export default function WarehouseInspectorDashboard() {
             </TabsTrigger>
           </TabsList>
 
-        {/* Quick Overview Cards - Now positioned after navigation tabs */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <Package className="w-5 h-5 mr-2 text-blue-600" />
-                Recent Storage Inspections
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {loadingInspections ? (
-                  <p className="text-center text-gray-500">Loading inspections...</p>
-                ) : pendingInspections && pendingInspections.length > 0 ? (
-                  pendingInspections.slice(0, 3).map((inspection: any) => (
-                    <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{inspection.storageFacility}</p>
-                        <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={getPriorityColor(inspection.priority)}>
-                          {inspection.priority}
-                        </Badge>
-                        <p className="text-xs text-gray-500 mt-1">{inspection.scheduledDate}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-500">No pending inspections</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
-                Quality Control Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {loadingQuality ? (
-                  <p className="text-center text-gray-500">Loading quality data...</p>
-                ) : qualityControls && qualityControls.length > 0 ? (
-                  qualityControls.slice(0, 3).map((control: any) => (
-                    <div key={control.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{control.testType}</p>
-                        <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                          {control.status}
-                        </Badge>
-                        <p className="text-xs text-gray-500 mt-1">{control.testDate}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-500">No quality controls</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <Building2 className="w-5 h-5 mr-2 text-purple-600" />
-                Regulatory Compliance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {loadingCompliance ? (
-                  <p className="text-center text-gray-500">Loading compliance data...</p>
-                ) : storageCompliance && storageCompliance.length > 0 ? (
-                  storageCompliance.map((compliance: any) => (
-                    <div key={compliance.category} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{compliance.category}</p>
-                        <p className="text-sm text-gray-600">Last checked: {compliance.lastCheck}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge className="bg-green-100 text-green-800">
-                          {compliance.rate}%
-                        </Badge>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-500">No compliance data</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Quick Overview Cards - Only visible on Overview tab */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Package className="w-5 h-5 mr-2 text-blue-600" />
+                    Recent Storage Inspections
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {loadingInspections ? (
+                      <p className="text-center text-gray-500">Loading inspections...</p>
+                    ) : pendingInspections && pendingInspections.length > 0 ? (
+                      pendingInspections.slice(0, 3).map((inspection: any) => (
+                        <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{inspection.storageFacility}</p>
+                            <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={getPriorityColor(inspection.priority)}>
+                              {inspection.priority}
+                            </Badge>
+                            <p className="text-xs text-gray-500 mt-1">{inspection.scheduledDate}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500">No pending inspections</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                    Quality Control Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {loadingQuality ? (
+                      <p className="text-center text-gray-500">Loading quality data...</p>
+                    ) : qualityControls && qualityControls.length > 0 ? (
+                      qualityControls.slice(0, 3).map((control: any) => (
+                        <div key={control.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{control.testType}</p>
+                            <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                              {control.status}
+                            </Badge>
+                            <p className="text-xs text-gray-500 mt-1">{control.testDate}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500">No quality controls</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Building2 className="w-5 h-5 mr-2 text-purple-600" />
+                    Regulatory Compliance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {loadingCompliance ? (
+                      <p className="text-center text-gray-500">Loading compliance data...</p>
+                    ) : storageCompliance && storageCompliance.length > 0 ? (
+                      storageCompliance.map((compliance: any) => (
+                        <div key={compliance.category} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{compliance.category}</p>
+                            <p className="text-sm text-gray-600">Last checked: {compliance.lastCheck}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className="bg-green-100 text-green-800">
+                              {compliance.rate}%
+                            </Badge>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500">No compliance data</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>

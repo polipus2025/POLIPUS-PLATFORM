@@ -233,6 +233,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         harvestDate: new Date(req.body.harvestDate),
         availableFromDate: new Date(req.body.availableFromDate),
+        expirationDate: new Date(req.body.expirationDate),
+        quantityAvailable: req.body.quantityAvailable.toString(),
+        pricePerUnit: req.body.pricePerUnit.toString(),
+        totalValue: req.body.totalValue.toString(),
       };
       
       console.log("Transformed data:", transformedData); // Debug log

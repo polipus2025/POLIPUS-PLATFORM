@@ -116,18 +116,28 @@ export default function FarmerDashboard() {
     setIsSubmitting(true);
 
     const formData = new FormData(e.target as HTMLFormElement);
+    const harvestDate = formData.get('harvestDate') as string;
+    const availableFromDate = new Date();
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30); // 30 days from now
+    
+    const quantityAvailable = parseFloat(formData.get('quantityAvailable') as string);
+    const pricePerUnit = parseFloat(formData.get('pricePerUnit') as string);
+    
     const offerData = {
       farmerId: parseInt(farmerId.split('-')[2]) || 1,
-      commodityType: formData.get('commodityType'),
-      quantityAvailable: parseFloat(formData.get('quantityAvailable') as string),
-      unit: formData.get('unit') || 'tons',
-      pricePerUnit: parseFloat(formData.get('pricePerUnit') as string),
-      qualityGrade: formData.get('qualityGrade'),
-      harvestDate: formData.get('harvestDate'),
-      availableFromDate: new Date().toISOString().split('T')[0],
-      paymentTerms: formData.get('paymentTerms') || 'Payment within 7 days',
-      deliveryTerms: formData.get('deliveryTerms') || 'Farm pickup',
-      description: formData.get('description') || '',
+      commodityType: formData.get('commodityType') as string,
+      quantityAvailable: quantityAvailable.toString(),
+      unit: formData.get('unit') as string || 'tons',
+      pricePerUnit: pricePerUnit.toString(),
+      totalValue: (quantityAvailable * pricePerUnit).toString(),
+      qualityGrade: formData.get('qualityGrade') as string,
+      harvestDate: harvestDate,
+      availableFromDate: availableFromDate.toISOString(),
+      expirationDate: expirationDate.toISOString(),
+      paymentTerms: formData.get('paymentTerms') as string || 'Payment within 7 days',
+      deliveryTerms: formData.get('deliveryTerms') as string || 'Farm pickup',
+      description: formData.get('description') as string || '',
       farmLocation: `${farmerName}'s Farm, ${farmerCounty} County`,
       farmerName: farmerName,
       county: farmerCounty

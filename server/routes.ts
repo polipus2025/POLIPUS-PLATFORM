@@ -342,7 +342,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: buyerNotifications.createdAt,
         })
         .from(buyerNotifications)
-        .where(eq(buyerNotifications.buyerId, 5))
+        .where(eq(buyerNotifications.buyerId, 
+          parseInt(buyerId) || 5
+        ))
         .orderBy(desc(buyerNotifications.createdAt));
 
       res.json({

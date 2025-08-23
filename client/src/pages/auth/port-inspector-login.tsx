@@ -1,30 +1,40 @@
-import React, { useState } from "react";
-import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { Eye, EyeOff, Ship, Anchor } from "lucide-react";
-
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
 export default function PortInspectorLogin() {
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6">Port Inspector Login</h1>
-        <p className="text-center text-gray-600">Port inspection portal is working</p>
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg border">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">Port Inspector Login</h1>
+          <p className="text-slate-600 mt-2">Access the port inspection portal</p>
+        </div>
+        
+        <form className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="username" className="text-sm font-medium text-slate-700">Username</label>
+            <input 
+              id="username"
+              type="text" 
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your username"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
+            <input 
+              id="password"
+              type="password" 
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your password"
+            />
+          </div>
+          
+          <button 
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Sign In to Port Portal
+          </button>
+        </form>
       </div>
     </div>
   );

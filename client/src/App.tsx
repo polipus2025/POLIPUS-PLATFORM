@@ -51,8 +51,8 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Switch>
-            {/* RESTORE ORIGINAL ROOT */}
-            <Route path="/" component={FrontPage} />
+            {/* TEMPORARY: Simple working root to bypass loading issues */}
+            <Route path="/" component={() => <div className="min-h-screen bg-slate-100 flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold">Polipus Platform</h1><p className="mt-4">System is operational</p><div className="mt-8 space-y-2"><a href="/warehouse-inspector-login" className="block p-2 bg-blue-500 text-white rounded">Warehouse Inspector Login</a><a href="/port-inspector-login" className="block p-2 bg-green-500 text-white rounded">Port Inspector Login</a><a href="/land-inspector-login" className="block p-2 bg-orange-500 text-white rounded">Land Inspector Login</a></div></div></div>} />
             <Route path="/front-page" component={FrontPage} />
             
             {/* Agricultural Traceability Portal */}
@@ -70,13 +70,16 @@ function App() {
             {/* TEST ROUTE - SIMPLE INLINE COMPONENT */}
             <Route path="/test-routing" component={() => <div style={{background: 'red', color: 'white', fontSize: '30px', padding: '50px', textAlign: 'center'}}>🚨 TEST ROUTE WORKS 🚨</div>} />
             
+            {/* DIRECT HTML TEST FOR INSPECTOR LOGIN */}
+            <Route path="/inspector-test" component={() => <div style={{background: 'green', color: 'white', fontSize: '20px', padding: '30px', textAlign: 'center'}}><h1>INSPECTOR TEST PAGE</h1><p>This is a direct HTML test for inspector routing</p></div>} />
+            
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
             <Route path="/regulatory-login" component={RegulatoryLogin} />
-            <Route path="/warehouse-inspector-login" component={() => <div style={{background: 'green', color: 'white', fontSize: '24px', padding: '30px', textAlign: 'center'}}>✅ WAREHOUSE INSPECTOR PORTAL WORKS ✅</div>} />
-            <Route path="/port-inspector-login" component={() => <div style={{background: 'purple', color: 'white', fontSize: '24px', padding: '30px', textAlign: 'center'}}>✅ PORT INSPECTOR PORTAL WORKS ✅</div>} />
-            <Route path="/land-inspector-login" component={() => <div style={{background: 'orange', color: 'white', fontSize: '24px', padding: '30px', textAlign: 'center'}}>✅ LAND INSPECTOR PORTAL WORKS ✅</div>} />
+            <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
+            <Route path="/port-inspector-login" component={PortInspectorLogin} />
+            <Route path="/land-inspector-login" component={LandInspectorLogin} />
             <Route path="/exporter-login" component={ExporterLogin} />
             <Route path="/ddgaf-login" component={DDGAFLogin} />
             <Route path="/ddgots-login" component={DDGOTSLogin} />

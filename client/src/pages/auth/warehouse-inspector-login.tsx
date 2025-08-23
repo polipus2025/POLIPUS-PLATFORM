@@ -1,31 +1,40 @@
-import React, { useState } from "react";
-import { useLocation } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Warehouse, 
-  Shield, 
-  ClipboardCheck, 
-  Package, 
-  Truck, 
-  FileText,
-  AlertTriangle,
-  CheckCircle,
-  Eye,
-  BarChart3
-} from "lucide-react";
-
 export default function WarehouseInspectorLogin() {
   return (
-    <div className="min-h-screen bg-red-100 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg border-4 border-red-500">
-        <h1 className="text-3xl font-bold text-center mb-6 text-red-600">🚨 WAREHOUSE INSPECTOR LOGIN TEST 🚨</h1>
-        <p className="text-center text-red-800 font-bold">THIS PAGE IS WORKING - WAREHOUSE INSPECTOR PORTAL</p>
-        <p className="text-center text-gray-600 mt-4">If you see this, the routing is working!</p>
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg border">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">Warehouse Inspector Login</h1>
+          <p className="text-slate-600 mt-2">Access the warehouse inspection portal</p>
+        </div>
+        
+        <form className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="username" className="text-sm font-medium text-slate-700">Username</label>
+            <input 
+              id="username"
+              type="text" 
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your username"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
+            <input 
+              id="password"
+              type="password" 
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your password"
+            />
+          </div>
+          
+          <button 
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Sign In to Warehouse Portal
+          </button>
+        </form>
       </div>
     </div>
   );

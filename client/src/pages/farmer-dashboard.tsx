@@ -196,36 +196,24 @@ export default function FarmerDashboard() {
         </div>
       </div>
 
-      {/* Balanced Tabbed Navigation Interface */}
+      {/* Simplified Tabbed Navigation Interface */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 bg-slate-100 h-auto sm:h-10">
-          <TabsTrigger value="overview" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
-            <Home className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-[10px] sm:text-sm">Overview</span>
+        <TabsList className="grid w-full grid-cols-4 bg-slate-100 h-12">
+          <TabsTrigger value="overview" className="flex items-center justify-center gap-2 text-sm p-3">
+            <Home className="h-4 w-4" />
+            <span>Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
-            <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-[10px] sm:text-sm">Land</span>
+          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-2 text-sm p-3">
+            <MapPin className="h-4 w-4" />
+            <span>Land Info</span>
           </TabsTrigger>
-          <TabsTrigger value="harvest-schedules" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
-            <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-[10px] sm:text-sm">Harvest</span>
+          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-2 text-sm p-3">
+            <ShoppingCart className="h-4 w-4" />
+            <span>Marketplace</span>
           </TabsTrigger>
-          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
-            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-[10px] sm:text-sm">Market</span>
-          </TabsTrigger>
-          <TabsTrigger value="transactions" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
-            <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-[10px] sm:text-sm">Transactions</span>
-          </TabsTrigger>
-          <TabsTrigger value="buyer-inquiries" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
-            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-[10px] sm:text-sm">Inquiries</span>
-          </TabsTrigger>
-          <TabsTrigger value="alerts" className="flex items-center justify-center gap-1 text-xs sm:text-sm p-2 sm:p-3">
-            <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-[10px] sm:text-sm">Alerts</span>
+          <TabsTrigger value="transactions" className="flex items-center justify-center gap-2 text-sm p-3">
+            <FileText className="h-4 w-4" />
+            <span>Transactions</span>
           </TabsTrigger>
         </TabsList>
 
@@ -338,26 +326,20 @@ export default function FarmerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Link href="/farm-plots">
-                    <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                      <MapPin className="h-6 w-6 text-green-600" />
-                      <span className="text-sm">View Farm Plots</span>
-                    </Button>
-                  </Link>
+                  <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2" disabled>
+                    <MapPin className="h-6 w-6 text-gray-400" />
+                    <span className="text-sm text-gray-500">Farm Plots - Restricted</span>
+                  </Button>
 
-                  <Link href="/farmer-gps-mapping">
-                    <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                      <MapPin className="h-6 w-6 text-blue-600" />
-                      <span className="text-sm">GPS Mapping</span>
-                    </Button>
-                  </Link>
+                  <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2" disabled>
+                    <MapPin className="h-6 w-6 text-gray-400" />
+                    <span className="text-sm text-gray-500">GPS Mapping - Restricted</span>
+                  </Button>
 
-                  <Link href="/crop-planning">
-                    <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                      <Calendar className="h-6 w-6 text-orange-600" />
-                      <span className="text-sm">Crop Planning</span>
-                    </Button>
-                  </Link>
+                  <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2" disabled>
+                    <Calendar className="h-6 w-6 text-gray-400" />
+                    <span className="text-sm text-gray-500">Use Marketplace Tab</span>
+                  </Button>
 
                   <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
                     <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -450,42 +432,6 @@ export default function FarmerDashboard() {
           </Card>
         </TabsContent>
 
-        {/* HARVEST SCHEDULES TAB */}
-        <TabsContent value="harvest-schedules" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                Crop Scheduling & Harvest Management
-              </CardTitle>
-              <CardDescription>
-                Focus on crop scheduling, harvest tracking, and marketplace listing creation.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-4 border rounded-lg bg-green-50">
-                  <h4 className="font-semibold text-green-900 mb-2">Active Crop Schedules</h4>
-                  <p className="text-sm text-gray-600 mb-4">Manage your planting and harvest schedules</p>
-                  <Link href="/crop-planning">
-                    <Button className="w-full bg-green-600 hover:bg-green-700">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      View Crop Schedules
-                    </Button>
-                  </Link>
-                </div>
-                <div className="p-4 border rounded-lg bg-blue-50">
-                  <h4 className="font-semibold text-blue-900 mb-2">Harvest Tracking</h4>
-                  <p className="text-sm text-gray-600 mb-4">Track harvest progress and mark completion</p>
-                  <Button className="w-full" variant="outline">
-                    <Package className="h-4 w-4 mr-2" />
-                    Track Harvests
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* MARKETPLACE TAB */}
         <TabsContent value="marketplace" className="space-y-6 mt-6">

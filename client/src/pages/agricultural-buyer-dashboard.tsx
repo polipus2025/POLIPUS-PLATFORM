@@ -272,9 +272,9 @@ export default function AgriculturalBuyerDashboard() {
               <CardContent>
                 {notificationsLoading ? (
                   <div className="text-center py-8 text-gray-500">Loading notifications...</div>
-                ) : notifications && notifications.length > 0 ? (
+                ) : notifications?.notifications && notifications.notifications.length > 0 ? (
                   <div className="space-y-4">
-                    {notifications.map((notification: any) => (
+                    {notifications.notifications.map((notification: any) => (
                       <Card key={notification.id} className="border border-gray-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">

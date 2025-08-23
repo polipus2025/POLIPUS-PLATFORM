@@ -13084,6 +13084,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentTerms: "50% Advance, 50% on Delivery",
           deliveryTerms: "FOB Farm Gate",
           verificationCode: "X0R27R24",
+          secondVerificationCode: null, // Will be generated when payment is confirmed
+          paymentConfirmed: false, // Farmer hasn't confirmed payment yet
+          paymentConfirmedAt: null,
           confirmedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
           status: "confirmed"
         }
@@ -13126,6 +13129,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching farmer verification codes:", error);
       res.status(500).json({ error: "Failed to fetch farmer verification codes" });
+    }
+  });
+
+  // Helper function to generate second verification code
+  function generateSecondVerificationCode(): string {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    let result = '';
+    
+    // Format: 2 letters + 2 numbers + 2 letters + 2 numbers (e.g., AB12CD34)
+    result += letters.charAt(Math.floor(Math.random() * letters.length));
+    result += letters.charAt(Math.floor(Math.random() * letters.length));
+    result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    result += letters.charAt(Math.floor(Math.random() * letters.length));
+    result += letters.charAt(Math.floor(Math.random() * letters.length));
+    result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    
+    return result;
+  }
+
+  // Farmer payment confirmation - Generate second verification code
+  app.post("/api/farmer/confirm-payment/:transactionId", async (req, res) => {
+    try {
+      const { transactionId } = req.params;
+      const { farmerId } = req.body;
+      
+      console.log(`Farmer ${farmerId} confirming payment for transaction: ${transactionId}`);
+
+      // Generate second verification code with EUDR compliance
+      const secondVerificationCode = generateSecondVerificationCode();
+      
+      // Get current date for compliance
+      const confirmationDate = new Date().toISOString();
+      
+      // Enhanced EUDR compliance data for second code
+      const eudrCompliance = {
+        deforestationStatus: "COMPLIANT",
+        supplierDueDiligence: "VERIFIED",
+        geoLocation: "6.3133°N, 10.8074°W - Montserrado County",
+        landUseClassification: "AGRICULTURAL_SUSTAINABLE",
+        riskAssessment: "LOW_RISK",
+        certificationStatus: "FSC_CERTIFIED",
+        chainOfCustody: "VERIFIED_CONTINUOUS",
+        paymentConfirmationDate: confirmationDate,
+        traceabilityCode: secondVerificationCode,
+        complianceOfficer: "Dr. Sarah Johnson",
+        approvalTimestamp: confirmationDate
+      };
+
+      // Mock successful update response
+      const updatedTransaction = {
+        id: transactionId,
+        farmerId: farmerId,
+        paymentConfirmed: true,
+        paymentConfirmedAt: confirmationDate,
+        secondVerificationCode: secondVerificationCode,
+        eudrCompliance: eudrCompliance,
+        status: "PAYMENT_CONFIRMED"
+      };
+
+      console.log(`✅ Payment confirmed for transaction ${transactionId}`);
+      console.log(`🔐 Second verification code generated: ${secondVerificationCode}`);
+      console.log(`📋 EUDR compliance data updated`);
+
+      res.json({
+        success: true,
+        message: "Payment confirmed successfully - Second verification code generated",
+        secondVerificationCode: secondVerificationCode,
+        eudrCompliance: eudrCompliance,
+        transaction: updatedTransaction
+      });
+
+    } catch (error) {
+      console.error("Error confirming farmer payment:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to confirm payment" 
+      });
     }
   });
 

@@ -32,6 +32,7 @@ export default function FarmerDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState<string | null>(null);
 
   // Get farmer ID from localStorage
   const farmerId = localStorage.getItem("farmerId") || "FRM-2024-001";
@@ -72,6 +73,42 @@ export default function FarmerDashboard() {
     { type: 'weather', message: 'Heavy rainfall expected this week', date: '2 days ago' },
     { type: 'market', message: 'Coffee prices increased by 5%', date: '1 week ago' }
   ];
+
+  // Payment confirmation mutation
+  const confirmPaymentMutation = useMutation({
+    mutationFn: async (transactionId: string) => {
+      return apiRequest(`/api/farmer/confirm-payment/${transactionId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ farmerId: farmerId })
+      });
+    },
+    onSuccess: (data, transactionId) => {
+      toast({
+        title: "Payment Confirmed Successfully!",
+        description: `Second verification code generated: ${data.secondVerificationCode}`
+      });
+      
+      // Invalidate and refetch the farmer data
+      queryClient.invalidateQueries({ queryKey: ['/api/farmer/confirmed-transactions', farmerId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/farmer/verification-codes', farmerId] });
+      setConfirmingPayment(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Confirmation Failed",
+        description: error.message || "Failed to confirm payment. Please try again.",
+        variant: "destructive"
+      });
+      setConfirmingPayment(null);
+    }
+  });
+
+  // Handle payment confirmation
+  const handleConfirmPayment = async (transactionId: string) => {
+    setConfirmingPayment(transactionId);
+    confirmPaymentMutation.mutate(transactionId);
+  };
 
   // Handle form submission
   const handleSubmitOffer = async (e: React.FormEvent) => {
@@ -572,19 +609,69 @@ export default function FarmerDashboard() {
               ) : farmerTransactions && farmerTransactions.length > 0 ? (
                 <div className="space-y-3">
                   {farmerTransactions.map((transaction: any) => (
-                    <div key={transaction.id} className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
+                    <div key={transaction.id} className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="font-semibold text-green-900">{transaction.commodityType}</p>
                           <p className="text-sm text-gray-600">Buyer: {transaction.buyerName} ({transaction.buyerCompany})</p>
                         </div>
-                        <Badge className="bg-green-600 text-white">Confirmed</Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge className="bg-green-600 text-white">Confirmed</Badge>
+                          {transaction.paymentConfirmed ? (
+                            <Badge className="bg-blue-600 text-white text-xs">Payment Confirmed</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-orange-600 border-orange-300 text-xs">Awaiting Payment</Badge>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-600">
+                      
+                      <div className="text-sm text-gray-600 mb-3">
                         <p>Quantity: <span className="font-medium">{transaction.quantityAvailable} {transaction.unit}</span></p>
-                        <p>Code: <span className="font-mono font-bold text-blue-600">{transaction.verificationCode}</span></p>
+                        <p>Total Value: <span className="font-medium">${transaction.totalValue}</span></p>
+                        <p>First Code: <span className="font-mono font-bold text-blue-600">{transaction.verificationCode}</span></p>
+                        {transaction.secondVerificationCode && (
+                          <p>Second Code: <span className="font-mono font-bold text-purple-600">{transaction.secondVerificationCode}</span></p>
+                        )}
                         <p className="text-xs">{new Date(transaction.confirmedAt).toLocaleDateString()}</p>
                       </div>
+
+                      {/* Payment Confirmation Button */}
+                      {!transaction.paymentConfirmed && (
+                        <div className="border-t pt-3">
+                          <p className="text-sm text-gray-700 mb-2">
+                            <strong>Payment Status:</strong> Waiting for buyer payment
+                          </p>
+                          <Button
+                            onClick={() => handleConfirmPayment(transaction.id)}
+                            disabled={confirmingPayment === transaction.id}
+                            className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                            data-testid="button-confirm-payment"
+                          >
+                            {confirmingPayment === transaction.id ? (
+                              <>
+                                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                                Confirming Payment...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                I Received Payment - Generate Second Code
+                              </>
+                            )}
+                          </Button>
+                          <p className="text-xs text-gray-500 mt-1 text-center">
+                            Click only after you receive payment from the buyer
+                          </p>
+                        </div>
+                      )}
+
+                      {transaction.paymentConfirmed && (
+                        <div className="border-t pt-3">
+                          <p className="text-sm text-green-700 font-medium">
+                            ✅ Payment confirmed - Second verification code generated
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

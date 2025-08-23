@@ -3348,21 +3348,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get available harvests from farmers
   app.get("/api/buyer/available-harvests", async (req, res) => {
     try {
-      // Mock data for available harvests from farmers who confirmed harvesting
-      const availableHarvests = [
+      // Fetch real farmer product offers from database
+      const realOffers = await db
+        .select({
+          id: farmerProductOffers.id,
+          farmerId: farmerProductOffers.farmerId,
+          farmerName: farmerProductOffers.farmerName,
+          commodity: farmerProductOffers.commodityType,
+          quantity: farmerProductOffers.quantityAvailable,
+          unit: farmerProductOffers.unit,
+          pricePerUnit: farmerProductOffers.pricePerUnit,
+          totalValue: farmerProductOffers.totalValue,
+          county: farmerProductOffers.county,
+          farmLocation: farmerProductOffers.farmLocation,
+          harvestDate: farmerProductOffers.harvestDate,
+          availableFromDate: farmerProductOffers.availableFromDate,
+          expirationDate: farmerProductOffers.expirationDate,
+          status: sql`'Ready'`.as('status'),
+          qualityGrade: farmerProductOffers.qualityGrade,
+          paymentTerms: farmerProductOffers.paymentTerms,
+          deliveryTerms: farmerProductOffers.deliveryTerms
+        })
+        .from(farmerProductOffers)
+        .orderBy(farmerProductOffers.createdAt);
+
+      // Add mock data as fallback for demonstration
+      const mockHarvests = [
         {
-          id: 1,
+          id: 1001,
           farmerId: "FRM-2024-045",
           farmerName: "Mary Johnson",
           commodity: "Cocoa Beans",
-          quantity: "750kg",
-          pricePerKg: 2.50,
+          quantity: "750",
+          unit: "kg",
+          pricePerUnit: "2.50",
+          totalValue: "1875",
           county: "Nimba County",
-          district: "Ganta District",
+          farmLocation: "Ganta District",
           harvestDate: "2024-01-15",
           status: "Ready",
-          gpsCoordinates: "7.2306° N, 8.5559° W"
-        },
+          qualityGrade: "Grade A"
+        }
+      ];
+
+      // Combine real offers with mock data
+      const availableHarvests = [...realOffers, ...mockHarvests];
+
+      res.json(availableHarvests);
+    } catch (error) {
+      console.error("Error fetching available harvests:", error);
+      res.status(500).json({ message: "Failed to fetch available harvests" });
+    }
+  });
+
+  // Also update marketplace endpoint to include Paolo Jr's data
+  app.get("/api/buyer/marketplace", async (req, res) => {
+    try {
+      // Fetch real farmer product offers from database  
+      const realOffers = await db
+        .select({
+          id: farmerProductOffers.id,
+          farmerId: farmerProductOffers.farmerId,
+          farmerName: farmerProductOffers.farmerName,
+          commodity: farmerProductOffers.commodityType,
+          quantity: farmerProductOffers.quantityAvailable,
+          unit: farmerProductOffers.unit,
+          pricePerUnit: farmerProductOffers.pricePerUnit,
+          totalValue: farmerProductOffers.totalValue,
+          county: farmerProductOffers.county,
+          farmLocation: farmerProductOffers.farmLocation,
+          harvestDate: farmerProductOffers.harvestDate,
+          availableFromDate: farmerProductOffers.availableFromDate,
+          expirationDate: farmerProductOffers.expirationDate,
+          status: sql`'Available'`.as('status'),
+          qualityGrade: farmerProductOffers.qualityGrade,
+          paymentTerms: farmerProductOffers.paymentTerms,
+          deliveryTerms: farmerProductOffers.deliveryTerms
+        })
+        .from(farmerProductOffers)
+        .orderBy(farmerProductOffers.createdAt);
+
+      res.json(realOffers);
+    } catch (error) {
+      console.error("Error fetching marketplace data:", error);
+      res.status(500).json({ message: "Failed to fetch marketplace data" });
+    }
+  });
+
+  // Keep old mock data endpoint for backwards compatibility
+  app.get("/api/buyer/old-available-harvests", async (req, res) => {
+    try {
+      const mockData = [
         {
           id: 2,
           farmerId: "FRM-2024-067",

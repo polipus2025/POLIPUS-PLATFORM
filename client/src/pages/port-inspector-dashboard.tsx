@@ -22,12 +22,24 @@ import {
   Filter,
   Users,
   Building2,
-  Globe
+  Globe,
+  Scan,
+  Camera,
+  Shield,
+  FileCheck
 } from "lucide-react";
+import { useRef } from "react";
+import { Label } from "@/components/ui/label";
 
 export default function PortInspectorDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
+  const [documentInput, setDocumentInput] = useState("");
+  const [scanType, setScanType] = useState<"hash" | "qr">("hash");
+  const [verificationResult, setVerificationResult] = useState<any>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -119,6 +131,84 @@ export default function PortInspectorDashboard() {
       inspectionId,
       data: { status, notes: `Inspection ${status}`, violations: null }
     });
+  };
+
+  // Document verification functions
+  const verifyDocumentMutation = useMutation({
+    mutationFn: async (data: { documentHash?: string; qrCode?: string; scanType: string }) => {
+      const response = await fetch('/api/port-inspector/verify-document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to verify document');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setVerificationResult(data);
+      if (data.verified) {
+        toast({ 
+          title: "Document Verified", 
+          description: `Document is ${data.status.toLowerCase()} in AgriTrace database`,
+          variant: data.status === "VALID" ? "default" : "destructive"
+        });
+      } else {
+        toast({ 
+          title: "Verification Failed", 
+          description: data.message,
+          variant: "destructive"
+        });
+      }
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to verify document", variant: "destructive" });
+    }
+  });
+
+  const { data: verificationHistory } = useQuery({
+    queryKey: ['/api/port-inspector/verification-history'],
+    select: (data: any) => data?.verifications || []
+  });
+
+  const handleDocumentVerification = () => {
+    if (!documentInput.trim()) {
+      toast({ title: "Input Required", description: "Please enter a document hash or QR code", variant: "destructive" });
+      return;
+    }
+
+    const verificationData = scanType === "hash" 
+      ? { documentHash: documentInput.trim(), scanType: "HASH_SCAN" }
+      : { qrCode: documentInput.trim(), scanType: "QR_SCAN" };
+
+    verifyDocumentMutation.mutate(verificationData);
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      setCameraStream(stream);
+      setIsScanning(true);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      toast({ 
+        title: "Camera Error", 
+        description: "Unable to access camera for scanning", 
+        variant: "destructive" 
+      });
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setIsScanning(false);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -219,9 +309,10 @@ export default function PortInspectorDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="inspections">Export Inspections</TabsTrigger>
+            <TabsTrigger value="verification">Document Scanner</TabsTrigger>
             <TabsTrigger value="shipments">Active Shipments</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="regulatory">Regulatory Sync</TabsTrigger>
@@ -397,6 +488,236 @@ export default function PortInspectorDashboard() {
                     ))
                   ) : (
                     <p className="text-center text-gray-500">No pending inspections</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Document Verification Tab */}
+          <TabsContent value="verification" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Document Scanner */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    Document Authentication Scanner
+                  </CardTitle>
+                  <CardDescription>
+                    Scan or enter document hash codes and QR codes to verify authenticity against AgriTrace database
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="scanType">Verification Method</Label>
+                    <div className="flex gap-4">
+                      <Button 
+                        variant={scanType === "hash" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setScanType("hash")}
+                      >
+                        <FileCheck className="w-4 h-4 mr-2" />
+                        Hash Code
+                      </Button>
+                      <Button 
+                        variant={scanType === "qr" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setScanType("qr")}
+                      >
+                        <Scan className="w-4 h-4 mr-2" />
+                        QR Code
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="documentInput">
+                      {scanType === "hash" ? "Document Hash Code" : "QR Code Content"}
+                    </Label>
+                    <Input
+                      id="documentInput"
+                      placeholder={
+                        scanType === "hash" 
+                          ? "Enter document hash code..." 
+                          : "Enter QR code content..."
+                      }
+                      value={documentInput}
+                      onChange={(e) => setDocumentInput(e.target.value)}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleDocumentVerification}
+                      disabled={verifyDocumentMutation.isPending || !documentInput.trim()}
+                      className="flex-1"
+                    >
+                      {verifyDocumentMutation.isPending ? (
+                        <>
+                          <Clock className="w-4 h-4 mr-2 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4 mr-2" />
+                          Verify Document
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={isScanning ? stopCamera : startCamera}
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {isScanning ? "Stop" : "Scan"}
+                    </Button>
+                  </div>
+
+                  {/* Camera View */}
+                  {isScanning && (
+                    <div className="mt-4">
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        className="w-full max-w-sm mx-auto rounded-lg border"
+                      />
+                      <p className="text-sm text-gray-600 text-center mt-2">
+                        Position document QR code or hash code in camera view
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Verification Result */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Verification Result
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {verificationResult ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">Authentication Status</h4>
+                        <Badge className={
+                          verificationResult.status === 'VALID' ? 'bg-green-100 text-green-800' :
+                          verificationResult.status === 'EXPIRED' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }>
+                          {verificationResult.status}
+                        </Badge>
+                      </div>
+
+                      {verificationResult.verified && verificationResult.document && (
+                        <div className="grid grid-cols-1 gap-3 text-sm">
+                          <div className="border rounded-lg p-3">
+                            <div className="space-y-2">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Document Type:</span>
+                                <span className="font-medium">{verificationResult.document.type}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Recipient:</span>
+                                <span className="font-medium">{verificationResult.document.recipient}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Issue Date:</span>
+                                <span className="font-medium">
+                                  {new Date(verificationResult.document.issueDate).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Certificate #:</span>
+                                <span className="font-medium font-mono text-xs">
+                                  {verificationResult.document.certificateNumber}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Issuer:</span>
+                                <span className="font-medium">{verificationResult.document.issuer}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="border rounded-lg p-3 bg-green-50">
+                            <h5 className="font-medium text-green-800 mb-2">Security Verification</h5>
+                            <div className="space-y-1 text-xs">
+                              <div className="flex justify-between">
+                                <span>Digital Signature:</span>
+                                <span className="text-green-600 font-medium">
+                                  {verificationResult.security.digitalSignature}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Integrity Check:</span>
+                                <span className="text-green-600 font-medium">
+                                  {verificationResult.security.integrityCheck}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Authentication Level:</span>
+                                <span className="text-green-600 font-medium">
+                                  {verificationResult.security.authenticationLevel}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-gray-500 border-t pt-3">
+                        <p>Verified at: {new Date(verificationResult.verification.verifiedAt).toLocaleString()}</p>
+                        <p>Method: {verificationResult.verification.method}</p>
+                        <p>Database: {verificationResult.verification.database}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500">
+                      <Shield className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No document verification performed</p>
+                      <p className="text-sm">Use the scanner to verify document authenticity</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Verification History */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="w-5 h-5" />
+                  Recent Verification History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {verificationHistory && verificationHistory.length > 0 ? (
+                    verificationHistory.slice(0, 10).map((verification: any) => (
+                      <div key={verification.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium text-sm">{verification.description}</p>
+                          <p className="text-xs text-gray-600">
+                            {new Date(verification.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                        <Badge className={
+                          verification.result === 'VALID' ? 'bg-green-100 text-green-800' :
+                          verification.result === 'EXPIRED' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }>
+                          {verification.result}
+                        </Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No verification history</p>
                   )}
                 </div>
               </CardContent>

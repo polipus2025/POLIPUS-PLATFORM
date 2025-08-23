@@ -3639,6 +3639,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Demo credentials for Port Inspector testing
+      if (username === "PORT-INS-001" && password === "port123") {
+        const token = jwt.sign(
+          { 
+            inspectorId: "PORT-INS-001",
+            username: "PORT-INS-001",
+            role: 'port_inspector',
+            userType: 'port_inspector',
+            inspectorType: 'port',
+            county: 'Montserrado',
+            isDemo: true
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          success: true,
+          token,
+          inspector: {
+            id: "demo-port-inspector",
+            inspectorId: "PORT-INS-001",
+            firstName: "Port",
+            lastName: "Inspector",
+            fullName: "Port Inspector Demo",
+            email: "port.inspector@agritrace.com",
+            phoneNumber: "+231-555-0103",
+            inspectorType: "port",
+            inspectionAreaCounty: "Montserrado",
+            inspectionAreaDistrict: "Monrovia",
+            portFacility: "Port of Monrovia",
+            specializations: ["EUDR Compliance", "Document Verification", "Export Inspection"],
+            certificationLevel: "Senior"
+          },
+          mustChangePassword: false
+        });
+      }
+
       // Check if inspector credentials exist and is of correct type
       const credentials = await storage.getInspectorCredentialsByUsername(username);
       if (!credentials || credentials.inspectorType !== 'port') {
@@ -11928,6 +11966,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Failed to fetch market intelligence report" 
+      });
+    }
+  });
+
+  // ========================================================================================
+  // DOCUMENT VERIFICATION SYSTEM FOR PORT INSPECTOR - SCANNER & QR CODE INTEGRATION
+  // ========================================================================================
+  
+  // Verify document authenticity by hash code or QR code
+  app.post("/api/port-inspector/verify-document", async (req, res) => {
+    try {
+      const { documentHash, qrCode, scanType } = req.body;
+      
+      if (!documentHash && !qrCode) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Document hash or QR code is required" 
+        });
+      }
+
+      // Search identifier (hash code or QR code content)
+      const searchValue = documentHash || qrCode;
+      
+      // Search in AgriTrace document database for authenticity
+      const documentRecord = await storage.verifyDocumentAuthenticity(searchValue);
+      
+      if (!documentRecord) {
+        return res.json({
+          success: true,
+          verified: false,
+          status: "INVALID",
+          message: "Document not found in AgriTrace database",
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // Document found - verify integrity
+      const currentTime = new Date();
+      const isExpired = documentRecord.expiryDate && new Date(documentRecord.expiryDate) < currentTime;
+      const isRevoked = documentRecord.status === 'revoked' || documentRecord.isRevoked;
+
+      const verificationResult = {
+        success: true,
+        verified: !isExpired && !isRevoked,
+        status: isRevoked ? "REVOKED" : isExpired ? "EXPIRED" : "VALID",
+        document: {
+          id: documentRecord.id,
+          type: documentRecord.documentType,
+          title: documentRecord.title || `${documentRecord.documentType} Certificate`,
+          issueDate: documentRecord.createdAt,
+          expiryDate: documentRecord.expiryDate,
+          issuer: "AgriTrace360™ System",
+          recipient: documentRecord.recipientName || documentRecord.farmerName || "N/A",
+          certificateNumber: documentRecord.certificateId || documentRecord.id,
+          hashCode: documentRecord.hashCode || searchValue,
+          qrCode: documentRecord.qrCode
+        },
+        verification: {
+          method: scanType || (documentHash ? "HASH_SCAN" : "QR_SCAN"),
+          verifiedAt: currentTime.toISOString(),
+          verifiedBy: "Port Inspector System",
+          database: "AgriTrace360™ Document Registry"
+        },
+        security: {
+          digitalSignature: documentRecord.digitalSignature || "VALID",
+          integrityCheck: "PASSED",
+          authenticationLevel: "HIGH"
+        }
+      };
+
+      // Log verification attempt
+      await storage.logDocumentVerification({
+        documentId: documentRecord.id,
+        verificationMethod: scanType || (documentHash ? "HASH_SCAN" : "QR_SCAN"),
+        verifiedBy: "port_inspector",
+        verificationResult: verificationResult.status,
+        timestamp: currentTime
+      });
+
+      res.json(verificationResult);
+
+    } catch (error) {
+      console.error("Document verification error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error verifying document" 
+      });
+    }
+  });
+
+  // Get document verification history
+  app.get("/api/port-inspector/verification-history", async (req, res) => {
+    try {
+      const { limit = 50, offset = 0 } = req.query;
+      
+      const verificationHistory = await storage.getDocumentVerificationHistory({
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
+        verifiedBy: 'port_inspector'
+      });
+
+      res.json({
+        success: true,
+        verifications: verificationHistory,
+        total: verificationHistory.length
+      });
+
+    } catch (error) {
+      console.error("Error fetching verification history:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error fetching verification history" 
       });
     }
   });

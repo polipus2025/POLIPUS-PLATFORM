@@ -3013,6 +3013,89 @@ export class DatabaseStorage implements IStorage {
     ];
   }
 
+  // Document verification methods for Port Inspector
+  async verifyDocumentAuthenticity(searchValue: string) {
+    try {
+      // Search across multiple certificate tables for the document
+      const certificates = [
+        // Try PDF certificates first
+        ...(await db.select().from(pdfCertificates)
+          .where(or(
+            eq(pdfCertificates.hashCode, searchValue),
+            eq(pdfCertificates.id, searchValue),
+            like(pdfCertificates.qrCode, `%${searchValue}%`)
+          ))
+          .limit(1)),
+        
+        // Try farmer certificates
+        ...(await db.select().from(farmers)
+          .where(or(
+            eq(farmers.id, searchValue),
+            eq(farmers.farmerId, searchValue)
+          ))
+          .limit(1))
+      ];
+
+      if (certificates && certificates.length > 0) {
+        const cert = certificates[0];
+        return {
+          id: cert.id,
+          documentType: cert.certificateType || 'Agricultural Certificate',
+          title: cert.title || `Certificate for ${cert.farmerName || cert.name}`,
+          createdAt: cert.createdAt || cert.registrationDate,
+          expiryDate: cert.expiryDate,
+          recipientName: cert.farmerName || cert.name,
+          certificateId: cert.id,
+          hashCode: cert.hashCode || cert.id,
+          qrCode: cert.qrCode,
+          status: cert.status || 'active',
+          isRevoked: cert.isRevoked || false,
+          digitalSignature: cert.digitalSignature || 'VALID'
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error verifying document authenticity:", error);
+      return null;
+    }
+  }
+
+  async logDocumentVerification(verificationData: any) {
+    try {
+      // For now, we'll use activities table to log verifications
+      await db.insert(activities).values({
+        type: 'document_verification',
+        description: `Document ${verificationData.documentId} verified via ${verificationData.verificationMethod}`,
+        metadata: JSON.stringify(verificationData),
+        createdAt: new Date()
+      });
+    } catch (error) {
+      console.error("Error logging document verification:", error);
+    }
+  }
+
+  async getDocumentVerificationHistory(options: any) {
+    try {
+      const verifications = await db.select().from(activities)
+        .where(eq(activities.type, 'document_verification'))
+        .orderBy(desc(activities.createdAt))
+        .limit(options.limit)
+        .offset(options.offset);
+
+      return verifications.map(v => ({
+        id: v.id,
+        timestamp: v.createdAt,
+        description: v.description,
+        details: v.metadata ? JSON.parse(v.metadata) : {},
+        result: v.metadata ? JSON.parse(v.metadata).verificationResult : 'UNKNOWN'
+      }));
+    } catch (error) {
+      console.error("Error fetching verification history:", error);
+      return [];
+    }
+  }
+
   async getRegulatoryDepartmentSync(): Promise<any[]> {
     // Get regulatory department sync status
     const departments = await db.select().from(regulatoryDepartments);

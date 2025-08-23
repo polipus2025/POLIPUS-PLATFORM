@@ -14,6 +14,14 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
 import WarehouseInspectorDashboard from "@/pages/warehouse-inspector-dashboard";
 
+// Inspector Portal imports
+import InspectorPortal from "@/pages/inspector-portal";
+import LandInspectorLogin from "@/pages/auth/land-inspector-login";
+import WarehouseInspectorLogin from "@/pages/auth/warehouse-inspector-login";
+import PortInspectorLogin from "@/pages/auth/port-inspector-login";
+import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashboard";
+import PortInspectorDashboard from "@/pages/port-inspector-dashboard";
+
 function App() {
   return (
     <ErrorBoundary>
@@ -35,8 +43,16 @@ function App() {
             {/* Buyer Portal Routes */}
             <Route path="/buyer-dashboard" component={BuyerDashboard} />
             
-            {/* Warehouse Inspector Route for Testing */}
+            {/* Inspector Portal Routes */}
+            <Route path="/inspector-portal" component={InspectorPortal} />
+            <Route path="/land-inspector-login" component={LandInspectorLogin} />
+            <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
+            <Route path="/port-inspector-login" component={PortInspectorLogin} />
+            
+            {/* Inspector Dashboard Routes */}
             <Route path="/warehouse-inspector-dashboard" component={WarehouseInspectorDashboard} />
+            <Route path="/unified-land-inspector-dashboard" component={UnifiedLandInspectorDashboard} />
+            <Route path="/port-inspector-dashboard" component={PortInspectorDashboard} />
             
             {/* Default fallback */}
             <Route component={FrontPage} />

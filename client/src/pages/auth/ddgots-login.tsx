@@ -166,13 +166,13 @@ export default function DDGOTSLogin() {
             {/* Additional Access Links */}
             <div className="flex justify-between text-sm">
               <button 
-                onClick={() => navigate('/auth/dg-login')}
+                onClick={() => navigate('/dg-login')}
                 className="text-slate-300 hover:text-white transition-colors"
               >
                 ← DG Portal
               </button>
               <button 
-                onClick={() => navigate('/auth/ddgaf-login')}
+                onClick={() => navigate('/ddgaf-login')}
                 className="text-slate-300 hover:text-white transition-colors"
               >
                 DDGAF Portal →

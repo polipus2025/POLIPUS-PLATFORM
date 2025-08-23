@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Building2, DollarSign, Settings, ArrowRight, Database, FileCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
+// Temporarily comment out asset import to debug routing
+// import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 export default function RegulatoryLogin() {
   const [, navigate] = useLocation();
@@ -14,11 +15,12 @@ export default function RegulatoryLogin() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
-            <img 
+            <Shield className="w-10 h-10 text-slate-600" />
+            {/* <img 
               src={lacraLogo} 
               alt="LACRA Logo" 
               className="w-16 h-16 object-contain rounded-full"
-            />
+            /> */}
           </div>
           <h1 className="text-4xl font-bold text-slate-900 mb-2">LACRA Regulatory Portal</h1>
           <p className="text-slate-700 text-lg">Three-Tier Access System</p>
@@ -29,7 +31,7 @@ export default function RegulatoryLogin() {
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {/* DG Portal */}
           <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group" 
-                onClick={() => navigate('/auth/dg-login')}>
+                onClick={() => navigate('/dg-login')}>
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Shield className="w-8 h-8 text-white" />
@@ -54,7 +56,7 @@ export default function RegulatoryLogin() {
               </ul>
               <Button 
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/auth/dg-login'); }}
+                onClick={(e) => { e.stopPropagation(); navigate('/dg-login'); }}
               >
                 Access DG Portal
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -64,7 +66,7 @@ export default function RegulatoryLogin() {
 
           {/* DDGOTS Portal */}
           <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
-                onClick={() => navigate('/auth/ddgots-login')}>
+                onClick={() => navigate('/ddgots-login')}>
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Settings className="w-8 h-8 text-white" />
@@ -89,7 +91,7 @@ export default function RegulatoryLogin() {
               </ul>
               <Button 
                 className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/auth/ddgots-login'); }}
+                onClick={(e) => { e.stopPropagation(); navigate('/ddgots-login'); }}
               >
                 Access DDGOTS Portal
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -99,7 +101,7 @@ export default function RegulatoryLogin() {
 
           {/* DDGAF Portal */}
           <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
-                onClick={() => navigate('/auth/ddgaf-login')}>
+                onClick={() => navigate('/ddgaf-login')}>
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <DollarSign className="w-8 h-8 text-white" />
@@ -124,7 +126,7 @@ export default function RegulatoryLogin() {
               </ul>
               <Button 
                 className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/auth/ddgaf-login'); }}
+                onClick={(e) => { e.stopPropagation(); navigate('/ddgaf-login'); }}
               >
                 Access DDGAF Portal
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

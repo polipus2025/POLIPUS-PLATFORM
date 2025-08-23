@@ -19,6 +19,7 @@ import {
   farmers,
   farmerProductOffers,
   buyerNotifications,
+  buyerVerificationCodes,
   insertCommoditySchema, 
   insertInspectionSchema, 
   insertCertificationSchema,
@@ -13312,14 +13313,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique verification code
       const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-      // In real system:
-      // 1. Update all notifications for this offer to 'expired'
-      // 2. Update the winner's notification to 'accepted'
-      // 3. Create transaction record
-      // 4. Notify farmer of successful match
+      // Get the notification details for storing verification code
+      const [notification] = await db
+        .select({
+          notificationId: buyerNotifications.notificationId,
+          offerId: buyerNotifications.offerId,
+          buyerId: buyerNotifications.buyerId,
+          farmerName: buyerNotifications.farmerName,
+          commodityType: buyerNotifications.commodityType,
+          quantityAvailable: buyerNotifications.quantityAvailable,
+          pricePerUnit: buyerNotifications.pricePerUnit,
+          county: buyerNotifications.county,
+        })
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.notificationId, notificationId));
 
-      console.log(`Buyer ${buyerName} (${company}) accepted offer ${notificationId}`);
-      console.log(`Verification code generated: ${verificationCode}`);
+      if (!notification) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      // Store verification code in database
+      const [savedCode] = await db.insert(buyerVerificationCodes).values({
+        verificationCode,
+        buyerId: buyerId || 'margibi_buyer',
+        buyerName: buyerName || 'Margibi Trading Company',
+        company: company || 'Agricultural Trading Company',
+        notificationId,
+        offerId: notification.offerId,
+        farmerId: '288',
+        farmerName: notification.farmerName,
+        commodityType: notification.commodityType,
+        quantityAvailable: notification.quantityAvailable,
+        pricePerUnit: notification.pricePerUnit,
+        totalValue: (parseFloat(notification.quantityAvailable) * parseFloat(notification.pricePerUnit)).toString(),
+        county: notification.county,
+        farmLocation: `${notification.county} County`,
+        paymentTerms: 'Payment within 7 days of delivery',
+        deliveryTerms: 'Pickup at farm location',
+        acceptedAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      }).returning();
+
+      // Update notification status to confirmed
+      await db.update(buyerNotifications)
+        .set({ response: 'confirmed' })
+        .where(eq(buyerNotifications.notificationId, notificationId));
+
+      console.log(`✅ Buyer ${buyerName} (${company}) accepted offer ${notificationId}`);
+      console.log(`🔐 Verification code saved: ${verificationCode}`);
 
       res.json({
         message: "Offer accepted successfully with EUDR compliance tracking!",
@@ -13413,22 +13454,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
       console.log(`Fetching verification codes for buyer: ${buyerId}`);
       
-      // Mock verification codes - in real system, fetch from database
-      const verificationCodes = [
-        {
-          id: "code-001",
-          verificationCode: "X0R27R24",
-          buyerId: parseInt(buyerId) || 1,
-          farmerId: 101,
-          farmerName: "Moses Williams",
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          totalValue: 62475.00,
-          generatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-          status: "active"
-        }
-      ];
+      // Fetch real verification codes from database
+      const verificationCodes = await db
+        .select({
+          id: buyerVerificationCodes.id,
+          verificationCode: buyerVerificationCodes.verificationCode,
+          buyerId: buyerVerificationCodes.buyerId,
+          farmerId: buyerVerificationCodes.farmerId,
+          farmerName: buyerVerificationCodes.farmerName,
+          commodityType: buyerVerificationCodes.commodityType,
+          quantityAvailable: buyerVerificationCodes.quantityAvailable,
+          unit: buyerVerificationCodes.unit,
+          pricePerUnit: buyerVerificationCodes.pricePerUnit,
+          totalValue: buyerVerificationCodes.totalValue,
+          status: buyerVerificationCodes.status,
+          county: buyerVerificationCodes.county,
+          paymentTerms: buyerVerificationCodes.paymentTerms,
+          deliveryTerms: buyerVerificationCodes.deliveryTerms,
+          acceptedAt: buyerVerificationCodes.acceptedAt,
+          expiresAt: buyerVerificationCodes.expiresAt,
+        })
+        .from(buyerVerificationCodes)
+        .where(eq(buyerVerificationCodes.buyerId, buyerId))
+        .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
       console.log(`Returning ${verificationCodes.length} verification codes`);
       res.json(verificationCodes);

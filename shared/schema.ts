@@ -234,6 +234,33 @@ export const bagMovementsRelations = relations(bagMovements, ({ one }) => ({
   }),
 }));
 
+// Buyer Verification Codes Table
+export const buyerVerificationCodes = pgTable("buyer_verification_codes", {
+  id: serial("id").primaryKey(),
+  verificationCode: text("verification_code").notNull().unique(),
+  buyerId: text("buyer_id").notNull(),
+  buyerName: text("buyer_name").notNull(),
+  company: text("company"),
+  notificationId: text("notification_id").notNull(),
+  offerId: text("offer_id").notNull(),
+  farmerId: text("farmer_id").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  commodityType: text("commodity_type").notNull(),
+  quantityAvailable: decimal("quantity_available", { precision: 10, scale: 2 }).notNull(),
+  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
+  unit: text("unit").notNull().default("tons"),
+  status: text("status").notNull().default("active"), // active, used, expired
+  county: text("county").notNull(),
+  farmLocation: text("farm_location"),
+  paymentTerms: text("payment_terms"),
+  deliveryTerms: text("delivery_terms"),
+  acceptedAt: timestamp("accepted_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Super Backend Administrative Control System
 export const systemConfigurations = pgTable("system_configurations", {
   id: serial("id").primaryKey(),

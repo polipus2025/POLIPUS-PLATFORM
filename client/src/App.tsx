@@ -10,6 +10,8 @@ import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import FarmerDashboard from "@/pages/farmer-dashboard";
 import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
+import FarmerLogin from "@/pages/auth/farmer-login";
+import FarmerLoginPortal from "@/pages/farmer-login-portal";
 
 function App() {
   return (
@@ -24,8 +26,12 @@ function App() {
             {/* Agricultural Traceability Portal */}
             <Route path="/portals" component={Landing} />
             
-            {/* Essential dashboards */}
+            {/* Farmer Portal Routes */}
+            <Route path="/farmer-login" component={FarmerLogin} />
+            <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
             <Route path="/farmer-dashboard" component={FarmerDashboard} />
+            
+            {/* Buyer Portal Routes */}
             <Route path="/buyer-dashboard" component={BuyerDashboard} />
             
             {/* Default fallback */}

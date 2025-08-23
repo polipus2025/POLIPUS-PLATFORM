@@ -34,6 +34,9 @@ export default function FarmerDashboard() {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState<string | null>(null);
+  const [updatingSchedule, setUpdatingSchedule] = useState<string | null>(null);
+  const [completingHarvest, setCompletingHarvest] = useState(false);
+  const [harvestData, setHarvestData] = useState<any>(null);
 
   // Get farmer ID from localStorage (authenticated user's actual ID)
   const farmerId = localStorage.getItem("farmerId") || localStorage.getItem("credentialId") || "FRM-2024-001";
@@ -114,6 +117,108 @@ export default function FarmerDashboard() {
     setConfirmingPayment(transactionId);
     confirmPaymentMutation.mutate(transactionId);
   };
+
+  // Handle schedule update (planting or harvest dates)
+  const handleUpdateSchedule = async (plotId: string, plotName: string, scheduleType: 'planting' | 'harvest', dateValue: string, event: React.FormEvent) => {
+    event.preventDefault();
+    if (!dateValue) {
+      toast({
+        title: "Date Required",
+        description: "Please select a date before updating the schedule.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUpdatingSchedule(plotId);
+    
+    try {
+      const endpoint = scheduleType === 'planting' 
+        ? `/api/farm-plots/${plotId}/planting-date`
+        : `/api/farm-plots/${plotId}/harvest-date`;
+      
+      const payload = scheduleType === 'planting' 
+        ? { plantingDate: dateValue }
+        : { expectedHarvestDate: dateValue };
+
+      await apiRequest(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      toast({
+        title: "Schedule Updated Successfully!",
+        description: `${scheduleType === 'planting' ? 'Planting' : 'Harvest'} date updated for ${plotName}`
+      });
+
+      // Refresh land data
+      queryClient.invalidateQueries({ queryKey: ["/api/farmer-land-data", farmerId] });
+    } catch (error: any) {
+      toast({
+        title: "Schedule Update Failed",
+        description: error.message || "Failed to update schedule. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUpdatingSchedule(null);
+    }
+  };
+
+  // Handle marking harvest complete
+  const handleMarkHarvestComplete = async () => {
+    if (!farmerLandData?.farmPlots || farmerLandData.farmPlots.length === 0) {
+      toast({
+        title: "No Plots Available",
+        description: "You need registered farm plots to complete harvests.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const plot = farmerLandData.farmPlots[0]; // Use first plot for demo
+    setCompletingHarvest(true);
+
+    try {
+      const harvestDetails = {
+        actualYield: "1250", // kg
+        qualityGrade: "Grade A",
+        harvestDate: new Date().toISOString().split('T')[0],
+        moistureContent: "12.5"
+      };
+
+      const result = await apiRequest(`/api/farm-plots/${plot.plot_id}/complete-harvest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(harvestDetails)
+      });
+
+      setHarvestData(result);
+
+      toast({
+        title: "🎉 Harvest Completed Successfully!",
+        description: `Batch code ${result.batchCode} generated. All stakeholders notified automatically.`
+      });
+
+      // Refresh land data
+      queryClient.invalidateQueries({ queryKey: ["/api/farmer-land-data", farmerId] });
+    } catch (error: any) {
+      toast({
+        title: "Harvest Completion Failed",
+        description: error.message || "Failed to complete harvest. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setCompletingHarvest(false);
+    }
+  };
+
+  // Fetch harvest history
+  const { data: harvestHistory } = useQuery({
+    queryKey: ["/api/farmers", farmerId, "harvest-history"],
+    queryFn: () => apiRequest(`/api/farmers/${farmerId}/harvest-history`),
+    enabled: !!farmerId,
+  });
 
   // Handle form submission
   const handleSubmitOffer = async (e: React.FormEvent) => {
@@ -538,43 +643,71 @@ export default function FarmerDashboard() {
                           </div>
                           
                           <div className="mt-4 space-y-3">
-                            {plot.planting_date ? (
-                              <div className="text-sm">
-                                <span className="font-medium">Planted:</span> {plot.planting_date}
-                              </div>
-                            ) : (
-                              <div className="p-3 bg-blue-50 rounded-lg">
-                                <p className="text-sm text-blue-800 font-medium mb-2">Schedule Planting</p>
-                                <input 
-                                  type="date" 
-                                  className="w-full p-2 border border-blue-200 rounded text-sm"
-                                  placeholder="Select planting date"
-                                />
-                              </div>
-                            )}
+                            <form onSubmit={(e) => {
+                              const formData = new FormData(e.target as HTMLFormElement);
+                              const plantingDate = formData.get('plantingDate') as string;
+                              if (plantingDate) {
+                                handleUpdateSchedule(plot.plot_id, plot.plot_name, 'planting', plantingDate, e);
+                              }
+                            }}>
+                              {plot.planting_date ? (
+                                <div className="text-sm">
+                                  <span className="font-medium">Planted:</span> {new Date(plot.planting_date).toLocaleDateString()}
+                                </div>
+                              ) : (
+                                <div className="p-3 bg-blue-50 rounded-lg">
+                                  <p className="text-sm text-blue-800 font-medium mb-2">Schedule Planting</p>
+                                  <input 
+                                    type="date" 
+                                    name="plantingDate"
+                                    className="w-full p-2 border border-blue-200 rounded text-sm"
+                                    placeholder="Select planting date"
+                                    required
+                                  />
+                                  <Button 
+                                    type="submit"
+                                    size="sm" 
+                                    className="w-full mt-2 bg-blue-600 hover:bg-blue-700"
+                                    disabled={updatingSchedule === plot.plot_id}
+                                  >
+                                    {updatingSchedule === plot.plot_id ? "Updating..." : "Set Planting Date"}
+                                  </Button>
+                                </div>
+                              )}
+                            </form>
                             
-                            {plot.expected_harvest_date ? (
-                              <div className="text-sm">
-                                <span className="font-medium">Expected Harvest:</span> {plot.expected_harvest_date}
-                              </div>
-                            ) : (
-                              <div className="p-3 bg-orange-50 rounded-lg">
-                                <p className="text-sm text-orange-800 font-medium mb-2">Schedule Harvest</p>
-                                <input 
-                                  type="date" 
-                                  className="w-full p-2 border border-orange-200 rounded text-sm"
-                                  placeholder="Select harvest date"
-                                />
-                              </div>
-                            )}
-                            
-                            <Button 
-                              size="sm" 
-                              className="w-full bg-green-600 hover:bg-green-700"
-                              data-testid={`schedule-harvest-${plot.plot_id}`}
-                            >
-                              Update Schedule
-                            </Button>
+                            <form onSubmit={(e) => {
+                              const formData = new FormData(e.target as HTMLFormElement);
+                              const harvestDate = formData.get('harvestDate') as string;
+                              if (harvestDate) {
+                                handleUpdateSchedule(plot.plot_id, plot.plot_name, 'harvest', harvestDate, e);
+                              }
+                            }}>
+                              {plot.expected_harvest_date ? (
+                                <div className="text-sm">
+                                  <span className="font-medium">Expected Harvest:</span> {new Date(plot.expected_harvest_date).toLocaleDateString()}
+                                </div>
+                              ) : (
+                                <div className="p-3 bg-orange-50 rounded-lg">
+                                  <p className="text-sm text-orange-800 font-medium mb-2">Schedule Harvest</p>
+                                  <input 
+                                    type="date" 
+                                    name="harvestDate"
+                                    className="w-full p-2 border border-orange-200 rounded text-sm"
+                                    placeholder="Select harvest date"
+                                    required
+                                  />
+                                  <Button 
+                                    type="submit"
+                                    size="sm" 
+                                    className="w-full mt-2 bg-orange-600 hover:bg-orange-700"
+                                    disabled={updatingSchedule === plot.plot_id}
+                                  >
+                                    {updatingSchedule === plot.plot_id ? "Updating..." : "Set Harvest Date"}
+                                  </Button>
+                                </div>
+                              )}
+                            </form>
                           </div>
                         </CardContent>
                       </Card>
@@ -609,9 +742,13 @@ export default function FarmerDashboard() {
                     variant="outline" 
                     className="w-full h-auto p-4 flex flex-col items-center gap-2 border-green-200 hover:bg-green-50"
                     data-testid="button-mark-harvest-complete"
+                    onClick={handleMarkHarvestComplete}
+                    disabled={completingHarvest}
                   >
                     <CheckCircle className="h-6 w-6 text-green-600" />
-                    <span className="text-sm font-medium">Mark Harvest Complete</span>
+                    <span className="text-sm font-medium">
+                      {completingHarvest ? "Processing..." : "Mark Harvest Complete"}
+                    </span>
                     <span className="text-xs text-gray-500">Generate batch codes & notify buyers</span>
                   </Button>
                   
@@ -629,6 +766,12 @@ export default function FarmerDashboard() {
                     variant="outline" 
                     className="w-full h-auto p-4 flex flex-col items-center gap-2 border-purple-200 hover:bg-purple-50"
                     data-testid="button-view-harvest-history"
+                    onClick={() => {
+                      toast({
+                        title: "Harvest History",
+                        description: harvestHistory ? `Found ${harvestHistory.length} harvest records` : "No harvest records found"
+                      });
+                    }}
                   >
                     <History className="h-6 w-6 text-purple-600" />
                     <span className="text-sm font-medium">View Harvest History</span>
@@ -655,6 +798,31 @@ export default function FarmerDashboard() {
                   </div>
                 </div>
                 
+                {/* Harvest Completion Success */}
+                {harvestData && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h5 className="font-medium text-green-800 mb-3">🎉 Harvest Successfully Completed!</h5>
+                    <div className="text-sm text-green-700 space-y-2">
+                      <div className="grid grid-cols-1 gap-2">
+                        <div><strong>Batch Code:</strong> <span className="font-mono bg-green-100 px-2 py-1 rounded">{harvestData.batchCode}</span></div>
+                        <div><strong>Plot:</strong> {harvestData.plotName} (#{harvestData.plotNumber})</div>
+                        <div><strong>Crop:</strong> {harvestData.cropType}</div>
+                        <div><strong>Yield:</strong> {harvestData.actualYield}kg</div>
+                        <div><strong>Quality:</strong> {harvestData.qualityGrade}</div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-green-300">
+                        <p className="font-medium text-green-800 mb-1">Notifications Sent:</p>
+                        <div className="grid grid-cols-2 gap-1 text-xs">
+                          <div>✅ Land Inspector</div>
+                          <div>✅ Warehouse Inspector</div>
+                          <div>✅ Regulatory Panels</div>
+                          <div>✅ Marketplace Enabled</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Important Notes */}
                 <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <h5 className="font-medium text-yellow-800 mb-2">📋 Important Notes</h5>

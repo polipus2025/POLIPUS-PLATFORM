@@ -459,20 +459,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
 
       // Get all buyers in the same county
-      const countyBuyers = await db
-        .select({
-          id: buyers.id,
-          buyerId: buyers.buyerId,
-          businessName: buyers.businessName,
-          contactPersonFirstName: buyers.contactPersonFirstName,
-          contactPersonLastName: buyers.contactPersonLastName,
-          primaryEmail: buyers.primaryEmail,
-          county: buyers.county,
-        })
-        .from(buyers)
-        .where(eq(buyers.county, validatedData.county))
-        .where(eq(buyers.isActive, true))
-        .where(eq(buyers.portalAccess, true));
+      const countyBuyersResult = await db.execute(sql`
+        SELECT id, buyer_id as "buyerId", business_name as "businessName", 
+               contact_person_first_name as "contactPersonFirstName", 
+               contact_person_last_name as "contactPersonLastName",
+               primary_email as "primaryEmail", county
+        FROM buyers 
+        WHERE county = ${validatedData.county} 
+        AND is_active = true 
+        AND portal_access = true
+      `);
+      
+      const countyBuyers = countyBuyersResult.rows || countyBuyersResult;
 
       // Create notifications for all buyers in the county
       const notifications = [];

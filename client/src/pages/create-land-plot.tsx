@@ -46,21 +46,46 @@ export default function CreateLandPlot() {
   // Create land plot mutation
   const createLandPlot = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/land-plots", {
+      return await apiRequest("/api/farm-plots", {
         method: "POST",
         body: JSON.stringify({
-          ...data,
+          // Required fields matching farmPlots schema
+          plotId: `PLOT-${selectedFarmerId}-${Date.now()}`, // Generate unique plot ID
           farmerId: selectedFarmerId,
           farmerName: selectedFarmer ? `${selectedFarmer.firstName} ${selectedFarmer.lastName}` : "",
-          totalAreaHectares: data.boundaryData?.area || parseFloat(data.totalAreaHectares || "0"),
-          elevationMeters: data.elevation ? parseFloat(data.elevation) : null,
-          coordinates: data.boundaryData ? JSON.stringify(data.boundaryData.points) : data.coordinates,
-          boundaryData: data.boundaryData ? JSON.stringify(data.boundaryData) : null,
-          complianceStatus: "approved",
-          inspectionStatus: "approved",
-          approvedBy: inspectorName,
-          approvedAt: new Date(),
-          isActive: true
+          plotNumber: 1, // TODO: Get actual next plot number for this farmer
+          plotName: data.plotName,
+          
+          // Agricultural data
+          cropType: data.plotType || "cocoa", // Map plotType to cropType
+          primaryCrop: data.plotType,
+          plotSize: data.boundaryData?.area || parseFloat(data.totalAreaHectares || "0"),
+          plotSizeUnit: "hectares",
+          
+          // Location data  
+          county: selectedFarmer?.county || "Monrovia",
+          district: selectedFarmer?.district || "",
+          gpsCoordinates: data.boundaryData ? 
+            `${data.boundaryData.points[0]?.lat},${data.boundaryData.points[0]?.lng}` : 
+            data.coordinates,
+          farmBoundaries: data.boundaryData,
+          landMapData: {
+            soilType: data.soilType,
+            elevation: data.elevation,
+            slope: data.slope,
+            landUse: data.landUse,
+            irrigationType: data.irrigationType,
+            description: data.plotDescription,
+            approvedBy: inspectorName,
+            approvedAt: new Date()
+          },
+          soilType: data.soilType,
+          
+          // Status
+          isActive: true,
+          status: "active",
+          landOwnership: "owned",
+          irrigationAccess: data.irrigationType !== "none"
         })
       });
     },

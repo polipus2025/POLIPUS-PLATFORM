@@ -3247,7 +3247,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testBuyerCredentials: Record<string, { password: string; firstName: string; lastName: string; company: string }> = {
         buyer001: { password: 'password123', firstName: 'John', lastName: 'Trading', company: 'ABC Trading Co.' },
         buyer002: { password: 'password123', firstName: 'Sarah', lastName: 'Commerce', company: 'Global Commodities Ltd.' },
-        test_buyer: { password: 'password123', firstName: 'Test', lastName: 'Buyer', company: 'Test Company' }
+        test_buyer: { password: 'password123', firstName: 'Test', lastName: 'Buyer', company: 'Test Company' },
+        margibi_buyer: { password: 'password123', firstName: 'Maria', lastName: 'Thompson', company: 'Margibi Trading Company' }
       };
 
       if (testBuyerCredentials[buyerId] && testBuyerCredentials[buyerId].password === password) {

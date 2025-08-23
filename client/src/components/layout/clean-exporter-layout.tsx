@@ -258,7 +258,15 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 space-y-2">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200" 
+              onClick={() => window.location.href = '/exporter-login'}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Back to Login Portal
+            </Button>
             <Button 
               variant="outline" 
               className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" 

@@ -294,7 +294,44 @@ export default function WarehouseInspectorDashboard() {
           </Card>
         </div>
 
-        {/* Quick Overview Cards */}
+        {/* Main Navigation Tabs - Moved to middle position */}
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm rounded-lg p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Package className="w-4 h-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="inspections" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <ClipboardCheck className="w-4 h-4 mr-2" />
+              Inspections
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger value="codes" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              Codes
+            </TabsTrigger>
+            <TabsTrigger value="bags" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Package className="w-4 h-4 mr-2" />
+              Bags
+            </TabsTrigger>
+            <TabsTrigger value="validation" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Shield className="w-4 h-4 mr-2" />
+              Validation
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Warehouse className="w-4 h-4 mr-2" />
+              Inventory
+            </TabsTrigger>
+            <TabsTrigger value="quality" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Quality
+            </TabsTrigger>
+          </TabsList>
+
+        {/* Quick Overview Cards - Now positioned after navigation tabs */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -394,43 +431,6 @@ export default function WarehouseInspectorDashboard() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Main Navigation Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm rounded-lg p-1">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Package className="w-4 h-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="inspections" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <ClipboardCheck className="w-4 h-4 mr-2" />
-              Inspections
-            </TabsTrigger>
-            <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Transactions
-            </TabsTrigger>
-            <TabsTrigger value="codes" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileText className="w-4 h-4 mr-2" />
-              Codes
-            </TabsTrigger>
-            <TabsTrigger value="bags" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Package className="w-4 h-4 mr-2" />
-              Bags
-            </TabsTrigger>
-            <TabsTrigger value="validation" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Shield className="w-4 h-4 mr-2" />
-              Validation
-            </TabsTrigger>
-            <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Warehouse className="w-4 h-4 mr-2" />
-              Inventory
-            </TabsTrigger>
-            <TabsTrigger value="quality" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Quality
-            </TabsTrigger>
-          </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">

@@ -151,7 +151,7 @@ export default function FarmerDashboard() {
       toast({
         title: "Schedule Updated Successfully!",
         description: scheduleType === 'planting' 
-          ? `Planting date set - Status reset to 'planted'. Expected harvest: ${updateResult.expectedHarvestDate || 'TBD'}`
+          ? `Planting date set - Status reset to 'planted'. Set harvest date separately.`
           : `Harvest date updated for ${plotName}`
       });
 

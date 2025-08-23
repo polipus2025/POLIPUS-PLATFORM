@@ -201,12 +201,12 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
                 <Badge variant="destructive" className="text-xs">3</Badge>
               </div>
               
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => window.location.href = '/exporter-login'}>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{user?.companyName || 'Demo Export Company'}</p>
-                  <p className="text-xs text-gray-500">Licensed Exporter</p>
+                  <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{user?.companyName || 'Demo Export Company'}</p>
+                  <p className="text-xs text-gray-500 group-hover:text-blue-500 transition-colors">Licensed Exporter • Click to Login Portal</p>
                 </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center group-hover:from-blue-600 group-hover:to-blue-700 transition-all">
                   <User className="w-5 h-5 text-white" />
                 </div>
               </div>
@@ -258,15 +258,7 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 space-y-2">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200" 
-              onClick={() => window.location.href = '/exporter-login'}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Back to Login Portal
-            </Button>
+          <div className="p-4 border-t border-gray-200">
             <Button 
               variant="outline" 
               className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" 

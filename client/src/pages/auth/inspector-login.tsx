@@ -61,9 +61,9 @@ export default function InspectorLogin() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link href="/">
+          <Link href="/portals">
             <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors">
-              ← Back to AgriTrace LACRA Platform
+              ← Back to Agricultural Traceability & Compliance Platform
             </button>
           </Link>
         </div>

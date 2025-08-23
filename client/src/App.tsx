@@ -430,14 +430,14 @@ function Router() {
       <Route path="/regulatory/buyer-management" component={BuyerManagement} />
       <Route path="/regulatory/exporter-management" component={ExporterManagement} />
 
-      {/* Protected Routes */}
-      {authToken ? (
+      {/* Always show main routes - removed auth blocking */}
+      {true ? (
         <>
 
           {/* Dashboard - Show correct component based on user type */}
           <Route path="/dashboard">
             {() => {
-              const userType = localStorage.getItem("userType");
+              const userType = typeof window !== 'undefined' ? localStorage.getItem("userType") : null;
               switch(userType) {
                 case 'farmer':
                   return <FarmerDashboard />;
@@ -458,6 +458,11 @@ function Router() {
           </Route>
           
           {/* Root route */}
+          <Route path="/" component={FrontPage} />
+        </>
+      ) : (
+        <>
+          {/* Public routes when no auth token */}
           <Route path="/" component={FrontPage} />
           
           {/* Inspector Dashboard Route */}

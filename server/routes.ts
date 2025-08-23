@@ -4771,50 +4771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/farm-plots/:farmerId?', async (req, res) => {
-    try {
-      const farmerId = req.params.farmerId;
-      const plots = [
-        {
-          id: 1,
-          farmerId: "FRM-001",
-          plotName: "North Coffee Plot",
-          coordinates: [[6.4281, -9.4295], [6.4285, -9.4290], [6.4280, -9.4285], [6.4276, -9.4290]],
-          area: 12.5,
-          cropType: "Coffee",
-          soilType: "Loamy",
-          elevation: 450,
-          slope: 15,
-          waterSource: "Stream",
-          accessRoad: true,
-          notes: "High quality arabica coffee plantation with good drainage"
-        },
-        {
-          id: 2,
-          farmerId: "FRM-001",
-          plotName: "South Cocoa Plot",
-          coordinates: [[6.4270, -9.4300], [6.4275, -9.4295], [6.4270, -9.4290], [6.4265, -9.4295]],
-          area: 8.3,
-          cropType: "Cocoa",
-          soilType: "Clay",
-          elevation: 380,
-          slope: 8,
-          waterSource: "Well",
-          accessRoad: true,
-          notes: "Premium cocoa with excellent fermentation facilities"
-        }
-      ];
-      
-      const filteredPlots = farmerId ? 
-        plots.filter(plot => plot.farmerId === farmerId) : 
-        plots;
-      
-      res.json(filteredPlots);
-    } catch (error) {
-      console.error("Error fetching farm plots:", error);
-      res.status(500).json({ message: "Failed to fetch farm plots" });
-    }
-  });
+  // REMOVED: Another duplicate demo farm-plots endpoint that was intercepting requests
 
   app.post('/api/farm-plots', async (req, res) => {
     try {

@@ -117,15 +117,6 @@ export default function FarmerDashboard() {
             Farmer ID: {farmerId} | Your farm management dashboard
           </p>
         </div>
-        <div className="flex gap-3 w-full sm:w-auto">
-          <Link href="/batch-code-generator" className="flex-1 sm:flex-none">
-            <Button className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
-              <Package className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Generate Batch Code</span>
-              <span className="sm:hidden">New Batch</span>
-            </Button>
-          </Link>
-        </div>
       </div>
 
       {/* Mobile-Responsive Statistics Cards */}
@@ -446,12 +437,6 @@ export default function FarmerDashboard() {
                 </Button>
               </Link>
 
-              <Link href="/batch-code-generator">
-                <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
-                  <Package className="h-6 w-6 text-purple-600" />
-                  <span className="text-sm">Batch Codes</span>
-                </Button>
-              </Link>
             </div>
           </CardContent>
         </Card>

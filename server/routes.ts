@@ -472,7 +472,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const notificationId = generateNotificationId();
         const buyerName = `${buyer.contactPersonFirstName} ${buyer.contactPersonLastName}`;
         
-        const [notification] = await db.insert(buyerNotifications).values({
+        // Insert notification without returning due to schema mismatch
+        await db.insert(buyerNotifications).values({
           notificationId,
           offerId: offer.offerId,
           buyerId: buyer.id,
@@ -484,7 +485,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pricePerUnit: validatedData.pricePerUnit,
           county: validatedData.county,
           farmerName: validatedData.farmerName,
-        }).returning();
+        });
+        
+        const notification = {
+          notificationId,
+          offerId: offer.offerId,
+          buyerId: buyer.id,
+          buyerName,
+          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
+          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for ${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
+          commodityType: validatedData.commodityType,
+          quantityAvailable: validatedData.quantityAvailable,
+          pricePerUnit: validatedData.pricePerUnit,
+          county: validatedData.county,
+          farmerName: validatedData.farmerName,
+        };
         
         notifications.push(notification);
       }

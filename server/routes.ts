@@ -5829,9 +5829,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmPlots = await storage.getFarmPlots();
       }
       
+      console.log(`✅ Farm plots API: Found ${farmPlots.length} plots`);
       res.json(farmPlots);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch farm plots" });
+      console.error("❌ Farm plots API error:", error);
+      res.status(500).json({ message: "Failed to fetch farm plots", error: error.message });
     }
   });
 

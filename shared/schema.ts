@@ -1449,7 +1449,7 @@ export const harvestAlerts = pgTable("harvest_alerts", {
   isRead: boolean("is_read").default(false),
   sentToMarketplace: boolean("sent_to_marketplace").default(false),
   marketplaceListingId: text("marketplace_listing_id"),
-  geofenceRadius: decimal("geofence_radius", { precision: 8, scale: 2 }).default(50), // km radius for nearby buyers
+  geofenceRadius: decimal("geofence_radius", { precision: 8, scale: 2 }).default("50"), // km radius for nearby buyers
   targetCounties: jsonb("target_counties"), // specific counties to target
   readBy: jsonb("read_by"), // array of user IDs who read this alert
   actionTaken: jsonb("action_taken"), // actions taken by buyers/inspectors

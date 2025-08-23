@@ -117,23 +117,24 @@ export default function FarmerDashboard() {
 
     const formData = new FormData(e.target as HTMLFormElement);
     const offerData = {
-      farmerId: farmerId,
+      farmerId: parseInt(farmerId.split('-')[2]) || 1,
       commodityType: formData.get('commodityType'),
       quantityAvailable: parseFloat(formData.get('quantityAvailable') as string),
-      unit: formData.get('unit'),
-      pricePerUnit: formData.get('pricePerUnit'),
+      unit: formData.get('unit') || 'tons',
+      pricePerUnit: parseFloat(formData.get('pricePerUnit') as string),
       qualityGrade: formData.get('qualityGrade'),
       harvestDate: formData.get('harvestDate'),
-      paymentTerms: formData.get('paymentTerms'),
-      deliveryTerms: formData.get('deliveryTerms'),
-      description: formData.get('description'),
+      availableFromDate: new Date().toISOString().split('T')[0],
+      paymentTerms: formData.get('paymentTerms') || 'Payment within 7 days',
+      deliveryTerms: formData.get('deliveryTerms') || 'Farm pickup',
+      description: formData.get('description') || '',
       farmLocation: `${farmerName}'s Farm, ${farmerCounty} County`,
       farmerName: farmerName,
-      farmerCounty: farmerCounty
+      county: farmerCounty
     };
 
     try {
-      const response = await apiRequest('/api/farmer/submit-product-offer', {
+      const response = await apiRequest('/api/farmer-product-offers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(offerData),

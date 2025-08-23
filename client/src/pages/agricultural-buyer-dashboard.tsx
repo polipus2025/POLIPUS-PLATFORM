@@ -117,7 +117,7 @@ export default function AgriculturalBuyerDashboard() {
       // Show detailed success message with verification code
       toast({
         title: "🎉 Offerta Accettata con Successo!",
-        description: `Transazione confermata. Codice di verifica: ${response.verificationCode}. Controlla l'archivio transazioni per i dettagli completi.`,
+        description: `Transaction confirmed. Verification code: ${response.verificationCode}. Check transaction archive for complete details.`,
       });
 
       // Refresh all data
@@ -168,7 +168,7 @@ export default function AgriculturalBuyerDashboard() {
             <TabsTrigger value="notifications">Product Offers</TabsTrigger>
             <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>
             <TabsTrigger value="confirmed">Transazioni Confermate</TabsTrigger>
-            <TabsTrigger value="codes">Codici Verifica</TabsTrigger>
+            <TabsTrigger value="codes">Verification Codes</TabsTrigger>
             <TabsTrigger value="transactions">Transaction Dashboard</TabsTrigger>
           </TabsList>
 
@@ -514,15 +514,15 @@ export default function AgriculturalBuyerDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                  Archivio Transazioni Confermate
+                  Confirmed Transactions Archive
                 </CardTitle>
                 <CardDescription>
-                  Storico completo delle offerte accettate con dettagli di pagamento e consegna
+                  Complete history of accepted offers with payment and delivery details
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {confirmedLoading ? (
-                  <div className="text-center py-8 text-gray-500">Caricamento transazioni...</div>
+                  <div className="text-center py-8 text-gray-500">Loading transactions...</div>
                 ) : confirmedTransactions && confirmedTransactions.length > 0 ? (
                   <div className="space-y-4">
                     {confirmedTransactions.map((transaction: any) => (
@@ -534,38 +534,38 @@ export default function AgriculturalBuyerDashboard() {
                               <p className="text-sm text-gray-600">Farmer: {transaction.farmerName}</p>
                               <p className="text-sm text-gray-500">{transaction.farmLocation}</p>
                             </div>
-                            <Badge className="bg-green-600 text-white">Confermata</Badge>
+                            <Badge className="bg-green-600 text-white">Confirmed</Badge>
                           </div>
                           
                           <div className="grid grid-cols-3 gap-4 mb-4">
                             <div>
-                              <p className="text-sm text-gray-600">Quantità</p>
+                              <p className="text-sm text-gray-600">Quantity</p>
                               <p className="font-medium">{transaction.quantityAvailable} {transaction.unit}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-600">Valore Totale</p>
+                              <p className="text-sm text-gray-600">Total Value</p>
                               <p className="font-medium text-green-600">${transaction.totalValue}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-600">Codice Verifica</p>
+                              <p className="text-sm text-gray-600">Verification Code</p>
                               <p className="font-mono font-bold text-blue-600">{transaction.verificationCode}</p>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
-                              <p className="text-sm text-gray-600">Termini Pagamento</p>
+                              <p className="text-sm text-gray-600">Payment Terms</p>
                               <p className="text-sm">{transaction.paymentTerms}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-600">Termini Consegna</p>
+                              <p className="text-sm text-gray-600">Delivery Terms</p>
                               <p className="text-sm">{transaction.deliveryTerms}</p>
                             </div>
                           </div>
 
                           <div className="flex justify-between items-center pt-3 border-t border-green-200">
                             <div className="text-xs text-gray-500">
-                              Confermata: {new Date(transaction.confirmedAt).toLocaleString()}
+                              Confirmed: {new Date(transaction.confirmedAt).toLocaleString()}
                             </div>
                             <Badge variant="outline" className="text-green-600 border-green-600">
                               ID: {transaction.notificationId}
@@ -578,8 +578,8 @@ export default function AgriculturalBuyerDashboard() {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>Nessuna transazione confermata al momento</p>
-                    <p className="text-sm mt-2">Le offerte accettate appariranno qui</p>
+                    <p>No confirmed transactions at this time</p>
+                    <p className="text-sm mt-2">Accepted offers will appear here</p>
                   </div>
                 )}
               </CardContent>
@@ -592,10 +592,10 @@ export default function AgriculturalBuyerDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                  Archivio Codici di Verifica
+                  Verification Codes Archive
                 </CardTitle>
                 <CardDescription>
-                  Tutti i codici di verifica generati per la tracciabilità delle transazioni
+                  All verification codes generated for transaction traceability
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -627,7 +627,7 @@ export default function AgriculturalBuyerDashboard() {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>Nessun codice di verifica generato</p>
+                    <p>No verification codes generated</p>
                     <p className="text-sm mt-2">I codici appariranno quando accetti le offerte</p>
                   </div>
                 )}

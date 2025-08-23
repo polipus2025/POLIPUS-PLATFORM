@@ -130,13 +130,13 @@ export default function WarehouseInspectorDashboard() {
     },
     onSuccess: (data) => {
       toast({ 
-        title: "✅ Codice Validato!", 
-        description: `Codice ${data.verificationCode} validato con successo. Tipo: ${data.codeType}` 
+        title: "✅ Code Validated!", 
+        description: `Code ${data.verificationCode} validated successfully. Type: ${data.codeType}` 
       });
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/verification-codes'] });
     },
     onError: () => {
-      toast({ title: "❌ Errore", description: "Codice non valido o già utilizzato", variant: "destructive" });
+      toast({ title: "❌ Error", description: "Invalid code or already used", variant: "destructive" });
     }
   });
 

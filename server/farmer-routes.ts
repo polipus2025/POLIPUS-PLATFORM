@@ -123,16 +123,16 @@ export function registerFarmerRoutes(app: Express) {
       const { credentialId, password } = req.body;
       console.log(`🔐 Login attempt for credential ID: ${credentialId}`);
 
-      // Test account fallback
+      // Test account fallback (Paolo Jr account)
       if (credentialId === "FRM434923" && password === "Test2025!") {
         console.log("✅ Test farmer login successful");
         return res.json({
           success: true,
           farmer: {
             id: 1,
-            farmerId: "FARMER-TEST-2025",
-            firstName: "John",
-            lastName: "Konneh",
+            farmerId: "FARMER-1755883520291-288", // Paolo Jr's actual farmer ID
+            firstName: "Paolo",
+            lastName: "Jr",
             mustChangePassword: false
           },
           token: `farmer_test_${Date.now()}`

@@ -17,6 +17,8 @@ import { createTestFarmer } from "./create-test-farmer";
 
 import { 
   farmers,
+  farmerProductOffers,
+  buyerNotifications,
   insertCommoditySchema, 
   insertInspectionSchema, 
   insertCertificationSchema,
@@ -3349,28 +3351,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/buyer/available-harvests", async (req, res) => {
     try {
       // Fetch real farmer product offers from database
+      console.log("🔍 Fetching farmer product offers from database...");
       const realOffers = await db
-        .select({
-          id: farmerProductOffers.id,
-          farmerId: farmerProductOffers.farmerId,
-          farmerName: farmerProductOffers.farmerName,
-          commodity: farmerProductOffers.commodityType,
-          quantity: farmerProductOffers.quantityAvailable,
-          unit: farmerProductOffers.unit,
-          pricePerUnit: farmerProductOffers.pricePerUnit,
-          totalValue: farmerProductOffers.totalValue,
-          county: farmerProductOffers.county,
-          farmLocation: farmerProductOffers.farmLocation,
-          harvestDate: farmerProductOffers.harvestDate,
-          availableFromDate: farmerProductOffers.availableFromDate,
-          expirationDate: farmerProductOffers.expirationDate,
-          status: sql`'Ready'`.as('status'),
-          qualityGrade: farmerProductOffers.qualityGrade,
-          paymentTerms: farmerProductOffers.paymentTerms,
-          deliveryTerms: farmerProductOffers.deliveryTerms
-        })
+        .select()
         .from(farmerProductOffers)
         .orderBy(farmerProductOffers.createdAt);
+      
+      console.log("📦 Found", realOffers.length, "real offers in database");
+      console.log("📋 First offer:", realOffers[0] ? JSON.stringify(realOffers[0], null, 2) : "none");
 
       // Add mock data as fallback for demonstration
       const mockHarvests = [

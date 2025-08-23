@@ -357,74 +357,129 @@ export default function FarmerDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-green-600" />
-                Land Mapping Information
+                Farm Plots & Land Mapping
               </CardTitle>
               <CardDescription>
-                {farmerLandData?.landMappingAvailable 
-                  ? "Your land mapping data from registration" 
+                {farmerLandData?.totalPlots > 0 
+                  ? `You have ${farmerLandData.totalPlots} registered farm plot(s) with unique identification numbers` 
                   : "Note: Farmers cannot map new plots. Land mapping is restricted to Land Inspectors."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {farmerLandData?.landMappingAvailable ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Farm Details */}
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Farm Details</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div><strong>Farm Size:</strong> {farmerLandData.farmer?.farmSize} {farmerLandData.farmer?.farmSizeUnit}</div>
-                      <div><strong>Primary Crop:</strong> {farmerLandData.farmer?.primaryCrop}</div>
-                      <div><strong>County:</strong> {farmerLandData.farmer?.county}</div>
-                      <div><strong>District:</strong> {farmerLandData.farmer?.district}</div>
-                      {farmerLandData.farmer?.village && <div><strong>Village:</strong> {farmerLandData.farmer?.village}</div>}
-                    </div>
-                    
-                    {/* Land Map Data */}
-                    {farmerLandData.farmer?.landMapData && (
-                      <div className="mt-4">
-                        <h4 className="font-medium">Land Analysis</h4>
-                        <div className="text-sm space-y-1">
-                          <div><strong>Soil Type:</strong> {farmerLandData.farmer.landMapData.soilType}</div>
-                          <div><strong>Water Sources:</strong> {farmerLandData.farmer.landMapData.waterSources?.join(', ')}</div>
-                          <div><strong>EUDR Risk Level:</strong> 
-                            <Badge variant={farmerLandData.farmer.landMapData.eudrCompliance?.riskLevel === 'low' ? 'default' : 'destructive'} className="ml-2">
-                              {farmerLandData.farmer.landMapData.eudrCompliance?.riskLevel}
-                            </Badge>
+              {farmerLandData?.farmPlots && farmerLandData.farmPlots.length > 0 ? (
+                <div className="space-y-6">
+                  {/* Individual Farm Plots */}
+                  {farmerLandData.farmPlots.map((plot: any, index: number) => (
+                    <Card key={plot.id} className="border-2 border-green-100">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg text-green-800">Plot #{plot.plot_number}: {plot.plot_name}</h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              <strong>Unique Plot ID:</strong> <span className="font-mono bg-green-50 px-2 py-1 rounded text-green-700 font-bold">{plot.plot_id}</span>
+                            </p>
                           </div>
-                          <div><strong>Compliance Score:</strong> {farmerLandData.farmer.landMapData.eudrCompliance?.complianceScore}%</div>
+                          <Badge variant="outline" className="text-green-700 border-green-300">
+                            {plot.crop_type.charAt(0).toUpperCase() + plot.crop_type.slice(1)}
+                          </Badge>
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* GPS Boundaries */}
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">GPS Boundaries</h3>
-                    {farmerLandData.farmer?.farmBoundaries && (
-                      <div className="text-sm">
-                        <div className="bg-gray-50 p-3 rounded border">
-                          <strong>Boundary Points:</strong>
-                          {farmerLandData.farmer.farmBoundaries.map((point: any, index: number) => (
-                            <div key={index} className="mt-1">
-                              Point {point.point}: {point.lat}, {point.lng}
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Plot Details */}
+                          <div className="space-y-3">
+                            <h4 className="font-medium text-gray-800">Plot Information</h4>
+                            <div className="text-sm space-y-1">
+                              <div><strong>Size:</strong> {plot.plot_size} {plot.plot_size_unit}</div>
+                              <div><strong>Primary Crop:</strong> {plot.primary_crop || plot.crop_type}</div>
+                              {plot.secondary_crops && <div><strong>Secondary Crops:</strong> {plot.secondary_crops}</div>}
+                              <div><strong>Location:</strong> {plot.county}</div>
+                              {plot.district && <div><strong>District:</strong> {plot.district}</div>}
+                              <div><strong>Status:</strong> 
+                                <Badge variant={plot.status === 'active' ? 'default' : 'secondary'} className="ml-2">
+                                  {plot.status}
+                                </Badge>
+                              </div>
                             </div>
-                          ))}
+                            
+                            {/* Land Map Data from Plot */}
+                            {plot.land_map_data && (
+                              <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                                <h5 className="font-medium text-green-800 mb-2">Land Analysis</h5>
+                                <div className="text-sm space-y-1">
+                                  <div><strong>Soil Type:</strong> {plot.land_map_data.soilType}</div>
+                                  <div><strong>Water Sources:</strong> {plot.land_map_data.waterSources?.join(', ')}</div>
+                                  <div><strong>EUDR Risk Level:</strong> 
+                                    <Badge variant={plot.land_map_data.eudrCompliance?.riskLevel === 'low' ? 'default' : 'destructive'} className="ml-2">
+                                      {plot.land_map_data.eudrCompliance?.riskLevel}
+                                    </Badge>
+                                  </div>
+                                  <div><strong>Compliance Score:</strong> {plot.land_map_data.eudrCompliance?.complianceScore}%</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* GPS Information */}
+                          <div className="space-y-3">
+                            <h4 className="font-medium text-gray-800">GPS & Boundaries</h4>
+                            <div className="text-sm">
+                              <div><strong>Primary GPS:</strong> {plot.gps_coordinates}</div>
+                            </div>
+                            
+                            {plot.farm_boundaries && (
+                              <div className="text-sm">
+                                <div className="bg-gray-50 p-3 rounded border">
+                                  <strong>Boundary Points:</strong>
+                                  {plot.farm_boundaries.map((point: any, pointIndex: number) => (
+                                    <div key={pointIndex} className="mt-1 font-mono text-xs">
+                                      Point {point.point}: {point.lat}, {point.lng}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    
-                    {farmerLandData.farmer?.gpsCoordinates && (
-                      <div className="text-sm">
-                        <strong>Primary GPS:</strong> {farmerLandData.farmer.gpsCoordinates}
-                      </div>
-                    )}
-                  </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  
+                  {/* Legacy Farm Data (if exists) */}
+                  {farmerLandData.farmer?.landMapData && (
+                    <Card className="border-2 border-blue-100">
+                      <CardHeader>
+                        <CardTitle className="text-blue-800">Legacy Farm Registration Data</CardTitle>
+                        <CardDescription>Original farm mapping data from farmer registration</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium">Farm Details</h4>
+                            <div className="text-sm space-y-1">
+                              <div><strong>Farm Size:</strong> {farmerLandData.farmer?.farmSize} {farmerLandData.farmer?.farmSizeUnit}</div>
+                              <div><strong>Primary Crop:</strong> {farmerLandData.farmer?.primaryCrop}</div>
+                              <div><strong>County:</strong> {farmerLandData.farmer?.county}</div>
+                              <div><strong>District:</strong> {farmerLandData.farmer?.district}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <h4 className="font-medium">Legacy GPS Data</h4>
+                            <div className="text-sm">
+                              <div><strong>Primary GPS:</strong> {farmerLandData.farmer?.gpsCoordinates}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-12 text-gray-500">
                   <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium mb-2">Land Mapping Restricted</p>
-                  <p className="text-sm">All land mapping activities are handled by official Land Inspectors.</p>
+                  <p className="text-lg font-medium mb-2">No Farm Plots Registered</p>
+                  <p className="text-sm">Land mapping and plot registration is handled by official Land Inspectors.</p>
                   <p className="text-sm">Focus on crop scheduling and harvest management instead.</p>
                 </div>
               )}

@@ -64,6 +64,30 @@ import GenerateReports from "@/pages/generate-reports";
 import FarmersList from "@/pages/farmers-list";
 import LandPlotsList from "@/pages/land-plots-list";
 
+// ADDITIONAL AGRICULTURAL PAGES
+import EudrCompliance from "@/pages/eudr-compliance";
+import MobileAppDashboard from "@/pages/mobile-app-dashboard";
+import BuyerDashboardOld from "@/pages/buyer-dashboard";
+import Dashboard from "@/pages/dashboard";
+import MonitoringDashboard from "@/pages/monitoring-dashboard";
+import IntegratedDashboard from "@/pages/integrated-dashboard";
+
+// MISSING AGRICULTURAL PAGES
+import FarmPlots from "@/pages/farm-plots";
+import LandMappingDashboard from "@/pages/land-mapping-dashboard";
+import FieldAgentDashboard from "@/pages/field-agent-dashboard";
+import MobileAppDownload from "@/pages/mobile-app-download";
+import PwaTest from "@/pages/pwa-test";
+import BuyerExporterNetwork from "@/pages/buyer-exporter-network";
+import InspectorFarmerLandManagement from "@/pages/inspector-farmer-land-management";
+
+// FARMER SUBPAGES
+import FarmerLandMapping from "@/pages/farmer/farmer-land-mapping";
+import FarmerPaymentServices from "@/pages/farmer/farmer-payment-services";
+
+// ADDITIONAL AUTH PAGES
+import MonitoringLogin from "@/pages/auth/monitoring-login";
+
 function App() {
   return (
     <ErrorBoundary>
@@ -138,6 +162,36 @@ function App() {
             <Route path="/generate-reports" component={GenerateReports} />
             <Route path="/farmers-list" component={FarmersList} />
             <Route path="/land-plots-list" component={LandPlotsList} />
+            
+            {/* ADDITIONAL AGRICULTURAL PAGES */}
+            <Route path="/eudr-compliance" component={EudrCompliance} />
+            <Route path="/mobile-app-dashboard" component={MobileAppDashboard} />
+            <Route path="/buyer-dashboard-old" component={BuyerDashboardOld} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/monitoring-dashboard" component={MonitoringDashboard} />
+            <Route path="/integrated-dashboard" component={IntegratedDashboard} />
+            
+            {/* MISSING AGRICULTURAL PAGES */}
+            <Route path="/farm-plots" component={FarmPlots} />
+            <Route path="/land-mapping-dashboard" component={LandMappingDashboard} />
+            <Route path="/field-agent-dashboard" component={FieldAgentDashboard} />
+            <Route path="/mobile-app-download" component={MobileAppDownload} />
+            <Route path="/pwa-test" component={PwaTest} />
+            <Route path="/buyer-exporter-network" component={BuyerExporterNetwork} />
+            <Route path="/inspector-farmer-land-management" component={InspectorFarmerLandManagement} />
+            
+            {/* FARMER SUBPAGES */}
+            <Route path="/farmer-land-mapping" component={FarmerLandMapping} />
+            <Route path="/farmer-payment-services" component={FarmerPaymentServices} />
+            
+            {/* ADDITIONAL AUTH PAGES */}
+            <Route path="/monitoring-login" component={MonitoringLogin} />
+            
+            {/* UTILITY REDIRECTS */}
+            <Route path="/install-app" component={MobileAppDownload} />
+            
+            {/* POLIPUS REDIRECT */}
+            <Route path="/polipus" component={FrontPage} />
             
             {/* Default fallback */}
             <Route component={FrontPage} />

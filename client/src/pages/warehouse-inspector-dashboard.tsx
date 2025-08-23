@@ -153,13 +153,13 @@ export default function WarehouseInspectorDashboard() {
     },
     onSuccess: (data) => {
       toast({ 
-        title: "🎯 Batch Generato!", 
-        description: `Batch Code: ${data.batchCode} | QR Code generato con successo` 
+        title: "🎯 Batch Generated!", 
+        description: `Batch Code: ${data.batchCode} | QR Code generated successfully` 
       });
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-collections'] });
     },
     onError: () => {
-      toast({ title: "❌ Errore", description: "Impossibile generare batch", variant: "destructive" });
+      toast({ title: "❌ Error", description: "Unable to generate batch", variant: "destructive" });
     }
   });
 
@@ -408,19 +408,19 @@ export default function WarehouseInspectorDashboard() {
             </TabsTrigger>
             <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <CheckCircle className="w-4 h-4 mr-2" />
-              Transazioni
+              Transactions
             </TabsTrigger>
             <TabsTrigger value="codes" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <FileText className="w-4 h-4 mr-2" />
-              Codici
+              Codes
             </TabsTrigger>
             <TabsTrigger value="bags" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
-              Borse
+              Bags
             </TabsTrigger>
             <TabsTrigger value="validation" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Shield className="w-4 h-4 mr-2" />
-              Validazione
+              Validation
             </TabsTrigger>
             <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Warehouse className="w-4 h-4 mr-2" />

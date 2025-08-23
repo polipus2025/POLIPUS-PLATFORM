@@ -85,6 +85,7 @@ import {
   farmerBuyerTransactions,
   farmers,
   buyers,
+  farmPlots,
   
   // Blue Carbon 360 Schemas
   insertBlueCarbon360ProjectSchema,
@@ -227,53 +228,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new farm plot
+  // Create new farm plot - FIXED VERSION
   app.post("/api/farm-plots", async (req, res) => {
     try {
       const plotData = req.body;
       console.log("🔄 Creating new farm plot:", plotData);
       
-      // Insert new farm plot into database
+      // Insert new farm plot into database with proper validation
       const [newPlot] = await db
         .insert(farmPlots)
         .values({
-          plotId: plotData.plotId,
+          plotId: plotData.plotId || `PLOT-${Date.now()}`,
           farmerId: plotData.farmerId,
           farmerName: plotData.farmerName,
-          plotNumber: plotData.plotNumber,
+          plotNumber: plotData.plotNumber || 1,
           plotName: plotData.plotName,
-          cropType: plotData.cropType,
-          primaryCrop: plotData.primaryCrop,
-          secondaryCrops: plotData.secondaryCrops,
-          plotSize: plotData.plotSize.toString(),
-          plotSizeUnit: plotData.plotSizeUnit,
+          cropType: plotData.cropType || "cocoa",
+          primaryCrop: plotData.primaryCrop || plotData.cropType,
+          secondaryCrops: plotData.secondaryCrops || null,
+          plotSize: plotData.plotSize?.toString() || "0",
+          plotSizeUnit: plotData.plotSizeUnit || "hectares", 
           county: plotData.county,
           district: plotData.district || "",
-          village: plotData.village,
+          village: plotData.village || null,
           gpsCoordinates: plotData.gpsCoordinates,
-          farmBoundaries: plotData.farmBoundaries,
-          landMapData: plotData.landMapData,
-          soilType: plotData.soilType,
-          plantingDate: plotData.plantingDate,
-          expectedHarvestDate: plotData.expectedHarvestDate,
-          isActive: plotData.isActive,
-          status: plotData.status,
-          irrigationAccess: plotData.irrigationAccess,
-          landOwnership: plotData.landOwnership,
-          certifications: plotData.certifications
+          farmBoundaries: plotData.farmBoundaries || null,
+          landMapData: plotData.landMapData || null,
+          soilType: plotData.soilType || "unknown",
+          plantingDate: plotData.plantingDate || null,
+          expectedHarvestDate: plotData.expectedHarvestDate || null,
+          isActive: plotData.isActive !== undefined ? plotData.isActive : true,
+          status: plotData.status || "active",
+          irrigationAccess: plotData.irrigationAccess || false,
+          landOwnership: plotData.landOwnership || null,
+          certifications: plotData.certifications || null,
+          registrationDate: new Date(),
+          lastUpdated: new Date()
         })
         .returning();
 
-      console.log("✅ Farm plot created successfully:", newPlot);
+      console.log("✅ Farm plot saved to database:", newPlot);
       
-      res.json({
-        success: true,
-        message: "Farm plot created successfully",
-        plot: newPlot
-      });
+      // Return the new plot in the same format as the GET endpoint
+      res.status(201).json(newPlot);
       
     } catch (error) {
-      console.error("❌ Error creating farm plot:", error);
+      console.error("❌ Database insert error:", error);
       res.status(500).json({
         success: false,
         message: "Failed to create farm plot",

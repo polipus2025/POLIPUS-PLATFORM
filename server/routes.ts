@@ -781,7 +781,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // 5. Get all active transactions for a buyer
+  // 5. Update buyer profile
+  app.put("/api/buyer/update-profile", async (req, res) => {
+    try {
+      const {
+        buyerId,
+        businessName,
+        contactPersonFirstName,
+        contactPersonLastName,
+        primaryEmail,
+        county,
+        phoneNumber,
+        address
+      } = req.body;
+
+      if (!buyerId) {
+        return res.status(400).json({
+          success: false,
+          message: "Buyer ID is required"
+        });
+      }
+
+      // Update buyer profile using raw SQL to avoid ORM issues
+      await db.execute(sql`
+        UPDATE buyers SET
+          business_name = ${businessName},
+          contact_person_first_name = ${contactPersonFirstName},
+          contact_person_last_name = ${contactPersonLastName},
+          primary_email = ${primaryEmail},
+          county = ${county},
+          primary_phone = ${phoneNumber},
+          business_address = ${address},
+          updated_at = ${new Date()}
+        WHERE buyer_id = ${buyerId}
+      `);
+
+      res.json({
+        success: true,
+        message: "Profile updated successfully"
+      });
+
+    } catch (error) {
+      console.error("Error updating buyer profile:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update profile"
+      });
+    }
+  });
+
+  // 6. Get buyer profile data
+  app.get("/api/buyer/profile/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+
+      const profileResult = await db.execute(sql`
+        SELECT buyer_id as "buyerId", business_name as "businessName",
+               contact_person_first_name as "contactPersonFirstName",
+               contact_person_last_name as "contactPersonLastName", 
+               primary_email as "primaryEmail", county, primary_phone as "phoneNumber",
+               business_address as "businessAddress", is_active as "isActive"
+        FROM buyers WHERE buyer_id = ${buyerId}
+      `);
+
+      const profile = profileResult.rows?.[0] || profileResult[0];
+
+      if (!profile) {
+        return res.status(404).json({
+          success: false,
+          message: "Buyer profile not found"
+        });
+      }
+
+      res.json({
+        success: true,
+        profile
+      });
+
+    } catch (error) {
+      console.error("Error fetching buyer profile:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch profile"
+      });
+    }
+  });
+
+  // 7. Get all active transactions for a buyer
   app.get("/api/buyer-transactions/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;

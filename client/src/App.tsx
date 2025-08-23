@@ -12,6 +12,7 @@ import FarmerDashboard from "@/pages/farmer-dashboard";
 import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
+import WarehouseInspectorDashboard from "@/pages/warehouse-inspector-dashboard";
 
 function App() {
   return (
@@ -33,6 +34,9 @@ function App() {
             
             {/* Buyer Portal Routes */}
             <Route path="/buyer-dashboard" component={BuyerDashboard} />
+            
+            {/* Warehouse Inspector Route for Testing */}
+            <Route path="/warehouse-inspector-dashboard" component={WarehouseInspectorDashboard} />
             
             {/* Default fallback */}
             <Route component={FrontPage} />

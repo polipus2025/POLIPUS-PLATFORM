@@ -42,40 +42,40 @@ export default function WarehouseInspectorDashboard() {
   // Real data queries
   const { data: pendingInspections, isLoading: loadingInspections } = useQuery({
     queryKey: ['/api/warehouse-inspector/pending-inspections'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   const { data: storageCompliance, isLoading: loadingCompliance } = useQuery({
     queryKey: ['/api/warehouse-inspector/storage-compliance'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   const { data: inventoryStatus, isLoading: loadingInventory } = useQuery({
     queryKey: ['/api/warehouse-inspector/inventory-status'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   const { data: qualityControls, isLoading: loadingQuality } = useQuery({
     queryKey: ['/api/warehouse-inspector/quality-controls'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   // Fetch warehouse transaction archives
   const { data: warehouseTransactions, isLoading: warehouseTransactionsLoading } = useQuery({
     queryKey: ['/api/warehouse-inspector/transactions'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   // Fetch warehouse verification codes archive
   const { data: warehouseCodes, isLoading: warehouseCodesLoading } = useQuery({
     queryKey: ['/api/warehouse-inspector/verification-codes'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   // Fetch bag collection tracking
   const { data: bagCollections, isLoading: bagCollectionsLoading } = useQuery({
     queryKey: ['/api/warehouse-inspector/bag-collections'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   // Mutations for inspection actions

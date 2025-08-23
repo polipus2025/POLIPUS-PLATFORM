@@ -239,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mark harvest as complete - Generate automatic batch codes & notify all stakeholders
+  // Mark harvest as complete (Simple version - No batch codes)
   app.post("/api/farm-plots/:plotId/complete-harvest", async (req, res) => {
     try {
       const { plotId } = req.params;
@@ -260,9 +260,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("No plot data found after extraction");
         return res.status(404).json({ message: "Plot data not found" });
       }
-      
-      // AUTOMATIC BATCH CODE GENERATION
-      const batchCode = `BATCH-${(plot.crop_type || 'UNKNOWN').toUpperCase()}-${Date.now()}-${plot.plot_id}`;
       
       // Create harvest record
       await db.execute(sql`
@@ -287,37 +284,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE plot_id = ${plotId}
       `);
 
-      // AUTOMATIC NOTIFICATIONS TO ALL STAKEHOLDERS
-      console.log(`🔄 AUTOMATIC BATCH CODE GENERATED: ${batchCode}`);
-      console.log(`📋 NOTIFYING LAND INSPECTOR: Harvest completed for plot ${plot.plot_name}`);
-      console.log(`🏢 NOTIFYING WAREHOUSE INSPECTOR: ${actualYield}kg ${plot.crop_type} ready for inspection`);
-      console.log(`🏛️ NOTIFYING REGULATORY PANELS (DG/DDGOTS/DDGAF): New harvest batch ${batchCode}`);
-      console.log(`🛒 MARKETPLACE LISTING ENABLED: Harvest ready for buyer marketplace`);
-
-      // Create comprehensive response
-      const harvestData = {
-        batchCode,
-        farmerId: plot.farmer_code,
-        farmerName: `${plot.first_name || 'Unknown'} ${plot.last_name || 'Farmer'}`,
+      console.log(`✅ Harvest completed for plot ${plotId}`);
+      res.json({ 
+        success: true, 
+        message: "Harvest completed successfully",
         plotId: plot.plot_id,
-        plotName: plot.plot_name || 'Unnamed Plot',
-        plotNumber: plot.plot_number || 'N/A',
-        cropType: plot.crop_type || 'Unknown Crop',
+        cropType: plot.crop_type,
         actualYield: parseFloat(actualYield),
-        qualityGrade,
-        harvestDate,
-        notifications: {
-          landInspector: 'NOTIFIED',
-          warehouseInspector: 'NOTIFIED', 
-          regulatoryPanels: 'NOTIFIED',
-          marketplaceListing: 'ENABLED'
-        },
-        status: 'harvest_completed',
-        timestamp: new Date().toISOString()
-      };
-
-      console.log(`✅ HARVEST WORKFLOW COMPLETED: ${batchCode} - All stakeholders notified`);
-      res.json(harvestData);
+        status: 'harvested'
+      });
     } catch (error) {
       console.error("Error completing harvest:", error);
       res.status(500).json({ message: "Failed to complete harvest" });

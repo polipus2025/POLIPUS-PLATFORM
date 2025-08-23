@@ -34,13 +34,17 @@ export default function FarmerDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState<string | null>(null);
 
-  // Get farmer ID from localStorage
-  const farmerId = localStorage.getItem("farmerId") || "FRM-2024-001";
+  // Get farmer ID from localStorage (authenticated user's actual ID)
+  const farmerId = localStorage.getItem("farmerId") || localStorage.getItem("credentialId") || "FRM-2024-001";
   const farmerName = localStorage.getItem("farmerFirstName") || "Moses";
   const farmerCounty = localStorage.getItem("farmerCounty") || "Monrovia";
   
   // Fetch farmer-specific data
-  const { data: farmPlots } = useQuery({ queryKey: ["/api/farm-plots"] });
+  const { data: farmerLandData } = useQuery({ 
+    queryKey: ["/api/farmer-land-data", farmerId],
+    queryFn: () => apiRequest(`/api/farmer-land-data/${farmerId}`),
+    enabled: !!farmerId,
+  });
   const { data: cropPlans } = useQuery({ queryKey: ["/api/crop-plans"] });
   const { data: trackingRecords } = useQuery({ queryKey: ["/api/tracking-records"] });
 
@@ -58,8 +62,8 @@ export default function FarmerDashboard() {
     enabled: !!farmerId,
   });
 
-  // Mock data for dashboard stats
-  const totalPlots = Array.isArray(farmPlots) ? farmPlots.length : 3;
+  // Mock data for dashboard stats  
+  const totalPlots = farmerLandData?.landMappingAvailable ? 1 : 0;
   const activeCropPlans = Array.isArray(cropPlans) ? cropPlans.filter((plan: any) => plan.status === 'active').length : 2;
   const totalHarvested = Array.isArray(trackingRecords) 
     ? trackingRecords.reduce((sum: number, record: any) => sum + (record.harvestedQuantity || 0), 0) 
@@ -374,16 +378,74 @@ export default function FarmerDashboard() {
                 Land Mapping Information
               </CardTitle>
               <CardDescription>
-                Note: Farmers cannot map new plots. Land mapping is restricted to Land Inspectors through the official land mapping system.
+                {farmerLandData?.landMappingAvailable 
+                  ? "Your land mapping data from registration" 
+                  : "Note: Farmers cannot map new plots. Land mapping is restricted to Land Inspectors."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg font-medium mb-2">Land Mapping Restricted</p>
-                <p className="text-sm">All land mapping activities are handled by official Land Inspectors.</p>
-                <p className="text-sm">Focus on crop scheduling and harvest management instead.</p>
-              </div>
+              {farmerLandData?.landMappingAvailable ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Farm Details */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Farm Details</h3>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div><strong>Farm Size:</strong> {farmerLandData.farmer?.farmSize} {farmerLandData.farmer?.farmSizeUnit}</div>
+                      <div><strong>Primary Crop:</strong> {farmerLandData.farmer?.primaryCrop}</div>
+                      <div><strong>County:</strong> {farmerLandData.farmer?.county}</div>
+                      <div><strong>District:</strong> {farmerLandData.farmer?.district}</div>
+                      {farmerLandData.farmer?.village && <div><strong>Village:</strong> {farmerLandData.farmer?.village}</div>}
+                    </div>
+                    
+                    {/* Land Map Data */}
+                    {farmerLandData.farmer?.landMapData && (
+                      <div className="mt-4">
+                        <h4 className="font-medium">Land Analysis</h4>
+                        <div className="text-sm space-y-1">
+                          <div><strong>Soil Type:</strong> {JSON.parse(farmerLandData.farmer.landMapData).soilType}</div>
+                          <div><strong>Water Sources:</strong> {JSON.parse(farmerLandData.farmer.landMapData).waterSources?.join(', ')}</div>
+                          <div><strong>EUDR Risk Level:</strong> 
+                            <Badge variant={JSON.parse(farmerLandData.farmer.landMapData).eudrCompliance?.riskLevel === 'low' ? 'default' : 'destructive'} className="ml-2">
+                              {JSON.parse(farmerLandData.farmer.landMapData).eudrCompliance?.riskLevel}
+                            </Badge>
+                          </div>
+                          <div><strong>Compliance Score:</strong> {JSON.parse(farmerLandData.farmer.landMapData).eudrCompliance?.complianceScore}%</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* GPS Boundaries */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">GPS Boundaries</h3>
+                    {farmerLandData.farmer?.farmBoundaries && (
+                      <div className="text-sm">
+                        <div className="bg-gray-50 p-3 rounded border">
+                          <strong>Boundary Points:</strong>
+                          {JSON.parse(farmerLandData.farmer.farmBoundaries).map((point: any, index: number) => (
+                            <div key={index} className="mt-1">
+                              Point {point.point}: {point.lat}, {point.lng}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {farmerLandData.farmer?.gpsCoordinates && (
+                      <div className="text-sm">
+                        <strong>Primary GPS:</strong> {farmerLandData.farmer.gpsCoordinates}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium mb-2">Land Mapping Restricted</p>
+                  <p className="text-sm">All land mapping activities are handled by official Land Inspectors.</p>
+                  <p className="text-sm">Focus on crop scheduling and harvest management instead.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

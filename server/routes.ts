@@ -16,6 +16,7 @@ import { generateComprehensivePlatformDocumentation } from "./comprehensive-plat
 import { createTestFarmer } from "./create-test-farmer";
 
 import { 
+  farmers,
   insertCommoditySchema, 
   insertInspectionSchema, 
   insertCertificationSchema,
@@ -187,6 +188,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register crop scheduling routes
   app.use('/api', cropSchedulingRoutes);
+
+  // Get farmer land mapping data (with authentication to ensure data isolation)
+  app.get("/api/farmer-land-data/:farmerId", authenticateToken, async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const authenticatedUser = req.user as any;
+      
+      // Security check: Ensure farmer can only access their own data
+      if (authenticatedUser.role !== 'farmer' || authenticatedUser.farmerId !== farmerId) {
+        return res.status(403).json({ 
+          message: "Access denied. You can only view your own farm data." 
+        });
+      }
+      
+      const [farmer] = await db
+        .select({
+          farmerId: farmers.farmerId,
+          firstName: farmers.firstName,
+          lastName: farmers.lastName,
+          landMapData: farmers.landMapData,
+          farmBoundaries: farmers.farmBoundaries,
+          farmSize: farmers.farmSize,
+          farmSizeUnit: farmers.farmSizeUnit,
+          primaryCrop: farmers.primaryCrop,
+          secondaryCrops: farmers.secondaryCrops,
+          county: farmers.county,
+          district: farmers.district,
+          village: farmers.village,
+          gpsCoordinates: farmers.gpsCoordinates,
+        })
+        .from(farmers)
+        .where(eq(farmers.farmerId, farmerId));
+
+      if (!farmer) {
+        return res.status(404).json({ message: "Farmer not found" });
+      }
+
+      res.json({
+        success: true,
+        farmer,
+        landMappingAvailable: !!(farmer.landMapData || farmer.farmBoundaries),
+      });
+    } catch (error) {
+      console.error("Error fetching farmer land data:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch farmer land data" 
+      });
+    }
+  });
 
   // ========================================
   // COUNTY-BASED FARMER-BUYER NOTIFICATION SYSTEM

@@ -62,8 +62,8 @@ export default function FarmerDashboard() {
     enabled: !!farmerId,
   });
 
-  // Mock data for dashboard stats  
-  const totalPlots = farmerLandData?.landMappingAvailable ? 1 : 0;
+  // Real data for dashboard stats  
+  const totalPlots = farmerLandData?.totalPlots || 0;
   const activeCropPlans = Array.isArray(cropPlans) ? cropPlans.filter((plan: any) => plan.status === 'active').length : 2;
   const totalHarvested = Array.isArray(trackingRecords) 
     ? trackingRecords.reduce((sum: number, record: any) => sum + (record.harvestedQuantity || 0), 0) 

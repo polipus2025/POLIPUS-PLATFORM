@@ -110,6 +110,7 @@ export const productConfigurations = pgTable("product_configurations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+
 // QR Code Batch Tracking System for Warehouse Bags - Enhanced
 export const qrBatches = pgTable("qr_batches", {
   id: serial("id").primaryKey(),
@@ -1557,17 +1558,41 @@ export const insertBuyerInquirySchema = createInsertSchema(buyerInquiries).omit(
 
 export const farmPlots = pgTable("farm_plots", {
   id: serial("id").primaryKey(),
-  plotId: text("plot_id").notNull().unique(),
-  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  plotId: text("plot_id").notNull().unique(), // PLOT-FARM001-001, PLOT-FARM001-002, etc.
+  farmerId: text("farmer_id").notNull(), // References farmers.farmer_id
+  farmerName: text("farmer_name").notNull(),
+  plotNumber: integer("plot_number").notNull(), // 1, 2, 3, etc. for this farmer
   plotName: text("plot_name").notNull(),
+  
+  // Plot-specific agricultural data
   cropType: text("crop_type").notNull(), // cocoa, coffee, palm_oil, rubber, rice
+  primaryCrop: text("primary_crop"),
+  secondaryCrops: text("secondary_crops"),
   plotSize: decimal("plot_size", { precision: 10, scale: 2 }).notNull(),
   plotSizeUnit: text("plot_size_unit").default("hectares"),
-  gpsCoordinates: text("gps_coordinates"), // JSON array of lat/lng points
+  
+  // Plot-specific location data
+  county: text("county").notNull(),
+  district: text("district"),
+  village: text("village"),
+  gpsCoordinates: text("gps_coordinates").notNull(), // Primary GPS for this plot
+  farmBoundaries: jsonb("farm_boundaries"), // GPS boundary points for this plot
+  landMapData: jsonb("land_map_data"), // Soil type, EUDR compliance, etc. for this plot
   soilType: text("soil_type"),
+  
+  // Plot management and status
   plantingDate: timestamp("planting_date"),
   expectedHarvestDate: timestamp("expected_harvest_date"),
+  isActive: boolean("is_active").default(true),
   status: text("status").notNull().default("active"), // active, fallow, retired
+  registrationDate: timestamp("registration_date").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  
+  // Additional plot-specific data
+  irrigationAccess: boolean("irrigation_access").default(false),
+  landOwnership: text("land_ownership"), // owned, leased, communal
+  certifications: text("certifications"), // Plot-specific certifications
+  
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -2792,6 +2817,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
 
 // LACRA Soft Commodity Pricing System
 export const softCommodities = pgTable("soft_commodities", {

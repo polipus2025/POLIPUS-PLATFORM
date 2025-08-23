@@ -189,11 +189,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register crop scheduling routes
   app.use('/api', cropSchedulingRoutes);
 
-  // Get farmer land mapping data (temporarily without auth for debugging)
+  // Get farmer land mapping data with unique plot numbering
   app.get("/api/farmer-land-data/:farmerId", async (req, res) => {
     try {
       const { farmerId } = req.params;
       
+      // Get farmer basic info
       const [farmer] = await db
         .select({
           farmerId: farmers.farmerId,
@@ -217,10 +218,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Farmer not found" });
       }
 
+      // Get farmer's individual plots
+      const farmerPlots = await db.execute(sql`
+        SELECT * FROM farm_plots 
+        WHERE farmer_id = ${farmerId} 
+        ORDER BY plot_number
+      `);
+
       res.json({
         success: true,
         farmer,
-        landMappingAvailable: !!(farmer.landMapData || farmer.farmBoundaries),
+        farmPlots: farmerPlots.rows || [],
+        totalPlots: farmerPlots.rows?.length || 0,
+        landMappingAvailable: !!(farmer.landMapData || farmer.farmBoundaries || farmerPlots.rows?.length > 0),
       });
     } catch (error) {
       console.error("Error fetching farmer land data:", error);

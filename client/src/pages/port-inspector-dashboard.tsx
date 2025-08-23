@@ -38,17 +38,17 @@ export default function PortInspectorDashboard() {
   // Real data queries
   const { data: pendingInspections, isLoading: loadingInspections } = useQuery({
     queryKey: ['/api/port-inspector/pending-inspections'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   const { data: activeShipments, isLoading: loadingShipments } = useQuery({
     queryKey: ['/api/port-inspector/active-shipments'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   const { data: complianceStats, isLoading: loadingCompliance } = useQuery({
     queryKey: ['/api/port-inspector/compliance-stats'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   const { data: regulatorySync, isLoading: loadingSync } = useQuery({

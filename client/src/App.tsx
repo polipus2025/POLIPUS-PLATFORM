@@ -14,6 +14,16 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
 import WarehouseInspectorDashboard from "@/pages/warehouse-inspector-dashboard";
 
+// AGRICULTURAL SYSTEM PORTALS
+import PortInspectorDashboard from "@/pages/port-inspector-dashboard";
+import ExporterDashboard from "@/pages/exporter-dashboard";
+import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashboard";
+import RegulatoryPortalClassic from "@/pages/regulatory-portal-classic";
+import DDGAFDashboard from "@/pages/ddgaf-dashboard";
+import DDGOTSDashboard from "@/pages/ddgots-dashboard";
+import DGDashboard from "@/pages/dg-dashboard";
+import AgriTraceAdminPortal from "@/pages/agritrace-admin-portal";
+
 // POLIPUS MODULE PORTALS - All 7 modules
 import LiveTracePortal from "@/pages/portals/live-trace-portal";
 import LandMap360Portal from "@/pages/portals/land-map360-portal";
@@ -53,8 +63,22 @@ function App() {
             {/* Buyer Portal Routes */}
             <Route path="/buyer-dashboard" component={BuyerDashboard} />
             
-            {/* Warehouse Inspector Route for Testing */}
+            {/* AGRICULTURAL INSPECTOR PORTALS */}
             <Route path="/warehouse-inspector-dashboard" component={WarehouseInspectorDashboard} />
+            <Route path="/port-inspector-dashboard" component={PortInspectorDashboard} />
+            <Route path="/unified-land-inspector-dashboard" component={UnifiedLandInspectorDashboard} />
+            
+            {/* REGULATORY PORTALS */}
+            <Route path="/regulatory-portal-classic" component={RegulatoryPortalClassic} />
+            <Route path="/ddgaf-dashboard" component={DDGAFDashboard} />
+            <Route path="/ddgots-dashboard" component={DDGOTSDashboard} />
+            <Route path="/dg-dashboard" component={DGDashboard} />
+            
+            {/* EXPORTER PORTAL */}
+            <Route path="/exporter-dashboard" component={ExporterDashboard} />
+            
+            {/* SYSTEM ADMIN PORTAL */}
+            <Route path="/agritrace-admin-portal" component={AgriTraceAdminPortal} />
             
             {/* Default fallback */}
             <Route component={FrontPage} />

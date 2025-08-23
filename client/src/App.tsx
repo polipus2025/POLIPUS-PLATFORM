@@ -24,6 +24,18 @@ import DDGOTSDashboard from "@/pages/ddgots-dashboard";
 import DGDashboard from "@/pages/dg-dashboard";
 import AgriTraceAdminPortal from "@/pages/agritrace-admin-portal";
 
+// AGRICULTURAL LOGIN PAGES
+import RegulatoryLogin from "@/pages/auth/regulatory-login";
+import WarehouseInspectorLogin from "@/pages/auth/warehouse-inspector-login";
+import PortInspectorLogin from "@/pages/auth/port-inspector-login";
+import LandInspectorLogin from "@/pages/auth/land-inspector-login";
+import ExporterLogin from "@/pages/auth/exporter-login";
+import DDGAFLogin from "@/pages/auth/ddgaf-login";
+import DDGOTSLogin from "@/pages/auth/ddgots-login";
+import DGLogin from "@/pages/auth/dg-login";
+import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
+import SystemAdminLogin from "@/pages/auth/system-admin-login";
+
 // POLIPUS MODULE PORTALS - All 7 modules
 import LiveTracePortal from "@/pages/portals/live-trace-portal";
 import LandMap360Portal from "@/pages/portals/land-map360-portal";
@@ -55,12 +67,22 @@ function App() {
             <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
             <Route path="/carbon-trace" component={CarbonTracePortal} />
             
-            {/* Farmer Portal Routes */}
+            {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
-            <Route path="/farmer-dashboard" component={FarmerDashboard} />
+            <Route path="/regulatory-login" component={RegulatoryLogin} />
+            <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
+            <Route path="/port-inspector-login" component={PortInspectorLogin} />
+            <Route path="/land-inspector-login" component={LandInspectorLogin} />
+            <Route path="/exporter-login" component={ExporterLogin} />
+            <Route path="/ddgaf-login" component={DDGAFLogin} />
+            <Route path="/ddgots-login" component={DDGOTSLogin} />
+            <Route path="/dg-login" component={DGLogin} />
+            <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
+            <Route path="/system-admin-login" component={SystemAdminLogin} />
             
-            {/* Buyer Portal Routes */}
+            {/* AGRICULTURAL DASHBOARD ROUTES */}
+            <Route path="/farmer-dashboard" component={FarmerDashboard} />
             <Route path="/buyer-dashboard" component={BuyerDashboard} />
             
             {/* AGRICULTURAL INSPECTOR PORTALS */}

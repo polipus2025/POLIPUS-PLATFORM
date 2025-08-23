@@ -24,7 +24,10 @@ import {
   MessageSquare,
   Bell,
   BarChart3,
-  Home
+  Home,
+  Clock,
+  CheckCircle,
+  Loader2
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -221,22 +224,30 @@ export default function FarmerDashboard() {
 
       {/* Simplified Tabbed Navigation Interface */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-slate-100 h-12">
-          <TabsTrigger value="overview" className="flex items-center justify-center gap-2 text-sm p-3">
-            <Home className="h-4 w-4" />
-            <span>Overview</span>
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-slate-100 h-12">
+          <TabsTrigger value="overview" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
+            <Home className="h-3 w-3 lg:h-4 lg:w-4" />
+            <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-2 text-sm p-3">
-            <MapPin className="h-4 w-4" />
-            <span>Land Info</span>
+          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
+            <MapPin className="h-3 w-3 lg:h-4 lg:w-4" />
+            <span className="hidden sm:inline">Land Info</span>
           </TabsTrigger>
-          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-2 text-sm p-3">
-            <ShoppingCart className="h-4 w-4" />
-            <span>Marketplace</span>
+          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
+            <ShoppingCart className="h-3 w-3 lg:h-4 lg:w-4" />
+            <span className="hidden sm:inline">Marketplace</span>
           </TabsTrigger>
-          <TabsTrigger value="transactions" className="flex items-center justify-center gap-2 text-sm p-3">
-            <FileText className="h-4 w-4" />
-            <span>Transactions</span>
+          <TabsTrigger value="pending-offers" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
+            <Clock className="h-3 w-3 lg:h-4 lg:w-4" />
+            <span className="hidden sm:inline">Pending Offers</span>
+          </TabsTrigger>
+          <TabsTrigger value="verification-codes" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 bg-blue-50 text-blue-600">
+            <CheckCircle className="h-3 w-3 lg:h-4 lg:w-4" />
+            <span className="hidden sm:inline">Verification Codes</span>
+          </TabsTrigger>
+          <TabsTrigger value="confirmed-transactions" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
+            <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
+            <span className="hidden sm:inline">Confirmed Transactions</span>
           </TabsTrigger>
         </TabsList>
 
@@ -709,16 +720,16 @@ export default function FarmerDashboard() {
         </TabsContent>
 
         {/* TRANSACTIONS TAB */}
-        <TabsContent value="transactions" className="space-y-3 mt-6">
-          {/* Pending Offers Section */}
+        {/* PENDING OFFERS TAB */}
+        <TabsContent value="pending-offers" className="space-y-3 mt-3">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Package className="w-5 h-5 mr-2 text-orange-600" />
-                Pending Product Offers
+                <Clock className="w-5 h-5 mr-2 text-orange-600" />
+                Pending Offers
               </CardTitle>
               <CardDescription>
-                Your submitted offers waiting for buyer acceptance
+                Your product offers awaiting buyer response
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -737,8 +748,62 @@ export default function FarmerDashboard() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Confirmed Transactions Archive */}
+        {/* VERIFICATION CODES TAB */}
+        <TabsContent value="verification-codes" className="space-y-3 mt-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2 text-blue-600" />
+                Verification Codes
+              </CardTitle>
+              <CardDescription>
+                Transaction verification codes from approved offers
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {verificationCodes?.map((code: any) => (
+                  <Card key={code.verificationCode} className="border-blue-200 bg-blue-50">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <code className="px-3 py-2 bg-blue-100 text-blue-700 rounded text-lg font-mono font-bold">
+                              {code.verificationCode}
+                            </code>
+                            <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+                              {code.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-700 font-medium">Buyer: {code.buyerName}</p>
+                          <p className="text-sm text-gray-600">{code.commodityType} • {code.quantityAvailable} {code.unit}</p>
+                          <p className="text-sm text-blue-600 font-medium">Total Value: ${code.totalValue?.toLocaleString()}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">
+                            Generated: {new Date(code.generatedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {(!verificationCodes || verificationCodes.length === 0) && (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No verification codes yet</p>
+                    <p className="text-sm">Codes will appear here when buyers accept your offers</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* CONFIRMED TRANSACTIONS TAB */}
+        <TabsContent value="confirmed-transactions" className="space-y-3 mt-3">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -746,7 +811,7 @@ export default function FarmerDashboard() {
                 Confirmed Transactions
               </CardTitle>
               <CardDescription>
-                Your accepted offers history
+                Completed transactions with payment confirmation
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -824,52 +889,13 @@ export default function FarmerDashboard() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                  <p className="text-sm">No transactions yet</p>
+                  <p className="text-sm">No confirmed transactions yet</p>
+                  <p className="text-xs">Completed transactions will appear here</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Verification Codes Archive */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                Verification Codes
-              </CardTitle>
-              <CardDescription>
-                Your verification codes for transactions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {farmerCodesLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading...</div>
-              ) : farmerCodes && farmerCodes.length > 0 ? (
-                <div className="space-y-3">
-                  {farmerCodes.map((code: any) => (
-                    <div key={code.id} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-mono font-bold text-blue-600">{code.verificationCode}</p>
-                          <p className="text-sm text-gray-600">{code.commodityType} - {code.buyerName}</p>
-                        </div>
-                        <Badge className="bg-blue-600 text-white text-xs">Active</Badge>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        <p>Value: <span className="font-medium">${code.totalValue}</span></p>
-                        <p className="text-xs">{new Date(code.generatedAt).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                  <p className="text-sm">No codes generated</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* BUYER INQUIRIES TAB */}

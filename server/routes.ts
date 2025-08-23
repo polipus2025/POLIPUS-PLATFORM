@@ -81,6 +81,7 @@ import {
   insertBuyerNotificationSchema,
   insertFarmerBuyerTransactionSchema,
   farmerProductOffers,
+  buyerNotifications,
   farmerBuyerTransactions,
   farmers,
   buyers,
@@ -187,151 +188,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register crop scheduling routes
   app.use('/api', cropSchedulingRoutes);
-
-  // HARVEST SCHEDULING & TRACKING API ENDPOINTS (Database Connected)
-  // Update plot planting date (MANUAL - No automatic harvest date calculation)
-  app.put("/api/farm-plots/:plotId/planting-date", async (req, res) => {
-    try {
-      const { plotId } = req.params;
-      const { plantingDate } = req.body;
-      
-      const plantingDateObj = new Date(plantingDate);
-      
-      await db.execute(sql`
-        UPDATE farm_plots 
-        SET 
-          planting_date = ${plantingDateObj}, 
-          status = 'planted',
-          created_at = ${new Date()}
-        WHERE plot_id = ${plotId}
-      `);
-      
-      console.log(`✅ Updated planting date for plot ${plotId} - Status reset to 'planted' (Manual control)`);
-      res.json({ 
-        success: true, 
-        message: "Planting date updated successfully - Set harvest date separately", 
-        newStatus: "planted"
-      });
-    } catch (error) {
-      console.error("Error updating planting date:", error);
-      res.status(500).json({ message: "Failed to update planting date" });
-    }
-  });
-
-  // Update plot harvest date
-  app.put("/api/farm-plots/:plotId/harvest-date", async (req, res) => {
-    try {
-      const { plotId } = req.params;
-      const { expectedHarvestDate } = req.body;
-      
-      await db.execute(sql`
-        UPDATE farm_plots 
-        SET expected_harvest_date = ${new Date(expectedHarvestDate)}, created_at = ${new Date()}
-        WHERE plot_id = ${plotId}
-      `);
-      
-      console.log(`✅ Updated harvest date for plot ${plotId}`);
-      res.json({ success: true, message: "Harvest date updated successfully" });
-    } catch (error) {
-      console.error("Error updating harvest date:", error);
-      res.status(500).json({ message: "Failed to update harvest date" });
-    }
-  });
-
-  // Mark harvest as complete (Simple version - No batch codes)
-  app.post("/api/farm-plots/:plotId/complete-harvest", async (req, res) => {
-    try {
-      const { plotId } = req.params;
-      const { actualYield, qualityGrade, harvestDate, moistureContent } = req.body;
-      
-      // Get plot details
-      const plotResult = await db.execute(sql`
-        SELECT fp.*, f.farmer_id as farmer_code, f.first_name, f.last_name 
-        FROM farm_plots fp 
-        JOIN farmers f ON fp.farmer_id = f.farmer_id 
-        WHERE fp.plot_id = ${plotId}
-      `);
-      
-      // Extract plot data from database result
-      const plot = plotResult?.rows?.[0] || plotResult?.[0];
-      
-      if (!plot) {
-        console.log("No plot data found after extraction");
-        return res.status(404).json({ message: "Plot data not found" });
-      }
-      
-      // Create harvest record
-      await db.execute(sql`
-        INSERT INTO harvest_records (farmer_id, plot_id, harvest_date, crop_type, quantity_harvested, unit, quality_grade, moisture_content, payment_status)
-        VALUES (
-          (SELECT id FROM farmers WHERE farmer_id = ${plot.farmer_code}),
-          ${plot.id},
-          ${new Date(harvestDate)},
-          ${plot.crop_type || 'Unknown'},
-          ${parseFloat(actualYield)},
-          'kg',
-          ${qualityGrade},
-          ${moistureContent ? parseFloat(moistureContent) : null},
-          'pending'
-        )
-      `);
-
-      // Update plot status
-      await db.execute(sql`
-        UPDATE farm_plots 
-        SET status = 'harvested', created_at = ${new Date()}
-        WHERE plot_id = ${plotId}
-      `);
-
-      console.log(`✅ Harvest completed for plot ${plotId}`);
-      res.json({ 
-        success: true, 
-        message: "Harvest completed successfully",
-        plotId: plot.plot_id,
-        cropType: plot.crop_type,
-        actualYield: parseFloat(actualYield),
-        status: 'harvested'
-      });
-    } catch (error) {
-      console.error("Error completing harvest:", error);
-      res.status(500).json({ message: "Failed to complete harvest" });
-    }
-  });
-
-  // Get harvest history for farmer
-  app.get("/api/farmers/:farmerId/harvest-history", async (req, res) => {
-    try {
-      const { farmerId } = req.params;
-      
-      // Get harvest records with plot details
-      const harvestHistory = await db.execute(sql`
-        SELECT 
-          hr.id,
-          hr.harvest_date,
-          hr.crop_type,
-          hr.quantity_harvested,
-          hr.unit,
-          hr.quality_grade,
-          hr.moisture_content,
-          hr.total_value,
-          hr.payment_status,
-          fp.plot_name,
-          fp.plot_id,
-          fp.plot_number
-        FROM harvest_records hr
-        LEFT JOIN farm_plots fp ON hr.plot_id = fp.id
-        LEFT JOIN farmers f ON hr.farmer_id = f.id
-        WHERE f.farmer_id = ${farmerId}
-        ORDER BY hr.harvest_date DESC
-      `);
-
-      console.log(`✅ Retrieved ${harvestHistory.length} harvest records for farmer ${farmerId}`);
-      res.json(harvestHistory);
-    } catch (error) {
-      console.error("Error fetching harvest history:", error);
-      res.status(500).json({ message: "Failed to fetch harvest history" });
-    }
-  });
 
   // Get farmer land mapping data with unique plot numbering
   app.get("/api/farmer-land-data/:farmerId", async (req, res) => {
@@ -459,60 +315,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
 
       // Get all buyers in the same county
-      const countyBuyersResult = await db.execute(sql`
-        SELECT id, buyer_id as "buyerId", business_name as "businessName", 
-               contact_person_first_name as "contactPersonFirstName", 
-               contact_person_last_name as "contactPersonLastName",
-               primary_email as "primaryEmail", county
-        FROM buyers 
-        WHERE county = ${validatedData.county} 
-        AND is_active = true 
-        AND portal_access = true
-      `);
-      
-      // Safe parsing of database result
-      let countyBuyers = [];
-      if (countyBuyersResult.rows && Array.isArray(countyBuyersResult.rows)) {
-        countyBuyers = countyBuyersResult.rows;
-      } else if (Array.isArray(countyBuyersResult)) {
-        countyBuyers = countyBuyersResult;
-      }
-      
-      console.log(`Found ${countyBuyers.length} buyers in ${validatedData.county} county`);
+      const countyBuyers = await db
+        .select({
+          id: buyers.id,
+          buyerId: buyers.buyerId,
+          businessName: buyers.businessName,
+          contactPersonFirstName: buyers.contactPersonFirstName,
+          contactPersonLastName: buyers.contactPersonLastName,
+          primaryEmail: buyers.primaryEmail,
+          county: buyers.county,
+        })
+        .from(buyers)
+        .where(eq(buyers.county, validatedData.county))
+        .where(eq(buyers.isActive, true))
+        .where(eq(buyers.portalAccess, true));
 
       // Create notifications for all buyers in the county
       const notifications = [];
-      
-      // Ensure countyBuyers is an array before iterating
-      if (!Array.isArray(countyBuyers)) {
-        console.error("countyBuyers is not an array:", typeof countyBuyers, countyBuyers);
-        countyBuyers = [];
-      }
-      
       for (const buyer of countyBuyers) {
         const notificationId = generateNotificationId();
         const buyerName = `${buyer.contactPersonFirstName} ${buyer.contactPersonLastName}`;
         
-        await db.execute(sql`
-          INSERT INTO buyer_notifications (
-            notification_id, offer_id, buyer_id, buyer_name, title, message, 
-            commodity_type, quantity_available, price_per_unit, county, farmer_name, created_at
-          ) VALUES (
-            ${notificationId}, ${offer.offerId}, ${buyer.id}, ${buyerName},
-            ${`New ${validatedData.commodityType} Available in ${validatedData.county}`},
-            ${`${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for ${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`},
-            ${validatedData.commodityType}, ${validatedData.quantityAvailable}, 
-            ${validatedData.pricePerUnit}, ${validatedData.county}, 
-            ${validatedData.farmerName}, ${new Date()}
-          )
-        `);
-        
-        const notification = {
+        const [notification] = await db.insert(buyerNotifications).values({
           notificationId,
+          offerId: offer.offerId,
           buyerId: buyer.id,
           buyerName,
-          commodityType: validatedData.commodityType
-        };
+          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
+          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for ${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
+          commodityType: validatedData.commodityType,
+          quantityAvailable: validatedData.quantityAvailable,
+          pricePerUnit: validatedData.pricePerUnit,
+          county: validatedData.county,
+          farmerName: validatedData.farmerName,
+        }).returning();
         
         notifications.push(notification);
       }
@@ -547,33 +383,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { buyerId } = req.params;
 
-      const notifications = await db.execute(sql`
-        SELECT 
-          notification_id as "notificationId",
-          notification_id as "id",
-          offer_id as "offerId",
-          buyer_id as "buyerId",
-          buyer_name as "buyerName",
-          title,
-          message,
-          commodity_type as "commodityType",
-          quantity_available as "quantityAvailable",
-          price_per_unit as "pricePerUnit",
-          county,
-          farmer_name as "farmerName",
-          CASE WHEN response IS NULL THEN 'pending' ELSE response END as status,
-          'tons' as unit,
-          (quantity_available * price_per_unit) as "totalValue",
-          'Grade A' as "qualityGrade",
-          'Payment within 7 days of delivery' as "paymentTerms",
-          'Pickup at farm location' as "deliveryTerms",
-          CONCAT(county, ' County') as "farmLocation",
-          message as description,
-          created_at as "createdAt"
-        FROM buyer_notifications 
-        WHERE buyer_id = ${parseInt(buyerId) || 5}
-        ORDER BY created_at DESC
-      `);
+      const notifications = await db
+        .select({
+          notificationId: buyerNotifications.notificationId,
+          id: buyerNotifications.notificationId,
+          offerId: buyerNotifications.offerId,
+          buyerId: buyerNotifications.buyerId,
+          buyerName: buyerNotifications.buyerName,
+          title: buyerNotifications.title,
+          message: buyerNotifications.message,
+          commodityType: buyerNotifications.commodityType,
+          quantityAvailable: buyerNotifications.quantityAvailable,
+          pricePerUnit: buyerNotifications.pricePerUnit,
+          county: buyerNotifications.county,
+          farmerName: buyerNotifications.farmerName,
+          status: sql`CASE WHEN ${buyerNotifications.response} IS NULL THEN 'pending' ELSE ${buyerNotifications.response} END`.as('status'),
+          unit: sql`'tons'`.as('unit'),
+          totalValue: sql`(${buyerNotifications.quantityAvailable} * ${buyerNotifications.pricePerUnit})`.as('totalValue'),
+          qualityGrade: sql`'Grade A'`.as('qualityGrade'),
+          paymentTerms: sql`'Payment within 7 days of delivery'`.as('paymentTerms'),
+          deliveryTerms: sql`'Pickup at farm location'`.as('deliveryTerms'),
+          farmLocation: sql`CONCAT(${buyerNotifications.county}, ' County')`.as('farmLocation'),
+          description: sql`${buyerNotifications.message}`.as('description'),
+          createdAt: buyerNotifications.createdAt,
+        })
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.buyerId, 
+          parseInt(buyerId) || 5
+        ))
+        .orderBy(desc(buyerNotifications.createdAt));
 
       res.json({
         success: true,
@@ -603,10 +441,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get the notification
-      const notificationResult = await db.execute(sql`
-        SELECT * FROM buyer_notifications WHERE notification_id = ${notificationId}
-      `);
-      const notification = notificationResult.rows?.[0] || notificationResult[0];
+      const [notification] = await db
+        .select()
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.notificationId, notificationId));
 
       if (!notification) {
         return res.status(404).json({
@@ -636,21 +474,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // First-Click-Wins Logic: Check if anyone has already confirmed
-      const existingConfirmationsResult = await db.execute(sql`
-        SELECT * FROM buyer_notifications 
-        WHERE offer_id = ${notification.offer_id} AND response = 'confirmed'
-      `);
-      const existingConfirmations = existingConfirmationsResult.rows || existingConfirmationsResult;
+      const existingConfirmations = await db
+        .select()
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.offerId, notification.offerId))
+        .where(eq(buyerNotifications.response, "confirmed"));
 
       if (response === "confirmed") {
         if (existingConfirmations.length > 0) {
           // Someone already confirmed - this buyer was too late
-          await db.execute(sql`
-            UPDATE buyer_notifications 
-            SET response = 'rejected', response_date = ${new Date()}, 
-                click_order = ${existingConfirmations.length + 1}, is_winner = false
-            WHERE notification_id = ${notificationId}
-          `);
+          await db.update(buyerNotifications)
+            .set({ 
+              response: "rejected",
+              responseDate: new Date(),
+              clickOrder: existingConfirmations.length + 1,
+              isWinner: false,
+            })
+            .where(eq(buyerNotifications.notificationId, notificationId));
 
           return res.status(400).json({
             success: false,
@@ -660,12 +500,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // First buyer to confirm - they win!
-        await db.execute(sql`
-          UPDATE buyer_notifications 
-          SET response = 'confirmed', response_date = ${new Date()}, 
-              click_order = 1, is_winner = true
-          WHERE notification_id = ${notificationId}
-        `);
+        await db.update(buyerNotifications)
+          .set({ 
+            response: "confirmed",
+            responseDate: new Date(),
+            clickOrder: 1,
+            isWinner: true,
+          })
+          .where(eq(buyerNotifications.notificationId, notificationId));
 
         // Mark offer as reserved
         await db.update(farmerProductOffers)
@@ -703,11 +545,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }).returning();
 
         // Mark all other notifications for this offer as rejected (auto-reject losers)
-        await db.execute(sql`
-          UPDATE buyer_notifications 
-          SET response = 'rejected', response_date = ${new Date()}, is_winner = false
-          WHERE offer_id = ${notification.offer_id} AND notification_id != ${notificationId}
-        `);
+        await db.update(buyerNotifications)
+          .set({ 
+            response: "rejected",
+            responseDate: new Date(),
+            isWinner: false,
+          })
+          .where(eq(buyerNotifications.offerId, notification.offerId))
+          .where(ne(buyerNotifications.notificationId, notificationId));
 
         res.json({
           success: true,
@@ -720,11 +565,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       } else {
         // Buyer rejected the offer
-        await db.execute(sql`
-          UPDATE buyer_notifications 
-          SET response = 'rejected', response_date = ${new Date()}, is_winner = false
-          WHERE notification_id = ${notificationId}
-        `);
+        await db.update(buyerNotifications)
+          .set({ 
+            response: "rejected",
+            responseDate: new Date(),
+            isWinner: false,
+          })
+          .where(eq(buyerNotifications.notificationId, notificationId));
 
         res.json({
           success: true,
@@ -781,93 +628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // 5. Update buyer profile
-  app.put("/api/buyer/update-profile", async (req, res) => {
-    try {
-      const {
-        buyerId,
-        businessName,
-        contactPersonFirstName,
-        contactPersonLastName,
-        primaryEmail,
-        county,
-        phoneNumber,
-        address
-      } = req.body;
-
-      if (!buyerId) {
-        return res.status(400).json({
-          success: false,
-          message: "Buyer ID is required"
-        });
-      }
-
-      // Update buyer profile using raw SQL to avoid ORM issues
-      await db.execute(sql`
-        UPDATE buyers SET
-          business_name = ${businessName},
-          contact_person_first_name = ${contactPersonFirstName},
-          contact_person_last_name = ${contactPersonLastName},
-          primary_email = ${primaryEmail},
-          county = ${county},
-          primary_phone = ${phoneNumber},
-          business_address = ${address},
-          updated_at = ${new Date()}
-        WHERE buyer_id = ${buyerId}
-      `);
-
-      res.json({
-        success: true,
-        message: "Profile updated successfully"
-      });
-
-    } catch (error) {
-      console.error("Error updating buyer profile:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to update profile"
-      });
-    }
-  });
-
-  // 6. Get buyer profile data
-  app.get("/api/buyer/profile/:buyerId", async (req, res) => {
-    try {
-      const { buyerId } = req.params;
-
-      const profileResult = await db.execute(sql`
-        SELECT buyer_id as "buyerId", business_name as "businessName",
-               contact_person_first_name as "contactPersonFirstName",
-               contact_person_last_name as "contactPersonLastName", 
-               primary_email as "primaryEmail", county, primary_phone as "phoneNumber",
-               business_address as "businessAddress", is_active as "isActive"
-        FROM buyers WHERE buyer_id = ${buyerId}
-      `);
-
-      const profile = profileResult.rows?.[0] || profileResult[0];
-
-      if (!profile) {
-        return res.status(404).json({
-          success: false,
-          message: "Buyer profile not found"
-        });
-      }
-
-      res.json({
-        success: true,
-        profile
-      });
-
-    } catch (error) {
-      console.error("Error fetching buyer profile:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch profile"
-      });
-    }
-  });
-
-  // 7. Get all active transactions for a buyer
+  // 5. Get all active transactions for a buyer
   app.get("/api/buyer-transactions/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
@@ -3770,42 +3531,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // TEMP: Add hardcoded test credentials for development
-      if (username === "land.inspector" && password === "land123") {
-        const token = jwt.sign(
-          { 
-            inspectorId: "LAND-INS-001",
-            username: "land.inspector",
-            role: 'land_inspector',
-            userType: 'land_inspector',
-            inspectorType: 'land',
-            county: "Montserrado"
-          },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
-
-        return res.json({
-          success: true,
-          token,
-          inspector: {
-            id: "LAND-INS-001",
-            inspectorId: "LAND-INS-001",
-            firstName: "Land",
-            lastName: "Inspector",
-            fullName: "Land Inspector Johnson",
-            email: "land.inspector@lacra.gov.lr",
-            phoneNumber: "+231-77-555-0101",
-            inspectorType: "land",
-            inspectionAreaCounty: "Montserrado",
-            inspectionAreaDistrict: "Greater Monrovia",
-            specializations: ["Crop Assessment", "Soil Analysis", "EUDR Compliance"],
-            certificationLevel: "Level 3"
-          },
-          mustChangePassword: false
-        });
-      }
-
       // Check if inspector credentials exist and is of correct type
       const credentials = await storage.getInspectorCredentialsByUsername(username);
       if (!credentials || credentials.inspectorType !== 'land') {
@@ -3911,42 +3636,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ 
           success: false, 
           message: "Username and password are required" 
-        });
-      }
-
-      // TEMP: Add hardcoded test credentials for development
-      if (username === "port.inspector" && password === "port123") {
-        const token = jwt.sign(
-          { 
-            inspectorId: "PORT-INS-001",
-            username: "port.inspector",
-            role: 'port_inspector',
-            userType: 'port_inspector',
-            inspectorType: 'port',
-            port: "Monrovia Port"
-          },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
-
-        return res.json({
-          success: true,
-          token,
-          inspector: {
-            id: "PORT-INS-001",
-            inspectorId: "PORT-INS-001",
-            firstName: "Port",
-            lastName: "Inspector",
-            fullName: "Port Inspector Williams",
-            email: "port.inspector@lacra.gov.lr",
-            phoneNumber: "+231-77-555-0102",
-            inspectorType: "port",
-            inspectionAreaCounty: "Montserrado",
-            portFacility: "Monrovia Port",
-            specializations: ["Export Inspection", "Container Verification", "Documentation Review"],
-            certificationLevel: "Level 3"
-          },
-          mustChangePassword: false
         });
       }
 

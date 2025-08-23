@@ -86,13 +86,6 @@ export default function AgriculturalBuyerDashboard() {
     enabled: !!buyerId,
   });
 
-  // Fetch buyer profile data
-  const { data: profileData, isLoading: profileLoading } = useQuery({
-    queryKey: ['/api/buyer/profile', buyerId],
-    queryFn: () => apiRequest(`/api/buyer/profile/${buyerId}`),
-    enabled: !!buyerId && activeTab === 'profile',
-  });
-
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('buyerId');
@@ -170,14 +163,13 @@ export default function AgriculturalBuyerDashboard() {
       {/* Main Content */}
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Business Overview</TabsTrigger>
             <TabsTrigger value="notifications">Product Offers</TabsTrigger>
             <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>
             <TabsTrigger value="confirmed">Confirmed Transactions</TabsTrigger>
             <TabsTrigger value="codes">Verification Codes</TabsTrigger>
             <TabsTrigger value="transactions">Transaction Dashboard</TabsTrigger>
-            <TabsTrigger value="profile">Profile & Settings</TabsTrigger>
           </TabsList>
 
           {/* Business Overview Tab */}
@@ -737,245 +729,6 @@ export default function AgriculturalBuyerDashboard() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Profile & Settings Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Profile & Business Settings
-                </CardTitle>
-                <CardDescription>
-                  Update your business profile and contact information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-6" onSubmit={async (e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target as HTMLFormElement);
-                  
-                  try {
-                    const profileData = {
-                      businessName: formData.get('businessName') as string,
-                      contactPersonFirstName: formData.get('firstName') as string,
-                      contactPersonLastName: formData.get('lastName') as string,
-                      primaryEmail: formData.get('email') as string,
-                      county: formData.get('county') as string,
-                      phoneNumber: formData.get('phoneNumber') as string,
-                      address: formData.get('address') as string,
-                      buyerId: buyerId
-                    };
-
-                    await apiRequest('/api/buyer/update-profile', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(profileData)
-                    });
-
-                    toast({
-                      title: "Profile Updated Successfully!",
-                      description: "Your business profile has been updated."
-                    });
-
-                    // Update localStorage with new data
-                    localStorage.setItem('buyerName', `${profileData.contactPersonFirstName} ${profileData.contactPersonLastName}`);
-                    localStorage.setItem('company', profileData.businessName);
-
-                  } catch (error: any) {
-                    toast({
-                      title: "Update Failed",
-                      description: error.message || "Failed to update profile. Please try again.",
-                      variant: "destructive"
-                    });
-                  }
-                }}>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Business Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">Business Information</h3>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Business Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="businessName"
-                          defaultValue={profileData?.profile?.businessName || company}
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          required
-                          data-testid="input-business-name"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          County/Region <span className="text-red-500">*</span>
-                        </label>
-                        <select 
-                          name="county"
-                          defaultValue={profileData?.profile?.county || ''}
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          required
-                          data-testid="select-county"
-                        >
-                          <option value="">Select County...</option>
-                          <option value="Monrovia">Monrovia</option>
-                          <option value="Bong">Bong</option>
-                          <option value="Nimba">Nimba</option>
-                          <option value="Lofa">Lofa</option>
-                          <option value="Grand Bassa">Grand Bassa</option>
-                          <option value="Cape Mount">Cape Mount</option>
-                          <option value="Gbarpolu">Gbarpolu</option>
-                          <option value="Grand Cape Mount">Grand Cape Mount</option>
-                          <option value="Margibi">Margibi</option>
-                          <option value="Maryland">Maryland</option>
-                          <option value="Montserrado">Montserrado</option>
-                          <option value="River Cess">River Cess</option>
-                          <option value="River Gee">River Gee</option>
-                          <option value="Sinoe">Sinoe</option>
-                          <option value="Grand Gedeh">Grand Gedeh</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Business Address
-                        </label>
-                        <textarea
-                          name="address"
-                          rows={3}
-                          defaultValue={profileData?.profile?.businessAddress || ''}
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Enter your business address..."
-                          data-testid="textarea-address"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Contact Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">Contact Information</h3>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            First Name <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="firstName"
-                            defaultValue={profileData?.profile?.contactPersonFirstName || buyerName.split(' ')[0]}
-                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                            data-testid="input-first-name"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Last Name <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="lastName"
-                            defaultValue={profileData?.profile?.contactPersonLastName || buyerName.split(' ')[1] || ''}
-                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                            data-testid="input-last-name"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Email Address <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          defaultValue={profileData?.profile?.primaryEmail || ''}
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          required
-                          data-testid="input-email"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Phone Number
-                        </label>
-                        <input
-                          type="tel"
-                          name="phoneNumber"
-                          defaultValue={profileData?.profile?.phoneNumber || ''}
-                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="+231 XXX XXXX"
-                          data-testid="input-phone"
-                        />
-                      </div>
-
-                      <div className="pt-4">
-                        <Button 
-                          type="submit" 
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                          data-testid="button-update-profile"
-                        >
-                          Update Profile
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Account Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Account Settings
-                </CardTitle>
-                <CardDescription>
-                  Manage your account preferences and security
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-gray-900">Buyer ID</h4>
-                      <p className="text-sm text-gray-600">{buyerId}</p>
-                    </div>
-                    <Badge variant="secondary">Active</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-gray-900">Portal Access</h4>
-                      <p className="text-sm text-gray-600">Full access to buyer portal</p>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800">Enabled</Badge>
-                  </div>
-
-                  <div className="pt-4 border-t">
-                    <Button 
-                      variant="outline" 
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2"
-                      data-testid="button-logout"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
-                    </Button>
                   </div>
                 </div>
               </CardContent>

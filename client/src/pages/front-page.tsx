@@ -30,7 +30,7 @@ import {
   FileCheck,
   Building2
 } from 'lucide-react';
-import poliposLogo from '@assets/polipos-logo-1_1753394173408.jpg';
+import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
 import GlobalGPSDetector from '@/components/global-gps-detector';
 
@@ -41,7 +41,7 @@ export default function FrontPage() {
       title: 'Agricultural Traceability & Compliance',
       icon: Wheat,
       color: 'bg-green-500',
-      route: '/agritrace',
+      route: '/portals',
       isAgriTrace: true,
       description: 'Complete agricultural commodity tracking & LACRA compliance system'
     },

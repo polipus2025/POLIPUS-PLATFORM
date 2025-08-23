@@ -43,7 +43,7 @@ export default function AgriculturalBuyerDashboard() {
   // Fetch product offer notifications for this buyer
   const { data: notifications, isLoading: notificationsLoading } = useQuery({
     queryKey: ['/api/buyer/notifications', buyerId],
-    queryFn: () => apiRequest(`/api/buyer/notifications/${buyerId}`),
+    queryFn: () => apiRequest(`/api/buyer-notifications/${buyerId}`),
     enabled: !!buyerId,
     refetchInterval: 30000, // Refresh every 30 seconds
   });

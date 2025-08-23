@@ -12,18 +12,15 @@ import FarmerDashboard from "@/pages/farmer-dashboard";
 import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
-import WarehouseInspectorDashboard from "@/pages/warehouse-inspector-dashboard";
 
-// Inspector Portal imports
-import InspectorPortal from "@/pages/inspector-portal";
+// Inspector Portal imports - MINIMAL TEST APPROACH
+import MinimalInspectorTest from "@/pages/minimal-inspector-test";
 import LandInspectorLogin from "@/pages/auth/land-inspector-login";
 import WarehouseInspectorLogin from "@/pages/auth/warehouse-inspector-login";
 import PortInspectorLogin from "@/pages/auth/port-inspector-login";
 import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashboard";
 import PortInspectorDashboard from "@/pages/port-inspector-dashboard";
-
-// Inspector App for dedicated routing
-import InspectorApp from "./InspectorApp";
+import WarehouseInspectorDashboard from "@/pages/warehouse-inspector-dashboard";
 
 function App() {
   return (
@@ -31,31 +28,17 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Switch>
-            {/* INSPECTOR ROUTES - ABSOLUTE PRIORITY */}
-            <Route path="/inspector-portal">
-              {() => <InspectorPortal />}
-            </Route>
-            <Route path="/land-inspector-login">
-              {() => <LandInspectorLogin />}
-            </Route>
-            <Route path="/warehouse-inspector-login">
-              {() => <WarehouseInspectorLogin />}
-            </Route>
-            <Route path="/port-inspector-login">
-              {() => <PortInspectorLogin />}
-            </Route>
-            <Route path="/warehouse-inspector-dashboard">
-              {() => <WarehouseInspectorDashboard />}
-            </Route>
-            <Route path="/unified-land-inspector-dashboard">
-              {() => <UnifiedLandInspectorDashboard />}
-            </Route>
-            <Route path="/port-inspector-dashboard">
-              {() => <PortInspectorDashboard />}
-            </Route>
+            {/* NUCLEAR SOLUTION - MINIMAL INSPECTOR TEST */}
+            <Route path="/" component={MinimalInspectorTest} />
+            <Route path="/inspector-portal" component={MinimalInspectorTest} />
+            <Route path="/land-inspector-login" component={LandInspectorLogin} />
+            <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
+            <Route path="/port-inspector-login" component={PortInspectorLogin} />
+            <Route path="/warehouse-inspector-dashboard" component={WarehouseInspectorDashboard} />
+            <Route path="/unified-land-inspector-dashboard" component={UnifiedLandInspectorDashboard} />
+            <Route path="/port-inspector-dashboard" component={PortInspectorDashboard} />
             
-            {/* Main Polipus page */}
-            <Route path="/" component={FrontPage} />
+            {/* Main Polipus page - MOVED TO BACK */}
             <Route path="/front-page" component={FrontPage} />
             
             {/* Agricultural Traceability Portal */}

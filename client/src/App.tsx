@@ -22,6 +22,10 @@ import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashbo
 import PortInspectorDashboard from "@/pages/port-inspector-dashboard";
 import WarehouseInspectorDashboard from "@/pages/warehouse-inspector-dashboard";
 
+// AgriTrace Module imports
+import AgriTraceDashboard from "@/pages/agritrace-dashboard";
+import AgriTraceAdminPortal from "@/pages/agritrace-admin-portal";
+
 function App() {
   return (
     <ErrorBoundary>
@@ -52,6 +56,11 @@ function App() {
 
             {/* Buyer Routes */}
             <Route path="/agricultural-buyer-dashboard" component={BuyerDashboard} />
+
+            {/* AgriTrace Routes */}
+            <Route path="/agritrace" component={AgriTraceDashboard} />
+            <Route path="/agritrace-dashboard" component={AgriTraceDashboard} />
+            <Route path="/agritrace-admin" component={AgriTraceAdminPortal} />
 
             {/* Fallback Route */}
             <Route>

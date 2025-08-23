@@ -105,7 +105,7 @@ export default function MobileNav() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
-      <div className="grid grid-cols-4 h-16">
+      <div className="flex h-16">
         {navigationItems.map((item) => {
           const isActive = location === item.href;
           const isMessaging = item.name === "Messages";
@@ -115,7 +115,7 @@ export default function MobileNav() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center space-y-1 transition-colors relative",
+                "flex flex-1 flex-col items-center justify-center py-2 transition-colors relative min-w-0",
                 isActive
                   ? userType === 'farmer' 
                     ? "text-green-700 bg-green-50"
@@ -127,12 +127,12 @@ export default function MobileNav() {
                   : "text-gray-600 hover:bg-gray-50"
               )}
             >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              <span className="text-xs font-medium mobile-responsive-text">{item.name}</span>
+              <item.icon className="h-4 w-4 flex-shrink-0 mb-1" />
+              <span className="text-xs font-medium mobile-responsive-text truncate max-w-full px-1">{item.name}</span>
               
               {/* Show notification badge for messaging */}
               {isMessaging && unreadCount > 0 && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-white">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>

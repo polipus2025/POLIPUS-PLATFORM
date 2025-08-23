@@ -158,7 +158,7 @@ export default function FarmerDashboard() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-3 sm:p-0">
+    <div className="space-y-3 sm:space-y-4 p-2 sm:p-4 max-w-7xl mx-auto">
       {/* Back to Polipus Button */}
       <div className="mb-4">
         <Link href="/polipus" className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
@@ -172,10 +172,10 @@ export default function FarmerDashboard() {
       {/* Mobile-Responsive Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900">
             Welcome back, {farmerName}!
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             Farmer ID: {farmerId} | Your farm management dashboard
           </p>
         </div>
@@ -215,64 +215,64 @@ export default function FarmerDashboard() {
         </TabsList>
 
         {/* OVERVIEW TAB */}
-        <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Perfectly Balanced Statistics Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <TabsContent value="overview" className="space-y-3 mt-3">
+          {/* Compact Statistics Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium text-green-600">Total Farm Plots</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-green-900">{totalPlots}</p>
-                    <p className="text-xs text-green-600 mt-1">Registered plots</p>
+                    <p className="text-xs font-medium text-green-600">Farm Plots</p>
+                    <p className="text-lg sm:text-xl font-bold text-green-900">{totalPlots}</p>
+                    <p className="text-xs text-green-600">Registered</p>
                   </div>
-                  <MapPin className="h-8 w-8 sm:h-12 sm:w-12 text-green-600" />
+                  <MapPin className="h-6 w-6 text-green-600" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium text-blue-600">Active Crop Plans</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-blue-900">{activeCropPlans}</p>
-                    <p className="text-xs text-blue-600 mt-1">Current season</p>
+                    <p className="text-xs font-medium text-blue-600">Crop Plans</p>
+                    <p className="text-lg sm:text-xl font-bold text-blue-900">{activeCropPlans}</p>
+                    <p className="text-xs text-blue-600">Active</p>
                   </div>
-                  <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-blue-600" />
+                  <Calendar className="h-6 w-6 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium text-orange-600">Total Harvested</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-orange-900">{totalHarvested.toFixed(1)}</p>
-                    <p className="text-xs text-orange-600 mt-1">Metric tons</p>
+                    <p className="text-xs font-medium text-orange-600">Harvested</p>
+                    <p className="text-lg sm:text-xl font-bold text-orange-900">{totalHarvested.toFixed(1)}</p>
+                    <p className="text-xs text-orange-600">Tons</p>
                   </div>
-                  <Package className="h-8 w-8 sm:h-12 sm:w-12 text-orange-600" />
+                  <Package className="h-6 w-6 text-orange-600" />
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium text-purple-600">Pending Inspections</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-purple-900">{pendingInspections}</p>
-                    <p className="text-xs text-purple-600 mt-1">Awaiting review</p>
+                    <p className="text-xs font-medium text-purple-600">Pending</p>
+                    <p className="text-lg sm:text-xl font-bold text-purple-900">{pendingInspections}</p>
+                    <p className="text-xs text-purple-600">Reviews</p>
                   </div>
-                  <Clock className="h-8 w-8 sm:h-12 sm:w-12 text-purple-600" />
+                  <Clock className="h-6 w-6 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Balanced Recent Activities and Quick Actions */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Compact Recent Activities and Quick Actions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Recent Farm Activities */}
             <Card>
               <CardHeader>

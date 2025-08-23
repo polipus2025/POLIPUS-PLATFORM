@@ -26,6 +26,7 @@ import AgriTraceAdminPortal from "@/pages/agritrace-admin-portal";
 
 // AGRICULTURAL LOGIN PAGES
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
+import InspectorLogin from "@/pages/auth/inspector-login";
 import WarehouseInspectorLogin from "@/pages/auth/warehouse-inspector-login";
 import PortInspectorLogin from "@/pages/auth/port-inspector-login";
 import LandInspectorLogin from "@/pages/auth/land-inspector-login";
@@ -72,6 +73,7 @@ function App() {
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
             <Route path="/regulatory-login" component={RegulatoryLogin} />
+            <Route path="/inspector-login" component={InspectorLogin} />
             <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
             <Route path="/port-inspector-login" component={PortInspectorLogin} />
             <Route path="/land-inspector-login" component={LandInspectorLogin} />

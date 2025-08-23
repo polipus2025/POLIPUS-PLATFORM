@@ -258,7 +258,7 @@ export default function PortInspectorDashboard() {
                 onClick={() => {
                   localStorage.removeItem("inspectorData");
                   localStorage.removeItem("inspectorToken");
-                  window.location.href = "/port-inspector-login";
+                  window.location.href = "/inspector-login";
                 }}
                 className="text-red-600 border-red-200 hover:bg-red-50"
               >

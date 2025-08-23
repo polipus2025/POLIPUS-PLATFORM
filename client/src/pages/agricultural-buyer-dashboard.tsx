@@ -72,6 +72,20 @@ export default function AgriculturalBuyerDashboard() {
     queryFn: () => apiRequest('/api/buyer/business-metrics'),
   });
 
+  // Fetch confirmed transactions archive
+  const { data: confirmedTransactions, isLoading: confirmedLoading } = useQuery({
+    queryKey: ['/api/buyer/confirmed-transactions', buyerId],
+    queryFn: () => apiRequest(`/api/buyer/confirmed-transactions/${buyerId}`),
+    enabled: !!buyerId,
+  });
+
+  // Fetch verification codes archive
+  const { data: verificationCodes, isLoading: codesLoading } = useQuery({
+    queryKey: ['/api/buyer/verification-codes', buyerId], 
+    queryFn: () => apiRequest(`/api/buyer/verification-codes/${buyerId}`),
+    enabled: !!buyerId,
+  });
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('buyerId');
@@ -100,17 +114,20 @@ export default function AgriculturalBuyerDashboard() {
         headers: { 'Content-Type': 'application/json' }
       });
 
+      // Show detailed success message with verification code
       toast({
-        title: "Offer Accepted Successfully!",
-        description: `Transaction confirmed. Your verification code is: ${response.verificationCode}`,
+        title: "🎉 Offerta Accettata con Successo!",
+        description: `Transazione confermata. Codice di verifica: ${response.verificationCode}. Controlla l'archivio transazioni per i dettagli completi.`,
       });
 
-      // Refresh notifications
+      // Refresh all data
       queryClient.invalidateQueries({ queryKey: ['/api/buyer/notifications', buyerId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/confirmed-transactions', buyerId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/verification-codes', buyerId] });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to accept offer. It may have been taken by another buyer.",
+        title: "Errore",
+        description: error.message || "Impossibile accettare l'offerta. Potrebbe essere stata presa da un altro buyer.",
         variant: "destructive",
       });
     }
@@ -146,10 +163,12 @@ export default function AgriculturalBuyerDashboard() {
       {/* Main Content */}
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Business Overview</TabsTrigger>
             <TabsTrigger value="notifications">Product Offers</TabsTrigger>
             <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>
+            <TabsTrigger value="confirmed">Transazioni Confermate</TabsTrigger>
+            <TabsTrigger value="codes">Codici Verifica</TabsTrigger>
             <TabsTrigger value="transactions">Transaction Dashboard</TabsTrigger>
           </TabsList>
 
@@ -489,6 +508,132 @@ export default function AgriculturalBuyerDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Confirmed Transactions Archive Tab */}
+          <TabsContent value="confirmed" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                  Archivio Transazioni Confermate
+                </CardTitle>
+                <CardDescription>
+                  Storico completo delle offerte accettate con dettagli di pagamento e consegna
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {confirmedLoading ? (
+                  <div className="text-center py-8 text-gray-500">Caricamento transazioni...</div>
+                ) : confirmedTransactions && confirmedTransactions.length > 0 ? (
+                  <div className="space-y-4">
+                    {confirmedTransactions.map((transaction: any) => (
+                      <Card key={transaction.id} className="border border-green-200 bg-green-50">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-semibold text-lg text-green-800">{transaction.commodityType}</h4>
+                              <p className="text-sm text-gray-600">Farmer: {transaction.farmerName}</p>
+                              <p className="text-sm text-gray-500">{transaction.farmLocation}</p>
+                            </div>
+                            <Badge className="bg-green-600 text-white">Confermata</Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-600">Quantità</p>
+                              <p className="font-medium">{transaction.quantityAvailable} {transaction.unit}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Valore Totale</p>
+                              <p className="font-medium text-green-600">${transaction.totalValue}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Codice Verifica</p>
+                              <p className="font-mono font-bold text-blue-600">{transaction.verificationCode}</p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-600">Termini Pagamento</p>
+                              <p className="text-sm">{transaction.paymentTerms}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Termini Consegna</p>
+                              <p className="text-sm">{transaction.deliveryTerms}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center pt-3 border-t border-green-200">
+                            <div className="text-xs text-gray-500">
+                              Confermata: {new Date(transaction.confirmedAt).toLocaleString()}
+                            </div>
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              ID: {transaction.notificationId}
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>Nessuna transazione confermata al momento</p>
+                    <p className="text-sm mt-2">Le offerte accettate appariranno qui</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Verification Codes Archive Tab */}
+          <TabsContent value="codes" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-blue-600" />
+                  Archivio Codici di Verifica
+                </CardTitle>
+                <CardDescription>
+                  Tutti i codici di verifica generati per la tracciabilità delle transazioni
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {codesLoading ? (
+                  <div className="text-center py-8 text-gray-500">Caricamento codici...</div>
+                ) : verificationCodes && verificationCodes.length > 0 ? (
+                  <div className="space-y-3">
+                    {verificationCodes.map((code: any) => (
+                      <div key={code.id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <p className="font-mono font-bold text-blue-600 text-lg">{code.verificationCode}</p>
+                              <p className="text-sm text-gray-600">{code.commodityType} - {code.farmerName}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Valore: <span className="font-medium">${code.totalValue}</span></p>
+                              <p className="text-sm text-gray-600">Quantità: <span className="font-medium">{code.quantityAvailable} {code.unit}</span></p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-blue-600 text-white mb-1">Attivo</Badge>
+                          <p className="text-xs text-gray-500">{new Date(code.generatedAt).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>Nessun codice di verifica generato</p>
+                    <p className="text-sm mt-2">I codici appariranno quando accetti le offerte</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Transaction Dashboard Tab */}
           <TabsContent value="transactions" className="space-y-6">

@@ -36,6 +36,20 @@ export default function FarmerDashboard() {
   const { data: farmPlots } = useQuery({ queryKey: ["/api/farm-plots"] });
   const { data: cropPlans } = useQuery({ queryKey: ["/api/crop-plans"] });
   const { data: trackingRecords } = useQuery({ queryKey: ["/api/tracking-records"] });
+
+  // Fetch farmer confirmed transactions archive
+  const { data: farmerTransactions, isLoading: farmerTransactionsLoading } = useQuery({
+    queryKey: ['/api/farmer/confirmed-transactions', farmerId],
+    queryFn: () => apiRequest(`/api/farmer/confirmed-transactions/${farmerId}`),
+    enabled: !!farmerId,
+  });
+
+  // Fetch farmer verification codes archive
+  const { data: farmerCodes, isLoading: farmerCodesLoading } = useQuery({
+    queryKey: ['/api/farmer/verification-codes', farmerId], 
+    queryFn: () => apiRequest(`/api/farmer/verification-codes/${farmerId}`),
+    enabled: !!farmerId,
+  });
   const { data: alerts } = useQuery({ queryKey: ["/api/alerts", "unreadOnly=true"] });
 
   // Calculate farmer statistics
@@ -517,6 +531,97 @@ export default function FarmerDashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Farmer Transaction Archives */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Confirmed Transactions Archive */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+              Transazioni Confermate
+            </CardTitle>
+            <CardDescription>
+              Storico delle tue offerte accettate dai buyers
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {farmerTransactionsLoading ? (
+              <div className="text-center py-8 text-gray-500">Caricamento...</div>
+            ) : farmerTransactions && farmerTransactions.length > 0 ? (
+              <div className="space-y-3">
+                {farmerTransactions.map((transaction: any) => (
+                  <div key={transaction.id} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-medium text-green-800">{transaction.commodityType}</p>
+                        <p className="text-sm text-gray-600">Buyer: {transaction.buyerName}</p>
+                      </div>
+                      <Badge className="bg-green-600 text-white text-xs">Confermata</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-gray-600">Quantità: <span className="font-medium">{transaction.quantityAvailable} {transaction.unit}</span></p>
+                        <p className="text-gray-600">Valore: <span className="font-medium text-green-600">${transaction.totalValue}</span></p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Codice: <span className="font-mono font-bold text-blue-600">{transaction.verificationCode}</span></p>
+                        <p className="text-gray-600 text-xs">{new Date(transaction.confirmedAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <CheckCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm">Nessuna transazione confermata</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Verification Codes Archive */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-blue-600" />
+              Codici di Verifica
+            </CardTitle>
+            <CardDescription>
+              I tuoi codici di verifica per le transazioni
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {farmerCodesLoading ? (
+              <div className="text-center py-8 text-gray-500">Caricamento...</div>
+            ) : farmerCodes && farmerCodes.length > 0 ? (
+              <div className="space-y-3">
+                {farmerCodes.map((code: any) => (
+                  <div key={code.id} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-mono font-bold text-blue-600">{code.verificationCode}</p>
+                        <p className="text-sm text-gray-600">{code.commodityType} - {code.buyerName}</p>
+                      </div>
+                      <Badge className="bg-blue-600 text-white text-xs">Attivo</Badge>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <p>Valore: <span className="font-medium">${code.totalValue}</span></p>
+                      <p className="text-xs">{new Date(code.generatedAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm">Nessun codice generato</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

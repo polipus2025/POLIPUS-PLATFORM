@@ -12962,5 +12962,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===============================
+  // TRANSACTION ARCHIVES APIs
+  // ===============================
+
+  // Get buyer confirmed transactions archive
+  app.get("/api/buyer/confirmed-transactions/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`Fetching confirmed transactions for buyer: ${buyerId}`);
+      
+      // Mock confirmed transactions - in real system, fetch from database
+      const confirmedTransactions = [
+        {
+          id: "conf-001",
+          notificationId: "OFFER-ABC123",
+          buyerId: parseInt(buyerId) || 1,
+          farmerId: 101,
+          farmerName: "Moses Williams",
+          farmLocation: "Williams Farm, Monrovia County",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          pricePerUnit: 2450.00,
+          totalValue: 62475.00,
+          qualityGrade: "Grade A",
+          paymentTerms: "50% Advance, 50% on Delivery",
+          deliveryTerms: "FOB Farm Gate",
+          verificationCode: "X0R27R24",
+          confirmedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          status: "confirmed"
+        }
+      ];
+
+      console.log(`Returning ${confirmedTransactions.length} confirmed transactions`);
+      res.json(confirmedTransactions);
+    } catch (error) {
+      console.error("Error fetching confirmed transactions:", error);
+      res.status(500).json({ error: "Failed to fetch confirmed transactions" });
+    }
+  });
+
+  // Get buyer verification codes archive
+  app.get("/api/buyer/verification-codes/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`Fetching verification codes for buyer: ${buyerId}`);
+      
+      // Mock verification codes - in real system, fetch from database
+      const verificationCodes = [
+        {
+          id: "code-001",
+          verificationCode: "X0R27R24",
+          buyerId: parseInt(buyerId) || 1,
+          farmerId: 101,
+          farmerName: "Moses Williams",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          totalValue: 62475.00,
+          generatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          status: "active"
+        }
+      ];
+
+      console.log(`Returning ${verificationCodes.length} verification codes`);
+      res.json(verificationCodes);
+    } catch (error) {
+      console.error("Error fetching verification codes:", error);
+      res.status(500).json({ error: "Failed to fetch verification codes" });
+    }
+  });
+
+  // Get farmer confirmed transactions archive
+  app.get("/api/farmer/confirmed-transactions/:farmerId", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      console.log(`Fetching confirmed transactions for farmer: ${farmerId}`);
+      
+      // Mock farmer confirmed transactions
+      const farmerTransactions = [
+        {
+          id: "fconf-001",
+          notificationId: "OFFER-ABC123",
+          farmerId: farmerId,
+          buyerId: 1,
+          buyerName: "Michael Johnson",
+          buyerCompany: "Johnson Agriculture Trading",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          pricePerUnit: 2450.00,
+          totalValue: 62475.00,
+          qualityGrade: "Grade A",
+          paymentTerms: "50% Advance, 50% on Delivery",
+          deliveryTerms: "FOB Farm Gate",
+          verificationCode: "X0R27R24",
+          confirmedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          status: "confirmed"
+        }
+      ];
+
+      console.log(`Returning ${farmerTransactions.length} farmer confirmed transactions`);
+      res.json(farmerTransactions);
+    } catch (error) {
+      console.error("Error fetching farmer confirmed transactions:", error);
+      res.status(500).json({ error: "Failed to fetch farmer confirmed transactions" });
+    }
+  });
+
+  // Get farmer verification codes archive
+  app.get("/api/farmer/verification-codes/:farmerId", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      console.log(`Fetching verification codes for farmer: ${farmerId}`);
+      
+      // Mock farmer verification codes
+      const farmerCodes = [
+        {
+          id: "fcode-001",
+          verificationCode: "X0R27R24",
+          farmerId: farmerId,
+          buyerId: 1,
+          buyerName: "Michael Johnson",
+          buyerCompany: "Johnson Agriculture Trading",
+          commodityType: "Cocoa",
+          quantityAvailable: 25.5,
+          unit: "tons",
+          totalValue: 62475.00,
+          generatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          status: "active"
+        }
+      ];
+
+      console.log(`Returning ${farmerCodes.length} farmer verification codes`);
+      res.json(farmerCodes);
+    } catch (error) {
+      console.error("Error fetching farmer verification codes:", error);
+      res.status(500).json({ error: "Failed to fetch farmer verification codes" });
+    }
+  });
+
   return httpServer;
 }

@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         harvestDate: new Date(req.body.harvestDate),
         availableFromDate: new Date(req.body.availableFromDate),
-        expirationDate: new Date(req.body.expirationDate),
+        expirationDate: req.body.expirationDate ? new Date(req.body.expirationDate) : new Date(Date.now() + 30*24*60*60*1000),
         quantityAvailable: req.body.quantityAvailable.toString(),
         pricePerUnit: req.body.pricePerUnit.toString(),
         totalValue: req.body.totalValue.toString(),

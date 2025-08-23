@@ -3770,6 +3770,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // TEMP: Add hardcoded test credentials for development
+      if (username === "land.inspector" && password === "land123") {
+        const token = jwt.sign(
+          { 
+            inspectorId: "LAND-INS-001",
+            username: "land.inspector",
+            role: 'land_inspector',
+            userType: 'land_inspector',
+            inspectorType: 'land',
+            county: "Montserrado"
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          success: true,
+          token,
+          inspector: {
+            id: "LAND-INS-001",
+            inspectorId: "LAND-INS-001",
+            firstName: "Land",
+            lastName: "Inspector",
+            fullName: "Land Inspector Johnson",
+            email: "land.inspector@lacra.gov.lr",
+            phoneNumber: "+231-77-555-0101",
+            inspectorType: "land",
+            inspectionAreaCounty: "Montserrado",
+            inspectionAreaDistrict: "Greater Monrovia",
+            specializations: ["Crop Assessment", "Soil Analysis", "EUDR Compliance"],
+            certificationLevel: "Level 3"
+          },
+          mustChangePassword: false
+        });
+      }
+
       // Check if inspector credentials exist and is of correct type
       const credentials = await storage.getInspectorCredentialsByUsername(username);
       if (!credentials || credentials.inspectorType !== 'land') {
@@ -3875,6 +3911,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ 
           success: false, 
           message: "Username and password are required" 
+        });
+      }
+
+      // TEMP: Add hardcoded test credentials for development
+      if (username === "port.inspector" && password === "port123") {
+        const token = jwt.sign(
+          { 
+            inspectorId: "PORT-INS-001",
+            username: "port.inspector",
+            role: 'port_inspector',
+            userType: 'port_inspector',
+            inspectorType: 'port',
+            port: "Monrovia Port"
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        return res.json({
+          success: true,
+          token,
+          inspector: {
+            id: "PORT-INS-001",
+            inspectorId: "PORT-INS-001",
+            firstName: "Port",
+            lastName: "Inspector",
+            fullName: "Port Inspector Williams",
+            email: "port.inspector@lacra.gov.lr",
+            phoneNumber: "+231-77-555-0102",
+            inspectorType: "port",
+            inspectionAreaCounty: "Montserrado",
+            portFacility: "Monrovia Port",
+            specializations: ["Export Inspection", "Container Verification", "Documentation Review"],
+            certificationLevel: "Level 3"
+          },
+          mustChangePassword: false
         });
       }
 

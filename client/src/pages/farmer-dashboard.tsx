@@ -25,7 +25,6 @@ import {
   Bell,
   BarChart3,
   Home,
-  Clock,
   CheckCircle,
   Loader2
 } from "lucide-react";

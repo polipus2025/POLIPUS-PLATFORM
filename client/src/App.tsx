@@ -431,8 +431,6 @@ function Router() {
       <Route path="/regulatory/exporter-management" component={ExporterManagement} />
 
       {/* Always show main routes - removed auth blocking */}
-      {true ? (
-        <>
 
           {/* Dashboard - Show correct component based on user type */}
           <Route path="/dashboard">
@@ -458,11 +456,6 @@ function Router() {
           </Route>
           
           {/* Root route */}
-          <Route path="/" component={FrontPage} />
-        </>
-      ) : (
-        <>
-          {/* Public routes when no auth token */}
           <Route path="/" component={FrontPage} />
           
           {/* Inspector Dashboard Route */}
@@ -768,14 +761,6 @@ function Router() {
             />
           </Route>
           
-        </>
-      ) : (
-        <>
-          {/* MAIN LANDING PAGE - Polipus Logo + 8 Modules + Login Buttons */}
-          <Route path="/" component={FrontPage} />
-          <Route path="/dashboard" component={FrontPage} />
-        </>
-      )}
       
       {/* ALWAYS AVAILABLE - Primary Polipus Main Landing Page Routes */}
       <Route path="/" component={FrontPage} />

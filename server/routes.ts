@@ -198,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await db.execute(sql`
         UPDATE farm_plots 
-        SET planting_date = ${new Date(plantingDate)}, updated_at = ${new Date()}
+        SET planting_date = ${new Date(plantingDate)}, created_at = ${new Date()}
         WHERE plot_id = ${plotId}
       `);
       
@@ -218,7 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await db.execute(sql`
         UPDATE farm_plots 
-        SET expected_harvest_date = ${new Date(expectedHarvestDate)}, updated_at = ${new Date()}
+        SET expected_harvest_date = ${new Date(expectedHarvestDate)}, created_at = ${new Date()}
         WHERE plot_id = ${plotId}
       `);
       
@@ -238,29 +238,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get plot details
       const plotResult = await db.execute(sql`
-        SELECT fp.*, f.farmer_id, f.first_name, f.last_name 
+        SELECT fp.*, f.farmer_id as farmer_code, f.first_name, f.last_name 
         FROM farm_plots fp 
         JOIN farmers f ON fp.farmer_id = f.farmer_id 
         WHERE fp.plot_id = ${plotId}
       `);
       
-      if (plotResult.length === 0) {
-        return res.status(404).json({ message: "Plot not found" });
+      // Extract plot data from database result
+      const plot = plotResult?.rows?.[0] || plotResult?.[0];
+      
+      if (!plot) {
+        console.log("No plot data found after extraction");
+        return res.status(404).json({ message: "Plot data not found" });
       }
       
-      const plot = plotResult[0];
-      
       // AUTOMATIC BATCH CODE GENERATION
-      const batchCode = `BATCH-${plot.crop_type.toUpperCase()}-${Date.now()}-${plot.plot_id}`;
+      const batchCode = `BATCH-${(plot.crop_type || 'UNKNOWN').toUpperCase()}-${Date.now()}-${plot.plot_id}`;
       
       // Create harvest record
       await db.execute(sql`
         INSERT INTO harvest_records (farmer_id, plot_id, harvest_date, crop_type, quantity_harvested, unit, quality_grade, moisture_content, payment_status)
         VALUES (
-          (SELECT id FROM farmers WHERE farmer_id = ${plot.farmer_id}),
+          (SELECT id FROM farmers WHERE farmer_id = ${plot.farmer_code}),
           ${plot.id},
           ${new Date(harvestDate)},
-          ${plot.crop_type},
+          ${plot.crop_type || 'Unknown'},
           ${parseFloat(actualYield)},
           'kg',
           ${qualityGrade},
@@ -272,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update plot status
       await db.execute(sql`
         UPDATE farm_plots 
-        SET status = 'harvested', updated_at = ${new Date()}
+        SET status = 'harvested', created_at = ${new Date()}
         WHERE plot_id = ${plotId}
       `);
 
@@ -286,12 +288,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create comprehensive response
       const harvestData = {
         batchCode,
-        farmerId: plot.farmer_id,
-        farmerName: `${plot.first_name} ${plot.last_name}`,
+        farmerId: plot.farmer_code,
+        farmerName: `${plot.first_name || 'Unknown'} ${plot.last_name || 'Farmer'}`,
         plotId: plot.plot_id,
-        plotName: plot.plot_name,
-        plotNumber: plot.plot_number,
-        cropType: plot.crop_type,
+        plotName: plot.plot_name || 'Unnamed Plot',
+        plotNumber: plot.plot_number || 'N/A',
+        cropType: plot.crop_type || 'Unknown Crop',
         actualYield: parseFloat(actualYield),
         qualityGrade,
         harvestDate,

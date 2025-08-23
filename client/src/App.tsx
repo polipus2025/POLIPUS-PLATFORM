@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,12 +22,38 @@ import PortInspectorLogin from "@/pages/auth/port-inspector-login";
 import UnifiedLandInspectorDashboard from "@/pages/unified-land-inspector-dashboard";
 import PortInspectorDashboard from "@/pages/port-inspector-dashboard";
 
+// Inspector App for dedicated routing
+import InspectorApp from "./InspectorApp";
+
 function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Switch>
+            {/* INSPECTOR ROUTES - ABSOLUTE PRIORITY */}
+            <Route path="/inspector-portal">
+              {() => <InspectorPortal />}
+            </Route>
+            <Route path="/land-inspector-login">
+              {() => <LandInspectorLogin />}
+            </Route>
+            <Route path="/warehouse-inspector-login">
+              {() => <WarehouseInspectorLogin />}
+            </Route>
+            <Route path="/port-inspector-login">
+              {() => <PortInspectorLogin />}
+            </Route>
+            <Route path="/warehouse-inspector-dashboard">
+              {() => <WarehouseInspectorDashboard />}
+            </Route>
+            <Route path="/unified-land-inspector-dashboard">
+              {() => <UnifiedLandInspectorDashboard />}
+            </Route>
+            <Route path="/port-inspector-dashboard">
+              {() => <PortInspectorDashboard />}
+            </Route>
+            
             {/* Main Polipus page */}
             <Route path="/" component={FrontPage} />
             <Route path="/front-page" component={FrontPage} />
@@ -42,17 +68,6 @@ function App() {
             
             {/* Buyer Portal Routes */}
             <Route path="/buyer-dashboard" component={BuyerDashboard} />
-            
-            {/* Inspector Portal Routes */}
-            <Route path="/inspector-portal" component={InspectorPortal} />
-            <Route path="/land-inspector-login" component={LandInspectorLogin} />
-            <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
-            <Route path="/port-inspector-login" component={PortInspectorLogin} />
-            
-            {/* Inspector Dashboard Routes */}
-            <Route path="/warehouse-inspector-dashboard" component={WarehouseInspectorDashboard} />
-            <Route path="/unified-land-inspector-dashboard" component={UnifiedLandInspectorDashboard} />
-            <Route path="/port-inspector-dashboard" component={PortInspectorDashboard} />
             
             {/* Default fallback */}
             <Route component={FrontPage} />

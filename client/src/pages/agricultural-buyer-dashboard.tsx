@@ -92,7 +92,7 @@ export default function AgriculturalBuyerDashboard() {
     localStorage.removeItem('buyerName');
     localStorage.removeItem('userType');
     localStorage.removeItem('company');
-    navigate('/exporter-login');
+    navigate('/auth/farmer-login');
   };
 
   const connectWithFarmer = (farmerId: string) => {

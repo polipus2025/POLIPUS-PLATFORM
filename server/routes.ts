@@ -181,6 +181,7 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 import { registerPolipusRoutes } from './polipus-routes';
+import { satelliteService, type SatelliteAnalysisResult } from './satellite-service';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register farmer routes
@@ -188,6 +189,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register crop scheduling routes
   app.use('/api', cropSchedulingRoutes);
+
+  // ========================================
+  // SATELLITE DATA ANALYSIS ENDPOINTS
+  // ========================================
+
+  // Analyze land plot using satellite data for automatic detection
+  app.post("/api/satellite/analyze-plot", async (req, res) => {
+    try {
+      const { boundaries } = req.body;
+      
+      if (!boundaries || !Array.isArray(boundaries) || boundaries.length < 3) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Valid GPS boundaries required (minimum 3 points)" 
+        });
+      }
+
+      console.log(`🛰️ Starting satellite analysis for ${boundaries.length} boundary points...`);
+      
+      // Perform satellite analysis
+      const analysisResult = await satelliteService.analyzeLandPlot(boundaries);
+      
+      res.json({
+        success: true,
+        analysis: analysisResult,
+        message: "Satellite analysis completed successfully"
+      });
+      
+    } catch (error) {
+      console.error("❌ Satellite analysis error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Satellite analysis failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   // Get farmer land mapping data with unique plot numbering
   app.get("/api/farmer-land-data/:farmerId", async (req, res) => {

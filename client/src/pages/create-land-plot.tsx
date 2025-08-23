@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair } from "lucide-react";
+import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair, Satellite, Zap, RefreshCw } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
@@ -31,6 +31,9 @@ export default function CreateLandPlot() {
     totalAreaHectares: "",
     coordinates: ""
   });
+
+  const [satelliteAnalysis, setSatelliteAnalysis] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
@@ -128,6 +131,63 @@ export default function CreateLandPlot() {
       });
     }
   });
+
+  // Satellite analysis mutation
+  const analyzeSatelliteData = useMutation({
+    mutationFn: async (boundaries: any[]) => {
+      return await apiRequest("/api/satellite/analyze-plot", {
+        method: "POST",
+        body: JSON.stringify({ boundaries })
+      });
+    },
+    onSuccess: (data: any) => {
+      const analysis = data.analysis;
+      setSatelliteAnalysis(analysis);
+      
+      // Auto-populate form with satellite data
+      setLandPlotData(prev => ({
+        ...prev,
+        soilType: analysis.soilType,
+        elevation: analysis.averageElevation.toString(),
+        slope: analysis.averageSlope.toString(),
+        totalAreaHectares: analysis.totalArea.toFixed(4)
+      }));
+      
+      toast({
+        title: "🛰️ Satellite Analysis Complete",
+        description: `Detected: ${analysis.soilType} soil, ${analysis.averageElevation}m elevation, ${analysis.averageSlope}° slope`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Satellite Analysis Failed",
+        description: error.message || "Could not analyze satellite data",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const performSatelliteAnalysis = () => {
+    if (!landPlotData.boundaryData || !landPlotData.boundaryData.points) {
+      toast({
+        title: "No Boundary Data",
+        description: "Please map the plot boundaries first to enable satellite analysis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    
+    // Convert boundary points to expected format
+    const boundaries = landPlotData.boundaryData.points.map((point: any) => ({
+      latitude: point.lat || point.latitude,
+      longitude: point.lng || point.longitude
+    }));
+
+    analyzeSatelliteData.mutate(boundaries);
+    setTimeout(() => setIsAnalyzing(false), 3000);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -343,14 +403,95 @@ export default function CreateLandPlot() {
                     </div>
                   </div>
 
+                  {/* Satellite Analysis Section */}
+                  <Card className="border-2 border-blue-200 bg-blue-50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-blue-800">
+                        <Satellite className="w-5 h-5 mr-2" />
+                        🛰️ Automatic Satellite Detection
+                      </CardTitle>
+                      <CardDescription>
+                        Use satellite data to automatically detect soil type, elevation, slope, and area. No manual input required!
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {!satelliteAnalysis ? (
+                          <div className="text-center">
+                            <Button 
+                              onClick={performSatelliteAnalysis} 
+                              disabled={isAnalyzing || !landPlotData.boundaryData}
+                              className="bg-blue-600 hover:bg-blue-700"
+                              size="lg"
+                            >
+                              {isAnalyzing ? (
+                                <>
+                                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                  Analyzing Satellite Data...
+                                </>
+                              ) : (
+                                <>
+                                  <Zap className="w-4 h-4 mr-2" />
+                                  🛰️ Auto-Detect Land Characteristics
+                                </>
+                              )}
+                            </Button>
+                            {!landPlotData.boundaryData && (
+                              <p className="text-sm text-gray-600 mt-2">
+                                ⚠️ Map plot boundaries first to enable automatic detection
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white p-3 rounded border">
+                              <div className="text-sm font-medium text-gray-600">🌱 Soil Type</div>
+                              <div className="text-lg font-bold text-green-700">{satelliteAnalysis.soilType}</div>
+                              <div className="text-xs text-gray-500">Confidence: {satelliteAnalysis.confidence}%</div>
+                            </div>
+                            <div className="bg-white p-3 rounded border">
+                              <div className="text-sm font-medium text-gray-600">📏 Total Area</div>
+                              <div className="text-lg font-bold text-blue-700">{satelliteAnalysis.totalArea.toFixed(4)} ha</div>
+                              <div className="text-xs text-gray-500">Satellite calculated</div>
+                            </div>
+                            <div className="bg-white p-3 rounded border">
+                              <div className="text-sm font-medium text-gray-600">⛰️ Elevation</div>
+                              <div className="text-lg font-bold text-purple-700">{satelliteAnalysis.averageElevation}m</div>
+                              <div className="text-xs text-gray-500">Above sea level</div>
+                            </div>
+                            <div className="bg-white p-3 rounded border">
+                              <div className="text-sm font-medium text-gray-600">📐 Slope</div>
+                              <div className="text-lg font-bold text-orange-700">{satelliteAnalysis.averageSlope}°</div>
+                              <div className="text-xs text-gray-500">Average gradient</div>
+                            </div>
+                            <div className="col-span-2 bg-green-50 border border-green-200 p-3 rounded">
+                              <div className="text-sm font-medium text-green-800">✅ Data Source</div>
+                              <div className="text-xs text-green-600">{satelliteAnalysis.dataSource}</div>
+                              <div className="text-xs text-green-500 mt-1">Analysis completed: {new Date(satelliteAnalysis.analysisDate).toLocaleString()}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="soilType">Soil Type</Label>
+                      <Label htmlFor="soilType">
+                        Soil Type 
+                        {satelliteAnalysis && <span className="text-green-600 text-xs ml-2">✅ Auto-detected</span>}
+                      </Label>
                       <Select value={landPlotData.soilType} onValueChange={(value) => setLandPlotData(prev => ({ ...prev, soilType: value }))}>
-                        <SelectTrigger>
+                        <SelectTrigger className={satelliteAnalysis ? "border-green-300 bg-green-50" : ""}>
                           <SelectValue placeholder="Select soil type" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="Ferralsols">Ferralsols (Red clay)</SelectItem>
+                          <SelectItem value="Acrisols">Acrisols (Acid soils)</SelectItem>
+                          <SelectItem value="Fluvisols">Fluvisols (River deposited)</SelectItem>
+                          <SelectItem value="Gleysols">Gleysols (Waterlogged)</SelectItem>
+                          <SelectItem value="Lixisols">Lixisols (Clay-enriched)</SelectItem>
+                          <SelectItem value="Arenosols">Arenosols (Sandy)</SelectItem>
                           <SelectItem value="clay">Clay</SelectItem>
                           <SelectItem value="loam">Loam</SelectItem>
                           <SelectItem value="sandy">Sandy</SelectItem>
@@ -379,7 +520,10 @@ export default function CreateLandPlot() {
 
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="totalArea">Total Area (hectares)</Label>
+                      <Label htmlFor="totalArea">
+                        Total Area (hectares)
+                        {satelliteAnalysis && <span className="text-green-600 text-xs ml-2">✅ Auto-calculated</span>}
+                      </Label>
                       <Input
                         id="totalArea"
                         type="number"
@@ -387,20 +531,30 @@ export default function CreateLandPlot() {
                         value={landPlotData.totalAreaHectares}
                         onChange={(e) => setLandPlotData(prev => ({ ...prev, totalAreaHectares: e.target.value }))}
                         placeholder="e.g., 1.5"
+                        className={satelliteAnalysis ? "border-green-300 bg-green-50" : ""}
+                        readOnly={!!satelliteAnalysis}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="elevation">Elevation (meters)</Label>
+                      <Label htmlFor="elevation">
+                        Elevation (meters)
+                        {satelliteAnalysis && <span className="text-green-600 text-xs ml-2">✅ Auto-detected</span>}
+                      </Label>
                       <Input
                         id="elevation"
                         type="number"
                         value={landPlotData.elevation}
                         onChange={(e) => setLandPlotData(prev => ({ ...prev, elevation: e.target.value }))}
                         placeholder="e.g., 150"
+                        className={satelliteAnalysis ? "border-green-300 bg-green-50" : ""}
+                        readOnly={!!satelliteAnalysis}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="slope">Slope (%)</Label>
+                      <Label htmlFor="slope">
+                        Slope (degrees)
+                        {satelliteAnalysis && <span className="text-green-600 text-xs ml-2">✅ Auto-detected</span>}
+                      </Label>
                       <Input
                         id="slope"
                         type="number"
@@ -408,6 +562,8 @@ export default function CreateLandPlot() {
                         value={landPlotData.slope}
                         onChange={(e) => setLandPlotData(prev => ({ ...prev, slope: e.target.value }))}
                         placeholder="e.g., 5.2"
+                        className={satelliteAnalysis ? "border-green-300 bg-green-50" : ""}
+                        readOnly={!!satelliteAnalysis}
                       />
                     </div>
                   </div>

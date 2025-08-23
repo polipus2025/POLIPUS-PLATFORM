@@ -28,7 +28,7 @@ export default function LandPlotDetails() {
   });
 
   const plotData = plot as any;
-  const boundaryPoints = farmerData?.farmBoundaries?.points || [];
+  const boundaryPoints = (farmerData as any)?.farmBoundaries?.points || [];
 
   if (isLoading) {
     return (
@@ -177,7 +177,7 @@ export default function LandPlotDetails() {
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Total boundary area: {farmerData?.farmBoundaries?.area?.toFixed(4)} hectares</p>
+                    <p className="text-xs text-gray-500 mt-1">Total boundary area: {(farmerData as any)?.farmBoundaries?.area?.toFixed(4)} hectares</p>
                   </div>
                 )}
 
@@ -302,20 +302,20 @@ export default function LandPlotDetails() {
                           <DialogTitle>EUDR Compliance Report - {plotData.plotName}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
-                          {farmerData?.complianceReports ? (
+                          {(farmerData as any)?.complianceReports ? (
                             <div className="space-y-3">
                               <div className="bg-green-50 border border-green-200 rounded p-3">
                                 <h4 className="font-semibold text-green-800 mb-2">EUDR Compliance Status</h4>
-                                <p><strong>Risk Level:</strong> <span className="capitalize">{farmerData.complianceReports.eudrCompliance.riskLevel}</span></p>
-                                <p><strong>Compliance Score:</strong> {farmerData.complianceReports.eudrCompliance.complianceScore}/100</p>
-                                <p><strong>Last Forest Date:</strong> {farmerData.complianceReports.eudrCompliance.lastForestDate}</p>
-                                <p><strong>Deforestation Risk:</strong> {farmerData.complianceReports.eudrCompliance.deforestationRisk}%</p>
+                                <p><strong>Risk Level:</strong> <span className="capitalize">{(farmerData as any).complianceReports.eudrCompliance.riskLevel}</span></p>
+                                <p><strong>Compliance Score:</strong> {(farmerData as any).complianceReports.eudrCompliance.complianceScore}/100</p>
+                                <p><strong>Last Forest Date:</strong> {(farmerData as any).complianceReports.eudrCompliance.lastForestDate}</p>
+                                <p><strong>Deforestation Risk:</strong> {(farmerData as any).complianceReports.eudrCompliance.deforestationRisk}%</p>
                               </div>
                               
                               <div className="bg-blue-50 border border-blue-200 rounded p-3">
                                 <h4 className="font-semibold text-blue-800 mb-2">Recommendations</h4>
                                 <ul className="list-disc list-inside text-sm space-y-1">
-                                  {farmerData.complianceReports.eudrCompliance.recommendations.map((rec: string, i: number) => (
+                                  {(farmerData as any).complianceReports.eudrCompliance.recommendations.map((rec: string, i: number) => (
                                     <li key={i}>{rec}</li>
                                   ))}
                                 </ul>
@@ -324,7 +324,7 @@ export default function LandPlotDetails() {
                               <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
                                 <h4 className="font-semibold text-yellow-800 mb-2">Required Documentation</h4>
                                 <ul className="list-disc list-inside text-sm space-y-1">
-                                  {farmerData.complianceReports.eudrCompliance.documentationRequired.map((doc: string, i: number) => (
+                                  {(farmerData as any).complianceReports.eudrCompliance.documentationRequired.map((doc: string, i: number) => (
                                     <li key={i}>{doc}</li>
                                   ))}
                                 </ul>

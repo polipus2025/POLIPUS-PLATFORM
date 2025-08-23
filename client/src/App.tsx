@@ -14,6 +14,15 @@ import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
 import WarehouseInspectorDashboard from "@/pages/warehouse-inspector-dashboard";
 
+// POLIPUS MODULE PORTALS - All 7 modules
+import LiveTracePortal from "@/pages/portals/live-trace-portal";
+import LandMap360Portal from "@/pages/portals/land-map360-portal";
+import MineWatchPortal from "@/pages/portals/mine-watch-portal";
+import ForestGuardPortal from "@/pages/portals/forest-guard-portal";
+import AquaTracePortal from "@/pages/portals/aqua-trace-portal";
+import BlueCarbon360Portal from "@/pages/portals/blue-carbon360-portal";
+import CarbonTracePortal from "@/pages/portals/carbon-trace-portal";
+
 function App() {
   return (
     <ErrorBoundary>
@@ -26,6 +35,15 @@ function App() {
             
             {/* Agricultural Traceability Portal */}
             <Route path="/portals" component={Landing} />
+            
+            {/* POLIPUS MODULE PORTALS - All 7 modules */}
+            <Route path="/live-trace" component={LiveTracePortal} />
+            <Route path="/landmap360-portal" component={LandMap360Portal} />
+            <Route path="/mine-watch" component={MineWatchPortal} />
+            <Route path="/forest-guard" component={ForestGuardPortal} />
+            <Route path="/aqua-trace" component={AquaTracePortal} />
+            <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
+            <Route path="/carbon-trace" component={CarbonTracePortal} />
             
             {/* Farmer Portal Routes */}
             <Route path="/farmer-login" component={FarmerLogin} />

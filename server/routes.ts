@@ -13532,23 +13532,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmerId } = req.params;
       console.log(`Fetching verification codes for farmer: ${farmerId}`);
       
-      // Mock farmer verification codes
-      const farmerCodes = [
-        {
-          id: "fcode-001",
-          verificationCode: "X0R27R24",
-          farmerId: farmerId,
-          buyerId: 1,
-          buyerName: "Michael Johnson",
-          buyerCompany: "Johnson Agriculture Trading",
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          totalValue: 62475.00,
-          generatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-          status: "active"
+      // Fetch real farmer verification codes from database
+      const farmerCodes = await db.query.farmerVerificationCodes?.findMany({
+        where: (table, { eq }) => eq(table.farmerId, farmerId),
+        orderBy: (table, { desc }) => desc(table.transactionDate)
+      }) || [];
+      
+      // If table doesn't exist yet, query directly with SQL
+      if (!farmerCodes.length) {
+        try {
+          const sqlResult = await db.execute(sql`
+            SELECT verification_code, farmer_id, buyer_name, commodity_type, 
+                   quantity_available, unit, total_value, transaction_date, status
+            FROM farmer_verification_codes 
+            WHERE farmer_id = ${farmerId} 
+            ORDER BY transaction_date DESC
+          `);
+          
+          farmerCodes.push(...sqlResult.rows.map((row: any) => ({
+            id: row.verification_code,
+            verificationCode: row.verification_code,
+            farmerId: row.farmer_id,
+            buyerName: row.buyer_name,
+            commodityType: row.commodity_type,
+            quantityAvailable: parseFloat(row.quantity_available),
+            unit: row.unit || 'tons',
+            totalValue: parseFloat(row.total_value),
+            generatedAt: new Date(row.transaction_date),
+            status: row.status || 'active'
+          })));
+        } catch (err) {
+          console.log('Direct SQL query fallback:', err);
         }
-      ];
+      }
 
       console.log(`Returning ${farmerCodes.length} farmer verification codes`);
       res.json(farmerCodes);

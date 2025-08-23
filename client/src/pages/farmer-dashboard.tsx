@@ -85,6 +85,8 @@ export default function FarmerDashboard() {
   
   // Real data for dashboard stats  
   const totalPlots = farmerLandData?.totalPlots || 0;
+  const farmPlots = farmerLandData?.farmPlots || [];
+  const farmer = farmerLandData?.farmer || { firstName: farmerName, county: farmerCounty };
   const activeCropPlans = Array.isArray(cropPlans) ? cropPlans.filter((plan: any) => plan.status === 'active').length : 2;
   const totalHarvested = Array.isArray(trackingRecords) 
     ? trackingRecords.reduce((sum: number, record: any) => sum + (record.harvestedQuantity || 0), 0) 
@@ -177,7 +179,7 @@ export default function FarmerDashboard() {
 
       toast({
         title: "Product Offer Submitted Successfully!",
-        description: `${response.notificationsSent} buyers in ${farmerCounty} County have been notified. Buyers notified: ${response.buyersNotified.join(', ')}`
+        description: `${response.notificationsSent} buyers in ${farmerCounty} County have been notified. Buyers notified: ${response.buyersNotified?.join(', ') || 'None'}`
       });
 
       // Reset form
@@ -450,7 +452,7 @@ export default function FarmerDashboard() {
                                 <h5 className="font-medium text-green-800 mb-2">Land Analysis</h5>
                                 <div className="text-sm space-y-1">
                                   <div><strong>Soil Type:</strong> {plot.land_map_data.soilType}</div>
-                                  <div><strong>Water Sources:</strong> {plot.land_map_data.waterSources?.join(', ')}</div>
+                                  <div><strong>Water Sources:</strong> {plot.land_map_data.waterSources?.join(', ') || 'None identified'}</div>
                                   <div><strong>EUDR Risk Level:</strong> 
                                     <Badge variant={plot.land_map_data.eudrCompliance?.riskLevel === 'low' ? 'default' : 'destructive'} className="ml-2">
                                       {plot.land_map_data.eudrCompliance?.riskLevel}

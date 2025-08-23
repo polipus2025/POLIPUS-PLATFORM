@@ -41,7 +41,7 @@ export default function FrontPage() {
       title: 'Agricultural Traceability & Compliance',
       icon: Wheat,
       color: 'bg-green-500',
-      route: '/portals',
+      route: '/agritrace',
       isAgriTrace: true,
       description: 'Complete agricultural commodity tracking & LACRA compliance system'
     },

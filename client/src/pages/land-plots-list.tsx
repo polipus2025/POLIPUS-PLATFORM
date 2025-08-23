@@ -13,7 +13,7 @@ export default function LandPlotsList() {
 
   // Get land plots list
   const { data: landPlots, isLoading } = useQuery({
-    queryKey: ["/api/land-plots"],
+    queryKey: ["/api/farm-plots"],
     retry: false
   });
 
@@ -21,7 +21,8 @@ export default function LandPlotsList() {
   const filteredPlots = landPlotsList.filter(plot => 
     plot.plotName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     plot.farmerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plot.plotType?.toLowerCase().includes(searchTerm.toLowerCase())
+    plot.cropType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    plot.primaryCrop?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -88,10 +89,10 @@ export default function LandPlotsList() {
                 <TableRow>
                   <TableHead>Plot Name</TableHead>
                   <TableHead>Farmer</TableHead>
-                  <TableHead>Plot Type</TableHead>
+                  <TableHead>Crop Type</TableHead>
                   <TableHead>Area</TableHead>
-                  <TableHead>Land Use</TableHead>
-                  <TableHead>EUDR Status</TableHead>
+                  <TableHead>Soil Type</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -105,29 +106,34 @@ export default function LandPlotsList() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium">{plot.farmerName}</div>
+                      <div className="font-medium">
+                        {plot.farmerName || plot.farmerId || 'N/A'}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize">
-                        {plot.plotType?.replace('_', ' ') || 'N/A'}
+                        {plot.cropType?.replace('_', ' ') || plot.primaryCrop?.replace('_', ' ') || 'N/A'}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         <MapPin className="w-3 h-3 mr-1 text-gray-400" />
-                        <span className="text-sm">{plot.totalAreaHectares ? `${plot.totalAreaHectares} ha` : 'N/A'}</span>
+                        <span className="text-sm">
+                          {plot.plotSize ? `${plot.plotSize} ha` : 
+                           plot.area ? `${plot.area} ha` : 'N/A'}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize">
-                        {plot.landUse?.replace('_', ' ') || 'N/A'}
+                        {plot.soilType?.replace('_', ' ') || 'N/A'}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         <TreePine className="w-3 h-3 mr-1 text-green-500" />
-                        <Badge className={plot.complianceStatus === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                          {plot.complianceStatus === 'approved' ? 'EUDR Compliant' : 'Under Review'}
+                        <Badge className={plot.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                          {plot.status === 'active' ? 'Active' : plot.status || 'Unknown'}
                         </Badge>
                       </div>
                     </TableCell>

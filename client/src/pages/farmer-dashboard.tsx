@@ -686,30 +686,32 @@ export default function FarmerDashboard() {
                                 handleUpdateSchedule(plot.plot_id, plot.plot_name, 'harvest', harvestDate, e);
                               }
                             }}>
-                              {plot.expected_harvest_date ? (
-                                <div className="text-sm">
-                                  <span className="font-medium">Expected Harvest:</span> {new Date(plot.expected_harvest_date).toLocaleDateString()}
-                                </div>
-                              ) : (
-                                <div className="p-3 bg-orange-50 rounded-lg">
-                                  <p className="text-sm text-orange-800 font-medium mb-2">Schedule Harvest</p>
-                                  <input 
-                                    type="date" 
-                                    name="harvestDate"
-                                    className="w-full p-2 border border-orange-200 rounded text-sm"
-                                    placeholder="Select harvest date"
-                                    required
-                                  />
-                                  <Button 
-                                    type="submit"
-                                    size="sm" 
-                                    className="w-full mt-2 bg-orange-600 hover:bg-orange-700"
-                                    disabled={updatingSchedule === plot.plot_id}
-                                  >
-                                    {updatingSchedule === plot.plot_id ? "Updating..." : "Set Harvest Date"}
-                                  </Button>
-                                </div>
-                              )}
+                              <div className="p-3 bg-orange-50 rounded-lg">
+                                <p className="text-sm text-orange-800 font-medium mb-2">
+                                  {plot.expected_harvest_date ? "Update Expected Harvest Date" : "Schedule Harvest"}
+                                </p>
+                                {plot.expected_harvest_date && (
+                                  <div className="text-xs text-orange-700 mb-2">
+                                    Current: {new Date(plot.expected_harvest_date).toLocaleDateString()}
+                                  </div>
+                                )}
+                                <input 
+                                  type="date" 
+                                  name="harvestDate"
+                                  className="w-full p-2 border border-orange-200 rounded text-sm"
+                                  placeholder="Select harvest date"
+                                  defaultValue={plot.expected_harvest_date ? new Date(plot.expected_harvest_date).toISOString().split('T')[0] : ''}
+                                  required
+                                />
+                                <Button 
+                                  type="submit"
+                                  size="sm" 
+                                  className="w-full mt-2 bg-orange-600 hover:bg-orange-700"
+                                  disabled={updatingSchedule === plot.plot_id}
+                                >
+                                  {updatingSchedule === plot.plot_id ? "Updating..." : plot.expected_harvest_date ? "Update Harvest Date" : "Set Harvest Date"}
+                                </Button>
+                              </div>
                             </form>
                           </div>
                         </CardContent>

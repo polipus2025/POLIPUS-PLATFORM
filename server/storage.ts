@@ -2732,8 +2732,10 @@ export class DatabaseStorage implements IStorage {
       village: farmer.village,
       soilType: 'unknown',
       status: 'active',
+      isActive: true,
       landMapData: landData,
       farmBoundaries: farmer.farmBoundaries,
+      registrationDate: farmer.onboardingDate || new Date(),
       createdAt: new Date()
     };
 

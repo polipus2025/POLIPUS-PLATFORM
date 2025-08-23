@@ -4728,39 +4728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Farm plots endpoints
-  app.get('/api/farm-plots', async (req, res) => {
-    try {
-      const farmerId = req.query.farmerId as string;
-      const farmPlots = [
-        {
-          id: 1,
-          farmerId: "FRM-2024-001",
-          plotName: "Northern Coffee Plot",
-          coordinates: [[6.4281, -9.4295], [6.4290, -9.4290], [6.4285, -9.4280], [6.4276, -9.4285]],
-          area: 12.5,
-          cropType: "Coffee",
-          soilType: "Loamy",
-          elevation: 245,
-          slope: 15,
-          waterSource: "Stream",
-          accessRoad: true,
-          notes: "High-quality arabica plantation with good drainage",
-          plantingDate: new Date('2023-03-15'),
-          harvestDate: new Date('2023-11-30')
-        }
-      ];
-      
-      const filteredPlots = farmerId ? 
-        farmPlots.filter(plot => plot.farmerId === farmerId) : 
-        farmPlots;
-      
-      res.json(filteredPlots);
-    } catch (error) {
-      console.error("Error fetching farm plots:", error);
-      res.status(500).json({ message: "Failed to fetch farm plots" });
-    }
-  });
+  // REMOVED: Demo farm plots endpoint - now using real database data
 
   app.post('/api/farm-plots', async (req, res) => {
     try {

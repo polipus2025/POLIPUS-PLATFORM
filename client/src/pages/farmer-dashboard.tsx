@@ -25,7 +25,6 @@ import {
   Bell,
   BarChart3,
   Home,
-  CheckCircle,
   Loader2
 } from "lucide-react";
 import { Link } from "wouter";
@@ -61,7 +60,7 @@ export default function FarmerDashboard() {
     },
     enabled: !!farmerId,
     staleTime: 0, // Always refetch
-    cacheTime: 0, // Don't cache
+    gcTime: 0, // Don't cache
   });
   const { data: cropPlans } = useQuery({ queryKey: ["/api/crop-plans"] });
   const { data: trackingRecords } = useQuery({ queryKey: ["/api/tracking-records"] });
@@ -763,7 +762,7 @@ export default function FarmerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {verificationCodes?.map((code: any) => (
+                {farmerCodes?.map((code: any) => (
                   <Card key={code.verificationCode} className="border-blue-200 bg-blue-50">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
@@ -789,7 +788,7 @@ export default function FarmerDashboard() {
                     </CardContent>
                   </Card>
                 ))}
-                {(!verificationCodes || verificationCodes.length === 0) && (
+                {(!farmerCodes || farmerCodes.length === 0) && (
                   <div className="text-center py-8 text-gray-500">
                     <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>No verification codes yet</p>

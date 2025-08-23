@@ -230,13 +230,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Transform data to match schema expectations
       const transformedData = {
-        ...req.body,
-        harvestDate: new Date(req.body.harvestDate),
-        availableFromDate: new Date(req.body.availableFromDate),
-        expirationDate: req.body.expirationDate ? new Date(req.body.expirationDate) : new Date(Date.now() + 30*24*60*60*1000),
+        farmerId: req.body.farmerId,
+        commodityType: req.body.commodityType,
         quantityAvailable: req.body.quantityAvailable.toString(),
+        unit: req.body.unit,
         pricePerUnit: req.body.pricePerUnit.toString(),
         totalValue: req.body.totalValue.toString(),
+        qualityGrade: req.body.qualityGrade,
+        harvestDate: new Date(req.body.harvestDate),
+        availableFromDate: new Date(req.body.availableFromDate),
+        expirationDate: new Date(req.body.expirationDate),
+        paymentTerms: req.body.paymentTerms,
+        deliveryTerms: req.body.deliveryTerms,
+        description: req.body.description || '',
+        farmLocation: req.body.farmLocation,
+        farmerName: req.body.farmerName,
+        county: req.body.county,
       };
       
       console.log("Transformed data:", transformedData); // Debug log

@@ -1395,6 +1395,17 @@ export class DatabaseStorage implements IStorage {
 
   async createFarmer(farmer: InsertFarmer): Promise<Farmer> {
     const [newFarmer] = await db.insert(farmers).values(farmer).returning();
+    
+    // AUTO-SYNC: Create corresponding farm plot if land boundaries exist
+    if (newFarmer.farmBoundaries || newFarmer.landMapData) {
+      try {
+        await this.createFarmPlotFromFarmerData(newFarmer);
+        console.log(`✅ AUTO-CREATED farm plot for farmer ${newFarmer.farmerId}`);
+      } catch (error) {
+        console.error(`❌ Failed to create farm plot for farmer ${newFarmer.farmerId}:`, error);
+      }
+    }
+    
     return newFarmer;
   }
 
@@ -2635,6 +2646,18 @@ export class DatabaseStorage implements IStorage {
       mappingId,
       updatedAt: new Date()
     }).returning();
+    
+    // AUTO-SYNC: Create or update corresponding farm plot
+    try {
+      const farmer = await this.getFarmer(newMapping.farmerId);
+      if (farmer) {
+        await this.createFarmPlotFromFarmerData(farmer);
+        console.log(`✅ AUTO-SYNCED farm plot for land mapping ${mappingId}`);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to sync farm plot for mapping ${mappingId}:`, error);
+    }
+    
     return newMapping;
   }
 
@@ -2652,6 +2675,70 @@ export class DatabaseStorage implements IStorage {
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(farmerLandMappings.id, id));
     return (result as any).changes > 0;
+  }
+
+  // HELPER METHOD: Create farm plot from farmer data  
+  async createFarmPlotFromFarmerData(farmer: Farmer): Promise<void> {
+    // Skip if no land boundaries/mapping data
+    if (!farmer.farmBoundaries && !farmer.landMapData) {
+      return;
+    }
+
+    // Check if farm plot already exists for this farmer
+    const existingPlots = await this.getFarmPlotsByFarmer(farmer.id);
+    if (existingPlots.length > 0) {
+      console.log(`Farm plot already exists for farmer ${farmer.farmerId}`);
+      return;
+    }
+
+    // Parse land boundaries data
+    let landData: any = {};
+    try {
+      if (typeof farmer.farmBoundaries === 'string') {
+        landData = JSON.parse(farmer.farmBoundaries);
+      } else if (farmer.farmBoundaries) {
+        landData = farmer.farmBoundaries;
+      } else if (typeof farmer.landMapData === 'string') {
+        landData = JSON.parse(farmer.landMapData);
+      } else if (farmer.landMapData) {
+        landData = farmer.landMapData;
+      }
+    } catch (error) {
+      console.error('Error parsing land data:', error);
+      return;
+    }
+
+    // Extract GPS coordinates
+    let gpsCoordinates = farmer.gpsCoordinates || '';
+    if (landData.points && Array.isArray(landData.points) && landData.points.length > 0) {
+      const firstPoint = landData.points[0];
+      if (firstPoint.latitude && firstPoint.longitude) {
+        gpsCoordinates = `${firstPoint.latitude}, ${firstPoint.longitude}`;
+      }
+    }
+
+    // Create farm plot record
+    const plotData = {
+      farmerId: farmer.id,
+      farmerName: `${farmer.firstName} ${farmer.lastName}`.trim(),
+      plotId: `PLOT-${farmer.farmerId}-${Date.now()}`,
+      plotName: `${farmer.firstName}'s Farm Plot` || `Plot for ${farmer.farmerId}`,
+      cropType: farmer.primaryCrop || 'unknown',
+      plotSize: landData.area || farmer.farmSize || 0,
+      plotSizeUnit: farmer.farmSizeUnit || 'hectares',
+      gpsCoordinates: gpsCoordinates,
+      county: farmer.county,
+      district: farmer.district,
+      village: farmer.village,
+      soilType: 'unknown',
+      status: 'active',
+      landMapData: landData,
+      farmBoundaries: farmer.farmBoundaries,
+      createdAt: new Date()
+    };
+
+    // Insert farm plot
+    await this.createFarmPlot(plotData);
   }
 
   async approveFarmerLandMapping(id: number, inspectorId: string): Promise<FarmerLandMapping | undefined> {

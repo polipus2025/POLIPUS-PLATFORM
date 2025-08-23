@@ -5939,6 +5939,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DATA SYNC ENDPOINT: Fix existing farmers with land boundaries but no farm plots
+  app.post("/api/sync-farmer-plots", async (req, res) => {
+    try {
+      console.log("🔄 Starting farmer-to-plot data synchronization...");
+      
+      // Get all farmers with land boundaries but no corresponding farm plots
+      const farmers = await storage.getFarmers();
+      let syncCount = 0;
+      let errorCount = 0;
+      const results = [];
+
+      for (const farmer of farmers) {
+        try {
+          // Check if farmer has land boundaries
+          if (!farmer.farmBoundaries && !farmer.landMapData) {
+            continue;
+          }
+
+          // Check if farm plot already exists
+          const existingPlots = await storage.getFarmPlotsByFarmer(farmer.id);
+          if (existingPlots.length > 0) {
+            continue; // Skip if plot already exists
+          }
+
+          // Create farm plot from farmer data
+          await storage.createFarmPlotFromFarmerData(farmer);
+          syncCount++;
+          
+          results.push({
+            farmerId: farmer.farmerId,
+            farmerName: `${farmer.firstName} ${farmer.lastName}`,
+            status: 'synced'
+          });
+          
+          console.log(`✅ Synced plot for farmer ${farmer.farmerId}`);
+          
+        } catch (error) {
+          errorCount++;
+          results.push({
+            farmerId: farmer.farmerId,
+            farmerName: `${farmer.firstName} ${farmer.lastName}`,
+            status: 'error',
+            error: error.message
+          });
+          console.error(`❌ Error syncing farmer ${farmer.farmerId}:`, error);
+        }
+      }
+
+      console.log(`✅ Sync complete: ${syncCount} plots created, ${errorCount} errors`);
+      
+      res.json({
+        success: true,
+        message: `Data sync completed: ${syncCount} farm plots created`,
+        syncCount,
+        errorCount,
+        results
+      });
+      
+    } catch (error) {
+      console.error("❌ Sync operation failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to sync farmer plots", 
+        error: error.message 
+      });
+    }
+  });
+
   // Crop Plan routes
   app.get("/api/crop-plans", async (req, res) => {
     try {

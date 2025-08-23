@@ -24,7 +24,8 @@ import {
   MessageSquare,
   Bell,
   BarChart3,
-  Home
+  Home,
+  History
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -198,22 +199,26 @@ export default function FarmerDashboard() {
 
       {/* Simplified Tabbed Navigation Interface */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-slate-100 h-12">
-          <TabsTrigger value="overview" className="flex items-center justify-center gap-2 text-sm p-3">
+        <TabsList className="grid w-full grid-cols-5 bg-slate-100 h-12">
+          <TabsTrigger value="overview" className="flex items-center justify-center gap-1 text-xs p-2">
             <Home className="h-4 w-4" />
             <span>Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-2 text-sm p-3">
+          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-1 text-xs p-2">
             <MapPin className="h-4 w-4" />
             <span>Land Info</span>
           </TabsTrigger>
-          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-2 text-sm p-3">
-            <ShoppingCart className="h-4 w-4" />
-            <span>Marketplace</span>
+          <TabsTrigger value="crop-scheduling" className="flex items-center justify-center gap-1 text-xs p-2">
+            <Calendar className="h-4 w-4" />
+            <span>Crops</span>
           </TabsTrigger>
-          <TabsTrigger value="transactions" className="flex items-center justify-center gap-2 text-sm p-3">
+          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-1 text-xs p-2">
+            <ShoppingCart className="h-4 w-4" />
+            <span>Market</span>
+          </TabsTrigger>
+          <TabsTrigger value="transactions" className="flex items-center justify-center gap-1 text-xs p-2">
             <FileText className="h-4 w-4" />
-            <span>Transactions</span>
+            <span>Deals</span>
           </TabsTrigger>
         </TabsList>
 
@@ -487,6 +492,182 @@ export default function FarmerDashboard() {
           </Card>
         </TabsContent>
 
+        {/* CROP SCHEDULING TAB - Harvest Scheduling & Tracking */}
+        <TabsContent value="crop-scheduling" className="space-y-6 mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* Harvest Scheduling Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-green-600" />
+                  Harvest Scheduling & Planning
+                </CardTitle>
+                <CardDescription>
+                  Schedule harvest dates for your farm plots and track progress
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {farmerLandData?.farmPlots && farmerLandData.farmPlots.length > 0 ? (
+                  <div className="space-y-4">
+                    {farmerLandData.farmPlots.map((plot: any) => (
+                      <Card key={plot.id} className="border border-green-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h4 className="font-semibold text-green-800">Plot #{plot.plot_number}: {plot.plot_name}</h4>
+                              <p className="text-sm text-gray-600">
+                                <span className="font-mono text-xs bg-green-50 px-2 py-1 rounded">{plot.plot_id}</span>
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="text-green-700">
+                              {plot.crop_type.charAt(0).toUpperCase() + plot.crop_type.slice(1)}
+                            </Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="font-medium">Size:</span> {plot.plot_size} {plot.plot_size_unit}
+                            </div>
+                            <div>
+                              <span className="font-medium">Status:</span> 
+                              <Badge variant={plot.status === 'active' ? 'default' : 'secondary'} className="ml-2 text-xs">
+                                {plot.status}
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-4 space-y-3">
+                            {plot.planting_date ? (
+                              <div className="text-sm">
+                                <span className="font-medium">Planted:</span> {plot.planting_date}
+                              </div>
+                            ) : (
+                              <div className="p-3 bg-blue-50 rounded-lg">
+                                <p className="text-sm text-blue-800 font-medium mb-2">Schedule Planting</p>
+                                <input 
+                                  type="date" 
+                                  className="w-full p-2 border border-blue-200 rounded text-sm"
+                                  placeholder="Select planting date"
+                                />
+                              </div>
+                            )}
+                            
+                            {plot.expected_harvest_date ? (
+                              <div className="text-sm">
+                                <span className="font-medium">Expected Harvest:</span> {plot.expected_harvest_date}
+                              </div>
+                            ) : (
+                              <div className="p-3 bg-orange-50 rounded-lg">
+                                <p className="text-sm text-orange-800 font-medium mb-2">Schedule Harvest</p>
+                                <input 
+                                  type="date" 
+                                  className="w-full p-2 border border-orange-200 rounded text-sm"
+                                  placeholder="Select harvest date"
+                                />
+                              </div>
+                            )}
+                            
+                            <Button 
+                              size="sm" 
+                              className="w-full bg-green-600 hover:bg-green-700"
+                              data-testid={`schedule-harvest-${plot.plot_id}`}
+                            >
+                              Update Schedule
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">No Farm Plots Available</p>
+                    <p className="text-sm">Register farm plots through Land Inspector to start crop scheduling.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Harvest Tracking Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                  Harvest Tracking & Progress
+                </CardTitle>
+                <CardDescription>
+                  Track your harvest progress and manage completed harvests
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                
+                {/* Quick Harvest Actions */}
+                <div className="grid grid-cols-1 gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-auto p-4 flex flex-col items-center gap-2 border-green-200 hover:bg-green-50"
+                    data-testid="button-mark-harvest-complete"
+                  >
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                    <span className="text-sm font-medium">Mark Harvest Complete</span>
+                    <span className="text-xs text-gray-500">Generate batch codes & notify buyers</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-auto p-4 flex flex-col items-center gap-2 border-blue-200 hover:bg-blue-50"
+                    data-testid="button-track-harvest-progress"
+                  >
+                    <BarChart3 className="h-6 w-6 text-blue-600" />
+                    <span className="text-sm font-medium">Track Harvest Progress</span>
+                    <span className="text-xs text-gray-500">Update harvest quantities & status</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-auto p-4 flex flex-col items-center gap-2 border-purple-200 hover:bg-purple-50"
+                    data-testid="button-view-harvest-history"
+                  >
+                    <History className="h-6 w-6 text-purple-600" />
+                    <span className="text-sm font-medium">View Harvest History</span>
+                    <span className="text-xs text-gray-500">See past harvests & batch codes</span>
+                  </Button>
+                </div>
+                
+                {/* Current Season Progress */}
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-800 mb-3">Current Season Progress</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Plots Planted:</span>
+                      <span className="font-semibold text-green-600">{farmerLandData?.totalPlots || 0}/{farmerLandData?.totalPlots || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Ready for Harvest:</span>
+                      <span className="font-semibold text-orange-600">0/{farmerLandData?.totalPlots || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Harvested:</span>
+                      <span className="font-semibold text-blue-600">0/{farmerLandData?.totalPlots || 0}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Important Notes */}
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <h5 className="font-medium text-yellow-800 mb-2">📋 Important Notes</h5>
+                  <div className="text-sm text-yellow-700 space-y-1">
+                    <p>• Batch codes are automatically generated when you mark harvest complete</p>
+                    <p>• All stakeholders (Land Inspector, Warehouse Inspector, Regulatory panels) are automatically notified</p>
+                    <p>• Use the Marketplace tab to list harvested products for buyers</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         {/* MARKETPLACE TAB */}
         <TabsContent value="marketplace" className="space-y-6 mt-6">

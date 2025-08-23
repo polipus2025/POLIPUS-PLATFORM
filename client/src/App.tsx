@@ -13,8 +13,8 @@ import BuyerDashboard from "@/pages/agricultural-buyer-dashboard";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
 
-// Inspector Portal imports - MINIMAL TEST APPROACH
-import MinimalInspectorTest from "@/pages/minimal-inspector-test";
+// Inspector Portal imports - FULL FUNCTIONALITY RESTORED
+import InspectorPortal from "@/pages/inspector-portal";
 import LandInspectorLogin from "@/pages/auth/land-inspector-login";
 import WarehouseInspectorLogin from "@/pages/auth/warehouse-inspector-login";
 import PortInspectorLogin from "@/pages/auth/port-inspector-login";
@@ -28,9 +28,11 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Switch>
-            {/* NUCLEAR SOLUTION - MINIMAL INSPECTOR TEST */}
-            <Route path="/" component={MinimalInspectorTest} />
-            <Route path="/inspector-portal" component={MinimalInspectorTest} />
+            {/* INSPECTOR PORTAL - FULLY FUNCTIONAL */}
+            <Route path="/inspector-portal" component={InspectorPortal} />
+            
+            {/* MAIN POLIPUS PAGE RESTORED */}
+            <Route path="/" component={FrontPage} />
             <Route path="/land-inspector-login" component={LandInspectorLogin} />
             <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
             <Route path="/port-inspector-login" component={PortInspectorLogin} />

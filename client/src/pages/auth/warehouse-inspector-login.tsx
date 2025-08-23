@@ -21,10 +21,11 @@ import {
 
 export default function WarehouseInspectorLogin() {
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6">Warehouse Inspector Login</h1>
-        <p className="text-center text-gray-600">Login portal is loading correctly</p>
+    <div className="min-h-screen bg-red-100 flex items-center justify-center">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg border-4 border-red-500">
+        <h1 className="text-3xl font-bold text-center mb-6 text-red-600">🚨 WAREHOUSE INSPECTOR LOGIN TEST 🚨</h1>
+        <p className="text-center text-red-800 font-bold">THIS PAGE IS WORKING - WAREHOUSE INSPECTOR PORTAL</p>
+        <p className="text-center text-gray-600 mt-4">If you see this, the routing is working!</p>
       </div>
     </div>
   );

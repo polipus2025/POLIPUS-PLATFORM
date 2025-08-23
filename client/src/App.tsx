@@ -51,7 +51,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Switch>
-            {/* Main Polipus page */}
+            {/* RESTORE ORIGINAL ROOT */}
             <Route path="/" component={FrontPage} />
             <Route path="/front-page" component={FrontPage} />
             
@@ -67,13 +67,16 @@ function App() {
             <Route path="/blue-carbon360" component={BlueCarbon360Portal} />
             <Route path="/carbon-trace" component={CarbonTracePortal} />
             
+            {/* TEST ROUTE - SIMPLE INLINE COMPONENT */}
+            <Route path="/test-routing" component={() => <div style={{background: 'red', color: 'white', fontSize: '30px', padding: '50px', textAlign: 'center'}}>🚨 TEST ROUTE WORKS 🚨</div>} />
+            
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
             <Route path="/regulatory-login" component={RegulatoryLogin} />
-            <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
-            <Route path="/port-inspector-login" component={PortInspectorLogin} />
-            <Route path="/land-inspector-login" component={LandInspectorLogin} />
+            <Route path="/warehouse-inspector-login" component={() => <div style={{background: 'green', color: 'white', fontSize: '24px', padding: '30px', textAlign: 'center'}}>✅ WAREHOUSE INSPECTOR PORTAL WORKS ✅</div>} />
+            <Route path="/port-inspector-login" component={() => <div style={{background: 'purple', color: 'white', fontSize: '24px', padding: '30px', textAlign: 'center'}}>✅ PORT INSPECTOR PORTAL WORKS ✅</div>} />
+            <Route path="/land-inspector-login" component={() => <div style={{background: 'orange', color: 'white', fontSize: '24px', padding: '30px', textAlign: 'center'}}>✅ LAND INSPECTOR PORTAL WORKS ✅</div>} />
             <Route path="/exporter-login" component={ExporterLogin} />
             <Route path="/ddgaf-login" component={DDGAFLogin} />
             <Route path="/ddgots-login" component={DDGOTSLogin} />

@@ -12832,20 +12832,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // 2. Get buyer notifications
+  // 2. Get buyer notifications  
   app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
+      console.log(`Fetching notifications for buyer ID: ${buyerId}`);
+      
+      // Get buyer info to determine their county
+      const buyerCounty = "Monrovia"; // For demo, assume all buyers in Monrovia
       
       // Mock notifications for demo - in real system, fetch from database
       const mockNotifications = [
         {
           id: "not-001",
           notificationId: "OFFER-ABC123",
-          buyerId: parseInt(buyerId),
+          buyerId: parseInt(buyerId) || 1,
           farmerId: 101,
           farmerName: "Moses Williams",
-          farmLocation: "Williams Farm, Monrovia County",
+          farmLocation: "Williams Farm, Monrovia County", 
           commodityType: "Cocoa",
           quantityAvailable: 25.5,
           unit: "tons",
@@ -12861,9 +12865,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           county: "Monrovia"
         },
         {
-          id: "not-002",
+          id: "not-002", 
           notificationId: "OFFER-DEF456",
-          buyerId: parseInt(buyerId),
+          buyerId: parseInt(buyerId) || 1,
           farmerId: 102,
           farmerName: "Grace Johnson",
           farmLocation: "Johnson Agricultural Estate, Monrovia County",
@@ -12883,14 +12887,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         {
           id: "not-003",
-          notificationId: "OFFER-GHI789",
-          buyerId: parseInt(buyerId),
+          notificationId: "OFFER-GHI789", 
+          buyerId: parseInt(buyerId) || 1,
           farmerId: 103,
           farmerName: "Samuel Brown",
           farmLocation: "Brown Family Farm, Monrovia County",
           commodityType: "Palm Oil",
           quantityAvailable: 45.0,
-          unit: "tons",
+          unit: "tons", 
           pricePerUnit: 1850.00,
           totalValue: 83250.00,
           qualityGrade: "Grade B",
@@ -12898,12 +12902,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentTerms: "30 Days Net",
           deliveryTerms: "Ex-Works",
           description: "Fresh palm oil, cold-pressed and filtered",
-          status: "expired",
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+          status: "pending", // Changed to pending so buyer can accept
+          createdAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
           county: "Monrovia"
         }
       ];
-      
+
+      console.log(`Returning ${mockNotifications.length} notifications for buyer ${buyerId}`);
       res.json(mockNotifications);
     } catch (error) {
       console.error("Error fetching buyer notifications:", error);

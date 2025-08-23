@@ -44,8 +44,13 @@ export default function FarmerDashboard() {
   // Fetch farmer-specific data
   const { data: farmerLandData, isLoading: landDataLoading, error: landDataError } = useQuery({ 
     queryKey: ["/api/farmer-land-data", farmerId],
-    queryFn: () => apiRequest(`/api/farmer-land-data/${farmerId}`),
+    queryFn: () => {
+      console.log("🔄 Making API call to:", `/api/farmer-land-data/${farmerId}`);
+      return apiRequest(`/api/farmer-land-data/${farmerId}`);
+    },
     enabled: !!farmerId,
+    staleTime: 0, // Always refetch
+    cacheTime: 0, // Don't cache
   });
   const { data: cropPlans } = useQuery({ queryKey: ["/api/crop-plans"] });
   const { data: trackingRecords } = useQuery({ queryKey: ["/api/tracking-records"] });

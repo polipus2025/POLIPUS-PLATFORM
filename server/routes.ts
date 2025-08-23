@@ -81,7 +81,6 @@ import {
   insertBuyerNotificationSchema,
   insertFarmerBuyerTransactionSchema,
   farmerProductOffers,
-  buyerNotifications,
   farmerBuyerTransactions,
   farmers,
   buyers,
@@ -481,19 +480,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const notificationId = generateNotificationId();
         const buyerName = `${buyer.contactPersonFirstName} ${buyer.contactPersonLastName}`;
         
-        const [notification] = await db.insert(buyerNotifications).values({
+        await db.execute(sql`
+          INSERT INTO buyer_notifications (
+            notification_id, offer_id, buyer_id, buyer_name, title, message, 
+            commodity_type, quantity_available, price_per_unit, county, farmer_name, created_at
+          ) VALUES (
+            ${notificationId}, ${offer.offerId}, ${buyer.id}, ${buyerName},
+            ${`New ${validatedData.commodityType} Available in ${validatedData.county}`},
+            ${`${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for ${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`},
+            ${validatedData.commodityType}, ${validatedData.quantityAvailable}, 
+            ${validatedData.pricePerUnit}, ${validatedData.county}, 
+            ${validatedData.farmerName}, ${new Date()}
+          )
+        `);
+        
+        const notification = {
           notificationId,
-          offerId: offer.offerId,
           buyerId: buyer.id,
           buyerName,
-          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
-          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for ${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
-          commodityType: validatedData.commodityType,
-          quantityAvailable: validatedData.quantityAvailable,
-          pricePerUnit: validatedData.pricePerUnit,
-          county: validatedData.county,
-          farmerName: validatedData.farmerName,
-        }).returning();
+          commodityType: validatedData.commodityType
+        };
         
         notifications.push(notification);
       }
@@ -528,35 +534,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { buyerId } = req.params;
 
-      const notifications = await db
-        .select({
-          notificationId: buyerNotifications.notificationId,
-          id: buyerNotifications.notificationId,
-          offerId: buyerNotifications.offerId,
-          buyerId: buyerNotifications.buyerId,
-          buyerName: buyerNotifications.buyerName,
-          title: buyerNotifications.title,
-          message: buyerNotifications.message,
-          commodityType: buyerNotifications.commodityType,
-          quantityAvailable: buyerNotifications.quantityAvailable,
-          pricePerUnit: buyerNotifications.pricePerUnit,
-          county: buyerNotifications.county,
-          farmerName: buyerNotifications.farmerName,
-          status: sql`CASE WHEN ${buyerNotifications.response} IS NULL THEN 'pending' ELSE ${buyerNotifications.response} END`.as('status'),
-          unit: sql`'tons'`.as('unit'),
-          totalValue: sql`(${buyerNotifications.quantityAvailable} * ${buyerNotifications.pricePerUnit})`.as('totalValue'),
-          qualityGrade: sql`'Grade A'`.as('qualityGrade'),
-          paymentTerms: sql`'Payment within 7 days of delivery'`.as('paymentTerms'),
-          deliveryTerms: sql`'Pickup at farm location'`.as('deliveryTerms'),
-          farmLocation: sql`CONCAT(${buyerNotifications.county}, ' County')`.as('farmLocation'),
-          description: sql`${buyerNotifications.message}`.as('description'),
-          createdAt: buyerNotifications.createdAt,
-        })
-        .from(buyerNotifications)
-        .where(eq(buyerNotifications.buyerId, 
-          parseInt(buyerId) || 5
-        ))
-        .orderBy(desc(buyerNotifications.createdAt));
+      const notifications = await db.execute(sql`
+        SELECT 
+          notification_id as "notificationId",
+          notification_id as "id",
+          offer_id as "offerId",
+          buyer_id as "buyerId",
+          buyer_name as "buyerName",
+          title,
+          message,
+          commodity_type as "commodityType",
+          quantity_available as "quantityAvailable",
+          price_per_unit as "pricePerUnit",
+          county,
+          farmer_name as "farmerName",
+          CASE WHEN response IS NULL THEN 'pending' ELSE response END as status,
+          'tons' as unit,
+          (quantity_available * price_per_unit) as "totalValue",
+          'Grade A' as "qualityGrade",
+          'Payment within 7 days of delivery' as "paymentTerms",
+          'Pickup at farm location' as "deliveryTerms",
+          CONCAT(county, ' County') as "farmLocation",
+          message as description,
+          created_at as "createdAt"
+        FROM buyer_notifications 
+        WHERE buyer_id = ${parseInt(buyerId) || 5}
+        ORDER BY created_at DESC
+      `);
 
       res.json({
         success: true,
@@ -586,10 +590,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get the notification
-      const [notification] = await db
-        .select()
-        .from(buyerNotifications)
-        .where(eq(buyerNotifications.notificationId, notificationId));
+      const notificationResult = await db.execute(sql`
+        SELECT * FROM buyer_notifications WHERE notification_id = ${notificationId}
+      `);
+      const notification = notificationResult.rows?.[0] || notificationResult[0];
 
       if (!notification) {
         return res.status(404).json({
@@ -619,23 +623,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // First-Click-Wins Logic: Check if anyone has already confirmed
-      const existingConfirmations = await db
-        .select()
-        .from(buyerNotifications)
-        .where(eq(buyerNotifications.offerId, notification.offerId))
-        .where(eq(buyerNotifications.response, "confirmed"));
+      const existingConfirmationsResult = await db.execute(sql`
+        SELECT * FROM buyer_notifications 
+        WHERE offer_id = ${notification.offer_id} AND response = 'confirmed'
+      `);
+      const existingConfirmations = existingConfirmationsResult.rows || existingConfirmationsResult;
 
       if (response === "confirmed") {
         if (existingConfirmations.length > 0) {
           // Someone already confirmed - this buyer was too late
-          await db.update(buyerNotifications)
-            .set({ 
-              response: "rejected",
-              responseDate: new Date(),
-              clickOrder: existingConfirmations.length + 1,
-              isWinner: false,
-            })
-            .where(eq(buyerNotifications.notificationId, notificationId));
+          await db.execute(sql`
+            UPDATE buyer_notifications 
+            SET response = 'rejected', response_date = ${new Date()}, 
+                click_order = ${existingConfirmations.length + 1}, is_winner = false
+            WHERE notification_id = ${notificationId}
+          `);
 
           return res.status(400).json({
             success: false,
@@ -645,14 +647,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // First buyer to confirm - they win!
-        await db.update(buyerNotifications)
-          .set({ 
-            response: "confirmed",
-            responseDate: new Date(),
-            clickOrder: 1,
-            isWinner: true,
-          })
-          .where(eq(buyerNotifications.notificationId, notificationId));
+        await db.execute(sql`
+          UPDATE buyer_notifications 
+          SET response = 'confirmed', response_date = ${new Date()}, 
+              click_order = 1, is_winner = true
+          WHERE notification_id = ${notificationId}
+        `);
 
         // Mark offer as reserved
         await db.update(farmerProductOffers)
@@ -690,14 +690,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }).returning();
 
         // Mark all other notifications for this offer as rejected (auto-reject losers)
-        await db.update(buyerNotifications)
-          .set({ 
-            response: "rejected",
-            responseDate: new Date(),
-            isWinner: false,
-          })
-          .where(eq(buyerNotifications.offerId, notification.offerId))
-          .where(ne(buyerNotifications.notificationId, notificationId));
+        await db.execute(sql`
+          UPDATE buyer_notifications 
+          SET response = 'rejected', response_date = ${new Date()}, is_winner = false
+          WHERE offer_id = ${notification.offer_id} AND notification_id != ${notificationId}
+        `);
 
         res.json({
           success: true,
@@ -710,13 +707,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       } else {
         // Buyer rejected the offer
-        await db.update(buyerNotifications)
-          .set({ 
-            response: "rejected",
-            responseDate: new Date(),
-            isWinner: false,
-          })
-          .where(eq(buyerNotifications.notificationId, notificationId));
+        await db.execute(sql`
+          UPDATE buyer_notifications 
+          SET response = 'rejected', response_date = ${new Date()}, is_winner = false
+          WHERE notification_id = ${notificationId}
+        `);
 
         res.json({
           success: true,

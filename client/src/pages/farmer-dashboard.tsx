@@ -265,7 +265,7 @@ export default function FarmerDashboard() {
 
       toast({
         title: "Product Offer Submitted Successfully!",
-        description: `${response.notificationsSent} buyers in ${farmerCounty} County have been notified. Buyers notified: ${response.buyersNotified.join(', ')}`
+        description: `${response.notificationsSent} buyers in ${farmerCounty} County have been notified.`
       });
 
       // Reset form

@@ -636,8 +636,126 @@ export default function WarehouseInspectorDashboard() {
             </Card>
           </TabsContent>
 
-          {/* QR Batch Management Tab */}
-          <TabsContent value="qr-batches" className="space-y-6">
+          {/* Transactions Tab */}
+          <TabsContent value="transactions" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                  Warehouse Transactions Archive
+                </CardTitle>
+                <CardDescription>
+                  Transaction history and verification codes for warehouse operations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {warehouseTransactionsLoading ? (
+                    <p className="text-center text-gray-500">Loading transactions...</p>
+                  ) : warehouseTransactions && warehouseTransactions.length > 0 ? (
+                    warehouseTransactions.map((transaction: any) => (
+                      <div key={transaction.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">{transaction.transactionType}</h4>
+                            <p className="text-sm text-gray-600">ID: {transaction.transactionId}</p>
+                          </div>
+                          <Badge className={transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {transaction.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <span className="font-medium">Farmer:</span>
+                            <p className="text-gray-600">{transaction.farmerName}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Commodity:</span>
+                            <p className="text-gray-600">{transaction.commodity}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Date:</span>
+                            <p className="text-gray-600">{transaction.transactionDate}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No transactions available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Codes Tab */}
+          <TabsContent value="codes" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-blue-600" />
+                  Verification Codes Archive
+                </CardTitle>
+                <CardDescription>
+                  Dual verification codes and QR batch management
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {warehouseCodesLoading ? (
+                    <p className="text-center text-gray-500">Loading verification codes...</p>
+                  ) : warehouseCodes && warehouseCodes.length > 0 ? (
+                    warehouseCodes.map((code: any) => (
+                      <div key={code.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">Code: {code.verificationCode}</h4>
+                            <p className="text-sm text-gray-600">Type: {code.codeType}</p>
+                          </div>
+                          <Badge className={code.isUsed ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'}>
+                            {code.isUsed ? 'Used' : 'Active'}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <span className="font-medium">Farmer:</span>
+                            <p className="text-gray-600">{code.farmerName}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Transaction:</span>
+                            <p className="text-gray-600">{code.transactionId}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Generated:</span>
+                            <p className="text-gray-600">{code.generatedDate}</p>
+                          </div>
+                        </div>
+                        {!code.isUsed && (
+                          <div className="mt-3">
+                            <Button
+                              size="sm"
+                              onClick={() => validateCodeMutation.mutate({ 
+                                codeType: code.codeType, 
+                                verificationCode: code.verificationCode 
+                              })}
+                              disabled={validateCodeMutation.isPending}
+                            >
+                              Validate Code
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No verification codes available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Bags Tab */}
+          <TabsContent value="bags" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card>
@@ -1004,8 +1122,8 @@ export default function WarehouseInspectorDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Compliance Tab */}
-          <TabsContent value="compliance" className="space-y-6">
+          {/* Validation Tab */}
+          <TabsContent value="validation" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">

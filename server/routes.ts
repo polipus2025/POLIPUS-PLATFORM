@@ -13538,7 +13538,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .from(buyerNotifications)
         .where(eq(buyerNotifications.buyerId, buyer.id))
-        // Only pending notifications (response is null)
+        // Only pending notifications (response is null or empty)
+        .where(sql`(${buyerNotifications.response} IS NULL OR ${buyerNotifications.response} = '')`)
         .orderBy(desc(buyerNotifications.createdAt));
 
       console.log(`📬 Returning ${realNotifications.length} REAL notifications for buyer ${buyerId}`);
@@ -13606,7 +13607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store verification code in database
       const [savedCode] = await db.insert(buyerVerificationCodes).values({
         verificationCode,
-        buyerId: buyerId, // Use the actual buyer ID from request
+        buyerId: buyerId || notification.buyerId, // Use the actual buyer ID from request or notification
         buyerName: buyerName || 'Agricultural Trading Company',
         company: company || 'Agricultural Trading Company',
         notificationId,

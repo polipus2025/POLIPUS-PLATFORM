@@ -14527,7 +14527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           batch_code, warehouse_id, warehouse_name, buyer_id, buyer_name,
           farmer_id, farmer_name, commodity_type, total_bags, bag_weight,
           total_weight, quality_grade, harvest_date, qr_code_data,
-          status, created_at, printed_at, distributed_at
+          qr_code_url, status, created_at, printed_at, distributed_at
         FROM qr_batches 
         ORDER BY created_at DESC
       `;
@@ -14538,7 +14538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             batch_code, warehouse_id, warehouse_name, buyer_id, buyer_name,
             farmer_id, farmer_name, commodity_type, total_bags, bag_weight,
             total_weight, quality_grade, harvest_date, qr_code_data,
-            status, created_at, printed_at, distributed_at
+            qr_code_url, status, created_at, printed_at, distributed_at
           FROM qr_batches 
           WHERE warehouse_id = ${warehouseId}
           ORDER BY created_at DESC
@@ -14561,6 +14561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         qualityGrade: row.quality_grade,
         harvestDate: row.harvest_date,
         qrCodeData: row.qr_code_data,
+        qrCodeUrl: row.qr_code_url,
         status: row.status,
         createdAt: row.created_at,
         printedAt: row.printed_at,

@@ -14194,24 +14194,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WAREHOUSE INSPECTOR ARCHIVES & TRACEABILITY APIs
   // ===============================
 
-  // Get warehouse transactions archive
+  // Get warehouse transactions archive - county-specific filtering
   app.get("/api/warehouse-inspector/transactions", async (req, res) => {
     try {
-      console.log("Fetching warehouse transactions archive");
+      console.log("Fetching warehouse transactions archive with county filtering");
       
-      // Get real warehouse transactions from database
-      const warehouseTransactionsResult = await db.execute(sql`
-        SELECT 
-          wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
-          wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name, 
-          wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
-          wt.received_at, wt.status, wt.processed_by, wt.processed_at, wt.notes,
-          wt.qr_batch_generated, wt.batch_code,
-          cw.warehouse_name, cw.warehouse_id
-        FROM warehouse_transactions wt
-        LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
-        ORDER BY wt.received_at DESC
-      `);
+      // Get inspector info from token/session to filter by county
+      const authHeader = req.headers.authorization;
+      let warehouseId = null;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          warehouseId = decoded.warehouseId;
+          console.log(`Filtering transactions for warehouse: ${warehouseId}`);
+        } catch (error) {
+          console.log("No valid token, returning all transactions");
+        }
+      }
+      
+      // Get real warehouse transactions from database - filtered by warehouse
+      let warehouseTransactionsResult;
+      if (warehouseId) {
+        warehouseTransactionsResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name, 
+            wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
+            wt.received_at, wt.status, wt.processed_by, wt.processed_at, wt.notes,
+            wt.qr_batch_generated, wt.batch_code,
+            cw.warehouse_name, cw.warehouse_id
+          FROM warehouse_transactions wt
+          LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          WHERE wt.warehouse_id = ${warehouseId}
+          ORDER BY wt.received_at DESC
+        `);
+      } else {
+        warehouseTransactionsResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name, 
+            wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
+            wt.received_at, wt.status, wt.processed_by, wt.processed_at, wt.notes,
+            wt.qr_batch_generated, wt.batch_code,
+            cw.warehouse_name, cw.warehouse_id
+          FROM warehouse_transactions wt
+          LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          ORDER BY wt.received_at DESC
+        `);
+      }
       
       const warehouseTransactions = warehouseTransactionsResult.rows.map((row: any) => ({
         id: `wh-trans-${row.id}`,
@@ -14246,24 +14278,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get warehouse verification codes archive
+  // Get warehouse verification codes archive - county-specific filtering
   app.get("/api/warehouse-inspector/verification-codes", async (req, res) => {
     try {
-      console.log("Fetching warehouse verification codes archive");
+      console.log("Fetching warehouse verification codes archive with county filtering");
       
-      // Get real verification codes from warehouse transactions
-      const warehouseCodesResult = await db.execute(sql`
-        SELECT 
-          wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
-          wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
-          wt.commodity_type, wt.quantity, wt.unit, wt.total_value,
-          wt.received_at, wt.status,
-          cw.warehouse_name, cw.county
-        FROM warehouse_transactions wt
-        LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
-        WHERE wt.verification_code IS NOT NULL
-        ORDER BY wt.received_at DESC
-      `);
+      // Get inspector info from token/session to filter by county
+      const authHeader = req.headers.authorization;
+      let warehouseId = null;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          warehouseId = decoded.warehouseId;
+          console.log(`Filtering verification codes for warehouse: ${warehouseId}`);
+        } catch (error) {
+          console.log("No valid token, returning all verification codes");
+        }
+      }
+      
+      // Get real verification codes from warehouse transactions - filtered by warehouse
+      let warehouseCodesResult;
+      if (warehouseId) {
+        warehouseCodesResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.commodity_type, wt.quantity, wt.unit, wt.total_value,
+            wt.received_at, wt.status,
+            cw.warehouse_name, cw.county
+          FROM warehouse_transactions wt
+          LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          WHERE wt.verification_code IS NOT NULL AND wt.warehouse_id = ${warehouseId}
+          ORDER BY wt.received_at DESC
+        `);
+      } else {
+        warehouseCodesResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.commodity_type, wt.quantity, wt.unit, wt.total_value,
+            wt.received_at, wt.status,
+            cw.warehouse_name, cw.county
+          FROM warehouse_transactions wt
+          LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          WHERE wt.verification_code IS NOT NULL
+          ORDER BY wt.received_at DESC
+        `);
+      }
       
       const warehouseCodes = [];
       
@@ -14322,24 +14385,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // QR BATCH MANAGEMENT & GENERATION SYSTEM
   // ===============================
   
-  // Get available transactions for QR batch generation
+  // Get available transactions for QR batch generation - county-specific filtering
   app.get("/api/warehouse-inspector/available-transactions", async (req, res) => {
     try {
-      console.log("Fetching available transactions for QR batch generation");
+      console.log("Fetching available transactions for QR batch generation with county filtering");
       
-      const availableTransactionsResult = await db.execute(sql`
-        SELECT 
-          wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
-          wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
-          wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
-          wt.status, wt.qr_batch_generated, wt.batch_code,
-          cw.warehouse_name, cw.warehouse_id
-        FROM warehouse_transactions wt
-        LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
-        WHERE wt.payment_verification_code IS NOT NULL 
-        AND wt.status IN ('received', 'processed')
-        ORDER BY wt.received_at DESC
-      `);
+      // Get inspector info from token/session to filter by county
+      const authHeader = req.headers.authorization;
+      let warehouseId = null;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          warehouseId = decoded.warehouseId;
+          console.log(`Filtering available transactions for warehouse: ${warehouseId}`);
+        } catch (error) {
+          console.log("No valid token, returning all available transactions");
+        }
+      }
+      
+      let availableTransactionsResult;
+      if (warehouseId) {
+        availableTransactionsResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
+            wt.status, wt.qr_batch_generated, wt.batch_code,
+            cw.warehouse_name, cw.warehouse_id
+          FROM warehouse_transactions wt
+          LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          WHERE wt.payment_verification_code IS NOT NULL 
+          AND wt.status IN ('received', 'processed')
+          AND wt.warehouse_id = ${warehouseId}
+          ORDER BY wt.received_at DESC
+        `);
+      } else {
+        availableTransactionsResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
+            wt.status, wt.qr_batch_generated, wt.batch_code,
+            cw.warehouse_name, cw.warehouse_id
+          FROM warehouse_transactions wt
+          LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          WHERE wt.payment_verification_code IS NOT NULL 
+          AND wt.status IN ('received', 'processed')
+          ORDER BY wt.received_at DESC
+        `);
+      }
       
       const availableTransactions = availableTransactionsResult.rows.map((row: any) => ({
         transactionId: row.transaction_id,
@@ -14461,22 +14557,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get bag collections tracking
+  // Get bag collections tracking - county-specific filtering
   app.get("/api/warehouse-inspector/bag-collections", async (req, res) => {
     try {
-      console.log("Fetching bag collections tracking data");
+      console.log("Fetching bag collections tracking data with county filtering");
       
-      // Real bag collections data from warehouse transactions with generated batch codes
-      const warehouseTransactionsResult = await db.execute(sql`
-        SELECT 
-          wt.id, wt.transaction_id, wt.batch_code, wt.commodity_type,
-          wt.farmer_id, wt.farmer_name, wt.buyer_id, wt.buyer_name,
-          wt.quantity, wt.unit, wt.total_value, wt.received_at,
-          wt.qr_batch_generated, wt.status, wt.verification_code
-        FROM warehouse_transactions wt
-        WHERE wt.qr_batch_generated = true AND wt.batch_code IS NOT NULL
-        ORDER BY wt.received_at DESC
-      `);
+      // Get inspector info from token/session to filter by county
+      const authHeader = req.headers.authorization;
+      let warehouseId = null;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          warehouseId = decoded.warehouseId;
+          console.log(`Filtering bag collections for warehouse: ${warehouseId}`);
+        } catch (error) {
+          console.log("No valid token, returning all bag collections");
+        }
+      }
+      
+      // Real bag collections data from warehouse transactions with generated batch codes - filtered by warehouse
+      let warehouseTransactionsResult;
+      if (warehouseId) {
+        warehouseTransactionsResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.batch_code, wt.commodity_type,
+            wt.farmer_id, wt.farmer_name, wt.buyer_id, wt.buyer_name,
+            wt.quantity, wt.unit, wt.total_value, wt.received_at,
+            wt.qr_batch_generated, wt.status, wt.verification_code
+          FROM warehouse_transactions wt
+          WHERE wt.qr_batch_generated = true AND wt.batch_code IS NOT NULL AND wt.warehouse_id = ${warehouseId}
+          ORDER BY wt.received_at DESC
+        `);
+      } else {
+        warehouseTransactionsResult = await db.execute(sql`
+          SELECT 
+            wt.id, wt.transaction_id, wt.batch_code, wt.commodity_type,
+            wt.farmer_id, wt.farmer_name, wt.buyer_id, wt.buyer_name,
+            wt.quantity, wt.unit, wt.total_value, wt.received_at,
+            wt.qr_batch_generated, wt.status, wt.verification_code
+          FROM warehouse_transactions wt
+          WHERE wt.qr_batch_generated = true AND wt.batch_code IS NOT NULL
+          ORDER BY wt.received_at DESC
+        `);
+      }
 
       const bagCollections = warehouseTransactionsResult.rows.map((row: any) => {
         // Calculate realistic bag usage based on commodity type and quantity

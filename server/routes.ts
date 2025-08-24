@@ -508,7 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         message: `Product offer submitted successfully and saved to marketplace!`,
         offer,
-        notificationsSent: countyBuyers.length,
+        notificationsSent: notifications.length,
       });
 
     } catch (error) {
@@ -13293,7 +13293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===============================
 
   // 1. Farmer submits product offer and automatically notifies all county buyers
-  app.post("/api/farmer/submit-product-offer", async (req, res) => {
+  app.post("/api/farmer/submit-offer", async (req, res) => {
     try {
       const {
         farmerId,

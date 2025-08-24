@@ -126,7 +126,7 @@ import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { db } from './db';
-import { eq, desc, ne, sql } from "drizzle-orm";
+import { eq, desc, ne, sql, and, or } from "drizzle-orm";
 import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables

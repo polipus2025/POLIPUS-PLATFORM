@@ -14881,21 +14881,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Create QR batch entry
           await db.execute(sql`
             INSERT INTO qr_batches (
-              batch_code, transaction_id, warehouse_id, warehouse_name,
+              batch_code, warehouse_id, warehouse_name,
               buyer_id, buyer_name, farmer_id, farmer_name,
-              commodity_type, packaging_type, total_packages, package_weight, 
+              commodity_type, total_bags, bag_weight, 
               total_weight, quality_grade, harvest_date, 
-              inspection_data, eudr_compliance, certification_data, compliance_data,
+              inspection_data, eudr_compliance,
               qr_code_data, status
             ) VALUES (
-              ${batchCode}, ${transaction.transaction_id}, ${transaction.warehouse_id}, ${warehouseName},
+              ${batchCode}, ${transaction.warehouse_id}, ${warehouseName},
               ${transaction.buyer_id}, ${transaction.buyer_name}, ${transaction.farmer_id}, ${transaction.farmer_name},
-              ${transaction.commodity_type}, ${packagingType}, ${totalPackages}, ${packageWeight}, 
+              ${transaction.commodity_type}, ${totalPackages}, ${packageWeight}, 
               ${totalQuantity}, 'Grade A', NOW(),
               ${JSON.stringify({ inspected: true, quality: 'excellent' })},
               ${JSON.stringify({ compliant: true, eudr_ready: true })},
-              ${JSON.stringify({ certified: true, organic: false })},
-              ${JSON.stringify({ compliant: true, standards_met: true })},
               ${JSON.stringify({ 
                 batch_code: batchCode, 
                 transaction_id: transaction.transaction_id,

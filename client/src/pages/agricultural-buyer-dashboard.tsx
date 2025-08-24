@@ -41,14 +41,14 @@ export default function AgriculturalBuyerDashboard() {
   const buyerName = localStorage.getItem("buyerName") || localStorage.getItem("firstName") + " " + localStorage.getItem("lastName");
   const company = localStorage.getItem("company") || "Agricultural Trading Company";
 
-  // Fetch product offer notifications for this buyer
+  // Fetch product offer notifications for this buyer - REAL-TIME for offer competition
   const { data: notifications, isLoading: notificationsLoading } = useQuery({
     queryKey: ['/api/buyer/notifications', buyerId],
     queryFn: () => apiRequest(`/api/buyer-notifications/${buyerId}`),
     enabled: !!buyerId,
-    staleTime: 60 * 1000, // Cache for 1 minute
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchInterval: 60000, // Refresh every 60 seconds (less aggressive)
+    staleTime: 0, // No cache - always fetch fresh for real-time offer status
+    gcTime: 0, // Don't keep in cache
+    refetchInterval: 5000, // Refresh every 5 seconds for real-time competition
   });
 
   // Fetch farmer harvests ready for purchase
@@ -387,7 +387,7 @@ export default function AgriculturalBuyerDashboard() {
                             <div className="text-xs text-gray-500">
                               Posted: {new Date(notification.createdAt).toLocaleString()}
                             </div>
-                            {notification.status === 'pending' ? (
+                            {!notification.response || notification.response === '' ? (
                               <Button 
                                 onClick={() => handleAcceptOffer(notification.notificationId)}
                                 className="bg-green-600 hover:bg-green-700"
@@ -397,8 +397,8 @@ export default function AgriculturalBuyerDashboard() {
                                 Accept Offer
                               </Button>
                             ) : (
-                              <Badge variant="outline" className="text-gray-500">
-                                {notification.status === 'accepted' ? 'Already Accepted' : 'No Longer Available'}
+                              <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">
+                                {notification.response === 'confirmed' ? '✅ You Accepted This' : '❌ Taken by Another Buyer'}
                               </Badge>
                             )}
                           </div>

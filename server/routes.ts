@@ -13622,6 +13622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmLocation: `${notification.county} County`,
         paymentTerms: 'Payment within 7 days of delivery',
         deliveryTerms: 'Pickup at farm location',
+        status: 'payment_confirmed', // Auto-confirm payment for immediate bag requests
         acceptedAt: new Date(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       }).returning();

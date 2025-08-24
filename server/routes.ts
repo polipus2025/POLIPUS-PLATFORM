@@ -13417,28 +13417,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
       console.log(`Fetching confirmed transactions for buyer: ${buyerId}`);
       
-      // Mock confirmed transactions - in real system, fetch from database
-      const confirmedTransactions = [
-        {
-          id: "conf-001",
-          notificationId: "OFFER-ABC123",
-          buyerId: parseInt(buyerId) || 1,
-          farmerId: 101,
-          farmerName: "Moses Williams",
-          farmLocation: "Williams Farm, Monrovia County",
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          pricePerUnit: 2450.00,
-          totalValue: 62475.00,
-          qualityGrade: "Grade A",
-          paymentTerms: "50% Advance, 50% on Delivery",
-          deliveryTerms: "FOB Farm Gate",
-          verificationCode: "X0R27R24",
-          confirmedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-          status: "confirmed"
-        }
-      ];
+      // Fetch real confirmed transactions from database
+      const realTransactions = await db
+        .select({
+          id: buyerVerificationCodes.id,
+          notificationId: buyerVerificationCodes.notificationId,
+          buyerId: buyerVerificationCodes.buyerId,
+          farmerId: buyerVerificationCodes.farmerId,
+          farmerName: buyerVerificationCodes.farmerName,
+          farmLocation: buyerVerificationCodes.farmLocation,
+          commodityType: buyerVerificationCodes.commodityType,
+          quantityAvailable: buyerVerificationCodes.quantityAvailable,
+          unit: buyerVerificationCodes.unit,
+          pricePerUnit: buyerVerificationCodes.pricePerUnit,
+          totalValue: buyerVerificationCodes.totalValue,
+          paymentTerms: buyerVerificationCodes.paymentTerms,
+          deliveryTerms: buyerVerificationCodes.deliveryTerms,
+          verificationCode: buyerVerificationCodes.verificationCode,
+          acceptedAt: buyerVerificationCodes.acceptedAt,
+        })
+        .from(buyerVerificationCodes)
+        .where(eq(buyerVerificationCodes.buyerId, buyerId))
+        .orderBy(desc(buyerVerificationCodes.acceptedAt));
+
+      // Format the transactions for the frontend
+      const confirmedTransactions = realTransactions.map(transaction => ({
+        id: transaction.id,
+        notificationId: transaction.notificationId,
+        buyerId: transaction.buyerId,
+        farmerId: transaction.farmerId,
+        farmerName: transaction.farmerName,
+        farmLocation: transaction.farmLocation,
+        commodityType: transaction.commodityType,
+        quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
+        unit: transaction.unit || 'kg',
+        pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
+        totalValue: parseFloat(transaction.totalValue || '0'),
+        qualityGrade: "Grade A", // Default quality grade
+        paymentTerms: transaction.paymentTerms,
+        deliveryTerms: transaction.deliveryTerms,
+        verificationCode: transaction.verificationCode,
+        confirmedAt: transaction.acceptedAt,
+        status: "confirmed",
+        paymentConfirmed: false, // Will be updated when buyer confirms payment
+        awaitingPaymentConfirmation: true // Flag to show payment confirmation button
+      }));
 
       console.log(`Returning ${confirmedTransactions.length} confirmed transactions`);
       res.json(confirmedTransactions);
@@ -13523,6 +13546,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching farmer confirmed transactions:", error);
       res.status(500).json({ error: "Failed to fetch farmer confirmed transactions" });
+    }
+  });
+
+  // Buyer payment confirmation - Generate second verification code
+  app.post("/api/buyer/confirm-payment/:transactionId", async (req, res) => {
+    try {
+      const { transactionId } = req.params;
+      const { buyerId, buyerName } = req.body;
+      
+      console.log(`Buyer ${buyerId} confirming payment for transaction: ${transactionId}`);
+      
+      // Generate second verification code
+      const secondVerificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const confirmationDate = new Date();
+      
+      // Update the verification code record with payment confirmation
+      const [updatedTransaction] = await db
+        .update(buyerVerificationCodes)
+        .set({
+          secondVerificationCode: secondVerificationCode,
+          paymentConfirmedAt: confirmationDate,
+          status: 'payment_confirmed'
+        })
+        .where(eq(buyerVerificationCodes.id, parseInt(transactionId)))
+        .returning();
+      
+      if (!updatedTransaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      
+      console.log(`✅ Payment confirmed by buyer ${buyerName}`);
+      console.log(`🔐 Second verification code generated: ${secondVerificationCode}`);
+      
+      res.json({
+        message: "Payment confirmed successfully! Second verification code generated.",
+        secondVerificationCode,
+        confirmationDate,
+        transaction: updatedTransaction
+      });
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ error: "Failed to confirm payment" });
     }
   });
 

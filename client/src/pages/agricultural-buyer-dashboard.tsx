@@ -133,6 +133,35 @@ export default function AgriculturalBuyerDashboard() {
     }
   };
 
+  // Handle payment confirmation to generate second verification code
+  const handlePaymentConfirmation = async (transactionId: string, farmerName: string) => {
+    try {
+      const response = await apiRequest(`/api/buyer/confirm-payment/${transactionId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          buyerId: buyerId,
+          buyerName: buyerName
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      toast({
+        title: "✅ Payment Confirmed!",
+        description: `Second verification code generated: ${response.secondVerificationCode}. Payment confirmed for ${farmerName}.`,
+      });
+
+      // Refresh confirmed transactions to show updated status
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/confirmed-transactions', buyerId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/verification-codes', buyerId] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to confirm payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const accessMarketplace = () => {
     // Navigate to buyer marketplace
     navigate('/buyer-marketplace');
@@ -513,9 +542,26 @@ export default function AgriculturalBuyerDashboard() {
                             <div className="text-xs text-gray-500">
                               Confirmed: {new Date(transaction.confirmedAt).toLocaleString()}
                             </div>
-                            <Badge variant="outline" className="text-green-600 border-green-600">
-                              ID: {transaction.notificationId}
-                            </Badge>
+                            <div className="flex items-center space-x-2">
+                              {transaction.awaitingPaymentConfirmation && !transaction.paymentConfirmed ? (
+                                <Button 
+                                  size="sm" 
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                  onClick={() => handlePaymentConfirmation(transaction.id.toString(), transaction.farmerName)}
+                                  data-testid={`button-confirm-payment-${transaction.id}`}
+                                >
+                                  <DollarSign className="w-4 h-4 mr-2" />
+                                  Confirm Payment
+                                </Button>
+                              ) : transaction.paymentConfirmed ? (
+                                <Badge className="bg-green-600 text-white">
+                                  Payment Confirmed
+                                </Badge>
+                              ) : null}
+                              <Badge variant="outline" className="text-green-600 border-green-600">
+                                ID: {transaction.notificationId}
+                              </Badge>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>

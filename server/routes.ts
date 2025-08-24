@@ -13715,7 +13715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique request ID
       const requestId = `REQ-${county.replace(' County', '').toUpperCase()}-${String(Date.now()).slice(-6)}`;
 
-      // Create bag request - convert numeric strings to proper types
+      // Create bag request - convert to match database field types
       const bagRequest = {
         requestId,
         warehouseId: warehouse.warehouseId,
@@ -13726,7 +13726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmerId: existingCode[0].farmerId,
         farmerName,
         commodityType,
-        quantity: parseFloat(quantity), // Convert string to decimal
+        quantity: Math.ceil(parseFloat(quantity)), // Convert to integer (rounded up)
         unit: existingCode[0].unit,
         totalValue: parseFloat(totalValue), // Convert string to decimal
         county,

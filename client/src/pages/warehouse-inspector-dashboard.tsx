@@ -1336,7 +1336,6 @@ export default function WarehouseInspectorDashboard() {
                 </Card>
               </div>
             </div>
-          </TabsContent>
 
           {/* Inventory Control Tab */}
           <TabsContent value="inventory" className="space-y-6">

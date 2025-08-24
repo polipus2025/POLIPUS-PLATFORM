@@ -13791,47 +13791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Buyer payment confirmation - Generate second verification code
-  app.post("/api/buyer/confirm-payment/:transactionId", async (req, res) => {
-    try {
-      const { transactionId } = req.params;
-      const { buyerId, buyerName } = req.body;
-      
-      console.log(`Buyer ${buyerId} confirming payment for transaction: ${transactionId}`);
-      
-      // Generate second verification code
-      const secondVerificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const confirmationDate = new Date();
-      
-      // Update the verification code record with payment confirmation
-      const [updatedTransaction] = await db
-        .update(buyerVerificationCodes)
-        .set({
-          secondVerificationCode: secondVerificationCode,
-          paymentConfirmedAt: confirmationDate,
-          status: 'payment_confirmed'
-        })
-        .where(eq(buyerVerificationCodes.id, parseInt(transactionId)))
-        .returning();
-      
-      if (!updatedTransaction) {
-        return res.status(404).json({ error: "Transaction not found" });
-      }
-      
-      console.log(`✅ Payment confirmed by buyer ${buyerName}`);
-      console.log(`🔐 Second verification code generated: ${secondVerificationCode}`);
-      
-      res.json({
-        message: "Payment confirmed successfully! Second verification code generated.",
-        secondVerificationCode,
-        confirmationDate,
-        transaction: updatedTransaction
-      });
-    } catch (error) {
-      console.error("Error confirming payment:", error);
-      res.status(500).json({ error: "Failed to confirm payment" });
-    }
-  });
+  // SECURITY: Buyer payment confirmation endpoint REMOVED - only farmers can confirm payments to prevent fraud
 
   // Get farmer verification codes archive
   app.get("/api/farmer/verification-codes/:farmerId", async (req, res) => {

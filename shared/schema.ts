@@ -2417,9 +2417,15 @@ export const farmerProductOffers = pgTable("farmer_product_offers", {
   deliveryTerms: text("delivery_terms").notNull(), // farm_pickup, delivery_available, port_delivery
   
   // System Status
-  status: text("status").notNull().default("available"), // available, reserved, sold, expired, cancelled
+  status: text("status").notNull().default("available"), // available, reserved, sold, expired, cancelled, pending, confirmed
   notificationsSent: boolean("notifications_sent").default(false),
   totalNotificationsSent: integer("total_notifications_sent").default(0),
+  
+  // Buyer Information (when confirmed)
+  buyerId: text("buyer_id"), // Buyer who confirmed the offer
+  buyerName: text("buyer_name"), // Buyer company name
+  verificationCode: text("verification_code"), // First verification code
+  confirmedAt: timestamp("confirmed_at"), // When buyer confirmed
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

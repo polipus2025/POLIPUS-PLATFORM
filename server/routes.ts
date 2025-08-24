@@ -600,7 +600,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const notifications = await db
         .select({
           notificationId: buyerNotifications.notificationId,
-          id: buyerNotifications.notificationId,
           offerId: buyerNotifications.offerId,
           buyerId: buyerNotifications.buyerId,
           buyerName: buyerNotifications.buyerName,
@@ -678,7 +677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      if (offer.status !== "available") {
+      if (offer.status !== "pending") {
         return res.status(400).json({
           success: false,
           message: "This product is no longer available",
@@ -721,16 +720,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .where(eq(buyerNotifications.notificationId, notificationId));
 
-        // Mark offer as reserved
+        // Mark offer as confirmed
         await db.update(farmerProductOffers)
-          .set({ status: "reserved" })
+          .set({ 
+            status: "confirmed",
+            confirmedAt: new Date(),
+            buyerId: notification.buyerId,
+            buyerName: notification.buyerName,
+            verificationCode: generateVerificationCode()
+          })
           .where(eq(farmerProductOffers.offerId, notification.offerId));
 
         // Get buyer information
         const [buyer] = await db
           .select()
           .from(buyers)
-          .where(eq(buyers.id, notification.buyerId));
+          .where(eq(buyers.buyerId, notification.buyerId));
 
         // Create transaction with unique verification code
         const transactionId = generateTransactionId();

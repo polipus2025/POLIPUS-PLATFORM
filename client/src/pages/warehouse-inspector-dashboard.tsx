@@ -1670,18 +1670,82 @@ export default function WarehouseInspectorDashboard() {
 
               {/* QR Code Data Information */}
               <div className="border-t pt-4">
-                <h4 className="font-semibold text-lg mb-3">QR Code Contains</h4>
+                <h4 className="font-semibold text-lg mb-3">QR Code Data</h4>
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <ul className="text-sm space-y-1 list-disc list-inside text-blue-700">
-                    <li><strong>Complete Traceability Chain:</strong> From farm to warehouse</li>
-                    <li><strong>Product Information:</strong> Commodity type, quality grade, harvest date</li>
-                    <li><strong>EUDR Compliance Data:</strong> Deforestation risk assessment, geolocation</li>
-                    <li><strong>Inspection Results:</strong> Quality control and compliance verification</li>
-                    <li><strong>Certification Data:</strong> LACRA compliance, international standards</li>
-                    <li><strong>Digital Verification:</strong> Tamper-proof signatures and verification URL</li>
-                    <li><strong>Packaging Details:</strong> Bag counts, weights, and storage information</li>
-                    <li><strong>Stakeholder Information:</strong> Farmer, buyer, warehouse, and inspector details</li>
-                  </ul>
+                  {selectedQrBatch.qrCodeData ? (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <h5 className="font-semibold text-blue-800 mb-2">Traceability Information:</h5>
+                        <div className="grid grid-cols-2 gap-4 text-blue-700">
+                          <div>
+                            <strong>Batch Code:</strong> {selectedQrBatch.qrCodeData.batchCode || selectedQrBatch.batchCode}
+                          </div>
+                          <div>
+                            <strong>Farmer:</strong> {selectedQrBatch.qrCodeData.farmer || selectedQrBatch.farmerName}
+                          </div>
+                          <div>
+                            <strong>Buyer:</strong> {selectedQrBatch.qrCodeData.buyer || selectedQrBatch.buyerName}
+                          </div>
+                          <div>
+                            <strong>Commodity:</strong> {selectedQrBatch.qrCodeData.commodity || selectedQrBatch.commodityType}
+                          </div>
+                          <div>
+                            <strong>Weight:</strong> {selectedQrBatch.qrCodeData.totalWeight || selectedQrBatch.totalWeight} kg
+                          </div>
+                          <div>
+                            <strong>Quality:</strong> {selectedQrBatch.qrCodeData.qualityGrade || selectedQrBatch.qualityGrade}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {selectedQrBatch.qrCodeData.eudrCompliance && (
+                        <div className="border-t border-blue-200 pt-3">
+                          <h5 className="font-semibold text-blue-800 mb-2">EUDR Compliance:</h5>
+                          <div className="text-sm text-blue-700">
+                            <span className={`inline-block px-2 py-1 rounded text-xs ${
+                              selectedQrBatch.qrCodeData.eudrCompliance.compliant 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {selectedQrBatch.qrCodeData.eudrCompliance.compliant ? '✅ EUDR Compliant' : '❌ Non-Compliant'}
+                            </span>
+                            {selectedQrBatch.qrCodeData.eudrCompliance.deforestationRisk && (
+                              <span className="ml-2 text-xs">
+                                Risk: {selectedQrBatch.qrCodeData.eudrCompliance.deforestationRisk}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedQrBatch.qrCodeData.verificationUrl && (
+                        <div className="border-t border-blue-200 pt-3">
+                          <h5 className="font-semibold text-blue-800 mb-2">Verification:</h5>
+                          <div className="text-sm text-blue-700">
+                            <a 
+                              href={selectedQrBatch.qrCodeData.verificationUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="underline hover:text-blue-900"
+                            >
+                              🔗 Verify Online: {selectedQrBatch.qrCodeData.verificationUrl}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <ul className="text-sm space-y-1 list-disc list-inside text-blue-700">
+                      <li><strong>Complete Traceability Chain:</strong> From farm to warehouse</li>
+                      <li><strong>Product Information:</strong> Commodity type, quality grade, harvest date</li>
+                      <li><strong>EUDR Compliance Data:</strong> Deforestation risk assessment, geolocation</li>
+                      <li><strong>Inspection Results:</strong> Quality control and compliance verification</li>
+                      <li><strong>Certification Data:</strong> LACRA compliance, international standards</li>
+                      <li><strong>Digital Verification:</strong> Tamper-proof signatures and verification URL</li>
+                      <li><strong>Packaging Details:</strong> Bag counts, weights, and storage information</li>
+                      <li><strong>Stakeholder Information:</strong> Farmer, buyer, warehouse, and inspector details</li>
+                    </ul>
+                  )}
                 </div>
               </div>
 

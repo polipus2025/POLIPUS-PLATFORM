@@ -13591,13 +13591,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Notification not found" });
       }
 
-      // CRITICAL: Update the original farmer offer to "confirmed" status with buyer info
+      // CRITICAL: Update the original farmer offer to "confirmed" status with buyer info and verification code
       await db
         .update(farmerProductOffers)
         .set({
           status: "confirmed",
           buyerId: buyerId ? buyerId.toString() : buyerId,
           buyerName: buyerName || 'Agricultural Trading Company',
+          verificationCode: verificationCode, // Save verification code to farmer offer
           confirmedAt: new Date()
         })
         .where(eq(farmerProductOffers.offerId, notification.offerId));
@@ -13698,7 +13699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`📦 Buyer ${buyerName} requesting bags for ${commodityType} (${verificationCode})`);
 
-      // Validate verification code exists and is payment confirmed
+      // Validate verification code exists (REMOVED payment confirmation requirement)
       const existingCode = await db
         .select()
         .from(buyerVerificationCodes)
@@ -13709,9 +13710,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Verification code not found" });
       }
 
-      if (existingCode[0].status !== 'payment_confirmed') {
-        return res.status(400).json({ error: "Payment must be confirmed before requesting bags" });
-      }
+      // PAYMENT CONFIRMATION NO LONGER REQUIRED - Allow bag requests once verification code exists
+      console.log(`✅ Verification code ${verificationCode} valid - allowing bag request without payment confirmation`)
 
       // Find county warehouse for buyer's county - handle both "County" and without "County" suffix
       let warehouseResults = await db
@@ -13864,13 +13864,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get buyer verification codes archive
+  // Get buyer verification codes archive (MY ORDERS for buyers)
   app.get("/api/buyer/verification-codes/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
       console.log(`Fetching verification codes for buyer: ${buyerId}`);
       
-      // Fetch real verification codes from database
+      // Fetch real verification codes from database (these represent buyer's confirmed orders/transactions)
       const verificationCodes = await db
         .select({
           id: buyerVerificationCodes.id,
@@ -13890,13 +13890,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
           delivery_terms: buyerVerificationCodes.deliveryTerms,
           accepted_at: buyerVerificationCodes.acceptedAt,
           expires_at: buyerVerificationCodes.expiresAt,
+          offer_id: buyerVerificationCodes.offerId,
+          notification_id: buyerVerificationCodes.notificationId,
         })
         .from(buyerVerificationCodes)
         .where(eq(buyerVerificationCodes.buyerId, buyerId))
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
-      console.log(`Returning ${verificationCodes.length} verification codes`);
-      res.json(verificationCodes);
+      // Transform to match expected "My Orders" format for buyer
+      const myOrders = verificationCodes.map(code => ({
+        id: code.id,
+        transactionId: code.verification_code, // Use verification code as transaction ID
+        offerId: code.offer_id,
+        farmerId: code.farmer_id,
+        farmerName: code.farmer_name,
+        commodityType: code.commodity_type,
+        quantity: parseFloat(code.quantity_available),
+        unit: code.unit || 'tons',
+        pricePerUnit: parseFloat(code.price_per_unit),
+        totalValue: parseFloat(code.total_value),
+        status: 'confirmed', // All verification codes represent confirmed orders
+        county: code.county,
+        farmLocation: code.farm_location,
+        paymentTerms: code.payment_terms,
+        deliveryTerms: code.delivery_terms,
+        verificationCode: code.verification_code,
+        confirmedAt: code.accepted_at,
+        expiresAt: code.expires_at,
+        orderStatus: code.status === 'bags_requested' ? 'Bags Requested' : 'Confirmed'
+      }));
+
+      console.log(`✅ Returning ${myOrders.length} confirmed orders (verification codes) for buyer ${buyerId}`);
+      myOrders.forEach((order, i) => {
+        console.log(`  ${i+1}. ${order.commodityType} - ${order.farmerName} - ${order.quantity} ${order.unit} - $${order.totalValue} - Code: ${order.verificationCode}`);
+      });
+      
+      res.json({ 
+        data: myOrders,
+        success: true,
+        message: `Found ${myOrders.length} confirmed orders`
+      });
     } catch (error) {
       console.error("Error fetching verification codes:", error);
       res.status(500).json({ error: "Failed to fetch verification codes" });

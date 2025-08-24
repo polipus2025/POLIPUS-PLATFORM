@@ -13690,12 +13690,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Payment must be confirmed before requesting bags" });
       }
 
-      // Find county warehouse for buyer's county
-      const warehouseResults = await db
+      // Find county warehouse for buyer's county - handle both "County" and without "County" suffix
+      let warehouseResults = await db
         .select()
         .from(countyWarehouses)
         .where(eq(countyWarehouses.county, county))
         .limit(1);
+      
+      // If not found, try with "County" suffix
+      if (warehouseResults.length === 0) {
+        warehouseResults = await db
+          .select()
+          .from(countyWarehouses)
+          .where(eq(countyWarehouses.county, `${county} County`))
+          .limit(1);
+      }
 
       if (warehouseResults.length === 0) {
         return res.status(404).json({ error: `No warehouse found for ${county}` });
@@ -13859,7 +13868,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
       console.log(`Returning ${verificationCodes.length} verification codes`);
-      console.log('📋 Sample verification code data:', JSON.stringify(verificationCodes[0], null, 2));
       res.json(verificationCodes);
     } catch (error) {
       console.error("Error fetching verification codes:", error);

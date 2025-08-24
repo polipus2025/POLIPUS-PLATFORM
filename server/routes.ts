@@ -13621,13 +13621,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if the farmer offer is still pending
+      // Check if the farmer offer is still available for acceptance
       const [farmerOffer] = await db
         .select({ status: farmerProductOffers.status })
         .from(farmerProductOffers)
         .where(eq(farmerProductOffers.offerId, currentNotification.offerId));
         
-      if (!farmerOffer || farmerOffer.status !== 'pending') {
+      if (!farmerOffer || (farmerOffer.status !== 'pending' && farmerOffer.status !== 'available')) {
         return res.status(400).json({ 
           error: "Offer no longer available. Another buyer was faster!" 
         });

@@ -13960,6 +13960,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For Paolo's transactions, update the real database record
       if (farmerId === "FARMER-1755883520291-288") {
+        // Handle ID offset: frontend sends 1000+ IDs for database transactions
+        let actualId = parseInt(transactionId);
+        if (actualId > 1000) {
+          // This is a database transaction ID with offset, need to find the verification code by offer
+          const offerDatabaseId = actualId - 1000;
+          const [offer] = await db
+            .select()
+            .from(farmerProductOffers)
+            .where(eq(farmerProductOffers.id, offerDatabaseId));
+          
+          if (offer) {
+            // Find verification code by offer ID
+            const [verificationRecord] = await db
+              .select()
+              .from(buyerVerificationCodes)
+              .where(eq(buyerVerificationCodes.offerId, offer.offerId));
+            
+            if (verificationRecord) {
+              actualId = verificationRecord.id;
+            }
+          }
+        }
+        
         const [updatedTransaction] = await db
           .update(buyerVerificationCodes)
           .set({
@@ -13967,7 +13990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentConfirmedAt: confirmationDate,
             status: 'payment_confirmed'
           })
-          .where(eq(buyerVerificationCodes.id, parseInt(transactionId)))
+          .where(eq(buyerVerificationCodes.id, actualId))
           .returning();
         
         if (!updatedTransaction) {

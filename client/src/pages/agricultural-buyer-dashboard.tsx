@@ -337,23 +337,23 @@ export default function AgriculturalBuyerDashboard() {
                 ) : notifications && notifications.length > 0 ? (
                   <div className="space-y-4">
                     {notifications.map((notification: any) => (
-                      <Card key={notification.id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                      <Card key={notification.notificationId} className="border border-gray-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
                               <h4 className="font-semibold text-lg">{notification.commodityType}</h4>
                               <p className="text-sm text-gray-600">From: {notification.farmerName}</p>
-                              <p className="text-sm text-gray-500">{notification.farmLocation}</p>
+                              <p className="text-sm text-gray-500">{notification.county}</p>
                             </div>
-                            <Badge className={notification.status === 'pending' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                              {notification.status}
+                            <Badge className={!notification.response ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                              {!notification.response ? 'Available' : 'Taken'}
                             </Badge>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
                               <p className="text-sm text-gray-600">Quantity Available</p>
-                              <p className="font-medium">{notification.quantityAvailable} {notification.unit}</p>
+                              <p className="font-medium">{notification.quantityAvailable} tons</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Price per Unit</p>
@@ -361,22 +361,22 @@ export default function AgriculturalBuyerDashboard() {
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Total Value</p>
-                              <p className="font-medium text-green-600">${notification.totalValue}</p>
+                              <p className="font-medium text-green-600">${(parseFloat(notification.quantityAvailable) * parseFloat(notification.pricePerUnit)).toFixed(2)}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Quality Grade</p>
-                              <p className="font-medium">{notification.qualityGrade}</p>
+                              <p className="font-medium">Grade A</p>
                             </div>
                           </div>
 
                           <div className="mb-4">
                             <p className="text-sm text-gray-600">Payment Terms</p>
-                            <p className="text-sm">{notification.paymentTerms}</p>
+                            <p className="text-sm">Cash on Delivery</p>
                           </div>
 
                           <div className="mb-4">
                             <p className="text-sm text-gray-600">Delivery Terms</p>
-                            <p className="text-sm">{notification.deliveryTerms}</p>
+                            <p className="text-sm">FOB Farm Gate</p>
                           </div>
 
                           {notification.description && (
@@ -390,7 +390,7 @@ export default function AgriculturalBuyerDashboard() {
                             <div className="text-xs text-gray-500">
                               Posted: {new Date(notification.createdAt).toLocaleString()}
                             </div>
-                            {!notification.response || notification.response === '' ? (
+                            {!notification.response ? (
                               <Button 
                                 onClick={() => handleAcceptOffer(notification.notificationId)}
                                 className="bg-green-600 hover:bg-green-700"
@@ -437,14 +437,14 @@ export default function AgriculturalBuyerDashboard() {
                   <div className="text-center py-8 text-gray-500">Loading your orders...</div>
                 ) : verificationCodes && verificationCodes.length > 0 ? (
                   <div className="space-y-4">
-                    {verificationCodes.filter((code: any) => code.status === 'active' || code.status === 'payment_confirmed' || code.status === 'bags_requested').map((acceptance: any) => (
-                      <Card key={acceptance.verification_code} className="border border-blue-200 hover:shadow-md transition-shadow">
+                    {verificationCodes.map((acceptance: any) => (
+                      <Card key={acceptance.verificationCode} className="border border-blue-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h4 className="font-semibold text-lg">{acceptance.commodity_type}</h4>
-                              <p className="text-sm text-gray-600">From: {acceptance.farmer_name}</p>
-                              <p className="text-sm text-gray-500">{acceptance.farm_location}</p>
+                              <h4 className="font-semibold text-lg">{acceptance.commodityType}</h4>
+                              <p className="text-sm text-gray-600">From: {acceptance.farmerName}</p>
+                              <p className="text-sm text-gray-500">{acceptance.farmLocation}</p>
                             </div>
                             <Badge className={
                               acceptance.status === 'bags_requested' ? "bg-purple-100 text-purple-800" :
@@ -458,11 +458,11 @@ export default function AgriculturalBuyerDashboard() {
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
                               <p className="text-sm text-gray-600">Quantity</p>
-                              <p className="font-medium">{acceptance.quantity_available} {acceptance.unit}</p>
+                              <p className="font-medium">{acceptance.quantity} {acceptance.unit}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Total Value</p>
-                              <p className="font-medium text-green-600">${acceptance.total_value}</p>
+                              <p className="font-medium text-green-600">${acceptance.totalValue}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">County</p>
@@ -470,36 +470,36 @@ export default function AgriculturalBuyerDashboard() {
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Verification Code</p>
-                              <p className="font-mono text-sm bg-gray-100 p-1 rounded">{acceptance.verification_code}</p>
+                              <p className="font-mono text-sm bg-gray-100 p-1 rounded">{acceptance.verificationCode}</p>
                             </div>
                           </div>
 
                           <div className="mb-4">
                             <p className="text-sm text-gray-600">Payment Terms</p>
-                            <p className="text-sm">{acceptance.payment_terms}</p>
+                            <p className="text-sm">{acceptance.paymentTerms}</p>
                           </div>
 
                           <div className="flex justify-between items-center pt-3 border-t">
                             <div className="text-xs text-gray-500">
-                              Accepted: {new Date(acceptance.accepted_at).toLocaleString()}
+                              Accepted: {new Date(acceptance.confirmedAt).toLocaleString()}
                             </div>
                             {acceptance.status === 'bags_requested' ? (
                               <Button 
                                 disabled
                                 className="bg-gray-400 cursor-not-allowed"
-                                data-testid={`button-bags-requested-${acceptance.verification_code}`}
+                                data-testid={`button-bags-requested-${acceptance.verificationCode}`}
                               >
                                 <CheckCircle className="w-4 h-4 mr-2" />
                                 Requested
                               </Button>
                             ) : (
                               <Button 
-                                onClick={() => handleRequestBags(acceptance.verification_code, acceptance)}
-                                disabled={requestingBags === acceptance.verification_code}
+                                onClick={() => handleRequestBags(acceptance.verificationCode, acceptance)}
+                                disabled={requestingBags === acceptance.verificationCode}
                                 className="bg-blue-600 hover:bg-blue-700"
-                                data-testid={`button-request-bags-${acceptance.verification_code}`}
+                                data-testid={`button-request-bags-${acceptance.verificationCode}`}
                               >
-                                {requestingBags === acceptance.verification_code ? (
+                                {requestingBags === acceptance.verificationCode ? (
                                   <>
                                     <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
                                     Requesting...

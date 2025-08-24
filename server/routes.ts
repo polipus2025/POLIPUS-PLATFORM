@@ -923,10 +923,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { buyerId } = req.params;
 
+      // First, get the buyer's integer ID from the buyers table
+      const [buyer] = await db
+        .select({ id: buyers.id })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+      
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+
       const transactions = await db
         .select()
         .from(farmerBuyerTransactions)
-        .where(eq(farmerBuyerTransactions.buyerId, parseInt(buyerId)))
+        .where(eq(farmerBuyerTransactions.buyerId, buyer.id))
         .orderBy(desc(farmerBuyerTransactions.createdAt));
 
       res.json({
@@ -13499,10 +13509,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
       console.log(`Fetching notifications for buyer ID: ${buyerId}`);
       
-      // Get buyer info to determine their county
-      const buyerCounty = "Monrovia"; // For demo, assume all buyers in Monrovia
+      // First, get the buyer's integer ID from the buyers table
+      const [buyer] = await db
+        .select({ id: buyers.id })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
       
-      // Get REAL notifications from database for this buyer
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+      
+      console.log(`Found buyer integer ID: ${buyer.id} for buyerId: ${buyerId}`);
+      
+      // Get REAL notifications from database for this buyer using integer ID
       const realNotifications = await db
         .select({
           notificationId: buyerNotifications.notificationId,
@@ -13518,7 +13537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: buyerNotifications.createdAt
         })
         .from(buyerNotifications)
-        .where(eq(buyerNotifications.buyerId, parseInt(buyerId)))
+        .where(eq(buyerNotifications.buyerId, buyer.id))
         // Only pending notifications (response is null)
         .orderBy(desc(buyerNotifications.createdAt));
 

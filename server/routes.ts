@@ -13833,19 +13833,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
       console.log(`Fetching verification codes for buyer: ${buyerId}`);
       
-      // Special fix for BYR-20250819-050 - update their verification code YB5Z1S1T
-      if (buyerId === 'BYR-20250819-050') {
-        try {
-          await db
-            .update(buyerVerificationCodes)
-            .set({ buyerId: 'BYR-20250819-050' })
-            .where(eq(buyerVerificationCodes.verificationCode, 'YB5Z1S1T'));
-          console.log(`✅ Fixed verification code YB5Z1S1T for buyer ${buyerId}`);
-        } catch (fixError) {
-          console.log('Verification code fix attempt (may already be fixed)');
-        }
-      }
-      
       // Fetch real verification codes from database
       const verificationCodes = await db
         .select({

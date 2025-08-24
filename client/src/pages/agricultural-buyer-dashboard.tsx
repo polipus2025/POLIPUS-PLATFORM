@@ -434,7 +434,7 @@ export default function AgriculturalBuyerDashboard() {
                   <div className="text-center py-8 text-gray-500">Loading your orders...</div>
                 ) : verificationCodes && verificationCodes.length > 0 ? (
                   <div className="space-y-4">
-                    {verificationCodes.filter((code: any) => code.status === 'active' || code.status === 'payment_confirmed').map((acceptance: any) => (
+                    {verificationCodes.filter((code: any) => code.status === 'active' || code.status === 'payment_confirmed' || code.status === 'bags_requested').map((acceptance: any) => (
                       <Card key={acceptance.verification_code} className="border border-blue-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
@@ -443,8 +443,12 @@ export default function AgriculturalBuyerDashboard() {
                               <p className="text-sm text-gray-600">From: {acceptance.farmer_name}</p>
                               <p className="text-sm text-gray-500">{acceptance.farm_location}</p>
                             </div>
-                            <Badge className={acceptance.status === 'payment_confirmed' ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}>
-                              {acceptance.status === 'payment_confirmed' ? 'Payment Confirmed' : 'Ready for Bags'}
+                            <Badge className={
+                              acceptance.status === 'bags_requested' ? "bg-purple-100 text-purple-800" :
+                              acceptance.status === 'payment_confirmed' ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
+                            }>
+                              {acceptance.status === 'bags_requested' ? 'Bag Request Complete' :
+                               acceptance.status === 'payment_confirmed' ? 'Payment Confirmed' : 'Ready for Bags'}
                             </Badge>
                           </div>
                           
@@ -476,24 +480,35 @@ export default function AgriculturalBuyerDashboard() {
                             <div className="text-xs text-gray-500">
                               Accepted: {new Date(acceptance.accepted_at).toLocaleString()}
                             </div>
-                            <Button 
-                              onClick={() => handleRequestBags(acceptance.verification_code, acceptance)}
-                              disabled={requestingBags === acceptance.verification_code}
-                              className="bg-blue-600 hover:bg-blue-700"
-                              data-testid={`button-request-bags-${acceptance.verification_code}`}
-                            >
-                              {requestingBags === acceptance.verification_code ? (
-                                <>
-                                  <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                                  Requesting...
-                                </>
-                              ) : (
-                                <>
-                                  <Truck className="w-4 h-4 mr-2" />
-                                  Request Bags to Warehouse
-                                </>
-                              )}
-                            </Button>
+                            {acceptance.status === 'bags_requested' ? (
+                              <Button 
+                                disabled
+                                className="bg-gray-400 cursor-not-allowed"
+                                data-testid={`button-bags-requested-${acceptance.verification_code}`}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Requested
+                              </Button>
+                            ) : (
+                              <Button 
+                                onClick={() => handleRequestBags(acceptance.verification_code, acceptance)}
+                                disabled={requestingBags === acceptance.verification_code}
+                                className="bg-blue-600 hover:bg-blue-700"
+                                data-testid={`button-request-bags-${acceptance.verification_code}`}
+                              >
+                                {requestingBags === acceptance.verification_code ? (
+                                  <>
+                                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                                    Requesting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Truck className="w-4 h-4 mr-2" />
+                                    Request Bags to Warehouse
+                                  </>
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </CardContent>
                       </Card>

@@ -13735,6 +13735,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await db.insert(warehouseBagRequests).values(bagRequest);
 
+      // Update buyer verification code status to indicate bag request completed
+      await db.update(buyerVerificationCodes)
+        .set({ status: 'bags_requested' })
+        .where(eq(buyerVerificationCodes.verificationCode, verificationCode));
+
       console.log(`✅ Bag request ${requestId} sent to ${warehouse.warehouseName}`);
       console.log(`📍 Warehouse: ${warehouse.warehouseId} - ${county}`);
 

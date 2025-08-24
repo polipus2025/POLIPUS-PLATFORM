@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Warehouse, 
   Package, 
@@ -33,6 +34,7 @@ import {
 export default function WarehouseInspectorDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
+  const [validatingRequest, setValidatingRequest] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -80,6 +82,46 @@ export default function WarehouseInspectorDashboard() {
     queryKey: ['/api/warehouse-inspector/bag-collections'],
     select: (data: any) => data?.data || []
   });
+
+  // Fetch incoming bag requests from buyers
+  const { data: bagRequests, isLoading: bagRequestsLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/bag-requests'],
+    select: (data: any) => data?.data || []
+  });
+
+  // Handle bag request validation
+  const handleValidateBagRequest = async (requestId: string, action: 'validate' | 'reject', notes?: string) => {
+    if (validatingRequest) return;
+    
+    setValidatingRequest(requestId);
+    try {
+      await apiRequest('/api/warehouse-inspector/validate-bag-request', {
+        method: 'POST',
+        body: JSON.stringify({
+          requestId,
+          action,
+          validationNotes: notes
+        })
+      });
+      
+      toast({
+        title: action === 'validate' ? "✅ Request Validated!" : "❌ Request Rejected",
+        description: `Bag request ${requestId} has been ${action === 'validate' ? 'validated' : 'rejected'} successfully.`,
+      });
+      
+      // Refresh bag requests
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/transactions'] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${action} bag request`,
+        variant: "destructive",
+      });
+    } finally {
+      setValidatingRequest(null);
+    }
+  };
 
   // Mutations for inspection actions
   const startInspectionMutation = useMutation({
@@ -827,6 +869,157 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Bags Tab */}
           <TabsContent value="bags" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Truck className="w-5 h-5 mr-2" />
+                  Incoming Bag Requests from Buyers
+                </CardTitle>
+                <CardDescription>
+                  Validate or reject bag requests from buyers who have completed payment confirmation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {bagRequestsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading bag requests...</p>
+                  </div>
+                ) : bagRequests && bagRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {bagRequests.map((request: any) => (
+                      <Card key={request.requestId} className="border border-gray-200 hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-semibold text-lg flex items-center">
+                                {request.commodityType}
+                                <Badge 
+                                  className={`ml-2 ${
+                                    request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                    request.status === 'validated' ? 'bg-green-100 text-green-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                </Badge>
+                              </h4>
+                              <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
+                              <p className="text-sm text-gray-600">From: {request.buyerName} ({request.company})</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-500">
+                                {new Date(request.requestedAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-600">Farmer</p>
+                              <p className="font-medium">{request.farmerName}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Quantity</p>
+                              <p className="font-medium">{request.quantity} {request.unit}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Total Value</p>
+                              <p className="font-medium text-green-600">${request.totalValue}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">County</p>
+                              <p className="font-medium">{request.county}</p>
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600">Farm Location</p>
+                            <p className="text-sm">{request.farmLocation}</p>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600">Verification Code</p>
+                            <p className="font-mono text-sm bg-gray-100 p-2 rounded">{request.verificationCode}</p>
+                          </div>
+
+                          {request.status === 'validated' && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
+                              <p className="text-sm text-green-800">
+                                <strong>Validated by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
+                              </p>
+                              {request.validationNotes && (
+                                <p className="text-sm text-green-700 mt-1">
+                                  <strong>Notes:</strong> {request.validationNotes}
+                                </p>
+                              )}
+                              {request.transactionId && (
+                                <p className="text-sm text-green-700 mt-1">
+                                  <strong>Transaction ID:</strong> {request.transactionId}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {request.status === 'rejected' && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+                              <p className="text-sm text-red-800">
+                                <strong>Rejected by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
+                              </p>
+                              {request.validationNotes && (
+                                <p className="text-sm text-red-700 mt-1">
+                                  <strong>Reason:</strong> {request.validationNotes}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {request.status === 'pending' && (
+                            <div className="flex justify-end space-x-2 pt-3 border-t">
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleValidateBagRequest(request.requestId, 'reject', 'Request does not meet validation criteria')}
+                                disabled={validatingRequest === request.requestId}
+                                className="border-red-300 text-red-700 hover:bg-red-50"
+                                data-testid={`button-reject-${request.requestId}`}
+                              >
+                                {validatingRequest === request.requestId ? 'Processing...' : 'Reject Request'}
+                              </Button>
+                              <Button 
+                                onClick={() => handleValidateBagRequest(request.requestId, 'validate', 'Request validated - proceeding to transaction')}
+                                disabled={validatingRequest === request.requestId}
+                                className="bg-green-600 hover:bg-green-700"
+                                data-testid={`button-validate-${request.requestId}`}
+                              >
+                                {validatingRequest === request.requestId ? (
+                                  <>
+                                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                                    Validating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Validate Request
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No bag requests from buyers at this time.</p>
+                    <p className="text-sm">Bag requests will appear here when buyers request bags for validated transactions.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card>
@@ -848,13 +1041,21 @@ export default function WarehouseInspectorDashboard() {
                           Generate QR Batch from Transaction
                         </h3>
                         <div className="mb-4 p-3 bg-white rounded border">
-                          <p className="text-sm text-gray-600 mb-2">Select completed buyer-farmer transaction:</p>
-                          <select className="w-full p-2 border rounded">
-                            <option value="">Select Transaction...</option>
-                            <option value="TXN-20250821-001">TXN-20250821-001 - Monrovia Trading (Cocoa) - John Konneh</option>
-                            <option value="TXN-20250821-002">TXN-20250821-002 - Atlantic Coffee (Coffee) - Mary Kollie</option>
-                            <option value="TXN-20250820-003">TXN-20250820-003 - West Africa Exports (Palm Oil) - David Toe</option>
+                          <p className="text-sm text-gray-600 mb-2">Select validated buyer bag request:</p>
+                          <select className="w-full p-2 border rounded" data-testid="select-validated-request">
+                            <option value="">Select Validated Request...</option>
+                            {bagRequests?.filter((request: any) => request.status === 'validated').map((request: any) => (
+                              <option key={request.requestId} value={request.requestId}>
+                                {request.requestId} - {request.company} ({request.commodityType}) - {request.farmerName} - {request.quantity} {request.unit} - ${request.totalValue}
+                              </option>
+                            ))}
                           </select>
+                          {(!bagRequests || bagRequests.filter((request: any) => request.status === 'validated').length === 0) && (
+                            <p className="text-sm text-amber-600 mt-2 flex items-center">
+                              <Eye className="w-4 h-4 mr-2" />
+                              No validated bag requests available. Requests will appear here after warehouse validation.
+                            </p>
+                          )}
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

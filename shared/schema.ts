@@ -261,6 +261,32 @@ export const countyWarehouses = pgTable("county_warehouses", {
 });
 
 // Warehouse Transactions (Real Data Only)
+// Buyer bag requests to county warehouses
+export const warehouseBagRequests = pgTable("warehouse_bag_requests", {
+  id: serial("id").primaryKey(),
+  requestId: text("request_id").notNull().unique(), // REQ-MARGIBI-001
+  warehouseId: text("warehouse_id").references(() => countyWarehouses.warehouseId).notNull(),
+  verificationCode: text("verification_code").notNull(), // From buyer_verification_codes
+  buyerId: text("buyer_id").notNull(),
+  buyerName: text("buyer_name").notNull(),
+  company: text("company").notNull(),
+  farmerId: text("farmer_id").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  commodityType: text("commodity_type").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  unit: text("unit").notNull(),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
+  county: text("county").notNull(),
+  farmLocation: text("farm_location"),
+  status: text("status").notNull().default("pending"), // pending, validated, rejected
+  validatedBy: text("validated_by"), // warehouse inspector who validated
+  validatedAt: timestamp("validated_at"),
+  validationNotes: text("validation_notes"),
+  transactionId: text("transaction_id"), // Generated when validated -> routes to warehouse_transactions
+  requestedAt: timestamp("requested_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const warehouseTransactions = pgTable("warehouse_transactions", {
   id: serial("id").primaryKey(),
   warehouseId: text("warehouse_id").references(() => countyWarehouses.warehouseId).notNull(),
@@ -285,6 +311,11 @@ export const warehouseTransactions = pgTable("warehouse_transactions", {
   batchCode: text("batch_code"), // Generated QR batch code
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Zod schemas for warehouse bag requests
+export const insertWarehouseBagRequestSchema = createInsertSchema(warehouseBagRequests);
+export type InsertWarehouseBagRequest = z.infer<typeof insertWarehouseBagRequestSchema>;
+export type SelectWarehouseBagRequest = typeof warehouseBagRequests.$inferSelect;
 
 // Buyer Verification Codes Table
 export const buyerVerificationCodes = pgTable("buyer_verification_codes", {

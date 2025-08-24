@@ -34,6 +34,7 @@ export default function AgriculturalBuyerDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [requestingBags, setRequestingBags] = useState<string | null>(null);
 
   // Get buyer info from localStorage
   const buyerId = localStorage.getItem("buyerId") || localStorage.getItem("userId") || "";
@@ -147,6 +148,46 @@ export default function AgriculturalBuyerDashboard() {
     }
   };
 
+  // Handle requesting bags from warehouse
+  const handleRequestBags = async (verificationCode: string, acceptanceData: any) => {
+    if (requestingBags) return;
+    
+    setRequestingBags(verificationCode);
+    try {
+      const response = await apiRequest('/api/buyer/request-bags', {
+        method: 'POST',
+        body: JSON.stringify({
+          verificationCode,
+          buyerId,
+          buyerName,
+          company,
+          farmerName: acceptanceData.farmer_name,
+          commodityType: acceptanceData.commodity_type,
+          quantity: acceptanceData.quantity_available,
+          totalValue: acceptanceData.total_value,
+          county: acceptanceData.county,
+          farmLocation: acceptanceData.farm_location
+        })
+      });
+      
+      toast({
+        title: "✅ Bags Requested Successfully!",
+        description: `Your request has been sent to ${acceptanceData.county} warehouse. Transaction: ${response.transactionId}`,
+      });
+      
+      // Refresh verification codes to update status
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/verification-codes', buyerId] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to request bags from warehouse",
+        variant: "destructive",
+      });
+    } finally {
+      setRequestingBags(null);
+    }
+  };
+
   // SECURITY: Payment confirmation removed - only farmers can confirm payments to prevent fraud
 
   const accessMarketplace = () => {
@@ -184,6 +225,7 @@ export default function AgriculturalBuyerDashboard() {
             <TabsTrigger value="notifications" className="flex-1 text-xs px-2 py-2 min-w-0">Product Offers</TabsTrigger>
             <TabsTrigger value="farmers" className="flex-1 text-xs px-2 py-2 min-w-0">Farmer Connections</TabsTrigger>
             <TabsTrigger value="confirmed" className="flex-1 text-xs px-2 py-2 min-w-0">Confirmed Transactions</TabsTrigger>
+            <TabsTrigger value="orders" className="flex-1 text-xs px-2 py-2 min-w-0">My Orders</TabsTrigger>
             <TabsTrigger value="codes" className="flex-1 text-xs px-2 py-2 min-w-0">Verification Codes</TabsTrigger>
             <TabsTrigger value="transactions" className="flex-1 text-xs px-2 py-2 min-w-0">Transaction Dashboard</TabsTrigger>
           </TabsList>
@@ -368,6 +410,97 @@ export default function AgriculturalBuyerDashboard() {
                     <Package2 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>No product offers at this time.</p>
                     <p className="text-sm">Notifications will appear here when farmers in your county submit offers.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* My Orders Tab - Buyer Acceptances with Request Bags */}
+          <TabsContent value="orders" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Truck className="w-5 h-5 mr-2" />
+                  My Orders - Request Bags to Warehouse
+                </CardTitle>
+                <CardDescription>
+                  Accepted offers ready for bag requests. Click "Request Bags" to send acceptance details to your county warehouse.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {codesLoading ? (
+                  <div className="text-center py-8 text-gray-500">Loading your orders...</div>
+                ) : verificationCodes?.codes && verificationCodes.codes.length > 0 ? (
+                  <div className="space-y-4">
+                    {verificationCodes.codes.filter((code: any) => code.status === 'payment_confirmed').map((acceptance: any) => (
+                      <Card key={acceptance.verification_code} className="border border-blue-200 hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-semibold text-lg">{acceptance.commodity_type}</h4>
+                              <p className="text-sm text-gray-600">From: {acceptance.farmer_name}</p>
+                              <p className="text-sm text-gray-500">{acceptance.farm_location}</p>
+                            </div>
+                            <Badge className="bg-green-100 text-green-800">Payment Confirmed</Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-600">Quantity</p>
+                              <p className="font-medium">{acceptance.quantity_available} {acceptance.unit}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Total Value</p>
+                              <p className="font-medium text-green-600">${acceptance.total_value}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">County</p>
+                              <p className="font-medium">{acceptance.county}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Verification Code</p>
+                              <p className="font-mono text-sm bg-gray-100 p-1 rounded">{acceptance.verification_code}</p>
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600">Payment Terms</p>
+                            <p className="text-sm">{acceptance.payment_terms}</p>
+                          </div>
+
+                          <div className="flex justify-between items-center pt-3 border-t">
+                            <div className="text-xs text-gray-500">
+                              Accepted: {new Date(acceptance.accepted_at).toLocaleString()}
+                            </div>
+                            <Button 
+                              onClick={() => handleRequestBags(acceptance.verification_code, acceptance)}
+                              disabled={requestingBags === acceptance.verification_code}
+                              className="bg-blue-600 hover:bg-blue-700"
+                              data-testid={`button-request-bags-${acceptance.verification_code}`}
+                            >
+                              {requestingBags === acceptance.verification_code ? (
+                                <>
+                                  <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                                  Requesting...
+                                </>
+                              ) : (
+                                <>
+                                  <Truck className="w-4 h-4 mr-2" />
+                                  Request Bags to Warehouse
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No confirmed orders ready for bag requests.</p>
+                    <p className="text-sm">Complete payment confirmation on accepted offers to request bags from warehouse.</p>
                   </div>
                 )}
               </CardContent>

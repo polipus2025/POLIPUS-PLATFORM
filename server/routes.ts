@@ -20,6 +20,9 @@ import {
   farmerProductOffers,
   buyerNotifications,
   buyerVerificationCodes,
+  warehouseBagRequests,
+  countyWarehouses,
+  insertWarehouseBagRequestSchema,
   insertCommoditySchema, 
   insertInspectionSchema, 
   insertCertificationSchema,
@@ -13654,6 +13657,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API endpoint for buyer to request bags from county warehouse
+  app.post("/api/buyer/request-bags", async (req, res) => {
+    try {
+      const {
+        verificationCode,
+        buyerId,
+        buyerName,
+        company,
+        farmerName,
+        commodityType,
+        quantity,
+        totalValue,
+        county,
+        farmLocation
+      } = req.body;
+
+      console.log(`📦 Buyer ${buyerName} requesting bags for ${commodityType} (${verificationCode})`);
+
+      // Validate verification code exists and is payment confirmed
+      const existingCode = await db
+        .select()
+        .from(buyerVerificationCodes)
+        .where(eq(buyerVerificationCodes.verificationCode, verificationCode))
+        .limit(1);
+
+      if (existingCode.length === 0) {
+        return res.status(404).json({ error: "Verification code not found" });
+      }
+
+      if (existingCode[0].status !== 'payment_confirmed') {
+        return res.status(400).json({ error: "Payment must be confirmed before requesting bags" });
+      }
+
+      // Find county warehouse for buyer's county
+      const warehouseResults = await db
+        .select()
+        .from(countyWarehouses)
+        .where(eq(countyWarehouses.county, county))
+        .limit(1);
+
+      if (warehouseResults.length === 0) {
+        return res.status(404).json({ error: `No warehouse found for ${county}` });
+      }
+
+      const warehouse = warehouseResults[0];
+
+      // Generate unique request ID
+      const requestId = `REQ-${county.replace(' County', '').toUpperCase()}-${String(Date.now()).slice(-6)}`;
+
+      // Create bag request
+      const bagRequest = {
+        requestId,
+        warehouseId: warehouse.warehouseId,
+        verificationCode,
+        buyerId,
+        buyerName,
+        company,
+        farmerId: existingCode[0].farmerId,
+        farmerName,
+        commodityType,
+        quantity,
+        unit: existingCode[0].unit,
+        totalValue,
+        county,
+        farmLocation
+      };
+
+      await db.insert(warehouseBagRequests).values(bagRequest);
+
+      console.log(`✅ Bag request ${requestId} sent to ${warehouse.warehouseName}`);
+      console.log(`📍 Warehouse: ${warehouse.warehouseId} - ${county}`);
+
+      res.json({
+        message: "Bag request sent to warehouse successfully!",
+        requestId,
+        transactionId: requestId, // Same as requestId initially
+        warehouseName: warehouse.warehouseName,
+        warehouseId: warehouse.warehouseId,
+        county,
+        status: "pending_validation"
+      });
+    } catch (error: any) {
+      console.error("Error requesting bags:", error);
+      res.status(500).json({ error: "Failed to request bags from warehouse" });
+    }
+  });
+
   // ===============================
   // TRANSACTION ARCHIVES APIs
   // ===============================
@@ -14391,6 +14481,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching warehouse verification codes:", error);
       res.status(500).json({ error: "Failed to fetch warehouse verification codes" });
+    }
+  });
+
+  // Get warehouse bag requests from buyers
+  app.get("/api/warehouse-inspector/bag-requests", async (req, res) => {
+    try {
+      console.log("Fetching warehouse bag requests from buyers");
+      
+      // Get inspector info from token to filter by warehouse
+      const authHeader = req.headers.authorization;
+      let warehouseId = null;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          warehouseId = decoded.warehouseId;
+          console.log(`Filtering bag requests for warehouse: ${warehouseId}`);
+        } catch (error) {
+          console.log("No valid token, returning all bag requests");
+        }
+      }
+      
+      // Fetch bag requests for this warehouse
+      let bagRequestsQuery = db
+        .select({
+          id: warehouseBagRequests.id,
+          requestId: warehouseBagRequests.requestId,
+          verificationCode: warehouseBagRequests.verificationCode,
+          buyerId: warehouseBagRequests.buyerId,
+          buyerName: warehouseBagRequests.buyerName,
+          company: warehouseBagRequests.company,
+          farmerId: warehouseBagRequests.farmerId,
+          farmerName: warehouseBagRequests.farmerName,
+          commodityType: warehouseBagRequests.commodityType,
+          quantity: warehouseBagRequests.quantity,
+          unit: warehouseBagRequests.unit,
+          totalValue: warehouseBagRequests.totalValue,
+          county: warehouseBagRequests.county,
+          farmLocation: warehouseBagRequests.farmLocation,
+          status: warehouseBagRequests.status,
+          validatedBy: warehouseBagRequests.validatedBy,
+          validatedAt: warehouseBagRequests.validatedAt,
+          validationNotes: warehouseBagRequests.validationNotes,
+          transactionId: warehouseBagRequests.transactionId,
+          requestedAt: warehouseBagRequests.requestedAt,
+          createdAt: warehouseBagRequests.createdAt,
+        })
+        .from(warehouseBagRequests)
+        .orderBy(desc(warehouseBagRequests.requestedAt));
+
+      if (warehouseId) {
+        bagRequestsQuery = bagRequestsQuery.where(eq(warehouseBagRequests.warehouseId, warehouseId));
+      }
+
+      const bagRequests = await bagRequestsQuery;
+
+      console.log(`Returning ${bagRequests.length} bag requests`);
+
+      res.json({ 
+        success: true, 
+        data: bagRequests,
+        message: `Found ${bagRequests.length} bag requests`
+      });
+    } catch (error: any) {
+      console.error("Error fetching warehouse bag requests:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch warehouse bag requests",
+        details: error.message 
+      });
+    }
+  });
+
+  // Validate bag request (warehouse inspector accepts/rejects)
+  app.post("/api/warehouse-inspector/validate-bag-request", async (req, res) => {
+    try {
+      const { requestId, action, validationNotes } = req.body; // action: 'validate' or 'reject'
+      
+      // Get inspector info from token
+      const authHeader = req.headers.authorization;
+      let inspectorId = null;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          inspectorId = decoded.userId;
+        } catch (error) {
+          return res.status(401).json({ error: "Invalid authentication token" });
+        }
+      }
+
+      console.log(`🏭 Warehouse inspector ${inspectorId} ${action === 'validate' ? 'validating' : 'rejecting'} bag request ${requestId}`);
+
+      // Update bag request status
+      const updatedStatus = action === 'validate' ? 'validated' : 'rejected';
+      
+      // For validated requests, generate transaction ID
+      let transactionId = null;
+      if (action === 'validate') {
+        transactionId = `TXN-${String(Date.now()).slice(-8)}`;
+      }
+
+      await db.update(warehouseBagRequests)
+        .set({
+          status: updatedStatus,
+          validatedBy: inspectorId,
+          validatedAt: new Date(),
+          validationNotes,
+          transactionId
+        })
+        .where(eq(warehouseBagRequests.requestId, requestId));
+
+      // If validated, create entry in warehouse_transactions for QR batch generation
+      if (action === 'validate') {
+        const bagRequest = await db
+          .select()
+          .from(warehouseBagRequests)
+          .where(eq(warehouseBagRequests.requestId, requestId))
+          .limit(1);
+
+        if (bagRequest.length > 0) {
+          const request = bagRequest[0];
+          
+          await db.insert(warehouseTransactions).values({
+            warehouseId: request.warehouseId,
+            transactionId,
+            verificationCode: request.verificationCode,
+            paymentVerificationCode: null, // Will be added when payment is confirmed
+            buyerId: request.buyerId,
+            buyerName: request.buyerName,
+            farmerId: request.farmerId,
+            farmerName: request.farmerName,
+            commodityType: request.commodityType,
+            quantity: request.quantity,
+            unit: request.unit,
+            totalValue: request.totalValue,
+            county: request.county,
+            status: 'validated',
+            processedBy: inspectorId,
+            processedAt: new Date(),
+            notes: `Validated from bag request ${requestId}. ${validationNotes || ''}`
+          });
+
+          console.log(`✅ Transaction ${transactionId} created for validated bag request`);
+        }
+      }
+
+      res.json({
+        message: `Bag request ${action === 'validate' ? 'validated' : 'rejected'} successfully`,
+        requestId,
+        transactionId,
+        status: updatedStatus
+      });
+    } catch (error: any) {
+      console.error("Error validating bag request:", error);
+      res.status(500).json({ 
+        error: "Failed to validate bag request",
+        details: error.message 
+      });
     }
   });
 

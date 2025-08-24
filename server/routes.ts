@@ -14793,7 +14793,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM warehouse_transactions wt
           LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
           WHERE wt.payment_verification_code IS NOT NULL 
-          AND wt.status IN ('received', 'processed')
+          AND wt.status IN ('received', 'processed', 'validated')
+          AND (wt.qr_batch_generated = false OR wt.qr_batch_generated IS NULL)
           AND wt.warehouse_id = ${warehouseId}
           ORDER BY wt.received_at DESC
         `);
@@ -14808,7 +14809,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM warehouse_transactions wt
           LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
           WHERE wt.payment_verification_code IS NOT NULL 
-          AND wt.status IN ('received', 'processed')
+          AND wt.status IN ('received', 'processed', 'validated')
+          AND (wt.qr_batch_generated = false OR wt.qr_batch_generated IS NULL)
           ORDER BY wt.received_at DESC
         `);
       }
@@ -14885,7 +14887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               buyer_id, buyer_name, farmer_id, farmer_name,
               commodity_type, total_bags, bag_weight, 
               total_weight, quality_grade, harvest_date, 
-              inspection_data, eudr_compliance,
+              inspection_data, eudr_compliance, gps_coordinates,
               qr_code_data, status
             ) VALUES (
               ${batchCode}, ${transaction.warehouse_id}, ${warehouseName},
@@ -14894,6 +14896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ${totalQuantity}, 'Grade A', NOW(),
               ${JSON.stringify({ inspected: true, quality: 'excellent' })},
               ${JSON.stringify({ compliant: true, eudr_ready: true })},
+              '6.428°N, 9.429°W',
               ${JSON.stringify({ 
                 batch_code: batchCode, 
                 transaction_id: transaction.transaction_id,

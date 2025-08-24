@@ -13531,7 +13531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
       console.log(`Fetching confirmed transactions for buyer: ${buyerId}`);
       
-      // Fetch real confirmed transactions from database
+      // Fetch real confirmed transactions from database including payment status
       const realTransactions = await db
         .select({
           id: buyerVerificationCodes.id,
@@ -13548,34 +13548,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentTerms: buyerVerificationCodes.paymentTerms,
           deliveryTerms: buyerVerificationCodes.deliveryTerms,
           verificationCode: buyerVerificationCodes.verificationCode,
+          secondVerificationCode: buyerVerificationCodes.secondVerificationCode,
+          paymentConfirmedAt: buyerVerificationCodes.paymentConfirmedAt,
+          status: buyerVerificationCodes.status,
           acceptedAt: buyerVerificationCodes.acceptedAt,
         })
         .from(buyerVerificationCodes)
         .where(eq(buyerVerificationCodes.buyerId, buyerId))
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
-      // Format the transactions for the frontend
-      const confirmedTransactions = realTransactions.map(transaction => ({
-        id: transaction.id,
-        notificationId: transaction.notificationId,
-        buyerId: transaction.buyerId,
-        farmerId: transaction.farmerId,
-        farmerName: transaction.farmerName,
-        farmLocation: transaction.farmLocation,
-        commodityType: transaction.commodityType,
-        quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
-        unit: transaction.unit || 'kg',
-        pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
-        totalValue: parseFloat(transaction.totalValue || '0'),
-        qualityGrade: "Grade A", // Default quality grade
-        paymentTerms: transaction.paymentTerms,
-        deliveryTerms: transaction.deliveryTerms,
-        verificationCode: transaction.verificationCode,
-        confirmedAt: transaction.acceptedAt,
-        status: "confirmed",
-        paymentConfirmed: false, // Will be updated when buyer confirms payment
-        awaitingPaymentConfirmation: true // Flag to show payment confirmation button
-      }));
+      // Format the transactions for the frontend with REAL payment status
+      const confirmedTransactions = realTransactions.map(transaction => {
+        const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
+        
+        // Debug payment confirmation status
+        if (transaction.commodityType === "Palm Oil") {
+          console.log(`🔍 Palm Oil payment check:`, {
+            id: transaction.id,
+            secondVerificationCode: transaction.secondVerificationCode,
+            paymentConfirmedAt: transaction.paymentConfirmedAt,
+            hasPaymentConfirmation: hasPaymentConfirmation
+          });
+        }
+        
+        return {
+          id: transaction.id,
+          notificationId: transaction.notificationId,
+          buyerId: transaction.buyerId,
+          farmerId: transaction.farmerId,
+          farmerName: transaction.farmerName,
+          farmLocation: transaction.farmLocation,
+          commodityType: transaction.commodityType,
+          quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
+          unit: transaction.unit || 'kg',
+          pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
+          totalValue: parseFloat(transaction.totalValue || '0'),
+          qualityGrade: "Grade A", // Default quality grade
+          paymentTerms: transaction.paymentTerms,
+          deliveryTerms: transaction.deliveryTerms,
+          verificationCode: transaction.verificationCode,
+          secondVerificationCode: transaction.secondVerificationCode,
+          confirmedAt: transaction.acceptedAt,
+          status: "confirmed",
+          paymentConfirmed: hasPaymentConfirmation, // TRUE when farmer confirms payment
+          paymentConfirmedAt: transaction.paymentConfirmedAt,
+          awaitingPaymentConfirmation: !hasPaymentConfirmation // FALSE when payment confirmed
+        };
+      });
 
       console.log(`Returning ${confirmedTransactions.length} confirmed transactions`);
       res.json(confirmedTransactions);

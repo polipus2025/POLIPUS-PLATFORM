@@ -28,7 +28,9 @@ import {
   Shield,
   Thermometer,
   Scale,
-  MapPin
+  MapPin,
+  Printer,
+  QrCode
 } from "lucide-react";
 
 export default function WarehouseInspectorDashboard() {
@@ -37,6 +39,8 @@ export default function WarehouseInspectorDashboard() {
   const [validatingRequest, setValidatingRequest] = useState<string | null>(null);
   const [selectedCodeType, setSelectedCodeType] = useState("");
   const [validationCode, setValidationCode] = useState("");
+  const [selectedQrBatch, setSelectedQrBatch] = useState<any>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -257,6 +261,80 @@ export default function WarehouseInspectorDashboard() {
       case 'completed': return 'bg-green-100 text-green-800';
       case 'failed': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Handle QR code printing
+  const handlePrintQr = (batch: any) => {
+    // Create a printable window with the QR code
+    if (batch.qrCodeUrl) {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>QR Code - ${batch.batchCode}</title>
+              <style>
+                body { 
+                  font-family: Arial, sans-serif; 
+                  text-align: center; 
+                  padding: 20px; 
+                }
+                .qr-container {
+                  margin: 20px auto;
+                  padding: 20px;
+                  border: 2px solid #000;
+                  width: 400px;
+                }
+                .qr-code {
+                  width: 256px;
+                  height: 256px;
+                  margin: 20px auto;
+                }
+                .batch-info {
+                  margin: 10px 0;
+                  font-size: 14px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="qr-container">
+                <h2>Agricultural Traceability QR Code</h2>
+                <div class="batch-info">
+                  <strong>Batch Code:</strong> ${batch.batchCode}
+                </div>
+                <div class="batch-info">
+                  <strong>Commodity:</strong> ${batch.commodityType}
+                </div>
+                <div class="batch-info">
+                  <strong>Farmer:</strong> ${batch.farmerName}
+                </div>
+                <div class="batch-info">
+                  <strong>Total Weight:</strong> ${batch.totalWeight} kg
+                </div>
+                <img src="${batch.qrCodeUrl}" alt="QR Code" class="qr-code" />
+                <div class="batch-info">
+                  <strong>Generated:</strong> ${new Date().toLocaleDateString()}
+                </div>
+                <div class="batch-info" style="font-size: 12px; margin-top: 20px;">
+                  <strong>Verification URL:</strong><br/>
+                  https://agritrace360.lacra.gov.lr/verify/${batch.batchCode}
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      }
+    } else {
+      toast({
+        title: "❌ Error",
+        description: "QR code not available for printing",
+        variant: "destructive"
+      });
     }
   };
 
@@ -1002,12 +1080,25 @@ export default function WarehouseInspectorDashboard() {
                                     <Badge variant="outline">{batch.totalBags} bags</Badge>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <Button size="sm" variant="outline">
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => {
+                                        setSelectedQrBatch(batch);
+                                        setShowQrModal(true);
+                                      }}
+                                      data-testid={`button-view-qr-${batch.batchCode}`}
+                                    >
                                       <Eye className="w-4 h-4 mr-1" />
                                       View QR
                                     </Button>
-                                    <Button size="sm" variant="outline">
-                                      <Download className="w-4 h-4 mr-1" />
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => handlePrintQr(batch)}
+                                      data-testid={`button-print-qr-${batch.batchCode}`}
+                                    >
+                                      <Printer className="w-4 h-4 mr-1" />
                                       Print
                                     </Button>
                                   </div>
@@ -1495,6 +1586,126 @@ export default function WarehouseInspectorDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* QR Code Modal */}
+      <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5" />
+              QR Code - {selectedQrBatch?.batchCode}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedQrBatch && (
+            <div className="space-y-6">
+              {/* QR Code Image */}
+              <div className="flex justify-center">
+                {selectedQrBatch.qrCodeUrl ? (
+                  <div className="text-center">
+                    <img 
+                      src={selectedQrBatch.qrCodeUrl} 
+                      alt={`QR Code for ${selectedQrBatch.batchCode}`}
+                      className="w-64 h-64 mx-auto mb-4 border-2 border-gray-200 rounded-lg"
+                    />
+                    <p className="text-sm text-gray-600">
+                      Scan this QR code for complete traceability information
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center p-8 bg-gray-50 rounded-lg">
+                    <QrCode className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600">QR Code not available</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Batch Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-lg">Batch Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">Batch Code:</span>
+                      <p className="font-mono text-blue-600">{selectedQrBatch.batchCode}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Commodity:</span>
+                      <p>{selectedQrBatch.commodityType}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Total Weight:</span>
+                      <p>{selectedQrBatch.totalWeight} kg</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Total Bags:</span>
+                      <p>{selectedQrBatch.totalBags} bags</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-lg">Traceability</h4>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">Farmer:</span>
+                      <p>{selectedQrBatch.farmerName}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Buyer:</span>
+                      <p>{selectedQrBatch.buyerName}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Generated:</span>
+                      <p>{new Date(selectedQrBatch.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Status:</span>
+                      <Badge className={selectedQrBatch.status === 'generated' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                        {selectedQrBatch.status.charAt(0).toUpperCase() + selectedQrBatch.status.slice(1)}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* QR Code Data Information */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold text-lg mb-3">QR Code Contains</h4>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <ul className="text-sm space-y-1 list-disc list-inside text-blue-700">
+                    <li><strong>Complete Traceability Chain:</strong> From farm to warehouse</li>
+                    <li><strong>Product Information:</strong> Commodity type, quality grade, harvest date</li>
+                    <li><strong>EUDR Compliance Data:</strong> Deforestation risk assessment, geolocation</li>
+                    <li><strong>Inspection Results:</strong> Quality control and compliance verification</li>
+                    <li><strong>Certification Data:</strong> LACRA compliance, international standards</li>
+                    <li><strong>Digital Verification:</strong> Tamper-proof signatures and verification URL</li>
+                    <li><strong>Packaging Details:</strong> Bag counts, weights, and storage information</li>
+                    <li><strong>Stakeholder Information:</strong> Farmer, buyer, warehouse, and inspector details</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handlePrintQr(selectedQrBatch)}
+                  className="flex items-center gap-2"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print QR Code
+                </Button>
+                <Button 
+                  onClick={() => setShowQrModal(false)}
+                  className="flex items-center gap-2"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

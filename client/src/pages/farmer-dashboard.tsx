@@ -835,19 +835,62 @@ export default function FarmerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="font-semibold text-orange-900">Recently Submitted Offer</p>
-                    <p className="text-sm text-gray-600">3 buyers in Monrovia County notified</p>
-                  </div>
-                  <Badge className="bg-orange-600 text-white">Pending</Badge>
+              {farmerOffersLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading pending offers...</div>
+              ) : farmerOffers && farmerOffers.filter((offer: any) => offer.status === 'pending').length > 0 ? (
+                <div className="space-y-4">
+                  {farmerOffers.filter((offer: any) => offer.status === 'pending').map((offer: any) => (
+                    <div key={offer.id} className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="font-semibold text-orange-900">{offer.commodityType} Offer</p>
+                          <p className="text-sm text-gray-600">Offer ID: {offer.offerId}</p>
+                          <p className="text-sm text-gray-600">{offer.quantityAvailable} {offer.unit} • ${offer.totalValue.toLocaleString()}</p>
+                        </div>
+                        <Badge className="bg-orange-600 text-white">PENDING</Badge>
+                      </div>
+                      
+                      {/* Offer Details */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 text-sm">
+                        <div>
+                          <p><strong>Quality:</strong> {offer.qualityGrade}</p>
+                          <p><strong>Price per {offer.unit}:</strong> ${offer.pricePerUnit.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p><strong>Payment:</strong> {offer.paymentTerms}</p>
+                          <p><strong>Delivery:</strong> {offer.deliveryTerms}</p>
+                        </div>
+                      </div>
+
+                      {/* Date Information */}
+                      <div className="border-t pt-3 mb-3">
+                        <p className="text-sm">
+                          <strong>📅 Submitted:</strong> {new Date(offer.offerCreatedAt).toLocaleString()}
+                        </p>
+                        <p className="text-sm text-orange-600">
+                          <strong>⏳ Status:</strong> Waiting for buyer acceptance in {offer.county} County
+                        </p>
+                      </div>
+
+                      <div className="bg-orange-100 p-3 rounded border border-orange-300">
+                        <p className="text-sm text-orange-700 font-medium">
+                          🔔 All buyers in {offer.county} County have been notified
+                        </p>
+                        <p className="text-xs text-orange-600 mt-1">
+                          First buyer to accept this offer wins the deal!
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="text-sm text-gray-600">
-                  <p>Status: <span className="font-medium text-orange-600">Waiting for buyer acceptance</span></p>
-                  <p className="text-xs mt-1">First buyer to accept wins the offer</p>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium mb-2">No Pending Offers</p>
+                  <p className="text-sm">All your offers have been accepted by buyers!</p>
+                  <p className="text-sm">Submit new offers in the Marketplace tab.</p>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

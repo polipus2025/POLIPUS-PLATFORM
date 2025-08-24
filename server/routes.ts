@@ -15014,7 +15014,7 @@ Complete farm-to-export traceability guaranteed.`;
               ${JSON.stringify({ inspected: true, quality: 'excellent' })},
               ${JSON.stringify({ compliant: true, eudr_ready: true })},
               '6.428°N, 9.429°W',
-              ${readableQrData}, ${qrCodeUrl}, 'generated'
+              ${JSON.stringify(readableQrData)}, ${qrCodeUrl}, 'generated'
             )
           `);
           

@@ -3569,7 +3569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const realOffers = await db
         .select()
         .from(farmerProductOffers)
-        .orderBy(farmerProductOffers.createdAt);
+        .orderBy(desc(farmerProductOffers.createdAt));
       
       console.log("📦 Found", realOffers.length, "real offers in database");
       console.log("📋 First offer:", realOffers[0] ? JSON.stringify(realOffers[0], null, 2) : "none");

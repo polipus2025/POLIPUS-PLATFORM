@@ -13544,7 +13544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Found buyer integer ID: ${buyer.id} for buyerId: ${buyerId}`);
       
-      // Get REAL notifications from database for this buyer using integer ID
+      // Get ALL notifications from database for this buyer using integer ID (including taken ones)
       const realNotifications = await db
         .select({
           notificationId: buyerNotifications.notificationId,
@@ -13561,8 +13561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .from(buyerNotifications)
         .where(eq(buyerNotifications.buyerId, buyer.id))
-        // Only pending notifications (response is null or empty)
-        .where(sql`(${buyerNotifications.response} IS NULL OR ${buyerNotifications.response} = '')`)
+        // FIXED: Return ALL notifications so frontend can show proper status
         .orderBy(desc(buyerNotifications.createdAt));
 
       console.log(`📬 Returning ${realNotifications.length} REAL notifications for buyer ${buyerId}`);

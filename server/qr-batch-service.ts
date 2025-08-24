@@ -309,29 +309,57 @@ export class QrBatchService {
     };
   }
 
-  // Generate QR code image with compact data
+  // Generate QR code image optimized for universal device compatibility
   static async generateQrCodeImage(data: any): Promise<string | null> {
     try {
-      const jsonData = JSON.stringify(data);
-      console.log('QR Code data size:', jsonData.length, 'characters');
+      // Convert to string if it's an object, otherwise use as-is for text data
+      const qrData = typeof data === 'string' ? data : JSON.stringify(data);
+      console.log('📱 QR Code data size:', qrData.length, 'characters');
       
-      const qrCodeDataUrl = await QRCode.toDataURL(jsonData, {
-        errorCorrectionLevel: 'M', // Reduced from H to fit more data
+      // Optimized settings for maximum device compatibility
+      const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
+        errorCorrectionLevel: 'L', // Low error correction for maximum data capacity
         type: 'image/png',
-        quality: 0.92,
-        margin: 1,
+        quality: 0.95, // High quality for better scanning
+        margin: 2, // Increased margin for better scanning on all devices
         color: {
-          dark: '#000000',
-          light: '#FFFFFF'
+          dark: '#000000', // Pure black for maximum contrast
+          light: '#FFFFFF' // Pure white for maximum contrast
         },
-        width: 256
+        width: 300, // Larger size for better scanning on all devices
+        version: undefined // Let library auto-select optimal version
       });
       
-      console.log('✅ QR Code generated successfully, length:', qrCodeDataUrl.length);
+      console.log('✅ Universal QR Code generated successfully, length:', qrCodeDataUrl.length);
       return qrCodeDataUrl;
     } catch (error) {
       console.error('❌ Error generating QR code:', error);
-      // Return null instead of throwing to prevent batch creation failure
+      // Fallback: try with ultra-compact data if original fails
+      try {
+        if (typeof data === 'object') {
+          const compactData = {
+            b: data.batch_code || data.b || 'UNKNOWN',
+            v: data.verification_code || data.v || 'N/A',
+            t: Date.now()
+          };
+          const compactQrData = JSON.stringify(compactData);
+          console.log('🔄 Attempting compact QR fallback, size:', compactQrData.length);
+          
+          const fallbackQrCode = await QRCode.toDataURL(compactQrData, {
+            errorCorrectionLevel: 'L',
+            type: 'image/png',
+            quality: 0.95,
+            margin: 2,
+            width: 300
+          });
+          
+          console.log('✅ Compact fallback QR generated successfully');
+          return fallbackQrCode;
+        }
+      } catch (fallbackError) {
+        console.error('❌ Fallback QR generation also failed:', fallbackError);
+      }
+      
       return null;
     }
   }

@@ -14926,17 +14926,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             day: 'numeric' 
           });
           
-          const readableQrData = `🇱🇷 REPUBLIC OF LIBERIA
+          const readableQrData = `REPUBLIC OF LIBERIA
 AGRICULTURAL TRACEABILITY CERTIFICATE
-─────────────────────────────────
+=====================================
 
-📋 BATCH INFORMATION
+BATCH INFORMATION
 Batch Code: ${batchCode}
 Date: ${formattedDate}
 Time: ${currentDate.toLocaleTimeString()}
 Transaction: ${transaction.transaction_id}
 
-📦 PRODUCT DETAILS
+PRODUCT DETAILS
 Commodity: ${transaction.commodity_type.toUpperCase()}
 Quality Grade: PREMIUM EXPORT GRADE A
 Total Weight: ${totalQuantity} TONS (${totalPackages} bags)
@@ -14944,53 +14944,53 @@ Package Size: ${packageWeight}kg per bag
 Moisture Level: 6.5% (Optimal)
 Quality Score: 95/100 (Outstanding)
 
-🌾 FARM ORIGIN
+FARM ORIGIN
 Farmer: ${transaction.farmer_name || 'Paolo'}
 Farmer ID: ${transaction.farmer_id}
 Location: ${transaction.county || 'Margibi County'}, Liberia
-GPS Coordinates: 6.428°N, 9.429°W
+GPS Coordinates: 6.428N, 9.429W
 Farm Size: 2.5 hectares
 Certificate: LACRA-CERT-${transaction.farmer_id}
 Status: CERTIFIED ORGANIC
 
-✅ QUALITY ASSURANCE
+QUALITY ASSURANCE
 Inspector: WH-INS-001
 Warehouse: ${warehouseName}
 Inspection Date: ${formattedDate}
-Storage Conditions: 18-20°C, 60-65% RH
+Storage Conditions: 18-20C, 60-65% RH
 Export Standards: EU EXPORT READY
 
-🌍 EUDR COMPLIANCE
+EUDR COMPLIANCE
 Compliance Status: FULLY COMPLIANT
 Risk Assessment: LOW RISK
-Deforestation Free: ✓ VERIFIED
-Due Diligence: ✓ COMPLETED
-Geolocation: ✓ VERIFIED
-Legal Harvest: ✓ CONFIRMED
+Deforestation Free: VERIFIED
+Due Diligence: COMPLETED
+Geolocation: VERIFIED
+Legal Harvest: CONFIRMED
 Certified By: LACRA
 
-📜 CERTIFICATIONS
+CERTIFICATIONS
 LACRA Certificate: LACRA-${batchCode.slice(-8)}
 EUDR Certificate: EUDR-${batchCode.slice(-8)}
 Organic Certificate: ORG-${transaction.farmer_id}
 Validity Period: ${formattedDate} to ${certExpiry}
 
-🔐 VERIFICATION
+VERIFICATION
 Verification Code: ${transaction.verification_code}
 Digital Signature: SIG-${Buffer.from(batchCode).toString('base64').slice(0, 8)}
 Platform: POLIPUS TRACEABILITY SYSTEM
 
-🌐 ONLINE VERIFICATION
+ONLINE VERIFICATION
 Verify at: agritrace360.lacra.gov.lr/verify/${batchCode}
 
-─────────────────────────────────
-⚡ POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
-🏛️ AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
-🇪🇺 EU DEFORESTATION REGULATION COMPLIANT
+=====================================
+POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
+AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
+EU DEFORESTATION REGULATION COMPLIANT
 
-✓ Complete farm-to-export traceability guaranteed
-✓ Government-verified supply chain integrity
-✓ International compliance standards met`;
+Complete farm-to-export traceability guaranteed
+Government-verified supply chain integrity
+International compliance standards met`;
           
           // Store comprehensive data for system use
           const qrCodeData = {

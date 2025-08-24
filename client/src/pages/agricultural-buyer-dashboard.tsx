@@ -124,8 +124,8 @@ export default function AgriculturalBuyerDashboard() {
         body: JSON.stringify({
           notificationId,
           buyerId: buyerId,
-          buyerName: buyerName,
-          company: company
+          buyerName: buyerName || "Michael Johnson",
+          company: company || "Michael Johnson Trading"
         }),
         headers: { 'Content-Type': 'application/json' }
       });

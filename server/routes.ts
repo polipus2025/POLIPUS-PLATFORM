@@ -13950,7 +13950,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
       console.log(`Fetching verification codes for buyer: ${buyerId}`);
       
-      // Fetch real verification codes from database (these represent buyer's confirmed orders/transactions)
+      // FIXED: Get the internal buyer ID first, then fetch verification codes
+      const [buyer] = await db
+        .select({ id: buyers.id })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+      
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+      
+      // Fetch verification codes using internal buyer ID
       const verificationCodes = await db
         .select({
           id: buyerVerificationCodes.id,
@@ -13974,7 +13984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           notification_id: buyerVerificationCodes.notificationId,
         })
         .from(buyerVerificationCodes)
-        .where(eq(buyerVerificationCodes.buyerId, buyerId))
+        .where(eq(buyerVerificationCodes.buyerId, buyer.id.toString()))
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
       // Transform to match expected "My Orders" format for buyer

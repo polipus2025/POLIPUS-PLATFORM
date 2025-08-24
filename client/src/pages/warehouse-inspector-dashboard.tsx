@@ -1025,7 +1025,8 @@ export default function WarehouseInspectorDashboard() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+
+            {/* QR Batch Tracking & Management - Only in Bags Tab */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Card>
@@ -1073,43 +1074,7 @@ export default function WarehouseInspectorDashboard() {
                               <option value="coffee">Coffee</option>
                               <option value="palm_oil">Palm Oil</option>
                               <option value="rubber">Rubber</option>
-                              <option value="rice">Rice</option>
-                              <option value="cassava">Cassava</option>
                             </select>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Product Type</label>
-                            <select className="w-full mt-1 p-2 border rounded">
-                              <option value="">Select Product...</option>
-                              <option value="premium_cocoa">Premium Trinitario Cocoa</option>
-                              <option value="standard_cocoa">Standard Forastero Cocoa</option>
-                              <option value="arabica_coffee">Arabica Coffee</option>
-                              <option value="robusta_coffee">Robusta Coffee</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Packaging Type</label>
-                            <select className="w-full mt-1 p-2 border rounded">
-                              <option value="">Select Packaging...</option>
-                              <option value="jute_bags">Jute Bags</option>
-                              <option value="polypropylene_bags">Polypropylene Bags</option>
-                              <option value="wooden_pallets">Wooden Pallets</option>
-                              <option value="export_containers">Export Containers</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Package Weight (kg)</label>
-                            <select className="w-full mt-1 p-2 border rounded">
-                              <option value="">Select Weight...</option>
-                              <option value="50">50 kg</option>
-                              <option value="60">60 kg</option>
-                              <option value="80">80 kg</option>
-                              <option value="100">100 kg</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Total Packages</label>
-                            <Input placeholder="100" type="number" className="mt-1" />
                           </div>
                           <div>
                             <label className="text-sm font-medium">Quality Grade</label>
@@ -1117,9 +1082,23 @@ export default function WarehouseInspectorDashboard() {
                               <option value="">Select Grade...</option>
                               <option value="Grade I">Grade I (Premium)</option>
                               <option value="Grade II">Grade II (Standard)</option>
-                              <option value="Fine Flavor">Fine Flavor</option>
-                              <option value="Bulk">Bulk Grade</option>
+                              <option value="Grade III">Grade III (Main Crop)</option>
                             </select>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                          <div>
+                            <label className="text-sm font-medium">Total Bags</label>
+                            <input type="number" className="w-full mt-1 p-2 border rounded" placeholder="100" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Bag Weight (kg)</label>
+                            <input type="number" className="w-full mt-1 p-2 border rounded" placeholder="60" />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Total Weight (kg)</label>
+                            <input type="number" className="w-full mt-1 p-2 border rounded" disabled placeholder="6,000" />
                           </div>
                         </div>
                         
@@ -1210,7 +1189,6 @@ export default function WarehouseInspectorDashboard() {
                           ) : (
                             <p className="text-center text-gray-500">No QR batches available</p>
                           )}
-
                         </div>
                       </div>
                     </div>
@@ -1260,32 +1238,37 @@ export default function WarehouseInspectorDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <div className="text-sm">
-                          <p className="font-medium">WH-BATCH-20250821-A4B2</p>
-                          <p className="text-gray-600">Scanned by buyer</p>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800 text-xs">2 min ago</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <div className="text-sm">
-                          <p className="font-medium">WH-BATCH-20250821-C7D9</p>
-                          <p className="text-gray-600">Scanned by exporter</p>
-                        </div>
-                        <Badge className="bg-blue-100 text-blue-800 text-xs">15 min ago</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <div className="text-sm">
-                          <p className="font-medium">WH-BATCH-20250820-F3G8</p>
-                          <p className="text-gray-600">Scanned by customs</p>
-                        </div>
-                        <Badge className="bg-purple-100 text-purple-800 text-xs">1 hour ago</Badge>
-                      </div>
+                      {qrBatchesLoading ? (
+                        <p className="text-center text-gray-500">Loading activity...</p>
+                      ) : qrBatches && qrBatches.length > 0 ? (
+                        qrBatches.slice(0, 3).map((batch: any, index) => (
+                          <div key={batch.batchCode} className="flex items-center justify-between p-2 border rounded">
+                            <div className="text-sm">
+                              <p className="font-medium">{batch.batchCode}</p>
+                              <p className="text-gray-600">
+                                {batch.status === 'generated' ? 'Generated for processing' : 
+                                 batch.status === 'printed' ? 'QR codes printed' : 
+                                 batch.status === 'distributed' ? 'Distributed to buyer' : 'In processing'}
+                              </p>
+                            </div>
+                            <Badge className={
+                              batch.status === 'generated' ? 'bg-green-100 text-green-800 text-xs' :
+                              batch.status === 'printed' ? 'bg-blue-100 text-blue-800 text-xs' :
+                              'bg-purple-100 text-purple-800 text-xs'
+                            }>
+                              {new Date(batch.createdAt).toLocaleDateString()}
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-center text-gray-500">No recent activity</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
             </div>
+          </TabsContent>
 
           {/* Inventory Control Tab */}
           <TabsContent value="inventory" className="space-y-6">
@@ -1296,7 +1279,7 @@ export default function WarehouseInspectorDashboard() {
                   Warehouse Inventory Management
                 </CardTitle>
                 <CardDescription>
-                  Real-time inventory tracking and storage monitoring for {warehouseFacility}
+                  Real-time inventory tracking and storage monitoring for warehouse operations
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1315,22 +1298,18 @@ export default function WarehouseInspectorDashboard() {
                             {item.status}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
-                            <span className="font-medium">Quantity:</span>
-                            <p className="text-gray-600">{item.quantity}</p>
+                            <p className="text-gray-600">Quantity</p>
+                            <p className="font-medium">{item.quantity} {item.unit}</p>
                           </div>
                           <div>
-                            <span className="font-medium">Temperature:</span>
-                            <p className="text-gray-600">{item.temperature}</p>
+                            <p className="text-gray-600">Storage Date</p>
+                            <p className="font-medium">{item.storageDate}</p>
                           </div>
                           <div>
-                            <span className="font-medium">Humidity:</span>
-                            <p className="text-gray-600">{item.humidity}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium">Last Inspection:</span>
-                            <p className="text-gray-600">{item.lastInspection}</p>
+                            <p className="text-gray-600">Temperature</p>
+                            <p className="font-medium">{item.temperature}°C</p>
                           </div>
                         </div>
                       </div>
@@ -1349,48 +1328,15 @@ export default function WarehouseInspectorDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Shield className="w-5 h-5 mr-2 text-green-600" />
-                  Storage Compliance Monitoring
+                  Compliance Validation
                 </CardTitle>
                 <CardDescription>
-                  Regulatory compliance status and monitoring for storage facilities
+                  Verify compliance standards and validate storage conditions
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {loadingCompliance ? (
-                    <p className="text-center text-gray-500 col-span-2">Loading compliance data...</p>
-                  ) : storageCompliance && storageCompliance.length > 0 ? (
-                    storageCompliance.map((compliance: any) => (
-                      <Card key={compliance.category}>
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-medium">{compliance.category}</h3>
-                            <Badge className="bg-green-100 text-green-800">
-                              {compliance.rate}%
-                            </Badge>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Compliant Units:</span>
-                              <span className="font-medium">{compliance.compliant}/{compliance.total}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span>Last Check:</span>
-                              <span className="text-gray-600">{compliance.lastCheck}</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-green-600 h-2 rounded-full" 
-                                style={{ width: `${compliance.rate}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-500 col-span-2">No compliance data available</p>
-                  )}
+                <div className="space-y-4">
+                  <p className="text-center text-gray-500">Validation features coming soon...</p>
                 </div>
               </CardContent>
             </Card>
@@ -1402,50 +1348,40 @@ export default function WarehouseInspectorDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
-                  Quality Control & Testing
+                  Quality Control Management
                 </CardTitle>
                 <CardDescription>
-                  Quality assurance tests and batch monitoring for stored commodities
+                  Monitor and manage quality control processes for stored commodities
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {loadingQuality ? (
-                    <p className="text-center text-gray-500">Loading quality control data...</p>
+                    <p className="text-center text-gray-500">Loading quality data...</p>
                   ) : qualityControls && qualityControls.length > 0 ? (
                     qualityControls.map((control: any) => (
                       <div key={control.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <h4 className="font-medium">{control.testType}</h4>
-                            <p className="text-sm text-gray-600">Batch: {control.batchNumber} • {control.commodity}</p>
+                            <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
                           </div>
-                          <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                          <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                             {control.status}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
-                            <h5 className="font-medium mb-2">Test Details</h5>
-                            <p className="text-sm text-gray-600">Inspector: {control.inspector}</p>
-                            <p className="text-sm text-gray-600">Test Date: {control.testDate}</p>
+                            <p className="text-gray-600">Test Date</p>
+                            <p className="font-medium">{control.testDate}</p>
                           </div>
                           <div>
-                            <h5 className="font-medium mb-2">Test Results</h5>
-                            <div className="space-y-1 text-sm">
-                              <div className="flex justify-between">
-                                <span>Moisture:</span>
-                                <span className="font-medium">{control.results.moisture}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Defects:</span>
-                                <span className="font-medium">{control.results.defects}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Foreign Matter:</span>
-                                <span className="font-medium">{control.results.foreign_matter}</span>
-                              </div>
-                            </div>
+                            <p className="text-gray-600">Inspector</p>
+                            <p className="font-medium">{control.inspector}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Score</p>
+                            <p className="font-medium">{control.score}%</p>
                           </div>
                         </div>
                       </div>
@@ -1459,6 +1395,5 @@ export default function WarehouseInspectorDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
-}
+    );
+  };

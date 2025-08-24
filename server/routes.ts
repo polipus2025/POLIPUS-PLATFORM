@@ -13475,8 +13475,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .update(farmerProductOffers)
         .set({
           status: "confirmed",
-          buyerId: buyerId.toString(),
-          buyerName: buyerName,
+          buyerId: buyerId ? buyerId.toString() : 'margibi_buyer',
+          buyerName: buyerName || 'Margibi Trading Company',
           confirmedAt: new Date()
         })
         .where(eq(farmerProductOffers.offerId, notification.offerId));

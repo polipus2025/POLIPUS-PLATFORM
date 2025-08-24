@@ -13999,7 +13999,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         unit: code.unit || 'tons',
         pricePerUnit: parseFloat(code.price_per_unit),
         totalValue: parseFloat(code.total_value),
-        status: 'confirmed', // All verification codes represent confirmed orders
+        status: code.status, // Use actual database status (confirmed, bags_requested, etc.)
         county: code.county,
         farmLocation: code.farm_location,
         paymentTerms: code.payment_terms,

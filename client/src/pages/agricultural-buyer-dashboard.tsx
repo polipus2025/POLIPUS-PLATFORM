@@ -163,13 +163,13 @@ export default function AgriculturalBuyerDashboard() {
       {/* Main Content */}
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Business Overview</TabsTrigger>
-            <TabsTrigger value="notifications">Product Offers</TabsTrigger>
-            <TabsTrigger value="farmers">Farmer Connections</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmed Transactions</TabsTrigger>
-            <TabsTrigger value="codes">Verification Codes</TabsTrigger>
-            <TabsTrigger value="transactions">Transaction Dashboard</TabsTrigger>
+          <TabsList className="flex w-full h-auto p-1">
+            <TabsTrigger value="overview" className="flex-1 text-xs px-2 py-2 min-w-0">Business Overview</TabsTrigger>
+            <TabsTrigger value="notifications" className="flex-1 text-xs px-2 py-2 min-w-0">Product Offers</TabsTrigger>
+            <TabsTrigger value="farmers" className="flex-1 text-xs px-2 py-2 min-w-0">Farmer Connections</TabsTrigger>
+            <TabsTrigger value="confirmed" className="flex-1 text-xs px-2 py-2 min-w-0">Confirmed Transactions</TabsTrigger>
+            <TabsTrigger value="codes" className="flex-1 text-xs px-2 py-2 min-w-0">Verification Codes</TabsTrigger>
+            <TabsTrigger value="transactions" className="flex-1 text-xs px-2 py-2 min-w-0">Transaction Dashboard</TabsTrigger>
           </TabsList>
 
           {/* Business Overview Tab */}

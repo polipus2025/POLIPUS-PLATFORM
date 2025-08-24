@@ -397,8 +397,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper function to generate unique offer ID
   const generateOfferId = () => {
     const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const timestamp = Date.now().toString().slice(-6); // Use timestamp for uniqueness
     const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
-    return `FPO-${date}-${random}`;
+    return `FPO-${date}-${timestamp}-${random}`;
   };
 
   // Helper function to generate notification ID

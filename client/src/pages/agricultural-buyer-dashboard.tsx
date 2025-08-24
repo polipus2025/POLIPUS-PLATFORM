@@ -44,7 +44,7 @@ export default function AgriculturalBuyerDashboard() {
   // Fetch product offer notifications for this buyer - REAL-TIME for offer competition
   const { data: notifications, isLoading: notificationsLoading } = useQuery({
     queryKey: ['/api/buyer/notifications', buyerId],
-    queryFn: () => apiRequest(`/api/buyer-notifications/${buyerId}`),
+    queryFn: () => apiRequest(`/api/buyer/notifications/${buyerId}`),
     enabled: !!buyerId,
     staleTime: 0, // No cache - always fetch fresh for real-time offer status
     gcTime: 0, // Don't keep in cache

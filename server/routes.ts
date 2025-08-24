@@ -14792,7 +14792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cw.warehouse_name, cw.warehouse_id
           FROM warehouse_transactions wt
           LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
-          WHERE wt.payment_verification_code IS NOT NULL 
+          WHERE wt.verification_code IS NOT NULL 
           AND wt.status IN ('received', 'processed', 'validated')
           AND (wt.qr_batch_generated = false OR wt.qr_batch_generated IS NULL)
           AND wt.warehouse_id = ${warehouseId}
@@ -14808,7 +14808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cw.warehouse_name, cw.warehouse_id
           FROM warehouse_transactions wt
           LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
-          WHERE wt.payment_verification_code IS NOT NULL 
+          WHERE wt.verification_code IS NOT NULL 
           AND wt.status IN ('received', 'processed', 'validated')
           AND (wt.qr_batch_generated = false OR wt.qr_batch_generated IS NULL)
           ORDER BY wt.received_at DESC

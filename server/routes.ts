@@ -13582,6 +13582,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { notificationId, buyerId, buyerName, company } = req.body;
 
+      // PERMANENT FIX: Get the correct internal buyer ID for all future buyers
+      const [buyerRecord] = await db
+        .select({ 
+          internalId: buyers.id,
+          buyerCode: buyers.buyerId,
+          businessName: buyers.businessName 
+        })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+        
+      if (!buyerRecord) {
+        return res.status(404).json({ 
+          error: "Buyer not found in system!" 
+        });
+      }
+      
+      console.log(`✅ BUYER LOOKUP: ${buyerId} → Internal ID: ${buyerRecord.internalId}`);
+
       // REAL-TIME CHECK: Verify offer is still available (atomic check)
       const [currentNotification] = await db
         .select({
@@ -13652,10 +13670,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🔄 Updated farmer offer ${notification.offerId} to confirmed status with buyer: ${buyerName}`);
 
-      // Store verification code in database
+      // Store verification code in database - PERMANENT FIX: Use internal buyer ID
       const [savedCode] = await db.insert(buyerVerificationCodes).values({
         verificationCode,
-        buyerId: buyerId || notification.buyerId, // Use the actual buyer ID from request or notification
+        buyerId: buyerRecord.internalId.toString(), // FIXED: Always use internal ID for future compatibility
         buyerName: buyerName || 'Agricultural Trading Company',
         company: company || 'Agricultural Trading Company',
         notificationId,

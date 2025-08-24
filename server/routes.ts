@@ -3447,6 +3447,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // MAIN WORKING CREDENTIALS
         margibi_buyer: { password: 'password123', firstName: 'Maria', lastName: 'Thompson', company: 'Margibi Trading Company' },
         'BYR-20250819-050': { password: 'password123', firstName: 'John', lastName: 'Smith', company: 'Test Agricultural Buyer' },
+        // NEW MARGIBI BUYERS - CORRECT FORMAT
+        'BYR-20250824-051': { password: 'buyer123', firstName: 'Maria', lastName: 'Thompson', company: 'Margibi Trading Company' },
+        'BYR-20250824-052': { password: 'buyer123', firstName: 'Michael', lastName: 'Johnson', company: 'Michael Johnson Trading' },
         // BACKUP CREDENTIALS
         buyer001: { password: 'password123', firstName: 'John', lastName: 'Trading', company: 'ABC Trading Co.' },
         buyer002: { password: 'password123', firstName: 'Sarah', lastName: 'Commerce', company: 'Global Commodities Ltd.' },

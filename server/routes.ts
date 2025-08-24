@@ -14484,6 +14484,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get QR batches for warehouse inspector
+  app.get("/api/warehouse-inspector/qr-batches", async (req, res) => {
+    try {
+      console.log("Fetching QR batches from database");
+      
+      // Get inspector info from token to filter by warehouse
+      const authHeader = req.headers.authorization;
+      let warehouseId = null;
+      
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          warehouseId = decoded.warehouseId;
+          console.log(`Filtering QR batches for warehouse: ${warehouseId}`);
+        } catch (error) {
+          console.log("No valid token, returning all QR batches");
+        }
+      }
+      
+      // Fetch QR batches
+      let qrBatchesQuery = sql`
+        SELECT 
+          batch_code, warehouse_id, warehouse_name, buyer_id, buyer_name,
+          farmer_id, farmer_name, commodity_type, total_bags, bag_weight,
+          total_weight, quality_grade, harvest_date, qr_code_data,
+          status, created_at, printed_at, distributed_at
+        FROM qr_batches 
+        ORDER BY created_at DESC
+      `;
+      
+      if (warehouseId) {
+        qrBatchesQuery = sql`
+          SELECT 
+            batch_code, warehouse_id, warehouse_name, buyer_id, buyer_name,
+            farmer_id, farmer_name, commodity_type, total_bags, bag_weight,
+            total_weight, quality_grade, harvest_date, qr_code_data,
+            status, created_at, printed_at, distributed_at
+          FROM qr_batches 
+          WHERE warehouse_id = ${warehouseId}
+          ORDER BY created_at DESC
+        `;
+      }
+      
+      const qrBatchesResult = await db.execute(qrBatchesQuery);
+      const qrBatches = qrBatchesResult.rows.map(row => ({
+        batchCode: row.batch_code,
+        warehouseId: row.warehouse_id,
+        warehouseName: row.warehouse_name,
+        buyerId: row.buyer_id,
+        buyerName: row.buyer_name,
+        farmerId: row.farmer_id,
+        farmerName: row.farmer_name,
+        commodityType: row.commodity_type,
+        totalBags: row.total_bags,
+        bagWeight: row.bag_weight,
+        totalWeight: row.total_weight,
+        qualityGrade: row.quality_grade,
+        harvestDate: row.harvest_date,
+        qrCodeData: row.qr_code_data,
+        status: row.status,
+        createdAt: row.created_at,
+        printedAt: row.printed_at,
+        distributedAt: row.distributed_at
+      }));
+
+      console.log(`Returning ${qrBatches.length} QR batches`);
+      res.json({ success: true, data: qrBatches });
+    } catch (error) {
+      console.error("Error fetching QR batches:", error);
+      res.status(500).json({ error: "Failed to fetch QR batches" });
+    }
+  });
+
   // Get warehouse bag requests from buyers
   app.get("/api/warehouse-inspector/bag-requests", async (req, res) => {
     try {

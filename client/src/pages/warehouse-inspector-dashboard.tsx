@@ -89,6 +89,12 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data?.data || []
   });
 
+  // Fetch QR batches from database
+  const { data: qrBatches, isLoading: qrBatchesLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/qr-batches'],
+    select: (data: any) => data?.data || []
+  });
+
   // Handle bag request validation
   const handleValidateBagRequest = async (requestId: string, action: 'validate' | 'reject', notes?: string) => {
     if (validatingRequest) return;
@@ -1151,120 +1157,60 @@ export default function WarehouseInspectorDashboard() {
                         </div>
                       </div>
 
-                      {/* Recent QR Batches */}
+                      {/* Recent QR Batches - Real Data */}
                       <div>
                         <h3 className="font-medium mb-3">Recent QR Batches</h3>
                         <div className="space-y-3">
-                          <div className="border rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-green-100 text-green-800">WH-BATCH-20250821-A4B2</Badge>
-                                <Badge variant="outline">100 bags</Badge>
+                          {qrBatchesLoading ? (
+                            <p className="text-center text-gray-500">Loading QR batches...</p>
+                          ) : qrBatches && qrBatches.length > 0 ? (
+                            qrBatches.map((batch: any) => (
+                              <div key={batch.batchCode} className="border rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-green-100 text-green-800">{batch.batchCode}</Badge>
+                                    <Badge variant="outline">{batch.totalBags} bags</Badge>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button size="sm" variant="outline">
+                                      <Eye className="w-4 h-4 mr-1" />
+                                      View QR
+                                    </Button>
+                                    <Button size="sm" variant="outline">
+                                      <Download className="w-4 h-4 mr-1" />
+                                      Print
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                                  <div>
+                                    <span className="font-medium">Buyer:</span>
+                                    <p className="text-gray-600">{batch.buyerName}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Commodity:</span>
+                                    <p className="text-gray-600">{batch.commodityType}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Total Weight:</span>
+                                    <p className="text-gray-600">{batch.totalWeight} kg</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Status:</span>
+                                    <p className={batch.status === 'generated' ? 'text-green-600' : batch.status === 'printed' ? 'text-blue-600' : 'text-yellow-600'}>
+                                      {batch.status.charAt(0).toUpperCase() + batch.status.slice(1)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="mt-2 text-xs text-gray-500">
+                                  Farmer: {batch.farmerName} • Created: {new Date(batch.createdAt).toLocaleDateString()}
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View QR
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Download className="w-4 h-4 mr-1" />
-                                  Print
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                              <div>
-                                <span className="font-medium">Buyer:</span>
-                                <p className="text-gray-600">Monrovia Trading Co.</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Commodity:</span>
-                                <p className="text-gray-600">Premium Cocoa</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Total Weight:</span>
-                                <p className="text-gray-600">6,000 kg</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Status:</span>
-                                <p className="text-green-600">Distributed</p>
-                              </div>
-                            </div>
-                          </div>
+                            ))
+                          ) : (
+                            <p className="text-center text-gray-500">No QR batches available</p>
+                          )}
 
-                          <div className="border rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-blue-100 text-blue-800">WH-BATCH-20250821-C7D9</Badge>
-                                <Badge variant="outline">75 bags</Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View QR
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Download className="w-4 h-4 mr-1" />
-                                  Print
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                              <div>
-                                <span className="font-medium">Buyer:</span>
-                                <p className="text-gray-600">Atlantic Coffee Ltd.</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Commodity:</span>
-                                <p className="text-gray-600">Robusta Coffee</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Total Weight:</span>
-                                <p className="text-gray-600">4,500 kg</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Status:</span>
-                                <p className="text-yellow-600">Reserved</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="border rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-purple-100 text-purple-800">WH-BATCH-20250820-F3G8</Badge>
-                                <Badge variant="outline">120 bags</Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View QR
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Download className="w-4 h-4 mr-1" />
-                                  Print
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                              <div>
-                                <span className="font-medium">Buyer:</span>
-                                <p className="text-gray-600">West Africa Exports</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Commodity:</span>
-                                <p className="text-gray-600">Palm Oil</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Total Weight:</span>
-                                <p className="text-gray-600">7,200 kg</p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Status:</span>
-                                <p className="text-blue-600">Generated</p>
-                              </div>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -1284,18 +1230,22 @@ export default function WarehouseInspectorDashboard() {
                     <div className="space-y-4">
                       <div className="text-center p-4 bg-green-50 rounded-lg">
                         <CheckCircle className="w-8 h-8 mx-auto text-green-600 mb-2" />
-                        <p className="text-2xl font-bold text-green-600">23</p>
+                        <p className="text-2xl font-bold text-green-600">{qrBatches ? qrBatches.length : 0}</p>
                         <p className="text-sm text-gray-600">Active QR Batches</p>
                       </div>
                       <div className="text-center p-4 bg-blue-50 rounded-lg">
                         <Package className="w-8 h-8 mx-auto text-blue-600 mb-2" />
-                        <p className="text-2xl font-bold text-blue-600">2,847</p>
+                        <p className="text-2xl font-bold text-blue-600">
+                          {qrBatches ? qrBatches.reduce((total: number, batch: any) => total + parseInt(batch.totalBags || 0), 0) : 0}
+                        </p>
                         <p className="text-sm text-gray-600">Total Bags Tracked</p>
                       </div>
                       <div className="text-center p-4 bg-purple-50 rounded-lg">
                         <FileText className="w-8 h-8 mx-auto text-purple-600 mb-2" />
-                        <p className="text-2xl font-bold text-purple-600">156</p>
-                        <p className="text-sm text-gray-600">QR Codes Scanned</p>
+                        <p className="text-2xl font-bold text-purple-600">
+                          {qrBatches ? qrBatches.filter((batch: any) => batch.status === 'printed' || batch.status === 'distributed').length : 0}
+                        </p>
+                        <p className="text-sm text-gray-600">QR Codes Printed</p>
                       </div>
                     </div>
                   </CardContent>

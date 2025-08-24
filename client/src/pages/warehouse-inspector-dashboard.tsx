@@ -877,157 +877,6 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Bags Tab */}
           <TabsContent value="bags" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Truck className="w-5 h-5 mr-2" />
-                  Incoming Bag Requests from Buyers
-                </CardTitle>
-                <CardDescription>
-                  Validate or reject bag requests from buyers who have completed payment confirmation.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {bagRequestsLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading bag requests...</p>
-                  </div>
-                ) : bagRequests && bagRequests.length > 0 ? (
-                  <div className="space-y-4">
-                    {bagRequests.map((request: any) => (
-                      <Card key={request.requestId} className="border border-gray-200 hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h4 className="font-semibold text-lg flex items-center">
-                                {request.commodityType}
-                                <Badge 
-                                  className={`ml-2 ${
-                                    request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                    request.status === 'validated' ? 'bg-green-100 text-green-800' :
-                                    'bg-red-100 text-red-800'
-                                  }`}
-                                >
-                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                                </Badge>
-                              </h4>
-                              <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
-                              <p className="text-sm text-gray-600">From: {request.buyerName} ({request.company})</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-500">
-                                {new Date(request.requestedAt).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-600">Farmer</p>
-                              <p className="font-medium">{request.farmerName}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600">Quantity</p>
-                              <p className="font-medium">{request.quantity} {request.unit}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600">Total Value</p>
-                              <p className="font-medium text-green-600">${request.totalValue}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600">County</p>
-                              <p className="font-medium">{request.county}</p>
-                            </div>
-                          </div>
-
-                          <div className="mb-4">
-                            <p className="text-sm text-gray-600">Farm Location</p>
-                            <p className="text-sm">{request.farmLocation}</p>
-                          </div>
-
-                          <div className="mb-4">
-                            <p className="text-sm text-gray-600">Verification Code</p>
-                            <p className="font-mono text-sm bg-gray-100 p-2 rounded">{request.verificationCode}</p>
-                          </div>
-
-                          {request.status === 'validated' && (
-                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
-                              <p className="text-sm text-green-800">
-                                <strong>Validated by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
-                              </p>
-                              {request.validationNotes && (
-                                <p className="text-sm text-green-700 mt-1">
-                                  <strong>Notes:</strong> {request.validationNotes}
-                                </p>
-                              )}
-                              {request.transactionId && (
-                                <p className="text-sm text-green-700 mt-1">
-                                  <strong>Transaction ID:</strong> {request.transactionId}
-                                </p>
-                              )}
-                            </div>
-                          )}
-
-                          {request.status === 'rejected' && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-                              <p className="text-sm text-red-800">
-                                <strong>Rejected by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
-                              </p>
-                              {request.validationNotes && (
-                                <p className="text-sm text-red-700 mt-1">
-                                  <strong>Reason:</strong> {request.validationNotes}
-                                </p>
-                              )}
-                            </div>
-                          )}
-
-                          {request.status === 'pending' && (
-                            <div className="flex justify-end space-x-2 pt-3 border-t">
-                              <Button 
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleValidateBagRequest(request.requestId, 'reject', 'Request does not meet validation criteria')}
-                                disabled={validatingRequest === request.requestId}
-                                className="border-red-300 text-red-700 hover:bg-red-50"
-                                data-testid={`button-reject-${request.requestId}`}
-                              >
-                                {validatingRequest === request.requestId ? 'Processing...' : 'Reject Request'}
-                              </Button>
-                              <Button 
-                                onClick={() => handleValidateBagRequest(request.requestId, 'validate', 'Request validated - proceeding to transaction')}
-                                disabled={validatingRequest === request.requestId}
-                                className="bg-green-600 hover:bg-green-700"
-                                data-testid={`button-validate-${request.requestId}`}
-                              >
-                                {validatingRequest === request.requestId ? (
-                                  <>
-                                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                                    Validating...
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                    Validate Request
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No bag requests from buyers at this time.</p>
-                    <p className="text-sm">Bag requests will appear here when buyers request bags for validated transactions.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
             {/* QR Batch Tracking & Management - Only in Bags Tab */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
@@ -1270,6 +1119,158 @@ export default function WarehouseInspectorDashboard() {
                 </Card>
               </div>
             </div>
+
+            {/* Incoming Bag Requests from Buyers - Now after QR Code Generator */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Truck className="w-5 h-5 mr-2" />
+                  Incoming Bag Requests from Buyers
+                </CardTitle>
+                <CardDescription>
+                  Validate or reject bag requests from buyers who have completed payment confirmation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {bagRequestsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading bag requests...</p>
+                  </div>
+                ) : bagRequests && bagRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {bagRequests.map((request: any) => (
+                      <Card key={request.requestId} className="border border-gray-200 hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-semibold text-lg flex items-center">
+                                {request.commodityType}
+                                <Badge 
+                                  className={`ml-2 ${
+                                    request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                    request.status === 'validated' ? 'bg-green-100 text-green-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                </Badge>
+                              </h4>
+                              <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
+                              <p className="text-sm text-gray-600">From: {request.buyerName} ({request.company})</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-500">
+                                {new Date(request.requestedAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-600">Farmer</p>
+                              <p className="font-medium">{request.farmerName}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Quantity</p>
+                              <p className="font-medium">{request.quantity} {request.unit}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Total Value</p>
+                              <p className="font-medium text-green-600">${request.totalValue}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">County</p>
+                              <p className="font-medium">{request.county}</p>
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600">Farm Location</p>
+                            <p className="text-sm">{request.farmLocation}</p>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600">Verification Code</p>
+                            <p className="font-mono text-sm bg-gray-100 p-2 rounded">{request.verificationCode}</p>
+                          </div>
+
+                          {request.status === 'validated' && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
+                              <p className="text-sm text-green-800">
+                                <strong>Validated by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
+                              </p>
+                              {request.validationNotes && (
+                                <p className="text-sm text-green-700 mt-1">
+                                  <strong>Notes:</strong> {request.validationNotes}
+                                </p>
+                              )}
+                              {request.transactionId && (
+                                <p className="text-sm text-green-700 mt-1">
+                                  <strong>Transaction ID:</strong> {request.transactionId}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {request.status === 'rejected' && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+                              <p className="text-sm text-red-800">
+                                <strong>Rejected by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
+                              </p>
+                              {request.validationNotes && (
+                                <p className="text-sm text-red-700 mt-1">
+                                  <strong>Reason:</strong> {request.validationNotes}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {request.status === 'pending' && (
+                            <div className="flex justify-end space-x-2 pt-3 border-t">
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleValidateBagRequest(request.requestId, 'reject', 'Request does not meet validation criteria')}
+                                disabled={validatingRequest === request.requestId}
+                                className="border-red-300 text-red-700 hover:bg-red-50"
+                                data-testid={`button-reject-${request.requestId}`}
+                              >
+                                {validatingRequest === request.requestId ? 'Processing...' : 'Reject Request'}
+                              </Button>
+                              <Button 
+                                onClick={() => handleValidateBagRequest(request.requestId, 'validate', 'Request validated - proceeding to transaction')}
+                                disabled={validatingRequest === request.requestId}
+                                className="bg-green-600 hover:bg-green-700"
+                                data-testid={`button-validate-${request.requestId}`}
+                              >
+                                {validatingRequest === request.requestId ? (
+                                  <>
+                                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                                    Validating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Validate Request
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No bag requests from buyers at this time.</p>
+                    <p className="text-sm">Bag requests will appear here when buyers request bags for validated transactions.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Inventory Control Tab */}

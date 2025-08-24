@@ -13648,131 +13648,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmerId } = req.params;
       console.log(`Fetching confirmed transactions for farmer: ${farmerId}`);
       
-      // For Paolo's farmer ID, get ALL confirmed transactions (database + mock)
+      // For Paolo's farmer ID, get ALL confirmed transactions from buyer_verification_codes table
       if (farmerId === "FARMER-1755883520291-288") {
-        // Get all confirmed offers from database
-        const confirmedOffers = await db
+        // Get all confirmed transactions from buyer_verification_codes (where buyers accept offers)
+        const confirmedTransactions = await db
           .select()
-          .from(farmerProductOffers)
-          .where(eq(farmerProductOffers.farmerId, 288))
-          .where(eq(farmerProductOffers.status, "confirmed"))
-          .orderBy(desc(farmerProductOffers.confirmedAt));
+          .from(buyerVerificationCodes)
+          .where(eq(buyerVerificationCodes.farmerId, "288"))
+          .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
-        console.log(`📂 Found ${confirmedOffers.length} confirmed offers in database for Paolo`);
+        console.log(`📂 Found ${confirmedTransactions.length} confirmed transactions in buyer_verification_codes for Paolo`);
         
-        // Check database for payment confirmations
-        let transaction1Confirmed = false;
-        let transaction2Confirmed = false;
-        let transaction1SecondCode = null;
-        let transaction2SecondCode = null;
-        let transaction1PaymentDate = null;
-        let transaction2PaymentDate = null;
+        // All transactions are now from real database - no mock data needed
         
-        try {
-          // Check if payments were confirmed in database
-          const verificationCheck = await db.execute(sql`
-            SELECT id, second_verification_code, payment_confirmed_at 
-            FROM buyer_verification_codes 
-            WHERE farmer_id = '288' AND id IN (1, 2)
-          `);
+        // Create confirmed transactions from buyer_verification_codes
+        const realConfirmedTransactions = confirmedTransactions.map(transaction => {
+          const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
           
-          verificationCheck.rows.forEach((row: any) => {
-            if (row.id === 1 && row.second_verification_code) {
-              transaction1Confirmed = true;
-              transaction1SecondCode = row.second_verification_code;
-              transaction1PaymentDate = row.payment_confirmed_at;
-            }
-            if (row.id === 2 && row.second_verification_code) {
-              transaction2Confirmed = true;
-              transaction2SecondCode = row.second_verification_code;
-              transaction2PaymentDate = row.payment_confirmed_at;
-            }
-          });
-        } catch (e) {
-          console.log("Could not check verification status from database");
-        }
-        
-        // Create database confirmed transactions
-        const databaseTransactions = confirmedOffers.map(offer => ({
-          id: offer.id + 1000, // Offset to avoid conflicts with mock IDs
-          notificationId: `BN-${offer.offerId}`,
-          farmerId: farmerId,
-          buyerId: offer.buyerId || "margibi_buyer",
-          buyerName: offer.buyerName || "Margibi Trading Company",
-          buyerCompany: "Agricultural Trading Company",
-          commodityType: offer.commodityType,
-          quantityAvailable: parseFloat(offer.quantityAvailable),
-          unit: offer.unit,
-          pricePerUnit: parseFloat(offer.pricePerUnit),
-          totalValue: parseFloat(offer.totalValue),
-          qualityGrade: offer.qualityGrade,
-          paymentTerms: offer.paymentTerms,
-          deliveryTerms: offer.deliveryTerms,
-          verificationCode: offer.verificationCode,
-          secondVerificationCode: null, // Will be added when payment is confirmed
-          paymentConfirmed: false,
-          paymentConfirmedAt: null,
-          confirmedAt: offer.confirmedAt,
-          status: "confirmed"
-        }));
-
-        // Paolo's mock confirmed transactions with updated payment status  
-        const mockTransactions = [
-          {
-            id: 1,
-            notificationId: "BN-PAOLO-6",
+          return {
+            id: transaction.id,
+            notificationId: transaction.notificationId,
             farmerId: farmerId,
-            buyerId: "margibi_buyer",
-            buyerName: "Margibi Trading Company",
-            buyerCompany: "Agricultural Trading Company",
-            commodityType: "Cocoa",
-            quantityAvailable: 5.0,
-            unit: "tons",
-            pricePerUnit: 4000.00,
-            totalValue: 20000.00,
+            buyerId: transaction.buyerId,
+            buyerName: transaction.buyerName,
+            buyerCompany: transaction.company || "Agricultural Trading Company",
+            commodityType: transaction.commodityType,
+            quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
+            unit: transaction.unit,
+            pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
+            totalValue: parseFloat(transaction.totalValue || '0'),
             qualityGrade: "Grade A",
-            paymentTerms: "Payment within 7 days of delivery",
-            deliveryTerms: "Pickup at farm location",
-            verificationCode: "R83ZIELI",
-            secondVerificationCode: transaction1SecondCode,
-            paymentConfirmed: transaction1Confirmed,
-            paymentConfirmedAt: transaction1PaymentDate,
-            confirmedAt: new Date("2025-08-23T23:30:13.893Z"),
-            status: transaction1Confirmed ? "payment_confirmed" : "confirmed"
-          },
-          {
-            id: 2,
-            notificationId: "BN-PAOLO-4", 
-            farmerId: farmerId,
-            buyerId: "margibi_buyer",
-            buyerName: "Margibi Trading Company",
-            buyerCompany: "Agricultural Trading Company",
-            commodityType: "Cocoa",
-            quantityAvailable: 5.0,
-            unit: "tons",
-            pricePerUnit: 4000.00,
-            totalValue: 20000.00,
-            qualityGrade: "Grade A",
-            paymentTerms: "Payment within 7 days of delivery",
-            deliveryTerms: "Pickup at farm location",
-            verificationCode: "WQR6KFRB",
-            secondVerificationCode: transaction2SecondCode,
-            paymentConfirmed: transaction2Confirmed,
-            paymentConfirmedAt: transaction2PaymentDate,
-            confirmedAt: new Date("2025-08-23T23:33:13.651Z"),
-            status: transaction2Confirmed ? "payment_confirmed" : "confirmed"
-          }
-        ];
+            paymentTerms: transaction.paymentTerms,
+            deliveryTerms: transaction.deliveryTerms,
+            verificationCode: transaction.verificationCode,
+            secondVerificationCode: transaction.secondVerificationCode,
+            paymentConfirmed: hasPaymentConfirmation,
+            paymentConfirmedAt: transaction.paymentConfirmedAt,
+            confirmedAt: transaction.acceptedAt,
+            status: "confirmed"
+          };
+        });
 
-        // Combine all confirmed transactions (database + mock)
-        const allTransactions = [...mockTransactions, ...databaseTransactions];
-
-        console.log(`✅ Returning ${allTransactions.length} Paolo confirmed transactions (${mockTransactions.length} mock + ${databaseTransactions.length} database)`);
-        allTransactions.forEach((t, i) => {
+        console.log(`✅ Returning ${realConfirmedTransactions.length} Paolo confirmed transactions from buyer_verification_codes`);
+        realConfirmedTransactions.forEach((t, i) => {
           console.log(`  ${i+1}. ${t.commodityType} - ${t.buyerName} - $${t.totalValue} - Code: ${t.verificationCode}`);
         });
         
-        res.json(allTransactions);
+        res.json(realConfirmedTransactions);
         return;
       }
       

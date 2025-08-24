@@ -20,6 +20,21 @@ export default function WarehouseInspectorLogin() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        
+        // Store inspector data in localStorage for dashboard access
+        localStorage.setItem("warehouseInspectorData", JSON.stringify({
+          ...data.inspector,
+          token: data.token
+        }));
+        
+        // Store token separately for API calls
+        if (data.token) {
+          localStorage.setItem("authToken", data.token);
+        }
+        
+        console.log("✅ Warehouse inspector data saved to localStorage:", data.inspector);
+        
         // Successful login - redirect to warehouse inspector dashboard
         setLocation("/warehouse-inspector-dashboard");
       } else {

@@ -4199,6 +4199,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`✅ Warehouse inspector ${username} authenticated successfully for ${warehouseInspectorCredentials[username].county}`);
         
+        // Get warehouse details from database
+        const warehouseResult = await db.execute(sql`
+          SELECT warehouse_name, county, address, manager_name 
+          FROM county_warehouses 
+          WHERE warehouse_id = ${warehouseInspectorCredentials[username].warehouseId}
+        `);
+        
+        const warehouseDetails = warehouseResult.rows[0] || {};
+        const warehouseName = warehouseDetails.warehouse_name || `${warehouseInspectorCredentials[username].county} Central Warehouse`;
+        
         return res.json({
           success: true,
           token,
@@ -4209,7 +4219,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userType: 'warehouse_inspector',
             county: warehouseInspectorCredentials[username].county,
             warehouseId: warehouseInspectorCredentials[username].warehouseId,
-            warehouseFacility: `${warehouseInspectorCredentials[username].county} Warehouse`
+            warehouseFacility: warehouseName,
+            warehouseName: warehouseName,
+            address: warehouseDetails.address,
+            manager: warehouseDetails.manager_name
           }
         });
       }

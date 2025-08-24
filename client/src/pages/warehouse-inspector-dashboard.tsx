@@ -38,7 +38,9 @@ export default function WarehouseInspectorDashboard() {
 
   // Get inspector data from localStorage
   const inspectorData = JSON.parse(localStorage.getItem("warehouseInspectorData") || "{}");
-  const warehouseFacility = inspectorData.warehouseFacility || "Monrovia Central Warehouse";
+  const warehouseFacility = inspectorData.warehouseFacility || inspectorData.warehouseName || "Central Warehouse";
+  const inspectorUsername = inspectorData.username || inspectorData.warehouseId || "WH-INS-001";
+  const inspectorCounty = inspectorData.county || "County";
 
   // Real data queries
   const { data: pendingInspections, isLoading: loadingInspections } = useQuery({
@@ -219,7 +221,7 @@ export default function WarehouseInspectorDashboard() {
               Warehouse Inspector Dashboard
             </h1>
             <p className="text-gray-600 mt-1">
-              {warehouseFacility} • Inspector: {inspectorData.username || 'WH-INS-001'}
+              {warehouseFacility} • Inspector: {inspectorUsername} • {inspectorCounty}
             </p>
           </div>
           <div className="flex items-center gap-3">

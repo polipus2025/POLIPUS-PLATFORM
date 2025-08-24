@@ -123,7 +123,7 @@ export default function AgriculturalBuyerDashboard() {
         method: 'POST',
         body: JSON.stringify({
           notificationId,
-          buyerId: buyerId ? parseInt(buyerId) : 0,
+          buyerId: buyerId,
           buyerName: buyerName,
           company: company
         }),

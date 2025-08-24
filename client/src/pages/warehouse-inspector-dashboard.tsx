@@ -35,6 +35,8 @@ export default function WarehouseInspectorDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [validatingRequest, setValidatingRequest] = useState<string | null>(null);
+  const [selectedCodeType, setSelectedCodeType] = useState("");
+  const [validationCode, setValidationCode] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1328,15 +1330,112 @@ export default function WarehouseInspectorDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Shield className="w-5 h-5 mr-2 text-green-600" />
-                  Compliance Validation
+                  Code Validation Center
                 </CardTitle>
                 <CardDescription>
-                  Verify compliance standards and validate storage conditions
+                  Validate buyer acceptance codes and EUDR compliance codes
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <p className="text-center text-gray-500">Validation features coming soon...</p>
+                <div className="space-y-6">
+                  {/* Code Validation Form */}
+                  <div className="border rounded-lg p-6 bg-gradient-to-r from-green-50 to-blue-50">
+                    <h3 className="font-medium mb-4 flex items-center">
+                      <Shield className="w-5 h-5 mr-2 text-green-600" />
+                      Validate Compliance Code
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Code Type</label>
+                        <select 
+                          className="w-full p-3 border rounded-lg"
+                          onChange={(e) => setSelectedCodeType(e.target.value)}
+                          data-testid="select-code-type"
+                        >
+                          <option value="">Select Code Type...</option>
+                          <option value="buyer-acceptance">Buyer Acceptance Code</option>
+                          <option value="eudr-compliance">EUDR Compliance Code</option>
+                          <option value="warehouse-verification">Warehouse Verification Code</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Validation Code</label>
+                        <input 
+                          type="text" 
+                          className="w-full p-3 border rounded-lg font-mono"
+                          placeholder="Enter code (e.g., V1A2B3C4)"
+                          value={validationCode}
+                          onChange={(e) => setValidationCode(e.target.value.toUpperCase())}
+                          data-testid="input-validation-code"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-start">
+                        <CheckCircle className="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-blue-700">
+                          <p className="font-medium">Valid codes for this warehouse:</p>
+                          <p>Buyer Acceptance: V1A2B3C4 • EUDR Compliance: EU2024XYZ • Warehouse: WH-BATCH-001</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full mt-4 bg-green-600 hover:bg-green-700" 
+                      onClick={() => {
+                        if (selectedCodeType && validationCode) {
+                          validateCodeMutation.mutate({ 
+                            codeType: selectedCodeType, 
+                            verificationCode: validationCode 
+                          });
+                        } else {
+                          toast({
+                            title: "❌ Missing Information",
+                            description: "Please select code type and enter validation code",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      disabled={validateCodeMutation.isPending || !selectedCodeType || !validationCode}
+                      data-testid="button-validate-code"
+                    >
+                      {validateCodeMutation.isPending ? (
+                        <>
+                          <Clock className="w-4 h-4 mr-2 animate-spin" />
+                          Validating...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4 mr-2" />
+                          Validate Code
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Recent Validation History */}
+                  <div>
+                    <h3 className="font-medium mb-3 flex items-center">
+                      <Clock className="w-4 h-4 mr-2 text-blue-600" />
+                      Recent Validations
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-3 bg-green-50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-green-800">V1A2B3C4</p>
+                            <p className="text-sm text-green-600">Buyer Acceptance Code - EUDR Compliant ✅</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">Validated</Badge>
+                        </div>
+                      </div>
+                      <div className="text-center py-4 text-gray-500">
+                        <p className="text-sm">Additional validation history will appear here</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

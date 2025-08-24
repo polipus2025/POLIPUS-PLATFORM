@@ -3460,6 +3460,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Agricultural Buyer API Routes
+  
+  // Get available offers for a specific buyer ID
+  app.get("/api/buyer/available-offers/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`🔍 Fetching available offers for buyer: ${buyerId}`);
+      
+      // Get all available farmer offers (status = 'available')
+      const availableOffers = await db
+        .select()
+        .from(farmerProductOffers)
+        .where(eq(farmerProductOffers.status, 'available'))
+        .orderBy(desc(farmerProductOffers.createdAt));
+      
+      console.log(`📦 Found ${availableOffers.length} available offers for buyer ${buyerId}`);
+      
+      const transformedOffers = availableOffers.map(offer => ({
+        id: offer.id,
+        offerId: offer.offerId,
+        farmerId: offer.farmerId,
+        farmerName: offer.farmerName || "Paolo",
+        commodityType: offer.commodityType,
+        quantityAvailable: offer.quantityAvailable,
+        unit: offer.unit,
+        qualityGrade: offer.qualityGrade,
+        pricePerUnit: offer.pricePerUnit,
+        totalValue: offer.totalValue,
+        county: offer.county,
+        farmLocation: offer.farmLocation,
+        harvestDate: offer.harvestDate,
+        availableFromDate: offer.availableFromDate,
+        expirationDate: offer.expirationDate,
+        description: offer.description,
+        paymentTerms: offer.paymentTerms,
+        deliveryTerms: offer.deliveryTerms,
+        status: offer.status,
+        createdAt: offer.createdAt
+      }));
+      
+      console.log(`✅ Returning ${transformedOffers.length} available offers to buyer ${buyerId}`);
+      transformedOffers.forEach((offer, i) => {
+        console.log(`  ${i+1}. ${offer.farmerName} - ${offer.commodityType} - ${offer.quantityAvailable} ${offer.unit} - $${offer.totalValue}`);
+      });
+      
+      res.json(transformedOffers);
+    } catch (error) {
+      console.error("Error fetching available offers for buyer:", error);
+      res.status(500).json({ error: "Failed to fetch available offers" });
+    }
+  });
+  
   // Get available harvests from farmers
   app.get("/api/buyer/available-harvests", async (req, res) => {
     try {

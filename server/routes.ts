@@ -453,18 +453,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offerId,
       }).returning();
 
-      // Temporarily skip buyer notifications due to database schema mismatch
-      console.log("🔄 Product offer saved successfully, skipping notifications temporarily");
-      const countyBuyers = []; // Empty for now
+      // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
+      console.log("🔄 Product offer saved successfully, creating automatic buyer notifications");
+      
+      // Get all registered buyers from database (real buyers only)
+      const allBuyers = await db
+        .select({
+          id: buyers.id,
+          buyerId: buyers.buyerId,
+          businessName: buyers.businessName,
+          contactPersonFirstName: buyers.contactPersonFirstName,
+          contactPersonLastName: buyers.contactPersonLastName
+        })
+        .from(buyers)
+        .where(eq(buyers.complianceStatus, 'approved'));
+      
+      console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
+      
+      // Create notification for each approved buyer
       const notifications = [];
+      for (const buyer of allBuyers) {
+        const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}`;
+        
+        const [notification] = await db.insert(buyerNotifications).values({
+          notificationId,
+          offerId: offerId,
+          buyerId: buyer.id,
+          buyerName: buyer.businessName,
+          farmerName: validatedData.farmerName,
+          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
+          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for $${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
+          commodityType: validatedData.commodityType,
+          quantityAvailable: validatedData.quantityAvailable,
+          pricePerUnit: validatedData.pricePerUnit,
+          county: validatedData.county,
+          createdAt: new Date()
+        }).returning();
+        
+        notifications.push(notification);
+      }
 
-      // Mark as processed without notifications for now
+      // Update offer with notification count
       await db.update(farmerProductOffers)
         .set({ 
           notificationsSent: true, 
-          totalNotificationsSent: 0 
+          totalNotificationsSent: notifications.length 
         })
         .where(eq(farmerProductOffers.offerId, offerId));
+        
+      console.log(`✅ Automatically created ${notifications.length} buyer notifications for offer ${offerId}`);
 
       res.status(201).json({
         success: true,

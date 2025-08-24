@@ -14298,77 +14298,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Get real verification codes from warehouse transactions - filtered by warehouse
+      // Get buyer acceptance codes from transactions - filtered by buyer's county matching warehouse county
       let warehouseCodesResult;
       if (warehouseId) {
         warehouseCodesResult = await db.execute(sql`
           SELECT 
-            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.id, wt.transaction_id, wt.verification_code,
             wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
             wt.commodity_type, wt.quantity, wt.unit, wt.total_value,
             wt.received_at, wt.status,
-            cw.warehouse_name, cw.county
+            cw.warehouse_name, cw.county as warehouse_county,
+            b.county as buyer_county, b.business_name as buyer_business_name,
+            b.contact_person_first_name, b.contact_person_last_name,
+            b.primary_phone, b.primary_email
           FROM warehouse_transactions wt
           LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
-          WHERE wt.verification_code IS NOT NULL AND wt.warehouse_id = ${warehouseId}
+          LEFT JOIN buyers b ON wt.buyer_id = b.buyer_id
+          WHERE wt.verification_code IS NOT NULL 
+          AND wt.warehouse_id = ${warehouseId}
+          AND b.county = cw.county
           ORDER BY wt.received_at DESC
         `);
       } else {
         warehouseCodesResult = await db.execute(sql`
           SELECT 
-            wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+            wt.id, wt.transaction_id, wt.verification_code,
             wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
             wt.commodity_type, wt.quantity, wt.unit, wt.total_value,
             wt.received_at, wt.status,
-            cw.warehouse_name, cw.county
+            cw.warehouse_name, cw.county as warehouse_county,
+            b.county as buyer_county, b.business_name as buyer_business_name,
+            b.contact_person_first_name, b.contact_person_last_name,
+            b.primary_phone, b.primary_email
           FROM warehouse_transactions wt
           LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          LEFT JOIN buyers b ON wt.buyer_id = b.buyer_id
           WHERE wt.verification_code IS NOT NULL
+          AND b.county = cw.county
           ORDER BY wt.received_at DESC
         `);
       }
       
       const warehouseCodes = [];
       
-      // Process verification codes from real transactions
+      // Process ONLY buyer acceptance codes from real transactions (first verification code only)
       for (const row of warehouseCodesResult.rows) {
-        const baseData = {
-          farmerId: row.farmer_id,
-          farmerName: row.farmer_name,
-          buyerId: row.buyer_id,
-          buyerName: row.buyer_name,
-          commodityType: row.commodity_type,
-          quantity: parseFloat(row.quantity),
-          unit: row.unit,
-          totalValue: parseFloat(row.total_value),
-          transactionId: row.transaction_id,
-          warehouseName: row.warehouse_name,
-          county: row.county
-        };
-        
-        // Add first verification code (buyer acceptance)
+        // Only add first verification code (buyer acceptance) - NO payment confirmation codes
         if (row.verification_code) {
           warehouseCodes.push({
             id: `wh-code-1-${row.id}`,
             verificationCode: row.verification_code,
             codeType: "buyer-acceptance",
-            validated: true,
+            validated: false, // Set to false initially, will be validated by inspector
             generatedAt: row.received_at,
-            validatedAt: row.received_at,
-            ...baseData
-          });
-        }
-        
-        // Add second verification code (payment confirmation) if exists
-        if (row.payment_verification_code) {
-          warehouseCodes.push({
-            id: `wh-code-2-${row.id}`,
-            verificationCode: row.payment_verification_code,
-            codeType: "payment-confirmation",
-            validated: true,
-            generatedAt: row.received_at,
-            validatedAt: row.received_at,
-            ...baseData
+            validatedAt: null,
+            transactionId: row.transaction_id,
+            farmerId: row.farmer_id,
+            farmerName: row.farmer_name,
+            buyerId: row.buyer_id,
+            buyerName: row.buyer_name,
+            buyerBusinessName: row.buyer_business_name,
+            buyerContactPerson: `${row.contact_person_first_name} ${row.contact_person_last_name}`,
+            buyerPhone: row.primary_phone,
+            buyerEmail: row.primary_email,
+            buyerCounty: row.buyer_county,
+            commodityType: row.commodity_type,
+            quantity: parseFloat(row.quantity),
+            unit: row.unit,
+            totalValue: parseFloat(row.total_value),
+            warehouseName: row.warehouse_name,
+            warehouseCounty: row.warehouse_county,
+            status: row.status
           });
         }
       }

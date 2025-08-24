@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -687,50 +688,118 @@ export default function WarehouseInspectorDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Codes Tab */}
+          {/* Codes Tab - Only Buyer Acceptance Codes */}
           <TabsContent value="codes" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                  Verification Codes Archive
+                  Buyer Acceptance Codes - County Specific
                 </CardTitle>
                 <CardDescription>
-                  Dual verification codes and QR batch management
+                  First verification codes (buyer acceptance) routed to your county warehouse
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center">
+                    <Shield className="w-5 h-5 mr-2 text-blue-600" />
+                    <p className="text-sm text-blue-800">
+                      <strong>County-Based Routing:</strong> Only codes from buyers in {inspectorData.county} are shown here
+                    </p>
+                  </div>
+                </div>
                 <div className="space-y-4">
                   {warehouseCodesLoading ? (
-                    <p className="text-center text-gray-500">Loading verification codes...</p>
+                    <p className="text-center text-gray-500">Loading buyer acceptance codes...</p>
                   ) : warehouseCodes && warehouseCodes.length > 0 ? (
-                    warehouseCodes.map((code: any) => (
-                      <div key={code.id} className="border rounded-lg p-4">
+                    warehouseCodes.filter((code: any) => code.codeType === "buyer-acceptance").map((code: any) => (
+                      <div key={code.id} className="border rounded-lg p-4 bg-gradient-to-r from-green-50 to-blue-50">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <h4 className="font-medium">Code: {code.verificationCode}</h4>
-                            <p className="text-sm text-gray-600">Type: {code.codeType}</p>
+                            <h4 className="font-medium text-lg">Code: {code.verificationCode}</h4>
+                            <p className="text-sm text-blue-600 font-medium">Buyer Acceptance Code</p>
                           </div>
-                          <Badge className={code.isUsed ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'}>
-                            {code.isUsed ? 'Used' : 'Active'}
+                          <Badge className={code.validated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {code.validated ? 'Validated' : 'Pending Validation'}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <span className="font-medium">Farmer:</span>
-                            <p className="text-gray-600">{code.farmerName}</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <div>
+                              <span className="font-medium text-gray-700">Transaction ID:</span>
+                              <p className="text-gray-600">{code.transactionId}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Commodity:</span>
+                              <p className="text-gray-600">{code.commodityType} ({code.quantity} {code.unit})</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Value:</span>
+                              <p className="text-gray-600">${code.totalValue.toLocaleString()}</p>
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-medium">Transaction:</span>
-                            <p className="text-gray-600">{code.transactionId}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium">Generated:</span>
-                            <p className="text-gray-600">{code.generatedDate}</p>
+                          <div className="space-y-2">
+                            <div>
+                              <span className="font-medium text-gray-700">Buyer:</span>
+                              <p className="text-gray-600">{code.buyerName}</p>
+                              <p className="text-sm text-blue-600">{code.buyerCounty}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Farmer:</span>
+                              <p className="text-gray-600">{code.farmerName}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Generated:</span>
+                              <p className="text-gray-600">{new Date(code.generatedAt).toLocaleDateString()}</p>
+                            </div>
                           </div>
                         </div>
-                        {!code.isUsed && (
-                          <div className="mt-3">
+
+                        <div className="flex gap-3 mt-4">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-4 h-4 mr-1" />
+                                View Details
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Transaction Details - {code.transactionId}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="font-medium mb-2">Buyer Information</h4>
+                                    <p><strong>Name:</strong> {code.buyerName}</p>
+                                    <p><strong>Business:</strong> {code.buyerBusinessName}</p>
+                                    <p><strong>Contact:</strong> {code.buyerContactPerson}</p>
+                                    <p><strong>Phone:</strong> {code.buyerPhone}</p>
+                                    <p><strong>Email:</strong> {code.buyerEmail}</p>
+                                    <p><strong>County:</strong> {code.buyerCounty}</p>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium mb-2">Farmer Information</h4>
+                                    <p><strong>Name:</strong> {code.farmerName}</p>
+                                    <p><strong>Farmer ID:</strong> {code.farmerId}</p>
+                                    <p><strong>Commodity:</strong> {code.commodityType}</p>
+                                    <p><strong>Quantity:</strong> {code.quantity} {code.unit}</p>
+                                    <p><strong>Total Value:</strong> ${code.totalValue.toLocaleString()}</p>
+                                  </div>
+                                </div>
+                                <div className="border-t pt-4">
+                                  <h4 className="font-medium mb-2">Warehouse Information</h4>
+                                  <p><strong>Warehouse:</strong> {code.warehouseName}</p>
+                                  <p><strong>County:</strong> {code.warehouseCounty}</p>
+                                  <p><strong>Status:</strong> {code.status}</p>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {!code.validated && (
                             <Button
                               size="sm"
                               onClick={() => validateCodeMutation.mutate({ 
@@ -739,14 +808,15 @@ export default function WarehouseInspectorDashboard() {
                               })}
                               disabled={validateCodeMutation.isPending}
                             >
+                              <Shield className="w-4 h-4 mr-1" />
                               Validate Code
                             </Button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No verification codes available</p>
+                    <p className="text-center text-gray-500">No buyer acceptance codes available for your county</p>
                   )}
                 </div>
               </CardContent>

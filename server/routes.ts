@@ -13364,75 +13364,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get buyer info to determine their county
       const buyerCounty = "Monrovia"; // For demo, assume all buyers in Monrovia
       
-      // Mock notifications for demo - in real system, fetch from database
-      const mockNotifications = [
-        {
-          id: "not-001",
-          notificationId: "OFFER-ABC123",
-          buyerId: parseInt(buyerId) || 1,
-          farmerId: 101,
-          farmerName: "Moses Williams",
-          farmLocation: "Williams Farm, Monrovia County", 
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          pricePerUnit: 2450.00,
-          totalValue: 62475.00,
-          qualityGrade: "Grade A",
-          harvestDate: "2024-08-15",
-          paymentTerms: "50% Advance, 50% on Delivery",
-          deliveryTerms: "FOB Farm Gate",
-          description: "Premium quality cocoa beans, organic certified",
-          status: "pending",
-          createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-          county: "Monrovia"
-        },
-        {
-          id: "not-002", 
-          notificationId: "OFFER-DEF456",
-          buyerId: parseInt(buyerId) || 1,
-          farmerId: 102,
-          farmerName: "Grace Johnson",
-          farmLocation: "Johnson Agricultural Estate, Monrovia County",
-          commodityType: "Coffee",
-          quantityAvailable: 18.2,
-          unit: "tons",
-          pricePerUnit: 3200.00,
-          totalValue: 58240.00,
-          qualityGrade: "Grade A",
-          harvestDate: "2024-08-20",
-          paymentTerms: "Cash on Delivery",
-          deliveryTerms: "Delivered to Warehouse",
-          description: "Arabica coffee beans, shade-grown and sustainably harvested",
-          status: "pending",
-          createdAt: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-          county: "Monrovia"
-        },
-        {
-          id: "not-003",
-          notificationId: "OFFER-GHI789", 
-          buyerId: parseInt(buyerId) || 1,
-          farmerId: 103,
-          farmerName: "Samuel Brown",
-          farmLocation: "Brown Family Farm, Monrovia County",
-          commodityType: "Palm Oil",
-          quantityAvailable: 45.0,
-          unit: "tons", 
-          pricePerUnit: 1850.00,
-          totalValue: 83250.00,
-          qualityGrade: "Grade B",
-          harvestDate: "2024-08-18",
-          paymentTerms: "30 Days Net",
-          deliveryTerms: "Ex-Works",
-          description: "Fresh palm oil, cold-pressed and filtered",
-          status: "pending", // Changed to pending so buyer can accept
-          createdAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-          county: "Monrovia"
-        }
-      ];
+      // Get REAL notifications from database for this buyer
+      const realNotifications = await db
+        .select({
+          notificationId: buyerNotifications.notificationId,
+          offerId: buyerNotifications.offerId,
+          commodityType: buyerNotifications.commodityType,
+          farmerName: buyerNotifications.farmerName,
+          quantityAvailable: buyerNotifications.quantityAvailable,
+          pricePerUnit: buyerNotifications.pricePerUnit,
+          county: buyerNotifications.county,
+          title: buyerNotifications.title,
+          message: buyerNotifications.message,
+          response: buyerNotifications.response,
+          createdAt: buyerNotifications.createdAt
+        })
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.buyerId, parseInt(buyerId)))
+        // Only pending notifications (response is null)
+        .orderBy(desc(buyerNotifications.createdAt));
 
-      console.log(`Returning ${mockNotifications.length} notifications for buyer ${buyerId}`);
-      res.json(mockNotifications);
+      console.log(`📬 Returning ${realNotifications.length} REAL notifications for buyer ${buyerId}`);
+      realNotifications.forEach((notif, i) => {
+        console.log(`  ${i+1}. ${notif.farmerName} - ${notif.commodityType} - ${notif.quantityAvailable} @ $${notif.pricePerUnit}`);
+      });
+      
+      res.json(realNotifications);
     } catch (error) {
       console.error("Error fetching buyer notifications:", error);
       res.status(500).json({ error: "Failed to fetch notifications" });

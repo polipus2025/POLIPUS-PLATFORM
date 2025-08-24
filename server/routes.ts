@@ -13446,6 +13446,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Notification not found" });
       }
 
+      // CRITICAL: Update the original farmer offer to "confirmed" status with buyer info
+      await db
+        .update(farmerProductOffers)
+        .set({
+          status: "confirmed",
+          buyerId: buyerId.toString(),
+          buyerName: buyerName,
+          confirmedAt: new Date()
+        })
+        .where(eq(farmerProductOffers.offerId, notification.offerId));
+
+      console.log(`🔄 Updated farmer offer ${notification.offerId} to confirmed status with buyer: ${buyerName}`);
+
       // Store verification code in database
       const [savedCode] = await db.insert(buyerVerificationCodes).values({
         verificationCode,

@@ -53,6 +53,7 @@ export default function RealTimeBoundaryDisplay({
       setCenterPoint(center);
       setIsComplete(points.length >= 4);
       
+      console.log('Boundary updated:', {
         points: points.length,
         area: `${area.toFixed(3)} hectares`,
         perimeter: `${perim.toFixed(1)} meters`,

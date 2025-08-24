@@ -162,6 +162,7 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
     setCurrentRecord(newRecord);
     setIsRecording(true);
     
+    console.log('Field recording started:', {
       position: `${currentPosition.latitude.toFixed(6)}, ${currentPosition.longitude.toFixed(6)}`,
       accuracy: `${currentPosition.accuracy.toFixed(1)}m`
     });

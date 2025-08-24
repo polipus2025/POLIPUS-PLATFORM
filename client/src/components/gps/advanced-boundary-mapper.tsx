@@ -221,6 +221,7 @@ export default function AdvancedBoundaryMapper({
     stopBoundaryMapping();
     onBoundaryComplete?.(completedBoundary);
 
+    console.log('Boundary completed:', {
       points: completedBoundary.points.length,
       area: `${completedBoundary.totalArea.toFixed(2)} hectares`,
       perimeter: `${completedBoundary.perimeter.toFixed(1)} meters`

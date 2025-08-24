@@ -97,8 +97,8 @@ export default function AgriculturalBuyerDashboard() {
     queryKey: ['/api/buyer/verification-codes', buyerId], 
     queryFn: () => apiRequest(`/api/buyer/verification-codes/${buyerId}`),
     enabled: !!buyerId,
-    staleTime: 3 * 60 * 1000, // Cache for 3 minutes
-    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
+    staleTime: 0, // No cache - always fetch fresh data
+    gcTime: 0, // Don't keep in cache
   });
 
 

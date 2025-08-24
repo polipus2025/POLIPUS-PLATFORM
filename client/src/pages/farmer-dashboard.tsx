@@ -77,6 +77,10 @@ export default function FarmerDashboard() {
     queryKey: ['/api/farmer/my-offers', farmerId],
     queryFn: () => apiRequest(`/api/farmer/my-offers/${farmerId}`),
     enabled: !!farmerId,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
+    refetchOnWindowFocus: true, // Refresh when window gains focus
+    refetchOnMount: true, // Always refetch on component mount
   });
 
   // Fetch farmer verification codes archive
@@ -189,6 +193,10 @@ export default function FarmerDashboard() {
         title: "Product Offer Submitted Successfully!",
         description: `${response.notificationsSent} buyers in ${farmerCounty} County have been notified. Buyers notified: ${response.buyersNotified?.join(', ') || 'None'}`
       });
+
+      // CRITICAL: Invalidate cache to show new pending offer immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/farmer/my-offers', farmerId] });
+      queryClient.refetchQueries({ queryKey: ['/api/farmer/my-offers', farmerId] });
 
       // Reset form
       (e.target as HTMLFormElement).reset();

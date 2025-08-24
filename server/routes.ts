@@ -598,36 +598,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         ];
 
-        // Transform real database offers to display format
-        const transformedRealOffers = realOffers.map(offer => ({
-          id: offer.id,
-          offerId: offer.offerId,
-          farmerId: farmerId, // Use the frontend format
-          commodityType: offer.commodityType,
-          quantityAvailable: parseFloat(offer.quantityAvailable),
-          unit: offer.unit,
-          pricePerUnit: parseFloat(offer.pricePerUnit),
-          totalValue: parseFloat(offer.totalValue),
-          qualityGrade: offer.qualityGrade,
-          harvestDate: offer.harvestDate?.toISOString().split('T')[0],
-          paymentTerms: offer.paymentTerms,
-          deliveryTerms: offer.deliveryTerms,
-          county: offer.county,
-          status: offer.status === 'available' ? 'pending' : offer.status, // Convert status
-          offerCreatedAt: offer.createdAt,
-          confirmedAt: offer.confirmedAt, // Use actual confirmed date
-          buyerId: offer.buyerId, // Use actual buyer ID
-          buyerName: offer.buyerName, // Use actual buyer name
-          buyerCompany: offer.buyerName ? "Agricultural Trading Company" : null, // Default company for confirmed offers
-          verificationCode: offer.verificationCode // Use actual verification code
-        }));
+        // SEPARATE pending and confirmed offers for proper management
+        const pendingOffers = realOffers
+          .filter(offer => offer.status === 'available') // Only show available as pending
+          .map(offer => ({
+            id: offer.id,
+            offerId: offer.offerId,
+            farmerId: farmerId,
+            commodityType: offer.commodityType,
+            quantityAvailable: parseFloat(offer.quantityAvailable),
+            unit: offer.unit,
+            pricePerUnit: parseFloat(offer.pricePerUnit),
+            totalValue: parseFloat(offer.totalValue),
+            qualityGrade: offer.qualityGrade,
+            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
+            paymentTerms: offer.paymentTerms,
+            deliveryTerms: offer.deliveryTerms,
+            county: offer.county,
+            status: 'pending', // Always pending for available offers
+            offerCreatedAt: offer.createdAt,
+            confirmedAt: null, // No confirmation yet
+            buyerId: null, // No buyer yet
+            buyerName: null, // No buyer yet
+            buyerCompany: null,
+            verificationCode: null
+          }));
 
-        // Combine confirmed offers and pending real offers
-        const allOffers = [...confirmedOffers, ...transformedRealOffers];
+        const confirmedRealOffers = realOffers
+          .filter(offer => offer.status === 'confirmed') // Only confirmed offers
+          .map(offer => ({
+            id: offer.id,
+            offerId: offer.offerId,
+            farmerId: farmerId,
+            commodityType: offer.commodityType,
+            quantityAvailable: parseFloat(offer.quantityAvailable),
+            unit: offer.unit,
+            pricePerUnit: parseFloat(offer.pricePerUnit),
+            totalValue: parseFloat(offer.totalValue),
+            qualityGrade: offer.qualityGrade,
+            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
+            paymentTerms: offer.paymentTerms,
+            deliveryTerms: offer.deliveryTerms,
+            county: offer.county,
+            status: 'confirmed',
+            offerCreatedAt: offer.createdAt,
+            confirmedAt: offer.confirmedAt,
+            buyerId: offer.buyerId,
+            buyerName: offer.buyerName,
+            buyerCompany: offer.buyerName ? "Agricultural Trading Company" : null,
+            verificationCode: offer.verificationCode
+          }));
 
-        console.log(`✅ Returning ${allOffers.length} Paolo offers (${confirmedOffers.length} confirmed + ${transformedRealOffers.length} pending)`);
-        allOffers.forEach((offer, i) => {
-          console.log(`  ${i+1}. ${offer.commodityType} - ${offer.status.toUpperCase()} - ${offer.buyerName || 'No buyer yet'} - $${offer.totalValue}`);
+        // Combine confirmed offers (hardcoded + real confirmed offers) and pending offers
+        const allOffers = [...confirmedOffers, ...confirmedRealOffers, ...pendingOffers];
+
+        const totalConfirmed = confirmedOffers.length + confirmedRealOffers.length;
+        const totalPending = pendingOffers.length;
+        
+        console.log(`✅ Returning ${allOffers.length} Paolo offers (${totalConfirmed} confirmed + ${totalPending} pending)`);
+        console.log(`📊 PENDING OFFERS (awaiting buyer):`);
+        pendingOffers.forEach((offer, i) => {
+          console.log(`  ${i+1}. ${offer.commodityType} - PENDING - No buyer yet - $${offer.totalValue}`);
+        });
+        console.log(`📊 CONFIRMED OFFERS (with buyers):`);
+        [...confirmedOffers, ...confirmedRealOffers].forEach((offer, i) => {
+          console.log(`  ${i+1}. ${offer.commodityType} - CONFIRMED - ${offer.buyerName || 'Unknown'} - $${offer.totalValue}`);
         });
         
         res.json(allOffers);

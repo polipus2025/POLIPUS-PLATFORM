@@ -45,6 +45,9 @@ const DDGAFDashboard = lazy(() => import("@/pages/ddgaf-dashboard"));
 const DDGOTSDashboard = lazy(() => import("@/pages/ddgots-dashboard"));
 const DGDashboard = lazy(() => import("@/pages/dg-dashboard"));
 const AgriTraceAdminPortal = lazy(() => import("@/pages/agritrace-admin-portal"));
+const BuyerManagement = lazy(() => import("@/pages/buyer-management"));
+const InspectorManagement = lazy(() => import("@/pages/inspector-management"));
+const ExporterManagement = lazy(() => import("@/pages/exporter-management"));
 
 // AGRICULTURAL LOGIN PAGES
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
@@ -163,6 +166,11 @@ function App() {
             <Route path="/ddgaf-dashboard" component={createLazyRoute(DDGAFDashboard)} />
             <Route path="/ddgots-dashboard" component={createLazyRoute(DDGOTSDashboard)} />
             <Route path="/dg-dashboard" component={createLazyRoute(DGDashboard)} />
+            
+            {/* MANAGEMENT PAGES */}
+            <Route path="/buyer-management" component={createLazyRoute(BuyerManagement)} />
+            <Route path="/inspector-management" component={createLazyRoute(InspectorManagement)} />
+            <Route path="/exporter-management" component={createLazyRoute(ExporterManagement)} />
             
             {/* EXPORTER PORTAL - LAZY LOADED */}
             <Route path="/exporter-dashboard" component={createLazyRoute(ExporterDashboard)} />

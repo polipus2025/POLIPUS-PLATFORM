@@ -3524,29 +3524,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("📦 Found", realOffers.length, "real offers in database");
       console.log("📋 First offer:", realOffers[0] ? JSON.stringify(realOffers[0], null, 2) : "none");
 
-      // Add mock data as fallback for demonstration
-      const mockHarvests = [
-        {
-          id: 1001,
-          farmerId: "FRM-2024-045",
-          farmerName: "Mary Johnson",
-          commodity: "Cocoa Beans",
-          quantity: "750",
-          unit: "kg",
-          pricePerUnit: "2.50",
-          totalValue: "1875",
-          county: "Nimba County",
-          farmLocation: "Ganta District",
-          harvestDate: "2024-01-15",
-          status: "Ready",
-          qualityGrade: "Grade A"
-        }
-      ];
-
-      // Combine real offers with mock data
-      const availableHarvests = [...realOffers, ...mockHarvests];
-
-      res.json(availableHarvests);
+      // Return ONLY real data from database - no mock data
+      res.json(realOffers);
     } catch (error) {
       console.error("Error fetching available harvests:", error);
       res.status(500).json({ message: "Failed to fetch available harvests" });

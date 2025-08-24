@@ -656,11 +656,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const totalPending = pendingOffers.length;
         
         console.log(`✅ Returning ${allOffers.length} Paolo offers (${totalConfirmed} confirmed + ${totalPending} pending)`);
-        console.log(`📊 PENDING OFFERS (awaiting buyer):`);
+        console.log(`🔄 RAW DATABASE OFFERS (${realOffers.length} total):`);
+        realOffers.forEach((offer, i) => {
+          console.log(`  DB-${i+1}. ${offer.commodityType} - STATUS: ${offer.status} - $${offer.totalValue} - ID: ${offer.id}`);
+        });
+        console.log(`📊 PENDING OFFERS (awaiting buyer - ${totalPending}):`);
         pendingOffers.forEach((offer, i) => {
           console.log(`  ${i+1}. ${offer.commodityType} - PENDING - No buyer yet - $${offer.totalValue}`);
         });
-        console.log(`📊 CONFIRMED OFFERS (with buyers):`);
+        console.log(`📊 CONFIRMED OFFERS (with buyers - ${totalConfirmed}):`);
         [...confirmedOffers, ...confirmedRealOffers].forEach((offer, i) => {
           console.log(`  ${i+1}. ${offer.commodityType} - CONFIRMED - ${offer.buyerName || 'Unknown'} - $${offer.totalValue}`);
         });

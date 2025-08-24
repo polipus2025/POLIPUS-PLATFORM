@@ -41,6 +41,10 @@ export default function WarehouseInspectorDashboard() {
   const [validationCode, setValidationCode] = useState("");
   const [selectedQrBatch, setSelectedQrBatch] = useState<any>(null);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
+  const [packagingType, setPackagingType] = useState('50kg bags');
+  const [totalPackages, setTotalPackages] = useState(10);
+  const [packageWeight, setPackageWeight] = useState(50);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -101,6 +105,12 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data?.data || []
   });
 
+  // Fetch available transactions for QR batch generation
+  const { data: availableTransactions, isLoading: availableTransactionsLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/available-transactions'],
+    select: (data: any) => data?.data || []
+  });
+
   // Handle bag request validation
   const handleValidateBagRequest = async (requestId: string, action: 'validate' | 'reject', notes?: string) => {
     if (validatingRequest) return;
@@ -124,6 +134,7 @@ export default function WarehouseInspectorDashboard() {
       // Refresh bag requests
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-requests'] });
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/available-transactions'] });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -133,6 +144,58 @@ export default function WarehouseInspectorDashboard() {
     } finally {
       setValidatingRequest(null);
     }
+  };
+
+  // Generate QR Batch mutation
+  const generateQrBatchMutation = useMutation({
+    mutationFn: async (batchData: any) => {
+      return await apiRequest('/api/warehouse-inspector/generate-qr-batch', {
+        method: 'POST',
+        body: JSON.stringify(batchData)
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "✅ QR Batch Generated!",
+        description: `Successfully generated QR batch: ${data.batchCode}`,
+      });
+      // Reset form
+      setSelectedTransactions([]);
+      setPackagingType('50kg bags');
+      setTotalPackages(10);
+      setPackageWeight(50);
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/qr-batches'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/available-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/transactions'] });
+    },
+    onError: (error: any) => {
+      console.error('QR batch generation error:', error);
+      toast({
+        title: "❌ QR Batch Generation Failed",
+        description: "Failed to generate QR batch. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handle QR batch generation
+  const handleGenerateQrBatch = () => {
+    if (selectedTransactions.length === 0) {
+      toast({
+        title: "❌ No Transactions Selected",
+        description: "Please select at least one transaction to generate QR batch.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    generateQrBatchMutation.mutate({
+      selectedTransactions,
+      packagingType,
+      totalPackages,
+      packageWeight
+    });
   };
 
   // Mutations for inspection actions
@@ -977,20 +1040,49 @@ export default function WarehouseInspectorDashboard() {
                           Generate QR Batch from Transaction
                         </h3>
                         <div className="mb-4 p-3 bg-white rounded border">
-                          <p className="text-sm text-gray-600 mb-2">Select validated buyer bag request:</p>
-                          <select className="w-full p-2 border rounded" data-testid="select-validated-request">
-                            <option value="">Select Validated Request...</option>
-                            {bagRequests?.filter((request: any) => request.status === 'validated').map((request: any) => (
-                              <option key={request.requestId} value={request.requestId}>
-                                {request.requestId} - {request.company} ({request.commodityType}) - {request.farmerName} - {request.quantity} {request.unit} - ${request.totalValue}
-                              </option>
-                            ))}
-                          </select>
-                          {(!bagRequests || bagRequests.filter((request: any) => request.status === 'validated').length === 0) && (
+                          <p className="text-sm text-gray-600 mb-2">Select available transactions for QR batch:</p>
+                          {availableTransactionsLoading ? (
+                            <p className="text-center text-gray-500">Loading available transactions...</p>
+                          ) : availableTransactions && availableTransactions.length > 0 ? (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                              {availableTransactions.map((transaction: any) => (
+                                <div key={transaction.transactionId} className="flex items-center p-2 border rounded hover:bg-gray-50">
+                                  <input
+                                    type="checkbox"
+                                    id={`transaction-${transaction.transactionId}`}
+                                    checked={selectedTransactions.includes(transaction.transactionId)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedTransactions([...selectedTransactions, transaction.transactionId]);
+                                      } else {
+                                        setSelectedTransactions(selectedTransactions.filter(id => id !== transaction.transactionId));
+                                      }
+                                    }}
+                                    className="mr-3"
+                                    data-testid={`checkbox-transaction-${transaction.transactionId}`}
+                                  />
+                                  <label htmlFor={`transaction-${transaction.transactionId}`} className="flex-1 text-sm cursor-pointer">
+                                    <span className="font-medium">{transaction.transactionId}</span> - 
+                                    <span className="text-blue-600"> {transaction.buyerName}</span> - 
+                                    <span className="text-green-600">{transaction.commodityType}</span> - 
+                                    <span>{transaction.quantity} {transaction.unit}</span> - 
+                                    <span className="font-medium">${transaction.totalValue}</span>
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
                             <p className="text-sm text-amber-600 mt-2 flex items-center">
                               <Eye className="w-4 h-4 mr-2" />
-                              No validated bag requests available. Requests will appear here after warehouse validation.
+                              No available transactions for QR batch generation. Complete bag validations first.
                             </p>
+                          )}
+                          {selectedTransactions.length > 0 && (
+                            <div className="mt-2 p-2 bg-blue-50 rounded">
+                              <p className="text-sm text-blue-800">
+                                ✅ {selectedTransactions.length} transaction(s) selected for QR batch
+                              </p>
+                            </div>
                           )}
                         </div>
                         
@@ -1018,16 +1110,40 @@ export default function WarehouseInspectorDashboard() {
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                           <div>
-                            <label className="text-sm font-medium">Total Bags</label>
-                            <input type="number" className="w-full mt-1 p-2 border rounded" placeholder="100" />
+                            <label className="text-sm font-medium">Total Packages</label>
+                            <input 
+                              type="number" 
+                              value={totalPackages}
+                              onChange={(e) => setTotalPackages(Number(e.target.value))}
+                              className="w-full mt-1 p-2 border rounded" 
+                              placeholder="10" 
+                              data-testid="input-total-packages"
+                            />
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Bag Weight (kg)</label>
-                            <input type="number" className="w-full mt-1 p-2 border rounded" placeholder="60" />
+                            <label className="text-sm font-medium">Package Weight (kg)</label>
+                            <input 
+                              type="number" 
+                              value={packageWeight}
+                              onChange={(e) => setPackageWeight(Number(e.target.value))}
+                              className="w-full mt-1 p-2 border rounded" 
+                              placeholder="50" 
+                              data-testid="input-package-weight"
+                            />
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Total Weight (kg)</label>
-                            <input type="number" className="w-full mt-1 p-2 border rounded" disabled placeholder="6,000" />
+                            <label className="text-sm font-medium">Packaging Type</label>
+                            <select 
+                              value={packagingType}
+                              onChange={(e) => setPackagingType(e.target.value)}
+                              className="w-full mt-1 p-2 border rounded"
+                              data-testid="select-packaging-type"
+                            >
+                              <option value="50kg bags">50kg bags</option>
+                              <option value="25kg bags">25kg bags</option>
+                              <option value="60kg bags">60kg bags</option>
+                              <option value="100kg bags">100kg bags</option>
+                            </select>
                           </div>
                         </div>
                         
@@ -1054,9 +1170,14 @@ export default function WarehouseInspectorDashboard() {
                         </div>
                         
                         <div className="flex gap-2 mt-4">
-                          <Button className="flex-1">
+                          <Button 
+                            className="flex-1"
+                            onClick={handleGenerateQrBatch}
+                            disabled={generateQrBatchMutation.isPending || selectedTransactions.length === 0}
+                            data-testid="button-generate-qr-batch"
+                          >
                             <FileText className="w-4 h-4 mr-2" />
-                            Generate QR Batch
+                            {generateQrBatchMutation.isPending ? 'Generating...' : 'Generate QR Batch'}
                           </Button>
                           <Button variant="outline">
                             <Eye className="w-4 h-4 mr-2" />

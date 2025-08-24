@@ -310,7 +310,7 @@ export class QrBatchService {
   }
 
   // Generate QR code image with compact data
-  static async generateQrCodeImage(data: any): Promise<string> {
+  static async generateQrCodeImage(data: any): Promise<string | null> {
     try {
       const jsonData = JSON.stringify(data);
       console.log('QR Code data size:', jsonData.length, 'characters');
@@ -326,10 +326,13 @@ export class QrBatchService {
         },
         width: 256
       });
+      
+      console.log('✅ QR Code generated successfully, length:', qrCodeDataUrl.length);
       return qrCodeDataUrl;
     } catch (error) {
-      console.error('Error generating QR code:', error);
-      throw new Error('Failed to generate QR code');
+      console.error('❌ Error generating QR code:', error);
+      // Return null instead of throwing to prevent batch creation failure
+      return null;
     }
   }
 

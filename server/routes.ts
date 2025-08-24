@@ -14880,6 +14880,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           warehouseId = transaction.warehouse_id;
           warehouseName = transaction.warehouse_name;
           
+          // Create QR code data payload
+          const qrCodeData = {
+            batch_code: batchCode,
+            transaction_id: transaction.transaction_id,
+            verification_codes: [transaction.verification_code, transaction.payment_verification_code],
+            timestamp: new Date().toISOString(),
+            warehouse_id: transaction.warehouse_id,
+            warehouse_name: warehouseName,
+            commodity_type: transaction.commodity_type,
+            buyer_name: transaction.buyer_name,
+            farmer_name: transaction.farmer_name,
+            total_weight: totalQuantity,
+            total_packages: totalPackages
+          };
+          
+          // Generate QR code image URL using QrBatchService
+          console.log('🔄 Generating QR code for batch:', batchCode);
+          const { QrBatchService } = await import('./qr-batch-service');
+          const qrCodeUrl = await QrBatchService.generateQrCodeImage(qrCodeData);
+          console.log('✅ QR code generated:', qrCodeUrl ? 'SUCCESS' : 'FAILED');
+
           // Create QR batch entry
           await db.execute(sql`
             INSERT INTO qr_batches (
@@ -14888,7 +14909,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               commodity_type, total_bags, bag_weight, 
               total_weight, quality_grade, harvest_date, 
               inspection_data, eudr_compliance, gps_coordinates,
-              qr_code_data, status
+              qr_code_data, qr_code_url, status
             ) VALUES (
               ${batchCode}, ${transaction.warehouse_id}, ${warehouseName},
               ${transaction.buyer_id}, ${transaction.buyer_name}, ${transaction.farmer_id}, ${transaction.farmer_name},
@@ -14897,12 +14918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ${JSON.stringify({ inspected: true, quality: 'excellent' })},
               ${JSON.stringify({ compliant: true, eudr_ready: true })},
               '6.428°N, 9.429°W',
-              ${JSON.stringify({ 
-                batch_code: batchCode, 
-                transaction_id: transaction.transaction_id,
-                verification_codes: [transaction.verification_code, transaction.payment_verification_code],
-                timestamp: new Date().toISOString() 
-              })}, 'generated'
+              ${JSON.stringify(qrCodeData)}, ${qrCodeUrl}, 'generated'
             )
           `);
           

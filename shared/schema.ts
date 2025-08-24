@@ -234,6 +234,58 @@ export const bagMovementsRelations = relations(bagMovements, ({ one }) => ({
   }),
 }));
 
+// County-based Warehouse Management System
+export const countyWarehouses = pgTable("county_warehouses", {
+  id: serial("id").primaryKey(),
+  warehouseId: text("warehouse_id").notNull().unique(), // WH-MARGIBI-001
+  warehouseName: text("warehouse_name").notNull(),
+  county: text("county").notNull(), // Margibi County, Montserrado County, etc.
+  district: text("district"),
+  address: text("address").notNull(),
+  gpsCoordinates: text("gps_coordinates"),
+  managerName: text("manager_name").notNull(),
+  managerPhone: text("manager_phone").notNull(),
+  managerEmail: text("manager_email"),
+  capacity: integer("capacity").notNull(), // Total storage capacity in tons
+  currentStock: integer("current_stock").default(0),
+  facilityType: text("facility_type").notNull().default("standard"), // standard, cold_storage, bulk, specialized
+  operatingHours: text("operating_hours").notNull().default("08:00-17:00"),
+  certifications: jsonb("certifications"), // Storage certifications
+  equipmentList: jsonb("equipment_list"), // Available equipment
+  securityFeatures: jsonb("security_features"), // Security systems
+  storageConditions: jsonb("storage_conditions"), // Temperature, humidity controls
+  status: text("status").notNull().default("active"), // active, maintenance, inactive
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Warehouse Transactions (Real Data Only)
+export const warehouseTransactions = pgTable("warehouse_transactions", {
+  id: serial("id").primaryKey(),
+  warehouseId: text("warehouse_id").references(() => countyWarehouses.warehouseId).notNull(),
+  transactionId: text("transaction_id").notNull(), // From buyer_verification_codes
+  verificationCode: text("verification_code").notNull(), // 1st verification code
+  paymentVerificationCode: text("payment_verification_code"), // 2nd verification code
+  buyerId: text("buyer_id").notNull(),
+  buyerName: text("buyer_name").notNull(),
+  farmerId: text("farmer_id").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  commodityType: text("commodity_type").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  unit: text("unit").notNull(),
+  totalValue: decimal("total_value", { precision: 10, scale: 2 }).notNull(),
+  county: text("county").notNull(), // County where transaction originated
+  receivedAt: timestamp("received_at").defaultNow(),
+  status: text("status").notNull().default("received"), // received, processed, qr_generated, completed
+  processedBy: text("processed_by"), // Warehouse inspector who processed
+  processedAt: timestamp("processed_at"),
+  notes: text("notes"),
+  qrBatchGenerated: boolean("qr_batch_generated").default(false),
+  batchCode: text("batch_code"), // Generated QR batch code
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Buyer Verification Codes Table
 export const buyerVerificationCodes = pgTable("buyer_verification_codes", {
   id: serial("id").primaryKey(),

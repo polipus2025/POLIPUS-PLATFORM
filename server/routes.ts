@@ -14033,12 +14033,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ Payment confirmed for transaction ${transactionId}`);
       console.log(`🔐 Second verification code generated: ${secondVerificationCode}`);
 
+      // Step 3: Auto-route transaction to county warehouse after payment confirmation
+      const countyWarehouseResult = await db.execute(sql`
+        SELECT warehouse_id, warehouse_name FROM county_warehouses 
+        WHERE county = ${farmerData.county} AND is_active = true 
+        LIMIT 1
+      `);
+      
+      let warehouseRouted = false;
+      if (countyWarehouseResult.rows.length > 0) {
+        const warehouse = countyWarehouseResult.rows[0] as any;
+        
+        // Insert transaction into warehouse system
+        await db.execute(sql`
+          INSERT INTO warehouse_transactions (
+            warehouse_id, transaction_id, verification_code, payment_verification_code,
+            buyer_id, buyer_name, farmer_id, farmer_name, commodity_type, 
+            quantity, unit, total_value, county, status
+          ) VALUES (
+            ${warehouse.warehouse_id}, ${transactionId}, ${verificationCode}, ${secondVerificationCode},
+            ${buyerId}, ${buyerName}, ${farmerId}, ${farmerData.name}, ${commodityType},
+            ${quantityAvailable}, ${unit}, ${totalValue}, ${farmerData.county}, 'received'
+          )
+        `);
+        
+        warehouseRouted = true;
+        console.log(`✅ Transaction routed to ${warehouse.warehouse_name} (${warehouse.warehouse_id})`);
+      }
+
       res.json({
         success: true,
         message: "Payment confirmed successfully - Second verification code generated",
         secondVerificationCode: secondVerificationCode,
         eudrCompliance: eudrCompliance,
-        transaction: updatedTransaction
+        transaction: updatedTransaction,
+        warehouseRouted: warehouseRouted
       });
 
     } catch (error) {
@@ -14051,6 +14080,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ===============================
+  // COUNTY WAREHOUSE MANAGEMENT APIs
+  // ===============================
+  
+  // Seed county warehouses (run once to populate data)
+  app.post("/api/warehouse/seed-counties", async (req, res) => {
+    try {
+      console.log("Seeding county warehouses...");
+      
+      const liberianCountyWarehouses = [
+        { county: "Margibi County", warehouseId: "WH-MARGIBI-001", name: "Margibi Central Warehouse", district: "Kakata", manager: "James Kollie", phone: "+231-77-123-4567", capacity: 5000 },
+        { county: "Montserrado County", warehouseId: "WH-MONTSERRADO-001", name: "Monrovia Agricultural Warehouse", district: "Greater Monrovia", manager: "Grace Williams", phone: "+231-88-234-5678", capacity: 8000 },
+        { county: "Grand Bassa County", warehouseId: "WH-GRANDBASSA-001", name: "Grand Bassa Storage Facility", district: "Buchanan", manager: "Moses Johnson", phone: "+231-77-345-6789", capacity: 4500 },
+        { county: "Nimba County", warehouseId: "WH-NIMBA-001", name: "Nimba County Warehouse", district: "Ganta", manager: "Sarah Kpaka", phone: "+231-88-456-7890", capacity: 6000 },
+        { county: "Bong County", warehouseId: "WH-BONG-001", name: "Bong Agricultural Center", district: "Gbarnga", manager: "Patrick Doe", phone: "+231-77-567-8901", capacity: 4000 },
+        { county: "Lofa County", warehouseId: "WH-LOFA-001", name: "Lofa County Storage", district: "Voinjama", manager: "Martha Kollie", phone: "+231-88-678-9012", capacity: 3500 },
+        { county: "Grand Cape Mount County", warehouseId: "WH-GRANDCAPEMOUNT-001", name: "Cape Mount Warehouse", district: "Robertsport", manager: "David Johnson", phone: "+231-77-789-0123", capacity: 2800 },
+        { county: "Grand Gedeh County", warehouseId: "WH-GRANDGEDEH-001", name: "Grand Gedeh Storage", district: "Zwedru", manager: "Rebecca Williams", phone: "+231-88-890-1234", capacity: 2500 }
+      ];
+      
+      for (const warehouse of liberianCountyWarehouses) {
+        await db.execute(sql`
+          INSERT INTO county_warehouses (
+            warehouse_id, warehouse_name, county, district, address, manager_name,
+            manager_phone, capacity, facility_type, operating_hours, status
+          ) VALUES (
+            ${warehouse.warehouseId}, ${warehouse.name}, ${warehouse.county}, 
+            ${warehouse.district}, ${warehouse.district + ", " + warehouse.county}, ${warehouse.manager},
+            ${warehouse.phone}, ${warehouse.capacity}, 'standard', '08:00-17:00', 'active'
+          )
+          ON CONFLICT (warehouse_id) DO UPDATE SET
+            warehouse_name = ${warehouse.name},
+            manager_name = ${warehouse.manager},
+            manager_phone = ${warehouse.phone}
+        `);
+      }
+      
+      console.log(`✅ Successfully seeded ${liberianCountyWarehouses.length} county warehouses`);
+      res.json({ success: true, message: "County warehouses seeded successfully", count: liberianCountyWarehouses.length });
+    } catch (error) {
+      console.error("Error seeding county warehouses:", error);
+      res.status(500).json({ error: "Failed to seed county warehouses" });
+    }
+  });
+  
+  // Get all county warehouses
+  app.get("/api/warehouse/counties", async (req, res) => {
+    try {
+      const warehousesResult = await db.execute(sql`
+        SELECT * FROM county_warehouses WHERE is_active = true ORDER BY county
+      `);
+      
+      res.json({ data: warehousesResult.rows });
+    } catch (error) {
+      console.error("Error fetching county warehouses:", error);
+      res.status(500).json({ error: "Failed to fetch county warehouses" });
+    }
+  });
+  
+  // Update warehouse profile
+  app.put("/api/warehouse/profile/:warehouseId", async (req, res) => {
+    try {
+      const { warehouseId } = req.params;
+      const { warehouseName, managerName, managerPhone, managerEmail, operatingHours, capacity } = req.body;
+      
+      await db.execute(sql`
+        UPDATE county_warehouses 
+        SET warehouse_name = ${warehouseName}, 
+            manager_name = ${managerName},
+            manager_phone = ${managerPhone},
+            manager_email = ${managerEmail},
+            operating_hours = ${operatingHours},
+            capacity = ${capacity},
+            updated_at = NOW()
+        WHERE warehouse_id = ${warehouseId}
+      `);
+      
+      console.log(`✅ Updated warehouse profile for ${warehouseId}`);
+      res.json({ success: true, message: "Warehouse profile updated successfully" });
+    } catch (error) {
+      console.error("Error updating warehouse profile:", error);
+      res.status(500).json({ error: "Failed to update warehouse profile" });
+    }
+  });
+
+  // ===============================
   // WAREHOUSE INSPECTOR ARCHIVES & TRACEABILITY APIs
   // ===============================
 
@@ -14059,45 +14173,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Fetching warehouse transactions archive");
       
-      // Mock warehouse transactions with dual verification codes
-      const warehouseTransactions = [
-        {
-          id: "wh-trans-001",
-          transactionId: "OFFER-ABC123",
-          farmerId: "FRM-2024-001",
-          farmerName: "Moses Williams",
-          farmLocation: "Williams Farm, Monrovia County",
-          buyerId: 1,
-          buyerName: "Michael Johnson",
-          buyerCompany: "Johnson Agriculture Trading",
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          totalValue: 62475.00,
-          verificationCode1: "X0R27R24", // Buyer acceptance code
-          verificationCode2: "B7K94X31", // Bag usage code
-          processedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-          status: "warehouse_processed"
-        },
-        {
-          id: "wh-trans-002",
-          transactionId: "OFFER-DEF456",
-          farmerId: "FRM-2024-002",
-          farmerName: "Grace Johnson",
-          farmLocation: "Johnson Agricultural Estate, Monrovia County",
-          buyerId: 2,
-          buyerName: "Sarah Williams",
-          buyerCompany: "Williams Export Ltd",
-          commodityType: "Coffee",
-          quantityAvailable: 18.2,
-          unit: "tons",
-          totalValue: 58240.00,
-          verificationCode1: "M3P58N92",
-          verificationCode2: null, // Second code not yet generated
-          processedAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-          status: "warehouse_processed"
-        }
-      ];
+      // Get real warehouse transactions from database
+      const warehouseTransactionsResult = await db.execute(sql`
+        SELECT 
+          wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+          wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name, 
+          wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
+          wt.received_at, wt.status, wt.processed_by, wt.processed_at, wt.notes,
+          wt.qr_batch_generated, wt.batch_code,
+          cw.warehouse_name, cw.warehouse_id
+        FROM warehouse_transactions wt
+        LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+        ORDER BY wt.received_at DESC
+      `);
+      
+      const warehouseTransactions = warehouseTransactionsResult.rows.map((row: any) => ({
+        id: `wh-trans-${row.id}`,
+        transactionId: row.transaction_id,
+        farmerId: row.farmer_id,
+        farmerName: row.farmer_name,
+        buyerId: row.buyer_id,
+        buyerName: row.buyer_name,
+        commodityType: row.commodity_type,
+        quantity: parseFloat(row.quantity),
+        unit: row.unit,
+        totalValue: parseFloat(row.total_value),
+        county: row.county,
+        warehouseName: row.warehouse_name,
+        warehouseId: row.warehouse_id,
+        verificationCode1: row.verification_code,
+        verificationCode2: row.payment_verification_code,
+        receivedAt: row.received_at,
+        processedAt: row.processed_at,
+        processedBy: row.processed_by,
+        status: row.status,
+        notes: row.notes,
+        qrBatchGenerated: row.qr_batch_generated,
+        batchCode: row.batch_code
+      }));
 
       console.log(`Returning ${warehouseTransactions.length} warehouse transactions`);
       res.json({ data: warehouseTransactions });
@@ -14112,63 +14225,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Fetching warehouse verification codes archive");
       
-      // Mock verification codes with dual type system
-      const warehouseCodes = [
-        {
-          id: "wh-code-001",
-          verificationCode: "X0R27R24",
-          codeType: "buyer-acceptance",
-          farmerId: "FRM-2024-001",
-          farmerName: "Moses Williams",
-          buyerId: 1,
-          buyerName: "Michael Johnson",
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          totalValue: 62475.00,
-          validated: true,
-          generatedAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-          validatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000)  // 3 hours ago
-        },
-        {
-          id: "wh-code-002",
-          verificationCode: "B7K94X31",
-          codeType: "bag-usage",
-          farmerId: "FRM-2024-001",
-          farmerName: "Moses Williams",
-          buyerId: 1,
-          buyerName: "Michael Johnson",
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          totalValue: 62475.00,
-          validated: false,
-          generatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-          validatedAt: null
-        },
-        {
-          id: "wh-code-003",
-          verificationCode: "M3P58N92",
-          codeType: "buyer-acceptance",
-          farmerId: "FRM-2024-002",
-          farmerName: "Grace Johnson",
-          buyerId: 2,
-          buyerName: "Sarah Williams",
-          commodityType: "Coffee",
-          quantityAvailable: 18.2,
-          unit: "tons",
-          totalValue: 58240.00,
-          validated: true,
-          generatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-          validatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000)  // 5 hours ago
+      // Get real verification codes from warehouse transactions
+      const warehouseCodesResult = await db.execute(sql`
+        SELECT 
+          wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+          wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+          wt.commodity_type, wt.quantity, wt.unit, wt.total_value,
+          wt.received_at, wt.status,
+          cw.warehouse_name, cw.county
+        FROM warehouse_transactions wt
+        LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+        WHERE wt.verification_code IS NOT NULL
+        ORDER BY wt.received_at DESC
+      `);
+      
+      const warehouseCodes = [];
+      
+      // Process verification codes from real transactions
+      for (const row of warehouseCodesResult.rows) {
+        const baseData = {
+          farmerId: row.farmer_id,
+          farmerName: row.farmer_name,
+          buyerId: row.buyer_id,
+          buyerName: row.buyer_name,
+          commodityType: row.commodity_type,
+          quantity: parseFloat(row.quantity),
+          unit: row.unit,
+          totalValue: parseFloat(row.total_value),
+          transactionId: row.transaction_id,
+          warehouseName: row.warehouse_name,
+          county: row.county
+        };
+        
+        // Add first verification code (buyer acceptance)
+        if (row.verification_code) {
+          warehouseCodes.push({
+            id: `wh-code-1-${row.id}`,
+            verificationCode: row.verification_code,
+            codeType: "buyer-acceptance",
+            validated: true,
+            generatedAt: row.received_at,
+            validatedAt: row.received_at,
+            ...baseData
+          });
         }
-      ];
+        
+        // Add second verification code (payment confirmation) if exists
+        if (row.payment_verification_code) {
+          warehouseCodes.push({
+            id: `wh-code-2-${row.id}`,
+            verificationCode: row.payment_verification_code,
+            codeType: "payment-confirmation",
+            validated: true,
+            generatedAt: row.received_at,
+            validatedAt: row.received_at,
+            ...baseData
+          });
+        }
+      }
 
       console.log(`Returning ${warehouseCodes.length} warehouse verification codes`);
       res.json({ data: warehouseCodes });
     } catch (error) {
       console.error("Error fetching warehouse verification codes:", error);
       res.status(500).json({ error: "Failed to fetch warehouse verification codes" });
+    }
+  });
+
+  // ===============================
+  // QR BATCH MANAGEMENT & GENERATION SYSTEM
+  // ===============================
+  
+  // Get available transactions for QR batch generation
+  app.get("/api/warehouse-inspector/available-transactions", async (req, res) => {
+    try {
+      console.log("Fetching available transactions for QR batch generation");
+      
+      const availableTransactionsResult = await db.execute(sql`
+        SELECT 
+          wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
+          wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+          wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
+          wt.status, wt.qr_batch_generated, wt.batch_code,
+          cw.warehouse_name, cw.warehouse_id
+        FROM warehouse_transactions wt
+        LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+        WHERE wt.payment_verification_code IS NOT NULL 
+        AND wt.status IN ('received', 'processed')
+        ORDER BY wt.received_at DESC
+      `);
+      
+      const availableTransactions = availableTransactionsResult.rows.map((row: any) => ({
+        transactionId: row.transaction_id,
+        farmerId: row.farmer_id,
+        farmerName: row.farmer_name,
+        buyerId: row.buyer_id,
+        buyerName: row.buyer_name,
+        commodityType: row.commodity_type,
+        quantity: parseFloat(row.quantity),
+        unit: row.unit,
+        totalValue: parseFloat(row.total_value),
+        county: row.county,
+        warehouseName: row.warehouse_name,
+        warehouseId: row.warehouse_id,
+        verificationCode: row.verification_code,
+        paymentVerificationCode: row.payment_verification_code,
+        status: row.status,
+        qrBatchGenerated: row.qr_batch_generated,
+        existingBatchCode: row.batch_code,
+        label: `${row.transaction_id} - ${row.farmer_name} → ${row.buyer_name} (${row.commodity_type})`
+      }));
+      
+      console.log(`Returning ${availableTransactions.length} available transactions for QR batch`);
+      res.json({ data: availableTransactions });
+    } catch (error) {
+      console.error("Error fetching available transactions:", error);
+      res.status(500).json({ error: "Failed to fetch available transactions" });
+    }
+  });
+  
+  // Generate QR Batch with selected transactions
+  app.post("/api/warehouse-inspector/generate-qr-batch", async (req, res) => {
+    try {
+      const { selectedTransactions, packagingType, totalPackages, packageWeight } = req.body;
+      
+      if (!selectedTransactions || selectedTransactions.length === 0) {
+        return res.status(400).json({ error: "No transactions selected for QR batch generation" });
+      }
+      
+      console.log(`Generating QR batch for ${selectedTransactions.length} transactions`);
+      
+      // Generate unique batch code
+      const batchCode = `WH-BATCH-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+      
+      let totalQuantity = 0;
+      let totalValue = 0;
+      let warehouseId = '';
+      let warehouseName = '';
+      
+      // Process each selected transaction
+      for (const transactionId of selectedTransactions) {
+        // Get transaction details
+        const transactionResult = await db.execute(sql`
+          SELECT wt.*, cw.warehouse_name 
+          FROM warehouse_transactions wt
+          LEFT JOIN county_warehouses cw ON wt.warehouse_id = cw.warehouse_id
+          WHERE wt.transaction_id = ${transactionId}
+        `);
+        
+        if (transactionResult.rows.length > 0) {
+          const transaction = transactionResult.rows[0] as any;
+          totalQuantity += parseFloat(transaction.quantity);
+          totalValue += parseFloat(transaction.total_value);
+          warehouseId = transaction.warehouse_id;
+          warehouseName = transaction.warehouse_name;
+          
+          // Create QR batch entry
+          await db.execute(sql`
+            INSERT INTO qr_batches (
+              batch_code, transaction_id, warehouse_id, warehouse_name,
+              buyer_id, buyer_name, farmer_id, farmer_name,
+              commodity_type, packaging_type, total_packages, package_weight, 
+              total_weight, quality_grade, harvest_date, 
+              inspection_data, eudr_compliance, certification_data, compliance_data,
+              qr_code_data, status
+            ) VALUES (
+              ${batchCode}, ${transaction.transaction_id}, ${transaction.warehouse_id}, ${warehouseName},
+              ${transaction.buyer_id}, ${transaction.buyer_name}, ${transaction.farmer_id}, ${transaction.farmer_name},
+              ${transaction.commodity_type}, ${packagingType}, ${totalPackages}, ${packageWeight}, 
+              ${totalQuantity}, 'Grade A', NOW(),
+              ${JSON.stringify({ inspected: true, quality: 'excellent' })},
+              ${JSON.stringify({ compliant: true, eudr_ready: true })},
+              ${JSON.stringify({ certified: true, organic: false })},
+              ${JSON.stringify({ compliant: true, standards_met: true })},
+              ${JSON.stringify({ 
+                batch_code: batchCode, 
+                transaction_id: transaction.transaction_id,
+                verification_codes: [transaction.verification_code, transaction.payment_verification_code],
+                timestamp: new Date().toISOString() 
+              })}, 'generated'
+            )
+          `);
+          
+          // Mark transaction as QR batch generated
+          await db.execute(sql`
+            UPDATE warehouse_transactions 
+            SET qr_batch_generated = true, batch_code = ${batchCode}, status = 'qr_generated'
+            WHERE transaction_id = ${transactionId}
+          `);
+        }
+      }
+      
+      console.log(`✅ QR Batch ${batchCode} generated successfully`);
+      console.log(`📦 Total: ${totalQuantity} ${packagingType} packages, Value: $${totalValue.toFixed(2)}`);
+      
+      res.json({ 
+        success: true, 
+        message: "QR Batch generated successfully",
+        batchCode: batchCode,
+        totalTransactions: selectedTransactions.length,
+        totalQuantity: totalQuantity,
+        totalValue: totalValue,
+        packagingType: packagingType,
+        totalPackages: totalPackages
+      });
+    } catch (error) {
+      console.error("Error generating QR batch:", error);
+      res.status(500).json({ error: "Failed to generate QR batch" });
     }
   });
 

@@ -119,6 +119,7 @@ import {
   
   // Regulatory Department System
   regulatoryDepartments,
+  qrBatches,
   type RegulatoryDepartment
 } from "@shared/schema";
 import { z } from "zod";
@@ -15083,6 +15084,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating batch:", error);
       res.status(500).json({ error: "Failed to generate batch" });
+    }
+  });
+
+  // Generate missing QR codes for existing batches
+  app.post("/api/warehouse-inspector/generate-qr/:batchCode", async (req, res) => {
+    try {
+      const { batchCode } = req.params;
+      console.log(`Generating missing QR code for batch: ${batchCode}`);
+
+      // Get the existing batch data using raw SQL to match actual database structure
+      const batchResult = await db.execute(sql`
+        SELECT * FROM qr_batches WHERE batch_code = ${batchCode} LIMIT 1
+      `);
+
+      if (batchResult.rows.length === 0) {
+        return res.status(404).json({ error: "Batch not found" });
+      }
+
+      const batch = batchResult.rows[0];
+
+      // Create QR code data using the existing batch information
+      const qrCodeData = {
+        batchCode: batch.batch_code,
+        warehouseId: batch.warehouse_id,
+        warehouseName: batch.warehouse_name,
+        commodity: batch.commodity_type,
+        farmer: batch.farmer_name,
+        farmerId: batch.farmer_id,
+        buyer: batch.buyer_name,
+        buyerId: batch.buyer_id,
+        totalBags: batch.total_bags,
+        bagWeight: batch.bag_weight,
+        totalWeight: batch.total_weight,
+        qualityGrade: batch.quality_grade,
+        harvestDate: batch.harvest_date,
+        gpsCoordinates: batch.gps_coordinates,
+        verificationUrl: `https://agritrace360.lacra.gov.lr/verify/${batch.batch_code}`,
+        generatedAt: new Date().toISOString(),
+        inspectionData: batch.inspection_data,
+        eudrCompliance: batch.eudr_compliance,
+        digitalSignature: QrBatchService.generateDigitalSignature({
+          batchCode: batch.batch_code,
+          warehouseId: batch.warehouse_id,
+          totalWeight: batch.total_weight,
+          transactionId: batch.transaction_id || null // Handle missing transactionId
+        })
+      };
+
+      // Generate the QR code image
+      const qrCodeUrl = await QrBatchService.generateQrCodeImage(qrCodeData);
+
+      // Update the database with the generated QR code URL using raw SQL to match existing schema
+      await db.execute(sql`
+        UPDATE qr_batches 
+        SET qr_code_url = ${qrCodeUrl}, 
+            qr_code_data = ${JSON.stringify(qrCodeData)}
+        WHERE batch_code = ${batchCode}
+      `);
+
+      console.log(`✅ QR code generated successfully for batch ${batchCode}`);
+      
+      res.json({
+        success: true,
+        batchCode,
+        qrCodeUrl,
+        message: `QR code generated successfully for batch ${batchCode}`
+      });
+
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      res.status(500).json({ 
+        error: "Failed to generate QR code",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

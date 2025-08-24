@@ -14893,100 +14893,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
             day: 'numeric' 
           });
           
-          const readableQrData = `
-════════════════════════════════════════
-🇱🇷 REPUBLIC OF LIBERIA
-🌱 AGRICULTURAL TRACEABILITY CERTIFICATE
-════════════════════════════════════════
+          const readableQrData = `🇱🇷 REPUBLIC OF LIBERIA - AGRICULTURAL CERTIFICATE
 
-📊 CERTIFICATE DETAILS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 Batch Code: ${batchCode}
-🗓️ Issue Date: ${formattedDate}
-⏰ Timestamp: ${currentDate.toLocaleTimeString()}
-🆔 Transaction: ${transaction.transaction_id}
+📦 BATCH: ${batchCode}
+📅 DATE: ${formattedDate}
+🕐 TIME: ${currentDate.toLocaleTimeString()}
 
-🚜 PRODUCT SPECIFICATIONS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🌾 Commodity: ${transaction.commodity_type.toUpperCase()}
-⭐ Quality Grade: PREMIUM EXPORT GRADE A
-📏 Total Weight: ${totalQuantity} TONS
-📦 Total Packages: ${totalPackages} BAGS
-⚖️ Package Weight: ${packageWeight}kg per bag
-💧 Moisture Content: 6.5% (Optimal)
-🔍 Defect Rate: <2% (Excellent)
-📈 Quality Score: 95/100 (Outstanding)
+🌾 PRODUCT: ${transaction.commodity_type.toUpperCase()}
+⭐ GRADE: PREMIUM EXPORT GRADE A
+📏 WEIGHT: ${totalQuantity} TONS (${totalPackages} bags)
+⚖️ PACKAGE: ${packageWeight}kg bags
+💧 MOISTURE: 6.5% (Optimal)
+📈 QUALITY: 95/100 (Outstanding)
 
-🏡 FARM ORIGIN & TRACEABILITY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👨‍🌾 Farmer: ${transaction.farmer_name || 'Paolo'}
-🏆 Farmer ID: ${transaction.farmer_id}
-📍 Location: ${transaction.county || 'Margibi County'}, Liberia
-🌍 GPS Coordinates: 6.428°N, 9.429°W
-🏞️ Farm Size: 2.5 hectares
-📜 Land Certificate: LACRA-CERT-${transaction.farmer_id}
-🌱 Organic Status: CERTIFIED ORGANIC
-🗓️ Harvest Date: ${new Date().toLocaleDateString()}
+👨‍🌾 FARMER: ${transaction.farmer_name || 'Paolo'}
+📍 LOCATION: ${transaction.county || 'Margibi County'}, Liberia
+🌍 GPS: 6.428°N, 9.429°W
+🏞️ FARM: 2.5 hectares
+📜 CERT: LACRA-CERT-${transaction.farmer_id}
+🌱 STATUS: CERTIFIED ORGANIC
 
-🏭 QUALITY & INSPECTION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏭 INSPECTION:
 👮 Inspector: WH-INS-001
-🏢 Inspection Facility: ${warehouseName}
-📅 Inspection Date: ${formattedDate}
-🌡️ Storage Conditions: 18-20°C, 60-65% RH
-🔬 Foreign Matter: <1% (Excellent)
-⚠️ Damage Rate: <0.5% (Minimal)
-✅ Processing Standards: EU EXPORT READY
+🏢 Facility: ${warehouseName}
+🌡️ Storage: 18-20°C, 60-65% RH
+✅ Standards: EU EXPORT READY
 
-🌍 EUDR COMPLIANCE STATUS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ COMPLIANCE STATUS: FULLY COMPLIANT
-🚨 Risk Assessment: LOW RISK
-🌳 Deforestation Status: DEFORESTATION-FREE ✓
-🔍 Due Diligence: COMPLETED ✓
-📍 Geolocation: VERIFIED ✓
-⚖️ Legal Harvest: CONFIRMED ✓
-🏛️ Certification Body: LACRA
-📅 Compliance Date: ${formattedDate}
+🌍 EUDR COMPLIANCE:
+✅ STATUS: FULLY COMPLIANT
+🚨 RISK: LOW RISK
+🌳 DEFORESTATION-FREE ✓
+🔍 DUE DILIGENCE: COMPLETED ✓
+📍 GEOLOCATION: VERIFIED ✓
+⚖️ LEGAL HARVEST: CONFIRMED ✓
+🏛️ CERTIFIED BY: LACRA
 
-📋 OFFICIAL CERTIFICATIONS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏆 LACRA Certification
-   Number: LACRA-${batchCode.slice(-8)}
-   Issued: ${formattedDate}
-   Expires: ${certExpiry}
-   
-🇪🇺 EUDR Compliance Certificate
-   Number: EUDR-${batchCode.slice(-8)}
-   Issued: ${formattedDate}
-   Expires: ${certExpiry}
-   
-🌱 Organic Certification
-   Number: ORG-${transaction.farmer_id}
-   Status: ACTIVE
+📋 CERTIFICATIONS:
+🏆 LACRA: LACRA-${batchCode.slice(-8)}
+🇪🇺 EUDR: EUDR-${batchCode.slice(-8)}
+🌱 ORGANIC: ORG-${transaction.farmer_id}
+📅 VALID: ${formattedDate} - ${certExpiry}
 
-🔐 SECURITY & VERIFICATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔑 Verification Code: ${transaction.verification_code}
-🖊️ Digital Signature: SIG-${Buffer.from(batchCode).toString('base64').slice(0, 12)}
-🔒 Blockchain Hash: [Pending Integration]
-⚡ Verification System: POLIPUS PLATFORM
+🔐 VERIFICATION:
+🔑 CODE: ${transaction.verification_code}
+🖊️ SIGNATURE: SIG-${Buffer.from(batchCode).toString('base64').slice(0, 8)}
+⚡ SYSTEM: POLIPUS PLATFORM
+🆔 TXN: ${transaction.transaction_id}
 
-🌐 ONLINE VERIFICATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔗 Verify at: 
-   agritrace360.lacra.gov.lr/verify/${batchCode}
-📱 Scan to verify authenticity
-💻 Real-time status updates available
+🌐 VERIFY ONLINE:
+agritrace360.lacra.gov.lr/verify/${batchCode}
 
-════════════════════════════════════════
 ⚡ POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
 🏛️ AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
 🇪🇺 EU DEFORESTATION REGULATION COMPLIANT
-════════════════════════════════════════
 
-✅ This certificate guarantees complete farm-to-export 
-   traceability meeting international standards.
+✅ Complete farm-to-export traceability guaranteed.
 🌍 Sustainable agriculture | Verified quality | Global compliance`;
           
           // Store comprehensive data for system use

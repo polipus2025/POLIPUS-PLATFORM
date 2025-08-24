@@ -350,8 +350,10 @@ export default function WarehouseInspectorDashboard() {
                   width: 400px;
                 }
                 .qr-code {
-                  width: 256px;
-                  height: 256px;
+                  max-width: 400px;
+                  max-height: 400px;
+                  width: 100%;
+                  height: auto;
                   margin: 20px auto;
                 }
                 .batch-info {
@@ -1710,7 +1712,7 @@ export default function WarehouseInspectorDashboard() {
 
       {/* QR Code Modal */}
       <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <QrCode className="w-5 h-5" />
@@ -1726,7 +1728,8 @@ export default function WarehouseInspectorDashboard() {
                     <img 
                       src={selectedQrBatch.qrCodeUrl} 
                       alt={`QR Code for ${selectedQrBatch.batchCode}`}
-                      className="w-64 h-64 mx-auto mb-4 border-2 border-gray-200 rounded-lg"
+                      className="w-full max-w-sm h-auto mx-auto mb-4 border-2 border-gray-200 rounded-lg"
+                      style={{ maxHeight: '80vh', objectFit: 'contain' }}
                     />
                     <p className="text-sm text-gray-600">
                       Scan this QR code for complete traceability information

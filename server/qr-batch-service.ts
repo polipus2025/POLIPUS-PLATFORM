@@ -382,7 +382,8 @@ export class QrBatchService {
       const productConfig = this.getProductConfiguration(transactionData.commodityType, transactionData.commoditySubType);
       
       // Calculate total weight and create package details
-      const totalWeight = transactionData.totalPackages * parseFloat(transactionData.packageWeight.toString());
+      // Use actual transaction quantity instead of calculating from packages  
+      const totalWeight = parseFloat(transactionData.actualTransactionQuantity?.toString() || (transactionData.totalPackages * parseFloat(transactionData.packageWeight.toString())).toString());
       const packageDetails = {
         packaging: productValidation.packaging,
         productConfig,
@@ -511,7 +512,8 @@ export class QrBatchService {
       const batchCode = this.generateBatchCode(request.warehouseId);
       
       // Calculate total weight
-      const totalWeight = request.totalBags * parseFloat(request.bagWeight.toString());
+      // Use actual transaction quantity instead of calculating from bags
+      const totalWeight = parseFloat(request.actualTransactionQuantity?.toString() || (request.totalBags * parseFloat(request.bagWeight.toString())).toString());
 
       // Create QR code data payload
       const qrCodeData = this.createQrCodeData(

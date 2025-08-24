@@ -3408,13 +3408,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Test credentials for buyers
+      // Test credentials for buyers - PRIORITY CREDENTIALS
       const testBuyerCredentials: Record<string, { password: string; firstName: string; lastName: string; company: string }> = {
+        // MAIN WORKING CREDENTIALS
+        margibi_buyer: { password: 'password123', firstName: 'Maria', lastName: 'Thompson', company: 'Margibi Trading Company' },
+        'BYR-20250819-050': { password: 'password123', firstName: 'John', lastName: 'Smith', company: 'Test Agricultural Buyer' },
+        // BACKUP CREDENTIALS
         buyer001: { password: 'password123', firstName: 'John', lastName: 'Trading', company: 'ABC Trading Co.' },
         buyer002: { password: 'password123', firstName: 'Sarah', lastName: 'Commerce', company: 'Global Commodities Ltd.' },
-        test_buyer: { password: 'password123', firstName: 'Test', lastName: 'Buyer', company: 'Test Company' },
-        'BYR-20250819-050': { password: 'password123', firstName: 'John', lastName: 'Smith', company: 'Test Agricultural Buyer' },
-        margibi_buyer: { password: 'password123', firstName: 'Maria', lastName: 'Thompson', company: 'Margibi Trading Company' }
+        test_buyer: { password: 'password123', firstName: 'Test', lastName: 'Buyer', company: 'Test Company' }
       };
 
       if (testBuyerCredentials[buyerId] && testBuyerCredentials[buyerId].password === password) {
@@ -3446,9 +3448,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check buyer credentials from the buyerCredentials table
+      // If test credentials didn't match, check buyer credentials from the buyerCredentials table
+      console.log(`🔐 Login attempt for credential ID: ${buyerId}`);
       const buyerCredentials = await storage.getBuyerCredentials(buyerId);
+      console.log(`🔍 Credential lookup result: ${buyerCredentials ? 'Found' : 'Not found'}`);
+      
       if (!buyerCredentials) {
+        console.log(`❌ Login failed: Credentials not found`);
         return res.status(401).json({ 
           success: false, 
           message: "Invalid buyer credentials" 

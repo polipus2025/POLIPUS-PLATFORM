@@ -1009,7 +1009,15 @@ export default function BuyerManagement() {
 
                   {buyer.interestedCommodities && (
                     <div className="flex flex-wrap gap-1">
-                      {(JSON.parse(buyer.interestedCommodities || '[]')).map((commodity: string) => (
+                      {(() => {
+                        try {
+                          const commodities = JSON.parse(buyer.interestedCommodities || '[]');
+                          return Array.isArray(commodities) ? commodities : [];
+                        } catch (error) {
+                          // If JSON parsing fails, treat as comma-separated string
+                          return buyer.interestedCommodities.split(',').map(c => c.trim()).filter(c => c);
+                        }
+                      })().map((commodity: string) => (
                         <Badge key={commodity} variant="secondary" className="text-xs">
                           {commodity}
                         </Badge>

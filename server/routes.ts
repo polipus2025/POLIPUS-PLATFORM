@@ -565,11 +565,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           county: offer.county,
           status: offer.status === 'available' ? 'pending' : offer.status, // Convert status
           offerCreatedAt: offer.createdAt,
-          confirmedAt: null, // New offers are not confirmed yet
-          buyerId: null,
-          buyerName: null,
-          buyerCompany: null,
-          verificationCode: null
+          confirmedAt: offer.confirmedAt, // Use actual confirmed date
+          buyerId: offer.buyerId, // Use actual buyer ID
+          buyerName: offer.buyerName, // Use actual buyer name
+          buyerCompany: offer.buyerName ? "Agricultural Trading Company" : null, // Default company for confirmed offers
+          verificationCode: offer.verificationCode // Use actual verification code
         }));
 
         // Combine confirmed offers and pending real offers
@@ -13629,8 +13629,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmerId } = req.params;
       console.log(`Fetching confirmed transactions for farmer: ${farmerId}`);
       
-      // For Paolo's farmer ID, return his Margibi buyer transactions directly
+      // For Paolo's farmer ID, get ALL confirmed transactions (database + mock)
       if (farmerId === "FARMER-1755883520291-288") {
+        // Get all confirmed offers from database
+        const confirmedOffers = await db
+          .select()
+          .from(farmerProductOffers)
+          .where(eq(farmerProductOffers.farmerId, 288))
+          .where(eq(farmerProductOffers.status, "confirmed"))
+          .orderBy(desc(farmerProductOffers.confirmedAt));
+
+        console.log(`📂 Found ${confirmedOffers.length} confirmed offers in database for Paolo`);
+        
         // Check database for payment confirmations
         let transaction1Confirmed = false;
         let transaction2Confirmed = false;
@@ -13663,8 +13673,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Could not check verification status from database");
         }
         
-        // Paolo's confirmed transactions with updated payment status
-        const paoloTransactions = [
+        // Create database confirmed transactions
+        const databaseTransactions = confirmedOffers.map(offer => ({
+          id: offer.id + 1000, // Offset to avoid conflicts with mock IDs
+          notificationId: `BN-${offer.offerId}`,
+          farmerId: farmerId,
+          buyerId: offer.buyerId || "margibi_buyer",
+          buyerName: offer.buyerName || "Margibi Trading Company",
+          buyerCompany: "Agricultural Trading Company",
+          commodityType: offer.commodityType,
+          quantityAvailable: parseFloat(offer.quantityAvailable),
+          unit: offer.unit,
+          pricePerUnit: parseFloat(offer.pricePerUnit),
+          totalValue: parseFloat(offer.totalValue),
+          qualityGrade: offer.qualityGrade,
+          paymentTerms: offer.paymentTerms,
+          deliveryTerms: offer.deliveryTerms,
+          verificationCode: offer.verificationCode,
+          secondVerificationCode: null, // Will be added when payment is confirmed
+          paymentConfirmed: false,
+          paymentConfirmedAt: null,
+          confirmedAt: offer.confirmedAt,
+          status: "confirmed"
+        }));
+
+        // Paolo's mock confirmed transactions with updated payment status  
+        const mockTransactions = [
           {
             id: 1,
             notificationId: "BN-PAOLO-6",
@@ -13711,12 +13745,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         ];
 
-        console.log(`✅ Returning ${paoloTransactions.length} Paolo confirmed transactions from Margibi buyer`);
-        paoloTransactions.forEach((t, i) => {
+        // Combine all confirmed transactions (database + mock)
+        const allTransactions = [...mockTransactions, ...databaseTransactions];
+
+        console.log(`✅ Returning ${allTransactions.length} Paolo confirmed transactions (${mockTransactions.length} mock + ${databaseTransactions.length} database)`);
+        allTransactions.forEach((t, i) => {
           console.log(`  ${i+1}. ${t.commodityType} - ${t.buyerName} - $${t.totalValue} - Code: ${t.verificationCode}`);
         });
         
-        res.json(paoloTransactions);
+        res.json(allTransactions);
         return;
       }
       

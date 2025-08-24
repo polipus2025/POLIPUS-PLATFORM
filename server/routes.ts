@@ -474,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create notification for each approved buyer - FIXED WITH DIRECT SQL
       const notifications = [];
       for (const buyer of allBuyers) {
-        const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}`;
+        const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}-BUYER-${buyer.id}`;
         
         try {
           // Use direct SQL to avoid ORM bugs
@@ -13362,7 +13362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create notification for each approved buyer - FIXED WITH DIRECT SQL
       const notifications = [];
       for (const buyer of allBuyers) {
-        const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}`;
+        const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}-BUYER-${buyer.id}`;
         
         try {
           // Use direct SQL to avoid ORM bugs

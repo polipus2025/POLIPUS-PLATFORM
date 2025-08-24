@@ -13295,103 +13295,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 1. Farmer submits product offer and automatically notifies all county buyers
   app.post("/api/farmer/submit-offer", async (req, res) => {
     try {
-      const {
-        farmerId,
-        commodityType,
-        quantityAvailable,
-        unit,
-        pricePerUnit,
-        qualityGrade,
-        harvestDate,
-        paymentTerms,
-        deliveryTerms,
-        description,
-        farmLocation,
-        farmerName,
-        farmerCounty
-      } = req.body;
-
-      // Calculate total value
-      const totalValue = (parseFloat(quantityAvailable) * parseFloat(pricePerUnit)).toFixed(2);
-
-      // Create the product offer
-      const offer = {
-        id: Math.random().toString(36).substring(2, 9),
-        farmerId: parseInt(farmerId),
-        commodityType,
-        quantityAvailable: parseFloat(quantityAvailable),
-        unit,
-        pricePerUnit: parseFloat(pricePerUnit),
-        totalValue: parseFloat(totalValue),
-        qualityGrade,
-        harvestDate: new Date(harvestDate),
-        paymentTerms,
-        deliveryTerms,
-        description: description || '',
-        farmLocation: farmLocation || 'Farm Location',
-        farmerName: farmerName || 'Farmer',
-        farmerCounty: farmerCounty || 'Monrovia',
-        status: 'pending',
-        createdAt: new Date()
+      console.log("Received offer data:", req.body); // Debug log
+      
+      // Transform data to match schema expectations
+      const transformedData = {
+        farmerId: req.body.farmerId,
+        commodityType: req.body.commodityType,
+        quantityAvailable: req.body.quantityAvailable.toString(),
+        unit: req.body.unit,
+        pricePerUnit: req.body.pricePerUnit.toString(),
+        totalValue: req.body.totalValue.toString(),
+        qualityGrade: req.body.qualityGrade,
+        harvestDate: new Date(req.body.harvestDate),
+        availableFromDate: new Date(req.body.availableFromDate || new Date()),
+        expirationDate: new Date(req.body.expirationDate || Date.now() + 30*24*60*60*1000),
+        paymentTerms: req.body.paymentTerms,
+        deliveryTerms: req.body.deliveryTerms,
+        description: req.body.description || '',
+        farmLocation: req.body.farmLocation,
+        farmerName: req.body.farmerName,
+        county: req.body.county,
       };
+      
+      console.log("Transformed data:", transformedData); // Debug log
+      
+      const validatedData = insertFarmerProductOfferSchema.parse(transformedData);
+      
+      // Generate unique offer ID
+      const offerId = generateOfferId();
+      
+      // Create the farmer product offer
+      const [offer] = await db.insert(farmerProductOffers).values({
+        ...validatedData,
+        offerId,
+      }).returning();
 
-      // Generate unique notification ID for this offer
-      const notificationId = Math.random().toString(36).substring(2, 15).toUpperCase();
+      // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
+      console.log("🔄 Product offer saved successfully, creating automatic buyer notifications");
+      
+      // Get all registered buyers from database (real buyers only)
+      const allBuyers = await db
+        .select({
+          id: buyers.id,
+          buyerId: buyers.buyerId,
+          businessName: buyers.businessName,
+          contactPersonFirstName: buyers.contactPersonFirstName,
+          contactPersonLastName: buyers.contactPersonLastName
+        })
+        .from(buyers)
+        .where(eq(buyers.complianceStatus, 'approved'));
+      
+      console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
+      
+      // Create notification for each approved buyer
+      const notifications = [];
+      for (const buyer of allBuyers) {
+        const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}`;
+        
+        const [notification] = await db.insert(buyerNotifications).values({
+          notificationId,
+          offerId: offerId,
+          buyerId: buyer.id,
+          buyerName: buyer.businessName,
+          farmerName: validatedData.farmerName,
+          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
+          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for $${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
+          commodityType: validatedData.commodityType,
+          quantityAvailable: validatedData.quantityAvailable,
+          pricePerUnit: validatedData.pricePerUnit,
+          county: validatedData.county,
+          createdAt: new Date()
+        }).returning();
+        
+        notifications.push(notification);
+      }
 
-      // Find all buyers in the same county
-      const countyBuyers = [
-        { id: 1, name: "Michael Johnson", company: "Johnson Agriculture Trading", county: "Monrovia" },
-        { id: 2, name: "Sarah Williams", company: "Global Commodity Buyers LLC", county: "Buchanan" },
-        { id: 3, name: "David Chen", company: "African Harvest Solutions", county: "Gbarnga" },
-        { id: 4, name: "Emily Rodriguez", company: "Premium Agro Exports", county: "Harper" },
-        { id: 5, name: "James Thompson", company: "Liberian Commodity Partners", county: "Kakata" },
-        { id: 6, name: "Maria Santos", company: "Santos Trading Co", county: "Monrovia" },
-        { id: 7, name: "Robert Kim", company: "Asia-Africa Commodities", county: "Monrovia" },
-        { id: 8, name: "Lisa Anderson", company: "Anderson Export Group", county: "Buchanan" }
-      ].filter(buyer => buyer.county === farmerCounty);
+      // Update offer with notification count
+      await db.update(farmerProductOffers)
+        .set({ 
+          notificationsSent: true, 
+          totalNotificationsSent: notifications.length 
+        })
+        .where(eq(farmerProductOffers.offerId, offerId));
+        
+      console.log(`✅ Automatically created ${notifications.length} buyer notifications for offer ${offerId}`);
 
-      // Create notifications for all buyers in the county
-      const buyerNotifications = countyBuyers.map(buyer => ({
-        id: Math.random().toString(36).substring(2, 9),
-        notificationId,
-        buyerId: buyer.id,
-        buyerName: buyer.name,
-        buyerCompany: buyer.company,
-        farmerId: parseInt(farmerId),
-        farmerName,
-        farmLocation,
-        commodityType,
-        quantityAvailable: parseFloat(quantityAvailable),
-        unit,
-        pricePerUnit: parseFloat(pricePerUnit),
-        totalValue: parseFloat(totalValue),
-        qualityGrade,
-        harvestDate: new Date(harvestDate),
-        paymentTerms,
-        deliveryTerms,
-        description: description || '',
-        status: 'pending',
-        createdAt: new Date(),
-        county: farmerCounty
-      }));
-
-      // In a real system, save notifications to database
-      // For now, we'll return success with the count
-      console.log(`Created ${buyerNotifications.length} notifications for buyers in ${farmerCounty} county`);
-
-      res.json({
-        message: "Farmer product offer submitted successfully",
+      res.status(201).json({
+        success: true,
+        message: `Product offer submitted successfully and saved to marketplace!`,
         offer,
-        notificationsSent: buyerNotifications.length,
-        totalNotificationsSent: buyerNotifications.length,
-        notificationId,
-        buyersNotified: countyBuyers.map(b => b.name)
+        notificationsSent: notifications.length,
       });
+
     } catch (error) {
-      console.error("Error submitting farmer product offer:", error);
-      res.status(500).json({ error: "Failed to submit product offer" });
+      console.error("Error creating farmer product offer:", error);
+      res.status(400).json({ 
+        success: false, 
+        message: "Failed to create product offer", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
+
+  // 2. Get buyer notifications
 
   // 2. Get buyer notifications  
   app.get("/api/buyer/notifications/:buyerId", async (req, res) => {

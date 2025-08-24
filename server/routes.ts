@@ -14952,11 +14952,12 @@ https://agritrace360.lacra.gov.lr/verify/${batchCode}
           // Generate QR code image URL using QrBatchService with readable data
           console.log('🔄 Generating HUMAN-READABLE QR code for batch:', batchCode);
           console.log('📏 Readable QR Data Size:', readableQrData.length, 'characters');
+          console.log('📄 QR Content Preview:', readableQrData.substring(0, 100) + '...');
           const { QrBatchService } = await import('./qr-batch-service');
           const qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
           console.log('✅ QR code generated:', qrCodeUrl ? 'SUCCESS' : 'FAILED');
 
-          // Create QR batch entry
+          // Create QR batch entry with READABLE TEXT as the qr_code_data
           await db.execute(sql`
             INSERT INTO qr_batches (
               batch_code, warehouse_id, warehouse_name,
@@ -14973,7 +14974,7 @@ https://agritrace360.lacra.gov.lr/verify/${batchCode}
               ${JSON.stringify({ inspected: true, quality: 'excellent' })},
               ${JSON.stringify({ compliant: true, eudr_ready: true })},
               '6.428°N, 9.429°W',
-              ${JSON.stringify(qrCodeData)}, ${qrCodeUrl}, 'generated'
+              ${readableQrData}, ${qrCodeUrl}, 'generated'
             )
           `);
           

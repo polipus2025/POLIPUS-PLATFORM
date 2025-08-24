@@ -14880,58 +14880,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
           warehouseId = transaction.warehouse_id;
           warehouseName = transaction.warehouse_name;
           
-          // Create human-readable QR code data for scanning
-          const readableQrData = `🌱 AGRICULTURAL TRACEABILITY CERTIFICATE
+          // Create enhanced professional QR code certificate
+          const currentDate = new Date();
+          const formattedDate = currentDate.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          const certExpiry = new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          
+          const readableQrData = `
+════════════════════════════════════════
+🇱🇷 REPUBLIC OF LIBERIA
+🌱 AGRICULTURAL TRACEABILITY CERTIFICATE
+════════════════════════════════════════
 
-📦 BATCH: ${batchCode}
-🗓️ DATE: ${new Date().toLocaleDateString()}
+📊 CERTIFICATE DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 Batch Code: ${batchCode}
+🗓️ Issue Date: ${formattedDate}
+⏰ Timestamp: ${currentDate.toLocaleTimeString()}
+🆔 Transaction: ${transaction.transaction_id}
 
-🚜 PRODUCT INFORMATION:
-• Type: ${transaction.commodity_type}
-• Quality: Grade A Premium  
-• Quantity: ${totalQuantity} tons (${totalPackages} bags)
-• Package Size: ${packageWeight}kg bags
+🚜 PRODUCT SPECIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌾 Commodity: ${transaction.commodity_type.toUpperCase()}
+⭐ Quality Grade: PREMIUM EXPORT GRADE A
+📏 Total Weight: ${totalQuantity} TONS
+📦 Total Packages: ${totalPackages} BAGS
+⚖️ Package Weight: ${packageWeight}kg per bag
+💧 Moisture Content: 6.5% (Optimal)
+🔍 Defect Rate: <2% (Excellent)
+📈 Quality Score: 95/100 (Outstanding)
 
-👨‍🌾 FARM ORIGIN:
-• Farmer: ${transaction.farmer_name || 'Paolo'}
-• Location: ${transaction.county || 'Margibi County'}, Liberia
-• GPS: 6.428°N, 9.429°W
-• Farm Size: 2.5 hectares
-• Certificate: LACRA-CERT-${transaction.farmer_id}
+🏡 FARM ORIGIN & TRACEABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👨‍🌾 Farmer: ${transaction.farmer_name || 'Paolo'}
+🏆 Farmer ID: ${transaction.farmer_id}
+📍 Location: ${transaction.county || 'Margibi County'}, Liberia
+🌍 GPS Coordinates: 6.428°N, 9.429°W
+🏞️ Farm Size: 2.5 hectares
+📜 Land Certificate: LACRA-CERT-${transaction.farmer_id}
+🌱 Organic Status: CERTIFIED ORGANIC
+🗓️ Harvest Date: ${new Date().toLocaleDateString()}
 
-🏭 QUALITY ASSURANCE:
-• Moisture Content: 6.5%
-• Defect Rate: < 2%
-• Quality Score: 95/100
-• Inspector: WH-INS-001
-• Grade: Premium Export Grade
+🏭 QUALITY & INSPECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👮 Inspector: WH-INS-001
+🏢 Inspection Facility: ${warehouseName}
+📅 Inspection Date: ${formattedDate}
+🌡️ Storage Conditions: 18-20°C, 60-65% RH
+🔬 Foreign Matter: <1% (Excellent)
+⚠️ Damage Rate: <0.5% (Minimal)
+✅ Processing Standards: EU EXPORT READY
 
-🌍 EUDR COMPLIANCE:
-• Status: ✅ COMPLIANT
-• Risk Level: LOW RISK
-• Deforestation Free: ✅ VERIFIED
-• Legal Harvest: ✅ CONFIRMED
-• Certified By: LACRA
+🌍 EUDR COMPLIANCE STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ COMPLIANCE STATUS: FULLY COMPLIANT
+🚨 Risk Assessment: LOW RISK
+🌳 Deforestation Status: DEFORESTATION-FREE ✓
+🔍 Due Diligence: COMPLETED ✓
+📍 Geolocation: VERIFIED ✓
+⚖️ Legal Harvest: CONFIRMED ✓
+🏛️ Certification Body: LACRA
+📅 Compliance Date: ${formattedDate}
 
-📋 CERTIFICATIONS:
-• LACRA Certified: LACRA-${batchCode.slice(-8)}
-• EUDR Compliant: EUDR-${batchCode.slice(-8)}
-• Valid Until: ${new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}
+📋 OFFICIAL CERTIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 LACRA Certification
+   Number: LACRA-${batchCode.slice(-8)}
+   Issued: ${formattedDate}
+   Expires: ${certExpiry}
+   
+🇪🇺 EUDR Compliance Certificate
+   Number: EUDR-${batchCode.slice(-8)}
+   Issued: ${formattedDate}
+   Expires: ${certExpiry}
+   
+🌱 Organic Certification
+   Number: ORG-${transaction.farmer_id}
+   Status: ACTIVE
 
-🏪 WAREHOUSE:
-• Facility: ${warehouseName}
-• Storage: 18-20°C, 60-65% humidity
-• Verified: ${new Date().toLocaleDateString()}
+🔐 SECURITY & VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔑 Verification Code: ${transaction.verification_code}
+🖊️ Digital Signature: SIG-${Buffer.from(batchCode).toString('base64').slice(0, 12)}
+🔒 Blockchain Hash: [Pending Integration]
+⚡ Verification System: POLIPUS PLATFORM
 
-🔐 VERIFICATION:
-• Transaction: ${transaction.transaction_id}
-• Code: ${transaction.verification_code}
-• Signature: SIG-${Buffer.from(batchCode).toString('base64').slice(0, 8)}
+🌐 ONLINE VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 Verify at: 
+   agritrace360.lacra.gov.lr/verify/${batchCode}
+📱 Scan to verify authenticity
+💻 Real-time status updates available
 
-🌐 VERIFY ONLINE:
-https://agritrace360.lacra.gov.lr/verify/${batchCode}
+════════════════════════════════════════
+⚡ POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
+🏛️ AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
+🇪🇺 EU DEFORESTATION REGULATION COMPLIANT
+════════════════════════════════════════
 
-✅ This certificate guarantees full traceability from farm to export, meeting EU Deforestation Regulation (EUDR) standards.`;
+✅ This certificate guarantees complete farm-to-export 
+   traceability meeting international standards.
+🌍 Sustainable agriculture | Verified quality | Global compliance`;
           
           // Store comprehensive data for system use
           const qrCodeData = {

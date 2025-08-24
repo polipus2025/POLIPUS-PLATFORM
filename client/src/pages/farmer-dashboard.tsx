@@ -72,6 +72,13 @@ export default function FarmerDashboard() {
     enabled: !!farmerId,
   });
 
+  // Fetch farmer's own offers with status tracking
+  const { data: farmerOffers, isLoading: farmerOffersLoading } = useQuery({
+    queryKey: ['/api/farmer/my-offers', farmerId],
+    queryFn: () => apiRequest(`/api/farmer/my-offers/${farmerId}`),
+    enabled: !!farmerId,
+  });
+
   // Fetch farmer verification codes archive
   const { data: farmerCodes, isLoading: farmerCodesLoading } = useQuery({
     queryKey: ['/api/farmer/verification-codes', farmerId],
@@ -713,6 +720,103 @@ export default function FarmerDashboard() {
                   {isSubmitting ? "Submitting..." : "Submit Product Offer & Notify Buyers"}
                 </button>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* CURRENT OFFERS STATUS TRACKING */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Package className="w-5 h-5 mr-2 text-green-600" />
+                My Product Offers Status
+              </CardTitle>
+              <CardDescription>
+                Track your offers from creation to buyer confirmation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {farmerOffersLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading offers...</div>
+              ) : farmerOffers && farmerOffers.length > 0 ? (
+                <div className="space-y-4">
+                  {farmerOffers.map((offer: any) => (
+                    <div key={offer.id} className={`p-4 border rounded-lg ${
+                      offer.status === 'pending' ? 'bg-orange-50 border-orange-200' : 
+                      offer.status === 'confirmed' ? 'bg-green-50 border-green-200' : 
+                      'bg-gray-50 border-gray-200'
+                    }`}>
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="font-semibold text-gray-900">{offer.commodityType}</p>
+                          <p className="text-sm text-gray-600">Offer ID: {offer.offerId}</p>
+                          <p className="text-sm text-gray-600">{offer.quantityAvailable} {offer.unit} • ${offer.totalValue}</p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={`${
+                            offer.status === 'pending' ? 'bg-orange-600' : 
+                            offer.status === 'confirmed' ? 'bg-green-600' : 
+                            'bg-gray-600'
+                          } text-white`}>
+                            {offer.status === 'pending' ? 'PENDING' : 
+                             offer.status === 'confirmed' ? 'CONFIRMED' : 
+                             offer.status.toUpperCase()}
+                          </Badge>
+                          {offer.verificationCode && (
+                            <Badge variant="outline" className="text-blue-600 border-blue-300 text-xs">
+                              Code: {offer.verificationCode}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Dates Section */}
+                      <div className="text-sm text-gray-600 mb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <p>
+                            <strong>📅 Offer Created:</strong> {new Date(offer.offerCreatedAt).toLocaleString()}
+                          </p>
+                          {offer.confirmedAt ? (
+                            <p>
+                              <strong>✅ Confirmed:</strong> {new Date(offer.confirmedAt).toLocaleString()}
+                            </p>
+                          ) : (
+                            <p className="text-orange-600">
+                              <strong>⏳ Status:</strong> Waiting for buyer acceptance
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Buyer Details - Only show when confirmed */}
+                      {offer.status === 'confirmed' && offer.buyerName && (
+                        <div className="border-t pt-3 mt-3">
+                          <p className="text-sm font-medium text-green-700 mb-1">✅ Buyer Details:</p>
+                          <div className="text-sm text-gray-600">
+                            <p><strong>Buyer:</strong> {offer.buyerName}</p>
+                            <p><strong>Company:</strong> {offer.buyerCompany}</p>
+                            <p><strong>Buyer ID:</strong> {offer.buyerId}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Pending Status Details */}
+                      {offer.status === 'pending' && (
+                        <div className="border-t pt-3 mt-3">
+                          <p className="text-sm text-orange-600 font-medium">
+                            🔔 Buyers in {offer.county} County have been notified. First to accept wins!
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>No offers submitted yet</p>
+                  <p className="text-sm">Submit your first product offer above</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

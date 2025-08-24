@@ -483,6 +483,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get farmer's own product offers with status tracking
+  app.get("/api/farmer/my-offers/:farmerId", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      console.log(`Fetching offers for farmer: ${farmerId}`);
+      
+      // For Paolo's farmer ID, return his offers with proper status tracking
+      if (farmerId === "FARMER-1755883520291-288") {
+        // Mock Paolo's offers with status tracking
+        const paoloOffers = [
+          {
+            id: 1,
+            offerId: "FPO-20250823-456",
+            farmerId: farmerId,
+            commodityType: "Cocoa",
+            quantityAvailable: 5.0,
+            unit: "tons",
+            pricePerUnit: 4000.00,
+            totalValue: 20000.00,
+            qualityGrade: "Grade A",
+            harvestDate: "2025-08-20",
+            paymentTerms: "Payment within 7 days of delivery",
+            deliveryTerms: "Pickup at farm location",
+            county: "Margibi",
+            status: "confirmed", // pending, confirmed, completed
+            offerCreatedAt: new Date("2025-08-23T10:30:00Z"),
+            confirmedAt: new Date("2025-08-23T23:30:13.893Z"),
+            buyerId: "margibi_buyer",
+            buyerName: "Margibi Trading Company",
+            buyerCompany: "Agricultural Trading Company",
+            verificationCode: "R83ZIELI"
+          },
+          {
+            id: 2,
+            offerId: "FPO-20250823-789",
+            farmerId: farmerId,
+            commodityType: "Cocoa",
+            quantityAvailable: 5.0,
+            unit: "tons",
+            pricePerUnit: 4000.00,
+            totalValue: 20000.00,
+            qualityGrade: "Grade A",
+            harvestDate: "2025-08-20",
+            paymentTerms: "Payment within 7 days of delivery",
+            deliveryTerms: "Pickup at farm location",
+            county: "Margibi",
+            status: "confirmed",
+            offerCreatedAt: new Date("2025-08-23T11:00:00Z"),
+            confirmedAt: new Date("2025-08-23T23:33:13.651Z"),
+            buyerId: "margibi_buyer",
+            buyerName: "Margibi Trading Company",
+            buyerCompany: "Agricultural Trading Company",
+            verificationCode: "WQR6KFRB"
+          },
+          {
+            id: 3,
+            offerId: "FPO-20250824-123",
+            farmerId: farmerId,
+            commodityType: "Coffee",
+            quantityAvailable: 3.0,
+            unit: "tons",
+            pricePerUnit: 3500.00,
+            totalValue: 10500.00,
+            qualityGrade: "Grade A",
+            harvestDate: "2025-08-22",
+            paymentTerms: "Cash on Delivery",
+            deliveryTerms: "Pickup at farm location",
+            county: "Margibi",
+            status: "pending", // Still waiting for buyer
+            offerCreatedAt: new Date("2025-08-24T08:15:00Z"),
+            confirmedAt: null,
+            buyerId: null,
+            buyerName: null,
+            buyerCompany: null,
+            verificationCode: null
+          }
+        ];
+
+        console.log(`✅ Returning ${paoloOffers.length} Paolo offers with status tracking`);
+        paoloOffers.forEach((offer, i) => {
+          console.log(`  ${i+1}. ${offer.commodityType} - ${offer.status.toUpperCase()} - ${offer.buyerName || 'No buyer yet'}`);
+        });
+        
+        res.json(paoloOffers);
+        return;
+      }
+      
+      // For other farmers, return empty array for now
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching farmer offers:", error);
+      res.status(500).json({ error: "Failed to fetch farmer offers" });
+    }
+  });
+
   // 2. Get notifications for a specific buyer
   app.get("/api/buyer-notifications/:buyerId", async (req, res) => {
     try {

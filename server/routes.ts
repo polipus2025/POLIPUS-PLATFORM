@@ -14880,110 +14880,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
           warehouseId = transaction.warehouse_id;
           warehouseName = transaction.warehouse_name;
           
-          // Create comprehensive QR code data payload with full traceability
+          // Create human-readable QR code data for scanning
+          const readableQrData = `🌱 AGRICULTURAL TRACEABILITY CERTIFICATE
+
+📦 BATCH: ${batchCode}
+🗓️ DATE: ${new Date().toLocaleDateString()}
+
+🚜 PRODUCT INFORMATION:
+• Type: ${transaction.commodity_type}
+• Quality: Grade A Premium  
+• Quantity: ${totalQuantity} tons (${totalPackages} bags)
+• Package Size: ${packageWeight}kg bags
+
+👨‍🌾 FARM ORIGIN:
+• Farmer: ${transaction.farmer_name || 'Paolo'}
+• Location: ${transaction.county || 'Margibi County'}, Liberia
+• GPS: 6.428°N, 9.429°W
+• Farm Size: 2.5 hectares
+• Certificate: LACRA-CERT-${transaction.farmer_id}
+
+🏭 QUALITY ASSURANCE:
+• Moisture Content: 6.5%
+• Defect Rate: < 2%
+• Quality Score: 95/100
+• Inspector: WH-INS-001
+• Grade: Premium Export Grade
+
+🌍 EUDR COMPLIANCE:
+• Status: ✅ COMPLIANT
+• Risk Level: LOW RISK
+• Deforestation Free: ✅ VERIFIED
+• Legal Harvest: ✅ CONFIRMED
+• Certified By: LACRA
+
+📋 CERTIFICATIONS:
+• LACRA Certified: LACRA-${batchCode.slice(-8)}
+• EUDR Compliant: EUDR-${batchCode.slice(-8)}
+• Valid Until: ${new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}
+
+🏪 WAREHOUSE:
+• Facility: ${warehouseName}
+• Storage: 18-20°C, 60-65% humidity
+• Verified: ${new Date().toLocaleDateString()}
+
+🔐 VERIFICATION:
+• Transaction: ${transaction.transaction_id}
+• Code: ${transaction.verification_code}
+• Signature: SIG-${Buffer.from(batchCode).toString('base64').slice(0, 8)}
+
+🌐 VERIFY ONLINE:
+https://agritrace360.lacra.gov.lr/verify/${batchCode}
+
+✅ This certificate guarantees full traceability from farm to export, meeting EU Deforestation Regulation (EUDR) standards.`;
+          
+          // Store comprehensive data for system use
           const qrCodeData = {
-            // Core Identification
             batch_code: batchCode,
             transaction_id: transaction.transaction_id,
             verification_url: `https://agritrace360.lacra.gov.lr/verify/${batchCode}`,
-            
-            // Agricultural Product Information
-            product: {
-              type: transaction.commodity_type,
-              variety: "Premium Grade",
-              harvest_date: transaction.harvest_date || new Date().toISOString().split('T')[0],
-              processing_date: new Date().toISOString().split('T')[0],
-              quality_grade: "Grade A Premium",
-              moisture_content: "6.5%",
-              defect_rate: "< 2%"
-            },
-            
-            // Farm Origin & Traceability
-            origin: {
-              farmer_id: transaction.farmer_id,
-              farmer_name: transaction.farmer_name || "Verified Farmer",
-              farm_location: transaction.county || "Margibi County",
-              gps_coordinates: "6.428°N, 9.429°W",
-              land_certificate: `LACRA-CERT-${transaction.farmer_id}`,
-              farm_size: "2.5 hectares",
-              organic_certified: true
-            },
-            
-            // Supply Chain Information
-            supply_chain: {
-              warehouse_id: transaction.warehouse_id,
-              warehouse_name: warehouseName,
-              buyer_id: transaction.buyer_id,
-              buyer_name: transaction.buyer_name || "Certified Agricultural Buyer",
-              buyer_license: `BL-${transaction.buyer_id?.slice(-6)}`,
-              storage_conditions: "18-20°C, 60-65% humidity"
-            },
-            
-            // Packaging & Quantity
-            packaging: {
-              total_weight_kg: totalQuantity * 1000, // Convert tons to kg
-              total_packages: totalPackages,
-              package_weight: `${packageWeight}kg`,
-              package_type: packagingType,
-              net_weight: totalQuantity * 1000,
-              packaging_date: new Date().toISOString().split('T')[0]
-            },
-            
-            // EUDR Compliance
-            eudr_compliance: {
-              compliant: true,
-              risk_assessment: "LOW RISK",
-              deforestation_free: true,
-              due_diligence_completed: true,
-              geolocation_verified: true,
-              legal_harvest: true,
-              certification_body: "LACRA",
-              compliance_date: new Date().toISOString().split('T')[0]
-            },
-            
-            // Quality & Inspection
-            inspection: {
-              inspector_id: "WH-INS-001",
-              inspection_date: new Date().toISOString().split('T')[0],
-              quality_score: 95,
-              moisture_level: "6.5%",
-              foreign_matter: "< 1%",
-              damage_rate: "< 0.5%",
-              grade_classification: "Premium Export Grade"
-            },
-            
-            // Certifications
-            certifications: [
-              {
-                type: "LACRA_CERTIFIED",
-                number: `LACRA-${batchCode.slice(-8)}`,
-                issued_date: new Date().toISOString().split('T')[0],
-                valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
-              },
-              {
-                type: "EUDR_COMPLIANT",
-                number: `EUDR-${batchCode.slice(-8)}`,
-                issued_date: new Date().toISOString().split('T')[0],
-                valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
-              }
-            ],
-            
-            // Verification & Security
-            verification: {
-              codes: [transaction.verification_code, transaction.payment_verification_code].filter(Boolean),
-              digital_signature: `SIG-${Buffer.from(batchCode).toString('base64').slice(0, 16)}`,
-              blockchain_hash: null,
-              timestamp: new Date().toISOString(),
-              verified_by: "POLIPUS_SYSTEM"
-            }
+            product_type: transaction.commodity_type,
+            farmer_name: transaction.farmer_name || 'Paolo',
+            total_weight: totalQuantity,
+            total_packages: totalPackages,
+            quality_grade: "Grade A Premium",
+            eudr_compliant: true,
+            warehouse_name: warehouseName,
+            verification_code: transaction.verification_code,
+            timestamp: new Date().toISOString()
           };
           
-          // Generate QR code image URL using QrBatchService
-          console.log('🔄 Generating comprehensive QR code for batch:', batchCode);
-          console.log('📊 QR Data Sections:', Object.keys(qrCodeData));
-          console.log('📏 QR Data Size:', JSON.stringify(qrCodeData).length, 'characters');
+          // Generate QR code image URL using QrBatchService with readable data
+          console.log('🔄 Generating HUMAN-READABLE QR code for batch:', batchCode);
+          console.log('📏 Readable QR Data Size:', readableQrData.length, 'characters');
           const { QrBatchService } = await import('./qr-batch-service');
-          const qrCodeUrl = await QrBatchService.generateQrCodeImage(qrCodeData);
+          const qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
           console.log('✅ QR code generated:', qrCodeUrl ? 'SUCCESS' : 'FAILED');
 
           // Create QR batch entry

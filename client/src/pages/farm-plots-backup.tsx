@@ -1,14 +1,17 @@
 import { Helmet } from "react-helmet";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Search, Map, Crop, TreePine, BarChart3, Eye, Edit, MapPin } from "lucide-react";
+import { Plus, Search, Map, Crop, TreePine, BarChart3, Eye, Edit, MapPin, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { FarmPlot, Farmer } from "@shared/schema";
+import type { farmPlots, farmers } from "@shared/schema";
+
+type FarmPlot = typeof farmPlots.$inferSelect;
+type Farmer = typeof farmers.$inferSelect;
 
 export default function FarmPlotsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,54 +67,6 @@ export default function FarmPlotsPage() {
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Existing Farm Plots</h2>
               <p className="text-sm text-gray-600 mt-1">View and manage your mapped farm plots</p>
-            </div>
-                      <option value="Palm Oil">Palm Oil</option>
-                      <option value="Rubber">Rubber</option>
-                      <option value="Rice">Rice</option>
-                      <option value="Cassava">Cassava</option>
-                      <option value="Kola Nut">Kola Nut</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Plot Size (hectares)</label>
-                    <Input type="number" step="0.1" placeholder="e.g., 2.5" />
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">GPS Coordinates</label>
-                    <div className="space-y-2">
-                      <Input placeholder="Latitude (e.g., 8.0050)" />
-                      <Input placeholder="Longitude (e.g., -9.5200)" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Soil Type</label>
-                    <select className="w-full p-2 border border-gray-300 rounded-md">
-                      <option value="">Select soil type...</option>
-                      <option value="Forest soil">Forest soil</option>
-                      <option value="Volcanic soil">Volcanic soil</option>
-                      <option value="Lateritic soil">Lateritic soil</option>
-                      <option value="Alluvial soil">Alluvial soil</option>
-                      <option value="Sandy soil">Sandy soil</option>
-                      <option value="Clay soil">Clay soil</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Planting Date</label>
-                    <Input type="date" />
-                  </div>
-                  <div className="flex gap-2 mt-6">
-                    <Button className="flex-1 bg-lacra-green hover:bg-green-700">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      Save Plot
-                    </Button>
-                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -257,6 +257,8 @@ export const buyerVerificationCodes = pgTable("buyer_verification_codes", {
   deliveryTerms: text("delivery_terms"),
   acceptedAt: timestamp("accepted_at").defaultNow(),
   expiresAt: timestamp("expires_at"),
+  secondVerificationCode: text("second_verification_code"),
+  paymentConfirmedAt: timestamp("payment_confirmed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

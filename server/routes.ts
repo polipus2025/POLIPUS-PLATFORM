@@ -13517,7 +13517,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For Paolo's farmer ID, return his Margibi buyer transactions directly
       if (farmerId === "FARMER-1755883520291-288") {
-        // Paolo's confirmed transactions from database data
+        // Check database for payment confirmations
+        let transaction1Confirmed = false;
+        let transaction2Confirmed = false;
+        let transaction1SecondCode = null;
+        let transaction2SecondCode = null;
+        let transaction1PaymentDate = null;
+        let transaction2PaymentDate = null;
+        
+        try {
+          // Check if payments were confirmed in database
+          const verificationCheck = await db.execute(sql`
+            SELECT id, second_verification_code, payment_confirmed_at 
+            FROM buyer_verification_codes 
+            WHERE farmer_id = '288' AND id IN (1, 2)
+          `);
+          
+          verificationCheck.rows.forEach((row: any) => {
+            if (row.id === 1 && row.second_verification_code) {
+              transaction1Confirmed = true;
+              transaction1SecondCode = row.second_verification_code;
+              transaction1PaymentDate = row.payment_confirmed_at;
+            }
+            if (row.id === 2 && row.second_verification_code) {
+              transaction2Confirmed = true;
+              transaction2SecondCode = row.second_verification_code;
+              transaction2PaymentDate = row.payment_confirmed_at;
+            }
+          });
+        } catch (e) {
+          console.log("Could not check verification status from database");
+        }
+        
+        // Paolo's confirmed transactions with updated payment status
         const paoloTransactions = [
           {
             id: 1,
@@ -13535,11 +13567,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentTerms: "Payment within 7 days of delivery",
             deliveryTerms: "Pickup at farm location",
             verificationCode: "R83ZIELI",
-            secondVerificationCode: null,
-            paymentConfirmed: false,
-            paymentConfirmedAt: null,
+            secondVerificationCode: transaction1SecondCode,
+            paymentConfirmed: transaction1Confirmed,
+            paymentConfirmedAt: transaction1PaymentDate,
             confirmedAt: new Date("2025-08-23T23:30:13.893Z"),
-            status: "confirmed"
+            status: transaction1Confirmed ? "payment_confirmed" : "confirmed"
           },
           {
             id: 2,
@@ -13557,11 +13589,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentTerms: "Payment within 7 days of delivery",
             deliveryTerms: "Pickup at farm location",
             verificationCode: "WQR6KFRB",
-            secondVerificationCode: null,
-            paymentConfirmed: false,
-            paymentConfirmedAt: null,
+            secondVerificationCode: transaction2SecondCode,
+            paymentConfirmed: transaction2Confirmed,
+            paymentConfirmedAt: transaction2PaymentDate,
             confirmedAt: new Date("2025-08-23T23:33:13.651Z"),
-            status: "confirmed"
+            status: transaction2Confirmed ? "payment_confirmed" : "confirmed"
           }
         ];
 
@@ -13656,7 +13688,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmerId } = req.params;
       console.log(`Fetching verification codes for farmer: ${farmerId}`);
       
-      // Fetch real farmer verification codes from database
+      // For Paolo's farmer ID, return his verification codes with payment confirmation details
+      if (farmerId === "FARMER-1755883520291-288") {
+        try {
+          // Get Paolo's verification codes from buyer_verification_codes table
+          const paoloCodesResult = await db.execute(sql`
+            SELECT id, verification_code, buyer_name, commodity_type, 
+                   quantity_available, unit, total_value, accepted_at, status,
+                   second_verification_code, payment_confirmed_at
+            FROM buyer_verification_codes 
+            WHERE farmer_id = '288' 
+            ORDER BY accepted_at DESC
+          `);
+          
+          const paoloVerificationCodes = paoloCodesResult.rows.map((row: any) => {
+            const hasPaymentConfirmation = row.second_verification_code && row.payment_confirmed_at;
+            
+            return {
+              id: `PAOLO-${row.id}`,
+              verificationCode: row.verification_code,
+              secondVerificationCode: row.second_verification_code,
+              farmerId: farmerId,
+              buyerName: row.buyer_name || 'Margibi Trading Company',
+              commodityType: row.commodity_type,
+              quantityAvailable: parseFloat(row.quantity_available),
+              unit: row.unit || 'tons',
+              totalValue: parseFloat(row.total_value),
+              generatedAt: new Date(row.accepted_at),
+              paymentConfirmedAt: row.payment_confirmed_at ? new Date(row.payment_confirmed_at) : null,
+              status: hasPaymentConfirmation ? 'payment_confirmed' : 'active',
+              paymentStatus: hasPaymentConfirmation ? 'PAYMENT RECEIVED & CONFIRMED' : 'Awaiting Payment',
+              transactionComplete: hasPaymentConfirmation
+            };
+          });
+
+          console.log(`✅ Returning ${paoloVerificationCodes.length} Paolo verification codes with payment details`);
+          paoloVerificationCodes.forEach((code, i) => {
+            console.log(`  ${i+1}. ${code.verificationCode} ${code.secondVerificationCode ? `+ ${code.secondVerificationCode}` : ''} - ${code.paymentStatus}`);
+          });
+          
+          res.json(paoloVerificationCodes);
+          return;
+        } catch (error) {
+          console.log("Error fetching Paolo's verification codes:", error);
+        }
+      }
+      
+      // For other farmers, use the old logic
       const farmerCodes = await db.query.farmerVerificationCodes?.findMany({
         where: (table, { eq }) => eq(table.farmerId, farmerId),
         orderBy: (table, { desc }) => desc(table.transactionDate)

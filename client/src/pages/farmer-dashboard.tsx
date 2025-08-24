@@ -771,13 +771,40 @@ export default function FarmerDashboard() {
                             <code className="px-3 py-2 bg-blue-100 text-blue-700 rounded text-lg font-mono font-bold">
                               {code.verificationCode}
                             </code>
-                            <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                              {code.status}
+                            <Badge variant="outline" className={`${
+                              code.status === 'payment_confirmed' ? 'bg-green-100 text-green-700 border-green-300' : 
+                              'bg-blue-100 text-blue-700 border-blue-300'
+                            }`}>
+                              {code.status === 'payment_confirmed' ? 'PAID' : code.status}
                             </Badge>
+                            {code.paymentStatus && (
+                              <Badge variant="outline" className={`text-xs ${
+                                code.paymentStatus.includes('CONFIRMED') ? 'text-green-600 border-green-300' : 'text-orange-600 border-orange-300'
+                              }`}>
+                                {code.paymentStatus}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm text-gray-700 font-medium">Buyer: {code.buyerName}</p>
                           <p className="text-sm text-gray-600">{code.commodityType} • {code.quantityAvailable} {code.unit}</p>
                           <p className="text-sm text-blue-600 font-medium">Total Value: ${code.totalValue?.toLocaleString()}</p>
+                          
+                          {/* Show second verification code if payment confirmed */}
+                          {code.secondVerificationCode && (
+                            <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded">
+                              <p className="text-xs text-gray-600 mb-1">Second Verification Code:</p>
+                              <code className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm font-mono font-bold">
+                                {code.secondVerificationCode}
+                              </code>
+                            </div>
+                          )}
+                          
+                          {/* Payment confirmation details */}
+                          {code.paymentConfirmedAt && (
+                            <p className="text-xs text-green-600 font-medium mt-1">
+                              ✅ Payment confirmed: {new Date(code.paymentConfirmedAt).toLocaleString()}
+                            </p>
+                          )}
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-gray-500">
@@ -840,6 +867,11 @@ export default function FarmerDashboard() {
                         <p>First Code: <span className="font-mono font-bold text-blue-600">{transaction.verificationCode}</span></p>
                         {transaction.secondVerificationCode && (
                           <p>Second Code: <span className="font-mono font-bold text-purple-600">{transaction.secondVerificationCode}</span></p>
+                        )}
+                        {transaction.paymentConfirmed && transaction.paymentConfirmedAt && (
+                          <p className="text-sm text-green-600 font-medium">
+                            ✅ Payment Received: {new Date(transaction.paymentConfirmedAt).toLocaleString()}
+                          </p>
                         )}
                         <p className="text-xs">{new Date(transaction.confirmedAt).toLocaleDateString()}</p>
                       </div>

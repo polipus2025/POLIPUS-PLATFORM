@@ -489,12 +489,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmerId } = req.params;
       console.log(`Fetching offers for farmer: ${farmerId}`);
       
-      // For Paolo's farmer ID, return his offers with proper status tracking
+      // For Paolo's farmer ID, get both mock confirmed offers and real database offers
       if (farmerId === "FARMER-1755883520291-288") {
-        // Mock Paolo's offers with status tracking
-        const paoloOffers = [
+        // Get real offers from database (farmer_id = 288 in database)
+        const realOffers = await db
+          .select()
+          .from(farmerProductOffers)
+          .where(eq(farmerProductOffers.farmerId, 288))
+          .orderBy(desc(farmerProductOffers.createdAt));
+
+        console.log(`📂 Found ${realOffers.length} real offers in database for Paolo`);
+
+        // Mock confirmed offers (these represent offers that were accepted by buyers)
+        const confirmedOffers = [
           {
-            id: 1,
+            id: 1001,
             offerId: "FPO-20250823-456",
             farmerId: farmerId,
             commodityType: "Cocoa",
@@ -507,7 +516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentTerms: "Payment within 7 days of delivery",
             deliveryTerms: "Pickup at farm location",
             county: "Margibi",
-            status: "confirmed", // pending, confirmed, completed
+            status: "confirmed",
             offerCreatedAt: new Date("2025-08-23T10:30:00Z"),
             confirmedAt: new Date("2025-08-23T23:30:13.893Z"),
             buyerId: "margibi_buyer",
@@ -516,7 +525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             verificationCode: "R83ZIELI"
           },
           {
-            id: 2,
+            id: 1002,
             offerId: "FPO-20250823-789",
             farmerId: farmerId,
             commodityType: "Cocoa",
@@ -536,37 +545,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
             buyerName: "Margibi Trading Company",
             buyerCompany: "Agricultural Trading Company",
             verificationCode: "WQR6KFRB"
-          },
-          {
-            id: 3,
-            offerId: "FPO-20250824-123",
-            farmerId: farmerId,
-            commodityType: "Coffee",
-            quantityAvailable: 3.0,
-            unit: "tons",
-            pricePerUnit: 3500.00,
-            totalValue: 10500.00,
-            qualityGrade: "Grade A",
-            harvestDate: "2025-08-22",
-            paymentTerms: "Cash on Delivery",
-            deliveryTerms: "Pickup at farm location",
-            county: "Margibi",
-            status: "pending", // Still waiting for buyer
-            offerCreatedAt: new Date("2025-08-24T08:15:00Z"),
-            confirmedAt: null,
-            buyerId: null,
-            buyerName: null,
-            buyerCompany: null,
-            verificationCode: null
           }
         ];
 
-        console.log(`✅ Returning ${paoloOffers.length} Paolo offers with status tracking`);
-        paoloOffers.forEach((offer, i) => {
-          console.log(`  ${i+1}. ${offer.commodityType} - ${offer.status.toUpperCase()} - ${offer.buyerName || 'No buyer yet'}`);
+        // Transform real database offers to display format
+        const transformedRealOffers = realOffers.map(offer => ({
+          id: offer.id,
+          offerId: offer.offerId,
+          farmerId: farmerId, // Use the frontend format
+          commodityType: offer.commodityType,
+          quantityAvailable: parseFloat(offer.quantityAvailable),
+          unit: offer.unit,
+          pricePerUnit: parseFloat(offer.pricePerUnit),
+          totalValue: parseFloat(offer.totalValue),
+          qualityGrade: offer.qualityGrade,
+          harvestDate: offer.harvestDate?.toISOString().split('T')[0],
+          paymentTerms: offer.paymentTerms,
+          deliveryTerms: offer.deliveryTerms,
+          county: offer.county,
+          status: offer.status === 'available' ? 'pending' : offer.status, // Convert status
+          offerCreatedAt: offer.createdAt,
+          confirmedAt: null, // New offers are not confirmed yet
+          buyerId: null,
+          buyerName: null,
+          buyerCompany: null,
+          verificationCode: null
+        }));
+
+        // Combine confirmed offers and pending real offers
+        const allOffers = [...confirmedOffers, ...transformedRealOffers];
+
+        console.log(`✅ Returning ${allOffers.length} Paolo offers (${confirmedOffers.length} confirmed + ${transformedRealOffers.length} pending)`);
+        allOffers.forEach((offer, i) => {
+          console.log(`  ${i+1}. ${offer.commodityType} - ${offer.status.toUpperCase()} - ${offer.buyerName || 'No buyer yet'} - $${offer.totalValue}`);
         });
         
-        res.json(paoloOffers);
+        res.json(allOffers);
         return;
       }
       

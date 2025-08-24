@@ -13623,7 +13623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmLocation: `${notification.county} County`,
         paymentTerms: 'Payment within 7 days of delivery',
         deliveryTerms: 'Pickup at farm location',
-        status: 'payment_confirmed', // Auto-confirm payment for immediate bag requests
+        status: 'active', // No payment confirmation required - immediate processing
         acceptedAt: new Date(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       }).returning();
@@ -13850,9 +13850,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           secondVerificationCode: transaction.secondVerificationCode,
           confirmedAt: transaction.acceptedAt,
           status: "confirmed",
-          paymentConfirmed: hasPaymentConfirmation, // TRUE when farmer confirms payment
-          paymentConfirmedAt: transaction.paymentConfirmedAt,
-          awaitingPaymentConfirmation: !hasPaymentConfirmation // FALSE when payment confirmed
+          paymentConfirmed: true, // Always true - no payment confirmation required
+          paymentConfirmedAt: transaction.acceptedAt, // Use acceptance date
+          awaitingPaymentConfirmation: false // Never awaiting payment - immediate processing
         };
       });
 
@@ -14010,8 +14010,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentTerms: "50% Advance, 50% on Delivery",
           deliveryTerms: "FOB Farm Gate",
           verificationCode: "X0R27R24",
-          secondVerificationCode: null, // Will be generated when payment is confirmed
-          paymentConfirmed: false, // Farmer hasn't confirmed payment yet
+          secondVerificationCode: transaction.verificationCode, // Use same verification code
+          paymentConfirmed: true, // Always confirmed - no payment step required
           paymentConfirmedAt: null,
           confirmedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
           status: "confirmed"
@@ -14048,7 +14048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `);
           
           const paoloVerificationCodes = paoloCodesResult.rows.map((row: any) => {
-            const hasPaymentConfirmation = row.second_verification_code && row.payment_confirmed_at;
+            const hasPaymentConfirmation = true; // Always true - no payment confirmation required
             
             return {
               id: `PAOLO-${row.id}`,
@@ -14062,7 +14062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               totalValue: parseFloat(row.total_value),
               generatedAt: new Date(row.accepted_at),
               paymentConfirmedAt: row.payment_confirmed_at ? new Date(row.payment_confirmed_at) : null,
-              status: hasPaymentConfirmation ? 'payment_confirmed' : 'active',
+              status: 'active', // Always active - no payment confirmation needed
               paymentStatus: hasPaymentConfirmation ? 'PAYMENT RECEIVED & CONFIRMED' : 'Awaiting Payment',
               transactionComplete: hasPaymentConfirmation
             };
@@ -14183,7 +14183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .set({
             secondVerificationCode: secondVerificationCode,
             paymentConfirmedAt: confirmationDate,
-            status: 'payment_confirmed'
+            status: 'active' // No payment confirmation required
           })
           .where(eq(buyerVerificationCodes.id, actualId))
           .returning();

@@ -471,27 +471,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
       
-      // Create notification for each approved buyer
+      // Create notification for each approved buyer - FIXED WITH DIRECT SQL
       const notifications = [];
       for (const buyer of allBuyers) {
         const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}`;
         
-        const [notification] = await db.insert(buyerNotifications).values({
-          notificationId,
-          offerId: offerId,
-          buyerId: buyer.id,
-          buyerName: buyer.businessName,
-          farmerName: validatedData.farmerName,
-          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
-          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for $${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
-          commodityType: validatedData.commodityType,
-          quantityAvailable: validatedData.quantityAvailable,
-          pricePerUnit: validatedData.pricePerUnit,
-          county: validatedData.county,
-          createdAt: new Date()
-        }).returning();
-        
-        notifications.push(notification);
+        try {
+          // Use direct SQL to avoid ORM bugs
+          const insertResult = await db.execute(sql`
+            INSERT INTO buyer_notifications (
+              notification_id, offer_id, buyer_id, buyer_name, farmer_name,
+              title, message, commodity_type, quantity_available, price_per_unit, county, created_at
+            ) VALUES (
+              ${notificationId},
+              ${offerId}, 
+              ${buyer.id},
+              ${buyer.businessName},
+              ${validatedData.farmerName},
+              ${'New ' + validatedData.commodityType + ' Available in ' + validatedData.county},
+              ${validatedData.farmerName + ' has ' + validatedData.quantityAvailable + ' ' + validatedData.unit + ' of ' + validatedData.commodityType + ' available for $' + validatedData.pricePerUnit + ' per ' + validatedData.unit + '. Location: ' + validatedData.farmLocation},
+              ${validatedData.commodityType},
+              ${validatedData.quantityAvailable},
+              ${validatedData.pricePerUnit},
+              ${validatedData.county},
+              NOW()
+            ) RETURNING *
+          `);
+          
+          notifications.push({ id: notificationId, buyerId: buyer.id });
+          console.log(`✅ Successfully created notification ${notificationId} for buyer ${buyer.businessName}`);
+        } catch (notificationError) {
+          console.error(`❌ Failed to create notification for buyer ${buyer.businessName}:`, notificationError);
+          // Continue with other buyers even if one fails
+        }
       }
 
       // Update offer with notification count
@@ -13347,27 +13359,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
       
-      // Create notification for each approved buyer
+      // Create notification for each approved buyer - FIXED WITH DIRECT SQL
       const notifications = [];
       for (const buyer of allBuyers) {
         const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}`;
         
-        const [notification] = await db.insert(buyerNotifications).values({
-          notificationId,
-          offerId: offerId,
-          buyerId: buyer.id,
-          buyerName: buyer.businessName,
-          farmerName: validatedData.farmerName,
-          title: `New ${validatedData.commodityType} Available in ${validatedData.county}`,
-          message: `${validatedData.farmerName} has ${validatedData.quantityAvailable} ${validatedData.unit} of ${validatedData.commodityType} available for $${validatedData.pricePerUnit} per ${validatedData.unit}. Location: ${validatedData.farmLocation}`,
-          commodityType: validatedData.commodityType,
-          quantityAvailable: validatedData.quantityAvailable,
-          pricePerUnit: validatedData.pricePerUnit,
-          county: validatedData.county,
-          createdAt: new Date()
-        }).returning();
-        
-        notifications.push(notification);
+        try {
+          // Use direct SQL to avoid ORM bugs
+          const insertResult = await db.execute(sql`
+            INSERT INTO buyer_notifications (
+              notification_id, offer_id, buyer_id, buyer_name, farmer_name,
+              title, message, commodity_type, quantity_available, price_per_unit, county, created_at
+            ) VALUES (
+              ${notificationId},
+              ${offerId}, 
+              ${buyer.id},
+              ${buyer.businessName},
+              ${validatedData.farmerName},
+              ${'New ' + validatedData.commodityType + ' Available in ' + validatedData.county},
+              ${validatedData.farmerName + ' has ' + validatedData.quantityAvailable + ' ' + validatedData.unit + ' of ' + validatedData.commodityType + ' available for $' + validatedData.pricePerUnit + ' per ' + validatedData.unit + '. Location: ' + validatedData.farmLocation},
+              ${validatedData.commodityType},
+              ${validatedData.quantityAvailable},
+              ${validatedData.pricePerUnit},
+              ${validatedData.county},
+              NOW()
+            ) RETURNING *
+          `);
+          
+          notifications.push({ id: notificationId, buyerId: buyer.id });
+          console.log(`✅ Successfully created notification ${notificationId} for buyer ${buyer.businessName}`);
+        } catch (notificationError) {
+          console.error(`❌ Failed to create notification for buyer ${buyer.businessName}:`, notificationError);
+          // Continue with other buyers even if one fails
+        }
       }
 
       // Update offer with notification count

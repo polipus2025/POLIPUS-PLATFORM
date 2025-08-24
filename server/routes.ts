@@ -462,17 +462,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
       // Creating automatic buyer notifications
       
-      // Get all registered buyers from database (real buyers only)
+      // Get ALL active buyers from database - UNIVERSAL NOTIFICATION SYSTEM
       const allBuyers = await db
         .select({
           id: buyers.id,
           buyerId: buyers.buyerId,
           businessName: buyers.businessName,
           contactPersonFirstName: buyers.contactPersonFirstName,
-          contactPersonLastName: buyers.contactPersonLastName
+          contactPersonLastName: buyers.contactPersonLastName,
+          county: buyers.county,
+          isActive: buyers.isActive
         })
         .from(buyers)
-        .where(eq(buyers.complianceStatus, 'approved'));
+        .where(
+          and(
+            eq(buyers.isActive, true), // Only active buyers
+            or(
+              eq(buyers.complianceStatus, 'approved'),
+              eq(buyers.complianceStatus, 'pending') // Include pending for marketplace access
+            )
+          )
+        );
       
       console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
       
@@ -13428,17 +13438,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
       // Creating automatic buyer notifications
       
-      // Get all registered buyers from database (real buyers only)
+      // Get ALL active buyers from database - UNIVERSAL NOTIFICATION SYSTEM
       const allBuyers = await db
         .select({
           id: buyers.id,
           buyerId: buyers.buyerId,
           businessName: buyers.businessName,
           contactPersonFirstName: buyers.contactPersonFirstName,
-          contactPersonLastName: buyers.contactPersonLastName
+          contactPersonLastName: buyers.contactPersonLastName,
+          county: buyers.county,
+          isActive: buyers.isActive
         })
         .from(buyers)
-        .where(eq(buyers.complianceStatus, 'approved'));
+        .where(
+          and(
+            eq(buyers.isActive, true), // Only active buyers
+            or(
+              eq(buyers.complianceStatus, 'approved'),
+              eq(buyers.complianceStatus, 'pending') // Include pending for marketplace access
+            )
+          )
+        );
       
       console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
       
@@ -13562,11 +13582,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { notificationId, buyerId, buyerName, company } = req.body;
 
-      // Check if the notification is still pending (mock check)
-      // In real system, this would update database status atomically
-      const mockCheck = Math.random() > 0.2; // 80% success rate for demo
+      // REAL-TIME CHECK: Verify offer is still available (atomic check)
+      const [currentNotification] = await db
+        .select({
+          response: buyerNotifications.response,
+          offerId: buyerNotifications.offerId
+        })
+        .from(buyerNotifications)
+        .where(eq(buyerNotifications.notificationId, notificationId));
+        
+      if (!currentNotification) {
+        return res.status(404).json({ 
+          error: "Notification not found!" 
+        });
+      }
       
-      if (!mockCheck) {
+      // Check if this notification or the offer has already been taken
+      if (currentNotification.response && currentNotification.response !== '') {
+        return res.status(400).json({ 
+          error: "Offer no longer available. Another buyer was faster!" 
+        });
+      }
+      
+      // Check if the farmer offer is still pending
+      const [farmerOffer] = await db
+        .select({ status: farmerProductOffers.status })
+        .from(farmerProductOffers)
+        .where(eq(farmerProductOffers.offerId, currentNotification.offerId));
+        
+      if (!farmerOffer || farmerOffer.status !== 'pending') {
         return res.status(400).json({ 
           error: "Offer no longer available. Another buyer was faster!" 
         });
@@ -13631,10 +13675,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       }).returning();
 
-      // Update notification status to confirmed
+      // CRITICAL: Update THIS notification to confirmed and ALL OTHER notifications for same offer to DISABLED
       await db.update(buyerNotifications)
         .set({ response: 'confirmed' })
         .where(eq(buyerNotifications.notificationId, notificationId));
+        
+      // REAL-TIME DISABLE: Mark all OTHER notifications for this offer as unavailable
+      const disabledNotifications = await db.update(buyerNotifications)
+        .set({ 
+          response: 'offer_taken',
+          responseDate: new Date()
+        })
+        .where(
+          and(
+            eq(buyerNotifications.offerId, notification.offerId),
+            ne(buyerNotifications.notificationId, notificationId) // Don't update the accepted one
+          )
+        )
+        .returning({ notificationId: buyerNotifications.notificationId });
+        
+      console.log(`🚫 REAL-TIME DISABLED: ${disabledNotifications.length} other notifications for offer ${notification.offerId}`);
 
       console.log(`✅ Buyer ${buyerName} (${company}) accepted offer ${notificationId}`);
       console.log(`🔐 Verification code saved: ${verificationCode}`);

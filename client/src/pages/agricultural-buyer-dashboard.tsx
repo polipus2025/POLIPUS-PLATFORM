@@ -101,6 +101,12 @@ export default function AgriculturalBuyerDashboard() {
     gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
   });
 
+  // Debug logging
+  if (verificationCodes && verificationCodes.length > 0) {
+    console.log('🔍 Frontend received verification codes:', verificationCodes);
+    console.log('📋 First code sample:', JSON.stringify(verificationCodes[0], null, 2));
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('buyerId');

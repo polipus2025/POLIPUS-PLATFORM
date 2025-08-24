@@ -13859,6 +13859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
       console.log(`Returning ${verificationCodes.length} verification codes`);
+      console.log('📋 Sample verification code data:', JSON.stringify(verificationCodes[0], null, 2));
       res.json(verificationCodes);
     } catch (error) {
       console.error("Error fetching verification codes:", error);

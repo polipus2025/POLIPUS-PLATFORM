@@ -45,31 +45,41 @@ export default function AgriculturalBuyerDashboard() {
     queryKey: ['/api/buyer/notifications', buyerId],
     queryFn: () => apiRequest(`/api/buyer-notifications/${buyerId}`),
     enabled: !!buyerId,
-    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 60 * 1000, // Cache for 1 minute
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchInterval: 60000, // Refresh every 60 seconds (less aggressive)
   });
 
   // Fetch farmer harvests ready for purchase
   const { data: availableHarvests, isLoading: harvestsLoading } = useQuery({
     queryKey: ['/api/buyer/available-harvests'],
     queryFn: () => apiRequest('/api/buyer/available-harvests'),
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Fetch buyer's active transactions
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
     queryKey: ['/api/buyer/transactions'],
     queryFn: () => apiRequest('/api/buyer/transactions'),
+    staleTime: 90 * 1000, // Cache for 90 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   // Fetch marketplace data
   const { data: marketplace, isLoading: marketplaceLoading } = useQuery({
     queryKey: ['/api/buyer/marketplace'],
     queryFn: () => apiRequest('/api/buyer/marketplace'),
+    staleTime: 3 * 60 * 1000, // Cache for 3 minutes
+    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
   });
 
   // Fetch buyer business metrics
   const { data: businessMetrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['/api/buyer/business-metrics'],
     queryFn: () => apiRequest('/api/buyer/business-metrics'),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (metrics change slowly)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 
   // Fetch confirmed transactions archive
@@ -77,6 +87,8 @@ export default function AgriculturalBuyerDashboard() {
     queryKey: ['/api/buyer/confirmed-transactions', buyerId],
     queryFn: () => apiRequest(`/api/buyer/confirmed-transactions/${buyerId}`),
     enabled: !!buyerId,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Fetch verification codes archive
@@ -84,6 +96,8 @@ export default function AgriculturalBuyerDashboard() {
     queryKey: ['/api/buyer/verification-codes', buyerId], 
     queryFn: () => apiRequest(`/api/buyer/verification-codes/${buyerId}`),
     enabled: !!buyerId,
+    staleTime: 3 * 60 * 1000, // Cache for 3 minutes
+    gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes
   });
 
   const handleLogout = () => {
@@ -97,7 +111,7 @@ export default function AgriculturalBuyerDashboard() {
 
   const connectWithFarmer = (farmerId: string) => {
     // API call to initiate connection with farmer
-    console.log('Connecting with farmer:', farmerId);
+    // Connecting with farmer
   };
 
   // Handle accepting a product offer

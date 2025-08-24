@@ -289,11 +289,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/farmer-land-data/:farmerId", async (req, res) => {
     try {
       const { farmerId } = req.params;
-      console.log(`🔍 Looking for farmer land data for: ${farmerId}`);
+      // Looking up farmer land data
       
       // Special handling for Paolo Jr's test account
       if (farmerId === "FARMER-1755883520291-288") {
-        console.log("🎯 Found Paolo Jr - returning his land data");
+        // Farmer data found
         
         // Get Paolo Jr's farm plots directly
         const farmerPlots = await db.execute(sql`
@@ -455,7 +455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
 
       // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
-      console.log("🔄 Product offer saved successfully, creating automatic buyer notifications");
+      // Creating automatic buyer notifications
       
       // Get all registered buyers from database (real buyers only)
       const allBuyers = await db
@@ -499,7 +499,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `);
           
           notifications.push({ id: notificationId, buyerId: buyer.id });
-          console.log(`✅ Successfully created notification ${notificationId} for buyer ${buyer.businessName}`);
+          // Notification created successfully
         } catch (notificationError) {
           console.error(`❌ Failed to create notification for buyer ${buyer.businessName}:`, notificationError);
           // Continue with other buyers even if one fails
@@ -514,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .where(eq(farmerProductOffers.offerId, offerId));
         
-      console.log(`✅ Automatically created ${notifications.length} buyer notifications for offer ${offerId}`);
+      // Buyer notifications created
 
       res.status(201).json({
         success: true,
@@ -537,7 +537,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/farmer/my-offers/:farmerId", async (req, res) => {
     try {
       const { farmerId } = req.params;
-      console.log(`Fetching offers for farmer: ${farmerId}`);
       
       // For Paolo's farmer ID, get both mock confirmed offers and real database offers
       if (farmerId === "FARMER-1755883520291-288") {
@@ -547,8 +546,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .from(farmerProductOffers)
           .where(eq(farmerProductOffers.farmerId, 288))
           .orderBy(desc(farmerProductOffers.createdAt));
-
-        console.log(`📂 Found ${realOffers.length} real offers in database for Paolo`);
 
         // Mock confirmed offers (these represent offers that were accepted by buyers)
         const confirmedOffers = [
@@ -651,26 +648,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Combine confirmed offers (hardcoded + real confirmed offers) and pending offers
         const allOffers = [...confirmedOffers, ...confirmedRealOffers, ...pendingOffers];
-
-        const totalConfirmed = confirmedOffers.length + confirmedRealOffers.length;
-        const totalPending = pendingOffers.length;
         
-        console.log(`✅ Returning ${allOffers.length} Paolo offers (${totalConfirmed} confirmed + ${totalPending} pending)`);
-        console.log(`🔄 RAW DATABASE OFFERS (${realOffers.length} total):`);
-        realOffers.forEach((offer, i) => {
-          console.log(`  DB-${i+1}. ${offer.commodityType} - STATUS: ${offer.status} - $${offer.totalValue} - ID: ${offer.id}`);
-        });
-        console.log(`📊 PENDING OFFERS (awaiting buyer - ${totalPending}):`);
-        pendingOffers.forEach((offer, i) => {
-          console.log(`  ${i+1}. ${offer.commodityType} - PENDING - No buyer yet - $${offer.totalValue}`);
-        });
-        console.log(`📊 CONFIRMED OFFERS (with buyers - ${totalConfirmed}):`);
-        [...confirmedOffers, ...confirmedRealOffers].forEach((offer, i) => {
-          console.log(`  ${i+1}. ${offer.commodityType} - CONFIRMED - ${offer.buyerName || 'Unknown'} - $${offer.totalValue}`);
-        });
-        
-        res.json(allOffers);
-        return;
+        return res.json(allOffers);
       }
       
       // For other farmers, return empty array for now
@@ -3490,7 +3469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If test credentials didn't match, check buyer credentials from the buyerCredentials table
       console.log(`🔐 Login attempt for credential ID: ${buyerId}`);
       const buyerCredentials = await storage.getBuyerCredentials(buyerId);
-      console.log(`🔍 Credential lookup result: ${buyerCredentials ? 'Found' : 'Not found'}`);
+      // Credential lookup completed
       
       if (!buyerCredentials) {
         console.log(`❌ Login failed: Credentials not found`);
@@ -3595,7 +3574,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: offer.createdAt
       }));
       
-      console.log(`✅ Returning ${transformedOffers.length} available offers to buyer ${buyerId}`);
+      // Returning available offers
       transformedOffers.forEach((offer, i) => {
         console.log(`  ${i+1}. ${offer.farmerName} - ${offer.commodityType} - ${offer.quantityAvailable} ${offer.unit} - $${offer.totalValue}`);
       });
@@ -3611,7 +3590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/buyer/available-harvests", async (req, res) => {
     try {
       // Fetch real farmer product offers from database
-      console.log("🔍 Fetching farmer product offers from database...");
+      // Fetching product offers
       const realOffers = await db
         .select()
         .from(farmerProductOffers)
@@ -13389,7 +13368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
 
       // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
-      console.log("🔄 Product offer saved successfully, creating automatic buyer notifications");
+      // Creating automatic buyer notifications
       
       // Get all registered buyers from database (real buyers only)
       const allBuyers = await db
@@ -13433,7 +13412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `);
           
           notifications.push({ id: notificationId, buyerId: buyer.id });
-          console.log(`✅ Successfully created notification ${notificationId} for buyer ${buyer.businessName}`);
+          // Notification created successfully
         } catch (notificationError) {
           console.error(`❌ Failed to create notification for buyer ${buyer.businessName}:`, notificationError);
           // Continue with other buyers even if one fails
@@ -13448,7 +13427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .where(eq(farmerProductOffers.offerId, offerId));
         
-      console.log(`✅ Automatically created ${notifications.length} buyer notifications for offer ${offerId}`);
+      // Buyer notifications created
 
       res.status(201).json({
         success: true,
@@ -13643,7 +13622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/buyer/confirmed-transactions/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
-      console.log(`Fetching confirmed transactions for buyer: ${buyerId}`);
+      // Fetching buyer transactions
       
       // Fetch real confirmed transactions from database including payment status
       const realTransactions = await db
@@ -13760,7 +13739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/farmer/confirmed-transactions/:farmerId", async (req, res) => {
     try {
       const { farmerId } = req.params;
-      console.log(`Fetching confirmed transactions for farmer: ${farmerId}`);
+      // Fetching farmer transactions
       
       // For Paolo's farmer ID, get ALL confirmed transactions from buyer_verification_codes table
       if (farmerId === "FARMER-1755883520291-288") {

@@ -47,20 +47,15 @@ export default function FarmerDashboard() {
   const farmerName = localStorage.getItem("farmerFirstName") || "Paolo";
   const farmerCounty = localStorage.getItem("farmerCounty") || "Margibi";
   
-  console.log("🔍 Dashboard Farmer ID:", farmerId);
-  console.log("🔍 Stored Farmer ID:", storedFarmerId);
-  console.log("🔍 Credential ID:", credentialId);
+  // Dashboard initialized for farmer: ${farmerId}
   
   // Fetch farmer-specific data
   const { data: farmerLandData, isLoading: landDataLoading, error: landDataError } = useQuery({ 
     queryKey: ["/api/farmer-land-data", farmerId],
-    queryFn: () => {
-      console.log("🔄 Making API call to:", `/api/farmer-land-data/${farmerId}`);
-      return apiRequest(`/api/farmer-land-data/${farmerId}`);
-    },
+    queryFn: () => apiRequest(`/api/farmer-land-data/${farmerId}`),
     enabled: !!farmerId,
-    staleTime: 0, // Always refetch
-    gcTime: 0, // Don't cache
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
   const { data: cropPlans } = useQuery({ queryKey: ["/api/crop-plans"] });
   const { data: trackingRecords } = useQuery({ queryKey: ["/api/tracking-records"] });
@@ -77,10 +72,10 @@ export default function FarmerDashboard() {
     queryKey: ['/api/farmer/my-offers', farmerId],
     queryFn: () => apiRequest(`/api/farmer/my-offers/${farmerId}`),
     enabled: !!farmerId,
-    staleTime: 0, // Always fetch fresh data
-    gcTime: 0, // Don't cache
-    refetchOnWindowFocus: true, // Refresh when window gains focus
-    refetchOnMount: true, // Always refetch on component mount
+    staleTime: 30 * 1000, // Cache for 30 seconds (frequent updates needed)
+    gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnMount: false, // Don't always refetch on mount
   });
 
   // Fetch farmer verification codes archive
@@ -90,10 +85,7 @@ export default function FarmerDashboard() {
     enabled: !!farmerId,
   });
 
-  // Debug logging for farmer land data
-  console.log("🔍 farmerLandData:", farmerLandData);
-  console.log("🔍 farmPlots exist:", !!farmerLandData?.farmPlots);
-  console.log("🔍 farmPlots length:", farmerLandData?.farmPlots?.length);
+  // Farmer land data loaded
   
   // Real data for dashboard stats  
   const totalPlots = farmerLandData?.totalPlots || 0;
@@ -194,9 +186,8 @@ export default function FarmerDashboard() {
         description: `${response.notificationsSent} buyers in ${farmerCounty} County have been notified. Buyers notified: ${response.buyersNotified?.join(', ') || 'None'}`
       });
 
-      // CRITICAL: Invalidate cache to show new pending offer immediately
+      // Invalidate cache to show new pending offer
       queryClient.invalidateQueries({ queryKey: ['/api/farmer/my-offers', farmerId] });
-      queryClient.refetchQueries({ queryKey: ['/api/farmer/my-offers', farmerId] });
 
       // Reset form
       (e.target as HTMLFormElement).reset();

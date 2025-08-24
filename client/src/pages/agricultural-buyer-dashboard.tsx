@@ -431,9 +431,9 @@ export default function AgriculturalBuyerDashboard() {
               <CardContent>
                 {codesLoading ? (
                   <div className="text-center py-8 text-gray-500">Loading your orders...</div>
-                ) : verificationCodes?.codes && verificationCodes.codes.length > 0 ? (
+                ) : verificationCodes && verificationCodes.length > 0 ? (
                   <div className="space-y-4">
-                    {verificationCodes.codes.filter((code: any) => code.status === 'payment_confirmed').map((acceptance: any) => (
+                    {verificationCodes.filter((code: any) => code.status === 'active' || code.status === 'payment_confirmed').map((acceptance: any) => (
                       <Card key={acceptance.verification_code} className="border border-blue-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
@@ -442,7 +442,9 @@ export default function AgriculturalBuyerDashboard() {
                               <p className="text-sm text-gray-600">From: {acceptance.farmer_name}</p>
                               <p className="text-sm text-gray-500">{acceptance.farm_location}</p>
                             </div>
-                            <Badge className="bg-green-100 text-green-800">Payment Confirmed</Badge>
+                            <Badge className={acceptance.status === 'payment_confirmed' ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}>
+                              {acceptance.status === 'payment_confirmed' ? 'Payment Confirmed' : 'Ready for Bags'}
+                            </Badge>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4 mb-4">

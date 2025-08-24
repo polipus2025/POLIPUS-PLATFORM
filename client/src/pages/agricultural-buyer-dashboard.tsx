@@ -165,12 +165,12 @@ export default function AgriculturalBuyerDashboard() {
           buyerId,
           buyerName,
           company,
-          farmerName: acceptanceData.farmer_name,
-          commodityType: acceptanceData.commodity_type,
-          quantity: acceptanceData.quantity_available,
-          totalValue: acceptanceData.total_value,
+          farmerName: acceptanceData.farmerName,
+          commodityType: acceptanceData.commodityType,
+          quantity: acceptanceData.quantity,
+          totalValue: acceptanceData.totalValue,
           county: acceptanceData.county,
-          farmLocation: acceptanceData.farm_location
+          farmLocation: acceptanceData.farmLocation
         })
       });
       

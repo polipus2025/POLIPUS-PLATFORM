@@ -1395,5 +1395,6 @@ export default function WarehouseInspectorDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    );
-  };
+    </div>
+  );
+}

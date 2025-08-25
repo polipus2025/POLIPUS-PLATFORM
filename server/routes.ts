@@ -11657,6 +11657,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get buyer credentials for approved buyers - MUST BE BEFORE GENERAL /:id ROUTE
+  app.get("/api/buyers/:id/credentials", async (req, res) => {
+    try {
+      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer not found" });
+      }
+
+      if (buyer.complianceStatus !== 'approved') {
+        return res.status(400).json({ message: "Buyer must be approved to view credentials" });
+      }
+
+      if (!buyer.loginCredentialsGenerated) {
+        return res.status(400).json({ message: "Credentials not generated yet" });
+      }
+
+      // Get the credentials from the database
+      const credentials = await storage.getBuyerCredentials(buyer.id);
+      
+      if (!credentials) {
+        return res.status(404).json({ message: "Credentials not found" });
+      }
+
+      res.json({
+        credentials: {
+          buyerId: buyer.buyerId,
+          businessName: buyer.businessName,
+          username: credentials.username,
+          temporaryPassword: credentials.temporaryPassword,
+          mustChangePassword: true,
+          portalUrl: "/farmer-buyer-portal/login",
+          generatedAt: credentials.createdAt
+        }
+      });
+    } catch (error) {
+      console.error("Error retrieving buyer credentials:", error);
+      res.status(500).json({ message: "Failed to retrieve credentials" });
+    }
+  });
+
   // Get buyer by ID - FOR BMS DETAILS VIEW
   app.get("/api/buyers/:id", async (req, res) => {
     try {
@@ -11790,46 +11831,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get buyer credentials for approved buyers
-  app.get("/api/buyers/:id/credentials", async (req, res) => {
-    try {
-      const buyer = await storage.getBuyer(parseInt(req.params.id));
-      
-      if (!buyer) {
-        return res.status(404).json({ message: "Buyer not found" });
-      }
-
-      if (buyer.complianceStatus !== 'approved') {
-        return res.status(400).json({ message: "Buyer must be approved to view credentials" });
-      }
-
-      if (!buyer.loginCredentialsGenerated) {
-        return res.status(400).json({ message: "Credentials not generated yet" });
-      }
-
-      // Get the credentials from the database
-      const credentials = await storage.getBuyerCredentials(buyer.id);
-      
-      if (!credentials) {
-        return res.status(404).json({ message: "Credentials not found" });
-      }
-
-      res.json({
-        credentials: {
-          buyerId: buyer.buyerId,
-          businessName: buyer.businessName,
-          username: credentials.username,
-          temporaryPassword: credentials.temporaryPassword,
-          mustChangePassword: true,
-          portalUrl: "/farmer-buyer-portal/login",
-          generatedAt: credentials.createdAt
-        }
-      });
-    } catch (error) {
-      console.error("Error retrieving buyer credentials:", error);
-      res.status(500).json({ message: "Failed to retrieve credentials" });
-    }
-  });
 
   // Update buyer information
   app.put("/api/buyers/:id", async (req, res) => {

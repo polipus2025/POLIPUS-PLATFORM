@@ -527,7 +527,7 @@ export default function WarehouseInspectorDashboard() {
   const handlePrintQr = (batch: any) => {
     // Create a printable window with the QR code in the exact format from the PDF
     if (batch.qrCodeUrl) {
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open('', `_blank_${Date.now()}`);
       if (printWindow) {
         const currentDate = new Date().toLocaleDateString('en-US', { 
           year: 'numeric', 
@@ -544,7 +544,10 @@ export default function WarehouseInspectorDashboard() {
         printWindow.document.write(`
           <html>
             <head>
-              <title>QR Batch Details - ${batch.batchCode}</title>
+              <title>QR Batch Details - ${batch.batchCode} - ${Date.now()}</title>
+              <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+              <meta http-equiv="Pragma" content="no-cache">
+              <meta http-equiv="Expires" content="0">
               <style>
                 body { 
                   font-family: Arial, sans-serif; 

@@ -272,15 +272,15 @@ export default function AgriculturalBuyerDashboard() {
 
       {/* Main Content */}
       <div className="p-6">
-        {/* Custom Navigation with Farmers Dropdown */}
-        <div className="bg-white border border-gray-200 rounded-lg mb-6">
-          <div className="flex flex-wrap items-center justify-between p-2 border-b border-gray-100">
+        {/* Enhanced Navigation with Farmers Dropdown - Prominent Styling */}
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 border-2 border-slate-200 rounded-xl mb-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between p-4 gap-3">
             {/* Business Overview */}
             <Button 
               variant={activeTab === 'overview' ? 'default' : 'ghost'} 
-              size="sm"
+              size="lg"
               onClick={() => setActiveTab('overview')}
-              className="text-xs"
+              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
             >
               Business Overview
             </Button>
@@ -288,9 +288,9 @@ export default function AgriculturalBuyerDashboard() {
             {/* Product Offers */}
             <Button 
               variant={activeTab === 'notifications' ? 'default' : 'ghost'} 
-              size="sm"
+              size="lg"
               onClick={() => setActiveTab('notifications')}
-              className="text-xs"
+              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
             >
               Product Offers
             </Button>
@@ -299,50 +299,50 @@ export default function AgriculturalBuyerDashboard() {
             <div className="relative">
               <Button 
                 variant={['farmers', 'confirmed', 'orders'].includes(activeTab) ? 'default' : 'ghost'} 
-                size="sm"
+                size="lg"
                 onClick={() => setFarmersMenuOpen(!farmersMenuOpen)}
-                className="text-xs flex items-center gap-1"
+                className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105 flex items-center gap-2"
               >
                 Farmers
-                {farmersMenuOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                {farmersMenuOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </Button>
               
-              {/* Dropdown Menu */}
+              {/* Enhanced Dropdown Menu */}
               {farmersMenuOpen && (
-                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[180px]">
-                  <div className="py-1">
+                <div className="absolute top-full left-0 mt-2 bg-white border-2 border-slate-200 rounded-xl shadow-xl z-20 min-w-[220px]">
+                  <div className="py-2">
                     <button
                       onClick={() => {
                         setActiveTab('farmers');
                         setFarmersMenuOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
-                        activeTab === 'farmers' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      className={`w-full text-left px-5 py-3 font-medium text-sm hover:bg-slate-50 transition-all ${
+                        activeTab === 'farmers' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
                       }`}
                     >
-                      1) Farmer Connections
+                      Farmer Connections
                     </button>
                     <button
                       onClick={() => {
                         setActiveTab('confirmed');
                         setFarmersMenuOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
-                        activeTab === 'confirmed' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      className={`w-full text-left px-5 py-3 font-medium text-sm hover:bg-slate-50 transition-all ${
+                        activeTab === 'confirmed' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
                       }`}
                     >
-                      2) Confirmed Transactions
+                      Confirmed Transactions
                     </button>
                     <button
                       onClick={() => {
                         setActiveTab('orders');
                         setFarmersMenuOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
-                        activeTab === 'orders' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      className={`w-full text-left px-5 py-3 font-medium text-sm hover:bg-slate-50 transition-all ${
+                        activeTab === 'orders' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
                       }`}
                     >
-                      3) My Orders
+                      My Orders
                     </button>
                   </div>
                 </div>
@@ -352,9 +352,9 @@ export default function AgriculturalBuyerDashboard() {
             {/* Transaction Dashboard */}
             <Button 
               variant={activeTab === 'transactions' ? 'default' : 'ghost'} 
-              size="sm"
+              size="lg"
               onClick={() => setActiveTab('transactions')}
-              className="text-xs"
+              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
             >
               Transaction Dashboard
             </Button>

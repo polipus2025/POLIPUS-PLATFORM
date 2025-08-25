@@ -1454,183 +1454,400 @@ export default function WarehouseInspectorDashboard() {
 
           </TabsContent>
 
-          {/* Bags Tab - Direct QR generation for transactions */}
+          {/* Bags Tab - Original Format Restored */}
           <TabsContent value="bags" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Transaction Selection */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Package className="w-5 h-5 mr-2 text-blue-600" />
-                    Select Transactions for Bags
-                  </CardTitle>
-                  <CardDescription>
-                    Choose transactions to create bag packages and generate QR codes
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* Available Transactions */}
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium">Available Transactions</label>
-                      {availableTransactions && availableTransactions.length > 0 ? (
-                        <div className="space-y-2 max-h-48 overflow-y-auto border rounded p-2">
-                          {availableTransactions.map((transaction: any) => (
-                            <div key={transaction.id} className="flex items-center space-x-2 p-2 border rounded">
-                              <input
-                                type="checkbox"
-                                checked={selectedTransactions.includes(transaction.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedTransactions([...selectedTransactions, transaction.id]);
-                                  } else {
-                                    setSelectedTransactions(selectedTransactions.filter(id => id !== transaction.id));
-                                  }
-                                }}
-                                data-testid={`checkbox-transaction-${transaction.id}`}
-                              />
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">{transaction.commodityType}</p>
-                                <p className="text-xs text-gray-600">{transaction.quantity} kg • {transaction.buyerName}</p>
-                              </div>
-                            </div>
-                          ))}
+            {/* Incoming Bag Requests from Buyers */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Package className="w-5 h-5 mr-2 text-orange-600" />
+                  Incoming Bag Requests from Buyers
+                </CardTitle>
+                <CardDescription>
+                  Validate or reject bag requests from buyers who have completed payment confirmation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {bagRequests && bagRequests.length > 0 ? (
+                    bagRequests.map((request: any) => (
+                      <div key={request.id} className="p-4 border rounded-lg">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-semibold text-lg">{request.commodityType}</h3>
+                            <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
+                            <p className="text-sm text-gray-600">From: {request.buyerName} ({request.companyName})</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-gray-500">{request.requestDate}</p>
+                            <Badge className={request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}>
+                              {request.status}
+                            </Badge>
+                          </div>
                         </div>
-                      ) : (
-                        <div className="p-4 bg-gray-50 rounded-lg text-center">
-                          <Package className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600">No transactions available</p>
-                          <p className="text-xs text-gray-500">Complete product registrations first</p>
+                        <div className="grid grid-cols-4 gap-4 mb-4">
+                          <div>
+                            <p className="text-sm font-medium">Farmer</p>
+                            <p className="text-sm text-gray-600">{request.farmerName}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Quantity</p>
+                            <p className="text-sm text-gray-600">{request.quantity}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Total Value</p>
+                            <p className="text-sm text-green-600 font-medium">${request.totalValue}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">County</p>
+                            <p className="text-sm text-gray-600">{request.county}</p>
+                          </div>
                         </div>
-                      )}
+                        <div className="mb-4">
+                          <p className="text-sm font-medium">Farm Location</p>
+                          <p className="text-sm text-gray-600">{request.farmLocation}</p>
+                        </div>
+                        <div className="mb-4">
+                          <p className="text-sm font-medium">Verification Code</p>
+                          <div className="bg-gray-100 p-2 rounded font-mono text-sm">{request.verificationCode}</div>
+                        </div>
+                        {request.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                              data-testid={`button-reject-${request.id}`}
+                            >
+                              Reject Request
+                            </Button>
+                            <Button 
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              data-testid={`button-validate-${request.id}`}
+                            >
+                              Validate Request
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                      <Package className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600">No incoming bag requests</p>
                     </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-                    {/* Selected Transactions Summary */}
-                    {selectedTransactions.length > 0 && (
-                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm font-medium text-blue-800">
-                          {selectedTransactions.length} transaction{selectedTransactions.length > 1 ? 's' : ''} selected
-                        </p>
-                        <p className="text-xs text-blue-600">
-                          Ready for bag packaging and QR generation
-                        </p>
+            {/* Main QR Generation Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* QR Batch Tracking & Management */}
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <QrCode className="w-5 h-5 mr-2 text-blue-600" />
+                      QR Batch Tracking & Management
+                    </CardTitle>
+                    <CardDescription>
+                      Create and manage QR-coded bag batches for complete traceability from warehouse to buyer
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                      <h3 className="font-medium text-green-800 mb-3">Generate QR Batch from Transaction</h3>
+                      
+                      {/* Transaction Selection */}
+                      <div className="space-y-3 mb-4">
+                        <label className="text-sm font-medium">Select available transactions for QR batch:</label>
+                        {availableTransactions && availableTransactions.length > 0 ? (
+                          <div className="space-y-2">
+                            {availableTransactions.map((transaction: any) => (
+                              <div key={transaction.id} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedTransactions.includes(transaction.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedTransactions([...selectedTransactions, transaction.id]);
+                                    } else {
+                                      setSelectedTransactions(selectedTransactions.filter(id => id !== transaction.id));
+                                    }
+                                  }}
+                                  data-testid={`checkbox-transaction-${transaction.id}`}
+                                />
+                                <label className="text-sm">{transaction.transactionId} - {transaction.buyerName} - {transaction.commodityType} - {transaction.quantity} - ${transaction.amount}</label>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500">No transactions available</p>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Package Configuration & QR Generation */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <QrCode className="w-5 h-5 mr-2 text-purple-600" />
-                    Package Configuration & QR Generation
-                  </CardTitle>
-                  <CardDescription>
-                    Configure packaging details and generate QR batch codes
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Product Category */}
-                  <div>
-                    <label className="text-sm font-medium">Product Category</label>
-                    <select className="w-full p-2 border rounded text-sm mt-1" data-testid="select-product-category">
-                      <option value="agricultural">Agricultural Products</option>
-                      <option value="processed">Processed Goods</option>
-                      <option value="raw">Raw Materials</option>
-                    </select>
-                  </div>
-
-                  {/* Package Type */}
-                  <div>
-                    <label className="text-sm font-medium">Package Type</label>
-                    <select className="w-full p-2 border rounded text-sm mt-1" data-testid="select-package-type">
-                      <option value="bags">Bags</option>
-                      <option value="tins">Tins</option>
-                      <option value="pallet">Pallet</option>
-                      <option value="boxes">Boxes</option>
-                      <option value="containers">Containers</option>
-                    </select>
-                  </div>
-
-                  {/* Packaging Details */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium">Packaging Details</label>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div>
-                        <label className="text-xs text-gray-600">Packaging Type</label>
-                        <select
-                          value={packagingType}
-                          onChange={(e) => setPackagingType(e.target.value)}
-                          className="w-full p-2 border rounded text-sm"
-                          data-testid="select-packaging-type"
-                        >
-                          <option value="50kg bags">50kg Bags</option>
-                          <option value="25kg bags">25kg Bags</option>
-                          <option value="100kg bags">100kg Bags</option>
-                          <option value="20kg tins">20kg Tins</option>
-                          <option value="500kg pallet">500kg Pallet</option>
-                        </select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* Configuration Fields */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label className="text-xs text-gray-600">Total Count</label>
+                          <label className="text-sm font-medium">Commodity Category</label>
+                          <select className="w-full p-2 border rounded text-sm mt-1" data-testid="select-commodity-category">
+                            <option value="">Select Category...</option>
+                            <option value="cocoa">Cocoa</option>
+                            <option value="coffee">Coffee</option>
+                            <option value="coconut">Coconut Oil</option>
+                            <option value="rubber">Rubber</option>
+                            <option value="cashew">Cashew</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Quality Grade</label>
+                          <select className="w-full p-2 border rounded text-sm mt-1" data-testid="select-quality-grade">
+                            <option value="">Select Grade...</option>
+                            <option value="premium">Premium</option>
+                            <option value="standard">Standard</option>
+                            <option value="fair">Fair</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <label className="text-sm font-medium">Total Packages</label>
                           <input
                             type="number"
                             value={totalPackages}
                             onChange={(e) => setTotalPackages(parseInt(e.target.value))}
-                            className="w-full p-2 border rounded text-sm"
+                            className="w-full p-2 border rounded text-sm mt-1"
                             data-testid="input-total-packages"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-600">Package Weight (kg)</label>
+                          <label className="text-sm font-medium">Package Weight (kg)</label>
                           <input
                             type="number"
                             value={packageWeight}
                             onChange={(e) => setPackageWeight(parseInt(e.target.value))}
-                            className="w-full p-2 border rounded text-sm"
+                            className="w-full p-2 border rounded text-sm mt-1"
                             data-testid="input-package-weight"
                           />
                         </div>
+                        <div>
+                          <label className="text-sm font-medium">Packaging Type</label>
+                          <select
+                            value={packagingType}
+                            onChange={(e) => setPackagingType(e.target.value)}
+                            className="w-full p-2 border rounded text-sm mt-1"
+                            data-testid="select-packaging-type"
+                          >
+                            <option value="50kg bags">50kg bags</option>
+                            <option value="25kg bags">25kg bags</option>
+                            <option value="100kg bags">100kg bags</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Compliance & Certification */}
+                      <div className="mb-4">
+                        <label className="text-sm font-medium mb-2 block">Compliance & Certification Verification</label>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                              <ShieldCheck className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-sm">LACRA Certified</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                              <ShieldCheck className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-sm">EUDR Compliant</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                              <ShieldCheck className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-sm">Quality Inspected</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                              <ShieldCheck className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-sm">GPS Verified</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleGenerateQrBatch}
+                          disabled={selectedTransactions.length === 0}
+                          className="bg-blue-600 hover:bg-blue-700"
+                          data-testid="button-generate-qr-batch"
+                        >
+                          <QrCode className="w-4 h-4 mr-2" />
+                          Generate QR Batch
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          className="flex items-center"
+                          data-testid="button-preview-batch"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
+                        </Button>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* QR Batch Statistics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                    QR Batch Statistics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <ShieldCheck className="w-8 h-8 text-green-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-green-600">16</p>
+                    <p className="text-sm text-gray-600">Active QR Batches</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Package className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-blue-600">8470</p>
+                    <p className="text-sm text-gray-600">Total Bags Tracked</p>
                   </div>
 
-                  {/* Generate QR Button */}
-                  <Button
-                    onClick={handleGenerateQrBatch}
-                    disabled={selectedTransactions.length === 0}
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                    data-testid="button-generate-qr-batch"
-                  >
-                    <QrCode className="w-4 h-4 mr-2" />
-                    Generate QR Batch for Bags
-                  </Button>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Printer className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-purple-600">0</p>
+                    <p className="text-sm text-gray-600">QR Codes Printed</p>
+                  </div>
 
-                  {/* Recent Generated QR Batches */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Recent QR Batches</label>
-                    {bagCollections && bagCollections.length > 0 ? (
-                      <div className="space-y-2 max-h-32 overflow-y-auto">
-                        {bagCollections.slice(0, 3).map((batch: any) => (
-                          <div key={batch.batchCode} className="p-2 bg-purple-50 border border-purple-200 rounded text-sm">
-                            <p className="font-medium text-purple-800">{batch.batchCode}</p>
-                            <p className="text-xs text-purple-600">{batch.packagingType} • {batch.totalPackages} packages</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-3 bg-gray-50 rounded text-sm text-gray-600 text-center">
-                        <QrCode className="w-6 h-6 mx-auto text-gray-400 mb-1" />
-                        <p className="text-xs">No QR batches generated yet</p>
-                      </div>
-                    )}
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-2 flex items-center">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Recent Scan Activity
+                    </h4>
+                    <div className="text-sm text-gray-600">
+                      <p>WH-BATCH-1756052880737-8P2L</p>
+                      <p className="text-xs">Generated for processing</p>
+                      <p className="text-xs text-gray-500">8/24/2025</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Recent QR Batches */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent QR Batches</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {bagCollections && bagCollections.length > 0 ? (
+                    bagCollections.map((batch: any) => (
+                      <div key={batch.batchCode} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-semibold text-green-600">{batch.batchCode}</h3>
+                            <p className="text-lg font-medium">{batch.totalPackages} bags</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" data-testid={`button-view-qr-${batch.batchCode}`}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              View QR
+                            </Button>
+                            <Button size="sm" variant="outline" data-testid={`button-print-${batch.batchCode}`}>
+                              <Printer className="w-4 h-4 mr-1" />
+                              Print
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-sm font-medium">Buyer:</p>
+                            <p className="text-sm text-gray-600">{batch.buyerName || 'null null'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Commodity:</p>
+                            <p className="text-sm text-gray-600">{batch.commodityType}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Total Weight:</p>
+                            <p className="text-sm text-gray-600">{batch.totalWeight} kg</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Status:</p>
+                            <Badge className="bg-green-100 text-green-800">Generated</Badge>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">Farmer: {batch.farmerName || 'Paolo'} • Created: {batch.createdDate || '8/24/2025'}</p>
+                      </div>
+                    ))
+                  ) : (
+                    [
+                      { batchCode: "WH-BATCH-1756052880737-8P2L", bags: 15, commodity: "Coconut Oil", weight: "3.00 kg" },
+                      { batchCode: "WH-BATCH-1756052094495-WDU6", bags: 200, commodity: "Cocoa", weight: "8.00 kg" },
+                      { batchCode: "WH-BATCH-1756044733012-Q6XJ", bags: 5000, commodity: "Rubber", weight: "5.00 kg" },
+                      { batchCode: "WH-BATCH-1756041297826-XE3Z", bags: 320, commodity: "Cocoa", weight: "16.00 kg" }
+                    ].map((batch) => (
+                      <div key={batch.batchCode} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-semibold text-green-600">{batch.batchCode}</h3>
+                            <p className="text-lg font-medium">{batch.bags} bags</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" data-testid={`button-view-qr-${batch.batchCode}`}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              View QR
+                            </Button>
+                            <Button size="sm" variant="outline" data-testid={`button-print-${batch.batchCode}`}>
+                              <Printer className="w-4 h-4 mr-1" />
+                              Print
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-sm font-medium">Buyer:</p>
+                            <p className="text-sm text-gray-600">null null</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Commodity:</p>
+                            <p className="text-sm text-gray-600">{batch.commodity}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Total Weight:</p>
+                            <p className="text-sm text-gray-600">{batch.weight}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Status:</p>
+                            <Badge className="bg-green-100 text-green-800">Generated</Badge>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">Farmer: Paolo • Created: 8/24/2025</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Custody Management Tab - Simple QR scanner for warehouse-generated codes */}

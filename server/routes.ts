@@ -15874,41 +15874,6 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       res.json({ 
         success: true, 
-        data: mockCustodyRecords
-          registrationDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-          custodyStatus: "stored",
-          authorizationStatus: "pending",
-          maxStorageDays: 30,
-          actualStorageDays: 5
-        },
-        {
-          id: 2,
-          custodyId: "CUSTODY-WH-MARGIBI-20250823-B2C",
-          buyerId: "BUY-002",
-          buyerName: "Atlantic Coffee Ltd",
-          buyerCompany: "ACL Exports", 
-          productQrCode: "QR-BUYER-202508-B2C3D4",
-          commodityType: "coffee",
-          farmerName: "Mary Kollie",
-          farmLocation: "Bong County",
-          weight: 3.2,
-          unit: "tons",
-          qualityGrade: "Export Grade B+",
-          storageLocation: "Section B-2",
-          storageConditions: "Dry Storage",
-          dailyStorageRate: 2.00,
-          registrationDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-          custodyStatus: "stored",
-          authorizationStatus: "authorized",
-          maxStorageDays: 30,
-          actualStorageDays: 7,
-          authorizedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-          authorizedBy: "WH-INS-MARGIBI-001"
-        }
-      ];
-
-      res.json({ 
-        success: true, 
         data: mockCustodyRecords 
       });
     } catch (error) {

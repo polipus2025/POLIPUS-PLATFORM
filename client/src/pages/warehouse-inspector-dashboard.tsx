@@ -120,6 +120,130 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data?.data || []
   });
 
+  // Warehouse Custody System States
+  const [custodyRegistrationMode, setCustodyRegistrationMode] = useState<'single' | 'multi'>('single');
+  const [scannedQrCodes, setScannedQrCodes] = useState<any[]>([]);
+  const [currentQrInput, setCurrentQrInput] = useState('');
+  const [multiLotValidation, setMultiLotValidation] = useState<any>(null);
+  const [showCustodyModal, setShowCustodyModal] = useState(false);
+
+  // Warehouse Custody Records Query
+  const { data: custodyRecords, isLoading: custodyRecordsLoading } = useQuery({
+    queryKey: ['/api/warehouse-custody/records'],
+    select: (data: any) => data?.data || []
+  });
+
+  // QR Code Lookup Mutation
+  const lookupQrMutation = useMutation({
+    mutationFn: async (qrCode: string) => {
+      const response = await fetch(`/api/warehouse-custody/lookup-qr/${qrCode}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'QR code not found');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (custodyRegistrationMode === 'single') {
+        setScannedQrCodes([data.data]);
+        toast({
+          title: "✅ QR Code Found",
+          description: `Found ${data.data.commodityType} from ${data.data.farmerName} (${data.data.weight} tons)`,
+        });
+      } else {
+        // Multi-lot mode - add to list
+        const existingIndex = scannedQrCodes.findIndex(qr => qr.batchCode === data.data.batchCode);
+        if (existingIndex === -1) {
+          setScannedQrCodes(prev => [...prev, data.data]);
+          toast({
+            title: "✅ QR Code Added",
+            description: `Added ${data.data.commodityType} from ${data.data.farmerName} to multi-lot custody`,
+          });
+        } else {
+          toast({
+            title: "⚠️ Duplicate QR Code",
+            description: "This QR code is already in the list",
+            variant: "destructive",
+          });
+        }
+      }
+      setCurrentQrInput('');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ QR Lookup Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Multi-Lot Validation Mutation
+  const validateMultiLotMutation = useMutation({
+    mutationFn: async (qrCodes: string[]) => {
+      const response = await fetch('/api/warehouse-custody/validate-multi-lot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrCodes })
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Validation failed');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setMultiLotValidation(data);
+      toast({
+        title: "✅ Multi-Lot Validated",
+        description: data.message,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Validation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      setMultiLotValidation(null);
+    }
+  });
+
+  // Custody Registration Mutation
+  const registerCustodyMutation = useMutation({
+    mutationFn: async (registrationData: any) => {
+      const response = await fetch('/api/warehouse-custody/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registrationData)
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Registration failed');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "✅ Custody Registered",
+        description: `${data.message} (Storage Fee: $${data.storageAmount})`,
+      });
+      // Reset form
+      setScannedQrCodes([]);
+      setMultiLotValidation(null);
+      setCurrentQrInput('');
+      setShowCustodyModal(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Registration Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   // Product registration mutation
   const registerProductMutation = useMutation({
     mutationFn: async (registrationData: any) => {
@@ -688,10 +812,14 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Main Navigation Tabs - Moved to middle position */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-10 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="custody" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Scale className="w-4 h-4 mr-2" />
+              Custody
             </TabsTrigger>
             <TabsTrigger value="registration" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <QrCode className="w-4 h-4 mr-2" />
@@ -916,6 +1044,195 @@ export default function WarehouseInspectorDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Warehouse Custody Tab */}
+          <TabsContent value="custody" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - QR Registration */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Scale className="w-5 h-5 mr-2 text-blue-600" />
+                      Product Custody Registration
+                    </CardTitle>
+                    <CardDescription>
+                      Register products for warehouse custody storage - Single lot or multi-lot consolidation
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Registration Mode Selection */}
+                    <div className="flex space-x-2">
+                      <Button
+                        variant={custodyRegistrationMode === 'single' ? 'default' : 'outline'}
+                        onClick={() => {
+                          setCustodyRegistrationMode('single');
+                          setScannedQrCodes([]);
+                          setMultiLotValidation(null);
+                        }}
+                        className="flex-1"
+                        data-testid="button-single-mode"
+                      >
+                        Single Lot
+                      </Button>
+                      <Button
+                        variant={custodyRegistrationMode === 'multi' ? 'default' : 'outline'}
+                        onClick={() => {
+                          setCustodyRegistrationMode('multi');
+                          setScannedQrCodes([]);
+                          setMultiLotValidation(null);
+                        }}
+                        className="flex-1"
+                        data-testid="button-multi-mode"
+                      >
+                        Multi-Lot
+                      </Button>
+                    </div>
+
+                    {/* QR Code Input */}
+                    <div className="flex space-x-2">
+                      <Input
+                        placeholder="Scan or enter QR code..."
+                        value={currentQrInput}
+                        onChange={(e) => setCurrentQrInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && currentQrInput.trim()) {
+                            lookupQrMutation.mutate(currentQrInput.trim());
+                          }
+                        }}
+                        data-testid="input-qr-code"
+                      />
+                      <Button 
+                        onClick={() => currentQrInput.trim() && lookupQrMutation.mutate(currentQrInput.trim())}
+                        disabled={!currentQrInput.trim() || lookupQrMutation.isPending}
+                        data-testid="button-scan-qr"
+                      >
+                        {lookupQrMutation.isPending ? 'Looking up...' : 'Scan'}
+                      </Button>
+                    </div>
+
+                    {/* Scanned QR Codes Display */}
+                    {scannedQrCodes.length > 0 && (
+                      <div className="space-y-3">
+                        <h3 className="font-medium">Scanned QR Codes ({scannedQrCodes.length})</h3>
+                        <div className="max-h-60 overflow-y-auto space-y-2">
+                          {scannedQrCodes.map((qr, index) => (
+                            <div key={qr.batchCode} className="p-3 border rounded-lg" data-testid={`qr-item-${index}`}>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium">{qr.commodityType}</p>
+                                  <p className="text-sm text-gray-600">{qr.farmerName} - {qr.weight} tons</p>
+                                  <p className="text-xs text-gray-500">{qr.batchCode}</p>
+                                </div>
+                                {custodyRegistrationMode === 'multi' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setScannedQrCodes(prev => prev.filter((_, i) => i !== index));
+                                      setMultiLotValidation(null);
+                                    }}
+                                    data-testid={`button-remove-qr-${index}`}
+                                  >
+                                    Remove
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Multi-Lot Validation */}
+                    {custodyRegistrationMode === 'multi' && scannedQrCodes.length >= 2 && (
+                      <Button
+                        onClick={() => validateMultiLotMutation.mutate(scannedQrCodes.map(qr => qr.batchCode))}
+                        disabled={validateMultiLotMutation.isPending}
+                        className="w-full"
+                        data-testid="button-validate-multi-lot"
+                      >
+                        {validateMultiLotMutation.isPending ? 'Validating...' : 'Validate Multi-Lot Compatibility'}
+                      </Button>
+                    )}
+
+                    {/* Validation Results */}
+                    {multiLotValidation && (
+                      <div className="p-3 border border-green-200 bg-green-50 rounded-lg" data-testid="validation-results">
+                        <p className="text-green-800 font-medium">✅ Multi-Lot Validated</p>
+                        <p className="text-sm text-green-700">
+                          {multiLotValidation.consolidatedData.totalLots} lots of {multiLotValidation.consolidatedData.commodityType} 
+                          ({multiLotValidation.consolidatedData.totalWeight} tons total)
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Register Custody Button */}
+                    {scannedQrCodes.length > 0 && (custodyRegistrationMode === 'single' || multiLotValidation) && (
+                      <Button
+                        onClick={() => setShowCustodyModal(true)}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        data-testid="button-register-custody"
+                      >
+                        Register for Warehouse Custody
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Column - Custody Records */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-green-600" />
+                      Custody Records
+                    </CardTitle>
+                    <CardDescription>
+                      Active warehouse custody registrations and storage fees
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {custodyRecordsLoading ? (
+                      <p className="text-center text-gray-500">Loading custody records...</p>
+                    ) : custodyRecords && custodyRecords.length > 0 ? (
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {custodyRecords.map((record: any) => (
+                          <div key={record.custodyId} className="p-4 border rounded-lg" data-testid={`custody-record-${record.custodyId}`}>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium">{record.commodityType}</p>
+                                <p className="text-sm text-gray-600">
+                                  {record.custodyType === 'multi_lot' ? 
+                                    `Multi-lot (${record.farmerNames?.length || 1} farmers)` : 
+                                    record.farmerNames?.[0] || 'Single lot'}
+                                </p>
+                                <p className="text-xs text-gray-500">{record.custodyId}</p>
+                              </div>
+                              <div className="text-right">
+                                <Badge className={
+                                  record.authorizationStatus === 'authorized' ? 'bg-green-100 text-green-800' :
+                                  record.authorizationStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }>
+                                  {record.authorizationStatus}
+                                </Badge>
+                                <p className="text-sm font-medium mt-1">{record.totalWeight} tons</p>
+                                <p className="text-xs text-gray-500">${record.calculatedAmount || (record.totalWeight * 50)} storage fee</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">No custody records found</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Product Registration Tab */}
@@ -2484,6 +2801,100 @@ export default function WarehouseInspectorDashboard() {
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Validate Request
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Custody Registration Modal */}
+      <Dialog open={showCustodyModal} onOpenChange={setShowCustodyModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Register for Warehouse Custody</DialogTitle>
+          </DialogHeader>
+          
+          {scannedQrCodes.length > 0 && (
+            <div className="space-y-6">
+              {/* Summary */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-medium mb-2">Custody Registration Summary</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Registration Type</p>
+                    <p className="font-medium">{custodyRegistrationMode === 'single' ? 'Single Lot' : 'Multi-Lot'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Total QR Codes</p>
+                    <p className="font-medium">{scannedQrCodes.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Total Weight</p>
+                    <p className="font-medium">
+                      {scannedQrCodes.reduce((sum, qr) => sum + parseFloat(qr.weight || '0'), 0).toFixed(2)} tons
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Storage Fee ($50/ton)</p>
+                    <p className="font-medium text-green-600">
+                      ${(scannedQrCodes.reduce((sum, qr) => sum + parseFloat(qr.weight || '0'), 0) * 50).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* QR Codes Details */}
+              <div>
+                <h3 className="font-medium mb-2">QR Codes to Register</h3>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {scannedQrCodes.map((qr, index) => (
+                    <div key={qr.batchCode} className="p-3 border rounded">
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="font-medium">{qr.commodityType}</p>
+                          <p className="text-sm text-gray-600">{qr.farmerName} - {qr.weight} tons</p>
+                        </div>
+                        <p className="text-xs text-gray-500">{qr.batchCode}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Validation Status */}
+              {custodyRegistrationMode === 'multi' && multiLotValidation && (
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-green-800 font-medium">✅ Multi-Lot Compatibility Verified</p>
+                  <p className="text-sm text-green-700">
+                    All lots are compatible for consolidated storage
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCustodyModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    const registrationData = {
+                      custodyType: custodyRegistrationMode,
+                      qrCodes: scannedQrCodes.map(qr => qr.batchCode),
+                      inspectorId: inspectorUsername,
+                      warehouseFacility: warehouseFacility
+                    };
+                    registerCustodyMutation.mutate(registrationData);
+                  }}
+                  disabled={registerCustodyMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                  data-testid="button-confirm-custody"
+                >
+                  {registerCustodyMutation.isPending ? 'Registering...' : 'Confirm Registration'}
                 </Button>
               </div>
             </div>

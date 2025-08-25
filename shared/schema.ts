@@ -6,7 +6,7 @@ import { z } from "zod";
 export const commodities = pgTable("commodities", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  type: text("type").notNull(), // cocoa, coffee, palm_oil, rubber, rice
+  type: text("type").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava, tobacco
   batchNumber: text("batch_number").notNull().unique(),
   county: text("county").notNull(),
   qualityGrade: text("quality_grade").notNull(),
@@ -95,7 +95,7 @@ export const transactionQrLinks = pgTable("transaction_qr_links", {
 // Product Configuration for different commodities with packaging options
 export const productConfigurations = pgTable("product_configurations", {
   id: serial("id").primaryKey(),
-  category: text("category").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava
+  category: text("category").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava, tobacco
   subCategory: text("sub_category").notNull(), // premium_cocoa, robusta_coffee, etc.
   productName: text("product_name").notNull(),
   description: text("description"),
@@ -1677,7 +1677,7 @@ export const farmPlots = pgTable("farm_plots", {
   plotName: text("plot_name").notNull(),
   
   // Plot-specific agricultural data
-  cropType: text("crop_type").notNull(), // cocoa, coffee, palm_oil, rubber, rice
+  cropType: text("crop_type").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava, tobacco
   primaryCrop: text("primary_crop"),
   secondaryCrops: text("secondary_crops"),
   plotSize: decimal("plot_size", { precision: 10, scale: 2 }).notNull(),
@@ -1881,7 +1881,7 @@ export const harvestSchedules = pgTable("harvest_schedules", {
   landMappingId: integer("land_mapping_id").references(() => farmerLandMappings.id).notNull(),
   farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
   scheduleName: text("schedule_name").notNull(),
-  cropType: text("crop_type").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava, plantain
+  cropType: text("crop_type").notNull(), // cocoa, coffee, palm_oil, rubber, rice, cassava, tobacco, plantain
   cropVariety: text("crop_variety"),
   plantingArea: decimal("planting_area", { precision: 10, scale: 2 }).notNull(), // hectares
   plantingStartDate: timestamp("planting_start_date").notNull(),

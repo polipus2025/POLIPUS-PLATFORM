@@ -51,6 +51,7 @@ export const COMMODITY_TYPES = [
   "rubber",
   "rice",
   "cassava",
+  "tobacco",
   "plantain",
   "banana",
   "coconut",
@@ -81,6 +82,7 @@ export const QUALITY_GRADES = {
   rubber: ["Grade A", "Grade B", "Grade C"],
   rice: ["Grade 1", "Grade 2", "Grade 3", "Grade 4"],
   cassava: ["Fresh Grade A", "Fresh Grade B", "Dried Grade A", "Dried Grade B"],
+  tobacco: ["Virginia Gold", "Burley Premium", "Oriental Grade A", "Fire-Cured Premium", "Air-Cured Standard"],
   plantain: ["Green Premium", "Green Standard", "Ripe Premium", "Ripe Standard"],
   banana: ["Export Grade", "Domestic Premium", "Domestic Standard"],
   coconut: ["Fresh A", "Fresh B", "Dried A", "Dried B"],
@@ -124,6 +126,8 @@ export function getCommodityIcon(type: string): string {
       return 'wheat';
     case 'cassava':
       return 'carrot';
+    case 'tobacco':
+      return 'leaf';
     case 'plantain':
     case 'banana':
       return 'banana';

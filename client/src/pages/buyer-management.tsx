@@ -216,6 +216,26 @@ export default function BuyerManagement() {
     },
   });
 
+  // View existing credentials mutation
+  const viewCredentialsMutation = useMutation({
+    mutationFn: (buyerId: number) => 
+      apiRequest(`/api/buyers/${buyerId}/credentials`, { method: "GET" }),
+    onSuccess: (data) => {
+      toast({
+        title: "Buyer Credentials",
+        description: `Username: ${data.credentials.username}, Temporary Password: ${data.credentials.temporaryPassword}`,
+        duration: 10000, // Show longer so they can copy
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Retrieve Credentials",
+        description: error.message || "Could not retrieve buyer credentials",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: BuyerFormData) => {
     console.log("✅ Form validation passed - submitting data:", data);
     console.log("Form errors:", form.formState.errors);
@@ -1079,6 +1099,19 @@ export default function BuyerManagement() {
                     >
                       <Shield className="w-4 h-4 mr-1" />
                       Generate Credentials
+                    </Button>
+                  )}
+
+                  {buyer.complianceStatus === 'approved' && buyer.loginCredentialsGenerated && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => viewCredentialsMutation.mutate(buyer.id)}
+                      disabled={viewCredentialsMutation.isPending}
+                      data-testid={`button-view-credentials-${buyer.id}`}
+                    >
+                      <Shield className="w-4 h-4 mr-1" />
+                      View Credentials
                     </Button>
                   )}
 

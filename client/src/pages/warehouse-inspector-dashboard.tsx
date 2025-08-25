@@ -51,7 +51,7 @@ export default function WarehouseInspectorDashboard() {
   // Product Registration states
   const [scannedQrCode, setScannedQrCode] = useState("");
   const [scanMode, setScanMode] = useState<'single' | 'multiple'>('single');
-  const [multipleQrCodes, setMultipleQrCodes] = useState<Array<{code: string, product: string, weight: number}>>([]);
+  const [multipleQrCodes, setMultipleQrCodes] = useState<Array<{code: string, product: string, weight: number, buyerName: string, farmerName: string, qualityGrade: string, unit: string}>>([]);
   const [currentProduct, setCurrentProduct] = useState("");
   const [selectedStorageRate, setSelectedStorageRate] = useState("1.50");
   const [storageLocation, setStorageLocation] = useState("");
@@ -202,7 +202,11 @@ export default function WarehouseInspectorDashboard() {
           const newQrEntry = {
             code: scannedQrCode,
             product: productData.commodityType,
-            weight: parseFloat(productData.weight) || 0
+            weight: parseFloat(productData.weight) || 0,
+            buyerName: productData.buyerName,
+            farmerName: productData.farmerName,
+            qualityGrade: productData.qualityGrade,
+            unit: productData.unit || 'kg'
           };
           
           setMultipleQrCodes(prev => [...prev, newQrEntry]);
@@ -1254,23 +1258,30 @@ export default function WarehouseInspectorDashboard() {
                               Clear All
                             </Button>
                           </div>
-                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
                             {multipleQrCodes.map((item, index) => (
-                              <div key={item.code} className="flex items-center justify-between bg-white p-2 rounded text-sm">
-                                <div>
-                                  <span className="font-mono">{item.code}</span>
-                                  <span className="text-gray-600 ml-2">({item.weight}kg)</span>
+                              <div key={item.code} className="bg-white p-3 rounded border border-gray-200 text-sm">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-mono text-blue-600 font-medium">{item.code}</span>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => {
+                                      setMultipleQrCodes(prev => prev.filter(q => q.code !== item.code));
+                                      if (multipleQrCodes.length === 1) setCurrentProduct("");
+                                    }}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    ×
+                                  </Button>
                                 </div>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => {
-                                    setMultipleQrCodes(prev => prev.filter(q => q.code !== item.code));
-                                    if (multipleQrCodes.length === 1) setCurrentProduct("");
-                                  }}
-                                >
-                                  ×
-                                </Button>
+                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                  <div><span className="font-medium">Product:</span> {item.product}</div>
+                                  <div><span className="font-medium">Weight:</span> {item.weight}{item.unit}</div>
+                                  <div><span className="font-medium">Buyer:</span> {item.buyerName}</div>
+                                  <div><span className="font-medium">Grade:</span> {item.qualityGrade}</div>
+                                  <div className="col-span-2"><span className="font-medium">Farmer:</span> {item.farmerName}</div>
+                                </div>
                               </div>
                             ))}
                           </div>

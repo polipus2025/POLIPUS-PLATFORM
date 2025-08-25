@@ -15484,58 +15484,56 @@ International compliance standards met`;
   app.get("/api/warehouse-inspector/lookup-qr/:qrCode", async (req, res) => {
     try {
       const { qrCode } = req.params;
+      console.log('🔍 Looking up QR code for warehouse registration:', qrCode);
       
-      // Mock product lookup - in real implementation, this would query the database
-      const mockProducts = [
-        {
-          buyerId: "BUY-001",
-          buyerName: "Monrovia Trading Company",
-          buyerCompany: "MTC Ltd",
-          commodityType: "cocoa",
-          farmerName: "John Konneh",
-          farmLocation: "Margibi County, District 2",
-          weight: "5.5",
-          unit: "tons",
-          qualityGrade: "Premium Grade A",
-          verificationCode: "VERIFY-20250825-001"
-        },
-        {
-          buyerId: "BUY-002", 
-          buyerName: "Atlantic Coffee Ltd",
-          buyerCompany: "ACL Exports",
-          commodityType: "coffee",
-          farmerName: "Mary Kollie",
-          farmLocation: "Bong County, District 1",
-          weight: "3.2",
-          unit: "tons",
-          qualityGrade: "Export Grade B+",
-          verificationCode: "VERIFY-20250825-002"
-        }
-      ];
+      // Look up actual QR batch in database
+      const result = await db.execute(sql`
+        SELECT * FROM qr_batches WHERE batch_code = ${qrCode}
+      `);
 
-      // Simulate QR lookup
-      let foundProduct = null;
-      if (qrCode.includes("BUYER") || qrCode.length > 10) {
-        foundProduct = mockProducts[Math.floor(Math.random() * mockProducts.length)];
-      }
-
-      if (foundProduct) {
-        res.json({ 
-          success: true, 
-          data: foundProduct,
-          message: `Found ${foundProduct.commodityType} from ${foundProduct.buyerName}`
-        });
-      } else {
-        res.json({ 
-          success: false, 
-          message: "QR code not found in system records" 
+      if (result.rows.length === 0) {
+        console.log('❌ QR code not found in database:', qrCode);
+        return res.status(404).json({
+          success: false,
+          message: "QR code not found in system records"
         });
       }
+
+      const qrBatch = result.rows[0] as any;
+      console.log('✅ Found QR batch:', qrBatch.batch_code, 'Commodity:', qrBatch.commodity_type);
+      
+      // Return actual product data from database
+      const productData = {
+        batchCode: qrBatch.batch_code,
+        buyerId: qrBatch.buyer_id,
+        buyerName: qrBatch.buyer_name,
+        buyerCompany: qrBatch.buyer_company || qrBatch.buyer_name,
+        commodityType: qrBatch.commodity_type,
+        farmerName: qrBatch.farmer_name,
+        farmLocation: qrBatch.warehouse_location,
+        weight: qrBatch.total_weight.toString(),
+        unit: 'tons',
+        qualityGrade: qrBatch.quality_grade,
+        packagingType: qrBatch.packaging_type,
+        totalPackages: qrBatch.total_packages,
+        packageWeight: qrBatch.package_weight,
+        verificationCode: qrBatch.batch_code, // Use batch code as verification
+        gpsCoordinates: qrBatch.gps_coordinates,
+        eudrCompliance: qrBatch.eudr_compliance
+      };
+
+      res.json({ 
+        success: true, 
+        data: productData,
+        message: `Found ${qrBatch.commodity_type} from ${qrBatch.buyer_name || 'Batch Buyer'}`
+      });
+
     } catch (error) {
-      console.error("Error looking up QR code:", error);
+      console.error('❌ QR lookup error:', error);
       res.status(500).json({ 
         success: false, 
-        message: "Failed to lookup QR code" 
+        message: "Failed to lookup QR code",
+        details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

@@ -8,6 +8,7 @@ import { QrBatchService } from "./qr-batch-service";
 import { productConfigurationData } from "./product-config-data";
 import cropSchedulingRoutes from "./crop-scheduling-routes";
 import cropWorkflowPdfRoutes from "./crop-workflow-pdf-generator";
+import QRCode from 'qrcode';
 import completeProcessFlowRoutes from "./complete-process-flow-generator";
 import dgLevelRoutes from "./dg-level-implementation";
 import bcrypt from "bcryptjs";
@@ -1493,6 +1494,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching QR batch:", error);
       res.status(500).json({ success: false, message: "Failed to fetch QR batch" });
+    }
+  });
+
+  // Generate QR Code for warehouse display
+  app.post("/api/generate-qr", async (req, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ success: false, message: 'Text is required for QR code generation' });
+      }
+
+      console.log(`🎯 Generating QR Code for: ${text}`);
+
+      // Generate QR code as data URL
+      const qrCodeDataURL = await QRCode.toDataURL(text, {
+        errorCorrectionLevel: 'M',
+        type: 'image/png',
+        quality: 0.92,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        },
+        width: 200
+      });
+
+      res.json({
+        success: true,
+        qrCode: qrCodeDataURL,
+        text: text
+      });
+
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate QR code' });
     }
   });
 

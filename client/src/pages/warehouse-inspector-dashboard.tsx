@@ -30,7 +30,10 @@ import {
   Scale,
   MapPin,
   Printer,
-  QrCode
+  QrCode,
+  Layers,
+  X,
+  ShieldCheck
 } from "lucide-react";
 
 export default function WarehouseInspectorDashboard() {
@@ -812,14 +815,10 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Main Navigation Tabs - Moved to middle position */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-9 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
-            </TabsTrigger>
-            <TabsTrigger value="custody" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Scale className="w-4 h-4 mr-2" />
-              Custody
             </TabsTrigger>
             <TabsTrigger value="registration" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <QrCode className="w-4 h-4 mr-2" />
@@ -1046,71 +1045,265 @@ export default function WarehouseInspectorDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Warehouse Custody Tab */}
-          <TabsContent value="custody" className="space-y-6">
+          {/* Product Registration Tab - Two conditional modes */}
+          <TabsContent value="registration" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - QR Registration */}
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Scale className="w-5 h-5 mr-2 text-blue-600" />
-                      Product Custody Registration
-                    </CardTitle>
-                    <CardDescription>
-                      Register products for warehouse custody storage - Single lot or multi-lot consolidation
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Registration Mode Selection */}
-                    <div className="flex space-x-2">
-                      <Button
-                        variant={custodyRegistrationMode === 'single' ? 'default' : 'outline'}
-                        onClick={() => {
-                          setCustodyRegistrationMode('single');
-                          setScannedQrCodes([]);
-                          setMultiLotValidation(null);
-                        }}
-                        className="flex-1"
-                        data-testid="button-single-mode"
-                      >
-                        Single Lot
-                      </Button>
-                      <Button
-                        variant={custodyRegistrationMode === 'multi' ? 'default' : 'outline'}
-                        onClick={() => {
-                          setCustodyRegistrationMode('multi');
-                          setScannedQrCodes([]);
-                          setMultiLotValidation(null);
-                        }}
-                        className="flex-1"
-                        data-testid="button-multi-mode"
-                      >
-                        Multi-Lot
-                      </Button>
-                    </div>
+              {/* QR Scanner Section with Registration Mode Selection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <QrCode className="w-5 h-5 mr-2 text-blue-600" />
+                    Product Registration & Custody
+                  </CardTitle>
+                  <CardDescription>
+                    Register buyer products and place under mandatory warehouse custody control
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Registration Mode Selection */}
+                  <div className="flex gap-2 mb-6 p-3 bg-gray-50 rounded-lg">
+                    <Button 
+                      size="sm"
+                      variant={custodyRegistrationMode === 'single' ? 'default' : 'outline'}
+                      onClick={() => {
+                        setCustodyRegistrationMode('single');
+                        setScannedQrCodes([]);
+                        setMultiLotValidation(null);
+                      }}
+                      data-testid="button-single-lot-registration"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Single Lot Registration
+                    </Button>
+                    <Button 
+                      size="sm"
+                      variant={custodyRegistrationMode === 'multi' ? 'default' : 'outline'}
+                      onClick={() => {
+                        setCustodyRegistrationMode('multi');
+                        setScannedQrCodes([]);
+                        setMultiLotValidation(null);
+                      }}
+                      data-testid="button-multi-lot-registration"
+                    >
+                      <Layers className="w-4 h-4 mr-2" />
+                      Multi-Lot Registration
+                    </Button>
+                  </div>
 
-                    {/* QR Code Input */}
-                    <div className="flex space-x-2">
-                      <Input
-                        placeholder="Scan or enter QR code..."
-                        value={currentQrInput}
-                        onChange={(e) => setCurrentQrInput(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' && currentQrInput.trim()) {
-                            lookupQrMutation.mutate(currentQrInput.trim());
-                          }
-                        }}
-                        data-testid="input-qr-code"
-                      />
+                  {/* QR Code Input */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      {custodyRegistrationMode === 'single' ? 'Product QR Code' : 'Product QR Codes (Scan Multiple)'}
+                    </label>
+                    <Input
+                      placeholder={custodyRegistrationMode === 'single' ? "Scan or enter QR code" : "Scan or enter QR code (one at a time)"}
+                      value={scannedQrCode}
+                      onChange={(e) => setScannedQrCode(e.target.value)}
+                      data-testid="input-qr-code"
+                    />
+                    <div className="flex gap-2">
                       <Button 
-                        onClick={() => currentQrInput.trim() && lookupQrMutation.mutate(currentQrInput.trim())}
-                        disabled={!currentQrInput.trim() || lookupQrMutation.isPending}
-                        data-testid="button-scan-qr"
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          // Use your working QR code for testing
+                          setScannedQrCode("WH-BATCH-1756052880737-8P2L");
+                        }}
+                        data-testid="button-use-test-qr"
                       >
-                        {lookupQrMutation.isPending ? 'Looking up...' : 'Scan'}
+                        <QrCode className="w-4 h-4 mr-1" />
+                        Use Test QR
+                      </Button>
+                      <Button 
+                        onClick={handleQrCodeLookup}
+                        disabled={!scannedQrCode}
+                        data-testid="button-lookup-qr"
+                      >
+                        {custodyRegistrationMode === 'single' ? 'Lookup & Register' : 'Add to Multi-Lot'}
                       </Button>
                     </div>
+                  </div>
+
+                  {/* Multi-lot validation status */}
+                  {custodyRegistrationMode === 'multi' && scannedQrCodes.length >= 2 && (
+                    <div className={`p-4 rounded-lg border ${
+                      multiLotValidation?.success 
+                        ? 'bg-green-50 border-green-200' 
+                        : 'bg-red-50 border-red-200'
+                    }`}>
+                      <h4 className={`font-medium mb-2 ${
+                        multiLotValidation?.success ? 'text-green-800' : 'text-red-800'
+                      }`}>
+                        {multiLotValidation?.success ? '✅ Multi-Lot Compatible' : '❌ Multi-Lot Incompatible'}
+                      </h4>
+                      {multiLotValidation?.success ? (
+                        <p className="text-sm text-green-700">{multiLotValidation.message}</p>
+                      ) : (
+                        <p className="text-sm text-red-700">{multiLotValidation?.error}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Scanned QR codes display */}
+                  {scannedQrCodes.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm">
+                        {custodyRegistrationMode === 'single' ? 'Product to Register:' : `Scanned Products (${scannedQrCodes.length}):`}
+                      </h4>
+                      {scannedQrCodes.map((product, index) => (
+                        <div key={product.batchCode} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <p className="font-medium text-blue-800">{product.commodityType} - {product.weight} {product.unit}</p>
+                              <p className="text-sm text-blue-600">Farmer: {product.farmerName}</p>
+                              <p className="text-sm text-blue-600">QR: {product.batchCode}</p>
+                            </div>
+                            {custodyRegistrationMode === 'multi' && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  const newCodes = scannedQrCodes.filter((_, i) => i !== index);
+                                  setScannedQrCodes(newCodes);
+                                  if (newCodes.length < 2) {
+                                    setMultiLotValidation(null);
+                                  }
+                                }}
+                                data-testid={`button-remove-qr-${index}`}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Registration button */}
+                  {scannedQrCodes.length > 0 && (custodyRegistrationMode === 'single' || multiLotValidation?.success) && (
+                    <Button 
+                      className="w-full"
+                      onClick={() => setShowRegistrationModal(true)}
+                      data-testid="button-register-product-custody"
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-2" />
+                      Register for Warehouse Custody
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Storage Configuration Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Warehouse className="w-5 h-5 mr-2 text-green-600" />
+                    Storage Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Configure storage rates and location details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Daily Storage Rate (USD per ton)</label>
+                    <select
+                      value={selectedStorageRate}
+                      onChange={(e) => setSelectedStorageRate(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-rate"
+                    >
+                      <option value="1.00">$1.00 per ton/day - Basic Storage</option>
+                      <option value="1.50">$1.50 per ton/day - Standard Storage</option>
+                      <option value="2.00">$2.00 per ton/day - Premium Storage</option>
+                      <option value="2.50">$2.50 per ton/day - Climate Controlled</option>
+                      <option value="3.00">$3.00 per ton/day - Specialized Storage</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Storage Location</label>
+                    <select
+                      value={storageLocation}
+                      onChange={(e) => setStorageLocation(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-location"
+                    >
+                      <option value="">Select Storage Location</option>
+                      <option value="Section A-1">Section A-1 (Dry Goods)</option>
+                      <option value="Section A-2">Section A-2 (Climate Controlled)</option>
+                      <option value="Section B-1">Section B-1 (Large Items)</option>
+                      <option value="Section B-2">Section B-2 (Premium Storage)</option>
+                      <option value="Section C-1">Section C-1 (Cold Storage)</option>
+                      <option value="Outdoor Area 1">Outdoor Area 1 (Weather Resistant)</option>
+                    </select>
+                  </div>
+
+                  {/* Current Custody Records */}
+                  <div className="mt-6">
+                    <h3 className="font-medium mb-3">
+                      Current Custody Records
+                    </h3>
+                    <div className="text-center text-gray-500 py-4 border border-dashed border-gray-200 rounded-lg">
+                      Products currently registered in warehouse custody
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Custody Management Tab - Simple QR scanner for warehouse-generated codes */}
+          <TabsContent value="custody" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Scale className="w-5 h-5 mr-2 text-blue-600" />
+                  Custody Management
+                </CardTitle>
+                <CardDescription>
+                  Scan warehouse-generated QR codes to manage product custody and storage
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Warehouse QR Code</label>
+                  <Input
+                    placeholder="Scan warehouse-generated QR code"
+                    value={scannedQrCode}
+                    onChange={(e) => setScannedQrCode(e.target.value)}
+                    data-testid="input-custody-qr-code"
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Use test QR code for demonstration
+                        setScannedQrCode("QR-MULTI-LOT-WH-001-20250825");
+                      }}
+                      data-testid="button-use-warehouse-qr"
+                    >
+                      <QrCode className="w-4 h-4 mr-1" />
+                      Use Warehouse QR
+                    </Button>
+                    <Button 
+                      onClick={handleQrCodeLookup}
+                      disabled={!scannedQrCode}
+                      data-testid="button-manage-custody"
+                    >
+                      Manage Custody
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="text-sm text-gray-600 p-3 bg-blue-50 rounded-lg">
+                  <p><strong>Note:</strong> This tab manages products that have already been registered. Scan QR codes generated from the Registration process.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
                     {/* Scanned QR Codes Display */}
                     {scannedQrCodes.length > 0 && (
@@ -1238,22 +1431,65 @@ export default function WarehouseInspectorDashboard() {
           {/* Product Registration Tab */}
           <TabsContent value="registration" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* QR Scanner Section */}
+              {/* QR Scanner Section with Registration Mode Selection */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <QrCode className="w-5 h-5 mr-2 text-blue-600" />
-                    QR Code Scanner
+                    Product Registration & Custody
                   </CardTitle>
                   <CardDescription>
-                    Scan buyer product QR codes to register for warehouse custody
+                    Register buyer products and place under mandatory warehouse custody control
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Registration Mode Selection */}
+                  <div className="flex gap-2 mb-6 p-3 bg-gray-50 rounded-lg">
+                    <Button 
+                      size="sm"
+                      variant={custodyRegistrationMode === 'single' ? 'default' : 'outline'}
+                      onClick={() => {
+                        setCustodyRegistrationMode('single');
+                        setScannedQrCodes([]);
+                        setMultiLotValidation(null);
+                      }}
+                      data-testid="button-single-lot-registration"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Single Lot Registration
+                    </Button>
+                    <Button 
+                      size="sm"
+                      variant={custodyRegistrationMode === 'multi' ? 'default' : 'outline'}
+                      onClick={() => {
+                        setCustodyRegistrationMode('multi');
+                        setScannedQrCodes([]);
+                        setMultiLotValidation(null);
+                      }}
+                      data-testid="button-multi-lot-registration"
+                    >
+                      <Layers className="w-4 h-4 mr-2" />
+                      Multi-Lot Registration
+                    </Button>
+                  </div>
+                </CardContent>
+                <CardHeader className="pt-0">
+                  <CardTitle className="text-base">
+                    {custodyRegistrationMode === 'single' ? 'Single Lot QR Scanner' : 'Multi-Lot QR Scanner'}
+                  </CardTitle>
+                  <CardDescription>
+                    {custodyRegistrationMode === 'single' 
+                      ? 'Scan one QR code to register a single product lot' 
+                      : 'Scan multiple QR codes to register and consolidate multiple lots'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Product QR Code</label>
+                    <label className="text-sm font-medium">
+                      {custodyRegistrationMode === 'single' ? 'Product QR Code' : 'Product QR Codes (Scan Multiple)'}
+                    </label>
                     <Input
-                      placeholder="Scan or enter QR code"
+                      placeholder={custodyRegistrationMode === 'single' ? "Scan or enter QR code" : "Scan or enter QR code (one at a time)"}
                       value={scannedQrCode}
                       onChange={(e) => setScannedQrCode(e.target.value)}
                       data-testid="input-qr-code"
@@ -1263,35 +1499,90 @@ export default function WarehouseInspectorDashboard() {
                         variant="outline" 
                         size="sm"
                         onClick={() => {
-                          // Simulate QR scan - in real implementation this would open camera
-                          setScannedQrCode("QR-BUYER-202508-" + Math.random().toString(36).substr(2, 6).toUpperCase());
+                          // Use your working QR code for testing
+                          setScannedQrCode("WH-BATCH-1756052880737-8P2L");
                         }}
-                        data-testid="button-simulate-scan"
+                        data-testid="button-use-test-qr"
                       >
                         <QrCode className="w-4 h-4 mr-1" />
-                        Simulate Scan
+                        Use Test QR
                       </Button>
                       <Button 
                         onClick={handleQrCodeLookup}
                         disabled={!scannedQrCode}
                         data-testid="button-lookup-qr"
                       >
-                        Lookup Product
+                        {custodyRegistrationMode === 'single' ? 'Lookup & Register' : 'Add to Multi-Lot'}
                       </Button>
                     </div>
                   </div>
 
-                  {productToRegister && (
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                      <h4 className="font-medium text-green-800 mb-2">Product Found ✓</h4>
-                      <div className="grid grid-cols-1 gap-2 text-sm">
-                        <p><span className="font-medium">Buyer:</span> {productToRegister.buyerName}</p>
-                        <p><span className="font-medium">Commodity:</span> {productToRegister.commodityType}</p>
-                        <p><span className="font-medium">Weight:</span> {productToRegister.weight} {productToRegister.unit}</p>
-                        <p><span className="font-medium">Farmer:</span> {productToRegister.farmerName}</p>
-                        <p><span className="font-medium">Quality:</span> {productToRegister.qualityGrade}</p>
-                      </div>
+                  {/* Multi-lot validation status */}
+                  {custodyRegistrationMode === 'multi' && scannedQrCodes.length >= 2 && (
+                    <div className={`p-4 rounded-lg border ${
+                      multiLotValidation?.success 
+                        ? 'bg-green-50 border-green-200' 
+                        : 'bg-red-50 border-red-200'
+                    }`}>
+                      <h4 className={`font-medium mb-2 ${
+                        multiLotValidation?.success ? 'text-green-800' : 'text-red-800'
+                      }`}>
+                        {multiLotValidation?.success ? '✅ Multi-Lot Compatible' : '❌ Multi-Lot Incompatible'}
+                      </h4>
+                      {multiLotValidation?.success ? (
+                        <p className="text-sm text-green-700">{multiLotValidation.message}</p>
+                      ) : (
+                        <p className="text-sm text-red-700">{multiLotValidation?.error}</p>
+                      )}
                     </div>
+                  )}
+
+                  {/* Scanned QR codes display */}
+                  {scannedQrCodes.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm">
+                        {custodyRegistrationMode === 'single' ? 'Product to Register:' : `Scanned Products (${scannedQrCodes.length}):`}
+                      </h4>
+                      {scannedQrCodes.map((product, index) => (
+                        <div key={product.batchCode} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <p className="font-medium text-blue-800">{product.commodityType} - {product.weight} {product.unit}</p>
+                              <p className="text-sm text-blue-600">Farmer: {product.farmerName}</p>
+                              <p className="text-sm text-blue-600">QR: {product.batchCode}</p>
+                            </div>
+                            {custodyRegistrationMode === 'multi' && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  const newCodes = scannedQrCodes.filter((_, i) => i !== index);
+                                  setScannedQrCodes(newCodes);
+                                  if (newCodes.length < 2) {
+                                    setMultiLotValidation(null);
+                                  }
+                                }}
+                                data-testid={`button-remove-qr-${index}`}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Registration button */}
+                  {scannedQrCodes.length > 0 && (custodyRegistrationMode === 'single' || multiLotValidation?.success) && (
+                    <Button 
+                      className="w-full"
+                      onClick={() => setShowRegistrationModal(true)}
+                      data-testid="button-register-product-custody"
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-2" />
+                      Register for Warehouse Custody
+                    </Button>
                   )}
                 </CardContent>
               </Card>

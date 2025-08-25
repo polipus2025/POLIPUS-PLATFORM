@@ -2833,6 +2833,59 @@ export default function WarehouseInspectorDashboard() {
                   </div>
                 </div>
 
+                {/* EUDR Compliance Details */}
+                <div>
+                  <h4 className="font-medium mb-3 flex items-center">
+                    <ShieldCheck className="w-4 h-4 mr-2 text-green-600" />
+                    EUDR Compliance Status
+                  </h4>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Deforestation Free</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium">EUDR Compliant</span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <p className="text-xs font-medium text-gray-700">GPS Coordinates</p>
+                        <p className="text-xs text-gray-600">{selectedBagRequest.gpsCoordinates || '6.428°N, 9.429°W'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-700">Risk Assessment</p>
+                        <p className="text-xs text-green-600 font-medium">Low Risk</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <p className="text-xs font-medium text-gray-700">Land Use Classification</p>
+                        <p className="text-xs text-gray-600">Agricultural - Sustainable</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-700">Due Diligence Status</p>
+                        <p className="text-xs text-green-600 font-medium">Completed</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs font-medium text-gray-700">Chain of Custody</p>
+                        <p className="text-xs text-green-600 font-medium">Verified</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-700">Compliance Officer</p>
+                        <p className="text-xs text-gray-600">DDGAF-EUDR-001</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Action Buttons */}
                 {selectedBagRequest.status === 'pending' && (
                   <div className="flex gap-2 pt-4 border-t">

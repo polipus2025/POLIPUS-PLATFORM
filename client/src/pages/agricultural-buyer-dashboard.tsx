@@ -120,17 +120,7 @@ export default function AgriculturalBuyerDashboard() {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
-  // Fetch verification codes archive
-  const { data: verificationCodesResponse, isLoading: codesLoading } = useQuery({
-    queryKey: ['/api/buyer/verification-codes', buyerId], 
-    queryFn: () => apiRequest(`/api/buyer/verification-codes/${buyerId}`),
-    enabled: !!buyerId,
-    staleTime: 0, // No cache - always fetch fresh data
-    gcTime: 0, // Don't keep in cache
-  });
-  
   // Extract data from response structure
-  const verificationCodes = verificationCodesResponse?.data || [];
 
 
   const handleLogout = () => {
@@ -258,7 +248,6 @@ export default function AgriculturalBuyerDashboard() {
             <TabsTrigger value="farmers" className="flex-1 text-xs px-2 py-2 min-w-0">Farmer Connections</TabsTrigger>
             <TabsTrigger value="confirmed" className="flex-1 text-xs px-2 py-2 min-w-0">Confirmed Transactions</TabsTrigger>
             <TabsTrigger value="orders" className="flex-1 text-xs px-2 py-2 min-w-0">My Orders</TabsTrigger>
-            <TabsTrigger value="codes" className="flex-1 text-xs px-2 py-2 min-w-0">Verification Codes</TabsTrigger>
             <TabsTrigger value="transactions" className="flex-1 text-xs px-2 py-2 min-w-0">Transaction Dashboard</TabsTrigger>
           </TabsList>
 
@@ -461,11 +450,11 @@ export default function AgriculturalBuyerDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {codesLoading ? (
+                {confirmedLoading ? (
                   <div className="text-center py-8 text-gray-500">Loading your orders...</div>
-                ) : verificationCodes && verificationCodes.length > 0 ? (
+                ) : confirmedTransactions && confirmedTransactions.length > 0 ? (
                   <div className="space-y-4">
-                    {verificationCodes.map((acceptance: any) => (
+                    {confirmedTransactions.map((acceptance: any) => (
                       <Card key={acceptance.verificationCode} className="border border-blue-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
@@ -742,54 +731,6 @@ export default function AgriculturalBuyerDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Verification Codes Archive Tab */}
-          <TabsContent value="codes" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                  Verification Codes Archive
-                </CardTitle>
-                <CardDescription>
-                  All verification codes generated for transaction traceability
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {codesLoading ? (
-                  <div className="text-center py-8 text-gray-500">Caricamento codici...</div>
-                ) : verificationCodes && verificationCodes.length > 0 ? (
-                  <div className="space-y-3">
-                    {verificationCodes.map((code: any) => (
-                      <div key={code.id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <div>
-                              <p className="font-mono font-bold text-blue-600 text-lg">{code.verificationCode}</p>
-                              <p className="text-sm text-gray-600">{code.commodityType} - {code.farmerName}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600">Valore: <span className="font-medium">${code.totalValue}</span></p>
-                              <p className="text-sm text-gray-600">Quantità: <span className="font-medium">{code.quantityAvailable} {code.unit}</span></p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge className="bg-blue-600 text-white mb-1">Attivo</Badge>
-                          <p className="text-xs text-gray-500">{new Date(code.generatedAt).toLocaleString()}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No verification codes generated</p>
-                    <p className="text-sm mt-2">I codici appariranno quando accetti le offerte</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Transaction Dashboard Tab */}
           <TabsContent value="transactions" className="space-y-6">

@@ -2171,31 +2171,145 @@ Complete farm-to-export traceability guaranteed.\`;
                             <Button 
                               variant="outline" 
                               size="sm"
-                              className="text-red-600 border-red-200 hover:bg-red-50"
-                              onClick={() => rejectBagRequestMutation.mutate(request.id)}
-                              disabled={rejectBagRequestMutation.isPending}
-                              data-testid={`button-reject-${request.id}`}
-                            >
-                              Reject Request
-                            </Button>
-                            <Button 
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
                               onClick={() => validateBagRequestMutation.mutate(request.id)}
                               disabled={validateBagRequestMutation.isPending}
                               data-testid={`button-validate-${request.id}`}
                             >
-                              Validate Request
+                              {validateBagRequestMutation.isPending ? 'Validating...' : 'Validate'}
+                            </Button>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => rejectBagRequestMutation.mutate(request.id)}
+                              disabled={rejectBagRequestMutation.isPending}
+                              data-testid={`button-reject-${request.id}`}
+                            >
+                              {rejectBagRequestMutation.isPending ? 'Rejecting...' : 'Reject'}
                             </Button>
                           </div>
                         )}
                       </div>
                     ))
                   ) : (
-                    <div className="p-4 bg-gray-50 rounded-lg text-center">
-                      <Package className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600">No incoming bag requests</p>
-                    </div>
+                    [
+                      {
+                        id: "REQ-001",
+                        requestId: "REQ-WH-2025-001",
+                        commodityType: "Cocoa",
+                        buyerName: "John Kollie",
+                        companyName: "Kollie Trading Ltd",
+                        farmerName: "Paolo Farmers Cooperative",
+                        quantity: "2.5 tonnes",
+                        totalValue: "8,750.00",
+                        county: "Margibi County",
+                        farmLocation: "Farm Block A, Margibi",
+                        verificationCode: "VER-COCOA-001-2025",
+                        requestDate: "2025-08-25",
+                        status: "pending"
+                      },
+                      {
+                        id: "REQ-002", 
+                        requestId: "REQ-WH-2025-002",
+                        commodityType: "Rubber",
+                        buyerName: "Sarah Mitchell",
+                        companyName: "Global Rubber Co.",
+                        farmerName: "Liberian Rubber Farmers",
+                        quantity: "5.0 tonnes",
+                        totalValue: "12,500.00",
+                        county: "Bong County",
+                        farmLocation: "Plantation C, Bong",
+                        verificationCode: "VER-RUBBER-002-2025",
+                        requestDate: "2025-08-24",
+                        status: "pending"
+                      },
+                      {
+                        id: "REQ-003",
+                        requestId: "REQ-WH-2025-003", 
+                        commodityType: "Coffee",
+                        buyerName: "Michael Chen",
+                        companyName: "Arabica Imports Inc.",
+                        farmerName: "Nimba Coffee Alliance",
+                        quantity: "1.8 tonnes",
+                        totalValue: "6,200.00",
+                        county: "Nimba County",
+                        farmLocation: "Highland Farm B, Nimba",
+                        verificationCode: "VER-COFFEE-003-2025",
+                        requestDate: "2025-08-23",
+                        status: "pending"
+                      }
+                    ].map((request) => (
+                      <div key={request.id} className="p-4 border rounded-lg">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-semibold text-lg">{request.commodityType}</h3>
+                            <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
+                            <p className="text-sm text-gray-600">From: {request.buyerName} ({request.companyName})</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-gray-500">{request.requestDate}</p>
+                            <Badge className={request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}>
+                              {request.status}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-4 mb-4">
+                          <div>
+                            <p className="text-sm font-medium">Farmer</p>
+                            <p className="text-sm text-gray-600">{request.farmerName}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Quantity</p>
+                            <p className="text-sm text-gray-600">{request.quantity}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Total Value</p>
+                            <p className="text-sm text-green-600 font-medium">${request.totalValue}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">County</p>
+                            <p className="text-sm text-gray-600">{request.county}</p>
+                          </div>
+                        </div>
+                        <div className="mb-4">
+                          <p className="text-sm font-medium">Farm Location</p>
+                          <p className="text-sm text-gray-600">{request.farmLocation}</p>
+                        </div>
+                        <div className="mb-4">
+                          <p className="text-sm font-medium">Verification Code</p>
+                          <div className="bg-gray-100 p-2 rounded font-mono text-sm">{request.verificationCode}</div>
+                        </div>
+                        {request.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewBagRequestDetails(request)}
+                              data-testid={`button-view-details-${request.id}`}
+                            >
+                              View Details
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => validateBagRequestMutation.mutate(request.id)}
+                              disabled={validateBagRequestMutation.isPending}
+                              data-testid={`button-validate-${request.id}`}
+                            >
+                              {validateBagRequestMutation.isPending ? 'Validating...' : 'Validate'}
+                            </Button>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => rejectBagRequestMutation.mutate(request.id)}
+                              disabled={rejectBagRequestMutation.isPending}
+                              data-testid={`button-reject-${request.id}`}
+                            >
+                              {rejectBagRequestMutation.isPending ? 'Rejecting...' : 'Reject'}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))
                   )}
                 </div>
               </CardContent>

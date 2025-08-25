@@ -216,7 +216,7 @@ export default function BuyerManagement() {
   });
 
   const onSubmit = (data: BuyerFormData) => {
-    console.log("Form submitted with data:", data);
+    console.log("✅ Form validation passed - submitting data:", data);
     console.log("Form errors:", form.formState.errors);
     console.log("Selected commodities:", selectedCommodities);
     console.log("Selected regions:", selectedRegions);
@@ -232,6 +232,22 @@ export default function BuyerManagement() {
 
     console.log("Formatted data being sent:", formattedData);
     createBuyerMutation.mutate(formattedData);
+  };
+  
+  // Add helper to show validation errors
+  const checkFormValidation = () => {
+    console.log("🔍 Form Validation Check:");
+    console.log("Form valid:", form.formState.isValid);
+    console.log("Form errors:", form.formState.errors);
+    console.log("Form values:", form.getValues());
+    
+    if (!form.formState.isValid) {
+      toast({
+        title: "Form Validation Failed",
+        description: "Please fill in all required fields (marked with *)",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredBuyers = Array.isArray(buyers) ? buyers.filter((buyer: any) => {
@@ -856,11 +872,7 @@ export default function BuyerManagement() {
                     disabled={createBuyerMutation.isPending}
                     data-testid="button-register-buyer"
                     onClick={() => {
-                      console.log("Button clicked");
-                      console.log("Form valid:", form.formState.isValid);
-                      console.log("Form errors:", form.formState.errors);
-                      console.log("Selected commodities:", selectedCommodities);
-                      console.log("Selected regions:", selectedRegions);
+                      checkFormValidation();
                     }}
                   >
                     {createBuyerMutation.isPending ? "Registering..." : "Register Buyer"}

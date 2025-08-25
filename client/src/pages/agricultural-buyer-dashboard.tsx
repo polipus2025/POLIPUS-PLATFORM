@@ -120,7 +120,17 @@ export default function AgriculturalBuyerDashboard() {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
+  // Fetch verification codes archive
+  const { data: verificationCodesResponse, isLoading: codesLoading } = useQuery({
+    queryKey: ['/api/buyer/verification-codes', buyerId], 
+    queryFn: () => apiRequest(`/api/buyer/verification-codes/${buyerId}`),
+    enabled: !!buyerId,
+    staleTime: 0, // No cache - always fetch fresh data
+    gcTime: 0, // Don't keep in cache
+  });
+  
   // Extract data from response structure
+  const verificationCodes = verificationCodesResponse?.data || [];
 
 
   const handleLogout = () => {
@@ -450,11 +460,11 @@ export default function AgriculturalBuyerDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {confirmedLoading ? (
+                {codesLoading ? (
                   <div className="text-center py-8 text-gray-500">Loading your orders...</div>
-                ) : confirmedTransactions && confirmedTransactions.length > 0 ? (
+                ) : verificationCodes && verificationCodes.length > 0 ? (
                   <div className="space-y-4">
-                    {confirmedTransactions.map((acceptance: any) => (
+                    {verificationCodes.map((acceptance: any) => (
                       <Card key={acceptance.verificationCode} className="border border-blue-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">

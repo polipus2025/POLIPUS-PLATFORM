@@ -24,7 +24,7 @@ export default function BuyerTransactionDashboard() {
 
   // Fetch REAL transaction data using confirmed transactions API
   const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ['/api/buyer/confirmed-transactions', buyerId],
+    queryKey: [`/api/buyer/confirmed-transactions/${buyerId}`],
     enabled: !!buyerId,
   });
 

@@ -285,16 +285,6 @@ export default function AgriculturalBuyerDashboard() {
               Business Overview
             </Button>
             
-            {/* Product Offers */}
-            <Button 
-              variant={activeTab === 'notifications' ? 'default' : 'ghost'} 
-              size="lg"
-              onClick={() => setActiveTab('notifications')}
-              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
-            >
-              Product Offers
-            </Button>
-
             {/* My Products */}
             <Button 
               variant={activeTab === 'products' ? 'default' : 'ghost'} 
@@ -308,7 +298,7 @@ export default function AgriculturalBuyerDashboard() {
             {/* Farmers Dropdown Menu */}
             <div className="relative">
               <Button 
-                variant={['farmers', 'confirmed', 'orders'].includes(activeTab) ? 'default' : 'ghost'} 
+                variant={['farmers', 'notifications', 'confirmed', 'orders'].includes(activeTab) ? 'default' : 'ghost'} 
                 size="lg"
                 onClick={() => setFarmersMenuOpen(!farmersMenuOpen)}
                 className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105 flex items-center gap-2"
@@ -331,6 +321,17 @@ export default function AgriculturalBuyerDashboard() {
                       }`}
                     >
                       Farmer Connections
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab('notifications');
+                        setFarmersMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-5 py-3 font-medium text-sm hover:bg-slate-50 transition-all ${
+                        activeTab === 'notifications' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
+                      }`}
+                    >
+                      Product Offers
                     </button>
                     <button
                       onClick={() => {

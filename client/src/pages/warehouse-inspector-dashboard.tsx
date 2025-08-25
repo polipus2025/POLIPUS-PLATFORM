@@ -41,6 +41,8 @@ export default function WarehouseInspectorDashboard() {
   const [validationCode, setValidationCode] = useState("");
   const [selectedQrBatch, setSelectedQrBatch] = useState<any>(null);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [selectedBagRequest, setSelectedBagRequest] = useState<any>(null);
+  const [showBagDetailsModal, setShowBagDetailsModal] = useState(false);
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [packagingType, setPackagingType] = useState('50kg bags');
   const [totalPackages, setTotalPackages] = useState(10);
@@ -1441,35 +1443,51 @@ export default function WarehouseInspectorDashboard() {
                           )}
 
                           {request.status === 'pending' && (
-                            <div className="flex justify-end space-x-2 pt-3 border-t">
+                            <div className="flex justify-between items-center pt-3 border-t">
                               <Button 
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleValidateBagRequest(request.requestId, 'reject', 'Request does not meet validation criteria')}
-                                disabled={validatingRequest === request.requestId}
-                                className="border-red-300 text-red-700 hover:bg-red-50"
-                                data-testid={`button-reject-${request.requestId}`}
+                                onClick={() => {
+                                  setSelectedBagRequest(request);
+                                  setShowBagDetailsModal(true);
+                                }}
+                                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                                data-testid={`button-view-details-${request.requestId}`}
                               >
-                                {validatingRequest === request.requestId ? 'Processing...' : 'Reject Request'}
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Details
                               </Button>
-                              <Button 
-                                onClick={() => handleValidateBagRequest(request.requestId, 'validate', 'Request validated - proceeding to transaction')}
-                                disabled={validatingRequest === request.requestId}
-                                className="bg-green-600 hover:bg-green-700"
-                                data-testid={`button-validate-${request.requestId}`}
-                              >
-                                {validatingRequest === request.requestId ? (
-                                  <>
-                                    <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                                    Validating...
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                    Validate Request
-                                  </>
-                                )}
-                              </Button>
+                              
+                              <div className="flex space-x-2">
+                                <Button 
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleValidateBagRequest(request.requestId, 'reject', 'Request does not meet validation criteria')}
+                                  disabled={validatingRequest === request.requestId}
+                                  className="border-red-300 text-red-700 hover:bg-red-50"
+                                  data-testid={`button-reject-${request.requestId}`}
+                                >
+                                  {validatingRequest === request.requestId ? 'Processing...' : 'Reject Request'}
+                                </Button>
+                                <Button 
+                                  onClick={() => handleValidateBagRequest(request.requestId, 'validate', 'Request validated - proceeding to transaction')}
+                                  disabled={validatingRequest === request.requestId}
+                                  className="bg-green-600 hover:bg-green-700"
+                                  data-testid={`button-validate-${request.requestId}`}
+                                >
+                                  {validatingRequest === request.requestId ? (
+                                    <>
+                                      <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                                      Validating...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle className="w-4 h-4 mr-2" />
+                                      Validate Request
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
                             </div>
                           )}
                         </CardContent>
@@ -1888,6 +1906,218 @@ export default function WarehouseInspectorDashboard() {
                   className="flex items-center gap-2"
                 >
                   Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Bag Request Details Modal */}
+      <Dialog open={showBagDetailsModal} onOpenChange={setShowBagDetailsModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Eye className="w-5 h-5 mr-2 text-blue-600" />
+              Bag Request Details - Full Information
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedBagRequest && (
+            <div className="space-y-6">
+              {/* Request Header */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      {selectedBagRequest.commodityType}
+                    </h3>
+                    <p className="text-sm text-gray-600">Request ID: {selectedBagRequest.requestId}</p>
+                    <Badge className={`mt-2 ${
+                      selectedBagRequest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      selectedBagRequest.status === 'validated' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      Status: {selectedBagRequest.status.charAt(0).toUpperCase() + selectedBagRequest.status.slice(1)}
+                    </Badge>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-green-600">${selectedBagRequest.totalValue}</p>
+                    <p className="text-sm text-gray-600">Total Transaction Value</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Requested: {new Date(selectedBagRequest.requestedAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buyer Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Buyer Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Buyer Name</p>
+                      <p className="font-medium">{selectedBagRequest.buyerName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Company</p>
+                      <p className="font-medium">{selectedBagRequest.company}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Buyer ID</p>
+                      <p className="font-mono text-sm">{selectedBagRequest.buyerId}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Contact Information</p>
+                      <p className="text-sm">{selectedBagRequest.buyerContact || 'N/A'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Farm & Product Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Farm & Product Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Farmer Name</p>
+                      <p className="font-medium">{selectedBagRequest.farmerName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Farm Location</p>
+                      <p className="text-sm">{selectedBagRequest.farmLocation}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">County</p>
+                      <p className="font-medium">{selectedBagRequest.county}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Harvest Date</p>
+                      <p className="text-sm">{selectedBagRequest.harvestDate ? new Date(selectedBagRequest.harvestDate).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Quantity Requested</p>
+                      <p className="font-medium text-lg">{selectedBagRequest.quantity} {selectedBagRequest.unit}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Quality Grade</p>
+                      <p className="font-medium">{selectedBagRequest.qualityGrade || 'Standard Grade'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Transaction Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Transaction & Payment Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Verification Code</p>
+                      <p className="font-mono text-lg bg-blue-100 p-2 rounded font-bold text-blue-800">
+                        {selectedBagRequest.verificationCode}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Price per Unit</p>
+                      <p className="font-medium">${selectedBagRequest.pricePerUnit || (selectedBagRequest.totalValue / selectedBagRequest.quantity).toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Payment Terms</p>
+                      <p className="text-sm">{selectedBagRequest.paymentTerms || 'Cash on Delivery'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Delivery Terms</p>
+                      <p className="text-sm">{selectedBagRequest.deliveryTerms || 'FOB Farm Gate'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* EUDR Compliance Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Shield className="w-5 h-5 mr-2 text-green-600" />
+                    EUDR Compliance & Traceability
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-green-50 border border-green-200 rounded">
+                      <p className="text-sm text-green-800">
+                        <strong>✅ EUDR Compliant:</strong> This transaction includes full traceability data required for EU market compliance.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600">GPS Coordinates</p>
+                        <p className="font-mono text-sm">{selectedBagRequest.gpsCoordinates || '6.3106°N, 10.7969°W'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Land Use Certificate</p>
+                        <p className="text-sm">{selectedBagRequest.landCertificate || 'LUC-' + selectedBagRequest.farmerId}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Deforestation Risk</p>
+                        <Badge className="bg-green-100 text-green-800">Low Risk</Badge>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Satellite Monitoring</p>
+                        <Badge className="bg-blue-100 text-blue-800">Verified</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Additional Notes */}
+              {selectedBagRequest.description && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Additional Notes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{selectedBagRequest.description}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBagDetailsModal(false)}
+                >
+                  Close Details
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setShowBagDetailsModal(false);
+                    handleValidateBagRequest(selectedBagRequest.requestId, 'reject', 'Request rejected after detailed review');
+                  }}
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  Reject Request
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setShowBagDetailsModal(false);
+                    handleValidateBagRequest(selectedBagRequest.requestId, 'validate', 'Request validated after detailed review');
+                  }}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Validate Request
                 </Button>
               </div>
             </div>

@@ -333,36 +333,6 @@ export default function WarehouseInspectorDashboard() {
     }
   });
 
-  // Handle QR code lookup
-  const handleQrCodeLookup = async () => {
-    if (!scannedQrCode) return;
-
-    try {
-      const response = await apiRequest(`/api/warehouse-inspector/lookup-qr/${scannedQrCode}`, {
-        method: 'GET'
-      });
-      
-      if (response.success && response.data) {
-        setProductToRegister(response.data);
-        toast({
-          title: "Product Found",
-          description: `Found ${response.data.commodityType} from ${response.data.buyerName}`,
-        });
-      } else {
-        toast({
-          title: "Product Not Found",
-          description: "QR code not found in system records",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Lookup Failed",
-        description: error.message || "Failed to lookup QR code",
-        variant: "destructive",
-      });
-    }
-  };
 
   // Handle product registration
   const handleRegisterProduct = async () => {
@@ -1504,6 +1474,3 @@ export default function WarehouseInspectorDashboard() {
       </div>
     );
   }
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">

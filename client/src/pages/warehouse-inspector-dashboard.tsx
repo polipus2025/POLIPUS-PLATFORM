@@ -53,7 +53,8 @@ export default function WarehouseInspectorDashboard() {
   const [scanMode, setScanMode] = useState<'single' | 'multiple'>('single');
   const [multipleQrCodes, setMultipleQrCodes] = useState<Array<{code: string, product: string, weight: number, buyerName: string, farmerName: string, qualityGrade: string, unit: string}>>([]);
   const [currentProduct, setCurrentProduct] = useState("");
-  const [selectedStorageRate, setSelectedStorageRate] = useState("1.50");
+  const [currentBuyer, setCurrentBuyer] = useState("");
+  const [selectedStorageRate, setSelectedStorageRate] = useState("50.00"); // Fixed at $50/Metric Ton
   const [storageLocation, setStorageLocation] = useState("");
   const [storageConditions, setStorageConditions] = useState("");
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
@@ -175,16 +176,29 @@ export default function WarehouseInspectorDashboard() {
           setScannedQrCode("");
           
         } else {
-          // Multiple lot registration - same product validation
+          // Multiple lot registration - same product AND buyer validation
           if (!currentProduct) {
             setCurrentProduct(productData.commodityType);
-          } else if (currentProduct !== productData.commodityType) {
-            toast({
-              title: "Product Mismatch",
-              description: `All QR codes must be for ${currentProduct}. This QR is for ${productData.commodityType}`,
-              variant: "destructive",
-            });
-            return;
+            setCurrentBuyer(productData.buyerName);
+          } else {
+            // Check product match
+            if (currentProduct !== productData.commodityType) {
+              toast({
+                title: "Product Mismatch",
+                description: `All QR codes must be for ${currentProduct}. This QR is for ${productData.commodityType}`,
+                variant: "destructive",
+              });
+              return;
+            }
+            // Check buyer match
+            if (currentBuyer !== productData.buyerName) {
+              toast({
+                title: "Buyer Mismatch",
+                description: `All QR codes must be from ${currentBuyer}. This QR is from ${productData.buyerName}`,
+                variant: "destructive",
+              });
+              return;
+            }
           }
           
           // Check if QR already scanned
@@ -1235,7 +1249,8 @@ export default function WarehouseInspectorDashboard() {
                       {currentProduct && (
                         <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                           <h5 className="font-medium text-blue-800">Batch Product: {currentProduct}</h5>
-                          <p className="text-sm text-blue-600">All QR codes must be for this product</p>
+                          <h6 className="font-medium text-blue-700">Buyer: {currentBuyer}</h6>
+                          <p className="text-sm text-blue-600">All QR codes must be for this product from this buyer</p>
                         </div>
                       )}
                       
@@ -1249,6 +1264,7 @@ export default function WarehouseInspectorDashboard() {
                               onClick={() => {
                                 setMultipleQrCodes([]);
                                 setCurrentProduct("");
+                                setCurrentBuyer("");
                                 toast({
                                   title: "Batch Cleared",
                                   description: "All scanned QR codes have been cleared",
@@ -1268,7 +1284,10 @@ export default function WarehouseInspectorDashboard() {
                                     size="sm"
                                     onClick={() => {
                                       setMultipleQrCodes(prev => prev.filter(q => q.code !== item.code));
-                                      if (multipleQrCodes.length === 1) setCurrentProduct("");
+                                      if (multipleQrCodes.length === 1) {
+                                        setCurrentProduct("");
+                                        setCurrentBuyer("");
+                                      }
                                     }}
                                     className="text-red-500 hover:text-red-700"
                                   >
@@ -1339,19 +1358,11 @@ export default function WarehouseInspectorDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Daily Storage Rate (USD per ton)</label>
-                    <select
-                      value={selectedStorageRate}
-                      onChange={(e) => setSelectedStorageRate(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      data-testid="select-storage-rate"
-                    >
-                      <option value="1.00">$1.00 per ton/day - Basic Storage</option>
-                      <option value="1.50">$1.50 per ton/day - Standard Storage</option>
-                      <option value="2.00">$2.00 per ton/day - Premium Storage</option>
-                      <option value="2.50">$2.50 per ton/day - Climate Controlled</option>
-                      <option value="3.00">$3.00 per ton/day - Specialized Storage</option>
-                    </select>
+                    <label className="text-sm font-medium">Daily Storage Rate</label>
+                    <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-center">
+                      <span className="text-lg font-bold text-green-600">$50.00 per Metric Ton</span>
+                      <p className="text-xs text-gray-600 mt-1">Fixed warehouse storage rate</p>
+                    </div>
                   </div>
 
                   <div className="space-y-2">

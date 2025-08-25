@@ -153,7 +153,7 @@ export default function WarehouseInspectorDashboard() {
     }
   });
 
-  // Handle QR code lookup
+  // Handle QR code lookup with dual mode support
   const handleQrCodeLookup = async () => {
     if (!scannedQrCode) return;
 
@@ -163,11 +163,56 @@ export default function WarehouseInspectorDashboard() {
       });
       
       if (response.success && response.data) {
-        setProductToRegister(response.data);
-        toast({
-          title: "Product Found",
-          description: `Found ${response.data.commodityType} from ${response.data.buyerName}`,
-        });
+        const productData = response.data;
+        
+        if (scanMode === 'single') {
+          // Single lot registration
+          setProductToRegister(productData);
+          toast({
+            title: "Single Lot Found",
+            description: `Product: ${productData.commodityType} - Weight: ${productData.weight}${productData.unit || 'kg'}`,
+          });
+          setScannedQrCode("");
+          
+        } else {
+          // Multiple lot registration - same product validation
+          if (!currentProduct) {
+            setCurrentProduct(productData.commodityType);
+          } else if (currentProduct !== productData.commodityType) {
+            toast({
+              title: "Product Mismatch",
+              description: `All QR codes must be for ${currentProduct}. This QR is for ${productData.commodityType}`,
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          // Check if QR already scanned
+          const exists = multipleQrCodes.find(item => item.code === scannedQrCode);
+          if (exists) {
+            toast({
+              title: "QR Code Already Scanned",
+              description: "This QR code is already in the batch",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          // Add to multiple QR codes list
+          const newQrEntry = {
+            code: scannedQrCode,
+            product: productData.commodityType,
+            weight: parseFloat(productData.weight) || 0
+          };
+          
+          setMultipleQrCodes(prev => [...prev, newQrEntry]);
+          
+          toast({
+            title: "QR Added to Batch",
+            description: `Added ${productData.commodityType} (${productData.weight}${productData.unit || 'kg'}) - Total lots: ${multipleQrCodes.length + 1}`,
+          });
+          setScannedQrCode("");
+        }
       } else {
         toast({
           title: "Product Not Found",

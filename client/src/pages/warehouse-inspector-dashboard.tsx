@@ -783,7 +783,7 @@ export default function WarehouseInspectorDashboard() {
         <html>
           <head>
             <title>QR Batch Details - ${batchCode}</title>
-            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
             <style>
               body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
               .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
@@ -893,7 +893,7 @@ export default function WarehouseInspectorDashboard() {
               // Generate QR code when page loads
               setTimeout(function() {
                 try {
-                  if (typeof qrcode !== 'undefined') {
+                  if (typeof QRCode !== 'undefined') {
                     const certificateData = \`AGRICULTURAL TRACEABILITY CERTIFICATE
 REPUBLIC OF LIBERIA
 
@@ -974,39 +974,29 @@ EU DEFORESTATION REGULATION COMPLIANT
 
 Complete farm-to-export traceability guaranteed.\`;
 
-                    // Create QR code using qrcode-generator
-                    const qr = qrcode(0, 'M');
-                    qr.addData(certificateData);
-                    qr.make();
-                    
-                    // Get canvas and draw QR code
+                    // Generate QR code using QRCode.js library
                     const canvas = document.getElementById('qr-code');
-                    const ctx = canvas.getContext('2d');
-                    const moduleCount = qr.getModuleCount();
-                    const cellSize = 180 / moduleCount;
-                    
-                    // Clear canvas
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, 180, 180);
-                    
-                    // Draw QR code
-                    ctx.fillStyle = '#000000';
-                    for (let row = 0; row < moduleCount; row++) {
-                      for (let col = 0; col < moduleCount; col++) {
-                        if (qr.isDark(row, col)) {
-                          ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-                        }
+                    QRCode.toCanvas(canvas, certificateData, {
+                      width: 180,
+                      margin: 2,
+                      color: {
+                        dark: '#000000',
+                        light: '#FFFFFF'
                       }
-                    }
+                    }, function(error) {
+                      if (error) {
+                        document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
+                      }
+                    });
                   } else {
                     // Fallback if library doesn't load
-                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
+                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
                   }
                 } catch (error) {
                   // Fallback if QR generation fails
-                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
+                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
                 }
-              }, 100);
+              }, 500);
             </script>
           </body>
         </html>
@@ -1022,7 +1012,7 @@ Complete farm-to-export traceability guaranteed.\`;
       <html>
         <head>
           <title>Warehouse QR Batch - ${batchCode}</title>
-          <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; color: #1f2937; }
             .container { max-width: 600px; margin: 0 auto; }
@@ -1128,7 +1118,7 @@ Complete farm-to-export traceability guaranteed.\`;
             // Generate QR code when page loads, then print
             setTimeout(function() {
               try {
-                if (typeof qrcode !== 'undefined') {
+                if (typeof QRCode !== 'undefined') {
                   const certificateData = \`AGRICULTURAL TRACEABILITY CERTIFICATE
 REPUBLIC OF LIBERIA
 
@@ -1209,50 +1199,39 @@ EU DEFORESTATION REGULATION COMPLIANT
 
 Complete farm-to-export traceability guaranteed.\`;
 
-                  // Create QR code using qrcode-generator
-                  const qr = qrcode(0, 'M');
-                  qr.addData(certificateData);
-                  qr.make();
-                  
-                  // Get canvas and draw QR code
+                  // Generate QR code using QRCode.js library
                   const canvas = document.getElementById('qr-code-print');
-                  const ctx = canvas.getContext('2d');
-                  const moduleCount = qr.getModuleCount();
-                  const cellSize = 160 / moduleCount;
-                  
-                  // Clear canvas
-                  ctx.fillStyle = '#ffffff';
-                  ctx.fillRect(0, 0, 160, 160);
-                  
-                  // Draw QR code
-                  ctx.fillStyle = '#000000';
-                  for (let row = 0; row < moduleCount; row++) {
-                    for (let col = 0; col < moduleCount; col++) {
-                      if (qr.isDark(row, col)) {
-                        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-                      }
+                  QRCode.toCanvas(canvas, certificateData, {
+                    width: 160,
+                    margin: 2,
+                    color: {
+                      dark: '#000000',
+                      light: '#FFFFFF'
                     }
-                  }
-                  
-                  // Auto-print after QR code is generated
-                  setTimeout(function() {
-                    window.print();
-                  }, 300);
+                  }, function(error) {
+                    if (error) {
+                      document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">\${batchCode}</div>';
+                    }
+                    // Auto-print after QR code is generated
+                    setTimeout(function() {
+                      window.print();
+                    }, 500);
+                  });
                 } else {
                   // Fallback if library doesn't load
-                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">${batchCode}</div>';
+                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">\${batchCode}</div>';
                   setTimeout(function() {
                     window.print();
                   }, 200);
                 }
               } catch (error) {
                 // Fallback if QR generation fails
-                document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">${batchCode}</div>';
+                document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">\${batchCode}</div>';
                 setTimeout(function() {
                   window.print();
                 }, 200);
               }
-            }, 100);
+            }, 500);
           </script>
         </body>
       </html>

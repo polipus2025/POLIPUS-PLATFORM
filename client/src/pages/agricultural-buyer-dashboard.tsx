@@ -295,6 +295,16 @@ export default function AgriculturalBuyerDashboard() {
               Product Offers
             </Button>
 
+            {/* My Products */}
+            <Button 
+              variant={activeTab === 'products' ? 'default' : 'ghost'} 
+              size="lg"
+              onClick={() => setActiveTab('products')}
+              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
+            >
+              My Products
+            </Button>
+
             {/* Farmers Dropdown Menu */}
             <div className="relative">
               <Button 
@@ -660,6 +670,30 @@ export default function AgriculturalBuyerDashboard() {
                 )}
               </CardContent>
             </Card>
+            </div>
+          )}
+
+          {/* My Products Tab */}
+          {activeTab === 'products' && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Package2 className="w-5 h-5 mr-2" />
+                    My Products
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your product inventory and listings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12 text-gray-500">
+                    <Package2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">My Products Section</p>
+                    <p className="text-sm">Content will be added here as specified</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 

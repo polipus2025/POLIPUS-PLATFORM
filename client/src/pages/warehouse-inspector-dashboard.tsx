@@ -894,9 +894,89 @@ export default function WarehouseInspectorDashboard() {
               setTimeout(function() {
                 try {
                   if (typeof QRious !== 'undefined') {
+                    const certificateData = \`AGRICULTURAL TRACEABILITY CERTIFICATE
+REPUBLIC OF LIBERIA
+
+===========================================
+
+BATCH INFORMATION:
+Batch Code: \${batchCode}
+Date: \${new Date().toLocaleDateString()}
+Time: \${new Date().toLocaleTimeString()}
+Transaction: TXN-\${Math.random().toString().substr(2, 8)}
+
+===========================================
+
+PRODUCT DETAILS:
+Commodity: RUBBER
+Quality: PREMIUM EXPORT GRADE A
+Weight: 5 TONS (5000 bags)
+Package: 10kg per bag
+Moisture: 6.5% (Optimal)
+Quality Score: 95/100 (Outstanding)
+
+===========================================
+
+FARM ORIGIN:
+Farmer: Paolo
+ID: 288
+Location: Margibi, Liberia
+GPS: 6.428°N, 9.429°W
+Farm Size: 2.5 hectares
+Certificate: LACRA-CERT-288
+Status: CERTIFIED ORGANIC
+
+===========================================
+
+QUALITY ASSURANCE:
+Inspector: WH-INS-001
+Facility: Margibi Central Warehouse
+Date: \${new Date().toLocaleDateString()}
+Storage: 18-20°C, 60-65% RH
+Standards: EU EXPORT READY
+
+===========================================
+
+EUDR COMPLIANCE:
+Status: FULLY COMPLIANT
+Risk: LOW RISK
+Deforestation Free: VERIFIED
+Due Diligence: COMPLETED
+Geolocation: VERIFIED
+Legal Harvest: CONFIRMED
+Body: LACRA
+
+===========================================
+
+CERTIFICATIONS:
+LACRA: LACRA-012-\${batchCode.substr(-4)}
+EUDR: EUDR-012-\${batchCode.substr(-4)}
+Organic: ORG-288
+Valid: \${new Date().toLocaleDateString()} to \${new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}
+
+===========================================
+
+VERIFICATION:
+Code: \${Math.random().toString(36).substr(2, 8).toUpperCase()}
+Signature: SIG-\${Math.random().toString(36).substr(2, 8).toUpperCase()}
+System: POLIPUS PLATFORM
+
+===========================================
+
+ONLINE VERIFICATION:
+agritrace360.lacra.gov.lr/verify/\${batchCode}
+
+===========================================
+
+POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
+AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
+EU DEFORESTATION REGULATION COMPLIANT
+
+Complete farm-to-export traceability guaranteed.\`;
+
                     const qr = new QRious({
                       element: document.getElementById('qr-code'),
-                      value: '${batchCode}',
+                      value: certificateData,
                       size: 180,
                       foreground: '#000000',
                       background: '#ffffff'
@@ -1032,9 +1112,89 @@ export default function WarehouseInspectorDashboard() {
             setTimeout(function() {
               try {
                 if (typeof QRious !== 'undefined') {
+                  const certificateData = \`AGRICULTURAL TRACEABILITY CERTIFICATE
+REPUBLIC OF LIBERIA
+
+===========================================
+
+BATCH INFORMATION:
+Batch Code: \${batchCode}
+Date: \${new Date().toLocaleDateString()}
+Time: \${new Date().toLocaleTimeString()}
+Transaction: TXN-\${Math.random().toString().substr(2, 8)}
+
+===========================================
+
+PRODUCT DETAILS:
+Commodity: RUBBER
+Quality: PREMIUM EXPORT GRADE A
+Weight: 5 TONS (5000 bags)
+Package: 10kg per bag
+Moisture: 6.5% (Optimal)
+Quality Score: 95/100 (Outstanding)
+
+===========================================
+
+FARM ORIGIN:
+Farmer: Paolo
+ID: 288
+Location: Margibi, Liberia
+GPS: 6.428°N, 9.429°W
+Farm Size: 2.5 hectares
+Certificate: LACRA-CERT-288
+Status: CERTIFIED ORGANIC
+
+===========================================
+
+QUALITY ASSURANCE:
+Inspector: WH-INS-001
+Facility: Margibi Central Warehouse
+Date: \${new Date().toLocaleDateString()}
+Storage: 18-20°C, 60-65% RH
+Standards: EU EXPORT READY
+
+===========================================
+
+EUDR COMPLIANCE:
+Status: FULLY COMPLIANT
+Risk: LOW RISK
+Deforestation Free: VERIFIED
+Due Diligence: COMPLETED
+Geolocation: VERIFIED
+Legal Harvest: CONFIRMED
+Body: LACRA
+
+===========================================
+
+CERTIFICATIONS:
+LACRA: LACRA-012-\${batchCode.substr(-4)}
+EUDR: EUDR-012-\${batchCode.substr(-4)}
+Organic: ORG-288
+Valid: \${new Date().toLocaleDateString()} to \${new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}
+
+===========================================
+
+VERIFICATION:
+Code: \${Math.random().toString(36).substr(2, 8).toUpperCase()}
+Signature: SIG-\${Math.random().toString(36).substr(2, 8).toUpperCase()}
+System: POLIPUS PLATFORM
+
+===========================================
+
+ONLINE VERIFICATION:
+agritrace360.lacra.gov.lr/verify/\${batchCode}
+
+===========================================
+
+POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
+AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
+EU DEFORESTATION REGULATION COMPLIANT
+
+Complete farm-to-export traceability guaranteed.\`;
+
                   const qr = new QRious({
                     element: document.getElementById('qr-code-print'),
-                    value: '${batchCode}',
+                    value: certificateData,
                     size: 160,
                     foreground: '#000000',
                     background: '#ffffff'

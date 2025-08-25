@@ -128,7 +128,7 @@ export default function WarehouseInspectorDashboard() {
   // Product registration mutation
   const registerProductMutation = useMutation({
     mutationFn: async (registrationData: any) => {
-      return await apiRequest('/api/warehouse-inspector/register-product', {
+      return await apiRequest('/api/warehouse-custody/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -292,12 +292,32 @@ export default function WarehouseInspectorDashboard() {
 
     const custodyId = `CUSTODY-WH-${inspectorCounty.toUpperCase().replace(/\s+/g, '')}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
 
-    const registrationData = {
-      custodyId,
+    // Check if it's multi-lot or single lot registration
+    const registrationData = productToRegister.isMultiLot ? {
+      // Multi-lot data format for /api/warehouse-custody/register
+      scannedQrCodes: productToRegister.scannedQrCodes,
+      warehouseId: inspectorData.warehouseId || "WH-001",
+      warehouseName: warehouseFacility,
+      county: inspectorCounty,
+      commodityType: productToRegister.commodityType,
+      packagingType: productToRegister.packagingType,
+      qualityGrade: productToRegister.qualityGrade,
+      totalWeight: productToRegister.totalWeight,
+      totalPackages: productToRegister.totalPackages,
+      farmerNames: productToRegister.farmerNames,
+      farmLocations: productToRegister.farmLocations,
       buyerId: productToRegister.buyerId,
       buyerName: productToRegister.buyerName,
       buyerCompany: productToRegister.buyerCompany,
-      productQrCode: scannedQrCode,
+      storageLocation,
+      storageConditions,
+      storageRate: parseFloat(selectedStorageRate)
+    } : {
+      // Single lot data format for /api/warehouse-custody/register
+      scannedQrCode: productToRegister.batchCode || scannedQrCode,
+      buyerId: productToRegister.buyerId,
+      buyerName: productToRegister.buyerName,
+      buyerCompany: productToRegister.buyerCompany,
       verificationCode: productToRegister.verificationCode,
       warehouseId: inspectorData.warehouseId || "WH-001",
       warehouseName: warehouseFacility,
@@ -305,12 +325,14 @@ export default function WarehouseInspectorDashboard() {
       commodityType: productToRegister.commodityType,
       farmerName: productToRegister.farmerName,
       farmLocation: productToRegister.farmLocation,
-      weight: parseFloat(productToRegister.weight),
+      totalWeight: parseFloat(productToRegister.weight),
       unit: productToRegister.unit,
       qualityGrade: productToRegister.qualityGrade,
+      packagingType: productToRegister.packagingType || 'bags',
+      totalPackages: productToRegister.totalPackages || Math.ceil(parseFloat(productToRegister.weight) * 20), // Estimate packages
       storageLocation,
       storageConditions,
-      dailyStorageRate: parseFloat(selectedStorageRate)
+      storageRate: parseFloat(selectedStorageRate)
     };
 
     registerProductMutation.mutate(registrationData);
@@ -1390,25 +1412,36 @@ export default function WarehouseInspectorDashboard() {
                               onClick={() => {
                                 const totalWeight = multipleQrCodes.reduce((sum, item) => sum + item.weight, 0);
                                 
-                                // Create batch product data for registration
-                                const batchProductData = {
+                                // Create multi-lot batch data for direct registration
+                                const multiLotData = {
+                                  isMultiLot: true,
+                                  scannedQrCodes: multipleQrCodes.map(qr => ({
+                                    batchCode: qr.code,
+                                    farmerName: qr.farmerName,
+                                    farmLocation: `Location for ${qr.farmerName}`,
+                                    weight: qr.weight,
+                                    commodityType: qr.product,
+                                    qualityGrade: qr.qualityGrade,
+                                    verificationCode: `VER-${qr.code.split('-').pop()}`
+                                  })),
+                                  commodityType: currentProduct,
+                                  totalWeight: totalWeight,
+                                  totalPackages: Math.ceil(totalWeight * 20), // Estimate packages
+                                  packagingType: 'bags',
+                                  farmerNames: multipleQrCodes.map(qr => qr.farmerName),
+                                  farmLocations: multipleQrCodes.map(qr => `Location for ${qr.farmerName}`),
                                   buyerId: multipleQrCodes[0]?.buyerName || "BATCH-BUYER",
                                   buyerName: multipleQrCodes[0]?.buyerName || "Batch Buyer",
                                   buyerCompany: "Multiple Lot Batch",
-                                  commodityType: currentProduct,
-                                  farmerName: "Multiple Farmers",
-                                  farmLocation: "Multiple Locations", 
-                                  weight: totalWeight.toString(),
-                                  unit: "kg",
                                   qualityGrade: multipleQrCodes[0]?.qualityGrade || "Mixed Grade",
-                                  verificationCode: `BATCH-${multipleQrCodes.length}-LOTS`
+                                  unit: "kg"
                                 };
                                 
                                 // Set for registration
-                                setProductToRegister(batchProductData);
+                                setProductToRegister(multiLotData);
                                 
                                 toast({
-                                  title: "Batch Ready for Registration",
+                                  title: "Multi-Lot Batch Ready",
                                   description: `${multipleQrCodes.length} lots of ${currentProduct} - Total: ${totalWeight}kg - Ready to register`,
                                 });
                               }}

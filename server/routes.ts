@@ -15531,27 +15531,350 @@ International compliance standards met`;
     }
   });
 
+  // ====================================
+  // WAREHOUSE CUSTODY & AUTHORIZATION SYSTEM
+  // Two-Condition QR Code Registration System
+  // ====================================
+
+  // QR Code Lookup for Custody Registration (uses existing QR batches)
+  app.get('/api/warehouse-custody/lookup-qr/:qrCode', async (req, res) => {
+    try {
+      const { qrCode } = req.params;
+      console.log('🔍 Looking up QR code for custody registration:', qrCode);
+
+      // Look up QR batch in database
+      const result = await storage.query(`
+        SELECT * FROM qr_batches WHERE batch_code = $1
+      `, [qrCode]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'QR code not found in system records'
+        });
+      }
+
+      const qrBatch = result.rows[0];
+      
+      // Return lot information for custody registration
+      res.json({
+        success: true,
+        data: {
+          batchCode: qrBatch.batch_code,
+          buyerId: qrBatch.buyer_id,
+          buyerName: qrBatch.buyer_name,
+          buyerCompany: qrBatch.buyer_company || qrBatch.buyer_name,
+          commodityType: qrBatch.commodity_type,
+          farmerName: qrBatch.farmer_name,
+          farmLocation: qrBatch.warehouse_location,
+          weight: parseFloat(qrBatch.total_weight),
+          unit: 'tons',
+          qualityGrade: qrBatch.quality_grade,
+          packagingType: qrBatch.packaging_type,
+          totalPackages: qrBatch.total_packages,
+          packageWeight: qrBatch.package_weight,
+          qrCodeData: qrBatch.qr_code_data,
+          verificationCode: qrBatch.batch_code, // Use batch code as verification
+          gpsCoordinates: qrBatch.gps_coordinates,
+          eudrCompliance: qrBatch.eudr_compliance
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ QR lookup error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to lookup QR code',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Validate Multiple QR Codes for Multi-Lot Custody (Prevents Different Products)
+  app.post('/api/warehouse-custody/validate-multi-lot', async (req, res) => {
+    try {
+      const { qrCodes } = req.body;
+      console.log('🔍 Validating multiple QR codes for multi-lot custody:', qrCodes);
+
+      if (!qrCodes || qrCodes.length < 2) {
+        return res.status(400).json({
+          success: false,
+          error: 'At least 2 QR codes required for multi-lot custody'
+        });
+      }
+
+      const qrCodeDetails = [];
+      let baseProduct = null;
+      let basePackaging = null;
+
+      // Validate each QR code and check compatibility
+      for (const qrCode of qrCodes) {
+        const result = await storage.query(`
+          SELECT * FROM qr_batches WHERE batch_code = $1
+        `, [qrCode]);
+
+        if (result.rows.length === 0) {
+          return res.status(404).json({
+            success: false,
+            error: `QR code ${qrCode} not found in system records`
+          });
+        }
+
+        const qrBatch = result.rows[0];
+        
+        // First lot sets the baseline
+        if (!baseProduct) {
+          baseProduct = qrBatch.commodity_type;
+          basePackaging = qrBatch.packaging_type;
+        }
+
+        // ⚠️ CRITICAL VALIDATION: Prevents different products in same custody
+        if (qrBatch.commodity_type !== baseProduct) {
+          return res.status(400).json({
+            success: false,
+            error: `❌ PRODUCT TYPE MISMATCH: Cannot mix ${baseProduct} with ${qrBatch.commodity_type} in same custody`,
+            details: `All lots must be the same product type. Found ${baseProduct} and ${qrBatch.commodity_type}`
+          });
+        }
+
+        // ⚠️ CRITICAL VALIDATION: Prevents different packaging in same custody
+        if (qrBatch.packaging_type !== basePackaging) {
+          return res.status(400).json({
+            success: false,
+            error: `❌ PACKAGING TYPE MISMATCH: Cannot mix ${basePackaging} with ${qrBatch.packaging_type} in same custody`,
+            details: `All lots must have the same packaging type. Found ${basePackaging} and ${qrBatch.packaging_type}`
+          });
+        }
+
+        qrCodeDetails.push({
+          batchCode: qrBatch.batch_code,
+          buyerId: qrBatch.buyer_id,
+          buyerName: qrBatch.buyer_name,
+          commodityType: qrBatch.commodity_type,
+          farmerName: qrBatch.farmer_name,
+          farmLocation: qrBatch.warehouse_location,
+          weight: parseFloat(qrBatch.total_weight),
+          packagingType: qrBatch.packaging_type,
+          totalPackages: qrBatch.total_packages,
+          qualityGrade: qrBatch.quality_grade,
+          verificationCode: qrBatch.batch_code
+        });
+      }
+
+      // Calculate consolidated totals
+      const totalWeight = qrCodeDetails.reduce((sum, lot) => sum + lot.weight, 0);
+      const totalPackages = qrCodeDetails.reduce((sum, lot) => sum + lot.totalPackages, 0);
+      const allFarmers = [...new Set(qrCodeDetails.map(lot => lot.farmerName))];
+      const allLocations = [...new Set(qrCodeDetails.map(lot => lot.farmLocation))];
+
+      res.json({
+        success: true,
+        validation: {
+          compatible: true,
+          productType: baseProduct,
+          packagingType: basePackaging,
+          totalLots: qrCodeDetails.length
+        },
+        consolidatedData: {
+          commodityType: baseProduct,
+          packagingType: basePackaging,
+          totalWeight,
+          totalPackages,
+          farmerNames: allFarmers,
+          farmLocations: allLocations,
+          qrCodeDetails
+        },
+        message: `✅ ${qrCodeDetails.length} lots validated for ${baseProduct} with ${basePackaging} packaging`
+      });
+
+    } catch (error) {
+      console.error('❌ Multi-lot validation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to validate multi-lot QR codes',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Register Warehouse Custody (Single Lot or Multi-Lot with QR generation)
+  app.post('/api/warehouse-custody/register', async (req, res) => {
+    try {
+      console.log('📦 Warehouse custody registration request:', req.body);
+      const registrationData = req.body;
+
+      // Determine custody type
+      const custodyType = registrationData.scannedQrCodes?.length > 1 ? 'multi_lot' : 'single';
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      
+      let custodyId: string;
+      let qrCodeData: any = null;
+      let qrCodeUrl: string | null = null;
+      let consolidatedQrCode: string | null = null;
+
+      if (custodyType === 'multi_lot') {
+        // Generate consolidated QR code (same format as buyer bags)
+        consolidatedQrCode = `QR-MULTI-LOT-WH-${registrationData.warehouseId.split('-')[1]}-${timestamp}`;
+        custodyId = `CUSTODY-MULTI-${registrationData.warehouseId.split('-')[1]}-${timestamp}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+
+        // Create consolidated QR data (same format as buyer bags)
+        qrCodeData = {
+          batchCode: consolidatedQrCode,
+          type: 'warehouse_custody_multi',
+          version: '2.0',
+          
+          // Consolidated lot information
+          custodyId,
+          custodyType: 'multi_lot',
+          warehouseId: registrationData.warehouseId,
+          warehouseName: registrationData.warehouseName,
+          county: registrationData.county,
+          
+          // Product details
+          commodity: registrationData.commodityType,
+          totalWeight: `${registrationData.totalWeight} tons`,
+          totalPackages: registrationData.totalPackages,
+          packagingType: registrationData.packagingType,
+          qualityGrade: registrationData.qualityGrade,
+          
+          // Multiple lot origins (all mentioned)
+          lots: registrationData.scannedQrCodes.map((qr: any, index: number) => ({
+            lotNumber: index + 1,
+            originalQrCode: qr.batchCode,
+            farmer: qr.farmerName,
+            farmLocation: qr.farmLocation,
+            weight: qr.weight,
+            origin: `${qr.farmerName} - ${qr.farmLocation}`
+          })),
+          
+          // All origins mentioned
+          allOrigins: registrationData.farmerNames.map((farmer: string, index: number) => 
+            `${farmer} - ${registrationData.farmLocations[index]}`
+          ).join('; '),
+          
+          // Storage information
+          storageLocation: registrationData.storageLocation,
+          storageRate: 50, // $50/metric ton
+          registrationDate: new Date().toISOString(),
+          
+          // Verification
+          verificationUrl: `https://agritrace360.lacra.gov.lr/verify/${consolidatedQrCode}`,
+          digitalSignature: `${consolidatedQrCode}-${Date.now()}-MULTI-LOT`
+        };
+
+        // Generate QR code image (same format as buyer bags)
+        const readableQrData = `MULTI-LOT: ${consolidatedQrCode}
+CUSTODY: ${custodyId}
+COMMODITY: ${registrationData.commodityType}
+TOTAL WEIGHT: ${registrationData.totalWeight} tons
+LOTS: ${registrationData.scannedQrCodes.length}
+ORIGINS: ${qrCodeData.allOrigins}
+WAREHOUSE: ${registrationData.warehouseName}
+STORAGE RATE: $50/metric ton
+VERIFY: ${qrCodeData.verificationUrl}`;
+
+        qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
+        console.log('✅ Multi-lot QR code generated:', qrCodeUrl ? 'SUCCESS' : 'FAILED');
+
+      } else {
+        // Single lot custody
+        custodyId = `CUSTODY-SINGLE-${registrationData.warehouseId.split('-')[1]}-${timestamp}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+      }
+
+      // Calculate storage fees ($50/metric ton one-time)
+      const storageAmount = parseFloat(registrationData.totalWeight) * 50;
+
+      console.log('💾 Registering warehouse custody with storage amount:', storageAmount);
+
+      res.json({
+        success: true,
+        custodyId,
+        custodyType,
+        consolidatedQrCode,
+        qrCodeUrl,
+        storageAmount,
+        message: `${custodyType === 'multi_lot' ? 'Multi-lot' : 'Single lot'} custody registered successfully - $${storageAmount} storage fee calculated`
+      });
+
+    } catch (error) {
+      console.error('❌ Custody registration error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to register custody',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Get warehouse custody records
   app.get("/api/warehouse-custody/records", async (req, res) => {
     try {
-      // Mock custody records - in real implementation, this would query the database
+      // Mock custody records with enhanced structure
       const mockCustodyRecords = [
         {
           id: 1,
-          custodyId: "CUSTODY-WH-MARGIBI-20250825-A1B",
+          custodyId: "CUSTODY-SINGLE-MARGIBI-20250825-A1B",
+          custodyType: "single",
           buyerId: "BUY-001",
           buyerName: "Monrovia Trading Company",
           buyerCompany: "MTC Ltd",
-          productQrCode: "QR-BUYER-202508-A1B2C3",
-          commodityType: "cocoa",
-          farmerName: "John Konneh",
-          farmLocation: "Margibi County",
-          weight: 5.5,
+          productQrCodes: ["QR-BUYER-202508-A1B2C3"],
+          commodityType: "Cocoa",
+          farmerNames: ["John Konneh"],
+          farmLocations: ["Margibi County"],
+          totalWeight: 5.5,
           unit: "tons",
           qualityGrade: "Premium Grade A",
+          packagingType: "bags",
+          totalPackages: 110,
           storageLocation: "Section A-1",
           storageConditions: "Climate Controlled",
-          dailyStorageRate: 1.50,
+          storageRate: 50.00,
+          registrationDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+          custodyStatus: "stored",
+          authorizationStatus: "pending",
+          maxStorageDays: 30,
+          actualStorageDays: 5,
+          calculatedAmount: 275.00, // 5.5 * 50
+          amountDue: 275.00,
+          paymentStatus: "pending"
+        },
+        {
+          id: 2,
+          custodyId: "CUSTODY-MULTI-MARGIBI-20250823-B2C",
+          custodyType: "multi_lot",
+          buyerId: "BUY-002",
+          buyerName: "Atlantic Trading Ltd",
+          buyerCompany: "ATL Exports", 
+          productQrCodes: ["QR-BUYER-202508-B2C3D4", "QR-BUYER-202508-E5F6G7", "QR-BUYER-202508-H8I9J0"],
+          consolidatedQrCode: "QR-MULTI-LOT-WH-MARGIBI-20250823",
+          commodityType: "Coffee",
+          farmerNames: ["Mary Kollie", "David Toe", "Sarah Williams"],
+          farmLocations: ["Bong County", "Grand Bassa County", "Nimba County"],
+          totalWeight: 8.7,
+          unit: "tons",
+          qualityGrade: "Export Grade A",
+          packagingType: "bags",
+          totalPackages: 174,
+          storageLocation: "Section B-2",
+          storageConditions: "Dry Storage",
+          storageRate: 50.00,
+          registrationDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          custodyStatus: "stored",
+          authorizationStatus: "authorized",
+          maxStorageDays: 30,
+          actualStorageDays: 7,
+          authorizedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+          authorizedBy: "WH-INS-MARGIBI-001",
+          calculatedAmount: 435.00, // 8.7 * 50
+          amountDue: 435.00,
+          paymentStatus: "pending"
+        }
+      ];
+
+      res.json({ 
+        success: true, 
+        data: mockCustodyRecords
           registrationDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
           custodyStatus: "stored",
           authorizationStatus: "pending",

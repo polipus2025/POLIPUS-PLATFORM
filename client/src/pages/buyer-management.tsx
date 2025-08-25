@@ -179,10 +179,11 @@ export default function BuyerManagement() {
       setSelectedCommodities([]);
       setSelectedRegions([]);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Buyer registration error:", error);
       toast({
-        title: "Error",
-        description: "Failed to register buyer",
+        title: "Registration Failed",
+        description: error.message || error.errors?.[0]?.message || "Failed to register buyer. Please check all required fields.",
         variant: "destructive",
       });
     },
@@ -222,6 +223,7 @@ export default function BuyerManagement() {
     
     const formattedData = {
       ...data,
+      country: "Liberia", // Required field that was missing
       interestedCommodities: JSON.stringify(selectedCommodities),
       tradingRegions: JSON.stringify(selectedRegions),
       annualTurnover: data.annualTurnover ? parseFloat(data.annualTurnover) : null,

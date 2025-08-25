@@ -14879,7 +14879,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           verificationCode: warehouseBagRequests.verificationCode,
           buyerId: warehouseBagRequests.buyerId,
           buyerName: warehouseBagRequests.buyerName,
-          company: warehouseBagRequests.company,
+          companyName: warehouseBagRequests.company,
           farmerId: warehouseBagRequests.farmerId,
           farmerName: warehouseBagRequests.farmerName,
           commodityType: warehouseBagRequests.commodityType,
@@ -14893,7 +14893,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           validatedAt: warehouseBagRequests.validatedAt,
           validationNotes: warehouseBagRequests.validationNotes,
           transactionId: warehouseBagRequests.transactionId,
-          requestedAt: warehouseBagRequests.requestedAt,
+          requestDate: warehouseBagRequests.requestedAt,
           createdAt: warehouseBagRequests.createdAt,
         })
         .from(warehouseBagRequests)

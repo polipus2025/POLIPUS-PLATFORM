@@ -4305,8 +4305,16 @@ export const storageFees = pgTable("storage_fees", {
   // Payment Details
   paymentMethod: varchar("payment_method"), // cash, bank_transfer, mobile_money
   paymentReference: varchar("payment_reference"), // transaction ID
+  receiptUrl: varchar("receipt_url"), // uploaded receipt/screenshot URL
   paidDate: timestamp("paid_date"),
   paidBy: varchar("paid_by"), // buyer who made payment
+  
+  // Manual Confirmation
+  manualConfirmationType: varchar("manual_confirmation_type"), // receipt_upload, transaction_reference
+  confirmationStatus: varchar("confirmation_status").default("pending"), // pending, verified, rejected
+  verifiedBy: varchar("verified_by"), // warehouse inspector who verified
+  verifiedDate: timestamp("verified_date"),
+  verificationNotes: text("verification_notes"),
   
   // Fee Period
   feeStartDate: timestamp("fee_start_date").notNull(),

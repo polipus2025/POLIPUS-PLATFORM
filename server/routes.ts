@@ -16326,5 +16326,140 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // Manual Payment Confirmation Endpoints
+
+  // Get receipt upload URL 
+  app.post('/api/receipts/upload-url', async (req, res) => {
+    try {
+      const objectStorageService = new (await import('./objectStorage')).ObjectStorageService();
+      const uploadURL = await objectStorageService.getReceiptUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error('Error getting receipt upload URL:', error);
+      res.status(500).json({ message: 'Failed to get upload URL' });
+    }
+  });
+
+  // Manual payment confirmation via receipt upload
+  app.post('/api/storage-fees/confirm-payment-receipt', async (req, res) => {
+    try {
+      const { custodyId, receiptUrl, buyerId } = req.body;
+      
+      if (!custodyId || !receiptUrl || !buyerId) {
+        return res.status(400).json({ message: 'custodyId, receiptUrl, and buyerId are required' });
+      }
+
+      // Normalize the receipt path
+      const objectStorageService = new (await import('./objectStorage')).ObjectStorageService();
+      const normalizedReceiptPath = objectStorageService.normalizeReceiptPath(receiptUrl);
+
+      await db.update(storageFees)
+        .set({
+          receiptUrl: normalizedReceiptPath,
+          manualConfirmationType: 'receipt_upload',
+          confirmationStatus: 'pending'
+        })
+        .where(eq(storageFees.custodyId, custodyId));
+
+      console.log(`📧 Receipt uploaded for custody ${custodyId} by buyer ${buyerId}`);
+      res.json({ 
+        success: true, 
+        message: 'Receipt uploaded successfully. Awaiting warehouse verification.' 
+      });
+    } catch (error) {
+      console.error('Error confirming payment via receipt:', error);
+      res.status(500).json({ message: 'Failed to confirm payment' });
+    }
+  });
+
+  // Manual payment confirmation via transaction reference
+  app.post('/api/storage-fees/confirm-payment-reference', async (req, res) => {
+    try {
+      const { custodyId, transactionReference, buyerId } = req.body;
+      
+      if (!custodyId || !transactionReference || !buyerId) {
+        return res.status(400).json({ message: 'custodyId, transactionReference, and buyerId are required' });
+      }
+
+      await db.update(storageFees)
+        .set({
+          paymentReference: transactionReference,
+          manualConfirmationType: 'transaction_reference',
+          confirmationStatus: 'pending'
+        })
+        .where(eq(storageFees.custodyId, custodyId));
+
+      console.log(`💳 Transaction reference ${transactionReference} submitted for custody ${custodyId} by buyer ${buyerId}`);
+      res.json({ 
+        success: true, 
+        message: 'Transaction reference submitted successfully. Awaiting warehouse verification.' 
+      });
+    } catch (error) {
+      console.error('Error confirming payment via reference:', error);
+      res.status(500).json({ message: 'Failed to confirm payment' });
+    }
+  });
+
+  // Warehouse inspector verification endpoints
+  app.get('/api/warehouse-inspector/pending-confirmations', async (req, res) => {
+    try {
+      const pendingConfirmations = await db
+        .select({
+          custodyId: storageFees.custodyId,
+          buyerId: warehouseCustody.buyerId,
+          buyerName: warehouseCustody.buyerName,
+          totalWeight: storageFees.totalWeight,
+          calculatedAmount: storageFees.calculatedAmount,
+          manualConfirmationType: storageFees.manualConfirmationType,
+          paymentReference: storageFees.paymentReference,
+          receiptUrl: storageFees.receiptUrl,
+          confirmationStatus: storageFees.confirmationStatus,
+          createdAt: storageFees.createdAt
+        })
+        .from(storageFees)
+        .innerJoin(warehouseCustody, eq(storageFees.custodyId, warehouseCustody.custodyId))
+        .where(eq(storageFees.confirmationStatus, 'pending'));
+
+      res.json(pendingConfirmations);
+    } catch (error) {
+      console.error('Error fetching pending confirmations:', error);
+      res.status(500).json({ message: 'Failed to fetch pending confirmations' });
+    }
+  });
+
+  // Verify manual payment confirmation
+  app.post('/api/warehouse-inspector/verify-payment', async (req, res) => {
+    try {
+      const { custodyId, status, notes, inspectorName } = req.body;
+      
+      if (!custodyId || !status || !inspectorName) {
+        return res.status(400).json({ message: 'custodyId, status, and inspectorName are required' });
+      }
+
+      if (status !== 'verified' && status !== 'rejected') {
+        return res.status(400).json({ message: 'Status must be either "verified" or "rejected"' });
+      }
+
+      await db.update(storageFees)
+        .set({
+          confirmationStatus: status,
+          verifiedBy: inspectorName,
+          verifiedDate: new Date(),
+          verificationNotes: notes,
+          paymentStatus: status === 'verified' ? 'paid' : 'pending'
+        })
+        .where(eq(storageFees.custodyId, custodyId));
+
+      console.log(`✅ Payment ${status} for custody ${custodyId} by inspector ${inspectorName}`);
+      res.json({ 
+        success: true, 
+        message: `Payment confirmation ${status} successfully.` 
+      });
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      res.status(500).json({ message: 'Failed to verify payment' });
+    }
+  });
+
   return httpServer;
 }

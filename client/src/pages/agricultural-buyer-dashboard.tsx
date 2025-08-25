@@ -30,6 +30,11 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import { Upload, CreditCard } from "lucide-react";
 
 export default function AgriculturalBuyerDashboard() {
   const [, navigate] = useLocation();
@@ -38,6 +43,15 @@ export default function AgriculturalBuyerDashboard() {
   const queryClient = useQueryClient();
   const [requestingBags, setRequestingBags] = useState<string | null>(null);
   const [farmersMenuOpen, setFarmersMenuOpen] = useState(false);
+  
+  // Manual payment confirmation states
+  const [manualPaymentDialog, setManualPaymentDialog] = useState<{
+    open: boolean;
+    custodyId: string;
+    amount: string;
+  }>({ open: false, custodyId: '', amount: '' });
+  const [transactionReference, setTransactionReference] = useState('');
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
 
   // UNIVERSAL BUYER DETECTION - Same pattern as standalone transaction dashboard
   const [buyerId, setBuyerId] = useState<string>("");
@@ -220,6 +234,95 @@ export default function AgriculturalBuyerDashboard() {
         description: "Failed to submit authorization request. Please try again.",
         variant: "destructive"
       });
+    }
+  };
+
+  // Manual payment confirmation functions
+  const openManualPaymentDialog = (custodyId: string, amount: string) => {
+    setManualPaymentDialog({ open: true, custodyId, amount });
+    setTransactionReference('');
+  };
+
+  const handleReceiptUpload = async () => {
+    try {
+      const response = await apiRequest('POST', '/api/receipts/upload-url');
+      return {
+        method: "PUT" as const,
+        url: response.uploadURL,
+      };
+    } catch (error) {
+      console.error('Error getting upload URL:', error);
+      throw error;
+    }
+  };
+
+  const handleReceiptComplete = async (result: any) => {
+    if (result.successful && result.successful.length > 0) {
+      const receiptUrl = result.successful[0].uploadURL;
+      
+      try {
+        setConfirmingPayment(true);
+        await apiRequest('POST', '/api/storage-fees/confirm-payment-receipt', {
+          custodyId: manualPaymentDialog.custodyId,
+          receiptUrl,
+          buyerId
+        });
+        
+        toast({
+          title: "Receipt Uploaded",
+          description: "Payment receipt uploaded successfully. Awaiting warehouse verification.",
+        });
+        
+        setManualPaymentDialog({ open: false, custodyId: '', amount: '' });
+        refetchCustodyLots();
+      } catch (error) {
+        console.error('Error confirming payment:', error);
+        toast({
+          title: "Upload Failed",
+          description: "Failed to confirm payment via receipt. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setConfirmingPayment(false);
+      }
+    }
+  };
+
+  const handleTransactionReferenceSubmit = async () => {
+    if (!transactionReference.trim()) {
+      toast({
+        title: "Transaction Reference Required",
+        description: "Please enter the transaction reference number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setConfirmingPayment(true);
+      await apiRequest('POST', '/api/storage-fees/confirm-payment-reference', {
+        custodyId: manualPaymentDialog.custodyId,
+        transactionReference: transactionReference.trim(),
+        buyerId
+      });
+      
+      toast({
+        title: "Reference Submitted",
+        description: "Transaction reference submitted successfully. Awaiting warehouse verification.",
+      });
+      
+      setManualPaymentDialog({ open: false, custodyId: '', amount: '' });
+      setTransactionReference('');
+      refetchCustodyLots();
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      toast({
+        title: "Submission Failed",
+        description: "Failed to submit transaction reference. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConfirmingPayment(false);
     }
   };
 
@@ -884,14 +987,25 @@ export default function AgriculturalBuyerDashboard() {
                                 {/* Action Buttons */}
                                 <div className="space-y-2">
                                   {lot.storageFees?.paymentStatus !== 'paid' ? (
-                                    <Button 
-                                      onClick={() => handlePayStorageFees(lot.custodyId, lot.storageFees?.amountDue || '0')}
-                                      className="w-full bg-green-600 hover:bg-green-700"
-                                      size="sm"
-                                    >
-                                      <DollarSign className="w-4 h-4 mr-2" />
-                                      Pay Warehouse Fees (${lot.storageFees?.amountDue || '0'})
-                                    </Button>
+                                    <>
+                                      <Button 
+                                        onClick={() => handlePayStorageFees(lot.custodyId, lot.storageFees?.amountDue || '0')}
+                                        className="w-full bg-green-600 hover:bg-green-700"
+                                        size="sm"
+                                      >
+                                        <DollarSign className="w-4 h-4 mr-2" />
+                                        Pay Warehouse Fees (${lot.storageFees?.amountDue || '0'})
+                                      </Button>
+                                      <Button 
+                                        onClick={() => openManualPaymentDialog(lot.custodyId, lot.storageFees?.amountDue || '0')}
+                                        variant="outline"
+                                        className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                                        size="sm"
+                                      >
+                                        <Upload className="w-4 h-4 mr-2" />
+                                        Manual Payment Confirmation
+                                      </Button>
+                                    </>
                                   ) : lot.authorizationStatus !== 'authorized' ? (
                                     <Button 
                                       onClick={() => handleRequestAuthorization(lot.custodyId, lot.commodityType)}
@@ -1225,6 +1339,108 @@ export default function AgriculturalBuyerDashboard() {
           )}
         </div>
       </div>
+
+      {/* Manual Payment Confirmation Dialog */}
+      <Dialog 
+        open={manualPaymentDialog.open} 
+        onOpenChange={(open) => setManualPaymentDialog(prev => ({...prev, open}))}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <CreditCard className="w-5 h-5 mr-2 text-orange-600" />
+              Manual Payment Confirmation
+            </DialogTitle>
+            <DialogDescription>
+              Confirm your storage fee payment of ${manualPaymentDialog.amount} for custody lot {manualPaymentDialog.custodyId}.
+              Choose one method below:
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Option 1: Upload Receipt */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-center">
+                <Upload className="w-5 h-5 mr-2 text-blue-600" />
+                <h4 className="font-semibold text-sm">Option 1: Upload Payment Receipt</h4>
+              </div>
+              <p className="text-sm text-gray-600">
+                Upload a screenshot or photo of your payment confirmation from your bank or mobile money service.
+              </p>
+              <ObjectUploader
+                maxNumberOfFiles={1}
+                maxFileSize={5 * 1024 * 1024} // 5MB
+                onGetUploadParameters={handleReceiptUpload}
+                onComplete={handleReceiptComplete}
+                buttonClassName="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                <div className="flex items-center justify-center">
+                  {confirmingPayment ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Payment Receipt
+                    </>
+                  )}
+                </div>
+              </ObjectUploader>
+            </div>
+
+            {/* Option 2: Transaction Reference */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-center">
+                <CreditCard className="w-5 h-5 mr-2 text-green-600" />
+                <h4 className="font-semibold text-sm">Option 2: Enter Transaction Reference</h4>
+              </div>
+              <p className="text-sm text-gray-600">
+                Enter the transaction reference number or confirmation code from your payment.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="transaction-ref" className="text-sm font-medium">
+                    Transaction Reference Number
+                  </Label>
+                  <Input
+                    id="transaction-ref"
+                    placeholder="e.g., TXN123456789, MP240825001, etc."
+                    value={transactionReference}
+                    onChange={(e) => setTransactionReference(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <Button 
+                  onClick={handleTransactionReferenceSubmit}
+                  disabled={!transactionReference.trim() || confirmingPayment}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  {confirmingPayment ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Submit Reference Number
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <p className="text-sm text-yellow-800">
+                <strong>Note:</strong> After submitting either option, the warehouse inspector will verify your payment. 
+                You'll be notified once verification is complete and you can proceed with authorization requests.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -772,6 +772,30 @@ export default function WarehouseInspectorDashboard() {
     }
   });
 
+  // Handle QR code viewing
+  const handleViewQrCode = (batchCode: string) => {
+    toast({ 
+      title: "🔍 QR Code View", 
+      description: `Opening QR code for batch: ${batchCode}` 
+    });
+    // Additional QR viewing logic would go here
+  };
+
+  // Handle printing QR code
+  const handlePrintQrCode = (batchCode: string) => {
+    toast({ 
+      title: "🖨️ Printing QR Code", 
+      description: `Printing QR code for batch: ${batchCode}` 
+    });
+    // Additional printing logic would go here
+  };
+
+  // Handle viewing bag request details
+  const handleViewBagRequestDetails = (request: any) => {
+    setSelectedBagRequest(request);
+    setShowBagDetailsModal(true);
+  };
+
   // Calculate dashboard statistics from real data
   const dashboardStats = {
     pendingInspections: pendingInspections?.length || 8,
@@ -1556,6 +1580,14 @@ export default function WarehouseInspectorDashboard() {
                             <Button 
                               variant="outline" 
                               size="sm"
+                              onClick={() => handleViewBagRequestDetails(request)}
+                              data-testid={`button-view-details-${request.id}`}
+                            >
+                              View Details
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
                               className="text-red-600 border-red-200 hover:bg-red-50"
                               onClick={() => rejectBagRequestMutation.mutate(request.id)}
                               disabled={rejectBagRequestMutation.isPending}
@@ -1812,11 +1844,21 @@ export default function WarehouseInspectorDashboard() {
                             <p className="text-lg font-medium">{batch.totalPackages} bags</p>
                           </div>
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline" data-testid={`button-view-qr-${batch.batchCode}`}>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleViewQrCode(batch.batchCode)}
+                              data-testid={`button-view-qr-${batch.batchCode}`}
+                            >
                               <Eye className="w-4 h-4 mr-1" />
                               View QR
                             </Button>
-                            <Button size="sm" variant="outline" data-testid={`button-print-${batch.batchCode}`}>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handlePrintQrCode(batch.batchCode)}
+                              data-testid={`button-print-${batch.batchCode}`}
+                            >
                               <Printer className="w-4 h-4 mr-1" />
                               Print
                             </Button>
@@ -1857,11 +1899,21 @@ export default function WarehouseInspectorDashboard() {
                             <p className="text-lg font-medium">{batch.bags} bags</p>
                           </div>
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline" data-testid={`button-view-qr-${batch.batchCode}`}>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleViewQrCode(batch.batchCode)}
+                              data-testid={`button-view-qr-${batch.batchCode}`}
+                            >
                               <Eye className="w-4 h-4 mr-1" />
                               View QR
                             </Button>
-                            <Button size="sm" variant="outline" data-testid={`button-print-${batch.batchCode}`}>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handlePrintQrCode(batch.batchCode)}
+                              data-testid={`button-print-${batch.batchCode}`}
+                            >
                               <Printer className="w-4 h-4 mr-1" />
                               Print
                             </Button>

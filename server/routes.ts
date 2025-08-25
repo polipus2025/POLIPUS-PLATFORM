@@ -13869,9 +13869,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/buyer/confirmed-transactions/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
-      // Fetching buyer transactions
+      console.log(`Fetching confirmed transactions for buyer: ${buyerId}`);
       
-      // Fetch real confirmed transactions from database including payment status
+      // FIXED: Get the internal buyer ID first, then fetch confirmation codes
+      const [buyer] = await db
+        .select({ id: buyers.id })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+      
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+      
+      // Fetch real confirmed transactions from database using internal buyer ID
       const realTransactions = await db
         .select({
           id: buyerVerificationCodes.id,
@@ -13894,7 +13904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           acceptedAt: buyerVerificationCodes.acceptedAt,
         })
         .from(buyerVerificationCodes)
-        .where(eq(buyerVerificationCodes.buyerId, buyerId))
+        .where(eq(buyerVerificationCodes.buyerId, buyer.id.toString()))
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
       // Format the transactions for the frontend with REAL payment status

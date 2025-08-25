@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// Removed Tabs components - using conditional rendering instead
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Users, 
@@ -22,7 +22,9 @@ import {
   Calendar,
   FileText,
   Settings,
-  LogOut
+  LogOut,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -35,6 +37,7 @@ export default function AgriculturalBuyerDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [requestingBags, setRequestingBags] = useState<string | null>(null);
+  const [farmersMenuOpen, setFarmersMenuOpen] = useState(false);
 
   // UNIVERSAL BUYER DETECTION - Same pattern as standalone transaction dashboard
   const [buyerId, setBuyerId] = useState<string>("");
@@ -269,19 +272,101 @@ export default function AgriculturalBuyerDashboard() {
 
       {/* Main Content */}
       <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="flex w-full h-auto p-1">
-            <TabsTrigger value="overview" className="flex-1 text-xs px-2 py-2 min-w-0">Business Overview</TabsTrigger>
-            <TabsTrigger value="notifications" className="flex-1 text-xs px-2 py-2 min-w-0">Product Offers</TabsTrigger>
-            <TabsTrigger value="farmers" className="flex-1 text-xs px-2 py-2 min-w-0">Farmer Connections</TabsTrigger>
-            <TabsTrigger value="confirmed" className="flex-1 text-xs px-2 py-2 min-w-0">Confirmed Transactions</TabsTrigger>
-            <TabsTrigger value="orders" className="flex-1 text-xs px-2 py-2 min-w-0">My Orders</TabsTrigger>
-            <TabsTrigger value="transactions" className="flex-1 text-xs px-2 py-2 min-w-0">Transaction Dashboard</TabsTrigger>
-          </TabsList>
+        {/* Custom Navigation with Farmers Dropdown */}
+        <div className="bg-white border border-gray-200 rounded-lg mb-6">
+          <div className="flex flex-wrap items-center justify-between p-2 border-b border-gray-100">
+            {/* Business Overview */}
+            <Button 
+              variant={activeTab === 'overview' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setActiveTab('overview')}
+              className="text-xs"
+            >
+              Business Overview
+            </Button>
+            
+            {/* Product Offers */}
+            <Button 
+              variant={activeTab === 'notifications' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setActiveTab('notifications')}
+              className="text-xs"
+            >
+              Product Offers
+            </Button>
 
+            {/* Farmers Dropdown Menu */}
+            <div className="relative">
+              <Button 
+                variant={['farmers', 'confirmed', 'orders'].includes(activeTab) ? 'default' : 'ghost'} 
+                size="sm"
+                onClick={() => setFarmersMenuOpen(!farmersMenuOpen)}
+                className="text-xs flex items-center gap-1"
+              >
+                Farmers
+                {farmersMenuOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </Button>
+              
+              {/* Dropdown Menu */}
+              {farmersMenuOpen && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[180px]">
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        setActiveTab('farmers');
+                        setFarmersMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
+                        activeTab === 'farmers' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      }`}
+                    >
+                      1) Farmer Connections
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab('confirmed');
+                        setFarmersMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
+                        activeTab === 'confirmed' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      }`}
+                    >
+                      2) Confirmed Transactions
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab('orders');
+                        setFarmersMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 ${
+                        activeTab === 'orders' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      }`}
+                    >
+                      3) My Orders
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Transaction Dashboard */}
+            <Button 
+              variant={activeTab === 'transactions' ? 'default' : 'ghost'} 
+              size="sm"
+              onClick={() => setActiveTab('transactions')}
+              className="text-xs"
+            >
+              Transaction Dashboard
+            </Button>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div>
           {/* Business Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Active Connections</CardTitle>
@@ -362,10 +447,12 @@ export default function AgriculturalBuyerDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            </div>
+          )}
 
           {/* Product Offers Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-6">
+          {activeTab === 'notifications' && (
+            <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -463,10 +550,12 @@ export default function AgriculturalBuyerDashboard() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+            </div>
+          )}
 
           {/* My Orders Tab - Buyer Acceptances with Request Bags */}
-          <TabsContent value="orders" className="space-y-6">
+          {activeTab === 'orders' && (
+            <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -571,10 +660,12 @@ export default function AgriculturalBuyerDashboard() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+            </div>
+          )}
 
           {/* Farmer Connections Tab */}
-          <TabsContent value="farmers" className="space-y-6">
+          {activeTab === 'farmers' && (
+            <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Available Harvests from Farmers</CardTitle>
@@ -667,10 +758,12 @@ export default function AgriculturalBuyerDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            </div>
+          )}
 
           {/* Confirmed Transactions Archive Tab */}
-          <TabsContent value="confirmed" className="space-y-6">
+          {activeTab === 'confirmed' && (
+            <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -757,11 +850,12 @@ export default function AgriculturalBuyerDashboard() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-
+            </div>
+          )}
 
           {/* Transaction Dashboard Tab */}
-          <TabsContent value="transactions" className="space-y-6">
+          {activeTab === 'transactions' && (
+            <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Transaction Dashboard</CardTitle>
@@ -846,8 +940,9 @@ export default function AgriculturalBuyerDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1095,6 +1095,22 @@ export default function BuyerManagement() {
                       <UserX className="w-4 h-4" />
                     </Button>
                   )}
+
+                  {buyer.complianceStatus === 'suspended' && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => approveBuyerMutation.mutate({ 
+                        id: buyer.id, 
+                        data: { complianceStatus: 'approved', portalAccess: true } 
+                      })}
+                      disabled={approveBuyerMutation.isPending}
+                      data-testid={`button-reactivate-${buyer.id}`}
+                    >
+                      <UserCheck className="w-4 h-4 mr-1" />
+                      Reactivate
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>

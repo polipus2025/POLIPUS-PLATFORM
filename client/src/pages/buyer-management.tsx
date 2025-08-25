@@ -103,8 +103,9 @@ const businessTypes = [
 export default function BuyerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedBuyer, setSelectedBuyer] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedBuyer, setSelectedBuyer] = useState<any>(null);
   const [selectedCommodities, setSelectedCommodities] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const { toast } = useToast();
@@ -1041,7 +1042,15 @@ export default function BuyerManagement() {
                 </div>
 
                 <div className="flex items-center space-x-2 ml-4">
-                  <Button variant="outline" size="sm" data-testid={`button-view-${buyer.id}`}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      setSelectedBuyer(buyer);
+                      setShowViewModal(true);
+                    }}
+                    data-testid={`button-view-${buyer.id}`}
+                  >
                     <Eye className="w-4 h-4" />
                   </Button>
                   
@@ -1107,6 +1116,147 @@ export default function BuyerManagement() {
           </Card>
         )}
       </div>
+
+      {/* View Buyer Modal */}
+      <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Buyer Details</DialogTitle>
+          </DialogHeader>
+          
+          {selectedBuyer && (
+            <div className="space-y-6">
+              {/* Business Information */}
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Business Name</label>
+                      <p className="text-gray-900">{selectedBuyer.businessName}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Business Type</label>
+                      <p className="text-gray-900">{selectedBuyer.businessType}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Buyer ID</label>
+                      <p className="text-gray-900">{selectedBuyer.buyerId}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Status</label>
+                      <Badge variant={selectedBuyer.complianceStatus === 'approved' ? 'default' : 'secondary'}>
+                        {selectedBuyer.complianceStatus}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Contact Person</label>
+                      <p className="text-gray-900">
+                        {selectedBuyer.contactPersonFirstName} {selectedBuyer.contactPersonLastName}
+                        {selectedBuyer.contactPersonTitle && ` - ${selectedBuyer.contactPersonTitle}`}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Primary Email</label>
+                      <p className="text-gray-900">{selectedBuyer.primaryEmail}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Primary Phone</label>
+                      <p className="text-gray-900">{selectedBuyer.primaryPhone}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Business Address</label>
+                      <p className="text-gray-900">{selectedBuyer.businessAddress}</p>
+                      <p className="text-gray-600">{selectedBuyer.city}, {selectedBuyer.county}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trading Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Trading Information</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Interested Commodities</label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {(() => {
+                        try {
+                          const commodities = JSON.parse(selectedBuyer.interestedCommodities || '[]');
+                          return Array.isArray(commodities) ? commodities : [];
+                        } catch {
+                          return selectedBuyer.interestedCommodities?.split(',').map(c => c.trim()).filter(c => c) || [];
+                        }
+                      })().map((commodity: string) => (
+                        <Badge key={commodity} variant="secondary" className="text-xs">
+                          {commodity}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Trading Regions</label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {(() => {
+                        try {
+                          const regions = JSON.parse(selectedBuyer.tradingRegions || '[]');
+                          return Array.isArray(regions) ? regions : [];
+                        } catch {
+                          return selectedBuyer.tradingRegions?.split(',').map(r => r.trim()).filter(r => r) || [];
+                        }
+                      })().map((region: string) => (
+                        <Badge key={region} variant="outline" className="text-xs">
+                          {region}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              {(selectedBuyer.yearEstablished || selectedBuyer.numberOfEmployees || selectedBuyer.annualTurnover) && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Details</h3>
+                  <div className="grid grid-cols-3 gap-6">
+                    {selectedBuyer.yearEstablished && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Year Established</label>
+                        <p className="text-gray-900">{selectedBuyer.yearEstablished}</p>
+                      </div>
+                    )}
+                    {selectedBuyer.numberOfEmployees && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Employees</label>
+                        <p className="text-gray-900">{selectedBuyer.numberOfEmployees}</p>
+                      </div>
+                    )}
+                    {selectedBuyer.annualTurnover && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Annual Turnover</label>
+                        <p className="text-gray-900">${selectedBuyer.annualTurnover}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Registration Date */}
+              <div className="pt-4 border-t">
+                <p className="text-sm text-gray-600">
+                  Registered: {new Date(selectedBuyer.createdAt).toLocaleDateString()} at {new Date(selectedBuyer.createdAt).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

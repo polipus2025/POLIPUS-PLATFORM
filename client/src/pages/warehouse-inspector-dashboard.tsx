@@ -1235,46 +1235,63 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Daily Storage Rate (USD per ton)</label>
-                    <select
-                      value={selectedStorageRate}
-                      onChange={(e) => setSelectedStorageRate(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      data-testid="select-storage-rate"
-                    >
-                      <option value="1.00">$1.00 per ton/day - Basic Storage</option>
-                      <option value="1.50">$1.50 per ton/day - Standard Storage</option>
-                      <option value="2.00">$2.00 per ton/day - Premium Storage</option>
-                      <option value="2.50">$2.50 per ton/day - Climate Controlled</option>
-                      <option value="3.00">$3.00 per ton/day - Specialized Storage</option>
-                    </select>
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-800 font-medium">
+                        Current Rate: $1.50 per ton/day
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        Standard storage rate for {warehouseFacility}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Storage Location</label>
-                    <select
-                      value={storageLocation}
-                      onChange={(e) => setStorageLocation(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      data-testid="select-storage-location"
-                    >
-                      <option value="">Select Storage Location</option>
-                      <option value="Section A-1">Section A-1 (Dry Goods)</option>
-                      <option value="Section A-2">Section A-2 (Climate Controlled)</option>
-                      <option value="Section B-1">Section B-1 (Large Items)</option>
-                      <option value="Section B-2">Section B-2 (Premium Storage)</option>
-                      <option value="Section C-1">Section C-1 (Cold Storage)</option>
-                      <option value="Outdoor Area 1">Outdoor Area 1 (Weather Resistant)</option>
-                    </select>
+                    <label className="text-sm font-medium">Available Storage Locations</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2 bg-green-50 border border-green-200 rounded text-sm">
+                        <span className="text-green-800 font-medium">Section A-1</span>
+                        <span className="text-green-600 text-xs block">Available (85% capacity)</span>
+                      </div>
+                      <div className="p-2 bg-green-50 border border-green-200 rounded text-sm">
+                        <span className="text-green-800 font-medium">Section B-2</span>
+                        <span className="text-green-600 text-xs block">Available (72% capacity)</span>
+                      </div>
+                      <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                        <span className="text-yellow-800 font-medium">Section C-1</span>
+                        <span className="text-yellow-600 text-xs block">Limited (95% capacity)</span>
+                      </div>
+                      <div className="p-2 bg-red-50 border border-red-200 rounded text-sm">
+                        <span className="text-red-800 font-medium">Section A-2</span>
+                        <span className="text-red-600 text-xs block">Full (100% capacity)</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Current Custody Records */}
                   <div className="mt-6">
                     <h3 className="font-medium mb-3">
-                      Current Custody Records
+                      Recent Registrations
                     </h3>
-                    <div className="text-center text-gray-500 py-4 border border-dashed border-gray-200 rounded-lg">
-                      Products currently registered in warehouse custody
-                    </div>
+                    {custodyRecordsLoading ? (
+                      <div className="text-center text-gray-500 py-4 border border-dashed border-gray-200 rounded-lg">
+                        Loading custody records...
+                      </div>
+                    ) : custodyRecords && custodyRecords.length > 0 ? (
+                      <div className="space-y-2 max-h-32 overflow-y-auto">
+                        {custodyRecords.slice(0, 3).map((record: any) => (
+                          <div key={record.custodyId} className="p-2 bg-gray-50 border rounded-lg text-sm">
+                            <p className="font-medium">{record.commodityType}</p>
+                            <p className="text-xs text-gray-600">{record.totalWeight} tons • {record.authorizationStatus}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-gray-500 py-4 border border-dashed border-gray-200 rounded-lg">
+                        <Package className="w-6 h-6 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm">No products registered yet</p>
+                        <p className="text-xs text-gray-400">Register buyer products to begin custody process</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

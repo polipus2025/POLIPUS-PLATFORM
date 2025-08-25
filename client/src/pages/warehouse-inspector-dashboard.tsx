@@ -732,6 +732,46 @@ export default function WarehouseInspectorDashboard() {
     }
   });
 
+  // Validate bag request mutation
+  const validateBagRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      const response = await fetch(`/api/warehouse-inspector/validate-bag-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId })
+      });
+      if (!response.ok) throw new Error('Failed to validate request');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "✅ Request Validated", description: "Bag request has been validated successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-requests'] });
+    },
+    onError: () => {
+      toast({ title: "❌ Error", description: "Failed to validate request", variant: "destructive" });
+    }
+  });
+
+  // Reject bag request mutation
+  const rejectBagRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      const response = await fetch(`/api/warehouse-inspector/reject-bag-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId })
+      });
+      if (!response.ok) throw new Error('Failed to reject request');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "❌ Request Rejected", description: "Bag request has been rejected" });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-requests'] });
+    },
+    onError: () => {
+      toast({ title: "❌ Error", description: "Failed to reject request", variant: "destructive" });
+    }
+  });
+
   // Calculate dashboard statistics from real data
   const dashboardStats = {
     pendingInspections: pendingInspections?.length || 8,
@@ -1517,6 +1557,8 @@ export default function WarehouseInspectorDashboard() {
                               variant="outline" 
                               size="sm"
                               className="text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={() => rejectBagRequestMutation.mutate(request.id)}
+                              disabled={rejectBagRequestMutation.isPending}
                               data-testid={`button-reject-${request.id}`}
                             >
                               Reject Request
@@ -1524,6 +1566,8 @@ export default function WarehouseInspectorDashboard() {
                             <Button 
                               size="sm"
                               className="bg-green-600 hover:bg-green-700"
+                              onClick={() => validateBagRequestMutation.mutate(request.id)}
+                              disabled={validateBagRequestMutation.isPending}
                               data-testid={`button-validate-${request.id}`}
                             >
                               Validate Request

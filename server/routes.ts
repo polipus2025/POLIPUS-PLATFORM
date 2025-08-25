@@ -11712,6 +11712,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get buyer profile by buyerId string - FOR BUYER DASHBOARD DISPLAY
+  app.get("/api/buyer/profile/:buyerId", async (req, res) => {
+    try {
+      const buyers = await storage.getBuyers();
+      const buyer = buyers.find((b: any) => b.buyerId === req.params.buyerId);
+      
+      if (!buyer) {
+        return res.status(404).json({ message: "Buyer profile not found" });
+      }
+
+      // Return DDGOTS-created buyer profile data
+      res.json({
+        buyerId: buyer.buyerId,
+        businessName: buyer.businessName,
+        contactPersonFirstName: buyer.contactPersonFirstName,
+        contactPersonLastName: buyer.contactPersonLastName,
+        contactPersonTitle: buyer.contactPersonTitle,
+        primaryEmail: buyer.primaryEmail,
+        primaryPhone: buyer.primaryPhone,
+        businessAddress: buyer.businessAddress,
+        city: buyer.city,
+        county: buyer.county,
+        businessType: buyer.businessType,
+        complianceStatus: buyer.complianceStatus,
+        verificationStatus: buyer.verificationStatus
+      });
+    } catch (error) {
+      console.error("Error fetching buyer profile:", error);
+      res.status(500).json({ message: "Failed to fetch buyer profile" });
+    }
+  });
+
+  // Get exporter profile by exporterId string - FOR EXPORTER DASHBOARD DISPLAY
+  app.get("/api/exporter/profile/:exporterId", async (req, res) => {
+    try {
+      const exportersData = await storage.getExporters();
+      const exporter = exportersData.find((e: any) => e.exporterId === req.params.exporterId);
+      
+      if (!exporter) {
+        return res.status(404).json({ message: "Exporter profile not found" });
+      }
+
+      // Return DDGOTS-created exporter profile data
+      res.json({
+        exporterId: exporter.exporterId,
+        companyName: exporter.companyName,
+        contactPersonFirstName: exporter.contactPersonFirstName,
+        contactPersonLastName: exporter.contactPersonLastName,
+        contactPersonTitle: exporter.contactPersonTitle,
+        primaryEmail: exporter.primaryEmail,
+        primaryPhone: exporter.primaryPhone,
+        businessAddress: exporter.businessAddress,
+        city: exporter.city,
+        county: exporter.county,
+        businessType: exporter.businessType,
+        complianceStatus: exporter.complianceStatus,
+        verificationStatus: exporter.verificationStatus,
+        exportLicenseNumber: exporter.exportLicenseNumber
+      });
+    } catch (error) {
+      console.error("Error fetching exporter profile:", error);
+      res.status(500).json({ message: "Failed to fetch exporter profile" });
+    }
+  });
+
+  // Get inspector profile by inspectorId string - FOR INSPECTOR DASHBOARD DISPLAY
+  app.get("/api/inspector/profile/:inspectorId", async (req, res) => {
+    try {
+      const inspectorsData = await storage.getInspectors();
+      const inspector = inspectorsData.find((i: any) => i.inspectorId === req.params.inspectorId);
+      
+      if (!inspector) {
+        return res.status(404).json({ message: "Inspector profile not found" });
+      }
+
+      // Return DDGOTS-created inspector profile data
+      res.json({
+        inspectorId: inspector.inspectorId,
+        firstName: inspector.firstName,
+        lastName: inspector.lastName,
+        contactTitle: inspector.contactTitle,
+        primaryEmail: inspector.primaryEmail,
+        primaryPhone: inspector.primaryPhone,
+        officeAddress: inspector.officeAddress,
+        city: inspector.city,
+        county: inspector.county,
+        inspectorType: inspector.inspectorType,
+        complianceStatus: inspector.complianceStatus,
+        verificationStatus: inspector.verificationStatus,
+        licenseNumber: inspector.licenseNumber
+      });
+    } catch (error) {
+      console.error("Error fetching inspector profile:", error);
+      res.status(500).json({ message: "Failed to fetch inspector profile" });
+    }
+  });
+
   // Create new buyer - ONBOARDING SYSTEM
   app.post("/api/buyers", async (req, res) => {
     try {

@@ -59,15 +59,20 @@ export default function AgriculturalBuyerDashboard() {
     }
   }, []);
   
-  // Fix "null null" issue by properly handling null localStorage values
-  const firstName = localStorage.getItem("firstName");
-  const lastName = localStorage.getItem("lastName");
-  const storedBuyerName = localStorage.getItem("buyerName");
-  
-  const buyerName = storedBuyerName || 
-    (firstName && lastName ? `${firstName} ${lastName}` : 
-     firstName || lastName || "Agricultural Buyer");
-  const company = localStorage.getItem("company") || "Agricultural Trading Company";
+  // Fetch authentic DDGOTS-created buyer profile data
+  const { data: buyerProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ['/api/buyer/profile', buyerId],
+    queryFn: () => apiRequest(`/api/buyer/profile/${buyerId}`),
+    enabled: !!buyerId,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
+
+  // Use DDGOTS-created data instead of localStorage
+  const buyerName = buyerProfile?.contactPersonFirstName && buyerProfile?.contactPersonLastName 
+    ? `${buyerProfile.contactPersonFirstName} ${buyerProfile.contactPersonLastName}`
+    : "Agricultural Buyer";
+  const company = buyerProfile?.businessName || "Agricultural Trading Company";
 
   // Fetch product offer notifications for this buyer - REAL-TIME for offer competition
   const { data: notifications, isLoading: notificationsLoading } = useQuery({
@@ -234,11 +239,24 @@ export default function AgriculturalBuyerDashboard() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Agricultural Buyer Portal</h1>
-            <p className="text-gray-600">{company}</p>
+            {profileLoading ? (
+              <p className="text-gray-600">Loading company details...</p>
+            ) : (
+              <p className="text-gray-600">{company}</p>
+            )}
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <p className="font-medium text-gray-900">{buyerName}</p>
+              {profileLoading ? (
+                <p className="font-medium text-gray-900">Loading...</p>
+              ) : (
+                <>
+                  <p className="font-medium text-gray-900">{buyerName}</p>
+                  {buyerProfile && (
+                    <p className="text-xs text-gray-500">{buyerProfile.primaryEmail} • {buyerProfile.contactPersonTitle}</p>
+                  )}
+                </>
+              )}
               <p className="text-sm text-gray-500">Buyer ID: {buyerId}</p>
             </div>
             <Button variant="outline" onClick={handleLogout}>

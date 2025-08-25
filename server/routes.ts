@@ -13856,6 +13856,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // PAYMENT CONFIRMATION NO LONGER REQUIRED - Allow bag requests once verification code exists
       console.log(`✅ Verification code ${verificationCode} valid - allowing bag request without payment confirmation`)
 
+      // Fetch DDGOTS-created buyer details from database (don't trust frontend data)
+      const [buyerRecord] = await db
+        .select({
+          buyerId: buyers.buyerId,
+          businessName: buyers.businessName,
+          contactPersonFirstName: buyers.contactPersonFirstName,
+          contactPersonLastName: buyers.contactPersonLastName
+        })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId))
+        .limit(1);
+
+      if (!buyerRecord) {
+        return res.status(404).json({ error: `Buyer ${buyerId} not found in DDGOTS records` });
+      }
+
+      // Use DDGOTS-created buyer details (not frontend localStorage data)
+      const actualBuyerName = `${buyerRecord.contactPersonFirstName} ${buyerRecord.contactPersonLastName}`;
+      const actualCompany = buyerRecord.businessName;
+
+      console.log(`📋 Using DDGOTS buyer details: ${actualBuyerName} (${actualCompany})`);
+
       // Find county warehouse for buyer's county - handle both "County" and without "County" suffix
       let warehouseResults = await db
         .select()
@@ -13881,14 +13903,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique request ID
       const requestId = `REQ-${county.replace(' County', '').toUpperCase()}-${String(Date.now()).slice(-6)}`;
 
-      // Create bag request - convert to match database field types
+      // Create bag request using DDGOTS buyer details (not frontend data)
       const bagRequest = {
         requestId,
         warehouseId: warehouse.warehouseId,
         verificationCode,
         buyerId,
-        buyerName,
-        company,
+        buyerName: actualBuyerName,
+        company: actualCompany,
         farmerId: existingCode[0].farmerId,
         farmerName,
         commodityType,

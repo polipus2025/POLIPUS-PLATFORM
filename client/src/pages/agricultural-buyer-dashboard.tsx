@@ -59,7 +59,14 @@ export default function AgriculturalBuyerDashboard() {
     }
   }, []);
   
-  const buyerName = localStorage.getItem("buyerName") || localStorage.getItem("firstName") + " " + localStorage.getItem("lastName");
+  // Fix "null null" issue by properly handling null localStorage values
+  const firstName = localStorage.getItem("firstName");
+  const lastName = localStorage.getItem("lastName");
+  const storedBuyerName = localStorage.getItem("buyerName");
+  
+  const buyerName = storedBuyerName || 
+    (firstName && lastName ? `${firstName} ${lastName}` : 
+     firstName || lastName || "Agricultural Buyer");
   const company = localStorage.getItem("company") || "Agricultural Trading Company";
 
   // Fetch product offer notifications for this buyer - REAL-TIME for offer competition

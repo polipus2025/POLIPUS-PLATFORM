@@ -31,7 +31,10 @@ import {
   MapPin,
   Printer,
   QrCode,
-  Layers
+  Layers,
+  DollarSign,
+  Upload,
+  CreditCard
 } from "lucide-react";
 
 export default function WarehouseInspectorDashboard() {
@@ -405,13 +408,77 @@ export default function WarehouseInspectorDashboard() {
               </div>
               
               <div>
-                <h4 className="font-medium mb-1">Storage Info</h4>
+                <h4 className="font-medium mb-1">Storage & Payment Info</h4>
                 <p className="text-sm text-gray-600">Location: {record.storageLocation || 'Not assigned'}</p>
                 <p className="text-sm text-gray-600">Conditions: {record.storageConditions || 'Standard'}</p>
                 <p className="text-sm text-gray-600">Rate: ${record.storageRate}/metric ton (one-time)</p>
                 <p className="text-sm font-semibold text-green-600">
                   Total Payment: ${(parseFloat(record.totalWeight) * parseFloat(record.storageRate)).toFixed(2)}
                 </p>
+                
+                {/* Payment Status */}
+                {record.storageFees && (
+                  <div className="mt-2 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium">Payment:</span>
+                      <Badge className={`text-xs ${
+                        record.storageFees.paymentStatus === 'paid' 
+                          ? 'bg-green-100 text-green-800'
+                          : record.storageFees.paymentStatus === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {record.storageFees.paymentStatus}
+                      </Badge>
+                    </div>
+                    
+                    {/* Manual Payment Info */}
+                    {record.storageFees.manualConfirmationType && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">Manual Payment:</span>
+                          <Badge variant="outline" className="text-xs">
+                            {record.storageFees.manualConfirmationType === 'receipt' 
+                              ? 'Receipt Upload' 
+                              : 'Transaction Reference'}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">Status:</span>
+                          <Badge className={`text-xs ${
+                            record.storageFees.confirmationStatus === 'verified' 
+                              ? 'bg-green-100 text-green-800'
+                              : record.storageFees.confirmationStatus === 'rejected'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-orange-100 text-orange-800'
+                          }`}>
+                            {record.storageFees.confirmationStatus}
+                          </Badge>
+                        </div>
+                        
+                        {/* Receipt Image Button */}
+                        {record.storageFees.receiptUrl && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs p-1 h-6"
+                            onClick={() => window.open(record.storageFees.receiptUrl, '_blank')}
+                          >
+                            <Upload className="w-3 h-3 mr-1" />
+                            View Receipt
+                          </Button>
+                        )}
+                        
+                        {/* Transaction Reference */}
+                        {record.storageFees.paymentReference && (
+                          <p className="text-xs text-gray-600">
+                            Ref: {record.storageFees.paymentReference}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div>
@@ -469,39 +536,82 @@ export default function WarehouseInspectorDashboard() {
                     Details
                   </Button>
                   {record.authorizationStatus === 'pending' && (
-                    <Button 
-                      size="sm" 
-                      className="bg-green-600 hover:bg-green-700 text-white border-green-600"
-                      disabled={authorizingRecord === record.custodyId}
-                      onClick={async () => {
-                        setAuthorizingRecord(record.custodyId);
-                        try {
-                          await apiRequest('/api/warehouse-custody/authorize', {
-                            method: 'POST',
-                            body: JSON.stringify({
-                              custodyId: record.custodyId,
-                              authorizationNotes: 'Authorized by warehouse inspector'
-                            })
-                          });
-                          toast({
-                            title: 'Custody Authorized',
-                            description: `Custody ${record.custodyId} has been authorized successfully`,
-                          });
-                          queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
-                        } catch (error: any) {
-                          toast({
-                            title: 'Authorization Failed',
-                            description: error.message || 'Failed to authorize custody',
-                            variant: 'destructive',
-                          });
-                        } finally {
-                          setAuthorizingRecord(null);
-                        }
-                      }}
-                    >
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      {authorizingRecord === record.custodyId ? 'Authorizing...' : 'Authorize'}
-                    </Button>
+                    <>
+                      {/* Show different buttons based on payment status */}
+                      {record.storageFees?.manualConfirmationType && record.storageFees?.confirmationStatus === 'pending' ? (
+                        <Button 
+                          size="sm" 
+                          className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                          disabled={authorizingRecord === record.custodyId}
+                          onClick={async () => {
+                            setAuthorizingRecord(record.custodyId);
+                            try {
+                              await apiRequest('/api/warehouse-custody/verify-and-authorize', {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                  custodyId: record.custodyId,
+                                  verificationNotes: `Payment verified via ${record.storageFees.manualConfirmationType} - Authorized by warehouse inspector`
+                                })
+                              });
+                              toast({
+                                title: 'Payment Verified & Custody Authorized',
+                                description: `Payment verified and custody ${record.custodyId} authorized successfully`,
+                              });
+                              queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
+                            } catch (error: any) {
+                              toast({
+                                title: 'Verification/Authorization Failed',
+                                description: error.message || 'Failed to verify payment and authorize custody',
+                                variant: 'destructive',
+                              });
+                            } finally {
+                              setAuthorizingRecord(null);
+                            }
+                          }}
+                        >
+                          <CreditCard className="w-3 h-3 mr-1" />
+                          {authorizingRecord === record.custodyId ? 'Verifying...' : 'Verify Payment & Authorize'}
+                        </Button>
+                      ) : record.storageFees?.paymentStatus === 'paid' ? (
+                        <Button 
+                          size="sm" 
+                          className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+                          disabled={authorizingRecord === record.custodyId}
+                          onClick={async () => {
+                            setAuthorizingRecord(record.custodyId);
+                            try {
+                              await apiRequest('/api/warehouse-custody/authorize', {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                  custodyId: record.custodyId,
+                                  authorizationNotes: 'Authorized by warehouse inspector - Payment confirmed'
+                                })
+                              });
+                              toast({
+                                title: 'Custody Authorized',
+                                description: `Custody ${record.custodyId} has been authorized successfully`,
+                              });
+                              queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
+                            } catch (error: any) {
+                              toast({
+                                title: 'Authorization Failed',
+                                description: error.message || 'Failed to authorize custody',
+                                variant: 'destructive',
+                              });
+                            } finally {
+                              setAuthorizingRecord(null);
+                            }
+                          }}
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          {authorizingRecord === record.custodyId ? 'Authorizing...' : 'Authorize'}
+                        </Button>
+                      ) : (
+                        <div className="text-xs text-orange-600 font-medium">
+                          Waiting for payment confirmation
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

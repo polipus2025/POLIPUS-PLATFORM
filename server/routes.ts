@@ -16068,7 +16068,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
-  // Get warehouse custody records
+  // Get warehouse custody records with storage fees
   app.get("/api/warehouse-custody/records", async (req, res) => {
     try {
       console.log('📋 Fetching warehouse custody records from database...');
@@ -16081,27 +16081,86 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       console.log(`✅ Found ${custodyRecords.length} custody records in database`);
 
-      // Transform database records to match frontend expectations
-      const formattedRecords = custodyRecords.map(record => ({
-        ...record,
-        // Ensure JSON fields are properly parsed
-        productQrCodes: Array.isArray(record.productQrCodes) ? record.productQrCodes : JSON.parse(record.productQrCodes as string || '[]'),
-        verificationCodes: Array.isArray(record.verificationCodes) ? record.verificationCodes : JSON.parse(record.verificationCodes as string || '[]'),
-        farmerNames: Array.isArray(record.farmerNames) ? record.farmerNames : JSON.parse(record.farmerNames as string || '[]'),
-        farmLocations: Array.isArray(record.farmLocations) ? record.farmLocations : JSON.parse(record.farmLocations as string || '[]'),
-        lotOrigins: Array.isArray(record.lotOrigins) ? record.lotOrigins : JSON.parse(record.lotOrigins as string || '[]'),
-        qrCodeData: typeof record.qrCodeData === 'object' ? record.qrCodeData : JSON.parse(record.qrCodeData as string || '{}')
-      }));
+      // Get storage fees for each custody record (including manual payment data)
+      const custodyRecordsWithFees = await Promise.all(
+        custodyRecords.map(async (record) => {
+          const [storageFeesRecord] = await db
+            .select()
+            .from(storageFees)
+            .where(eq(storageFees.custodyId, record.custodyId));
+
+          return {
+            ...record,
+            storageFees: storageFeesRecord || null,
+            // Ensure JSON fields are properly parsed
+            productQrCodes: Array.isArray(record.productQrCodes) ? record.productQrCodes : JSON.parse(record.productQrCodes as string || '[]'),
+            verificationCodes: Array.isArray(record.verificationCodes) ? record.verificationCodes : JSON.parse(record.verificationCodes as string || '[]'),
+            farmerNames: Array.isArray(record.farmerNames) ? record.farmerNames : JSON.parse(record.farmerNames as string || '[]'),
+            farmLocations: Array.isArray(record.farmLocations) ? record.farmLocations : JSON.parse(record.farmLocations as string || '[]'),
+            lotOrigins: Array.isArray(record.lotOrigins) ? record.lotOrigins : JSON.parse(record.lotOrigins as string || '[]'),
+            qrCodeData: typeof record.qrCodeData === 'object' ? record.qrCodeData : JSON.parse(record.qrCodeData as string || '{}')
+          };
+        })
+      );
 
       res.json({ 
         success: true, 
-        data: formattedRecords 
+        data: custodyRecordsWithFees 
       });
     } catch (error) {
       console.error("Error fetching custody records:", error);
       res.status(500).json({ 
         success: false, 
         message: "Failed to fetch custody records" 
+      });
+    }
+  });
+
+  // Combined payment verification and authorization
+  app.post("/api/warehouse-custody/verify-and-authorize", async (req, res) => {
+    try {
+      const { custodyId, verificationNotes } = req.body;
+      const warehouseInspector = "warehouse_inspector"; // Should come from auth
+
+      console.log(`🔍 Verifying payment and authorizing custody: ${custodyId}`);
+
+      // First, update the storage fees to mark payment as verified
+      await db
+        .update(storageFees)
+        .set({
+          confirmationStatus: 'verified',
+          verifiedBy: warehouseInspector,
+          verifiedDate: new Date(),
+          verificationNotes,
+          paymentStatus: 'paid',
+          paidDate: new Date()
+        })
+        .where(eq(storageFees.custodyId, custodyId));
+
+      // Then, update the warehouse custody to mark as authorized
+      await db
+        .update(warehouseCustody)
+        .set({
+          authorizationStatus: 'authorized',
+          authorizedDate: new Date(),
+          authorizedBy: warehouseInspector,
+          authorizationNotes: `Payment verified and authorized by warehouse inspector. ${verificationNotes || ''}`
+        })
+        .where(eq(warehouseCustody.custodyId, custodyId));
+
+      console.log('✅ Payment verified and custody authorized successfully');
+
+      res.json({
+        success: true,
+        message: `Payment verified and custody ${custodyId} authorized successfully`
+      });
+
+    } catch (error) {
+      console.error('❌ Failed to verify payment and authorize custody:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to verify payment and authorize custody',
+        details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

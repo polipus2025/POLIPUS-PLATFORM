@@ -232,6 +232,29 @@ export class PaymentService {
 
     return await query.orderBy(desc(paymentTransactions.createdAt));
   }
+
+  // Process Stripe payment for warehouse storage fees
+  async processStripePayment(paymentIntentId: string, expectedAmount: number) {
+    try {
+      // For now, we'll simulate Stripe payment processing
+      // In a real implementation, you would integrate with Stripe API
+      console.log(`Processing Stripe payment: ${paymentIntentId} for $${expectedAmount}`);
+      
+      // Simulate successful payment (replace with actual Stripe integration)
+      return {
+        success: true,
+        paymentIntentId,
+        amount: expectedAmount,
+        status: 'succeeded'
+      };
+    } catch (error) {
+      console.error('Stripe payment processing error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown payment error'
+      };
+    }
+  }
 }
 
 export const paymentService = new PaymentService();

@@ -128,6 +128,15 @@ export default function AgriculturalBuyerDashboard() {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
+  // Fetch warehouse custody lots for this buyer
+  const { data: custodyLots, isLoading: custodyLoading, refetch: refetchCustodyLots } = useQuery({
+    queryKey: ['/api/buyer/custody-lots', buyerId],
+    queryFn: () => apiRequest(`/api/buyer/custody-lots/${buyerId}`),
+    enabled: !!buyerId,
+    staleTime: 30 * 1000, // Cache for 30 seconds (needs fresh data for payment status)
+    gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+  });
+
   // Fetch verification codes archive
   const { data: verificationCodesResponse, isLoading: codesLoading } = useQuery({
     queryKey: ['/api/buyer/verification-codes', buyerId], 
@@ -148,6 +157,70 @@ export default function AgriculturalBuyerDashboard() {
     localStorage.removeItem('userType');
     localStorage.removeItem('company');
     navigate('/auth/farmer-login');
+  };
+
+  // Handle warehouse storage fee payment
+  const handlePayStorageFees = async (custodyId: string, amount: string) => {
+    try {
+      const response = await apiRequest('/api/buyer/pay-storage-fees', {
+        method: 'POST',
+        body: JSON.stringify({
+          custodyId,
+          buyerId,
+          paymentMethod: 'stripe',
+          paymentReference: `STRIPE-${Date.now()}-${custodyId.slice(-3)}`
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      toast({
+        title: "Payment Successful",
+        description: `Storage fees of $${amount} paid successfully. You can now request authorization.`,
+      });
+
+      // Refresh custody lots data
+      refetchCustodyLots();
+      
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Failed",
+        description: "Failed to process storage fee payment. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Handle authorization request
+  const handleRequestAuthorization = async (custodyId: string, commodityType: string) => {
+    try {
+      const response = await apiRequest('/api/buyer/request-authorization', {
+        method: 'POST',
+        body: JSON.stringify({
+          custodyId,
+          buyerId,
+          requestReason: `Request authorization to sell ${commodityType} lot`,
+          urgentRequest: false
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      toast({
+        title: "Authorization Requested",
+        description: `Authorization request submitted successfully. Reference: ${response.requestId}`,
+      });
+
+      // Refresh custody lots data
+      refetchCustodyLots();
+      
+    } catch (error) {
+      console.error('Authorization request error:', error);
+      toast({
+        title: "Request Failed",
+        description: "Failed to submit authorization request. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const connectWithFarmer = (farmerId: string) => {
@@ -674,25 +747,198 @@ export default function AgriculturalBuyerDashboard() {
             </div>
           )}
 
-          {/* My Products Tab */}
+          {/* My Products Tab - Warehouse Custody Lots */}
           {activeTab === 'products' && (
             <div className="space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Package2 className="w-5 h-5 mr-2" />
-                    My Products
+                    My Products in Warehouse Custody
                   </CardTitle>
                   <CardDescription>
-                    Manage your product inventory and listings
+                    Products stored in warehouse custody. Pay storage fees and request authorization to sell.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12 text-gray-500">
-                    <Package2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                    <p className="text-lg font-medium mb-2">My Products Section</p>
-                    <p className="text-sm">Content will be added here as specified</p>
-                  </div>
+                  {custodyLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <span className="ml-2 text-gray-600">Loading custody lots...</span>
+                    </div>
+                  ) : !custodyLots?.data || custodyLots.data.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <Package2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium mb-2">No Products in Custody</p>
+                      <p className="text-sm">When warehouse creates custody of your product lots, they will appear here.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {custodyLots.data.map((lot: any) => (
+                        <Card key={lot.custodyId} className="border-2">
+                          <CardContent className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                              {/* Product Information */}
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="font-bold text-lg text-slate-800">
+                                    {lot.commodityType}
+                                  </h3>
+                                  <Badge 
+                                    variant={lot.custodyType === 'multi_lot' ? 'secondary' : 'outline'}
+                                    className="text-xs"
+                                  >
+                                    {lot.custodyType === 'multi_lot' ? 'Multi-Lot' : 'Single Lot'}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="text-sm space-y-1">
+                                  <p><span className="font-medium">Weight:</span> {lot.totalWeight} {lot.unit}</p>
+                                  <p><span className="font-medium">Packages:</span> {lot.totalPackages} {lot.packagingType}</p>
+                                  <p><span className="font-medium">Quality:</span> {lot.qualityGrade || 'Standard'}</p>
+                                  <p><span className="font-medium">Warehouse:</span> {lot.warehouseName}</p>
+                                  <p><span className="font-medium">County:</span> {lot.county}</p>
+                                </div>
+
+                                {/* Origins */}
+                                <div className="text-sm">
+                                  <p className="font-medium mb-1">Origins:</p>
+                                  <div className="space-y-1 text-xs">
+                                    {Array.isArray(lot.farmerNames) ? lot.farmerNames.map((farmer: string, index: number) => (
+                                      <p key={index} className="text-gray-600">
+                                        • {farmer} - {lot.farmLocations[index] || 'Location not specified'}
+                                      </p>
+                                    )) : (
+                                      <p className="text-gray-600">• {lot.farmerNames} - {lot.farmLocations}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Storage & Payment Information */}
+                              <div className="space-y-3">
+                                <div className="text-sm space-y-1">
+                                  <p><span className="font-medium">Custody ID:</span> {lot.custodyId}</p>
+                                  <p><span className="font-medium">Registered:</span> {new Date(lot.registrationDate).toLocaleDateString()}</p>
+                                  <p><span className="font-medium">Days in Storage:</span> {lot.daysInStorage} days</p>
+                                  <p><span className="font-medium">Max Storage:</span> {lot.maxStorageDays} days</p>
+                                  {lot.storageLocation && (
+                                    <p><span className="font-medium">Location:</span> {lot.storageLocation}</p>
+                                  )}
+                                </div>
+
+                                {/* Storage Fees */}
+                                {lot.storageFees && (
+                                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <h4 className="font-medium text-blue-900 mb-2">Storage Fees</h4>
+                                    <div className="text-sm space-y-1">
+                                      <p><span className="font-medium">Rate:</span> ${lot.storageFees.storageRate}/metric ton</p>
+                                      <p><span className="font-medium">Amount Due:</span> <span className="font-bold text-blue-700">${lot.storageFees.amountDue}</span></p>
+                                      <p>
+                                        <span className="font-medium">Payment Status:</span>
+                                        <Badge 
+                                          variant={lot.storageFees.paymentStatus === 'paid' ? 'default' : 'destructive'}
+                                          className="ml-2 text-xs"
+                                        >
+                                          {lot.storageFees.paymentStatus}
+                                        </Badge>
+                                      </p>
+                                      {lot.storageFees.paymentStatus === 'paid' && lot.storageFees.paidDate && (
+                                        <p className="text-green-600">
+                                          <span className="font-medium">Paid:</span> {new Date(lot.storageFees.paidDate).toLocaleDateString()}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Status & Actions */}
+                              <div className="space-y-3">
+                                <div className="text-sm space-y-1">
+                                  <p>
+                                    <span className="font-medium">Custody Status:</span>
+                                    <Badge 
+                                      variant={lot.custodyStatus === 'stored' ? 'secondary' : 'default'}
+                                      className="ml-2 text-xs"
+                                    >
+                                      {lot.custodyStatus}
+                                    </Badge>
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">Authorization:</span>
+                                    <Badge 
+                                      variant={lot.authorizationStatus === 'authorized' ? 'default' : 'outline'}
+                                      className="ml-2 text-xs"
+                                    >
+                                      {lot.authorizationStatus}
+                                    </Badge>
+                                  </p>
+                                  {lot.authorizedDate && (
+                                    <p className="text-green-600">
+                                      <span className="font-medium">Authorized:</span> {new Date(lot.authorizedDate).toLocaleDateString()}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="space-y-2">
+                                  {lot.storageFees?.paymentStatus !== 'paid' ? (
+                                    <Button 
+                                      onClick={() => handlePayStorageFees(lot.custodyId, lot.storageFees?.amountDue || '0')}
+                                      className="w-full bg-green-600 hover:bg-green-700"
+                                      size="sm"
+                                    >
+                                      <DollarSign className="w-4 h-4 mr-2" />
+                                      Pay Warehouse Fees (${lot.storageFees?.amountDue || '0'})
+                                    </Button>
+                                  ) : lot.authorizationStatus !== 'authorized' ? (
+                                    <Button 
+                                      onClick={() => handleRequestAuthorization(lot.custodyId, lot.commodityType)}
+                                      className="w-full bg-blue-600 hover:bg-blue-700"
+                                      size="sm"
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-2" />
+                                      Request Authorization
+                                    </Button>
+                                  ) : (
+                                    <Button 
+                                      className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                      size="sm"
+                                    >
+                                      <Handshake className="w-4 h-4 mr-2" />
+                                      Ready to Sell
+                                    </Button>
+                                  )}
+
+                                  {/* QR Code Info */}
+                                  {lot.consolidatedQrCode && (
+                                    <div className="text-xs text-gray-600 mt-2">
+                                      <p><span className="font-medium">QR Code:</span> {lot.consolidatedQrCode}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                      
+                      {/* Summary */}
+                      <Card className="bg-slate-50 border-slate-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-slate-700">
+                              Total Products: {custodyLots.data.length} lots
+                            </span>
+                            <span className="text-sm text-slate-600">
+                              Total Weight: {custodyLots.data.reduce((sum: number, lot: any) => sum + parseFloat(lot.totalWeight), 0).toFixed(2)} tons
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

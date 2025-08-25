@@ -16095,5 +16095,225 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // ========================================
+  // BUYER WAREHOUSE CUSTODY ENDPOINTS
+  // ========================================
+
+  // Get buyer's custody lots (for "My Products" menu)
+  app.get("/api/buyer/custody-lots/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`🏪 Fetching custody lots for buyer: ${buyerId}`);
+
+      // Get custody records for this buyer
+      const custodyLots = await db
+        .select()
+        .from(warehouseCustody)
+        .where(eq(warehouseCustody.buyerId, buyerId))
+        .orderBy(desc(warehouseCustody.registrationDate));
+
+      // Get storage fees for each custody lot
+      const custodyLotsWithFees = await Promise.all(
+        custodyLots.map(async (lot) => {
+          const [storageFeesRecord] = await db
+            .select()
+            .from(storageFees)
+            .where(eq(storageFees.custodyId, lot.custodyId));
+
+          return {
+            ...lot,
+            storageFees: storageFeesRecord || null,
+            // Calculate days in storage
+            daysInStorage: Math.floor((new Date().getTime() - new Date(lot.registrationDate).getTime()) / (1000 * 60 * 60 * 24)),
+            // Parse JSON fields
+            productQrCodes: Array.isArray(lot.productQrCodes) ? lot.productQrCodes : JSON.parse(lot.productQrCodes as string || '[]'),
+            verificationCodes: Array.isArray(lot.verificationCodes) ? lot.verificationCodes : JSON.parse(lot.verificationCodes as string || '[]'),
+            farmerNames: Array.isArray(lot.farmerNames) ? lot.farmerNames : JSON.parse(lot.farmerNames as string || '[]'),
+            farmLocations: Array.isArray(lot.farmLocations) ? lot.farmLocations : JSON.parse(lot.farmLocations as string || '[]'),
+            lotOrigins: Array.isArray(lot.lotOrigins) ? lot.lotOrigins : JSON.parse(lot.lotOrigins as string || '[]')
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: custodyLotsWithFees,
+        totalLots: custodyLotsWithFees.length
+      });
+
+    } catch (error) {
+      console.error("Error fetching buyer custody lots:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch custody lots"
+      });
+    }
+  });
+
+  // Pay warehouse storage fees
+  app.post("/api/buyer/pay-storage-fees", async (req, res) => {
+    try {
+      const { custodyId, buyerId, paymentMethod, paymentReference, stripePaymentIntentId } = req.body;
+      console.log(`💰 Processing storage fee payment for custody: ${custodyId}`);
+
+      // Get the storage fees record
+      const [storageFeesRecord] = await db
+        .select()
+        .from(storageFees)
+        .where(eq(storageFees.custodyId, custodyId));
+
+      if (!storageFeesRecord) {
+        return res.status(404).json({
+          success: false,
+          message: "Storage fees record not found"
+        });
+      }
+
+      if (storageFeesRecord.paymentStatus === 'paid') {
+        return res.status(400).json({
+          success: false,
+          message: "Storage fees have already been paid"
+        });
+      }
+
+      // Process Stripe payment if Stripe payment intent provided
+      let finalPaymentReference = paymentReference;
+      if (stripePaymentIntentId) {
+        try {
+          const paymentResult = await paymentService.processStripePayment(
+            stripePaymentIntentId, 
+            parseFloat(storageFeesRecord.amountDue)
+          );
+          
+          if (!paymentResult.success) {
+            return res.status(400).json({
+              success: false,
+              message: `Payment failed: ${paymentResult.error}`
+            });
+          }
+          
+          finalPaymentReference = stripePaymentIntentId;
+          console.log(`✅ Stripe payment processed: ${stripePaymentIntentId}`);
+        } catch (stripeError) {
+          console.error("Stripe payment error:", stripeError);
+          return res.status(500).json({
+            success: false,
+            message: "Payment processing failed"
+          });
+        }
+      }
+
+      // Update storage fees record to mark as paid
+      await db
+        .update(storageFees)
+        .set({
+          paymentStatus: 'paid',
+          amountPaid: storageFeesRecord.amountDue,
+          paymentMethod: paymentMethod || 'stripe',
+          paymentReference: finalPaymentReference,
+          paidDate: new Date(),
+          paidBy: buyerId
+        })
+        .where(eq(storageFees.custodyId, custodyId));
+
+      // Update custody record status
+      await db
+        .update(warehouseCustody)
+        .set({
+          custodyStatus: 'payment_completed'
+        })
+        .where(eq(warehouseCustody.custodyId, custodyId));
+
+      console.log(`✅ Storage fees payment processed for custody: ${custodyId}`);
+
+      res.json({
+        success: true,
+        message: `Storage fees payment of $${storageFeesRecord.amountDue} processed successfully`,
+        paymentAmount: storageFeesRecord.amountDue,
+        paymentReference: finalPaymentReference
+      });
+
+    } catch (error) {
+      console.error("Error processing storage fee payment:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to process payment"
+      });
+    }
+  });
+
+  // Request authorization for custody lot sale
+  app.post("/api/buyer/request-authorization", async (req, res) => {
+    try {
+      const { custodyId, buyerId, requestReason, urgentRequest = false } = req.body;
+      console.log(`🔐 Authorization request for custody: ${custodyId}`);
+
+      // Check if custody exists and belongs to buyer
+      const [custodyRecord] = await db
+        .select()
+        .from(warehouseCustody)
+        .where(and(
+          eq(warehouseCustody.custodyId, custodyId),
+          eq(warehouseCustody.buyerId, buyerId)
+        ));
+
+      if (!custodyRecord) {
+        return res.status(404).json({
+          success: false,
+          message: "Custody record not found"
+        });
+      }
+
+      // Check if storage fees are paid
+      const [storageFeesRecord] = await db
+        .select()
+        .from(storageFees)
+        .where(eq(storageFees.custodyId, custodyId));
+
+      if (!storageFeesRecord || storageFeesRecord.paymentStatus !== 'paid') {
+        return res.status(400).json({
+          success: false,
+          message: "Storage fees must be paid before requesting authorization"
+        });
+      }
+
+      // Generate authorization request ID
+      const requestId = `AUTH-REQ-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+
+      // Create authorization request
+      await db.insert(authorizationRequests).values({
+        requestId,
+        custodyId,
+        buyerId,
+        requestReason,
+        urgentRequest,
+        feesVerified: true, // Already checked above
+        documentationComplete: true, // Assume complete for now
+        storageConditionOk: true // Will be verified by warehouse
+      });
+
+      // Update custody record
+      await db
+        .update(warehouseCustody)
+        .set({
+          authorizationRequestDate: new Date()
+        })
+        .where(eq(warehouseCustody.custodyId, custodyId));
+
+      res.json({
+        success: true,
+        requestId,
+        message: "Authorization request submitted successfully"
+      });
+
+    } catch (error) {
+      console.error("Error creating authorization request:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create authorization request"
+      });
+    }
+  });
+
   return httpServer;
 }

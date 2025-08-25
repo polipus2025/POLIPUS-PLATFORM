@@ -355,6 +355,12 @@ export default function WarehouseInspectorDashboard() {
                 }`}>
                   {record.authorizationStatus}
                 </Badge>
+                {record.consolidatedQrCode && (
+                  <Badge className="bg-indigo-100 text-indigo-800">
+                    <QrCode className="w-3 h-3 mr-1" />
+                    Consolidated QR
+                  </Badge>
+                )}
               </div>
               <div className="text-right text-sm text-gray-600">
                 <p>Day {record.actualStorageDays || 0} of {record.maxStorageDays}</p>
@@ -366,21 +372,50 @@ export default function WarehouseInspectorDashboard() {
                 <h4 className="font-medium mb-1">Product Details</h4>
                 <p className="text-sm text-gray-600">Buyer: {record.buyerName}</p>
                 <p className="text-sm text-gray-600">Type: {record.commodityType}</p>
-                <p className="text-sm text-gray-600">Weight: {record.weight} {record.unit}</p>
+                <p className="text-sm text-gray-600">Weight: {record.totalWeight} {record.unit}</p>
+                <p className="text-sm text-gray-600">Packages: {record.totalPackages} {record.packagingType}</p>
+                {record.custodyType === 'multi_lot' && (
+                  <Badge className="bg-purple-100 text-purple-800 text-xs mt-1">Multi-Lot</Badge>
+                )}
               </div>
               
               <div>
                 <h4 className="font-medium mb-1">Storage Info</h4>
-                <p className="text-sm text-gray-600">Location: {record.storageLocation}</p>
-                <p className="text-sm text-gray-600">Conditions: {record.storageConditions}</p>
-                <p className="text-sm text-gray-600">Rate: ${record.dailyStorageRate}/ton/day</p>
+                <p className="text-sm text-gray-600">Location: {record.storageLocation || 'Not assigned'}</p>
+                <p className="text-sm text-gray-600">Conditions: {record.storageConditions || 'Standard'}</p>
+                <p className="text-sm text-gray-600">Rate: ${record.storageRate}/metric ton (one-time)</p>
               </div>
               
               <div>
                 <h4 className="font-medium mb-1">Origin</h4>
-                <p className="text-sm text-gray-600">Farmer: {record.farmerName}</p>
-                <p className="text-sm text-gray-600">Location: {record.farmLocation}</p>
-                <p className="text-sm text-gray-600">Grade: {record.qualityGrade}</p>
+                {record.custodyType === 'multi_lot' ? (
+                  <>
+                    <p className="text-sm text-gray-600">
+                      Farmers: {Array.isArray(record.farmerNames) 
+                        ? record.farmerNames.join(', ') 
+                        : record.farmerNames}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Locations: {Array.isArray(record.farmLocations) 
+                        ? record.farmLocations.join(', ') 
+                        : record.farmLocations}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600">
+                      Farmer: {Array.isArray(record.farmerNames) 
+                        ? record.farmerNames[0] 
+                        : record.farmerNames}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Location: {Array.isArray(record.farmLocations) 
+                        ? record.farmLocations[0] 
+                        : record.farmLocations}
+                    </p>
+                  </>
+                )}
+                <p className="text-sm text-gray-600">Grade: {record.qualityGrade || 'Standard'}</p>
               </div>
               
               <div>

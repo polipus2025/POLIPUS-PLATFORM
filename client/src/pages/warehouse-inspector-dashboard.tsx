@@ -130,58 +130,85 @@ export default function WarehouseInspectorDashboard() {
   const [showCustodyModal, setShowCustodyModal] = useState(false);
 
   // QR Code lookup handler
-  const handleQrCodeLookup = () => {
+  const handleQrCodeLookup = async () => {
     if (!scannedQrCode.trim()) return;
     
-    // For testing, use the working QR code logic
-    if (scannedQrCode === "WH-BATCH-1756052880737-8P2L") {
-      const mockProduct = {
-        batchCode: "WH-BATCH-1756052880737-8P2L",
-        commodityType: "Cocoa",
-        weight: 2.5,
-        unit: "tons",
-        farmerName: "John Smith",
-        county: "Montserrado",
-        harvestDate: "2024-12-15"
-      };
+    try {
+      // Call the real API to get QR data
+      const response = await fetch(`/api/warehouse-custody/lookup-qr/${scannedQrCode}`);
+      const data = await response.json();
       
-      if (custodyRegistrationMode === 'single') {
-        setScannedQrCodes([mockProduct]);
-      } else {
-        // Multi-lot mode - add to list if not already present
-        const exists = scannedQrCodes.find(qr => qr.batchCode === mockProduct.batchCode);
-        if (!exists) {
-          const newCodes = [...scannedQrCodes, mockProduct];
-          setScannedQrCodes(newCodes);
-          
-          // Check compatibility if we have 2+ items
-          if (newCodes.length >= 2) {
-            const firstType = newCodes[0].commodityType;
-            const allSameType = newCodes.every(qr => qr.commodityType === firstType);
+      if (data.success && data.data) {
+        const qrInfo = data.data;
+        
+        // Calculate storage fee based on weight
+        const weightInTons = parseFloat(qrInfo.weight) || 0;
+        const storageFee = weightInTons * 50; // $50 per metric ton
+        
+        const productData = {
+          batchCode: qrInfo.batchCode,
+          commodityType: qrInfo.commodityType,
+          weight: weightInTons,
+          unit: "metric tons",
+          buyerName: qrInfo.buyerName,
+          buyerCompany: qrInfo.buyerCompany,
+          buyerId: qrInfo.buyerId,
+          originalFarmer: qrInfo.farmerName,
+          purchaseDate: qrInfo.harvestDate || new Date().toISOString().split('T')[0],
+          county: qrInfo.farmLocation,
+          storageFee: storageFee,
+          qualityGrade: qrInfo.qualityGrade,
+          totalPackages: qrInfo.totalPackages,
+          packageWeight: qrInfo.packageWeight,
+          eudrCompliance: qrInfo.eudrCompliance
+        };
+        
+        if (custodyRegistrationMode === 'single') {
+          setScannedQrCodes([productData]);
+        } else {
+          // Multi-lot mode - add to list if not already present
+          const exists = scannedQrCodes.find(qr => qr.batchCode === productData.batchCode);
+          if (!exists) {
+            const newCodes = [...scannedQrCodes, productData];
+            setScannedQrCodes(newCodes);
             
-            if (allSameType) {
-              setMultiLotValidation({
-                success: true,
-                message: `All ${newCodes.length} lots are ${firstType} and compatible for consolidation`
-              });
-            } else {
-              setMultiLotValidation({
-                success: false,
-                error: "Cannot consolidate different commodity types in multi-lot"
-              });
+            // Check compatibility if we have 2+ items
+            if (newCodes.length >= 2) {
+              const firstType = newCodes[0].commodityType;
+              const allSameType = newCodes.every(qr => qr.commodityType === firstType);
+              
+              if (allSameType) {
+                setMultiLotValidation({
+                  success: true,
+                  message: `All ${newCodes.length} lots are ${firstType} and compatible for consolidation`
+                });
+              } else {
+                setMultiLotValidation({
+                  success: false,
+                  error: "Cannot consolidate different commodity types in multi-lot"
+                });
+              }
             }
           }
         }
+        
+        setScannedQrCode('');
+        toast({
+          title: "Buyer Product Found",
+          description: `${productData.commodityType} owned by ${productData.buyerName} - ${productData.weight} ${productData.unit} (Storage Fee: $${productData.storageFee})`
+        });
+      } else {
+        toast({
+          title: "QR Code Not Found",
+          description: data.message || "QR code not found in database",
+          variant: "destructive"
+        });
       }
-      setScannedQrCode('');
+    } catch (error) {
+      console.error('QR lookup error:', error);
       toast({
-        title: "QR Code Found",
-        description: `Product ${mockProduct.commodityType} - ${mockProduct.weight} ${mockProduct.unit} scanned successfully`
-      });
-    } else {
-      toast({
-        title: "QR Code Not Found",
-        description: "Use the test QR code for demonstration",
+        title: "Lookup Error",
+        description: "Failed to lookup QR code. Please try again.",
         variant: "destructive"
       });
     }
@@ -1182,8 +1209,9 @@ export default function WarehouseInspectorDashboard() {
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <p className="font-medium text-blue-800">{product.commodityType} - {product.weight} {product.unit}</p>
-                              <p className="text-sm text-blue-600">Farmer: {product.farmerName}</p>
-                              <p className="text-sm text-blue-600">QR: {product.batchCode}</p>
+                              <p className="text-sm text-blue-600">Buyer: {product.buyerName || product.buyerCompany}</p>
+                              <p className="text-sm text-blue-600">Storage Fee: ${product.storageFee || (product.weight * 50)}</p>
+                              <p className="text-xs text-blue-500">QR: {product.batchCode}</p>
                             </div>
                             {custodyRegistrationMode === 'multi' && (
                               <Button
@@ -1234,13 +1262,13 @@ export default function WarehouseInspectorDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Daily Storage Rate (USD per ton)</label>
+                    <label className="text-sm font-medium">Storage Fee (One-time per Metric Ton)</label>
                     <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
                       <p className="text-sm text-blue-800 font-medium">
-                        Current Rate: $1.50 per ton/day
+                        Storage Fee: $50.00 per Metric Ton
                       </p>
                       <p className="text-xs text-blue-600 mt-1">
-                        Standard storage rate for {warehouseFacility}
+                        One-time warehouse custody fee for {warehouseFacility}
                       </p>
                     </div>
                   </div>

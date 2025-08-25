@@ -774,390 +774,299 @@ export default function WarehouseInspectorDashboard() {
   });
 
   // Handle QR code viewing
-  const handleViewQrCode = async (batchCode: string) => {
-    try {
-      // Generate QR code on backend and get data URL
-      const response = await fetch('/api/generate-qr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: batchCode })
-      });
-      
-      const qrData = await response.json();
-      const qrCodeDataURL = qrData.success ? qrData.qrCode : '';
-      
-      // Create enhanced QR display modal with actual QR code - KEEPING THE APPROVED FORMAT
-      const qrWindow = window.open('', '_blank', 'width=900,height=700');
-      
-      if (qrWindow) {
-        qrWindow.document.write(`
-          <html>
-            <head>
-              <title>QR Batch Details - ${batchCode}</title>
-              <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
-                .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-                .header { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 24px; text-align: center; }
-                .qr-section { padding: 24px; text-align: center; border-bottom: 1px solid #e5e7eb; }
-                .qr-placeholder { width: 200px; height: 200px; border: 3px solid #059669; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #374151; background: #f9fafb; border-radius: 8px; }
-                .qr-code-img { border: 3px solid #059669; border-radius: 8px; margin: 0 auto 16px; }
-                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; }
-                .detail-card { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
-                .detail-title { font-weight: 600; color: #374151; margin-bottom: 8px; }
-                .detail-value { color: #6b7280; }
-                .compliance-section { background: #ecfdf5; padding: 20px; margin: 16px 24px; border-radius: 8px; border: 1px solid #d1fae5; }
-                .compliance-title { font-weight: 600; color: #065f46; margin-bottom: 12px; display: flex; align-items: center; }
-                .compliance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-                .compliance-item { display: flex; align-items: center; }
-                .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 8px; }
-                .print-btn { position: fixed; top: 20px; right: 20px; background: #059669; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-                .print-btn:hover { background: #047857; }
-                @media print { .print-btn { display: none; } }
-              </style>
-            </head>
-            <body>
-              <button class="print-btn" onclick="window.print()">🖨️ Print</button>
-              <div class="container">
-                <div class="header">
-                  <h1>🏭 Warehouse QR Batch</h1>
-                  <h2>${batchCode}</h2>
-                  <p>Agricultural Traceability System</p>
-                </div>
-                
-                <div class="qr-section">
-                  ${qrCodeDataURL ? 
-                    `<img src="${qrCodeDataURL}" alt="QR Code" class="qr-code-img" width="200" height="200" />` : 
-                    `<div class="qr-placeholder">QR Code: ${batchCode}</div>`
-                  }
-                  <p><strong>Scan for complete traceability</strong></p>
-                  <p>Generated: ${new Date().toLocaleString()}</p>
-                </div>
-                
-                <div class="details-grid">
-                  <div class="detail-card">
-                    <div class="detail-title">📦 Batch Information</div>
-                    <div class="detail-value">
-                      <p><strong>Batch Code:</strong> ${batchCode}</p>
-                      <p><strong>Total Packages:</strong> 15 bags</p>
-                      <p><strong>Total Weight:</strong> 2,500 kg</p>
-                      <p><strong>Commodity:</strong> Cocoa</p>
-                    </div>
-                  </div>
-                  
-                  <div class="detail-card">
-                    <div class="detail-title">🏢 Buyer Information</div>
-                    <div class="detail-value">
-                      <p><strong>Buyer:</strong> John Kollie</p>
-                      <p><strong>Company:</strong> Kollie Trading Ltd</p>
-                      <p><strong>Storage Fee:</strong> $125.00</p>
-                      <p><strong>Status:</strong> In Warehouse Custody</p>
-                    </div>
-                  </div>
-                  
-                  <div class="detail-card">
-                    <div class="detail-title">📍 Location & Tracking</div>
-                    <div class="detail-value">
-                      <p><strong>Warehouse:</strong> WH-MARGIBI-001</p>
-                      <p><strong>County:</strong> Margibi County</p>
-                      <p><strong>GPS:</strong> 6.428°N, 9.429°W</p>
-                      <p><strong>Created:</strong> ${new Date().toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  
-                  <div class="detail-card">
-                    <div class="detail-title">👨‍🌾 Farm Origin</div>
-                    <div class="detail-value">
-                      <p><strong>Farmer:</strong> Paolo Farmers Cooperative</p>
-                      <p><strong>Farm Location:</strong> Margibi County</p>
-                      <p><strong>Harvest Date:</strong> ${new Date().toLocaleDateString()}</p>
-                      <p><strong>Quality Grade:</strong> Premium Export</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="compliance-section">
-                  <div class="compliance-title">
-                    🛡️ EUDR Compliance Status
-                  </div>
-                  <div class="compliance-grid">
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>Deforestation Free</span>
-                    </div>
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>EUDR Compliant</span>
-                    </div>
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>Chain of Custody Verified</span>
-                    </div>
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>Due Diligence Complete</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </body>
-          </html>
-        `);
-        qrWindow.document.close();
-      }
-    } catch (error) {
-      // Fallback to the approved enhanced format if QR generation fails
-      const qrWindow = window.open('', '_blank', 'width=900,height=700');
-      if (qrWindow) {
-        qrWindow.document.write(`
-          <html>
-            <head>
-              <title>QR Batch Details - ${batchCode}</title>
-              <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
-                .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-                .header { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 24px; text-align: center; }
-                .qr-section { padding: 24px; text-align: center; border-bottom: 1px solid #e5e7eb; }
-                .qr-placeholder { width: 200px; height: 200px; border: 3px solid #059669; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #374151; background: #f9fafb; border-radius: 8px; }
-                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; }
-                .detail-card { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
-                .detail-title { font-weight: 600; color: #374151; margin-bottom: 8px; }
-                .detail-value { color: #6b7280; }
-                .compliance-section { background: #ecfdf5; padding: 20px; margin: 16px 24px; border-radius: 8px; border: 1px solid #d1fae5; }
-                .compliance-title { font-weight: 600; color: #065f46; margin-bottom: 12px; display: flex; align-items: center; }
-                .compliance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-                .compliance-item { display: flex; align-items: center; }
-                .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 8px; }
-                .print-btn { position: fixed; top: 20px; right: 20px; background: #059669; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-                .print-btn:hover { background: #047857; }
-                @media print { .print-btn { display: none; } }
-              </style>
-            </head>
-            <body>
-              <button class="print-btn" onclick="window.print()">🖨️ Print</button>
-              <div class="container">
-                <div class="header">
-                  <h1>🏭 Warehouse QR Batch</h1>
-                  <h2>${batchCode}</h2>
-                  <p>Agricultural Traceability System</p>
-                </div>
-                
-                <div class="qr-section">
-                  <div class="qr-placeholder">QR Code: ${batchCode}</div>
-                  <p><strong>Scan for complete traceability</strong></p>
-                  <p>Generated: ${new Date().toLocaleString()}</p>
-                </div>
-                
-                <div class="details-grid">
-                  <div class="detail-card">
-                    <div class="detail-title">📦 Batch Information</div>
-                    <div class="detail-value">
-                      <p><strong>Batch Code:</strong> ${batchCode}</p>
-                      <p><strong>Total Packages:</strong> 15 bags</p>
-                      <p><strong>Total Weight:</strong> 2,500 kg</p>
-                      <p><strong>Commodity:</strong> Cocoa</p>
-                    </div>
-                  </div>
-                  
-                  <div class="detail-card">
-                    <div class="detail-title">🏢 Buyer Information</div>
-                    <div class="detail-value">
-                      <p><strong>Buyer:</strong> John Kollie</p>
-                      <p><strong>Company:</strong> Kollie Trading Ltd</p>
-                      <p><strong>Storage Fee:</strong> $125.00</p>
-                      <p><strong>Status:</strong> In Warehouse Custody</p>
-                    </div>
-                  </div>
-                  
-                  <div class="detail-card">
-                    <div class="detail-title">📍 Location & Tracking</div>
-                    <div class="detail-value">
-                      <p><strong>Warehouse:</strong> WH-MARGIBI-001</p>
-                      <p><strong>County:</strong> Margibi County</p>
-                      <p><strong>GPS:</strong> 6.428°N, 9.429°W</p>
-                      <p><strong>Created:</strong> ${new Date().toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  
-                  <div class="detail-card">
-                    <div class="detail-title">👨‍🌾 Farm Origin</div>
-                    <div class="detail-value">
-                      <p><strong>Farmer:</strong> Paolo Farmers Cooperative</p>
-                      <p><strong>Farm Location:</strong> Margibi County</p>
-                      <p><strong>Harvest Date:</strong> ${new Date().toLocaleDateString()}</p>
-                      <p><strong>Quality Grade:</strong> Premium Export</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="compliance-section">
-                  <div class="compliance-title">
-                    🛡️ EUDR Compliance Status
-                  </div>
-                  <div class="compliance-grid">
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>Deforestation Free</span>
-                    </div>
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>EUDR Compliant</span>
-                    </div>
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>Chain of Custody Verified</span>
-                    </div>
-                    <div class="compliance-item">
-                      <div class="status-dot"></div>
-                      <span>Due Diligence Complete</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </body>
-          </html>
-        `);
-        qrWindow.document.close();
-      }
-    }
-  };
-
-  // Handle printing QR code
-  const handlePrintQrCode = async (batchCode: string) => {
-    try {
-      // Generate QR code for print
-      const response = await fetch('/api/generate-qr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: batchCode })
-      });
-      
-      const qrData = await response.json();
-      const qrCodeDataURL = qrData.success ? qrData.qrCode : '';
-      
-      // Generate enhanced print layout with actual QR code
-      const printContent = `
+  const handleViewQrCode = (batchCode: string) => {
+    // Create enhanced QR display modal with actual QR code using client-side generation
+    const qrWindow = window.open('', '_blank', 'width=900,height=700');
+    
+    if (qrWindow) {
+      qrWindow.document.write(`
         <html>
           <head>
-            <title>Warehouse QR Batch - ${batchCode}</title>
+            <title>QR Batch Details - ${batchCode}</title>
+            <script src="https://unpkg.com/qrious@4.0.2/dist/qrious.min.js"></script>
             <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; color: #1f2937; }
-              .container { max-width: 600px; margin: 0 auto; }
-              .header { text-align: center; border-bottom: 3px solid #059669; padding-bottom: 20px; margin-bottom: 20px; }
-              .logo { background: #059669; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block; margin-bottom: 16px; }
-              .qr-section { text-align: center; background: #f8fafc; padding: 24px; border-radius: 12px; margin: 20px 0; border: 2px solid #e5e7eb; }
-              .qr-code-image { border: 3px solid #059669; border-radius: 8px; background: white; padding: 10px; margin: 0 auto 16px; }
-              .qr-code { width: 180px; height: 180px; border: 3px solid #059669; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: white; border-radius: 8px; }
-              .details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
-              .detail-box { background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
-              .detail-title { font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 14px; }
-              .detail-value { color: #6b7280; font-size: 13px; line-height: 1.4; }
-              .compliance { background: #ecfdf5; padding: 16px; border-radius: 8px; border: 1px solid #d1fae5; margin: 20px 0; }
-              .compliance-title { font-weight: 600; color: #065f46; margin-bottom: 12px; }
-              .compliance-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-              .compliance-item { display: flex; align-items: center; font-size: 12px; }
-              .dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 6px; }
-              .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
-              @media print { 
-                body { margin: 0; } 
-                .container { margin: 0; max-width: none; }
-              }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
+              .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
+              .header { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 24px; text-align: center; }
+              .qr-section { padding: 24px; text-align: center; border-bottom: 1px solid #e5e7eb; }
+              .qr-placeholder { width: 200px; height: 200px; border: 3px solid #059669; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #374151; background: #f9fafb; border-radius: 8px; }
+              .qr-code-container { margin: 0 auto 16px; border: 3px solid #059669; border-radius: 8px; padding: 10px; background: white; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
+              .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; }
+              .detail-card { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
+              .detail-title { font-weight: 600; color: #374151; margin-bottom: 8px; }
+              .detail-value { color: #6b7280; }
+              .compliance-section { background: #ecfdf5; padding: 20px; margin: 16px 24px; border-radius: 8px; border: 1px solid #d1fae5; }
+              .compliance-title { font-weight: 600; color: #065f46; margin-bottom: 12px; display: flex; align-items: center; }
+              .compliance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+              .compliance-item { display: flex; align-items: center; }
+              .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 8px; }
+              .print-btn { position: fixed; top: 20px; right: 20px; background: #059669; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+              .print-btn:hover { background: #047857; }
+              @media print { .print-btn { display: none; } }
             </style>
           </head>
           <body>
+            <button class="print-btn" onclick="window.print()">🖨️ Print</button>
             <div class="container">
               <div class="header">
-                <div class="logo">🏭 POLIPUS AGRICULTURAL TRACEABILITY</div>
-                <h1>Warehouse QR Batch Certificate</h1>
-                <p style="margin: 0; color: #6b7280;">EUDR Compliant Agricultural Product Tracking</p>
+                <h1>🏭 Warehouse QR Batch</h1>
+                <h2>${batchCode}</h2>
+                <p>Agricultural Traceability System</p>
               </div>
               
               <div class="qr-section">
-                ${qrCodeDataURL ? 
-                  `<img src="${qrCodeDataURL}" alt="QR Code" class="qr-code-image" width="180" height="180" />` : 
-                  `<div class="qr-code">${batchCode}</div>`
-                }
-                <h3 style="margin: 0 0 8px 0; color: #059669;">Batch Code: ${batchCode}</h3>
-                <p style="margin: 0; color: #6b7280; font-size: 14px;">Scan for complete traceability and compliance verification</p>
+                <div class="qr-code-container">
+                  <canvas id="qr-code" width="180" height="180"></canvas>
+                </div>
+                <p><strong>Scan for complete traceability</strong></p>
+                <p>Generated: ${new Date().toLocaleString()}</p>
               </div>
               
-              <div class="details">
-                <div class="detail-box">
-                  <div class="detail-title">📦 BATCH INFORMATION</div>
+              <div class="details-grid">
+                <div class="detail-card">
+                  <div class="detail-title">📦 Batch Information</div>
                   <div class="detail-value">
+                    <p><strong>Batch Code:</strong> ${batchCode}</p>
                     <p><strong>Total Packages:</strong> 15 bags</p>
                     <p><strong>Total Weight:</strong> 2,500 kg</p>
                     <p><strong>Commodity:</strong> Cocoa</p>
-                    <p><strong>Quality Grade:</strong> Premium Export</p>
                   </div>
                 </div>
                 
-                <div class="detail-box">
-                  <div class="detail-title">🏢 BUYER DETAILS</div>
+                <div class="detail-card">
+                  <div class="detail-title">🏢 Buyer Information</div>
                   <div class="detail-value">
-                    <p><strong>Buyer Name:</strong> John Kollie</p>
+                    <p><strong>Buyer:</strong> John Kollie</p>
                     <p><strong>Company:</strong> Kollie Trading Ltd</p>
                     <p><strong>Storage Fee:</strong> $125.00</p>
-                    <p><strong>Status:</strong> Warehouse Custody</p>
+                    <p><strong>Status:</strong> In Warehouse Custody</p>
                   </div>
                 </div>
                 
-                <div class="detail-box">
-                  <div class="detail-title">📍 LOCATION & ORIGIN</div>
+                <div class="detail-card">
+                  <div class="detail-title">📍 Location & Tracking</div>
                   <div class="detail-value">
                     <p><strong>Warehouse:</strong> WH-MARGIBI-001</p>
-                    <p><strong>County:</strong> Margibi County, Liberia</p>
-                    <p><strong>GPS Coordinates:</strong> 6.428°N, 9.429°W</p>
-                    <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    <p><strong>County:</strong> Margibi County</p>
+                    <p><strong>GPS:</strong> 6.428°N, 9.429°W</p>
+                    <p><strong>Created:</strong> ${new Date().toLocaleDateString()}</p>
                   </div>
                 </div>
                 
-                <div class="detail-box">
-                  <div class="detail-title">👨‍🌾 FARM SOURCE</div>
+                <div class="detail-card">
+                  <div class="detail-title">👨‍🌾 Farm Origin</div>
                   <div class="detail-value">
                     <p><strong>Farmer:</strong> Paolo Farmers Cooperative</p>
                     <p><strong>Farm Location:</strong> Margibi County</p>
                     <p><strong>Harvest Date:</strong> ${new Date().toLocaleDateString()}</p>
-                    <p><strong>Verification Code:</strong> WH-VER-${Math.random().toString(36).substr(2, 6).toUpperCase()}</p>
+                    <p><strong>Quality Grade:</strong> Premium Export</p>
                   </div>
                 </div>
               </div>
               
-              <div class="compliance">
-                <div class="compliance-title">🛡️ EUDR COMPLIANCE CERTIFICATION</div>
-                <div class="compliance-items">
-                  <div class="compliance-item"><div class="dot"></div>Deforestation Free Verified</div>
-                  <div class="compliance-item"><div class="dot"></div>EUDR Regulation Compliant</div>
-                  <div class="compliance-item"><div class="dot"></div>Chain of Custody Maintained</div>
-                  <div class="compliance-item"><div class="dot"></div>Due Diligence Complete</div>
-                  <div class="compliance-item"><div class="dot"></div>GPS Location Verified</div>
-                  <div class="compliance-item"><div class="dot"></div>Risk Assessment: Low Risk</div>
+              <div class="compliance-section">
+                <div class="compliance-title">
+                  🛡️ EUDR Compliance Status
+                </div>
+                <div class="compliance-grid">
+                  <div class="compliance-item">
+                    <div class="status-dot"></div>
+                    <span>Deforestation Free</span>
+                  </div>
+                  <div class="compliance-item">
+                    <div class="status-dot"></div>
+                    <span>EUDR Compliant</span>
+                  </div>
+                  <div class="compliance-item">
+                    <div class="status-dot"></div>
+                    <span>Chain of Custody Verified</span>
+                  </div>
+                  <div class="compliance-item">
+                    <div class="status-dot"></div>
+                    <span>Due Diligence Complete</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <script>
+              // Generate QR code when page loads
+              setTimeout(function() {
+                try {
+                  if (typeof QRious !== 'undefined') {
+                    const qr = new QRious({
+                      element: document.getElementById('qr-code'),
+                      value: '${batchCode}',
+                      size: 180,
+                      foreground: '#000000',
+                      background: '#ffffff'
+                    });
+                  } else {
+                    // Fallback if library doesn't load
+                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
+                  }
+                } catch (error) {
+                  // Fallback if QR generation fails
+                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
+                }
+              }, 100);
+            </script>
+          </body>
+        </html>
+      `);
+      qrWindow.document.close();
+    }
+  };
+
+  // Handle printing QR code
+  const handlePrintQrCode = (batchCode: string) => {
+    // Generate enhanced print layout with actual QR code using client-side generation
+    const printContent = `
+      <html>
+        <head>
+          <title>Warehouse QR Batch - ${batchCode}</title>
+          <script src="https://unpkg.com/qrious@4.0.2/dist/qrious.min.js"></script>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; color: #1f2937; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { text-align: center; border-bottom: 3px solid #059669; padding-bottom: 20px; margin-bottom: 20px; }
+            .logo { background: #059669; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block; margin-bottom: 16px; }
+            .qr-section { text-align: center; background: #f8fafc; padding: 24px; border-radius: 12px; margin: 20px 0; border: 2px solid #e5e7eb; }
+            .qr-code-container { margin: 0 auto 16px; border: 3px solid #059669; border-radius: 8px; padding: 10px; background: white; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; }
+            .qr-placeholder { width: 160px; height: 160px; border: 2px solid #059669; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-weight: bold; background: white; border-radius: 8px; font-size: 12px; }
+            .details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+            .detail-box { background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
+            .detail-title { font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 14px; }
+            .detail-value { color: #6b7280; font-size: 13px; line-height: 1.4; }
+            .compliance { background: #ecfdf5; padding: 16px; border-radius: 8px; border: 1px solid #d1fae5; margin: 20px 0; }
+            .compliance-title { font-weight: 600; color: #065f46; margin-bottom: 12px; }
+            .compliance-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+            .compliance-item { display: flex; align-items: center; font-size: 12px; }
+            .dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 6px; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
+            @media print { 
+              body { margin: 0; } 
+              .container { margin: 0; max-width: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">🏭 POLIPUS AGRICULTURAL TRACEABILITY</div>
+              <h1>Warehouse QR Batch Certificate</h1>
+              <p style="margin: 0; color: #6b7280;">EUDR Compliant Agricultural Product Tracking</p>
+            </div>
+            
+            <div class="qr-section">
+              <div class="qr-code-container">
+                <canvas id="qr-code-print" width="160" height="160"></canvas>
+              </div>
+              <h3 style="margin: 0 0 8px 0; color: #059669;">Batch Code: ${batchCode}</h3>
+              <p style="margin: 0; color: #6b7280; font-size: 14px;">Scan for complete traceability and compliance verification</p>
+            </div>
+            
+            <div class="details">
+              <div class="detail-box">
+                <div class="detail-title">📦 BATCH INFORMATION</div>
+                <div class="detail-value">
+                  <p><strong>Total Packages:</strong> 15 bags</p>
+                  <p><strong>Total Weight:</strong> 2,500 kg</p>
+                  <p><strong>Commodity:</strong> Cocoa</p>
+                  <p><strong>Quality Grade:</strong> Premium Export</p>
                 </div>
               </div>
               
-              <div class="footer">
-                <p><strong>LACRA - Liberia Agriculture Commodity Regulatory Authority</strong></p>
-                <p>Generated: ${new Date().toLocaleString()} | Inspector: WH-MARGIBI-001 | System: POLIPUS AgriTrace360™</p>
-                <p>This certificate verifies compliance with EU Deforestation Regulation (EUDR) and agricultural traceability standards.</p>
+              <div class="detail-box">
+                <div class="detail-title">🏢 BUYER DETAILS</div>
+                <div class="detail-value">
+                  <p><strong>Buyer Name:</strong> John Kollie</p>
+                  <p><strong>Company:</strong> Kollie Trading Ltd</p>
+                  <p><strong>Storage Fee:</strong> $125.00</p>
+                  <p><strong>Status:</strong> Warehouse Custody</p>
+                </div>
+              </div>
+              
+              <div class="detail-box">
+                <div class="detail-title">📍 LOCATION & ORIGIN</div>
+                <div class="detail-value">
+                  <p><strong>Warehouse:</strong> WH-MARGIBI-001</p>
+                  <p><strong>County:</strong> Margibi County, Liberia</p>
+                  <p><strong>GPS Coordinates:</strong> 6.428°N, 9.429°W</p>
+                  <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
+              
+              <div class="detail-box">
+                <div class="detail-title">👨‍🌾 FARM SOURCE</div>
+                <div class="detail-value">
+                  <p><strong>Farmer:</strong> Paolo Farmers Cooperative</p>
+                  <p><strong>Farm Location:</strong> Margibi County</p>
+                  <p><strong>Harvest Date:</strong> ${new Date().toLocaleDateString()}</p>
+                  <p><strong>Verification Code:</strong> WH-VER-${Math.random().toString(36).substr(2, 6).toUpperCase()}</p>
+                </div>
               </div>
             </div>
-          </body>
-        </html>
-      `;
-      
-      const printWindow = window.open('', '_blank', 'width=800,height=1000');
-      if (printWindow) {
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-        setTimeout(() => {
-          printWindow.print();
-        }, 500);
-      }
-    } catch (error) {
-      toast({
-        title: "❌ Print Error",
-        description: "Failed to generate QR code for printing",
-        variant: "destructive"
-      });
+            
+            <div class="compliance">
+              <div class="compliance-title">🛡️ EUDR COMPLIANCE CERTIFICATION</div>
+              <div class="compliance-items">
+                <div class="compliance-item"><div class="dot"></div>Deforestation Free Verified</div>
+                <div class="compliance-item"><div class="dot"></div>EUDR Regulation Compliant</div>
+                <div class="compliance-item"><div class="dot"></div>Chain of Custody Maintained</div>
+                <div class="compliance-item"><div class="dot"></div>Due Diligence Complete</div>
+                <div class="compliance-item"><div class="dot"></div>GPS Location Verified</div>
+                <div class="compliance-item"><div class="dot"></div>Risk Assessment: Low Risk</div>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p><strong>LACRA - Liberia Agriculture Commodity Regulatory Authority</strong></p>
+              <p>Generated: ${new Date().toLocaleString()} | Inspector: WH-MARGIBI-001 | System: POLIPUS AgriTrace360™</p>
+              <p>This certificate verifies compliance with EU Deforestation Regulation (EUDR) and agricultural traceability standards.</p>
+            </div>
+          </div>
+          
+          <script>
+            // Generate QR code when page loads, then print
+            setTimeout(function() {
+              try {
+                if (typeof QRious !== 'undefined') {
+                  const qr = new QRious({
+                    element: document.getElementById('qr-code-print'),
+                    value: '${batchCode}',
+                    size: 160,
+                    foreground: '#000000',
+                    background: '#ffffff'
+                  });
+                  // Auto-print after QR code is generated
+                  setTimeout(function() {
+                    window.print();
+                  }, 200);
+                } else {
+                  // Fallback if library doesn't load
+                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">${batchCode}</div>';
+                  setTimeout(function() {
+                    window.print();
+                  }, 200);
+                }
+              } catch (error) {
+                // Fallback if QR generation fails
+                document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">${batchCode}</div>';
+                setTimeout(function() {
+                  window.print();
+                }, 200);
+              }
+            }, 100);
+          </script>
+        </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '_blank', 'width=800,height=1000');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
     }
   };
 

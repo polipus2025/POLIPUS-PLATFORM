@@ -675,7 +675,7 @@ export default function WarehouseInspectorDashboard() {
             <body>
               <div class="page-container">
                 <div class="header">
-                  <div class="main-title">🏭 Warehouse QR Batch</div>
+                  <div class="main-title" style="background: red; color: white; padding: 10px;">🏭 NEW FORMAT LOADED - Warehouse QR Batch</div>
                   <div class="batch-code-large">${batch.batchCode}</div>
                   <div class="subtitle">Agricultural Traceability System</div>
                 </div>

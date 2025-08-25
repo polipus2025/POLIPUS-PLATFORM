@@ -12,7 +12,8 @@ import {
   Warehouse, 
   Package, 
   ClipboardCheck, 
-  AlertTriangle, 
+  AlertTriangle,
+  Layers, 
   CheckCircle, 
   Clock, 
   FileText, 
@@ -49,6 +50,9 @@ export default function WarehouseInspectorDashboard() {
   const [packageWeight, setPackageWeight] = useState(50);
   // Product Registration states
   const [scannedQrCode, setScannedQrCode] = useState("");
+  const [scanMode, setScanMode] = useState<'single' | 'multiple'>('single');
+  const [multipleQrCodes, setMultipleQrCodes] = useState<Array<{code: string, product: string, weight: number}>>([]);
+  const [currentProduct, setCurrentProduct] = useState("");
   const [selectedStorageRate, setSelectedStorageRate] = useState("1.50");
   const [storageLocation, setStorageLocation] = useState("");
   const [storageConditions, setStorageConditions] = useState("");
@@ -675,7 +679,7 @@ export default function WarehouseInspectorDashboard() {
             <body>
               <div class="page-container">
                 <div class="header">
-                  <div class="main-title" style="background: red; color: white; padding: 10px;">🏭 NEW FORMAT LOADED - Warehouse QR Batch</div>
+                  <div class="main-title">🏭 Warehouse QR Batch</div>
                   <div class="batch-code-large">${batch.batchCode}</div>
                   <div class="subtitle">Agricultural Traceability System</div>
                 </div>
@@ -1114,6 +1118,37 @@ export default function WarehouseInspectorDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Scan Mode Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Scanner Mode</label>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant={scanMode === 'single' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setScanMode('single')}
+                        className="flex items-center"
+                      >
+                        <QrCode className="w-4 h-4 mr-1" />
+                        Single Lot
+                      </Button>
+                      <Button 
+                        variant={scanMode === 'multiple' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setScanMode('multiple')}
+                        className="flex items-center"
+                      >
+                        <Layers className="w-4 h-4 mr-1" />
+                        Multiple Lots
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {scanMode === 'single' 
+                        ? "Scan one QR code to register a single lot" 
+                        : "Scan multiple QR codes of the same product to register as batch"
+                      }
+                    </p>
+                  </div>
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Product QR Code</label>
                     <Input
@@ -1140,10 +1175,85 @@ export default function WarehouseInspectorDashboard() {
                         disabled={!scannedQrCode}
                         data-testid="button-lookup-qr"
                       >
-                        Lookup Product
+                        {scanMode === 'single' ? 'Lookup Product' : 'Add to Batch'}
                       </Button>
                     </div>
                   </div>
+
+                  {/* Multiple QR Codes Display */}
+                  {scanMode === 'multiple' && (
+                    <div className="space-y-3">
+                      {currentProduct && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <h5 className="font-medium text-blue-800">Batch Product: {currentProduct}</h5>
+                          <p className="text-sm text-blue-600">All QR codes must be for this product</p>
+                        </div>
+                      )}
+                      
+                      {multipleQrCodes.length > 0 && (
+                        <div className="bg-gray-50 p-3 rounded-lg border">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-medium">Scanned QR Codes ({multipleQrCodes.length})</h5>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setMultipleQrCodes([]);
+                                setCurrentProduct("");
+                                toast({
+                                  title: "Batch Cleared",
+                                  description: "All scanned QR codes have been cleared",
+                                });
+                              }}
+                            >
+                              Clear All
+                            </Button>
+                          </div>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {multipleQrCodes.map((item, index) => (
+                              <div key={item.code} className="flex items-center justify-between bg-white p-2 rounded text-sm">
+                                <div>
+                                  <span className="font-mono">{item.code}</span>
+                                  <span className="text-gray-600 ml-2">({item.weight}kg)</span>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setMultipleQrCodes(prev => prev.filter(q => q.code !== item.code));
+                                    if (multipleQrCodes.length === 1) setCurrentProduct("");
+                                  }}
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">Total Weight:</span>
+                              <span className="font-bold text-blue-600">
+                                {multipleQrCodes.reduce((sum, item) => sum + item.weight, 0)}kg
+                              </span>
+                            </div>
+                            <Button 
+                              className="w-full mt-2" 
+                              onClick={() => {
+                                const totalWeight = multipleQrCodes.reduce((sum, item) => sum + item.weight, 0);
+                                // Note: Integration with existing registration form would go here
+                                toast({
+                                  title: "Batch Ready for Registration",
+                                  description: `${multipleQrCodes.length} lots of ${currentProduct} - Total: ${totalWeight}kg`,
+                                });
+                              }}
+                            >
+                              Use Batch for Registration
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {productToRegister && (
                     <div className="bg-green-50 p-4 rounded-lg border border-green-200">

@@ -12,8 +12,7 @@ import {
   Warehouse, 
   Package, 
   ClipboardCheck, 
-  AlertTriangle,
-  Layers, 
+  AlertTriangle, 
   CheckCircle, 
   Clock, 
   FileText, 
@@ -31,7 +30,8 @@ import {
   Scale,
   MapPin,
   Printer,
-  QrCode
+  QrCode,
+  Layers
 } from "lucide-react";
 
 export default function WarehouseInspectorDashboard() {

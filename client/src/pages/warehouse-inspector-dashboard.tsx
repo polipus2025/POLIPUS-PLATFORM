@@ -738,7 +738,7 @@ export default function WarehouseInspectorDashboard() {
       const response = await fetch(`/api/warehouse-inspector/validate-bag-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId })
+        body: JSON.stringify({ requestId, action: 'validate', validationNotes: 'Approved by warehouse inspector' })
       });
       if (!response.ok) throw new Error('Failed to validate request');
       return response.json();
@@ -746,6 +746,7 @@ export default function WarehouseInspectorDashboard() {
     onSuccess: () => {
       toast({ title: "✅ Request Validated", description: "Bag request has been validated successfully" });
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/available-transactions'] });
     },
     onError: () => {
       toast({ title: "❌ Error", description: "Failed to validate request", variant: "destructive" });
@@ -755,10 +756,10 @@ export default function WarehouseInspectorDashboard() {
   // Reject bag request mutation
   const rejectBagRequestMutation = useMutation({
     mutationFn: async (requestId: string) => {
-      const response = await fetch(`/api/warehouse-inspector/reject-bag-request`, {
+      const response = await fetch(`/api/warehouse-inspector/validate-bag-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId })
+        body: JSON.stringify({ requestId, action: 'reject', validationNotes: 'Rejected by warehouse inspector' })
       });
       if (!response.ok) throw new Error('Failed to reject request');
       return response.json();
@@ -774,26 +775,82 @@ export default function WarehouseInspectorDashboard() {
 
   // Handle QR code viewing
   const handleViewQrCode = (batchCode: string) => {
-    toast({ 
-      title: "🔍 QR Code View", 
-      description: `Opening QR code for batch: ${batchCode}` 
-    });
-    // Additional QR viewing logic would go here
+    // Open QR code lookup page with the batch code
+    const qrLookupUrl = `/warehouse-qr-lookup?code=${batchCode}`;
+    window.open(qrLookupUrl, '_blank', 'width=800,height=600');
   };
 
   // Handle printing QR code
   const handlePrintQrCode = (batchCode: string) => {
-    toast({ 
-      title: "🖨️ Printing QR Code", 
-      description: `Printing QR code for batch: ${batchCode}` 
-    });
-    // Additional printing logic would go here
+    // Generate print window with QR code
+    const printContent = `
+      <html>
+        <head>
+          <title>QR Code - ${batchCode}</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+            .qr-container { margin: 20px auto; }
+            .batch-code { font-size: 18px; font-weight: bold; margin: 10px 0; }
+          </style>
+        </head>
+        <body>
+          <h2>Warehouse QR Code</h2>
+          <div class="batch-code">${batchCode}</div>
+          <div class="qr-container">
+            <div style="width: 200px; height: 200px; border: 2px solid #000; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+              QR Code: ${batchCode}
+            </div>
+          </div>
+          <p>Scan this QR code for batch tracking</p>
+        </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 100);
+    }
   };
 
   // Handle viewing bag request details
   const handleViewBagRequestDetails = (request: any) => {
     setSelectedBagRequest(request);
     setShowBagDetailsModal(true);
+  };
+
+  // Handle preview batch
+  const handlePreviewBatch = () => {
+    if (selectedTransactions.length === 0) {
+      toast({
+        title: "❌ No Transactions Selected",
+        description: "Please select at least one transaction to preview.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const selectedTransactionData = availableTransactions?.filter((t: any) => 
+      selectedTransactions.includes(t.id)
+    ) || [];
+
+    const previewData = {
+      totalTransactions: selectedTransactions.length,
+      totalPackages: totalPackages,
+      commodities: selectedTransactionData.map((t: any) => t.commodityType).join(', '),
+      buyers: selectedTransactionData.map((t: any) => t.buyerName).join(', '),
+      totalWeight: selectedTransactionData.reduce((sum: number, t: any) => sum + parseFloat(t.quantity || 0), 0),
+      batchCode: `WH-BATCH-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
+    };
+
+    toast({
+      title: "📋 Batch Preview",
+      description: `${previewData.totalTransactions} transactions, ${previewData.totalPackages} packages, Code: ${previewData.batchCode}`
+    });
   };
 
   // Calculate dashboard statistics from real data
@@ -1645,17 +1702,21 @@ export default function WarehouseInspectorDashboard() {
                               <div key={transaction.id} className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
+                                  id={`transaction-${transaction.id}`}
                                   checked={selectedTransactions.includes(transaction.id)}
                                   onChange={(e) => {
+                                    console.log('Checkbox clicked:', transaction.id, e.target.checked);
                                     if (e.target.checked) {
-                                      setSelectedTransactions([...selectedTransactions, transaction.id]);
+                                      setSelectedTransactions(prev => [...prev, transaction.id]);
                                     } else {
-                                      setSelectedTransactions(selectedTransactions.filter(id => id !== transaction.id));
+                                      setSelectedTransactions(prev => prev.filter(id => id !== transaction.id));
                                     }
                                   }}
                                   data-testid={`checkbox-transaction-${transaction.id}`}
                                 />
-                                <label className="text-sm">{transaction.transactionId} - {transaction.buyerName} - {transaction.commodityType} - {transaction.quantity} - ${transaction.amount}</label>
+                                <label htmlFor={`transaction-${transaction.id}`} className="text-sm cursor-pointer">
+                                  {transaction.transactionId} - {transaction.buyerName} - {transaction.commodityType} - {transaction.quantity} - ${transaction.amount}
+                                </label>
                               </div>
                             ))}
                           </div>
@@ -1769,6 +1830,7 @@ export default function WarehouseInspectorDashboard() {
                         <Button 
                           variant="outline"
                           className="flex items-center"
+                          onClick={handlePreviewBatch}
                           data-testid="button-preview-batch"
                         >
                           <Eye className="w-4 h-4 mr-2" />
@@ -2677,6 +2739,133 @@ export default function WarehouseInspectorDashboard() {
                     Print QR Code
                   </Button>
                 </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Bag Request Details Modal */}
+        <Dialog open={showBagDetailsModal} onOpenChange={setShowBagDetailsModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Bag Request Details</DialogTitle>
+              <DialogDescription>
+                Complete information about the bag request from buyer
+              </DialogDescription>
+            </DialogHeader>
+            {selectedBagRequest && (
+              <div className="space-y-6">
+                {/* Request Header */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">Request ID</p>
+                      <p className="font-mono text-blue-900">{selectedBagRequest.requestId}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">Status</p>
+                      <Badge className={selectedBagRequest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}>
+                        {selectedBagRequest.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Buyer Information */}
+                <div>
+                  <h4 className="font-medium mb-3">Buyer Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium">Buyer Name</p>
+                      <p className="text-sm text-gray-600">{selectedBagRequest.buyerName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Company</p>
+                      <p className="text-sm text-gray-600">{selectedBagRequest.companyName}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Information */}
+                <div>
+                  <h4 className="font-medium mb-3">Product Information</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm font-medium">Commodity</p>
+                      <p className="text-sm text-gray-600">{selectedBagRequest.commodityType}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Quantity</p>
+                      <p className="text-sm text-gray-600">{selectedBagRequest.quantity}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Total Value</p>
+                      <p className="text-sm font-bold text-green-600">${selectedBagRequest.totalValue}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Farm Information */}
+                <div>
+                  <h4 className="font-medium mb-3">Farm Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium">Farmer</p>
+                      <p className="text-sm text-gray-600">{selectedBagRequest.farmerName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">County</p>
+                      <p className="text-sm text-gray-600">{selectedBagRequest.county}</p>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-sm font-medium">Farm Location</p>
+                    <p className="text-sm text-gray-600">{selectedBagRequest.farmLocation}</p>
+                  </div>
+                </div>
+
+                {/* Verification Code */}
+                <div>
+                  <h4 className="font-medium mb-3">Verification</h4>
+                  <div className="bg-gray-100 p-3 rounded-lg">
+                    <p className="text-sm font-medium">Verification Code</p>
+                    <p className="font-mono text-lg">{selectedBagRequest.verificationCode}</p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                {selectedBagRequest.status === 'pending' && (
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowBagDetailsModal(false)}
+                      className="flex-1"
+                    >
+                      Close
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="text-red-600 border-red-200 hover:bg-red-50"
+                      onClick={() => {
+                        rejectBagRequestMutation.mutate(selectedBagRequest.id);
+                        setShowBagDetailsModal(false);
+                      }}
+                      disabled={rejectBagRequestMutation.isPending}
+                    >
+                      Reject Request
+                    </Button>
+                    <Button 
+                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => {
+                        validateBagRequestMutation.mutate(selectedBagRequest.id);
+                        setShowBagDetailsModal(false);
+                      }}
+                      disabled={validateBagRequestMutation.isPending}
+                    >
+                      Validate Request
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </DialogContent>

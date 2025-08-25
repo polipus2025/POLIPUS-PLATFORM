@@ -33,7 +33,8 @@ import {
   QrCode,
   Layers,
   X,
-  ShieldCheck
+  ShieldCheck,
+  Settings
 } from "lucide-react";
 
 export default function WarehouseInspectorDashboard() {
@@ -869,7 +870,7 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Main Navigation Tabs - Moved to middle position */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-10 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
@@ -878,33 +879,37 @@ export default function WarehouseInspectorDashboard() {
               <QrCode className="w-4 h-4 mr-2" />
               Registration
             </TabsTrigger>
+            <TabsTrigger value="custody" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Shield className="w-4 h-4 mr-2" />
+              Custody
+            </TabsTrigger>
             <TabsTrigger value="inspections" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <ClipboardCheck className="w-4 h-4 mr-2" />
               Inspections
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Transactions
-            </TabsTrigger>
-            <TabsTrigger value="codes" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileText className="w-4 h-4 mr-2" />
-              Codes
-            </TabsTrigger>
-            <TabsTrigger value="bags" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Package className="w-4 h-4 mr-2" />
-              Bags
-            </TabsTrigger>
-            <TabsTrigger value="validation" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Shield className="w-4 h-4 mr-2" />
-              Validation
-            </TabsTrigger>
-            <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="storage" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Warehouse className="w-4 h-4 mr-2" />
-              Inventory
+              Storage
+            </TabsTrigger>
+            <TabsTrigger value="temperature" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Thermometer className="w-4 h-4 mr-2" />
+              Temperature
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              Reports
             </TabsTrigger>
             <TabsTrigger value="quality" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4 mr-2" />
               Quality
+            </TabsTrigger>
+            <TabsTrigger value="shipping" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Truck className="w-4 h-4 mr-2" />
+              Shipping
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 

@@ -679,6 +679,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/buyer-notifications/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
+      console.log(`Fetching old buyer notifications for buyer: ${buyerId}`);
+      
+      // FIXED: Get the internal buyer ID first, then fetch notifications
+      const [buyer] = await db
+        .select({ id: buyers.id })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+      
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
 
       const notifications = await db
         .select({
@@ -704,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: buyerNotifications.createdAt,
         })
         .from(buyerNotifications)
-        .where(eq(buyerNotifications.buyerId, 8))
+        .where(eq(buyerNotifications.buyerId, buyer.id.toString()))
         .orderBy(desc(buyerNotifications.createdAt));
 
       res.json({

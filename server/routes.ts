@@ -15872,6 +15872,17 @@ International compliance standards met`;
       console.log('📦 Warehouse custody registration request:', req.body);
       const registrationData = req.body;
 
+      // ENFORCE BUYER ID STANDARD: Validate Buyer ID format for all current and future registrations
+      const buyerIdPattern = /^(BYR|BUY)-\d{8}-\d{3}$/; // BYR-YYYYMMDD-XXX or BUY-TEST-XXX format
+      if (!registrationData.buyerId || !buyerIdPattern.test(registrationData.buyerId)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid Buyer ID format',
+          message: 'Buyer ID must follow format: BYR-YYYYMMDD-XXX (e.g., BYR-20250825-362). Buyer names are not accepted.',
+          providedBuyerId: registrationData.buyerId
+        });
+      }
+
       // Determine custody type
       const custodyType = registrationData.scannedQrCodes?.length > 1 ? 'multi_lot' : 'single';
       const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');

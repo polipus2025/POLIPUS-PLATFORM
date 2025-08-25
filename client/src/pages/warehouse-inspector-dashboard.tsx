@@ -1472,5 +1472,6 @@ export default function WarehouseInspectorDashboard() {
           </DialogContent>
         </Dialog>
       </div>
-    );
-  }
+    </div>
+  );
+}

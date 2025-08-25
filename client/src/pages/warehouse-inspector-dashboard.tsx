@@ -47,6 +47,13 @@ export default function WarehouseInspectorDashboard() {
   const [packagingType, setPackagingType] = useState('50kg bags');
   const [totalPackages, setTotalPackages] = useState(10);
   const [packageWeight, setPackageWeight] = useState(50);
+  // Product Registration states
+  const [scannedQrCode, setScannedQrCode] = useState("");
+  const [selectedStorageRate, setSelectedStorageRate] = useState("1.50");
+  const [storageLocation, setStorageLocation] = useState("");
+  const [storageConditions, setStorageConditions] = useState("");
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [productToRegister, setProductToRegister] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -112,6 +119,193 @@ export default function WarehouseInspectorDashboard() {
     queryKey: ['/api/warehouse-inspector/available-transactions'],
     select: (data: any) => data?.data || []
   });
+
+  // Product registration mutation
+  const registerProductMutation = useMutation({
+    mutationFn: async (registrationData: any) => {
+      return await apiRequest('/api/warehouse-inspector/register-product', {
+        method: 'POST',
+        body: JSON.stringify(registrationData)
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Product Registered",
+        description: "Product successfully registered for warehouse custody",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
+      // Reset form
+      setScannedQrCode("");
+      setProductToRegister(null);
+      setStorageLocation("");
+      setStorageConditions("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Failed to register product",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Handle QR code lookup
+  const handleQrCodeLookup = async () => {
+    if (!scannedQrCode) return;
+
+    try {
+      const response = await apiRequest(`/api/warehouse-inspector/lookup-qr/${scannedQrCode}`, {
+        method: 'GET'
+      });
+      
+      if (response.success && response.data) {
+        setProductToRegister(response.data);
+        toast({
+          title: "Product Found",
+          description: `Found ${response.data.commodityType} from ${response.data.buyerName}`,
+        });
+      } else {
+        toast({
+          title: "Product Not Found",
+          description: "QR code not found in system records",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Lookup Failed",
+        description: error.message || "Failed to lookup QR code",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle product registration
+  const handleRegisterProduct = async () => {
+    if (!productToRegister) return;
+
+    const custodyId = `CUSTODY-WH-${inspectorCounty.toUpperCase().replace(/\s+/g, '')}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+
+    const registrationData = {
+      custodyId,
+      buyerId: productToRegister.buyerId,
+      buyerName: productToRegister.buyerName,
+      buyerCompany: productToRegister.buyerCompany,
+      productQrCode: scannedQrCode,
+      verificationCode: productToRegister.verificationCode,
+      warehouseId: inspectorData.warehouseId || "WH-001",
+      warehouseName: warehouseFacility,
+      county: inspectorCounty,
+      commodityType: productToRegister.commodityType,
+      farmerName: productToRegister.farmerName,
+      farmLocation: productToRegister.farmLocation,
+      weight: parseFloat(productToRegister.weight),
+      unit: productToRegister.unit,
+      qualityGrade: productToRegister.qualityGrade,
+      storageLocation,
+      storageConditions,
+      dailyStorageRate: parseFloat(selectedStorageRate)
+    };
+
+    registerProductMutation.mutate(registrationData);
+  };
+
+  // Custody Records Table Component
+  const CustodyRecordsTable = () => {
+    const { data: custodyRecords, isLoading } = useQuery({
+      queryKey: ['/api/warehouse-custody/records'],
+      select: (data: any) => data?.data || []
+    });
+
+    if (isLoading) {
+      return <p className="text-center text-gray-500">Loading custody records...</p>;
+    }
+
+    if (!custodyRecords || custodyRecords.length === 0) {
+      return (
+        <div className="text-center py-8 text-gray-500">
+          <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
+          <p>No products currently in custody</p>
+          <p className="text-sm">Scan QR codes to register products</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {custodyRecords.map((record: any) => (
+          <div key={record.id} className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <Badge className="bg-blue-100 text-blue-800">
+                  {record.custodyId}
+                </Badge>
+                <Badge className={`${
+                  record.authorizationStatus === 'authorized' 
+                    ? 'bg-green-100 text-green-800' 
+                    : record.authorizationStatus === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {record.authorizationStatus}
+                </Badge>
+              </div>
+              <div className="text-right text-sm text-gray-600">
+                <p>Day {record.actualStorageDays || 0} of {record.maxStorageDays}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <h4 className="font-medium mb-1">Product Details</h4>
+                <p className="text-sm text-gray-600">Buyer: {record.buyerName}</p>
+                <p className="text-sm text-gray-600">Type: {record.commodityType}</p>
+                <p className="text-sm text-gray-600">Weight: {record.weight} {record.unit}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-1">Storage Info</h4>
+                <p className="text-sm text-gray-600">Location: {record.storageLocation}</p>
+                <p className="text-sm text-gray-600">Conditions: {record.storageConditions}</p>
+                <p className="text-sm text-gray-600">Rate: ${record.dailyStorageRate}/ton/day</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-1">Origin</h4>
+                <p className="text-sm text-gray-600">Farmer: {record.farmerName}</p>
+                <p className="text-sm text-gray-600">Location: {record.farmLocation}</p>
+                <p className="text-sm text-gray-600">Grade: {record.qualityGrade}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-1">Status</h4>
+                <p className="text-sm text-gray-600">
+                  Registered: {new Date(record.registrationDate).toLocaleDateString()}
+                </p>
+                {record.authorizedDate && (
+                  <p className="text-sm text-gray-600">
+                    Authorized: {new Date(record.authorizedDate).toLocaleDateString()}
+                  </p>
+                )}
+                <div className="flex gap-1 mt-2">
+                  <Button size="sm" variant="outline">
+                    <Eye className="w-3 h-3 mr-1" />
+                    Details
+                  </Button>
+                  {record.authorizationStatus === 'pending' && (
+                    <Button size="sm" variant="outline">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Authorize
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   // Handle bag request validation
   const handleValidateBagRequest = async (requestId: string, action: 'validate' | 'reject', notes?: string) => {
@@ -494,10 +688,14 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Main Navigation Tabs - Moved to middle position */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-9 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="registration" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <QrCode className="w-4 h-4 mr-2" />
+              Registration
             </TabsTrigger>
             <TabsTrigger value="inspections" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <ClipboardCheck className="w-4 h-4 mr-2" />
@@ -716,6 +914,174 @@ export default function WarehouseInspectorDashboard() {
                     <p className="text-sm text-gray-600">Critical Issues</p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Product Registration Tab */}
+          <TabsContent value="registration" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* QR Scanner Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <QrCode className="w-5 h-5 mr-2 text-blue-600" />
+                    QR Code Scanner
+                  </CardTitle>
+                  <CardDescription>
+                    Scan buyer product QR codes to register for warehouse custody
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Product QR Code</label>
+                    <Input
+                      placeholder="Scan or enter QR code"
+                      value={scannedQrCode}
+                      onChange={(e) => setScannedQrCode(e.target.value)}
+                      data-testid="input-qr-code"
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          // Simulate QR scan - in real implementation this would open camera
+                          setScannedQrCode("QR-BUYER-202508-" + Math.random().toString(36).substr(2, 6).toUpperCase());
+                        }}
+                        data-testid="button-simulate-scan"
+                      >
+                        <QrCode className="w-4 h-4 mr-1" />
+                        Simulate Scan
+                      </Button>
+                      <Button 
+                        onClick={handleQrCodeLookup}
+                        disabled={!scannedQrCode}
+                        data-testid="button-lookup-qr"
+                      >
+                        Lookup Product
+                      </Button>
+                    </div>
+                  </div>
+
+                  {productToRegister && (
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <h4 className="font-medium text-green-800 mb-2">Product Found ✓</h4>
+                      <div className="grid grid-cols-1 gap-2 text-sm">
+                        <p><span className="font-medium">Buyer:</span> {productToRegister.buyerName}</p>
+                        <p><span className="font-medium">Commodity:</span> {productToRegister.commodityType}</p>
+                        <p><span className="font-medium">Weight:</span> {productToRegister.weight} {productToRegister.unit}</p>
+                        <p><span className="font-medium">Farmer:</span> {productToRegister.farmerName}</p>
+                        <p><span className="font-medium">Quality:</span> {productToRegister.qualityGrade}</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Registration Details Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Warehouse className="w-5 h-5 mr-2 text-green-600" />
+                    Storage Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Configure storage rates and location details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Daily Storage Rate (USD per ton)</label>
+                    <select
+                      value={selectedStorageRate}
+                      onChange={(e) => setSelectedStorageRate(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-rate"
+                    >
+                      <option value="1.00">$1.00 per ton/day - Basic Storage</option>
+                      <option value="1.50">$1.50 per ton/day - Standard Storage</option>
+                      <option value="2.00">$2.00 per ton/day - Premium Storage</option>
+                      <option value="2.50">$2.50 per ton/day - Climate Controlled</option>
+                      <option value="3.00">$3.00 per ton/day - Specialized Storage</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Storage Location</label>
+                    <select
+                      value={storageLocation}
+                      onChange={(e) => setStorageLocation(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-location"
+                    >
+                      <option value="">Select Storage Location</option>
+                      <option value="Section A-1">Section A-1 (Dry Goods)</option>
+                      <option value="Section A-2">Section A-2 (Climate Controlled)</option>
+                      <option value="Section B-1">Section B-1 (Large Items)</option>
+                      <option value="Section B-2">Section B-2 (Premium Storage)</option>
+                      <option value="Section C-1">Section C-1 (Cold Storage)</option>
+                      <option value="Outdoor Area 1">Outdoor Area 1 (Weather Resistant)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Storage Conditions</label>
+                    <select
+                      value={storageConditions}
+                      onChange={(e) => setStorageConditions(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-conditions"
+                    >
+                      <option value="">Select Storage Conditions</option>
+                      <option value="Standard">Standard (Room Temperature, Low Humidity)</option>
+                      <option value="Climate Controlled">Climate Controlled (20-25°C, 50-60% Humidity)</option>
+                      <option value="Dry Storage">Dry Storage (Low Humidity, Ventilated)</option>
+                      <option value="Cold Storage">Cold Storage (5-15°C)</option>
+                      <option value="Frozen">Frozen Storage (-18°C)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleRegisterProduct}
+                      disabled={!productToRegister || !storageLocation || !storageConditions}
+                      className="flex-1"
+                      data-testid="button-register-product"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Register for Custody
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Current Custody Records */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Building2 className="w-5 h-5 mr-2 text-purple-600" />
+                    Current Custody Records
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-1" />
+                      Filter
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-1" />
+                      Export
+                    </Button>
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  Products currently registered in warehouse custody
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CustodyRecordsTable />
               </CardContent>
             </Card>
           </TabsContent>

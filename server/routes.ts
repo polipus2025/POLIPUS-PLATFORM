@@ -15426,5 +15426,176 @@ International compliance standards met`;
     }
   });
 
+  // ================================
+  // WAREHOUSE CUSTODY & AUTHORIZATION SYSTEM API ROUTES
+  // ================================
+
+  // Register product for warehouse custody
+  app.post("/api/warehouse-inspector/register-product", async (req, res) => {
+    try {
+      const registrationData = req.body;
+      
+      // Generate unique custody ID if not provided
+      if (!registrationData.custodyId) {
+        const county = registrationData.county || 'COUNTY';
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const random = Math.random().toString(36).substr(2, 3).toUpperCase();
+        registrationData.custodyId = `CUSTODY-WH-${county.toUpperCase().replace(/\s+/g, '')}-${date}-${random}`;
+      }
+
+      // Set default values
+      registrationData.registrationDate = new Date();
+      registrationData.custodyStatus = 'stored';
+      registrationData.authorizationStatus = 'pending';
+      registrationData.actualStorageDays = 0;
+
+      // Register product in custody (this would use the actual database)
+      const custodyRecord = {
+        id: Math.floor(Math.random() * 10000),
+        ...registrationData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      res.json({ 
+        success: true, 
+        data: custodyRecord, 
+        message: "Product successfully registered for warehouse custody" 
+      });
+    } catch (error) {
+      console.error("Error registering product:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to register product for custody" 
+      });
+    }
+  });
+
+  // Lookup QR code for product information
+  app.get("/api/warehouse-inspector/lookup-qr/:qrCode", async (req, res) => {
+    try {
+      const { qrCode } = req.params;
+      
+      // Mock product lookup - in real implementation, this would query the database
+      const mockProducts = [
+        {
+          buyerId: "BUY-001",
+          buyerName: "Monrovia Trading Company",
+          buyerCompany: "MTC Ltd",
+          commodityType: "cocoa",
+          farmerName: "John Konneh",
+          farmLocation: "Margibi County, District 2",
+          weight: "5.5",
+          unit: "tons",
+          qualityGrade: "Premium Grade A",
+          verificationCode: "VERIFY-20250825-001"
+        },
+        {
+          buyerId: "BUY-002", 
+          buyerName: "Atlantic Coffee Ltd",
+          buyerCompany: "ACL Exports",
+          commodityType: "coffee",
+          farmerName: "Mary Kollie",
+          farmLocation: "Bong County, District 1",
+          weight: "3.2",
+          unit: "tons",
+          qualityGrade: "Export Grade B+",
+          verificationCode: "VERIFY-20250825-002"
+        }
+      ];
+
+      // Simulate QR lookup
+      let foundProduct = null;
+      if (qrCode.includes("BUYER") || qrCode.length > 10) {
+        foundProduct = mockProducts[Math.floor(Math.random() * mockProducts.length)];
+      }
+
+      if (foundProduct) {
+        res.json({ 
+          success: true, 
+          data: foundProduct,
+          message: `Found ${foundProduct.commodityType} from ${foundProduct.buyerName}`
+        });
+      } else {
+        res.json({ 
+          success: false, 
+          message: "QR code not found in system records" 
+        });
+      }
+    } catch (error) {
+      console.error("Error looking up QR code:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to lookup QR code" 
+      });
+    }
+  });
+
+  // Get warehouse custody records
+  app.get("/api/warehouse-custody/records", async (req, res) => {
+    try {
+      // Mock custody records - in real implementation, this would query the database
+      const mockCustodyRecords = [
+        {
+          id: 1,
+          custodyId: "CUSTODY-WH-MARGIBI-20250825-A1B",
+          buyerId: "BUY-001",
+          buyerName: "Monrovia Trading Company",
+          buyerCompany: "MTC Ltd",
+          productQrCode: "QR-BUYER-202508-A1B2C3",
+          commodityType: "cocoa",
+          farmerName: "John Konneh",
+          farmLocation: "Margibi County",
+          weight: 5.5,
+          unit: "tons",
+          qualityGrade: "Premium Grade A",
+          storageLocation: "Section A-1",
+          storageConditions: "Climate Controlled",
+          dailyStorageRate: 1.50,
+          registrationDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+          custodyStatus: "stored",
+          authorizationStatus: "pending",
+          maxStorageDays: 30,
+          actualStorageDays: 5
+        },
+        {
+          id: 2,
+          custodyId: "CUSTODY-WH-MARGIBI-20250823-B2C",
+          buyerId: "BUY-002",
+          buyerName: "Atlantic Coffee Ltd",
+          buyerCompany: "ACL Exports", 
+          productQrCode: "QR-BUYER-202508-B2C3D4",
+          commodityType: "coffee",
+          farmerName: "Mary Kollie",
+          farmLocation: "Bong County",
+          weight: 3.2,
+          unit: "tons",
+          qualityGrade: "Export Grade B+",
+          storageLocation: "Section B-2",
+          storageConditions: "Dry Storage",
+          dailyStorageRate: 2.00,
+          registrationDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+          custodyStatus: "stored",
+          authorizationStatus: "authorized",
+          maxStorageDays: 30,
+          actualStorageDays: 7,
+          authorizedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+          authorizedBy: "WH-INS-MARGIBI-001"
+        }
+      ];
+
+      res.json({ 
+        success: true, 
+        data: mockCustodyRecords 
+      });
+    } catch (error) {
+      console.error("Error fetching custody records:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch custody records" 
+      });
+    }
+  });
+
   return httpServer;
 }

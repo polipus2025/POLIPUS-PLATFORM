@@ -779,7 +779,7 @@ export default function AgriculturalBuyerDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        ${confirmedTransactions.reduce((sum: number, t: any) => sum + parseFloat(t.totalValue || 0), 0).toLocaleString()}
+                        ${confirmedTransactions?.reduce((sum: number, t: any) => sum + parseFloat(t.totalValue || 0), 0).toLocaleString() || '0'}
                       </div>
                       <p className="text-xs text-gray-600">From confirmed orders</p>
                     </CardContent>
@@ -791,7 +791,7 @@ export default function AgriculturalBuyerDashboard() {
                       <TrendingUp className="h-4 w-4 text-blue-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{confirmedTransactions.length}</div>
+                      <div className="text-2xl font-bold">{confirmedTransactions?.length || 0}</div>
                       <p className="text-xs text-gray-600">Confirmed transactions</p>
                     </CardContent>
                   </Card>
@@ -803,7 +803,7 @@ export default function AgriculturalBuyerDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {confirmedTransactions.filter((t: any) => !t.paymentConfirmed).length}
+                        {confirmedTransactions?.filter((t: any) => !t.paymentConfirmed).length || 0}
                       </div>
                       <p className="text-xs text-gray-600">Awaiting payment</p>
                     </CardContent>
@@ -817,7 +817,7 @@ export default function AgriculturalBuyerDashboard() {
                   </div>
                   <div className="p-4">
                     <div className="space-y-4">
-                      {confirmedTransactions.length > 0 ? (
+                      {confirmedTransactions && confirmedTransactions.length > 0 ? (
                         confirmedTransactions.slice(0, 4).map((transaction: any, index: number) => (
                           <div key={transaction.id} className="flex items-center justify-between py-2 border-b">
                             <div>

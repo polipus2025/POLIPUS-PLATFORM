@@ -1147,7 +1147,7 @@ export default function WarehouseInspectorDashboard() {
                       <span class="info-label">Total Packages:</span> ${batch.totalPackages || 'N/A'} bags
                     </div>
                     <div class="info-item">
-                      <span class="info-label">Total Weight:</span> ${batch.totalWeight} kg
+                      <span class="info-label">Total Weight:</span> ${batch.totalWeight} tons
                     </div>
                     <div class="info-item">
                       <span class="info-label">Commodity:</span> ${batch.commodityType}
@@ -1691,7 +1691,7 @@ export default function WarehouseInspectorDashboard() {
                             <div className="flex justify-between items-center">
                               <span className="font-medium">Total Weight:</span>
                               <span className="font-bold text-blue-600">
-                                {multipleQrCodes.reduce((sum, item) => sum + item.weight, 0)}kg
+                                {multipleQrCodes.reduce((sum, item) => sum + item.weight, 0)} tons
                               </span>
                             </div>
                             <Button 
@@ -2377,7 +2377,7 @@ export default function WarehouseInspectorDashboard() {
                                   </div>
                                   <div>
                                     <span className="font-medium">Total Weight:</span>
-                                    <p className="text-gray-600">{batch.totalWeight} kg</p>
+                                    <p className="text-gray-600">{batch.totalWeight} tons</p>
                                   </div>
                                   <div>
                                     <span className="font-medium">Status:</span>
@@ -2914,7 +2914,7 @@ export default function WarehouseInspectorDashboard() {
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">Total Weight:</span>
-                      <p>{selectedQrBatch.totalWeight} kg</p>
+                      <p>{selectedQrBatch.totalWeight} tons</p>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">Total Bags:</span>
@@ -2970,7 +2970,7 @@ export default function WarehouseInspectorDashboard() {
                             <strong>Commodity:</strong> {selectedQrBatch.qrCodeData.commodity || selectedQrBatch.commodityType}
                           </div>
                           <div>
-                            <strong>Weight:</strong> {selectedQrBatch.qrCodeData.totalWeight || selectedQrBatch.totalWeight} kg
+                            <strong>Weight:</strong> {selectedQrBatch.qrCodeData.totalWeight || selectedQrBatch.totalWeight} tons
                           </div>
                           <div>
                             <strong>Quality:</strong> {selectedQrBatch.qrCodeData.qualityGrade || selectedQrBatch.qualityGrade}

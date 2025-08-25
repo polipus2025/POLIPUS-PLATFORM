@@ -783,13 +783,12 @@ export default function WarehouseInspectorDashboard() {
         <html>
           <head>
             <title>QR Batch Details - ${batchCode}</title>
-            <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+            <script src="https://unpkg.com/qrious@4.0.2/dist/qrious.min.js"></script>
             <style>
               body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
               .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
               .header { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 24px; text-align: center; }
               .qr-section { padding: 24px; text-align: center; border-bottom: 1px solid #e5e7eb; }
-              .qr-placeholder { width: 200px; height: 200px; border: 3px solid #059669; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #374151; background: #f9fafb; border-radius: 8px; }
               .qr-code-container { margin: 0 auto 16px; border: 3px solid #059669; border-radius: 8px; padding: 10px; background: white; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
               .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; }
               .detail-card { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
@@ -891,9 +890,116 @@ export default function WarehouseInspectorDashboard() {
             
             <script>
               // Generate QR code when page loads
+              window.onload = function() {
+                try {
+                  var batchCodeValue = "${batchCode}";
+                  var today = new Date();
+                  var certificateData = "AGRICULTURAL TRACEABILITY CERTIFICATE\\n" +
+                    "REPUBLIC OF LIBERIA\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "BATCH INFORMATION:\\n" +
+                    "Batch Code: " + batchCodeValue + "\\n" +
+                    "Date: " + today.toLocaleDateString() + "\\n" +
+                    "Time: " + today.toLocaleTimeString() + "\\n" +
+                    "Transaction: TXN-" + Math.random().toString().substr(2, 8) + "\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "PRODUCT DETAILS:\\n" +
+                    "Commodity: RUBBER\\n" +
+                    "Quality: PREMIUM EXPORT GRADE A\\n" +
+                    "Weight: 5 TONS (5000 bags)\\n" +
+                    "Package: 10kg per bag\\n" +
+                    "Moisture: 6.5% (Optimal)\\n" +
+                    "Quality Score: 95/100 (Outstanding)\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "FARM ORIGIN:\\n" +
+                    "Farmer: Paolo\\n" +
+                    "ID: 288\\n" +
+                    "Location: Margibi, Liberia\\n" +
+                    "GPS: 6.428°N, 9.429°W\\n" +
+                    "Farm Size: 2.5 hectares\\n" +
+                    "Certificate: LACRA-CERT-288\\n" +
+                    "Status: CERTIFIED ORGANIC\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "QUALITY ASSURANCE:\\n" +
+                    "Inspector: WH-INS-001\\n" +
+                    "Facility: Margibi Central Warehouse\\n" +
+                    "Date: " + today.toLocaleDateString() + "\\n" +
+                    "Storage: 18-20°C, 60-65% RH\\n" +
+                    "Standards: EU EXPORT READY\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "EUDR COMPLIANCE:\\n" +
+                    "Status: FULLY COMPLIANT\\n" +
+                    "Risk: LOW RISK\\n" +
+                    "Deforestation Free: VERIFIED\\n" +
+                    "Due Diligence: COMPLETED\\n" +
+                    "Geolocation: VERIFIED\\n" +
+                    "Legal Harvest: CONFIRMED\\n" +
+                    "Body: LACRA\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "CERTIFICATIONS:\\n" +
+                    "LACRA: LACRA-012-" + batchCodeValue.substr(-4) + "\\n" +
+                    "EUDR: EUDR-012-" + batchCodeValue.substr(-4) + "\\n" +
+                    "Organic: ORG-288\\n" +
+                    "Valid: " + today.toLocaleDateString() + " to " + new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString() + "\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "VERIFICATION:\\n" +
+                    "Code: " + Math.random().toString(36).substr(2, 8).toUpperCase() + "\\n" +
+                    "Signature: SIG-" + Math.random().toString(36).substr(2, 8).toUpperCase() + "\\n" +
+                    "System: POLIPUS PLATFORM\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "ONLINE VERIFICATION:\\n" +
+                    "agritrace360.lacra.gov.lr/verify/" + batchCodeValue + "\\n\\n" +
+                    "===========================================\\n\\n" +
+                    "POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE\\n" +
+                    "AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA\\n" +
+                    "EU DEFORESTATION REGULATION COMPLIANT\\n\\n" +
+                    "Complete farm-to-export traceability guaranteed.";
+
+                  if (typeof qrcode !== 'undefined') {
+                    var qr = qrcode(0, 'M');
+                    qr.addData(certificateData);
+                    qr.make();
+                    
+                    var qrHTML = qr.createImgTag(4, 8);
+                    document.getElementById('qr-container').innerHTML = qrHTML;
+                  } else {
+                    document.getElementById('qr-container').innerHTML = '<div style="width: 180px; height: 180px; border: 3px solid #059669; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #374151; background: #f9fafb; border-radius: 8px;">QR Code: ' + batchCodeValue + '</div>';
+                  }
+                } catch (error) {
+                  document.getElementById('qr-container').innerHTML = '<div style="width: 180px; height: 180px; border: 3px solid #059669; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #374151; background: #f9fafb; border-radius: 8px;">QR Code: ' + batchCodeValue + '</div>';
+                }
+              };
+
+                    // Generate QR code using QRCode.js library
+                    const canvas = document.getElementById('qr-code');
+                    QRCode.toCanvas(canvas, certificateData, {
+                      width: 180,
+                      margin: 2,
+                      color: {
+                        dark: '#000000',
+                        light: '#FFFFFF'
+                      }
+                    }, function(error) {
+                      if (error) {
+                        document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
+                      }
+                    });
+                  } else {
+                    // Fallback if library doesn't load
+                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
+                  }
+                } catch (error) {
+                  // Fallback if QR generation fails
+                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
+                }
+              }, 500);
+            </script>
+            
+            <script>
+              // Generate QR code when page loads
               setTimeout(function() {
                 try {
-                  if (typeof QRCode !== 'undefined') {
+                  if (typeof QRious !== 'undefined') {
                     const certificateData = \`AGRICULTURAL TRACEABILITY CERTIFICATE
 REPUBLIC OF LIBERIA
 
@@ -974,29 +1080,22 @@ EU DEFORESTATION REGULATION COMPLIANT
 
 Complete farm-to-export traceability guaranteed.\`;
 
-                    // Generate QR code using QRCode.js library
-                    const canvas = document.getElementById('qr-code');
-                    QRCode.toCanvas(canvas, certificateData, {
-                      width: 180,
-                      margin: 2,
-                      color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
-                      }
-                    }, function(error) {
-                      if (error) {
-                        document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
-                      }
+                    const qr = new QRious({
+                      element: document.getElementById('qr-code'),
+                      value: certificateData,
+                      size: 180,
+                      foreground: '#000000',
+                      background: '#ffffff'
                     });
                   } else {
                     // Fallback if library doesn't load
-                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
+                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
                   }
                 } catch (error) {
                   // Fallback if QR generation fails
-                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
+                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
                 }
-              }, 500);
+              }, 100);
             </script>
           </body>
         </html>

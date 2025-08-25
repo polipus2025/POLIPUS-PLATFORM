@@ -45,18 +45,37 @@ export class QrBatchService {
   // Get packaging options for a product
   static getPackagingOptions(category: string, subCategory: string) {
     const product = this.getProductConfiguration(category, subCategory);
-    return product.packagingOptions;
+    // Handle both category object (with products array) and direct product object
+    if ('products' in product) {
+      const subProduct = product.products.find(p => p.subCategory === subCategory);
+      return subProduct?.packagingOptions || [];
+    }
+    return product.packagingOptions || [];
   }
 
   // Validate packaging selection
   static validatePackaging(category: string, subCategory: string, packagingType: string, weight: number) {
     const product = this.getProductConfiguration(category, subCategory);
-    const packaging = product.packagingOptions.find(p => p.type === packagingType);
+    
+    // Handle both category object and direct product object
+    let packagingOptions: any[] = [];
+    let productName = '';
+    
+    if ('products' in product) {
+      const subProduct = product.products.find((p: any) => p.subCategory === subCategory);
+      packagingOptions = subProduct?.packagingOptions || [];
+      productName = subProduct?.productName || subCategory;
+    } else {
+      packagingOptions = product.packagingOptions || [];
+      productName = product.productName || subCategory;
+    }
+    
+    const packaging = packagingOptions.find((p: any) => p.type === packagingType);
     
     if (!packaging) {
       return {
         valid: false,
-        error: `Packaging type '${packagingType}' not available for ${product.productName}`
+        error: `Packaging type '${packagingType}' not available for ${productName}`
       };
     }
 

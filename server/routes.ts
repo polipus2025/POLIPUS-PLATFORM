@@ -87,10 +87,7 @@ import {
   insertFarmerProductOfferSchema,
   insertBuyerNotificationSchema,
   insertFarmerBuyerTransactionSchema,
-  farmerProductOffers,
-  buyerNotifications,
   farmerBuyerTransactions,
-  farmers,
   buyers,
   farmPlots,
   

@@ -130,6 +130,9 @@ export default function WarehouseInspectorDashboard() {
     mutationFn: async (registrationData: any) => {
       return await apiRequest('/api/warehouse-inspector/register-product', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(registrationData)
       });
     },
@@ -139,16 +142,20 @@ export default function WarehouseInspectorDashboard() {
         description: "Product successfully registered for warehouse custody",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
-      // Reset form
+      // Reset form and clear multi-lot data
       setScannedQrCode("");
       setProductToRegister(null);
       setStorageLocation("");
       setStorageConditions("");
+      setMultipleQrCodes([]);
+      setCurrentProduct("");
+      setCurrentBuyer("");
     },
     onError: (error: any) => {
+      console.error('Registration error:', error);
       toast({
-        title: "Registration Failed",
-        description: error.message || "Failed to register product",
+        title: "Registration Failed", 
+        description: error.message || "Failed to register product. Please try again.",
         variant: "destructive",
       });
     }
@@ -249,7 +256,39 @@ export default function WarehouseInspectorDashboard() {
 
   // Handle product registration
   const handleRegisterProduct = async () => {
-    if (!productToRegister) return;
+    console.log('🔍 Registration Debug:', {
+      productToRegister,
+      storageLocation,
+      storageConditions,
+      selectedStorageRate
+    });
+
+    if (!productToRegister) {
+      toast({
+        title: "No Product Selected",
+        description: "Please scan a QR code first to select a product for registration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!storageLocation) {
+      toast({
+        title: "Storage Location Required", 
+        description: "Please select a storage location.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!storageConditions) {
+      toast({
+        title: "Storage Conditions Required",
+        description: "Please enter storage conditions.",
+        variant: "destructive", 
+      });
+      return;
+    }
 
     const custodyId = `CUSTODY-WH-${inspectorCounty.toUpperCase().replace(/\s+/g, '')}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
 
@@ -1315,10 +1354,27 @@ export default function WarehouseInspectorDashboard() {
                               className="w-full mt-2" 
                               onClick={() => {
                                 const totalWeight = multipleQrCodes.reduce((sum, item) => sum + item.weight, 0);
-                                // Note: Integration with existing registration form would go here
+                                
+                                // Create batch product data for registration
+                                const batchProductData = {
+                                  buyerId: multipleQrCodes[0]?.buyerName || "BATCH-BUYER",
+                                  buyerName: multipleQrCodes[0]?.buyerName || "Batch Buyer",
+                                  buyerCompany: "Multiple Lot Batch",
+                                  commodityType: currentProduct,
+                                  farmerName: "Multiple Farmers",
+                                  farmLocation: "Multiple Locations", 
+                                  weight: totalWeight.toString(),
+                                  unit: "kg",
+                                  qualityGrade: multipleQrCodes[0]?.qualityGrade || "Mixed Grade",
+                                  verificationCode: `BATCH-${multipleQrCodes.length}-LOTS`
+                                };
+                                
+                                // Set for registration
+                                setProductToRegister(batchProductData);
+                                
                                 toast({
                                   title: "Batch Ready for Registration",
-                                  description: `${multipleQrCodes.length} lots of ${currentProduct} - Total: ${totalWeight}kg`,
+                                  description: `${multipleQrCodes.length} lots of ${currentProduct} - Total: ${totalWeight}kg - Ready to register`,
                                 });
                               }}
                             >
@@ -1402,14 +1458,26 @@ export default function WarehouseInspectorDashboard() {
 
                   <div className="flex gap-2">
                     <Button 
-                      onClick={handleRegisterProduct}
-                      disabled={!productToRegister || !storageLocation || !storageConditions}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleRegisterProduct();
+                      }}
+                      disabled={!productToRegister || !storageLocation || !storageConditions || registerProductMutation.isPending}
                       className="flex-1"
                       data-testid="button-register-product"
                     >
                       <Package className="w-4 h-4 mr-2" />
-                      Register for Custody
+                      {registerProductMutation.isPending ? "Registering..." : "Register for Custody"}
                     </Button>
+                    
+                    {/* Debug Info */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Debug: Product={!!productToRegister ? '✓' : '✗'} | 
+                        Location={!!storageLocation ? '✓' : '✗'} | 
+                        Conditions={!!storageConditions ? '✓' : '✗'}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

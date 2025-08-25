@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Batch Print Test</title>
+</head>
+<body>
+    <h1>QR Batch Print Format Test</h1>
+    <button onclick="testPrintFormat()">Test Print Format - WH-BATCH-1756041111292-9FDM</button>
+    
+    <script>
+    function testPrintFormat() {
+        // Sample batch data matching the actual batch
+        const batch = {
+            batchCode: "WH-BATCH-1756041111292-9FDM",
+            warehouseId: "WH-MARGIBI-001", 
+            warehouseName: "Margibi Central Warehouse",
+            buyerId: "BYR-20250819-050",
+            buyerName: "Paolo Farmers Cooperative",
+            buyerCompany: "Kollie Trading Ltd",
+            farmerId: "288",
+            farmerName: "Paolo",
+            commodityType: "Cocoa",
+            totalPackages: 320,
+            packageWeight: 50,
+            totalWeight: "16,000",
+            qualityGrade: "Grade A",
+            harvestDate: "2025-08-24",
+            county: "Margibi County",
+            gpsCoordinates: "6.428°N, 9.429°W",
+            qrCodeUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==",
+            storageRate: "125.00",
+            status: "In Warehouse Custody"
+        };
+        
+        // Use the new print format
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            const currentDate = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'numeric', 
+                day: 'numeric' 
+            });
+            const currentTime = new Date().toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            });
+            
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>QR Batch Details - ${batch.batchCode}</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                margin: 0;
+                                padding: 40px;
+                                background: white;
+                                color: #333;
+                            }
+                            .page-container {
+                                max-width: 800px;
+                                margin: 0 auto;
+                            }
+                            .header {
+                                text-align: center;
+                                margin-bottom: 40px;
+                            }
+                            .main-title {
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #2563eb;
+                                margin: 10px 0;
+                            }
+                            .batch-code-large {
+                                font-size: 20px;
+                                font-weight: bold;
+                                color: #1f2937;
+                                margin: 10px 0;
+                            }
+                            .subtitle {
+                                font-size: 16px;
+                                color: #6b7280;
+                                margin: 10px 0;
+                            }
+                            .qr-section {
+                                text-align: center;
+                                margin: 40px 0;
+                            }
+                            .qr-label {
+                                font-size: 14px;
+                                font-weight: bold;
+                                color: #374151;
+                                margin: 10px 0;
+                            }
+                            .qr-code {
+                                width: 200px;
+                                height: 200px;
+                                margin: 20px auto;
+                                display: block;
+                                background: #f3f4f6;
+                                border: 2px solid #d1d5db;
+                            }
+                            .scan-instruction {
+                                font-size: 14px;
+                                color: #6b7280;
+                                margin: 15px 0;
+                            }
+                            .generated-time {
+                                font-size: 12px;
+                                color: #9ca3af;
+                                margin: 15px 0;
+                            }
+                            .details-grid {
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 40px;
+                                margin: 40px 0;
+                            }
+                            .info-section {
+                                background: #f9fafb;
+                                padding: 20px;
+                                border-radius: 8px;
+                                border: 1px solid #e5e7eb;
+                            }
+                            .section-title {
+                                font-size: 16px;
+                                font-weight: bold;
+                                color: #1f2937;
+                                margin-bottom: 15px;
+                                display: flex;
+                                align-items: center;
+                            }
+                            .info-item {
+                                margin: 8px 0;
+                                font-size: 13px;
+                            }
+                            .info-label {
+                                font-weight: bold;
+                                color: #374151;
+                            }
+                            .info-value {
+                                color: #6b7280;
+                            }
+                            .compliance-section {
+                                background: #f0fdf4;
+                                border: 1px solid #bbf7d0;
+                                border-radius: 8px;
+                                padding: 20px;
+                                margin-top: 30px;
+                            }
+                            .compliance-title {
+                                font-size: 16px;
+                                font-weight: bold;
+                                color: #166534;
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }
+                            .compliance-grid {
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 20px;
+                            }
+                            .compliance-item {
+                                text-align: center;
+                                padding: 10px;
+                                background: #dcfce7;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                font-weight: bold;
+                                color: #166534;
+                            }
+                            @media print {
+                                body { margin: 0; padding: 20px; }
+                                .page-container { max-width: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="page-container">
+                            <div class="header">
+                                <div class="main-title">🏭 Warehouse QR Batch</div>
+                                <div class="batch-code-large">${batch.batchCode}</div>
+                                <div class="subtitle">Agricultural Traceability System</div>
+                            </div>
+
+                            <div class="qr-section">
+                                <div class="qr-label">QR Code: ${batch.batchCode}</div>
+                                <div class="qr-code" style="display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6b7280;">QR CODE PLACEHOLDER</div>
+                                <div class="scan-instruction">Scan for complete traceability</div>
+                                <div class="generated-time">Generated: ${currentDate}, ${currentTime}</div>
+                            </div>
+
+                            <div class="details-grid">
+                                <div class="info-section">
+                                    <div class="section-title">📦 Batch Information</div>
+                                    <div class="info-item">
+                                        <span class="info-label">Batch Code:</span> ${batch.batchCode}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Total Packages:</span> ${batch.totalPackages} bags
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Total Weight:</span> ${batch.totalWeight} kg
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Commodity:</span> ${batch.commodityType}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="section-title">🏢 Buyer Information</div>
+                                    <div class="info-item">
+                                        <span class="info-label">Buyer:</span> ${batch.buyerName}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Company:</span> ${batch.buyerCompany}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Storage Fee:</span> $${batch.storageRate}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Status:</span> ${batch.status}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="section-title">📍 Location & Tracking</div>
+                                    <div class="info-item">
+                                        <span class="info-label">Warehouse:</span> ${batch.warehouseId}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">County:</span> ${batch.county}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">GPS:</span> ${batch.gpsCoordinates}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Created:</span> ${currentDate}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="section-title">👨‍🌾 Farm Origin</div>
+                                    <div class="info-item">
+                                        <span class="info-label">Farmer:</span> ${batch.farmerName}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Farm Location:</span> ${batch.county}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Harvest Date:</span> ${new Date(batch.harvestDate).toLocaleDateString()}
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Quality Grade:</span> ${batch.qualityGrade}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="compliance-section">
+                                <div class="compliance-title">🛡️ EUDR Compliance Status</div>
+                                <div class="compliance-grid">
+                                    <div class="compliance-item">✅ Deforestation Free</div>
+                                    <div class="compliance-item">✅ EUDR Compliant</div>
+                                    <div class="compliance-item">✅ Chain of Custody Verified</div>
+                                    <div class="compliance-item">✅ Due Diligence Complete</div>
+                                </div>
+                            </div>
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+    }
+    </script>
+</body>
+</html>

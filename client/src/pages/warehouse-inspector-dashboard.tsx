@@ -1308,7 +1308,7 @@ export default function WarehouseInspectorDashboard() {
                       {qrBatchesLoading ? (
                         <p className="text-center text-gray-500">Loading activity...</p>
                       ) : qrBatches && qrBatches.length > 0 ? (
-                        qrBatches.slice(0, 3).map((batch: any, index) => (
+                        qrBatches.slice(0, 3).map((batch: any) => (
                           <div key={batch.batchCode} className="flex items-center justify-between p-2 border rounded">
                             <div className="text-sm">
                               <p className="font-medium">{batch.batchCode}</p>

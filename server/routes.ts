@@ -15862,6 +15862,39 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // Authorize warehouse custody
+  app.post('/api/warehouse-custody/authorize', async (req, res) => {
+    try {
+      const { custodyId, authorizationNotes } = req.body;
+      console.log('🔓 Authorizing custody record:', custodyId);
+
+      // Update custody record with authorization
+      await db.execute(sql`
+        UPDATE warehouse_custody 
+        SET authorization_status = 'authorized',
+            authorized_date = ${new Date().toISOString()},
+            authorized_by = 'warehouse_inspector',
+            authorization_notes = ${authorizationNotes}
+        WHERE custody_id = ${custodyId}
+      `);
+
+      console.log('✅ Custody record authorized successfully');
+
+      res.json({
+        success: true,
+        message: `Custody ${custodyId} authorized successfully`
+      });
+
+    } catch (error) {
+      console.error('❌ Failed to authorize custody:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to authorize custody record',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Get warehouse custody records
   app.get("/api/warehouse-custody/records", async (req, res) => {
     try {

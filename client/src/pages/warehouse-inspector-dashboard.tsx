@@ -59,6 +59,9 @@ export default function WarehouseInspectorDashboard() {
   const [storageConditions, setStorageConditions] = useState("");
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [productToRegister, setProductToRegister] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [authorizingRecord, setAuthorizingRecord] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -406,6 +409,9 @@ export default function WarehouseInspectorDashboard() {
                 <p className="text-sm text-gray-600">Location: {record.storageLocation || 'Not assigned'}</p>
                 <p className="text-sm text-gray-600">Conditions: {record.storageConditions || 'Standard'}</p>
                 <p className="text-sm text-gray-600">Rate: ${record.storageRate}/metric ton (one-time)</p>
+                <p className="text-sm font-semibold text-green-600">
+                  Total Payment: ${(parseFloat(record.totalWeight) * parseFloat(record.storageRate)).toFixed(2)}
+                </p>
               </div>
               
               <div>
@@ -451,14 +457,50 @@ export default function WarehouseInspectorDashboard() {
                   </p>
                 )}
                 <div className="flex gap-1 mt-2">
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedRecord(record);
+                      setShowDetailsModal(true);
+                    }}
+                  >
                     <Eye className="w-3 h-3 mr-1" />
                     Details
                   </Button>
                   {record.authorizationStatus === 'pending' && (
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+                      disabled={authorizingRecord === record.custodyId}
+                      onClick={async () => {
+                        setAuthorizingRecord(record.custodyId);
+                        try {
+                          await apiRequest('/api/warehouse-custody/authorize', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                              custodyId: record.custodyId,
+                              authorizationNotes: 'Authorized by warehouse inspector'
+                            })
+                          });
+                          toast({
+                            title: 'Custody Authorized',
+                            description: `Custody ${record.custodyId} has been authorized successfully`,
+                          });
+                          queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
+                        } catch (error: any) {
+                          toast({
+                            title: 'Authorization Failed',
+                            description: error.message || 'Failed to authorize custody',
+                            variant: 'destructive',
+                          });
+                        } finally {
+                          setAuthorizingRecord(null);
+                        }
+                      }}
+                    >
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Authorize
+                      {authorizingRecord === record.custodyId ? 'Authorizing...' : 'Authorize'}
                     </Button>
                   )}
                 </div>
@@ -467,6 +509,251 @@ export default function WarehouseInspectorDashboard() {
           </div>
         ))}
       </div>
+    );
+  };
+
+  // Custody Details Modal Component
+  const CustodyDetailsModal = () => {
+    if (!selectedRecord) return null;
+    
+    return (
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-blue-600" />
+              Custody Record Details: {selectedRecord.custodyId}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Status Header */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+              <div>
+                <Badge className={`${
+                  selectedRecord.authorizationStatus === 'authorized' 
+                    ? 'bg-green-100 text-green-800' 
+                    : selectedRecord.authorizationStatus === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {selectedRecord.authorizationStatus?.toUpperCase()}
+                </Badge>
+                {selectedRecord.custodyType === 'multi_lot' && (
+                  <Badge className="bg-purple-100 text-purple-800 ml-2">Multi-Lot</Badge>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-lg text-green-600">
+                  Total Payment: ${(parseFloat(selectedRecord.totalWeight) * parseFloat(selectedRecord.storageRate)).toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {selectedRecord.totalWeight} tons × ${selectedRecord.storageRate}/metric ton
+                </p>
+              </div>
+            </div>
+
+            {/* Product Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Package className="w-5 h-5 mr-2 text-blue-600" />
+                    Product Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Commodity Type</label>
+                      <p className="text-sm">{selectedRecord.commodityType}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Total Weight</label>
+                      <p className="text-sm font-semibold">{selectedRecord.totalWeight} {selectedRecord.unit || 'tons'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Total Packages</label>
+                      <p className="text-sm">{selectedRecord.totalPackages} {selectedRecord.packagingType || 'bags'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Quality Grade</label>
+                      <p className="text-sm">{selectedRecord.qualityGrade || 'Standard'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <MapPin className="w-5 h-5 mr-2 text-green-600" />
+                    Origin Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">
+                        {selectedRecord.custodyType === 'multi_lot' ? 'Farmers' : 'Farmer'}
+                      </label>
+                      <p className="text-sm">
+                        {Array.isArray(selectedRecord.farmerNames) 
+                          ? selectedRecord.farmerNames.join(', ') 
+                          : selectedRecord.farmerNames}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">
+                        {selectedRecord.custodyType === 'multi_lot' ? 'Farm Locations' : 'Farm Location'}
+                      </label>
+                      <p className="text-sm">
+                        {Array.isArray(selectedRecord.farmLocations) 
+                          ? selectedRecord.farmLocations.join(', ') 
+                          : selectedRecord.farmLocations}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">County</label>
+                      <p className="text-sm">{selectedRecord.county}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Buyer & Storage Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-orange-600" />
+                    Buyer Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Buyer Name</label>
+                      <p className="text-sm">{selectedRecord.buyerName}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Company</label>
+                      <p className="text-sm">{selectedRecord.buyerCompany}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Buyer ID</label>
+                      <p className="text-sm">{selectedRecord.buyerId}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Warehouse className="w-5 h-5 mr-2 text-purple-600" />
+                    Storage Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Warehouse</label>
+                      <p className="text-sm">{selectedRecord.warehouseName}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Storage Location</label>
+                      <p className="text-sm">{selectedRecord.storageLocation || 'Not assigned'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Storage Conditions</label>
+                      <p className="text-sm">{selectedRecord.storageConditions || 'Standard'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Storage Rate</label>
+                      <p className="text-sm font-semibold text-green-600">
+                        ${selectedRecord.storageRate}/metric ton (one-time)
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* QR Codes & Verification */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <QrCode className="w-5 h-5 mr-2 text-indigo-600" />
+                  QR Codes & Verification
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {selectedRecord.custodyType === 'multi_lot' ? (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Consolidated QR Code</label>
+                        <p className="text-sm font-mono bg-gray-100 p-2 rounded">
+                          {selectedRecord.consolidatedQrCode || 'Generated automatically'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Original QR Codes</label>
+                        <div className="space-y-1">
+                          {Array.isArray(selectedRecord.productQrCodes) && selectedRecord.productQrCodes.map((qr: string, index: number) => (
+                            <p key={index} className="text-sm font-mono bg-gray-50 p-1 rounded">{qr}</p>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Product QR Code</label>
+                      <p className="text-sm font-mono bg-gray-100 p-2 rounded">
+                        {Array.isArray(selectedRecord.productQrCodes) ? selectedRecord.productQrCodes[0] : selectedRecord.productQrCodes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Dates & Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-gray-600" />
+                  Timeline & Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Registration Date</label>
+                    <p className="text-sm">{new Date(selectedRecord.registrationDate).toLocaleString()}</p>
+                  </div>
+                  {selectedRecord.authorizedDate && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Authorization Date</label>
+                      <p className="text-sm">{new Date(selectedRecord.authorizedDate).toLocaleString()}</p>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Storage Duration</label>
+                    <p className="text-sm">{selectedRecord.actualStorageDays || 0} / {selectedRecord.maxStorageDays || 30} days</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Current Status</label>
+                    <p className="text-sm">{selectedRecord.custodyStatus}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   };
 
@@ -2984,6 +3271,9 @@ export default function WarehouseInspectorDashboard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Custody Details Modal */}
+      <CustodyDetailsModal />
     </div>
   );
 }

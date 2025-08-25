@@ -778,30 +778,34 @@ export default function AgriculturalBuyerDashboard() {
                       <Package2 className="h-4 w-4 text-green-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">$124,500</div>
-                      <p className="text-xs text-gray-600">This month</p>
+                      <div className="text-2xl font-bold">
+                        ${confirmedTransactions.reduce((sum: number, t: any) => sum + parseFloat(t.totalValue || 0), 0).toLocaleString()}
+                      </div>
+                      <p className="text-xs text-gray-600">From confirmed orders</p>
                     </CardContent>
                   </Card>
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
+                      <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
                       <TrendingUp className="h-4 w-4 text-blue-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">$145,200</div>
-                      <p className="text-xs text-gray-600">This month</p>
+                      <div className="text-2xl font-bold">{confirmedTransactions.length}</div>
+                      <p className="text-xs text-gray-600">Confirmed transactions</p>
                     </CardContent>
                   </Card>
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
+                      <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
                       <DollarSign className="h-4 w-4 text-purple-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">$20,700</div>
-                      <p className="text-xs text-gray-600">16.6% margin</p>
+                      <div className="text-2xl font-bold">
+                        {confirmedTransactions.filter((t: any) => !t.paymentConfirmed).length}
+                      </div>
+                      <p className="text-xs text-gray-600">Awaiting payment</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -813,49 +817,33 @@ export default function AgriculturalBuyerDashboard() {
                   </div>
                   <div className="p-4">
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between py-2 border-b">
-                        <div>
-                          <p className="font-medium">Purchase from Mary Johnson</p>
-                          <p className="text-sm text-gray-600">750kg Cocoa Beans - FRM-2024-045</p>
+                      {confirmedTransactions.length > 0 ? (
+                        confirmedTransactions.slice(0, 4).map((transaction: any, index: number) => (
+                          <div key={transaction.id} className="flex items-center justify-between py-2 border-b">
+                            <div>
+                              <p className="font-medium">Purchase from {transaction.farmerName}</p>
+                              <p className="text-sm text-gray-600">{transaction.quantityAvailable} {transaction.unit} {transaction.commodityType}</p>
+                              <p className="text-xs text-blue-600 font-mono">Code: {transaction.verificationCode}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-red-600">${transaction.totalValue}</p>
+                              <p className="text-sm text-gray-600">{new Date(transaction.confirmedAt).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex items-center justify-between py-2 border-b">
+                          <div>
+                            <p className="font-medium">No real transactions yet</p>
+                            <p className="text-sm text-gray-600">Accept offers to see your purchases here</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium text-gray-500">$0</p>
+                            <p className="text-sm text-gray-600">Pending</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium text-red-600">-$1,875</p>
-                          <p className="text-sm text-gray-600">Jan 15, 2024</p>
-                        </div>
-                      </div>
+                      )}
 
-                      <div className="flex items-center justify-between py-2 border-b">
-                        <div>
-                          <p className="font-medium">Sale to Global Trading Ltd</p>
-                          <p className="text-sm text-gray-600">500kg Cocoa Beans</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-green-600">+$1,750</p>
-                          <p className="text-sm text-gray-600">Jan 14, 2024</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2 border-b">
-                        <div>
-                          <p className="font-medium">Purchase from David Wilson</p>
-                          <p className="text-sm text-gray-600">450kg Coffee Beans - FRM-2024-067</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-red-600">-$1,440</p>
-                          <p className="text-sm text-gray-600">Jan 12, 2024</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2">
-                        <div>
-                          <p className="font-medium">Sale to International Export Co.</p>
-                          <p className="text-sm text-gray-600">300kg Coffee Beans</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-green-600">+$1,260</p>
-                          <p className="text-sm text-gray-600">Jan 10, 2024</p>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>

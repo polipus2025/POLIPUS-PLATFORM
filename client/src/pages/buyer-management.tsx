@@ -209,7 +209,7 @@ export default function BuyerManagement() {
     onSuccess: (data) => {
       toast({
         title: "Credentials Generated",
-        description: `Username: ${data.username}, Temporary Password: ${data.temporaryPassword}`,
+        description: `Username: ${data.credentials.username}, Temporary Password: ${data.credentials.temporaryPassword}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/buyers"] });
     },

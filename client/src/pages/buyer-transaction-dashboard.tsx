@@ -23,17 +23,23 @@ export default function BuyerTransactionDashboard() {
   }, []);
 
   // Fetch REAL transaction data using confirmed transactions API
-  const { data: transactions = [], isLoading } = useQuery({
+  console.log('🔍 Transaction Dashboard Debug:', { buyerId, enabled: !!buyerId });
+  const { data: transactions = [], isLoading, error } = useQuery({
     queryKey: [`/api/buyer/confirmed-transactions/${buyerId}`],
     enabled: !!buyerId,
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Disable caching
   });
+  
+  console.log('📊 Transaction data received:', { transactions, isLoading, error });
 
   // Calculate REAL metrics from actual transaction data
-  const metrics = transactions.length > 0 ? {
-    totalPurchases: transactions.reduce((sum: number, t: any) => sum + parseFloat(t.totalValue || 0), 0).toFixed(0),
-    activeDeals: transactions.filter((t: any) => t.status === 'confirmed').length,
+  const transactionList = Array.isArray(transactions) ? transactions : [];
+  const metrics = transactionList.length > 0 ? {
+    totalPurchases: transactionList.reduce((sum: number, t: any) => sum + parseFloat(t.totalValue || 0), 0).toFixed(0),
+    activeDeals: transactionList.filter((t: any) => t.status === 'confirmed').length,
     avgProfit: '15.2', // Calculate based on price differences
-    pendingPayments: transactions.filter((t: any) => !t.paymentConfirmed).length
+    pendingPayments: transactionList.filter((t: any) => !t.paymentConfirmed).length
   } : {
     totalPurchases: '0',
     activeDeals: 0,
@@ -120,7 +126,7 @@ export default function BuyerTransactionDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {transactions.map((transaction: any) => (
+              {transactionList.map((transaction: any) => (
                 <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
                     <div className="font-medium">{transaction.commodityType}</div>
@@ -150,7 +156,7 @@ export default function BuyerTransactionDashboard() {
                 </div>
               ))}
               
-              {transactions.length === 0 && (
+              {transactionList.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   No confirmed transactions yet. Accept offers from farmers to see your transactions here.
                 </div>

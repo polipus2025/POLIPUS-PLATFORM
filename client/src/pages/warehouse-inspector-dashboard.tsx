@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,12 +30,7 @@ import {
   Scale,
   MapPin,
   Printer,
-  QrCode,
-  Layers,
-  X,
-  ShieldCheck,
-  Settings,
-  User
+  QrCode
 } from "lucide-react";
 
 export default function WarehouseInspectorDashboard() {
@@ -45,22 +40,20 @@ export default function WarehouseInspectorDashboard() {
   const [selectedCodeType, setSelectedCodeType] = useState("");
   const [validationCode, setValidationCode] = useState("");
   const [selectedQrBatch, setSelectedQrBatch] = useState<any>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
   const [selectedBagRequest, setSelectedBagRequest] = useState<any>(null);
   const [showBagDetailsModal, setShowBagDetailsModal] = useState(false);
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  const [custodyRegistrationMode, setCustodyRegistrationMode] = useState<'single' | 'multi'>('single');
-  const [scannedQrCode, setScannedQrCode] = useState('');
-  const [scannedQrCodes, setScannedQrCodes] = useState<any[]>([]);
-  const [multiLotValidation, setMultiLotValidation] = useState<any>(null);
-  const [selectedStorageRate, setSelectedStorageRate] = useState('1.50');
-  const [storageLocation, setStorageLocation] = useState('');
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [packagingType, setPackagingType] = useState('50kg bags');
   const [totalPackages, setTotalPackages] = useState(10);
   const [packageWeight, setPackageWeight] = useState(50);
+  // Product Registration states
+  const [scannedQrCode, setScannedQrCode] = useState("");
+  const [selectedStorageRate, setSelectedStorageRate] = useState("1.50");
+  const [storageLocation, setStorageLocation] = useState("");
   const [storageConditions, setStorageConditions] = useState("");
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [productToRegister, setProductToRegister] = useState<any>(null);
-  const [currentQrInput, setCurrentQrInput] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -127,282 +120,6 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data?.data || []
   });
 
-  // Additional warehouse states
-  const [showCustodyModal, setShowCustodyModal] = useState(false);
-  const [registeredProduct, setRegisteredProduct] = useState<any>(null);
-  const [showQrModal, setShowQrModal] = useState(false);
-  
-  // Get warehouse inspector data from localStorage
-  const warehouseInspectorData = JSON.parse(localStorage.getItem("warehouseInspectorData") || "{}");
-
-  // QR Code lookup handler
-  const handleQrCodeLookup = async () => {
-    if (!scannedQrCode.trim()) return;
-    
-    try {
-      // Call the real API to get QR data
-      const response = await fetch(`/api/warehouse-custody/lookup-qr/${scannedQrCode}`);
-      const data = await response.json();
-      
-      if (data.success && data.data) {
-        const qrInfo = data.data;
-        
-        // Calculate storage fee based on weight
-        const weightInTons = parseFloat(qrInfo.weight) || 0;
-        const storageFee = weightInTons * 50; // $50 per metric ton
-        
-        const productData = {
-          batchCode: qrInfo.batchCode,
-          commodityType: qrInfo.commodityType,
-          weight: weightInTons,
-          unit: "metric tons",
-          buyerName: qrInfo.buyerName,
-          buyerCompany: qrInfo.buyerCompany,
-          buyerId: qrInfo.buyerId,
-          originalFarmer: qrInfo.farmerName,
-          purchaseDate: qrInfo.harvestDate || new Date().toISOString().split('T')[0],
-          county: qrInfo.farmLocation,
-          storageFee: storageFee,
-          qualityGrade: qrInfo.qualityGrade,
-          totalPackages: qrInfo.totalPackages,
-          packageWeight: qrInfo.packageWeight,
-          eudrCompliance: qrInfo.eudrCompliance
-        };
-        
-        if (custodyRegistrationMode === 'single') {
-          setScannedQrCodes([productData]);
-        } else {
-          // Multi-lot mode - add to list if not already present
-          const exists = scannedQrCodes.find(qr => qr.batchCode === productData.batchCode);
-          if (!exists) {
-            const newCodes = [...scannedQrCodes, productData];
-            setScannedQrCodes(newCodes);
-            
-            // Check compatibility if we have 2+ items
-            if (newCodes.length >= 2) {
-              const firstType = newCodes[0].commodityType;
-              const allSameType = newCodes.every(qr => qr.commodityType === firstType);
-              
-              if (allSameType) {
-                setMultiLotValidation({
-                  success: true,
-                  message: `All ${newCodes.length} lots are ${firstType} and compatible for consolidation`
-                });
-              } else {
-                setMultiLotValidation({
-                  success: false,
-                  error: "Cannot consolidate different commodity types in multi-lot"
-                });
-              }
-            }
-          }
-        }
-        
-        setScannedQrCode('');
-        toast({
-          title: "Buyer Product Found",
-          description: `${productData.commodityType} owned by ${productData.buyerName} - ${productData.weight} ${productData.unit} (Storage Fee: $${productData.storageFee})`
-        });
-      } else {
-        toast({
-          title: "QR Code Not Found",
-          description: data.message || "QR code not found in database",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('QR lookup error:', error);
-      toast({
-        title: "Lookup Error",
-        description: "Failed to lookup QR code. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Handle actual product registration
-  const handleProductRegistration = async () => {
-    try {
-      const totalWeight = scannedQrCodes.reduce((sum, product) => sum + product.weight, 0);
-      const storageFee = totalWeight * 50; // $50 per metric ton
-      
-      const registrationData = {
-        products: scannedQrCodes,
-        warehouseId: warehouseInspectorData?.warehouseId || 'WH-MARGIBI-001',
-        totalWeight: totalWeight,
-        storageFee: storageFee,
-        registrationDate: new Date().toISOString(),
-        status: 'in_custody'
-      };
-
-      const response = await fetch('/api/warehouse-custody/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registrationData)
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        // Generate warehouse QR code
-        const warehouseQR = `WH-CUSTODY-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-        
-        setRegisteredProduct({
-          ...result.data,
-          warehouseQR: warehouseQR,
-          products: scannedQrCodes,
-          totalWeight: totalWeight,
-          storageFee: storageFee
-        });
-        
-        setShowRegistrationModal(false);
-        setShowQrModal(true);
-        setScannedQrCodes([]);
-        setMultiLotValidation(null);
-        
-        // Refresh custody records
-        queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
-        
-        toast({
-          title: "✅ Registration Complete",
-          description: `Products registered successfully. Storage fee: $${storageFee}`,
-        });
-      } else {
-        toast({
-          title: "❌ Registration Failed",
-          description: result.message || "Failed to register products",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast({
-        title: "❌ Registration Error",
-        description: "Failed to register products. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Warehouse Custody Records Query
-  const { data: custodyRecords, isLoading: custodyRecordsLoading } = useQuery({
-    queryKey: ['/api/warehouse-custody/records'],
-    select: (data: any) => data?.data || []
-  });
-
-  // QR Code Lookup Mutation
-  const lookupQrMutation = useMutation({
-    mutationFn: async (qrCode: string) => {
-      const response = await fetch(`/api/warehouse-custody/lookup-qr/${qrCode}`);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'QR code not found');
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      if (custodyRegistrationMode === 'single') {
-        setScannedQrCodes([data.data]);
-        toast({
-          title: "✅ QR Code Found",
-          description: `Found ${data.data.commodityType} from ${data.data.farmerName} (${data.data.weight} tons)`,
-        });
-      } else {
-        // Multi-lot mode - add to list
-        const existingIndex = scannedQrCodes.findIndex(qr => qr.batchCode === data.data.batchCode);
-        if (existingIndex === -1) {
-          setScannedQrCodes(prev => [...prev, data.data]);
-          toast({
-            title: "✅ QR Code Added",
-            description: `Added ${data.data.commodityType} from ${data.data.farmerName} to multi-lot custody`,
-          });
-        } else {
-          toast({
-            title: "⚠️ Duplicate QR Code",
-            description: "This QR code is already in the list",
-            variant: "destructive",
-          });
-        }
-      }
-      setCurrentQrInput('');
-    },
-    onError: (error: any) => {
-      toast({
-        title: "❌ QR Lookup Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Multi-Lot Validation Mutation
-  const validateMultiLotMutation = useMutation({
-    mutationFn: async (qrCodes: string[]) => {
-      const response = await fetch('/api/warehouse-custody/validate-multi-lot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ qrCodes })
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Validation failed');
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setMultiLotValidation(data);
-      toast({
-        title: "✅ Multi-Lot Validated",
-        description: data.message,
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "❌ Validation Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-      setMultiLotValidation(null);
-    }
-  });
-
-  // Custody Registration Mutation
-  const registerCustodyMutation = useMutation({
-    mutationFn: async (registrationData: any) => {
-      const response = await fetch('/api/warehouse-custody/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registrationData)
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Registration failed');
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "✅ Custody Registered",
-        description: `${data.message} (Storage Fee: $${data.storageAmount})`,
-      });
-      // Reset form
-      setScannedQrCodes([]);
-      setMultiLotValidation(null);
-      setCurrentQrInput('');
-      setShowCustodyModal(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "❌ Registration Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
   // Product registration mutation
   const registerProductMutation = useMutation({
     mutationFn: async (registrationData: any) => {
@@ -432,6 +149,36 @@ export default function WarehouseInspectorDashboard() {
     }
   });
 
+  // Handle QR code lookup
+  const handleQrCodeLookup = async () => {
+    if (!scannedQrCode) return;
+
+    try {
+      const response = await apiRequest(`/api/warehouse-inspector/lookup-qr/${scannedQrCode}`, {
+        method: 'GET'
+      });
+      
+      if (response.success && response.data) {
+        setProductToRegister(response.data);
+        toast({
+          title: "Product Found",
+          description: `Found ${response.data.commodityType} from ${response.data.buyerName}`,
+        });
+      } else {
+        toast({
+          title: "Product Not Found",
+          description: "QR code not found in system records",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Lookup Failed",
+        description: error.message || "Failed to lookup QR code",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Handle product registration
   const handleRegisterProduct = async () => {
@@ -732,658 +479,11 @@ export default function WarehouseInspectorDashboard() {
     }
   });
 
-  // Validate bag request mutation
-  const validateBagRequestMutation = useMutation({
-    mutationFn: async (requestId: string) => {
-      const response = await fetch(`/api/warehouse-inspector/validate-bag-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId, action: 'validate', validationNotes: 'Approved by warehouse inspector' })
-      });
-      if (!response.ok) throw new Error('Failed to validate request');
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({ title: "✅ Request Validated", description: "Bag request has been validated successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-requests'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/available-transactions'] });
-    },
-    onError: () => {
-      toast({ title: "❌ Error", description: "Failed to validate request", variant: "destructive" });
-    }
-  });
-
-  // Reject bag request mutation
-  const rejectBagRequestMutation = useMutation({
-    mutationFn: async (requestId: string) => {
-      const response = await fetch(`/api/warehouse-inspector/validate-bag-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId, action: 'reject', validationNotes: 'Rejected by warehouse inspector' })
-      });
-      if (!response.ok) throw new Error('Failed to reject request');
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({ title: "❌ Request Rejected", description: "Bag request has been rejected" });
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/bag-requests'] });
-    },
-    onError: () => {
-      toast({ title: "❌ Error", description: "Failed to reject request", variant: "destructive" });
-    }
-  });
-
-  // Handle QR code viewing
-  const handleViewQrCode = (batchCode: string) => {
-    // Create enhanced QR display modal with actual QR code using client-side generation
-    const qrWindow = window.open('', '_blank', 'width=900,height=700');
-    
-    if (qrWindow) {
-      qrWindow.document.write(`
-        <html>
-          <head>
-            <title>QR Batch Details - ${batchCode}</title>
-            <script src="https://unpkg.com/qrious@4.0.2/dist/qrious.min.js"></script>
-            <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
-              .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-              .header { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 24px; text-align: center; }
-              .qr-section { padding: 24px; text-align: center; border-bottom: 1px solid #e5e7eb; }
-              .qr-code-container { margin: 0 auto 16px; border: 3px solid #059669; border-radius: 8px; padding: 10px; background: white; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
-              .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px; }
-              .detail-card { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
-              .detail-title { font-weight: 600; color: #374151; margin-bottom: 8px; }
-              .detail-value { color: #6b7280; }
-              .compliance-section { background: #ecfdf5; padding: 20px; margin: 16px 24px; border-radius: 8px; border: 1px solid #d1fae5; }
-              .compliance-title { font-weight: 600; color: #065f46; margin-bottom: 12px; display: flex; align-items: center; }
-              .compliance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-              .compliance-item { display: flex; align-items: center; }
-              .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 8px; }
-              .print-btn { position: fixed; top: 20px; right: 20px; background: #059669; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-              .print-btn:hover { background: #047857; }
-              @media print { .print-btn { display: none; } }
-            </style>
-          </head>
-          <body>
-            <button class="print-btn" onclick="window.print()">🖨️ Print</button>
-            <div class="container">
-              <div class="header">
-                <h1>🏭 Warehouse QR Batch</h1>
-                <h2>${batchCode}</h2>
-                <p>Agricultural Traceability System</p>
-              </div>
-              
-              <div class="qr-section">
-                <div class="qr-code-container">
-                  <canvas id="qr-code" width="180" height="180"></canvas>
-                </div>
-                <p><strong>Scan for complete traceability</strong></p>
-                <p>Generated: ${new Date().toLocaleString()}</p>
-              </div>
-              
-              <div class="details-grid">
-                <div class="detail-card">
-                  <div class="detail-title">📦 Batch Information</div>
-                  <div class="detail-value">
-                    <p><strong>Batch Code:</strong> ${batchCode}</p>
-                    <p><strong>Total Packages:</strong> 15 bags</p>
-                    <p><strong>Total Weight:</strong> 2,500 kg</p>
-                    <p><strong>Commodity:</strong> Cocoa</p>
-                  </div>
-                </div>
-                
-                <div class="detail-card">
-                  <div class="detail-title">🏢 Buyer Information</div>
-                  <div class="detail-value">
-                    <p><strong>Buyer:</strong> John Kollie</p>
-                    <p><strong>Company:</strong> Kollie Trading Ltd</p>
-                    <p><strong>Storage Fee:</strong> $125.00</p>
-                    <p><strong>Status:</strong> In Warehouse Custody</p>
-                  </div>
-                </div>
-                
-                <div class="detail-card">
-                  <div class="detail-title">📍 Location & Tracking</div>
-                  <div class="detail-value">
-                    <p><strong>Warehouse:</strong> WH-MARGIBI-001</p>
-                    <p><strong>County:</strong> Margibi County</p>
-                    <p><strong>GPS:</strong> 6.428°N, 9.429°W</p>
-                    <p><strong>Created:</strong> ${new Date().toLocaleDateString()}</p>
-                  </div>
-                </div>
-                
-                <div class="detail-card">
-                  <div class="detail-title">👨‍🌾 Farm Origin</div>
-                  <div class="detail-value">
-                    <p><strong>Farmer:</strong> Paolo Farmers Cooperative</p>
-                    <p><strong>Farm Location:</strong> Margibi County</p>
-                    <p><strong>Harvest Date:</strong> ${new Date().toLocaleDateString()}</p>
-                    <p><strong>Quality Grade:</strong> Premium Export</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="compliance-section">
-                <div class="compliance-title">
-                  🛡️ EUDR Compliance Status
-                </div>
-                <div class="compliance-grid">
-                  <div class="compliance-item">
-                    <div class="status-dot"></div>
-                    <span>Deforestation Free</span>
-                  </div>
-                  <div class="compliance-item">
-                    <div class="status-dot"></div>
-                    <span>EUDR Compliant</span>
-                  </div>
-                  <div class="compliance-item">
-                    <div class="status-dot"></div>
-                    <span>Chain of Custody Verified</span>
-                  </div>
-                  <div class="compliance-item">
-                    <div class="status-dot"></div>
-                    <span>Due Diligence Complete</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <script>
-              // Generate QR code when page loads
-              window.onload = function() {
-                try {
-                  var batchCodeValue = "${batchCode}";
-                  var today = new Date();
-                  var certificateData = "AGRICULTURAL TRACEABILITY CERTIFICATE\\n" +
-                    "REPUBLIC OF LIBERIA\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "BATCH INFORMATION:\\n" +
-                    "Batch Code: " + batchCodeValue + "\\n" +
-                    "Date: " + today.toLocaleDateString() + "\\n" +
-                    "Time: " + today.toLocaleTimeString() + "\\n" +
-                    "Transaction: TXN-" + Math.random().toString().substr(2, 8) + "\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "PRODUCT DETAILS:\\n" +
-                    "Commodity: RUBBER\\n" +
-                    "Quality: PREMIUM EXPORT GRADE A\\n" +
-                    "Weight: 5 TONS (5000 bags)\\n" +
-                    "Package: 10kg per bag\\n" +
-                    "Moisture: 6.5% (Optimal)\\n" +
-                    "Quality Score: 95/100 (Outstanding)\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "FARM ORIGIN:\\n" +
-                    "Farmer: Paolo\\n" +
-                    "ID: 288\\n" +
-                    "Location: Margibi, Liberia\\n" +
-                    "GPS: 6.428°N, 9.429°W\\n" +
-                    "Farm Size: 2.5 hectares\\n" +
-                    "Certificate: LACRA-CERT-288\\n" +
-                    "Status: CERTIFIED ORGANIC\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "QUALITY ASSURANCE:\\n" +
-                    "Inspector: WH-INS-001\\n" +
-                    "Facility: Margibi Central Warehouse\\n" +
-                    "Date: " + today.toLocaleDateString() + "\\n" +
-                    "Storage: 18-20°C, 60-65% RH\\n" +
-                    "Standards: EU EXPORT READY\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "EUDR COMPLIANCE:\\n" +
-                    "Status: FULLY COMPLIANT\\n" +
-                    "Risk: LOW RISK\\n" +
-                    "Deforestation Free: VERIFIED\\n" +
-                    "Due Diligence: COMPLETED\\n" +
-                    "Geolocation: VERIFIED\\n" +
-                    "Legal Harvest: CONFIRMED\\n" +
-                    "Body: LACRA\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "CERTIFICATIONS:\\n" +
-                    "LACRA: LACRA-012-" + batchCodeValue.substr(-4) + "\\n" +
-                    "EUDR: EUDR-012-" + batchCodeValue.substr(-4) + "\\n" +
-                    "Organic: ORG-288\\n" +
-                    "Valid: " + today.toLocaleDateString() + " to " + new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString() + "\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "VERIFICATION:\\n" +
-                    "Code: " + Math.random().toString(36).substr(2, 8).toUpperCase() + "\\n" +
-                    "Signature: SIG-" + Math.random().toString(36).substr(2, 8).toUpperCase() + "\\n" +
-                    "System: POLIPUS PLATFORM\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "ONLINE VERIFICATION:\\n" +
-                    "agritrace360.lacra.gov.lr/verify/" + batchCodeValue + "\\n\\n" +
-                    "===========================================\\n\\n" +
-                    "POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE\\n" +
-                    "AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA\\n" +
-                    "EU DEFORESTATION REGULATION COMPLIANT\\n\\n" +
-                    "Complete farm-to-export traceability guaranteed.";
-
-                  if (typeof qrcode !== 'undefined') {
-                    var qr = qrcode(0, 'M');
-                    qr.addData(certificateData);
-                    qr.make();
-                    
-                    var qrHTML = qr.createImgTag(4, 8);
-                    document.getElementById('qr-container').innerHTML = qrHTML;
-                  } else {
-                    document.getElementById('qr-container').innerHTML = '<div style="width: 180px; height: 180px; border: 3px solid #059669; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #374151; background: #f9fafb; border-radius: 8px;">QR Code: ' + batchCodeValue + '</div>';
-                  }
-                } catch (error) {
-                  document.getElementById('qr-container').innerHTML = '<div style="width: 180px; height: 180px; border: 3px solid #059669; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #374151; background: #f9fafb; border-radius: 8px;">QR Code: ' + batchCodeValue + '</div>';
-                }
-              };
-
-                    // Generate QR code using QRCode.js library
-                    const canvas = document.getElementById('qr-code');
-                    QRCode.toCanvas(canvas, certificateData, {
-                      width: 180,
-                      margin: 2,
-                      color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
-                      }
-                    }, function(error) {
-                      if (error) {
-                        document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
-                      }
-                    });
-                  } else {
-                    // Fallback if library doesn't load
-                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
-                  }
-                } catch (error) {
-                  // Fallback if QR generation fails
-                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: \${batchCode}</div>';
-                }
-              }, 500);
-            </script>
-            
-            <script>
-              // Generate QR code when page loads
-              setTimeout(function() {
-                try {
-                  if (typeof QRious !== 'undefined') {
-                    const certificateData = \`AGRICULTURAL TRACEABILITY CERTIFICATE
-REPUBLIC OF LIBERIA
-
-===========================================
-
-BATCH INFORMATION:
-Batch Code: \${batchCode}
-Date: \${new Date().toLocaleDateString()}
-Time: \${new Date().toLocaleTimeString()}
-Transaction: TXN-\${Math.random().toString().substr(2, 8)}
-
-===========================================
-
-PRODUCT DETAILS:
-Commodity: RUBBER
-Quality: PREMIUM EXPORT GRADE A
-Weight: 5 TONS (5000 bags)
-Package: 10kg per bag
-Moisture: 6.5% (Optimal)
-Quality Score: 95/100 (Outstanding)
-
-===========================================
-
-FARM ORIGIN:
-Farmer: Paolo
-ID: 288
-Location: Margibi, Liberia
-GPS: 6.428°N, 9.429°W
-Farm Size: 2.5 hectares
-Certificate: LACRA-CERT-288
-Status: CERTIFIED ORGANIC
-
-===========================================
-
-QUALITY ASSURANCE:
-Inspector: WH-INS-001
-Facility: Margibi Central Warehouse
-Date: \${new Date().toLocaleDateString()}
-Storage: 18-20°C, 60-65% RH
-Standards: EU EXPORT READY
-
-===========================================
-
-EUDR COMPLIANCE:
-Status: FULLY COMPLIANT
-Risk: LOW RISK
-Deforestation Free: VERIFIED
-Due Diligence: COMPLETED
-Geolocation: VERIFIED
-Legal Harvest: CONFIRMED
-Body: LACRA
-
-===========================================
-
-CERTIFICATIONS:
-LACRA: LACRA-012-\${batchCode.substr(-4)}
-EUDR: EUDR-012-\${batchCode.substr(-4)}
-Organic: ORG-288
-Valid: \${new Date().toLocaleDateString()} to \${new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}
-
-===========================================
-
-VERIFICATION:
-Code: \${Math.random().toString(36).substr(2, 8).toUpperCase()}
-Signature: SIG-\${Math.random().toString(36).substr(2, 8).toUpperCase()}
-System: POLIPUS PLATFORM
-
-===========================================
-
-ONLINE VERIFICATION:
-agritrace360.lacra.gov.lr/verify/\${batchCode}
-
-===========================================
-
-POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
-AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
-EU DEFORESTATION REGULATION COMPLIANT
-
-Complete farm-to-export traceability guaranteed.\`;
-
-                    const qr = new QRious({
-                      element: document.getElementById('qr-code'),
-                      value: certificateData,
-                      size: 180,
-                      foreground: '#000000',
-                      background: '#ffffff'
-                    });
-                  } else {
-                    // Fallback if library doesn't load
-                    document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
-                  }
-                } catch (error) {
-                  // Fallback if QR generation fails
-                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">QR Code: ${batchCode}</div>';
-                }
-              }, 100);
-            </script>
-          </body>
-        </html>
-      `);
-      qrWindow.document.close();
-    }
-  };
-
-  // Handle printing QR code
-  const handlePrintQrCode = (batchCode: string) => {
-    // Generate enhanced print layout with actual QR code using client-side generation
-    const printContent = `
-      <html>
-        <head>
-          <title>Warehouse QR Batch - ${batchCode}</title>
-          <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; color: #1f2937; }
-            .container { max-width: 600px; margin: 0 auto; }
-            .header { text-align: center; border-bottom: 3px solid #059669; padding-bottom: 20px; margin-bottom: 20px; }
-            .logo { background: #059669; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block; margin-bottom: 16px; }
-            .qr-section { text-align: center; background: #f8fafc; padding: 24px; border-radius: 12px; margin: 20px 0; border: 2px solid #e5e7eb; }
-            .qr-code-container { margin: 0 auto 16px; border: 3px solid #059669; border-radius: 8px; padding: 10px; background: white; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; }
-            .qr-placeholder { width: 160px; height: 160px; border: 2px solid #059669; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-weight: bold; background: white; border-radius: 8px; font-size: 12px; }
-            .details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
-            .detail-box { background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; }
-            .detail-title { font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 14px; }
-            .detail-value { color: #6b7280; font-size: 13px; line-height: 1.4; }
-            .compliance { background: #ecfdf5; padding: 16px; border-radius: 8px; border: 1px solid #d1fae5; margin: 20px 0; }
-            .compliance-title { font-weight: 600; color: #065f46; margin-bottom: 12px; }
-            .compliance-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-            .compliance-item { display: flex; align-items: center; font-size: 12px; }
-            .dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 6px; }
-            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
-            @media print { 
-              body { margin: 0; } 
-              .container { margin: 0; max-width: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <div class="logo">🏭 POLIPUS AGRICULTURAL TRACEABILITY</div>
-              <h1>Warehouse QR Batch Certificate</h1>
-              <p style="margin: 0; color: #6b7280;">EUDR Compliant Agricultural Product Tracking</p>
-            </div>
-            
-            <div class="qr-section">
-              <div class="qr-code-container">
-                <canvas id="qr-code-print" width="160" height="160"></canvas>
-              </div>
-              <h3 style="margin: 0 0 8px 0; color: #059669;">Batch Code: ${batchCode}</h3>
-              <p style="margin: 0; color: #6b7280; font-size: 14px;">Scan for complete traceability and compliance verification</p>
-            </div>
-            
-            <div class="details">
-              <div class="detail-box">
-                <div class="detail-title">📦 BATCH INFORMATION</div>
-                <div class="detail-value">
-                  <p><strong>Total Packages:</strong> 15 bags</p>
-                  <p><strong>Total Weight:</strong> 2,500 kg</p>
-                  <p><strong>Commodity:</strong> Cocoa</p>
-                  <p><strong>Quality Grade:</strong> Premium Export</p>
-                </div>
-              </div>
-              
-              <div class="detail-box">
-                <div class="detail-title">🏢 BUYER DETAILS</div>
-                <div class="detail-value">
-                  <p><strong>Buyer Name:</strong> John Kollie</p>
-                  <p><strong>Company:</strong> Kollie Trading Ltd</p>
-                  <p><strong>Storage Fee:</strong> $125.00</p>
-                  <p><strong>Status:</strong> Warehouse Custody</p>
-                </div>
-              </div>
-              
-              <div class="detail-box">
-                <div class="detail-title">📍 LOCATION & ORIGIN</div>
-                <div class="detail-value">
-                  <p><strong>Warehouse:</strong> WH-MARGIBI-001</p>
-                  <p><strong>County:</strong> Margibi County, Liberia</p>
-                  <p><strong>GPS Coordinates:</strong> 6.428°N, 9.429°W</p>
-                  <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
-                </div>
-              </div>
-              
-              <div class="detail-box">
-                <div class="detail-title">👨‍🌾 FARM SOURCE</div>
-                <div class="detail-value">
-                  <p><strong>Farmer:</strong> Paolo Farmers Cooperative</p>
-                  <p><strong>Farm Location:</strong> Margibi County</p>
-                  <p><strong>Harvest Date:</strong> ${new Date().toLocaleDateString()}</p>
-                  <p><strong>Verification Code:</strong> WH-VER-${Math.random().toString(36).substr(2, 6).toUpperCase()}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="compliance">
-              <div class="compliance-title">🛡️ EUDR COMPLIANCE CERTIFICATION</div>
-              <div class="compliance-items">
-                <div class="compliance-item"><div class="dot"></div>Deforestation Free Verified</div>
-                <div class="compliance-item"><div class="dot"></div>EUDR Regulation Compliant</div>
-                <div class="compliance-item"><div class="dot"></div>Chain of Custody Maintained</div>
-                <div class="compliance-item"><div class="dot"></div>Due Diligence Complete</div>
-                <div class="compliance-item"><div class="dot"></div>GPS Location Verified</div>
-                <div class="compliance-item"><div class="dot"></div>Risk Assessment: Low Risk</div>
-              </div>
-            </div>
-            
-            <div class="footer">
-              <p><strong>LACRA - Liberia Agriculture Commodity Regulatory Authority</strong></p>
-              <p>Generated: ${new Date().toLocaleString()} | Inspector: WH-MARGIBI-001 | System: POLIPUS AgriTrace360™</p>
-              <p>This certificate verifies compliance with EU Deforestation Regulation (EUDR) and agricultural traceability standards.</p>
-            </div>
-          </div>
-          
-          <script>
-            // Generate QR code when page loads, then print
-            setTimeout(function() {
-              try {
-                if (typeof QRCode !== 'undefined') {
-                  const certificateData = \`AGRICULTURAL TRACEABILITY CERTIFICATE
-REPUBLIC OF LIBERIA
-
-===========================================
-
-BATCH INFORMATION:
-Batch Code: \${batchCode}
-Date: \${new Date().toLocaleDateString()}
-Time: \${new Date().toLocaleTimeString()}
-Transaction: TXN-\${Math.random().toString().substr(2, 8)}
-
-===========================================
-
-PRODUCT DETAILS:
-Commodity: RUBBER
-Quality: PREMIUM EXPORT GRADE A
-Weight: 5 TONS (5000 bags)
-Package: 10kg per bag
-Moisture: 6.5% (Optimal)
-Quality Score: 95/100 (Outstanding)
-
-===========================================
-
-FARM ORIGIN:
-Farmer: Paolo
-ID: 288
-Location: Margibi, Liberia
-GPS: 6.428°N, 9.429°W
-Farm Size: 2.5 hectares
-Certificate: LACRA-CERT-288
-Status: CERTIFIED ORGANIC
-
-===========================================
-
-QUALITY ASSURANCE:
-Inspector: WH-INS-001
-Facility: Margibi Central Warehouse
-Date: \${new Date().toLocaleDateString()}
-Storage: 18-20°C, 60-65% RH
-Standards: EU EXPORT READY
-
-===========================================
-
-EUDR COMPLIANCE:
-Status: FULLY COMPLIANT
-Risk: LOW RISK
-Deforestation Free: VERIFIED
-Due Diligence: COMPLETED
-Geolocation: VERIFIED
-Legal Harvest: CONFIRMED
-Body: LACRA
-
-===========================================
-
-CERTIFICATIONS:
-LACRA: LACRA-012-\${batchCode.substr(-4)}
-EUDR: EUDR-012-\${batchCode.substr(-4)}
-Organic: ORG-288
-Valid: \${new Date().toLocaleDateString()} to \${new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}
-
-===========================================
-
-VERIFICATION:
-Code: \${Math.random().toString(36).substr(2, 8).toUpperCase()}
-Signature: SIG-\${Math.random().toString(36).substr(2, 8).toUpperCase()}
-System: POLIPUS PLATFORM
-
-===========================================
-
-ONLINE VERIFICATION:
-agritrace360.lacra.gov.lr/verify/\${batchCode}
-
-===========================================
-
-POWERED BY POLIPUS AGRICULTURAL INTELLIGENCE
-AUTHORIZED BY LACRA - GOVERNMENT OF LIBERIA
-EU DEFORESTATION REGULATION COMPLIANT
-
-Complete farm-to-export traceability guaranteed.\`;
-
-                  // Generate QR code using QRCode.js library
-                  const canvas = document.getElementById('qr-code-print');
-                  QRCode.toCanvas(canvas, certificateData, {
-                    width: 160,
-                    margin: 2,
-                    color: {
-                      dark: '#000000',
-                      light: '#FFFFFF'
-                    }
-                  }, function(error) {
-                    if (error) {
-                      document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">\${batchCode}</div>';
-                    }
-                    // Auto-print after QR code is generated
-                    setTimeout(function() {
-                      window.print();
-                    }, 500);
-                  });
-                } else {
-                  // Fallback if library doesn't load
-                  document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">\${batchCode}</div>';
-                  setTimeout(function() {
-                    window.print();
-                  }, 200);
-                }
-              } catch (error) {
-                // Fallback if QR generation fails
-                document.querySelector('.qr-code-container').innerHTML = '<div class="qr-placeholder">\${batchCode}</div>';
-                setTimeout(function() {
-                  window.print();
-                }, 200);
-              }
-            }, 500);
-          </script>
-        </body>
-      </html>
-    `;
-    
-    const printWindow = window.open('', '_blank', 'width=800,height=1000');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-    }
-  };
-
-  // Handle viewing bag request details
-  const handleViewBagRequestDetails = (request: any) => {
-    setSelectedBagRequest(request);
-    setShowBagDetailsModal(true);
-  };
-
-  // Handle preview batch
-  const handlePreviewBatch = () => {
-    if (selectedTransactions.length === 0) {
-      toast({
-        title: "❌ No Transactions Selected",
-        description: "Please select at least one transaction to preview.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const selectedTransactionData = availableTransactions?.filter((t: any) => 
-      selectedTransactions.includes(t.id)
-    ) || [];
-
-    const previewData = {
-      totalTransactions: selectedTransactions.length,
-      totalPackages: totalPackages,
-      commodities: selectedTransactionData.map((t: any) => t.commodityType).join(', '),
-      buyers: selectedTransactionData.map((t: any) => t.buyerName).join(', '),
-      totalWeight: selectedTransactionData.reduce((sum: number, t: any) => sum + parseFloat(t.quantity || 0), 0),
-      batchCode: `WH-BATCH-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
-    };
-
-    toast({
-      title: "📋 Batch Preview",
-      description: `${previewData.totalTransactions} transactions, ${previewData.totalPackages} packages, Code: ${previewData.batchCode}`
-    });
-  };
-
   // Calculate dashboard statistics from real data
   const dashboardStats = {
-    pendingInspections: pendingInspections?.length || 8,
+    pendingInspections: pendingInspections?.length || 0,
     completedInspections: 89,
-    storageUnits: inventoryStatus?.length || 42,
+    storageUnits: inventoryStatus?.length || 0,
     complianceRate: storageCompliance?.length > 0 ? 
       (storageCompliance.reduce((acc: number, stat: any) => acc + parseFloat(stat.rate), 0) / storageCompliance.length).toFixed(1) : 
       96.8,
@@ -1588,7 +688,7 @@ Complete farm-to-export traceability guaranteed.\`;
 
         {/* Main Navigation Tabs - Moved to middle position */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-9 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
@@ -1597,41 +697,33 @@ Complete farm-to-export traceability guaranteed.\`;
               <QrCode className="w-4 h-4 mr-2" />
               Registration
             </TabsTrigger>
-            <TabsTrigger value="custody" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Shield className="w-4 h-4 mr-2" />
-              Custody
+            <TabsTrigger value="inspections" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <ClipboardCheck className="w-4 h-4 mr-2" />
+              Inspections
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger value="codes" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              Codes
             </TabsTrigger>
             <TabsTrigger value="bags" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Bags
             </TabsTrigger>
-            <TabsTrigger value="inspections" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <ClipboardCheck className="w-4 h-4 mr-2" />
-              Inspections
+            <TabsTrigger value="validation" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Shield className="w-4 h-4 mr-2" />
+              Validation
             </TabsTrigger>
-            <TabsTrigger value="storage" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Warehouse className="w-4 h-4 mr-2" />
-              Storage
-            </TabsTrigger>
-            <TabsTrigger value="temperature" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Thermometer className="w-4 h-4 mr-2" />
-              Temperature
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileText className="w-4 h-4 mr-2" />
-              Reports
+              Inventory
             </TabsTrigger>
             <TabsTrigger value="quality" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4 mr-2" />
               Quality
-            </TabsTrigger>
-            <TabsTrigger value="shipping" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Truck className="w-4 h-4 mr-2" />
-              Shipping
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -1648,7 +740,9 @@ Complete farm-to-export traceability guaranteed.\`;
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {pendingInspections && pendingInspections.length > 0 ? (
+                    {loadingInspections ? (
+                      <p className="text-center text-gray-500">Loading inspections...</p>
+                    ) : pendingInspections && pendingInspections.length > 0 ? (
                       pendingInspections.slice(0, 3).map((inspection: any) => (
                         <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
@@ -1664,24 +758,7 @@ Complete farm-to-export traceability guaranteed.\`;
                         </div>
                       ))
                     ) : (
-                      [
-                        { id: 1, storageFacility: 'Warehouse Section A-1', commodity: 'Cocoa Beans', quantity: '15 tons', priority: 'high', scheduledDate: 'Today 2:00 PM' },
-                        { id: 2, storageFacility: 'Warehouse Section B-2', commodity: 'Coffee Beans', quantity: '8 tons', priority: 'medium', scheduledDate: 'Tomorrow 9:00 AM' },
-                        { id: 3, storageFacility: 'Warehouse Section C-1', commodity: 'Cashew Nuts', quantity: '12 tons', priority: 'low', scheduledDate: 'Tomorrow 3:00 PM' }
-                      ].map((inspection: any) => (
-                        <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <p className="font-medium">{inspection.storageFacility}</p>
-                            <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge className={getPriorityColor(inspection.priority)}>
-                              {inspection.priority}
-                            </Badge>
-                            <p className="text-xs text-gray-500 mt-1">{inspection.scheduledDate}</p>
-                          </div>
-                        </div>
-                      ))
+                      <p className="text-center text-gray-500">No pending inspections</p>
                     )}
                   </div>
                 </CardContent>
@@ -1696,7 +773,9 @@ Complete farm-to-export traceability guaranteed.\`;
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {qualityControls && qualityControls.length > 0 ? (
+                    {loadingQuality ? (
+                      <p className="text-center text-gray-500">Loading quality data...</p>
+                    ) : qualityControls && qualityControls.length > 0 ? (
                       qualityControls.slice(0, 3).map((control: any) => (
                         <div key={control.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
@@ -1712,24 +791,7 @@ Complete farm-to-export traceability guaranteed.\`;
                         </div>
                       ))
                     ) : (
-                      [
-                        { id: 1, testType: 'Moisture Content', batchNumber: 'WH-BATCH-1756052880737-8P2L', status: 'passed', testDate: 'Today' },
-                        { id: 2, testType: 'Grade Classification', batchNumber: 'WH-BATCH-1756052880737-8P2L', status: 'passed', testDate: 'Today' },
-                        { id: 3, testType: 'Contamination Check', batchNumber: 'QR-MULTI-LOT-WH-001-20250825', status: 'passed', testDate: 'Yesterday' }
-                      ].map((control: any) => (
-                        <div key={control.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <p className="font-medium">{control.testType}</p>
-                            <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge className="bg-green-100 text-green-800">
-                              {control.status}
-                            </Badge>
-                            <p className="text-xs text-gray-500 mt-1">{control.testDate}</p>
-                          </div>
-                        </div>
-                      ))
+                      <p className="text-center text-gray-500">No quality controls</p>
                     )}
                   </div>
                 </CardContent>
@@ -1744,7 +806,9 @@ Complete farm-to-export traceability guaranteed.\`;
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {storageCompliance && storageCompliance.length > 0 ? (
+                    {loadingCompliance ? (
+                      <p className="text-center text-gray-500">Loading compliance data...</p>
+                    ) : storageCompliance && storageCompliance.length > 0 ? (
                       storageCompliance.map((compliance: any) => (
                         <div key={compliance.category} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
@@ -1759,23 +823,7 @@ Complete farm-to-export traceability guaranteed.\`;
                         </div>
                       ))
                     ) : (
-                      [
-                        { category: 'Temperature Control', rate: 98, lastCheck: 'Today 12:00 PM' },
-                        { category: 'Storage Standards', rate: 96, lastCheck: 'Today 11:30 AM' },
-                        { category: 'Safety Protocols', rate: 100, lastCheck: 'Today 10:15 AM' }
-                      ].map((compliance: any) => (
-                        <div key={compliance.category} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <p className="font-medium">{compliance.category}</p>
-                            <p className="text-sm text-gray-600">Last checked: {compliance.lastCheck}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge className="bg-green-100 text-green-800">
-                              {compliance.rate}%
-                            </Badge>
-                          </div>
-                        </div>
-                      ))
+                      <p className="text-center text-gray-500">No compliance data</p>
                     )}
                   </div>
                 </CardContent>
@@ -1870,58 +918,25 @@ Complete farm-to-export traceability guaranteed.\`;
             </Card>
           </TabsContent>
 
-          {/* Product Registration Tab - Two conditional modes */}
+          {/* Product Registration Tab */}
           <TabsContent value="registration" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* QR Scanner Section with Registration Mode Selection */}
+              {/* QR Scanner Section */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <QrCode className="w-5 h-5 mr-2 text-blue-600" />
-                    Product Registration & Custody
+                    QR Code Scanner
                   </CardTitle>
                   <CardDescription>
-                    Register buyer products and place under mandatory warehouse custody control
+                    Scan buyer product QR codes to register for warehouse custody
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {/* Registration Mode Selection */}
-                  <div className="flex gap-2 mb-6 p-3 bg-gray-50 rounded-lg">
-                    <Button 
-                      size="sm"
-                      variant={custodyRegistrationMode === 'single' ? 'default' : 'outline'}
-                      onClick={() => {
-                        setCustodyRegistrationMode('single');
-                        setScannedQrCodes([]);
-                        setMultiLotValidation(null);
-                      }}
-                      data-testid="button-single-lot-registration"
-                    >
-                      <Package className="w-4 h-4 mr-2" />
-                      Single Lot Registration
-                    </Button>
-                    <Button 
-                      size="sm"
-                      variant={custodyRegistrationMode === 'multi' ? 'default' : 'outline'}
-                      onClick={() => {
-                        setCustodyRegistrationMode('multi');
-                        setScannedQrCodes([]);
-                        setMultiLotValidation(null);
-                      }}
-                      data-testid="button-multi-lot-registration"
-                    >
-                      <Layers className="w-4 h-4 mr-2" />
-                      Multi-Lot Registration
-                    </Button>
-                  </div>
-
-                  {/* QR Code Input */}
+                <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      {custodyRegistrationMode === 'single' ? 'Product QR Code' : 'Product QR Codes (Scan Multiple)'}
-                    </label>
+                    <label className="text-sm font-medium">Product QR Code</label>
                     <Input
-                      placeholder={custodyRegistrationMode === 'single' ? "Scan or enter QR code" : "Scan or enter QR code (one at a time)"}
+                      placeholder="Scan or enter QR code"
                       value={scannedQrCode}
                       onChange={(e) => setScannedQrCode(e.target.value)}
                       data-testid="input-qr-code"
@@ -1931,96 +946,40 @@ Complete farm-to-export traceability guaranteed.\`;
                         variant="outline" 
                         size="sm"
                         onClick={() => {
-                          // Use your working QR code for testing
-                          setScannedQrCode("WH-BATCH-1756052880737-8P2L");
+                          // Simulate QR scan - in real implementation this would open camera
+                          setScannedQrCode("QR-BUYER-202508-" + Math.random().toString(36).substr(2, 6).toUpperCase());
                         }}
-                        data-testid="button-use-test-qr"
+                        data-testid="button-simulate-scan"
                       >
                         <QrCode className="w-4 h-4 mr-1" />
-                        Use Test QR
+                        Simulate Scan
                       </Button>
                       <Button 
                         onClick={handleQrCodeLookup}
                         disabled={!scannedQrCode}
                         data-testid="button-lookup-qr"
                       >
-                        {custodyRegistrationMode === 'single' ? 'Lookup & Register' : 'Add to Multi-Lot'}
+                        Lookup Product
                       </Button>
                     </div>
                   </div>
 
-                  {/* Multi-lot validation status */}
-                  {custodyRegistrationMode === 'multi' && scannedQrCodes.length >= 2 && (
-                    <div className={`p-4 rounded-lg border ${
-                      multiLotValidation?.success 
-                        ? 'bg-green-50 border-green-200' 
-                        : 'bg-red-50 border-red-200'
-                    }`}>
-                      <h4 className={`font-medium mb-2 ${
-                        multiLotValidation?.success ? 'text-green-800' : 'text-red-800'
-                      }`}>
-                        {multiLotValidation?.success ? '✅ Multi-Lot Compatible' : '❌ Multi-Lot Incompatible'}
-                      </h4>
-                      {multiLotValidation?.success ? (
-                        <p className="text-sm text-green-700">{multiLotValidation.message}</p>
-                      ) : (
-                        <p className="text-sm text-red-700">{multiLotValidation?.error}</p>
-                      )}
+                  {productToRegister && (
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <h4 className="font-medium text-green-800 mb-2">Product Found ✓</h4>
+                      <div className="grid grid-cols-1 gap-2 text-sm">
+                        <p><span className="font-medium">Buyer:</span> {productToRegister.buyerName}</p>
+                        <p><span className="font-medium">Commodity:</span> {productToRegister.commodityType}</p>
+                        <p><span className="font-medium">Weight:</span> {productToRegister.weight} {productToRegister.unit}</p>
+                        <p><span className="font-medium">Farmer:</span> {productToRegister.farmerName}</p>
+                        <p><span className="font-medium">Quality:</span> {productToRegister.qualityGrade}</p>
+                      </div>
                     </div>
-                  )}
-
-                  {/* Scanned QR codes display */}
-                  {scannedQrCodes.length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-sm">
-                        {custodyRegistrationMode === 'single' ? 'Product to Register:' : `Scanned Products (${scannedQrCodes.length}):`}
-                      </h4>
-                      {scannedQrCodes.map((product, index) => (
-                        <div key={product.batchCode} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <p className="font-medium text-blue-800">{product.commodityType} - {product.weight} {product.unit}</p>
-                              <p className="text-sm text-blue-600">Buyer: {product.buyerName || product.buyerCompany}</p>
-                              <p className="text-sm text-blue-600">Storage Fee: ${product.storageFee || (product.weight * 50)}</p>
-                              <p className="text-xs text-blue-500">QR: {product.batchCode}</p>
-                            </div>
-                            {custodyRegistrationMode === 'multi' && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  const newCodes = scannedQrCodes.filter((_, i) => i !== index);
-                                  setScannedQrCodes(newCodes);
-                                  if (newCodes.length < 2) {
-                                    setMultiLotValidation(null);
-                                  }
-                                }}
-                                data-testid={`button-remove-qr-${index}`}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Registration button */}
-                  {scannedQrCodes.length > 0 && (custodyRegistrationMode === 'single' || multiLotValidation?.success) && (
-                    <Button 
-                      className="w-full"
-                      onClick={() => setShowRegistrationModal(true)}
-                      data-testid="button-register-product-custody"
-                    >
-                      <ShieldCheck className="w-4 h-4 mr-2" />
-                      Register for Warehouse Custody
-                    </Button>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Storage Configuration Section */}
+              {/* Registration Details Section */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -2033,296 +992,409 @@ Complete farm-to-export traceability guaranteed.\`;
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Storage Fee (One-time per Metric Ton)</label>
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                      <p className="text-sm text-blue-800 font-medium">
-                        Storage Fee: $50.00 per Metric Ton
-                      </p>
-                      <p className="text-xs text-blue-600 mt-1">
-                        One-time warehouse custody fee for {warehouseFacility}
-                      </p>
-                    </div>
+                    <label className="text-sm font-medium">Daily Storage Rate (USD per ton)</label>
+                    <select
+                      value={selectedStorageRate}
+                      onChange={(e) => setSelectedStorageRate(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-rate"
+                    >
+                      <option value="1.00">$1.00 per ton/day - Basic Storage</option>
+                      <option value="1.50">$1.50 per ton/day - Standard Storage</option>
+                      <option value="2.00">$2.00 per ton/day - Premium Storage</option>
+                      <option value="2.50">$2.50 per ton/day - Climate Controlled</option>
+                      <option value="3.00">$3.00 per ton/day - Specialized Storage</option>
+                    </select>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Available Storage Locations</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2 bg-green-50 border border-green-200 rounded text-sm">
-                        <span className="text-green-800 font-medium">Section A-1</span>
-                        <span className="text-green-600 text-xs block">Available (85% capacity)</span>
-                      </div>
-                      <div className="p-2 bg-green-50 border border-green-200 rounded text-sm">
-                        <span className="text-green-800 font-medium">Section B-2</span>
-                        <span className="text-green-600 text-xs block">Available (72% capacity)</span>
-                      </div>
-                      <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                        <span className="text-yellow-800 font-medium">Section C-1</span>
-                        <span className="text-yellow-600 text-xs block">Limited (95% capacity)</span>
-                      </div>
-                      <div className="p-2 bg-red-50 border border-red-200 rounded text-sm">
-                        <span className="text-red-800 font-medium">Section A-2</span>
-                        <span className="text-red-600 text-xs block">Full (100% capacity)</span>
-                      </div>
-                    </div>
+                    <label className="text-sm font-medium">Storage Location</label>
+                    <select
+                      value={storageLocation}
+                      onChange={(e) => setStorageLocation(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-location"
+                    >
+                      <option value="">Select Storage Location</option>
+                      <option value="Section A-1">Section A-1 (Dry Goods)</option>
+                      <option value="Section A-2">Section A-2 (Climate Controlled)</option>
+                      <option value="Section B-1">Section B-1 (Large Items)</option>
+                      <option value="Section B-2">Section B-2 (Premium Storage)</option>
+                      <option value="Section C-1">Section C-1 (Cold Storage)</option>
+                      <option value="Outdoor Area 1">Outdoor Area 1 (Weather Resistant)</option>
+                    </select>
                   </div>
 
-                  {/* Current Custody Records */}
-                  <div className="mt-6">
-                    <h3 className="font-medium mb-3">
-                      Recent Registrations
-                    </h3>
-                    {custodyRecords && custodyRecords.length > 0 ? (
-                      <div className="space-y-2 max-h-32 overflow-y-auto">
-                        {custodyRecords.slice(0, 3).map((record: any) => (
-                          <div key={record.custodyId} className="p-2 bg-gray-50 border rounded-lg text-sm">
-                            <p className="font-medium">{record.commodityType}</p>
-                            <p className="text-xs text-gray-600">{record.totalWeight} tons • {record.authorizationStatus}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-2 max-h-32 overflow-y-auto">
-                        {[
-                          { custodyId: 1, commodityType: 'Cocoa Beans', totalWeight: 2.5, authorizationStatus: 'Under Custody' },
-                          { custodyId: 2, commodityType: 'Coffee Beans', totalWeight: 1.8, authorizationStatus: 'Under Custody' },
-                          { custodyId: 3, commodityType: 'Cashew Nuts', totalWeight: 3.2, authorizationStatus: 'Under Custody' }
-                        ].map((record: any) => (
-                          <div key={record.custodyId} className="p-2 bg-gray-50 border rounded-lg text-sm">
-                            <p className="font-medium">{record.commodityType}</p>
-                            <p className="text-xs text-gray-600">{record.totalWeight} tons • {record.authorizationStatus}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Storage Conditions</label>
+                    <select
+                      value={storageConditions}
+                      onChange={(e) => setStorageConditions(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      data-testid="select-storage-conditions"
+                    >
+                      <option value="">Select Storage Conditions</option>
+                      <option value="Standard">Standard (Room Temperature, Low Humidity)</option>
+                      <option value="Climate Controlled">Climate Controlled (20-25°C, 50-60% Humidity)</option>
+                      <option value="Dry Storage">Dry Storage (Low Humidity, Ventilated)</option>
+                      <option value="Cold Storage">Cold Storage (5-15°C)</option>
+                      <option value="Frozen">Frozen Storage (-18°C)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleRegisterProduct}
+                      disabled={!productToRegister || !storageLocation || !storageConditions}
+                      className="flex-1"
+                      data-testid="button-register-product"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Register for Custody
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-          </TabsContent>
-
-          {/* Bags Tab - Original Format Restored */}
-          <TabsContent value="bags" className="space-y-6">
-            {/* Incoming Bag Requests from Buyers */}
+            {/* Current Custody Records */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Package className="w-5 h-5 mr-2 text-orange-600" />
-                  Incoming Bag Requests from Buyers
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Building2 className="w-5 h-5 mr-2 text-purple-600" />
+                    Current Custody Records
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-1" />
+                      Filter
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-1" />
+                      Export
+                    </Button>
+                  </div>
                 </CardTitle>
                 <CardDescription>
-                  Validate or reject bag requests from buyers who have completed payment confirmation.
+                  Products currently registered in warehouse custody
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <CustodyRecordsTable />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Storage Inspections Tab */}
+          <TabsContent value="inspections" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Warehouse Storage Inspections</CardTitle>
+                    <CardDescription>
+                      Regulatory inspections for storage facilities at {warehouseFacility}
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <Input
+                        placeholder="Search inspections..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-1" />
+                      Filter
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  {bagRequests && bagRequests.length > 0 ? (
-                    bagRequests.map((request: any) => (
-                      <div key={request.id} className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="font-semibold text-lg">{request.commodityType}</h3>
-                            <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
-                            <p className="text-sm text-gray-600">From: {request.buyerName} ({request.companyName})</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-500">{request.requestDate}</p>
-                            <Badge className={request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}>
-                              {request.status}
+                  {loadingInspections ? (
+                    <p className="text-center text-gray-500">Loading inspections...</p>
+                  ) : pendingInspections && pendingInspections.length > 0 ? (
+                    pendingInspections.map((inspection: any) => (
+                      <div key={inspection.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <Badge className={getPriorityColor(inspection.priority)}>
+                              {inspection.priority} priority
+                            </Badge>
+                            <Badge className={getStatusColor(inspection.status)}>
+                              {inspection.status}
                             </Badge>
                           </div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-4 mb-4">
-                          <div>
-                            <p className="text-sm font-medium">Farmer</p>
-                            <p className="text-sm text-gray-600">{request.farmerName}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Quantity</p>
-                            <p className="text-sm text-gray-600">{request.quantity}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Total Value</p>
-                            <p className="text-sm text-green-600 font-medium">${request.totalValue}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">County</p>
-                            <p className="text-sm text-gray-600">{request.county}</p>
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <p className="text-sm font-medium">Farm Location</p>
-                          <p className="text-sm text-gray-600">{request.farmLocation}</p>
-                        </div>
-                        <div className="mb-4">
-                          <p className="text-sm font-medium">Verification Code</p>
-                          <div className="bg-gray-100 p-2 rounded font-mono text-sm">{request.verificationCode}</div>
-                        </div>
-                        {request.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewBagRequestDetails(request)}
-                              data-testid={`button-view-details-${request.id}`}
-                            >
-                              View Details
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline">
+                              <Eye className="w-4 h-4 mr-1" />
+                              Review
                             </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => validateBagRequestMutation.mutate(request.id)}
-                              disabled={validateBagRequestMutation.isPending}
-                              data-testid={`button-validate-${request.id}`}
-                            >
-                              {validateBagRequestMutation.isPending ? 'Validating...' : 'Validate'}
-                            </Button>
-                            <Button 
-                              variant="destructive" 
-                              size="sm"
-                              onClick={() => rejectBagRequestMutation.mutate(request.id)}
-                              disabled={rejectBagRequestMutation.isPending}
-                              data-testid={`button-reject-${request.id}`}
-                            >
-                              {rejectBagRequestMutation.isPending ? 'Rejecting...' : 'Reject'}
-                            </Button>
+                            {inspection.status === 'pending' ? (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleStartInspection(inspection.id)}
+                                disabled={startInspectionMutation.isPending}
+                              >
+                                Start Inspection
+                              </Button>
+                            ) : (
+                              <Button 
+                                size="sm"
+                                onClick={() => handleCompleteInspection(inspection.id, 'approved')}
+                                disabled={completeInspectionMutation.isPending}
+                              >
+                                Complete
+                              </Button>
+                            )}
                           </div>
-                        )}
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <h4 className="font-medium mb-2">Storage Details</h4>
+                            <p className="text-sm text-gray-600">Facility: {inspection.storageFacility}</p>
+                            <p className="text-sm text-gray-600">Unit: {inspection.storageUnit}</p>
+                            <p className="text-sm text-gray-600">Location: {inspection.warehouseSection}</p>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium mb-2">Commodity Details</h4>
+                            <p className="text-sm text-gray-600">Type: {inspection.commodity}</p>
+                            <p className="text-sm text-gray-600">Quantity: {inspection.quantity}</p>
+                            <p className="text-sm text-gray-600">Temperature: {inspection.temperature}°C</p>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium mb-2">Inspection Details</h4>
+                            <p className="text-sm text-gray-600">Scheduled: {inspection.scheduledDate}</p>
+                            <p className="text-sm text-gray-600">Type: {inspection.inspectionType}</p>
+                            <p className="text-sm text-gray-600">Duration: {inspection.estimatedDuration}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3">
+                          <h4 className="font-medium mb-2">Compliance Checks</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {inspection.complianceChecks?.map((check: string, index: number) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                {check}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     ))
                   ) : (
-                    [
-                      {
-                        id: "REQ-001",
-                        requestId: "REQ-WH-2025-001",
-                        commodityType: "Cocoa",
-                        buyerName: "John Kollie",
-                        companyName: "Kollie Trading Ltd",
-                        farmerName: "Paolo Farmers Cooperative",
-                        quantity: "2.5 tonnes",
-                        totalValue: "8,750.00",
-                        county: "Margibi County",
-                        farmLocation: "Farm Block A, Margibi",
-                        verificationCode: "VER-COCOA-001-2025",
-                        requestDate: "2025-08-25",
-                        status: "pending"
-                      },
-                      {
-                        id: "REQ-002", 
-                        requestId: "REQ-WH-2025-002",
-                        commodityType: "Rubber",
-                        buyerName: "Sarah Mitchell",
-                        companyName: "Global Rubber Co.",
-                        farmerName: "Liberian Rubber Farmers",
-                        quantity: "5.0 tonnes",
-                        totalValue: "12,500.00",
-                        county: "Bong County",
-                        farmLocation: "Plantation C, Bong",
-                        verificationCode: "VER-RUBBER-002-2025",
-                        requestDate: "2025-08-24",
-                        status: "pending"
-                      },
-                      {
-                        id: "REQ-003",
-                        requestId: "REQ-WH-2025-003", 
-                        commodityType: "Coffee",
-                        buyerName: "Michael Chen",
-                        companyName: "Arabica Imports Inc.",
-                        farmerName: "Nimba Coffee Alliance",
-                        quantity: "1.8 tonnes",
-                        totalValue: "6,200.00",
-                        county: "Nimba County",
-                        farmLocation: "Highland Farm B, Nimba",
-                        verificationCode: "VER-COFFEE-003-2025",
-                        requestDate: "2025-08-23",
-                        status: "pending"
-                      }
-                    ].map((request) => (
-                      <div key={request.id} className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="font-semibold text-lg">{request.commodityType}</h3>
-                            <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
-                            <p className="text-sm text-gray-600">From: {request.buyerName} ({request.companyName})</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-500">{request.requestDate}</p>
-                            <Badge className={request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}>
-                              {request.status}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-4 mb-4">
-                          <div>
-                            <p className="text-sm font-medium">Farmer</p>
-                            <p className="text-sm text-gray-600">{request.farmerName}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Quantity</p>
-                            <p className="text-sm text-gray-600">{request.quantity}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Total Value</p>
-                            <p className="text-sm text-green-600 font-medium">${request.totalValue}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">County</p>
-                            <p className="text-sm text-gray-600">{request.county}</p>
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <p className="text-sm font-medium">Farm Location</p>
-                          <p className="text-sm text-gray-600">{request.farmLocation}</p>
-                        </div>
-                        <div className="mb-4">
-                          <p className="text-sm font-medium">Verification Code</p>
-                          <div className="bg-gray-100 p-2 rounded font-mono text-sm">{request.verificationCode}</div>
-                        </div>
-                        {request.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewBagRequestDetails(request)}
-                              data-testid={`button-view-details-${request.id}`}
-                            >
-                              View Details
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => validateBagRequestMutation.mutate(request.id)}
-                              disabled={validateBagRequestMutation.isPending}
-                              data-testid={`button-validate-${request.id}`}
-                            >
-                              {validateBagRequestMutation.isPending ? 'Validating...' : 'Validate'}
-                            </Button>
-                            <Button 
-                              variant="destructive" 
-                              size="sm"
-                              onClick={() => rejectBagRequestMutation.mutate(request.id)}
-                              disabled={rejectBagRequestMutation.isPending}
-                              data-testid={`button-reject-${request.id}`}
-                            >
-                              {rejectBagRequestMutation.isPending ? 'Rejecting...' : 'Reject'}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    ))
+                    <p className="text-center text-gray-500">No pending inspections</p>
                   )}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Main QR Generation Area */}
+          {/* Transactions Tab */}
+          <TabsContent value="transactions" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                  Warehouse Transactions Archive
+                </CardTitle>
+                <CardDescription>
+                  Transaction history and verification codes for warehouse operations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {warehouseTransactionsLoading ? (
+                    <p className="text-center text-gray-500">Loading transactions...</p>
+                  ) : warehouseTransactions && warehouseTransactions.length > 0 ? (
+                    warehouseTransactions.map((transaction: any) => (
+                      <div key={transaction.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">{transaction.transactionType}</h4>
+                            <p className="text-sm text-gray-600">ID: {transaction.transactionId}</p>
+                          </div>
+                          <Badge className={transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {transaction.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <span className="font-medium">Farmer:</span>
+                            <p className="text-gray-600">{transaction.farmerName}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Commodity:</span>
+                            <p className="text-gray-600">{transaction.commodity}</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">Date:</span>
+                            <p className="text-gray-600">{transaction.transactionDate}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No transactions available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Codes Tab - Only Buyer Acceptance Codes */}
+          <TabsContent value="codes" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-blue-600" />
+                  Buyer Acceptance Codes - County Specific
+                </CardTitle>
+                <CardDescription>
+                  First verification codes (buyer acceptance) routed to your county warehouse
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center">
+                    <Shield className="w-5 h-5 mr-2 text-blue-600" />
+                    <p className="text-sm text-blue-800">
+                      <strong>County-Based Routing:</strong> Only codes from buyers in {inspectorData.county} are shown here
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {warehouseCodesLoading ? (
+                    <p className="text-center text-gray-500">Loading buyer acceptance codes...</p>
+                  ) : warehouseCodes && warehouseCodes.length > 0 ? (
+                    warehouseCodes.filter((code: any) => code.codeType === "buyer-acceptance").map((code: any) => (
+                      <div key={code.id} className="border rounded-lg p-4 bg-gradient-to-r from-green-50 to-blue-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium text-lg">Code: {code.verificationCode}</h4>
+                            <p className="text-sm text-blue-600 font-medium">Buyer Acceptance Code</p>
+                          </div>
+                          <Badge className={code.validated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {code.validated ? 'Validated' : 'Pending Validation'}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <div>
+                              <span className="font-medium text-gray-700">Transaction ID:</span>
+                              <p className="text-gray-600">{code.transactionId}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Commodity:</span>
+                              <p className="text-gray-600">{code.commodityType} ({code.quantity} {code.unit})</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Value:</span>
+                              <p className="text-gray-600">${code.totalValue.toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <div>
+                              <span className="font-medium text-gray-700">Buyer:</span>
+                              <p className="text-gray-600">{code.buyerName}</p>
+                              <p className="text-sm text-blue-600">{code.buyerCounty}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Farmer:</span>
+                              <p className="text-gray-600">{code.farmerName}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Generated:</span>
+                              <p className="text-gray-600">{new Date(code.generatedAt).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-4">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-4 h-4 mr-1" />
+                                View Details
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Transaction Details - {code.transactionId}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="font-medium mb-2">Buyer Information</h4>
+                                    <p><strong>Name:</strong> {code.buyerName}</p>
+                                    <p><strong>Business:</strong> {code.buyerBusinessName}</p>
+                                    <p><strong>Contact:</strong> {code.buyerContactPerson}</p>
+                                    <p><strong>Phone:</strong> {code.buyerPhone}</p>
+                                    <p><strong>Email:</strong> {code.buyerEmail}</p>
+                                    <p><strong>County:</strong> {code.buyerCounty}</p>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium mb-2">Farmer Information</h4>
+                                    <p><strong>Name:</strong> {code.farmerName}</p>
+                                    <p><strong>Farmer ID:</strong> {code.farmerId}</p>
+                                    <p><strong>Commodity:</strong> {code.commodityType}</p>
+                                    <p><strong>Quantity:</strong> {code.quantity} {code.unit}</p>
+                                    <p><strong>Total Value:</strong> ${code.totalValue.toLocaleString()}</p>
+                                  </div>
+                                </div>
+                                <div className="border-t pt-4">
+                                  <h4 className="font-medium mb-2">Warehouse Information</h4>
+                                  <p><strong>Warehouse:</strong> {code.warehouseName}</p>
+                                  <p><strong>County:</strong> {code.warehouseCounty}</p>
+                                  <p><strong>Status:</strong> {code.status}</p>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {!code.validated && (
+                            <Button
+                              size="sm"
+                              onClick={() => validateCodeMutation.mutate({ 
+                                codeType: code.codeType, 
+                                verificationCode: code.verificationCode 
+                              })}
+                              disabled={validateCodeMutation.isPending}
+                            >
+                              <Shield className="w-4 h-4 mr-1" />
+                              Validate Code
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No buyer acceptance codes available for your county</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Bags Tab */}
+          <TabsContent value="bags" className="space-y-6">
+            {/* QR Batch Tracking & Management - Only in Bags Tab */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* QR Batch Tracking & Management */}
               <div className="lg:col-span-2">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
-                      <QrCode className="w-5 h-5 mr-2 text-blue-600" />
+                      <FileText className="w-5 h-5 mr-2 text-blue-600" />
                       QR Batch Tracking & Management
                     </CardTitle>
                     <CardDescription>
@@ -2330,1240 +1402,1094 @@ Complete farm-to-export traceability guaranteed.\`;
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                      <h3 className="font-medium text-green-800 mb-3">Generate QR Batch from Transaction</h3>
-                      
-                      {/* Transaction Selection */}
-                      <div className="space-y-3 mb-4">
-                        <label className="text-sm font-medium">Select available transactions for QR batch:</label>
-                        {availableTransactions && availableTransactions.length > 0 ? (
-                          <div className="space-y-2">
-                            {availableTransactions.map((transaction: any) => (
-                              <div key={transaction.id} className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id={`transaction-${transaction.id}`}
-                                  checked={selectedTransactions.includes(transaction.id)}
-                                  onChange={(e) => {
-                                    console.log('Checkbox clicked:', transaction.id, e.target.checked);
-                                    if (e.target.checked) {
-                                      setSelectedTransactions(prev => [...prev, transaction.id]);
-                                    } else {
-                                      setSelectedTransactions(prev => prev.filter(id => id !== transaction.id));
-                                    }
-                                  }}
-                                  data-testid={`checkbox-transaction-${transaction.id}`}
-                                />
-                                <label htmlFor={`transaction-${transaction.id}`} className="text-sm cursor-pointer">
-                                  {transaction.transactionId} - {transaction.buyerName} - {transaction.commodityType} - {transaction.quantity} - ${transaction.amount}
-                                </label>
-                              </div>
-                            ))}
+                    <div className="space-y-4">
+                      {/* Transaction-Based QR Batch Generation */}
+                      <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-green-50">
+                        <h3 className="font-medium mb-3 flex items-center">
+                          <FileText className="w-4 h-4 mr-2 text-blue-600" />
+                          Generate QR Batch from Transaction
+                        </h3>
+                        <div className="mb-4 p-3 bg-white rounded border">
+                          <p className="text-sm text-gray-600 mb-2">Select available transactions for QR batch:</p>
+                          {availableTransactionsLoading ? (
+                            <p className="text-center text-gray-500">Loading available transactions...</p>
+                          ) : availableTransactions && availableTransactions.length > 0 ? (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                              {availableTransactions.map((transaction: any) => (
+                                <div key={transaction.transactionId} className="flex items-center p-2 border rounded hover:bg-gray-50">
+                                  <input
+                                    type="checkbox"
+                                    id={`transaction-${transaction.transactionId}`}
+                                    checked={selectedTransactions.includes(transaction.transactionId)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedTransactions([...selectedTransactions, transaction.transactionId]);
+                                      } else {
+                                        setSelectedTransactions(selectedTransactions.filter(id => id !== transaction.transactionId));
+                                      }
+                                    }}
+                                    className="mr-3"
+                                    data-testid={`checkbox-transaction-${transaction.transactionId}`}
+                                  />
+                                  <label htmlFor={`transaction-${transaction.transactionId}`} className="flex-1 text-sm cursor-pointer">
+                                    <span className="font-medium">{transaction.transactionId}</span> - 
+                                    <span className="text-blue-600"> {transaction.buyerName}</span> - 
+                                    <span className="text-green-600">{transaction.commodityType}</span> - 
+                                    <span>{transaction.quantity} {transaction.unit}</span> - 
+                                    <span className="font-medium">${transaction.totalValue}</span>
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-amber-600 mt-2 flex items-center">
+                              <Eye className="w-4 h-4 mr-2" />
+                              No available transactions for QR batch generation. Complete bag validations first.
+                            </p>
+                          )}
+                          {selectedTransactions.length > 0 && (
+                            <div className="mt-2 p-2 bg-blue-50 rounded">
+                              <p className="text-sm text-blue-800">
+                                ✅ {selectedTransactions.length} transaction(s) selected for QR batch
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Commodity Category</label>
+                            <select className="w-full mt-1 p-2 border rounded">
+                              <option value="">Select Category...</option>
+                              <option value="cocoa">Cocoa</option>
+                              <option value="coffee">Coffee</option>
+                              <option value="palm_oil">Palm Oil</option>
+                              <option value="rubber">Rubber</option>
+                            </select>
                           </div>
-                        ) : (
-                          <p className="text-sm text-gray-500">No transactions available</p>
-                        )}
-                      </div>
-
-                      {/* Configuration Fields */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="text-sm font-medium">Commodity Category</label>
-                          <select className="w-full p-2 border rounded text-sm mt-1" data-testid="select-commodity-category">
-                            <option value="">Select Category...</option>
-                            <option value="cocoa">Cocoa</option>
-                            <option value="coffee">Coffee</option>
-                            <option value="coconut">Coconut Oil</option>
-                            <option value="rubber">Rubber</option>
-                            <option value="cashew">Cashew</option>
-                          </select>
+                          <div>
+                            <label className="text-sm font-medium">Quality Grade</label>
+                            <select className="w-full mt-1 p-2 border rounded">
+                              <option value="">Select Grade...</option>
+                              <option value="Grade I">Grade I (Premium)</option>
+                              <option value="Grade II">Grade II (Standard)</option>
+                              <option value="Grade III">Grade III (Main Crop)</option>
+                            </select>
+                          </div>
                         </div>
-                        <div>
-                          <label className="text-sm font-medium">Quality Grade</label>
-                          <select className="w-full p-2 border rounded text-sm mt-1" data-testid="select-quality-grade">
-                            <option value="">Select Grade...</option>
-                            <option value="premium">Premium</option>
-                            <option value="standard">Standard</option>
-                            <option value="fair">Fair</option>
-                          </select>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                          <div>
+                            <label className="text-sm font-medium">Total Packages</label>
+                            <input 
+                              type="number" 
+                              value={totalPackages}
+                              onChange={(e) => setTotalPackages(Number(e.target.value))}
+                              className="w-full mt-1 p-2 border rounded" 
+                              placeholder="10" 
+                              data-testid="input-total-packages"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Package Weight (kg)</label>
+                            <input 
+                              type="number" 
+                              value={packageWeight}
+                              onChange={(e) => setPackageWeight(Number(e.target.value))}
+                              className="w-full mt-1 p-2 border rounded" 
+                              placeholder="50" 
+                              data-testid="input-package-weight"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Packaging Type</label>
+                            <select 
+                              value={packagingType}
+                              onChange={(e) => setPackagingType(e.target.value)}
+                              className="w-full mt-1 p-2 border rounded"
+                              data-testid="select-packaging-type"
+                            >
+                              <option value="50kg bags">50kg bags</option>
+                              <option value="25kg bags">25kg bags</option>
+                              <option value="60kg bags">60kg bags</option>
+                              <option value="100kg bags">100kg bags</option>
+                            </select>
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <label className="text-sm font-medium">Total Packages</label>
-                          <input
-                            type="number"
-                            value={totalPackages}
-                            onChange={(e) => setTotalPackages(parseInt(e.target.value))}
-                            className="w-full p-2 border rounded text-sm mt-1"
-                            data-testid="input-total-packages"
-                          />
+                        
+                        <div className="mt-4 p-3 bg-white rounded border">
+                          <h4 className="font-medium mb-2 text-sm">Compliance & Certification Verification</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              LACRA Certified
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              EUDR Compliant
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              Quality Inspected
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              GPS Verified
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <label className="text-sm font-medium">Package Weight (kg)</label>
-                          <input
-                            type="number"
-                            value={packageWeight}
-                            onChange={(e) => setPackageWeight(parseInt(e.target.value))}
-                            className="w-full p-2 border rounded text-sm mt-1"
-                            data-testid="input-package-weight"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Packaging Type</label>
-                          <select
-                            value={packagingType}
-                            onChange={(e) => setPackagingType(e.target.value)}
-                            className="w-full p-2 border rounded text-sm mt-1"
-                            data-testid="select-packaging-type"
+                        
+                        <div className="flex gap-2 mt-4">
+                          <Button 
+                            className="flex-1"
+                            onClick={handleGenerateQrBatch}
+                            disabled={generateQrBatchMutation.isPending || selectedTransactions.length === 0}
+                            data-testid="button-generate-qr-batch"
                           >
-                            <option value="50kg bags">50kg bags</option>
-                            <option value="25kg bags">25kg bags</option>
-                            <option value="100kg bags">100kg bags</option>
-                          </select>
+                            <FileText className="w-4 h-4 mr-2" />
+                            {generateQrBatchMutation.isPending ? 'Generating...' : 'Generate QR Batch'}
+                          </Button>
+                          <Button variant="outline">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview
+                          </Button>
                         </div>
                       </div>
 
-                      {/* Compliance & Certification */}
-                      <div className="mb-4">
-                        <label className="text-sm font-medium mb-2 block">Compliance & Certification Verification</label>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                              <ShieldCheck className="w-3 h-3 text-white" />
-                            </div>
-                            <span className="text-sm">LACRA Certified</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                              <ShieldCheck className="w-3 h-3 text-white" />
-                            </div>
-                            <span className="text-sm">EUDR Compliant</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                              <ShieldCheck className="w-3 h-3 text-white" />
-                            </div>
-                            <span className="text-sm">Quality Inspected</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                              <ShieldCheck className="w-3 h-3 text-white" />
-                            </div>
-                            <span className="text-sm">GPS Verified</span>
-                          </div>
+                      {/* Recent QR Batches - Real Data */}
+                      <div>
+                        <h3 className="font-medium mb-3">Recent QR Batches</h3>
+                        <div className="space-y-3">
+                          {qrBatchesLoading ? (
+                            <p className="text-center text-gray-500">Loading QR batches...</p>
+                          ) : qrBatches && qrBatches.length > 0 ? (
+                            qrBatches.map((batch: any) => (
+                              <div key={batch.batchCode} className="border rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-green-100 text-green-800">{batch.batchCode}</Badge>
+                                    <Badge variant="outline">{batch.totalBags} bags</Badge>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => {
+                                        setSelectedQrBatch(batch);
+                                        setShowQrModal(true);
+                                      }}
+                                      data-testid={`button-view-qr-${batch.batchCode}`}
+                                    >
+                                      <Eye className="w-4 h-4 mr-1" />
+                                      View QR
+                                    </Button>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => handlePrintQr(batch)}
+                                      data-testid={`button-print-qr-${batch.batchCode}`}
+                                    >
+                                      <Printer className="w-4 h-4 mr-1" />
+                                      Print
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                                  <div>
+                                    <span className="font-medium">Buyer:</span>
+                                    <p className="text-gray-600">{batch.buyerName}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Commodity:</span>
+                                    <p className="text-gray-600">{batch.commodityType}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Total Weight:</span>
+                                    <p className="text-gray-600">{batch.totalWeight} kg</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Status:</span>
+                                    <p className={batch.status === 'generated' ? 'text-green-600' : batch.status === 'printed' ? 'text-blue-600' : 'text-yellow-600'}>
+                                      {batch.status.charAt(0).toUpperCase() + batch.status.slice(1)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="mt-2 text-xs text-gray-500">
+                                  Farmer: {batch.farmerName} • Created: {new Date(batch.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-center text-gray-500">No QR batches available</p>
+                          )}
                         </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={handleGenerateQrBatch}
-                          disabled={selectedTransactions.length === 0}
-                          className="bg-blue-600 hover:bg-blue-700"
-                          data-testid="button-generate-qr-batch"
-                        >
-                          <QrCode className="w-4 h-4 mr-2" />
-                          Generate QR Batch
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          className="flex items-center"
-                          onClick={handlePreviewBatch}
-                          data-testid="button-preview-batch"
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          Preview
-                        </Button>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* QR Batch Statistics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
-                    QR Batch Statistics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <ShieldCheck className="w-8 h-8 text-green-600" />
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                      QR Batch Statistics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <CheckCircle className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                        <p className="text-2xl font-bold text-green-600">{qrBatches ? qrBatches.length : 0}</p>
+                        <p className="text-sm text-gray-600">Active QR Batches</p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <Package className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                        <p className="text-2xl font-bold text-blue-600">
+                          {qrBatches ? qrBatches.reduce((total: number, batch: any) => total + parseInt(batch.totalBags || 0), 0) : 0}
+                        </p>
+                        <p className="text-sm text-gray-600">Total Bags Tracked</p>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <FileText className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                        <p className="text-2xl font-bold text-purple-600">
+                          {qrBatches ? qrBatches.filter((batch: any) => batch.status === 'printed' || batch.status === 'distributed').length : 0}
+                        </p>
+                        <p className="text-sm text-gray-600">QR Codes Printed</p>
+                      </div>
                     </div>
-                    <p className="text-2xl font-bold text-green-600">16</p>
-                    <p className="text-sm text-gray-600">Active QR Batches</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Package className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <p className="text-2xl font-bold text-blue-600">8470</p>
-                    <p className="text-sm text-gray-600">Total Bags Tracked</p>
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Printer className="w-8 h-8 text-purple-600" />
-                    </div>
-                    <p className="text-2xl font-bold text-purple-600">0</p>
-                    <p className="text-sm text-gray-600">QR Codes Printed</p>
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h4 className="font-medium mb-2 flex items-center">
-                      <Eye className="w-4 h-4 mr-2" />
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Truck className="w-5 h-5 mr-2 text-orange-600" />
                       Recent Scan Activity
-                    </h4>
-                    <div className="text-sm text-gray-600">
-                      <p>WH-BATCH-1756052880737-8P2L</p>
-                      <p className="text-xs">Generated for processing</p>
-                      <p className="text-xs text-gray-500">8/24/2025</p>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {qrBatchesLoading ? (
+                        <p className="text-center text-gray-500">Loading activity...</p>
+                      ) : qrBatches && qrBatches.length > 0 ? (
+                        qrBatches.slice(0, 3).map((batch: any) => (
+                          <div key={batch.batchCode} className="flex items-center justify-between p-2 border rounded">
+                            <div className="text-sm">
+                              <p className="font-medium">{batch.batchCode}</p>
+                              <p className="text-gray-600">
+                                {batch.status === 'generated' ? 'Generated for processing' : 
+                                 batch.status === 'printed' ? 'QR codes printed' : 
+                                 batch.status === 'distributed' ? 'Distributed to buyer' : 'In processing'}
+                              </p>
+                            </div>
+                            <Badge className={
+                              batch.status === 'generated' ? 'bg-green-100 text-green-800 text-xs' :
+                              batch.status === 'printed' ? 'bg-blue-100 text-blue-800 text-xs' :
+                              'bg-purple-100 text-purple-800 text-xs'
+                            }>
+                              {new Date(batch.createdAt).toLocaleDateString()}
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-center text-gray-500">No recent activity</p>
+                      )}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
-            {/* Recent QR Batches */}
+            {/* Incoming Bag Requests from Buyers - Now after QR Code Generator */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent QR Batches</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Truck className="w-5 h-5 mr-2" />
+                  Incoming Bag Requests from Buyers
+                </CardTitle>
+                <CardDescription>
+                  Validate or reject bag requests from buyers who have completed payment confirmation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {bagRequestsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading bag requests...</p>
+                  </div>
+                ) : bagRequests && bagRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {bagRequests.map((request: any) => (
+                      <Card key={request.requestId} className="border border-gray-200 hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-semibold text-lg flex items-center">
+                                {request.commodityType}
+                                <Badge 
+                                  className={`ml-2 ${
+                                    request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                    request.status === 'validated' ? 'bg-green-100 text-green-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                </Badge>
+                              </h4>
+                              <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
+                              <p className="text-sm text-gray-600">From: {request.buyerName} ({request.company})</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-500">
+                                {new Date(request.requestedAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-600">Farmer</p>
+                              <p className="font-medium">{request.farmerName}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Quantity</p>
+                              <p className="font-medium">{request.quantity} {request.unit}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">Total Value</p>
+                              <p className="font-medium text-green-600">${request.totalValue}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600">County</p>
+                              <p className="font-medium">{request.county}</p>
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600">Farm Location</p>
+                            <p className="text-sm">{request.farmLocation}</p>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600">Verification Code</p>
+                            <p className="font-mono text-sm bg-gray-100 p-2 rounded">{request.verificationCode}</p>
+                          </div>
+
+                          {request.status === 'validated' && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
+                              <p className="text-sm text-green-800">
+                                <strong>Validated by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
+                              </p>
+                              {request.validationNotes && (
+                                <p className="text-sm text-green-700 mt-1">
+                                  <strong>Notes:</strong> {request.validationNotes}
+                                </p>
+                              )}
+                              {request.transactionId && (
+                                <p className="text-sm text-green-700 mt-1">
+                                  <strong>Transaction ID:</strong> {request.transactionId}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {request.status === 'rejected' && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+                              <p className="text-sm text-red-800">
+                                <strong>Rejected by:</strong> {request.validatedBy} on {new Date(request.validatedAt).toLocaleString()}
+                              </p>
+                              {request.validationNotes && (
+                                <p className="text-sm text-red-700 mt-1">
+                                  <strong>Reason:</strong> {request.validationNotes}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {request.status === 'pending' && (
+                            <div className="flex justify-between items-center pt-3 border-t">
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedBagRequest(request);
+                                  setShowBagDetailsModal(true);
+                                }}
+                                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                                data-testid={`button-view-details-${request.requestId}`}
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Details
+                              </Button>
+                              
+                              <div className="flex space-x-2">
+                                <Button 
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleValidateBagRequest(request.requestId, 'reject', 'Request does not meet validation criteria')}
+                                  disabled={validatingRequest === request.requestId}
+                                  className="border-red-300 text-red-700 hover:bg-red-50"
+                                  data-testid={`button-reject-${request.requestId}`}
+                                >
+                                  {validatingRequest === request.requestId ? 'Processing...' : 'Reject Request'}
+                                </Button>
+                                <Button 
+                                  onClick={() => handleValidateBagRequest(request.requestId, 'validate', 'Request validated - proceeding to transaction')}
+                                  disabled={validatingRequest === request.requestId}
+                                  className="bg-green-600 hover:bg-green-700"
+                                  data-testid={`button-validate-${request.requestId}`}
+                                >
+                                  {validatingRequest === request.requestId ? (
+                                    <>
+                                      <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                                      Validating...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle className="w-4 h-4 mr-2" />
+                                      Validate Request
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No bag requests from buyers at this time.</p>
+                    <p className="text-sm">Bag requests will appear here when buyers request bags for validated transactions.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Inventory Control Tab */}
+          <TabsContent value="inventory" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Package className="w-5 h-5 mr-2 text-blue-600" />
+                  Warehouse Inventory Management
+                </CardTitle>
+                <CardDescription>
+                  Real-time inventory tracking and storage monitoring for warehouse operations
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {bagCollections && bagCollections.length > 0 ? (
-                    bagCollections.map((batch: any) => (
-                      <div key={batch.batchCode} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-3">
+                  {loadingInventory ? (
+                    <p className="text-center text-gray-500">Loading inventory data...</p>
+                  ) : inventoryStatus && inventoryStatus.length > 0 ? (
+                    inventoryStatus.map((item: any) => (
+                      <div key={item.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
                           <div>
-                            <h3 className="font-semibold text-green-600">{batch.batchCode}</h3>
-                            <p className="text-lg font-medium">{batch.totalPackages} bags</p>
+                            <h4 className="font-medium">{item.commodity}</h4>
+                            <p className="text-sm text-gray-600">Storage Unit: {item.storageUnit}</p>
                           </div>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleViewQrCode(batch.batchCode)}
-                              data-testid={`button-view-qr-${batch.batchCode}`}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View QR
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handlePrintQrCode(batch.batchCode)}
-                              data-testid={`button-print-${batch.batchCode}`}
-                            >
-                              <Printer className="w-4 h-4 mr-1" />
-                              Print
-                            </Button>
+                          <Badge className={item.status === 'stored' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                            {item.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-600">Quantity</p>
+                            <p className="font-medium">{item.quantity} {item.unit}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Storage Date</p>
+                            <p className="font-medium">{item.storageDate}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Temperature</p>
+                            <p className="font-medium">{item.temperature}°C</p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-4 gap-4">
-                          <div>
-                            <p className="text-sm font-medium">Buyer:</p>
-                            <p className="text-sm text-gray-600">{batch.buyerName || 'null null'}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Commodity:</p>
-                            <p className="text-sm text-gray-600">{batch.commodityType}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Total Weight:</p>
-                            <p className="text-sm text-gray-600">{batch.totalWeight} kg</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Status:</p>
-                            <Badge className="bg-green-100 text-green-800">Generated</Badge>
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">Farmer: {batch.farmerName || 'Paolo'} • Created: {batch.createdDate || '8/24/2025'}</p>
                       </div>
                     ))
                   ) : (
-                    [
-                      { batchCode: "WH-BATCH-1756052880737-8P2L", bags: 15, commodity: "Coconut Oil", weight: "3.00 kg" },
-                      { batchCode: "WH-BATCH-1756052094495-WDU6", bags: 200, commodity: "Cocoa", weight: "8.00 kg" },
-                      { batchCode: "WH-BATCH-1756044733012-Q6XJ", bags: 5000, commodity: "Rubber", weight: "5.00 kg" },
-                      { batchCode: "WH-BATCH-1756041297826-XE3Z", bags: 320, commodity: "Cocoa", weight: "16.00 kg" }
-                    ].map((batch) => (
-                      <div key={batch.batchCode} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="font-semibold text-green-600">{batch.batchCode}</h3>
-                            <p className="text-lg font-medium">{batch.bags} bags</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleViewQrCode(batch.batchCode)}
-                              data-testid={`button-view-qr-${batch.batchCode}`}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View QR
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handlePrintQrCode(batch.batchCode)}
-                              data-testid={`button-print-${batch.batchCode}`}
-                            >
-                              <Printer className="w-4 h-4 mr-1" />
-                              Print
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-4">
-                          <div>
-                            <p className="text-sm font-medium">Buyer:</p>
-                            <p className="text-sm text-gray-600">null null</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Commodity:</p>
-                            <p className="text-sm text-gray-600">{batch.commodity}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Total Weight:</p>
-                            <p className="text-sm text-gray-600">{batch.weight}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Status:</p>
-                            <Badge className="bg-green-100 text-green-800">Generated</Badge>
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">Farmer: Paolo • Created: 8/24/2025</p>
-                      </div>
-                    ))
+                    <p className="text-center text-gray-500">No inventory data available</p>
                   )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Custody Management Tab - Simple QR scanner for warehouse-generated codes */}
-          <TabsContent value="custody" className="space-y-6">
+          {/* Validation Tab */}
+          <TabsContent value="validation" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Scale className="w-5 h-5 mr-2 text-blue-600" />
-                  Custody Management
+                  <Shield className="w-5 h-5 mr-2 text-green-600" />
+                  Code Validation Center
                 </CardTitle>
                 <CardDescription>
-                  Scan warehouse-generated QR codes to manage product custody and storage
+                  Validate buyer acceptance codes and EUDR compliance codes
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Warehouse QR Code</label>
-                  <Input
-                    placeholder="Scan warehouse-generated QR code"
-                    value={scannedQrCode}
-                    onChange={(e) => setScannedQrCode(e.target.value)}
-                    data-testid="input-custody-qr-code"
-                  />
-                  <div className="flex gap-2">
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Code Validation Form */}
+                  <div className="border rounded-lg p-6 bg-gradient-to-r from-green-50 to-blue-50">
+                    <h3 className="font-medium mb-4 flex items-center">
+                      <Shield className="w-5 h-5 mr-2 text-green-600" />
+                      Validate Compliance Code
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Code Type</label>
+                        <select 
+                          className="w-full p-3 border rounded-lg"
+                          onChange={(e) => setSelectedCodeType(e.target.value)}
+                          data-testid="select-code-type"
+                        >
+                          <option value="">Select Code Type...</option>
+                          <option value="buyer-acceptance">Buyer Acceptance Code</option>
+                          <option value="eudr-compliance">EUDR Compliance Code</option>
+                          <option value="warehouse-verification">Warehouse Verification Code</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Validation Code</label>
+                        <input 
+                          type="text" 
+                          className="w-full p-3 border rounded-lg font-mono"
+                          placeholder="Enter code (e.g., V1A2B3C4)"
+                          value={validationCode}
+                          onChange={(e) => setValidationCode(e.target.value.toUpperCase())}
+                          data-testid="input-validation-code"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-start">
+                        <CheckCircle className="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-blue-700">
+                          <p className="font-medium">Valid codes for this warehouse:</p>
+                          <p>Buyer Acceptance: V1A2B3C4 • EUDR Compliance: EU2024XYZ • Warehouse: WH-BATCH-001</p>
+                        </div>
+                      </div>
+                    </div>
+                    
                     <Button 
-                      variant="outline" 
-                      size="sm"
+                      className="w-full mt-4 bg-green-600 hover:bg-green-700" 
                       onClick={() => {
-                        // Use test QR code for demonstration
-                        setScannedQrCode("QR-MULTI-LOT-WH-001-20250825");
+                        if (selectedCodeType && validationCode) {
+                          validateCodeMutation.mutate({ 
+                            codeType: selectedCodeType, 
+                            verificationCode: validationCode 
+                          });
+                        } else {
+                          toast({
+                            title: "❌ Missing Information",
+                            description: "Please select code type and enter validation code",
+                            variant: "destructive"
+                          });
+                        }
                       }}
-                      data-testid="button-use-warehouse-qr"
+                      disabled={validateCodeMutation.isPending || !selectedCodeType || !validationCode}
+                      data-testid="button-validate-code"
                     >
-                      <QrCode className="w-4 h-4 mr-1" />
-                      Use Warehouse QR
-                    </Button>
-                    <Button 
-                      onClick={handleQrCodeLookup}
-                      disabled={!scannedQrCode}
-                      data-testid="button-manage-custody"
-                    >
-                      Manage Custody
+                      {validateCodeMutation.isPending ? (
+                        <>
+                          <Clock className="w-4 h-4 mr-2 animate-spin" />
+                          Validating...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4 mr-2" />
+                          Validate Code
+                        </>
+                      )}
                     </Button>
                   </div>
-                </div>
 
-                <div className="text-sm text-gray-600 p-3 bg-blue-50 rounded-lg">
-                  <p><strong>Note:</strong> This tab manages products that have already been registered. Scan QR codes generated from the Registration process.</p>
+                  {/* Recent Validation History */}
+                  <div>
+                    <h3 className="font-medium mb-3 flex items-center">
+                      <Clock className="w-4 h-4 mr-2 text-blue-600" />
+                      Recent Validations
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-3 bg-green-50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-green-800">V1A2B3C4</p>
+                            <p className="text-sm text-green-600">Buyer Acceptance Code - EUDR Compliant ✅</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">Validated</Badge>
+                        </div>
+                      </div>
+                      <div className="text-center py-4 text-gray-500">
+                        <p className="text-sm">Additional validation history will appear here</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Inspections Tab */}
-          <TabsContent value="inspections" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <ClipboardCheck className="w-5 h-5 mr-2 text-blue-600" />
-                    Pending Inspections
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {loadingInspections ? (
-                      <p className="text-center text-gray-500">Loading inspections...</p>
-                    ) : pendingInspections && pendingInspections.length > 0 ? (
-                      pendingInspections.map((inspection: any) => (
-                        <div key={inspection.id} className="p-3 border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{inspection.storageFacility}</p>
-                              <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
-                              <p className="text-xs text-gray-500">Scheduled: {inspection.scheduledDate}</p>
-                            </div>
-                            <Badge className={getPriorityColor(inspection.priority)}>
-                              {inspection.priority}
-                            </Badge>
-                          </div>
-                          <div className="mt-2 flex gap-2">
-                            <Button size="sm" variant="outline">View Details</Button>
-                            <Button size="sm">Start Inspection</Button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-center text-gray-500 py-8">No pending inspections</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                    Recent Inspections
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium">Section A-1 Quality Check</p>
-                          <p className="text-sm text-gray-600">Cocoa Beans • 15 tons</p>
-                          <p className="text-xs text-gray-500">Completed: Today 09:30 AM</p>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800">Passed</Badge>
-                      </div>
-                    </div>
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium">Section B-2 Storage Compliance</p>
-                          <p className="text-sm text-gray-600">Coffee Beans • 8 tons</p>
-                          <p className="text-xs text-gray-500">Completed: Yesterday 14:15 PM</p>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800">Passed</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Storage Tab */}
-          <TabsContent value="storage" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Warehouse className="w-5 h-5 mr-2 text-blue-600" />
-                    Storage Capacity Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <div>
-                        <p className="font-medium">Section A-1 (Dry Goods)</p>
-                        <p className="text-sm text-gray-600">15.2 tons / 18 tons capacity</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">85%</p>
-                        <p className="text-xs text-green-600">Available</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <div>
-                        <p className="font-medium">Section B-2 (Premium)</p>
-                        <p className="text-sm text-gray-600">14.4 tons / 20 tons capacity</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">72%</p>
-                        <p className="text-xs text-green-600">Available</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                      <div>
-                        <p className="font-medium">Section C-1 (Cold Storage)</p>
-                        <p className="text-sm text-gray-600">19 tons / 20 tons capacity</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-yellow-600">95%</p>
-                        <p className="text-xs text-yellow-600">Limited</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                      <div>
-                        <p className="font-medium">Section A-2 (Climate Control)</p>
-                        <p className="text-sm text-gray-600">25 tons / 25 tons capacity</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-red-600">100%</p>
-                        <p className="text-xs text-red-600">Full</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Package className="w-5 h-5 mr-2 text-green-600" />
-                    Active Storage Units
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {inventoryStatus && inventoryStatus.length > 0 ? (
-                      inventoryStatus.slice(0, 6).map((item: any, index: number) => (
-                        <div key={index} className="flex justify-between items-center p-2 border rounded">
-                          <div>
-                            <p className="font-medium">{item.commodity || 'Cocoa Beans'}</p>
-                            <p className="text-sm text-gray-600">{item.location || `Unit ${index + 1}`}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">{item.quantity || Math.floor(Math.random() * 20 + 5)} tons</p>
-                            <p className="text-xs text-gray-500">{item.status || 'In Storage'}</p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      ['Cocoa Beans - Section A-1', 'Coffee Beans - Section B-2', 'Cashew Nuts - Section A-1', 'Palm Oil - Section C-1', 'Rubber - Section B-2', 'Rice - Section A-2'].map((item, index) => (
-                        <div key={index} className="flex justify-between items-center p-2 border rounded">
-                          <div>
-                            <p className="font-medium">{item.split(' - ')[0]}</p>
-                            <p className="text-sm text-gray-600">{item.split(' - ')[1]}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">{Math.floor(Math.random() * 20 + 5)} tons</p>
-                            <p className="text-xs text-gray-500">In Storage</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Temperature Tab */}
-          <TabsContent value="temperature" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Thermometer className="w-5 h-5 mr-2 text-orange-600" />
-                    Current Environmental Conditions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">Section A-1 Temperature</p>
-                          <p className="text-2xl font-bold text-green-600">18.1°C</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-green-600">✓ Normal</p>
-                          <p className="text-xs text-gray-500">Target: 18-20°C</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">Section A-1 Humidity</p>
-                          <p className="text-2xl font-bold text-green-600">62%</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-green-600">✓ Normal</p>
-                          <p className="text-xs text-gray-500">Target: 60-70%</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">Section C-1 Temperature</p>
-                          <p className="text-2xl font-bold text-yellow-600">21.2°C</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-yellow-600">⚠ High</p>
-                          <p className="text-xs text-gray-500">Target: 18-20°C</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <AlertTriangle className="w-5 h-5 mr-2 text-red-600" />
-                    Temperature Alerts ({dashboardStats.temperatureAlerts})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-yellow-800">Section C-1 High Temperature</p>
-                          <p className="text-sm text-yellow-600">Current: 21.2°C (Target: 18-20°C)</p>
-                          <p className="text-xs text-gray-500">Alert since: 11:45 AM</p>
-                        </div>
-                        <Button size="sm" variant="outline">
-                          Adjust
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-blue-800">All Other Sections Normal</p>
-                          <p className="text-sm text-blue-600">Temperature within optimal range</p>
-                          <p className="text-xs text-gray-500">Last checked: 12:00 PM</p>
-                        </div>
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Reports Tab */}
-          <TabsContent value="reports" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                    Quick Reports
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Download className="w-4 h-4 mr-2" />
-                      Daily Warehouse Activity Report
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Download className="w-4 h-4 mr-2" />
-                      Storage Capacity Summary
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Download className="w-4 h-4 mr-2" />
-                      Temperature Monitoring Report
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Download className="w-4 h-4 mr-2" />
-                      Quality Control Summary
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Download className="w-4 h-4 mr-2" />
-                      Compliance Status Report
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
-                    Recent Activity Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Products Registered Today</p>
-                        <p className="text-sm text-gray-600">Warehouse custody registrations</p>
-                      </div>
-                      <p className="text-2xl font-bold text-blue-600">12</p>
-                    </div>
-                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Inspections Completed</p>
-                        <p className="text-sm text-gray-600">Quality and compliance checks</p>
-                      </div>
-                      <p className="text-2xl font-bold text-green-600">8</p>
-                    </div>
-                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Storage Alerts</p>
-                        <p className="text-sm text-gray-600">Temperature and capacity warnings</p>
-                      </div>
-                      <p className="text-2xl font-bold text-orange-600">2</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Quality Tab */}
+          {/* Quality Control Tab */}
           <TabsContent value="quality" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                    Quality Control Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {loadingQuality ? (
-                      <p className="text-center text-gray-500">Loading quality data...</p>
-                    ) : qualityControls && qualityControls.length > 0 ? (
-                      qualityControls.map((control: any) => (
-                        <div key={control.id} className="p-3 border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{control.testType}</p>
-                              <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
-                              <p className="text-xs text-gray-500">Test Date: {control.testDate}</p>
-                            </div>
-                            <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                              {control.status}
-                            </Badge>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
+                  Quality Control Management
+                </CardTitle>
+                <CardDescription>
+                  Monitor and manage quality control processes for stored commodities
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {loadingQuality ? (
+                    <p className="text-center text-gray-500">Loading quality data...</p>
+                  ) : qualityControls && qualityControls.length > 0 ? (
+                    qualityControls.map((control: any) => (
+                      <div key={control.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium">{control.testType}</h4>
+                            <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
                           </div>
-                          <div className="mt-2 flex gap-2">
-                            <Button size="sm" variant="outline">View Report</Button>
-                            <Button size="sm">Retest</Button>
-                          </div>
+                          <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                            {control.status}
+                          </Badge>
                         </div>
-                      ))
-                    ) : (
-                      [
-                        { testType: 'Moisture Content Test', batchNumber: 'WH-BATCH-1756052880737-8P2L', status: 'passed', testDate: 'Today' },
-                        { testType: 'Contamination Check', batchNumber: 'WH-BATCH-1756052880737-8P2L', status: 'passed', testDate: 'Today' },
-                        { testType: 'Grade Classification', batchNumber: 'WH-BATCH-1756052880737-8P2L', status: 'passed', testDate: 'Yesterday' }
-                      ].map((control, index) => (
-                        <div key={index} className="p-3 border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{control.testType}</p>
-                              <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
-                              <p className="text-xs text-gray-500">Test Date: {control.testDate}</p>
-                            </div>
-                            <Badge className="bg-green-100 text-green-800">
-                              {control.status}
-                            </Badge>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-600">Test Date</p>
+                            <p className="font-medium">{control.testDate}</p>
                           </div>
-                          <div className="mt-2 flex gap-2">
-                            <Button size="sm" variant="outline">View Report</Button>
-                            <Button size="sm">Retest</Button>
+                          <div>
+                            <p className="text-gray-600">Inspector</p>
+                            <p className="font-medium">{control.inspector}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Score</p>
+                            <p className="font-medium">{control.score}%</p>
                           </div>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
-                    Quality Metrics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Overall Pass Rate</span>
-                        <span className="text-2xl font-bold text-green-600">96.8%</span>
                       </div>
-                    </div>
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Tests Completed Today</span>
-                        <span className="text-2xl font-bold text-blue-600">24</span>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-yellow-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Pending Tests</span>
-                        <span className="text-2xl font-bold text-yellow-600">6</span>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Average Test Time</span>
-                        <span className="text-2xl font-bold text-purple-600">45m</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Shipping Tab */}
-          <TabsContent value="shipping" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Truck className="w-5 h-5 mr-2 text-blue-600" />
-                    Outbound Shipments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium">Cocoa Beans Export - WH-BATCH-1756052880737-8P2L</p>
-                          <p className="text-sm text-gray-600">Destination: Port of Monrovia</p>
-                          <p className="text-xs text-gray-500">Scheduled: Tomorrow 8:00 AM</p>
-                        </div>
-                        <Badge className="bg-blue-100 text-blue-800">Scheduled</Badge>
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        <Button size="sm" variant="outline">View Details</Button>
-                        <Button size="sm">Update Status</Button>
-                      </div>
-                    </div>
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium">Coffee Beans Export - QR-MULTI-LOT-WH-001-20250825</p>
-                          <p className="text-sm text-gray-600">Destination: Port of Buchanan</p>
-                          <p className="text-xs text-gray-500">Scheduled: Tuesday 2:00 PM</p>
-                        </div>
-                        <Badge className="bg-yellow-100 text-yellow-800">Preparing</Badge>
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        <Button size="sm" variant="outline">View Details</Button>
-                        <Button size="sm">Update Status</Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MapPin className="w-5 h-5 mr-2 text-green-600" />
-                    Logistics Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Available Transport</span>
-                        <span className="text-2xl font-bold text-green-600">4</span>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Pending Shipments</span>
-                        <span className="text-2xl font-bold text-blue-600">6</span>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-yellow-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">In Transit</span>
-                        <span className="text-2xl font-bold text-yellow-600">3</span>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Delivered Today</span>
-                        <span className="text-2xl font-bold text-purple-600">8</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Settings className="w-5 h-5 mr-2 text-blue-600" />
-                    Warehouse Configuration
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Temperature Monitoring</p>
-                        <p className="text-sm text-gray-600">Automatic alerts enabled</p>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">Active</Badge>
-                    </div>
-                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Storage Capacity Limits</p>
-                        <p className="text-sm text-gray-600">Maximum 50 tons per section</p>
-                      </div>
-                      <Badge className="bg-blue-100 text-blue-800">Configured</Badge>
-                    </div>
-                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Quality Control Standards</p>
-                        <p className="text-sm text-gray-600">EUDR compliance enabled</p>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">Active</Badge>
-                    </div>
-                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Access Control</p>
-                        <p className="text-sm text-gray-600">Inspector permissions</p>
-                      </div>
-                      <Badge className="bg-purple-100 text-purple-800">Restricted</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <User className="w-5 h-5 mr-2 text-green-600" />
-                    Inspector Profile
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <p className="font-medium">Inspector ID</p>
-                      <p className="text-sm text-gray-600">{inspectorUsername}</p>
-                    </div>
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      <p className="font-medium">Assigned Facility</p>
-                      <p className="text-sm text-gray-600">{warehouseFacility}</p>
-                    </div>
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <p className="font-medium">Operating County</p>
-                      <p className="text-sm text-gray-600">{inspectorCounty}</p>
-                    </div>
-                    <div className="p-3 bg-yellow-50 rounded-lg">
-                      <p className="font-medium">Authorization Level</p>
-                      <p className="text-sm text-gray-600">Warehouse Inspector</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500">No quality control data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
+      </div>
 
-        {/* Modals */}
-        <Dialog open={showRegistrationModal} onOpenChange={setShowRegistrationModal}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Product Registration Confirmation</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Confirm registration of {scannedQrCodes.length} product{scannedQrCodes.length > 1 ? 's' : ''} for warehouse custody.
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowRegistrationModal(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleProductRegistration}
-                  className="flex-1"
-                >
-                  Confirm Registration
-                </Button>
+      {/* QR Code Modal */}
+      <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5" />
+              QR Code - {selectedQrBatch?.batchCode}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedQrBatch && (
+            <div className="space-y-6">
+              {/* QR Code Image */}
+              <div className="flex justify-center">
+                {selectedQrBatch.qrCodeUrl ? (
+                  <div className="text-center">
+                    <img 
+                      src={selectedQrBatch.qrCodeUrl} 
+                      alt={`QR Code for ${selectedQrBatch.batchCode}`}
+                      className="w-full max-w-sm h-auto mx-auto mb-4 border-2 border-gray-200 rounded-lg"
+                      style={{ maxHeight: '80vh', objectFit: 'contain' }}
+                    />
+                    <p className="text-sm text-gray-600">
+                      Scan this QR code for complete traceability information
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center p-8 bg-gray-50 rounded-lg">
+                    <QrCode className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600">QR Code not available</p>
+                  </div>
+                )}
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
 
-        {/* Warehouse QR Code Modal */}
-        <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Registration Complete - Warehouse QR Code</DialogTitle>
-            </DialogHeader>
-            {registeredProduct && (
-              <div className="space-y-4">
-                <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
-                  <div className="w-32 h-32 mx-auto bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center mb-4">
-                    <QrCode className="w-16 h-16 text-gray-600" />
-                  </div>
-                  <p className="font-mono text-lg font-bold text-green-800">
-                    {registeredProduct.warehouseQR}
-                  </p>
-                  <p className="text-sm text-green-600 mt-2">
-                    Warehouse Custody QR Code
-                  </p>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Weight:</span>
-                    <span>{registeredProduct.totalWeight} metric tons</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Storage Fee:</span>
-                    <span className="font-bold text-green-600">${registeredProduct.storageFee}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Products Count:</span>
-                    <span>{registeredProduct.products.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Registration Date:</span>
-                    <span>{new Date().toLocaleDateString()}</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowQrModal(false)}
-                    className="flex-1"
-                  >
-                    Close
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      // Print QR code logic here
-                      window.print();
-                    }}
-                    className="flex-1"
-                  >
-                    <Printer className="w-4 h-4 mr-2" />
-                    Print QR Code
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Bag Request Details Modal */}
-        <Dialog open={showBagDetailsModal} onOpenChange={setShowBagDetailsModal}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Bag Request Details</DialogTitle>
-              <DialogDescription>
-                Complete information about the bag request from buyer
-              </DialogDescription>
-            </DialogHeader>
-            {selectedBagRequest && (
-              <div className="space-y-6">
-                {/* Request Header */}
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <div className="grid grid-cols-2 gap-4">
+              {/* Batch Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-lg">Batch Details</h4>
+                  <div className="space-y-2 text-sm">
                     <div>
-                      <p className="text-sm font-medium text-blue-800">Request ID</p>
-                      <p className="font-mono text-blue-900">{selectedBagRequest.requestId}</p>
+                      <span className="font-medium text-gray-700">Batch Code:</span>
+                      <p className="font-mono text-blue-600">{selectedQrBatch.batchCode}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-blue-800">Status</p>
-                      <Badge className={selectedBagRequest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}>
-                        {selectedBagRequest.status}
+                      <span className="font-medium text-gray-700">Commodity:</span>
+                      <p>{selectedQrBatch.commodityType}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Total Weight:</span>
+                      <p>{selectedQrBatch.totalWeight} kg</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Total Bags:</span>
+                      <p>{selectedQrBatch.totalBags} bags</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-lg">Traceability</h4>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">Farmer:</span>
+                      <p>{selectedQrBatch.farmerName}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Buyer:</span>
+                      <p>{selectedQrBatch.buyerName}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Generated:</span>
+                      <p>{new Date(selectedQrBatch.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Status:</span>
+                      <Badge className={selectedQrBatch.status === 'generated' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                        {selectedQrBatch.status.charAt(0).toUpperCase() + selectedQrBatch.status.slice(1)}
                       </Badge>
                     </div>
                   </div>
                 </div>
-
-                {/* Buyer Information */}
-                <div>
-                  <h4 className="font-medium mb-3">Buyer Information</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium">Buyer Name</p>
-                      <p className="text-sm text-gray-600">{selectedBagRequest.buyerName}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Company</p>
-                      <p className="text-sm text-gray-600">{selectedBagRequest.companyName}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Product Information */}
-                <div>
-                  <h4 className="font-medium mb-3">Product Information</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm font-medium">Commodity</p>
-                      <p className="text-sm text-gray-600">{selectedBagRequest.commodityType}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Quantity</p>
-                      <p className="text-sm text-gray-600">{selectedBagRequest.quantity}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Total Value</p>
-                      <p className="text-sm font-bold text-green-600">${selectedBagRequest.totalValue}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Farm Information */}
-                <div>
-                  <h4 className="font-medium mb-3">Farm Information</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium">Farmer</p>
-                      <p className="text-sm text-gray-600">{selectedBagRequest.farmerName}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">County</p>
-                      <p className="text-sm text-gray-600">{selectedBagRequest.county}</p>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <p className="text-sm font-medium">Farm Location</p>
-                    <p className="text-sm text-gray-600">{selectedBagRequest.farmLocation}</p>
-                  </div>
-                </div>
-
-                {/* Verification Code */}
-                <div>
-                  <h4 className="font-medium mb-3">Verification</h4>
-                  <div className="bg-gray-100 p-3 rounded-lg">
-                    <p className="text-sm font-medium">Verification Code</p>
-                    <p className="font-mono text-lg">{selectedBagRequest.verificationCode}</p>
-                  </div>
-                </div>
-
-                {/* EUDR Compliance Details */}
-                <div>
-                  <h4 className="font-medium mb-3 flex items-center">
-                    <ShieldCheck className="w-4 h-4 mr-2 text-green-600" />
-                    EUDR Compliance Status
-                  </h4>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium">Deforestation Free</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium">EUDR Compliant</span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      <div>
-                        <p className="text-xs font-medium text-gray-700">GPS Coordinates</p>
-                        <p className="text-xs text-gray-600">{selectedBagRequest.gpsCoordinates || '6.428°N, 9.429°W'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-700">Risk Assessment</p>
-                        <p className="text-xs text-green-600 font-medium">Low Risk</p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      <div>
-                        <p className="text-xs font-medium text-gray-700">Land Use Classification</p>
-                        <p className="text-xs text-gray-600">Agricultural - Sustainable</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-700">Due Diligence Status</p>
-                        <p className="text-xs text-green-600 font-medium">Completed</p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs font-medium text-gray-700">Chain of Custody</p>
-                        <p className="text-xs text-green-600 font-medium">Verified</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-700">Compliance Officer</p>
-                        <p className="text-xs text-gray-600">DDGAF-EUDR-001</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                {selectedBagRequest.status === 'pending' && (
-                  <div className="flex gap-2 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowBagDetailsModal(false)}
-                      className="flex-1"
-                    >
-                      Close
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="text-red-600 border-red-200 hover:bg-red-50"
-                      onClick={() => {
-                        rejectBagRequestMutation.mutate(selectedBagRequest.id);
-                        setShowBagDetailsModal(false);
-                      }}
-                      disabled={rejectBagRequestMutation.isPending}
-                    >
-                      Reject Request
-                    </Button>
-                    <Button 
-                      className="bg-green-600 hover:bg-green-700"
-                      onClick={() => {
-                        validateBagRequestMutation.mutate(selectedBagRequest.id);
-                        setShowBagDetailsModal(false);
-                      }}
-                      disabled={validateBagRequestMutation.isPending}
-                    >
-                      Validate Request
-                    </Button>
-                  </div>
-                )}
               </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      </div>
+
+              {/* QR Code Data Information */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold text-lg mb-3">QR Code Data</h4>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  {selectedQrBatch.qrCodeData ? (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <h5 className="font-semibold text-blue-800 mb-2">Traceability Information:</h5>
+                        <div className="grid grid-cols-2 gap-4 text-blue-700">
+                          <div>
+                            <strong>Batch Code:</strong> {selectedQrBatch.qrCodeData.batchCode || selectedQrBatch.batchCode}
+                          </div>
+                          <div>
+                            <strong>Farmer:</strong> {selectedQrBatch.qrCodeData.farmer || selectedQrBatch.farmerName}
+                          </div>
+                          <div>
+                            <strong>Buyer:</strong> {selectedQrBatch.qrCodeData.buyer || selectedQrBatch.buyerName}
+                          </div>
+                          <div>
+                            <strong>Commodity:</strong> {selectedQrBatch.qrCodeData.commodity || selectedQrBatch.commodityType}
+                          </div>
+                          <div>
+                            <strong>Weight:</strong> {selectedQrBatch.qrCodeData.totalWeight || selectedQrBatch.totalWeight} kg
+                          </div>
+                          <div>
+                            <strong>Quality:</strong> {selectedQrBatch.qrCodeData.qualityGrade || selectedQrBatch.qualityGrade}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {selectedQrBatch.qrCodeData.eudrCompliance && (
+                        <div className="border-t border-blue-200 pt-3">
+                          <h5 className="font-semibold text-blue-800 mb-2">EUDR Compliance:</h5>
+                          <div className="text-sm text-blue-700">
+                            <span className={`inline-block px-2 py-1 rounded text-xs ${
+                              selectedQrBatch.qrCodeData.eudrCompliance.compliant 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {selectedQrBatch.qrCodeData.eudrCompliance.compliant ? '✅ EUDR Compliant' : '❌ Non-Compliant'}
+                            </span>
+                            {selectedQrBatch.qrCodeData.eudrCompliance.deforestationRisk && (
+                              <span className="ml-2 text-xs">
+                                Risk: {selectedQrBatch.qrCodeData.eudrCompliance.deforestationRisk}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedQrBatch.qrCodeData.verificationUrl && (
+                        <div className="border-t border-blue-200 pt-3">
+                          <h5 className="font-semibold text-blue-800 mb-2">Verification:</h5>
+                          <div className="text-sm text-blue-700">
+                            <a 
+                              href={selectedQrBatch.qrCodeData.verificationUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="underline hover:text-blue-900"
+                            >
+                              🔗 Verify Online: {selectedQrBatch.qrCodeData.verificationUrl}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <ul className="text-sm space-y-1 list-disc list-inside text-blue-700">
+                      <li><strong>Complete Traceability Chain:</strong> From farm to warehouse</li>
+                      <li><strong>Product Information:</strong> Commodity type, quality grade, harvest date</li>
+                      <li><strong>EUDR Compliance Data:</strong> Deforestation risk assessment, geolocation</li>
+                      <li><strong>Inspection Results:</strong> Quality control and compliance verification</li>
+                      <li><strong>Certification Data:</strong> LACRA compliance, international standards</li>
+                      <li><strong>Digital Verification:</strong> Tamper-proof signatures and verification URL</li>
+                      <li><strong>Packaging Details:</strong> Bag counts, weights, and storage information</li>
+                      <li><strong>Stakeholder Information:</strong> Farmer, buyer, warehouse, and inspector details</li>
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handlePrintQr(selectedQrBatch)}
+                  className="flex items-center gap-2"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print QR Code
+                </Button>
+                <Button 
+                  onClick={() => setShowQrModal(false)}
+                  className="flex items-center gap-2"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Bag Request Details Modal */}
+      <Dialog open={showBagDetailsModal} onOpenChange={setShowBagDetailsModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Eye className="w-5 h-5 mr-2 text-blue-600" />
+              Bag Request Details - Full Information
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedBagRequest && (
+            <div className="space-y-6">
+              {/* Request Header */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      {selectedBagRequest.commodityType}
+                    </h3>
+                    <p className="text-sm text-gray-600">Request ID: {selectedBagRequest.requestId}</p>
+                    <Badge className={`mt-2 ${
+                      selectedBagRequest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      selectedBagRequest.status === 'validated' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      Status: {selectedBagRequest.status.charAt(0).toUpperCase() + selectedBagRequest.status.slice(1)}
+                    </Badge>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-green-600">${selectedBagRequest.totalValue}</p>
+                    <p className="text-sm text-gray-600">Total Transaction Value</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Requested: {new Date(selectedBagRequest.requestedAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buyer Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Buyer Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Buyer Name</p>
+                      <p className="font-medium">{selectedBagRequest.buyerName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Company</p>
+                      <p className="font-medium">{selectedBagRequest.company}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Buyer ID</p>
+                      <p className="font-mono text-sm">{selectedBagRequest.buyerId}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Contact Information</p>
+                      <p className="text-sm">{selectedBagRequest.buyerContact || 'N/A'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Farm & Product Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Farm & Product Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Farmer Name</p>
+                      <p className="font-medium">{selectedBagRequest.farmerName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Farm Location</p>
+                      <p className="text-sm">{selectedBagRequest.farmLocation}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">County</p>
+                      <p className="font-medium">{selectedBagRequest.county}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Harvest Date</p>
+                      <p className="text-sm">{selectedBagRequest.harvestDate ? new Date(selectedBagRequest.harvestDate).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Quantity Requested</p>
+                      <p className="font-medium text-lg">{selectedBagRequest.quantity} {selectedBagRequest.unit}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Quality Grade</p>
+                      <p className="font-medium">{selectedBagRequest.qualityGrade || 'Standard Grade'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Transaction Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Transaction & Payment Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Verification Code</p>
+                      <p className="font-mono text-lg bg-blue-100 p-2 rounded font-bold text-blue-800">
+                        {selectedBagRequest.verificationCode}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Price per Unit</p>
+                      <p className="font-medium">${selectedBagRequest.pricePerUnit || (selectedBagRequest.totalValue / selectedBagRequest.quantity).toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Payment Terms</p>
+                      <p className="text-sm">{selectedBagRequest.paymentTerms || 'Cash on Delivery'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Delivery Terms</p>
+                      <p className="text-sm">{selectedBagRequest.deliveryTerms || 'FOB Farm Gate'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* EUDR Compliance Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Shield className="w-5 h-5 mr-2 text-green-600" />
+                    EUDR Compliance & Traceability
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-green-50 border border-green-200 rounded">
+                      <p className="text-sm text-green-800">
+                        <strong>✅ EUDR Compliant:</strong> This transaction includes full traceability data required for EU market compliance.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600">GPS Coordinates</p>
+                        <p className="font-mono text-sm">{selectedBagRequest.gpsCoordinates || '6.3106°N, 10.7969°W'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Land Use Certificate</p>
+                        <p className="text-sm">{selectedBagRequest.landCertificate || 'LUC-' + selectedBagRequest.farmerId}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Deforestation Risk</p>
+                        <Badge className="bg-green-100 text-green-800">Low Risk</Badge>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Satellite Monitoring</p>
+                        <Badge className="bg-blue-100 text-blue-800">Verified</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Additional Notes */}
+              {selectedBagRequest.description && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Additional Notes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{selectedBagRequest.description}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBagDetailsModal(false)}
+                >
+                  Close Details
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setShowBagDetailsModal(false);
+                    handleValidateBagRequest(selectedBagRequest.requestId, 'reject', 'Request rejected after detailed review');
+                  }}
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  Reject Request
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setShowBagDetailsModal(false);
+                    handleValidateBagRequest(selectedBagRequest.requestId, 'validate', 'Request validated after detailed review');
+                  }}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Validate Request
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

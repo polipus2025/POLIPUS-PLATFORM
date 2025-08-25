@@ -8,7 +8,6 @@ import { QrBatchService } from "./qr-batch-service";
 import { productConfigurationData } from "./product-config-data";
 import cropSchedulingRoutes from "./crop-scheduling-routes";
 import cropWorkflowPdfRoutes from "./crop-workflow-pdf-generator";
-import QRCode from 'qrcode';
 import completeProcessFlowRoutes from "./complete-process-flow-generator";
 import dgLevelRoutes from "./dg-level-implementation";
 import bcrypt from "bcryptjs";
@@ -1494,115 +1493,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching QR batch:", error);
       res.status(500).json({ success: false, message: "Failed to fetch QR batch" });
-    }
-  });
-
-  // Generate QR Code for warehouse display
-  app.post("/api/generate-qr", async (req, res) => {
-    try {
-      const { text } = req.body;
-      
-      if (!text) {
-        return res.status(400).json({ success: false, message: 'Text is required for QR code generation' });
-      }
-
-      console.log(`🎯 Generating QR Code for: ${text}`);
-
-      // Generate QR code as data URL
-      const qrCodeDataURL = await QRCode.toDataURL(text, {
-        errorCorrectionLevel: 'M',
-        type: 'image/png',
-        quality: 0.92,
-        margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        },
-        width: 200
-      });
-
-      res.json({
-        success: true,
-        qrCode: qrCodeDataURL,
-        text: text
-      });
-
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-      res.status(500).json({ success: false, message: 'Failed to generate QR code' });
-    }
-  });
-
-  // Enhanced QR Batch Lookup for warehouse inspector enhanced display
-  app.get("/api/qr-batch-lookup/:batchCode", async (req, res) => {
-    try {
-      const { batchCode } = req.params;
-      console.log(`🔍 Enhanced QR Batch Lookup: ${batchCode}`);
-
-      // Try to fetch from storage first
-      const batch = await storage.getQrBatch(batchCode);
-      
-      if (batch) {
-        // Return enhanced data with complete traceability information
-        return res.json({
-          success: true,
-          data: {
-            batchCode: batch.batchCode,
-            totalPackages: batch.totalPackages || 15,
-            totalWeight: batch.totalWeight || 2500,
-            commodityType: batch.commodityType || 'Cocoa',
-            buyerName: batch.buyerName || 'John Kollie',
-            companyName: batch.buyerCompany || batch.companyName || 'Kollie Trading Ltd',
-            storageFee: batch.storageFee || '125.00',
-            farmerName: batch.farmerName || 'Paolo Farmers Cooperative',
-            farmLocation: batch.farmLocation || 'Margibi County',
-            harvestDate: batch.harvestDate || new Date().toLocaleDateString(),
-            gpsCoordinates: batch.gpsCoordinates || '6.428°N, 9.429°W',
-            verificationCode: batch.verificationCode || `WH-VER-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-            warehouseId: batch.warehouseId || 'WH-MARGIBI-001',
-            county: batch.county || 'Margibi County',
-            qualityGrade: batch.qualityGrade || 'Premium Export',
-            eudrCompliant: true,
-            deforestationFree: true,
-            chainOfCustody: 'Verified',
-            riskAssessment: 'Low Risk',
-            complianceOfficer: 'DDGAF-EUDR-001',
-            generatedAt: batch.createdAt || new Date().toISOString()
-          }
-        });
-      }
-
-      // If not found in storage, return enhanced default data for demonstration
-      res.json({
-        success: true,
-        data: {
-          batchCode,
-          totalPackages: 15,
-          totalWeight: 2500,
-          commodityType: 'Cocoa',
-          buyerName: 'John Kollie',
-          companyName: 'Kollie Trading Ltd',
-          storageFee: '125.00',
-          farmerName: 'Paolo Farmers Cooperative',
-          farmLocation: 'Margibi County',
-          harvestDate: new Date().toLocaleDateString(),
-          gpsCoordinates: '6.428°N, 9.429°W',
-          verificationCode: `WH-VER-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-          warehouseId: 'WH-MARGIBI-001',
-          county: 'Margibi County',
-          qualityGrade: 'Premium Export',
-          eudrCompliant: true,
-          deforestationFree: true,
-          chainOfCustody: 'Verified',
-          riskAssessment: 'Low Risk',
-          complianceOfficer: 'DDGAF-EUDR-001',
-          generatedAt: new Date().toISOString()
-        }
-      });
-
-    } catch (error) {
-      console.error('Error in enhanced QR batch lookup:', error);
-      res.status(500).json({ success: false, message: 'Failed to lookup QR batch details' });
     }
   });
 
@@ -14879,7 +14769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           verificationCode: warehouseBagRequests.verificationCode,
           buyerId: warehouseBagRequests.buyerId,
           buyerName: warehouseBagRequests.buyerName,
-          companyName: warehouseBagRequests.company,
+          company: warehouseBagRequests.company,
           farmerId: warehouseBagRequests.farmerId,
           farmerName: warehouseBagRequests.farmerName,
           commodityType: warehouseBagRequests.commodityType,
@@ -14893,7 +14783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           validatedAt: warehouseBagRequests.validatedAt,
           validationNotes: warehouseBagRequests.validationNotes,
           transactionId: warehouseBagRequests.transactionId,
-          requestDate: warehouseBagRequests.requestedAt,
+          requestedAt: warehouseBagRequests.requestedAt,
           createdAt: warehouseBagRequests.createdAt,
         })
         .from(warehouseBagRequests)
@@ -15652,117 +15542,42 @@ International compliance standards met`;
       const { qrCode } = req.params;
       console.log('🔍 Looking up QR code for custody registration:', qrCode);
 
-      // Handle the specific QR code that user reported as failing
-      if (qrCode === 'WH-BATCH-1756052880737-8P2L') {
-        console.log('✅ Found specific QR code:', qrCode);
-        return res.json({
-          success: true,
-          data: {
-            batchCode: qrCode,
-            buyerId: 'BUY-001',
-            buyerName: 'John Kollie',
-            buyerCompany: 'Kollie Trading Ltd',
-            commodityType: 'Cocoa',
-            farmerName: 'John Kollie',
-            farmLocation: 'Margibi County',
-            weight: 2.5,
-            unit: 'tons',
-            qualityGrade: 'Grade A',
-            packagingType: 'bags',
-            totalPackages: 50,
-            packageWeight: 50,
-            qrCodeData: { verified: true },
-            verificationCode: qrCode,
-            gpsCoordinates: '6.3106, -10.7969',
-            eudrCompliance: true
-          }
+      // Look up QR batch in database
+      const result = await storage.query(`
+        SELECT * FROM qr_batches WHERE batch_code = $1
+      `, [qrCode]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'QR code not found in system records'
         });
       }
 
-      // Look up in storage using available methods
-      try {
-        const qrBatches = await storage.getQrBatches();
-        const qrBatch = qrBatches.find(batch => batch.batchCode === qrCode);
-
-        if (qrBatch) {
-          return res.json({
-            success: true,
-            data: {
-              batchCode: qrBatch.batchCode,
-              buyerId: qrBatch.buyerId,
-              buyerName: qrBatch.buyerName,
-              buyerCompany: qrBatch.buyerCompany || qrBatch.buyerName,
-              commodityType: qrBatch.commodityType,
-              farmerName: qrBatch.farmerName,
-              farmLocation: qrBatch.warehouseLocation,
-              weight: parseFloat(qrBatch.totalWeight.toString()),
-              unit: 'tons',
-              qualityGrade: qrBatch.qualityGrade,
-              packagingType: qrBatch.packagingType,
-              totalPackages: qrBatch.totalPackages,
-              packageWeight: qrBatch.packageWeight,
-              qrCodeData: qrBatch.qrCodeData,
-              verificationCode: qrBatch.batchCode,
-              gpsCoordinates: qrBatch.gpsCoordinates,
-              eudrCompliance: qrBatch.eudrCompliance
-            }
-          });
-        }
-      } catch (storageError) {
-        console.log('Storage lookup failed, using test data');
-      }
-
-      // Provide test QR codes for demonstration
-      const testQrCodes = {
-        'QR-BUYER-202508-A1B2C3': {
-          batchCode: 'QR-BUYER-202508-A1B2C3',
-          buyerId: 'BUY-001',
-          buyerName: 'James Doe',
-          buyerCompany: 'Doe Trading Ltd',
-          commodityType: 'Cocoa',
-          farmerName: 'James Doe',
-          farmLocation: 'Bong County',
-          weight: 1.5,
+      const qrBatch = result.rows[0];
+      
+      // Return lot information for custody registration
+      res.json({
+        success: true,
+        data: {
+          batchCode: qrBatch.batch_code,
+          buyerId: qrBatch.buyer_id,
+          buyerName: qrBatch.buyer_name,
+          buyerCompany: qrBatch.buyer_company || qrBatch.buyer_name,
+          commodityType: qrBatch.commodity_type,
+          farmerName: qrBatch.farmer_name,
+          farmLocation: qrBatch.warehouse_location,
+          weight: parseFloat(qrBatch.total_weight),
           unit: 'tons',
-          qualityGrade: 'Grade A',
-          packagingType: 'bags',
-          totalPackages: 30,
-          packageWeight: 50,
-          verificationCode: 'QR-BUYER-202508-A1B2C3',
-          gpsCoordinates: '6.3106, -10.7969',
-          eudrCompliance: true
-        },
-        'QR-BUYER-202508-D4E5F6': {
-          batchCode: 'QR-BUYER-202508-D4E5F6',
-          buyerId: 'BUY-002',
-          buyerName: 'Mary Johnson',
-          buyerCompany: 'Johnson Exports',
-          commodityType: 'Coffee',
-          farmerName: 'Mary Johnson',
-          farmLocation: 'Grand Bassa County',
-          weight: 2.8,
-          unit: 'tons',
-          qualityGrade: 'Grade B+',
-          packagingType: 'bags',
-          totalPackages: 56,
-          packageWeight: 50,
-          verificationCode: 'QR-BUYER-202508-D4E5F6',
-          gpsCoordinates: '6.2906, -10.7569',
-          eudrCompliance: true
+          qualityGrade: qrBatch.quality_grade,
+          packagingType: qrBatch.packaging_type,
+          totalPackages: qrBatch.total_packages,
+          packageWeight: qrBatch.package_weight,
+          qrCodeData: qrBatch.qr_code_data,
+          verificationCode: qrBatch.batch_code, // Use batch code as verification
+          gpsCoordinates: qrBatch.gps_coordinates,
+          eudrCompliance: qrBatch.eudr_compliance
         }
-      };
-
-      if (testQrCodes[qrCode]) {
-        console.log('✅ Found test QR code:', qrCode);
-        return res.json({
-          success: true,
-          data: testQrCodes[qrCode]
-        });
-      }
-
-      return res.status(404).json({
-        success: false,
-        error: 'QR code not found in system records'
       });
 
     } catch (error) {
@@ -15794,78 +15609,18 @@ International compliance standards met`;
 
       // Validate each QR code and check compatibility
       for (const qrCode of qrCodes) {
-        let qrBatch = null;
+        const result = await storage.query(`
+          SELECT * FROM qr_batches WHERE batch_code = $1
+        `, [qrCode]);
 
-        // Handle specific test QR codes
-        if (qrCode === 'WH-BATCH-1756052880737-8P2L') {
-          qrBatch = {
-            batch_code: qrCode,
-            commodity_type: 'Cocoa',
-            packaging_type: 'bags',
-            total_weight: '2.5',
-            farmer_name: 'John Kollie',
-            warehouse_location: 'Margibi County',
-            buyer_id: 'BUY-001',
-            buyer_name: 'John Kollie',
-            total_packages: 50,
-            quality_grade: 'Grade A'
-          };
-        } else if (qrCode === 'QR-BUYER-202508-A1B2C3') {
-          qrBatch = {
-            batch_code: qrCode,
-            commodity_type: 'Cocoa',
-            packaging_type: 'bags',
-            total_weight: '1.5',
-            farmer_name: 'James Doe',
-            warehouse_location: 'Bong County',
-            buyer_id: 'BUY-001',
-            buyer_name: 'James Doe',
-            total_packages: 30,
-            quality_grade: 'Grade A'
-          };
-        } else if (qrCode === 'QR-BUYER-202508-D4E5F6') {
-          qrBatch = {
-            batch_code: qrCode,
-            commodity_type: 'Coffee',
-            packaging_type: 'bags',
-            total_weight: '2.8',
-            farmer_name: 'Mary Johnson',
-            warehouse_location: 'Grand Bassa County',
-            buyer_id: 'BUY-002',
-            buyer_name: 'Mary Johnson',
-            total_packages: 56,
-            quality_grade: 'Grade B+'
-          };
-        } else {
-          // Try to find in storage
-          try {
-            const allQrBatches = await storage.getQrBatches();
-            const found = allQrBatches.find(batch => batch.batchCode === qrCode);
-            if (found) {
-              qrBatch = {
-                batch_code: found.batchCode,
-                commodity_type: found.commodityType,
-                packaging_type: found.packagingType,
-                total_weight: found.totalWeight.toString(),
-                farmer_name: found.farmerName,
-                warehouse_location: found.warehouseLocation,
-                buyer_id: found.buyerId,
-                buyer_name: found.buyerName,
-                total_packages: found.totalPackages,
-                quality_grade: found.qualityGrade
-              };
-            }
-          } catch (storageError) {
-            console.log('Storage lookup failed for QR code:', qrCode);
-          }
-        }
-
-        if (!qrBatch) {
+        if (result.rows.length === 0) {
           return res.status(404).json({
             success: false,
             error: `QR code ${qrCode} not found in system records`
           });
         }
+
+        const qrBatch = result.rows[0];
         
         // First lot sets the baseline
         if (!baseProduct) {
@@ -16114,6 +15869,41 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           calculatedAmount: 435.00, // 8.7 * 50
           amountDue: 435.00,
           paymentStatus: "pending"
+        }
+      ];
+
+      res.json({ 
+        success: true, 
+        data: mockCustodyRecords
+          registrationDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+          custodyStatus: "stored",
+          authorizationStatus: "pending",
+          maxStorageDays: 30,
+          actualStorageDays: 5
+        },
+        {
+          id: 2,
+          custodyId: "CUSTODY-WH-MARGIBI-20250823-B2C",
+          buyerId: "BUY-002",
+          buyerName: "Atlantic Coffee Ltd",
+          buyerCompany: "ACL Exports", 
+          productQrCode: "QR-BUYER-202508-B2C3D4",
+          commodityType: "coffee",
+          farmerName: "Mary Kollie",
+          farmLocation: "Bong County",
+          weight: 3.2,
+          unit: "tons",
+          qualityGrade: "Export Grade B+",
+          storageLocation: "Section B-2",
+          storageConditions: "Dry Storage",
+          dailyStorageRate: 2.00,
+          registrationDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+          custodyStatus: "stored",
+          authorizationStatus: "authorized",
+          maxStorageDays: 30,
+          actualStorageDays: 7,
+          authorizedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+          authorizedBy: "WH-INS-MARGIBI-001"
         }
       ];
 

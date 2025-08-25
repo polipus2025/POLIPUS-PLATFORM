@@ -117,9 +117,9 @@ import {
   // Regulatory Department System
   regulatoryDepartments,
   qrBatches,
-  type RegulatoryDepartment
-} from "@shared/schema";
-import { 
+  type RegulatoryDepartment,
+  
+  // Warehouse Custody Tables
   warehouseCustody,
   storageFees,
   authorizationRequests,
@@ -129,8 +129,8 @@ import {
   type WarehouseCustody,
   type NewWarehouseCustody,
   type StorageFees,
-  type AuthorizationRequest 
-} from "@shared/schema-warehouse-extension";
+  type AuthorizationRequest
+} from "@shared/schema";
 import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';

@@ -119,6 +119,18 @@ import {
   qrBatches,
   type RegulatoryDepartment
 } from "@shared/schema";
+import { 
+  warehouseCustody,
+  storageFees,
+  authorizationRequests,
+  insertWarehouseCustodySchema,
+  insertStorageFeesSchema,
+  insertAuthorizationRequestSchema,
+  type WarehouseCustody,
+  type NewWarehouseCustody,
+  type StorageFees,
+  type AuthorizationRequest 
+} from "@shared/schema-warehouse-extension";
 import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
@@ -15781,7 +15793,56 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       // Calculate storage fees ($50/metric ton one-time)
       const storageAmount = parseFloat(registrationData.totalWeight) * 50;
 
-      console.log('💾 Registering warehouse custody with storage amount:', storageAmount);
+      console.log('💾 Saving warehouse custody to database with storage amount:', storageAmount);
+
+      // Save custody record to database
+      const custodyRecord: NewWarehouseCustody = {
+        custodyId,
+        custodyType,
+        buyerId: registrationData.buyerId,
+        buyerName: registrationData.buyerName,
+        buyerCompany: registrationData.buyerCompany || registrationData.buyerName,
+        productQrCodes: custodyType === 'multi_lot' 
+          ? registrationData.scannedQrCodes.map((qr: any) => qr.batchCode)
+          : [registrationData.scannedQrCode],
+        verificationCodes: custodyType === 'multi_lot' 
+          ? registrationData.scannedQrCodes.map((qr: any) => qr.verificationCode)
+          : [registrationData.verificationCode || registrationData.scannedQrCode],
+        consolidatedQrCode,
+        qrCodeData,
+        qrCodeUrl,
+        warehouseId: registrationData.warehouseId,
+        warehouseName: registrationData.warehouseName,
+        county: registrationData.county || 'County',
+        commodityType: registrationData.commodityType,
+        farmerNames: registrationData.farmerNames || [registrationData.farmerName || 'Unknown'],
+        farmLocations: registrationData.farmLocations || [registrationData.farmLocation || 'Unknown'],
+        totalWeight: registrationData.totalWeight.toString(),
+        unit: registrationData.unit || 'tons',
+        qualityGrade: registrationData.qualityGrade,
+        packagingType: registrationData.packagingType,
+        totalPackages: registrationData.totalPackages,
+        lotOrigins: custodyType === 'multi_lot' ? registrationData.scannedQrCodes : [registrationData],
+        storageLocation: registrationData.storageLocation,
+        storageConditions: registrationData.storageConditions,
+        storageRate: '50.00'
+      };
+
+      // Insert custody record
+      await db.insert(warehouseCustody).values(custodyRecord);
+      console.log('✅ Custody record saved to database');
+
+      // Save storage fees record
+      const storageFeesRecord = {
+        custodyId,
+        totalWeight: registrationData.totalWeight.toString(),
+        calculatedAmount: storageAmount.toString(),
+        amountDue: storageAmount.toString(),
+        feeStartDate: new Date()
+      };
+
+      await db.insert(storageFees).values(storageFeesRecord);
+      console.log('✅ Storage fees record saved to database');
 
       res.json({
         success: true,
@@ -15806,72 +15867,31 @@ VERIFY: ${qrCodeData.verificationUrl}`;
   // Get warehouse custody records
   app.get("/api/warehouse-custody/records", async (req, res) => {
     try {
-      // Mock custody records with enhanced structure
-      const mockCustodyRecords = [
-        {
-          id: 1,
-          custodyId: "CUSTODY-SINGLE-MARGIBI-20250825-A1B",
-          custodyType: "single",
-          buyerId: "BUY-001",
-          buyerName: "Monrovia Trading Company",
-          buyerCompany: "MTC Ltd",
-          productQrCodes: ["QR-BUYER-202508-A1B2C3"],
-          commodityType: "Cocoa",
-          farmerNames: ["John Konneh"],
-          farmLocations: ["Margibi County"],
-          totalWeight: 5.5,
-          unit: "tons",
-          qualityGrade: "Premium Grade A",
-          packagingType: "bags",
-          totalPackages: 110,
-          storageLocation: "Section A-1",
-          storageConditions: "Climate Controlled",
-          storageRate: 50.00,
-          registrationDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-          custodyStatus: "stored",
-          authorizationStatus: "pending",
-          maxStorageDays: 30,
-          actualStorageDays: 5,
-          calculatedAmount: 275.00, // 5.5 * 50
-          amountDue: 275.00,
-          paymentStatus: "pending"
-        },
-        {
-          id: 2,
-          custodyId: "CUSTODY-MULTI-MARGIBI-20250823-B2C",
-          custodyType: "multi_lot",
-          buyerId: "BUY-002",
-          buyerName: "Atlantic Trading Ltd",
-          buyerCompany: "ATL Exports", 
-          productQrCodes: ["QR-BUYER-202508-B2C3D4", "QR-BUYER-202508-E5F6G7", "QR-BUYER-202508-H8I9J0"],
-          consolidatedQrCode: "QR-MULTI-LOT-WH-MARGIBI-20250823",
-          commodityType: "Coffee",
-          farmerNames: ["Mary Kollie", "David Toe", "Sarah Williams"],
-          farmLocations: ["Bong County", "Grand Bassa County", "Nimba County"],
-          totalWeight: 8.7,
-          unit: "tons",
-          qualityGrade: "Export Grade A",
-          packagingType: "bags",
-          totalPackages: 174,
-          storageLocation: "Section B-2",
-          storageConditions: "Dry Storage",
-          storageRate: 50.00,
-          registrationDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          custodyStatus: "stored",
-          authorizationStatus: "authorized",
-          maxStorageDays: 30,
-          actualStorageDays: 7,
-          authorizedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-          authorizedBy: "WH-INS-MARGIBI-001",
-          calculatedAmount: 435.00, // 8.7 * 50
-          amountDue: 435.00,
-          paymentStatus: "pending"
-        }
-      ];
+      console.log('📋 Fetching warehouse custody records from database...');
+      
+      // Query actual database records
+      const custodyRecords = await db
+        .select()
+        .from(warehouseCustody)
+        .orderBy(desc(warehouseCustody.registrationDate));
+
+      console.log(`✅ Found ${custodyRecords.length} custody records in database`);
+
+      // Transform database records to match frontend expectations
+      const formattedRecords = custodyRecords.map(record => ({
+        ...record,
+        // Ensure JSON fields are properly parsed
+        productQrCodes: Array.isArray(record.productQrCodes) ? record.productQrCodes : JSON.parse(record.productQrCodes as string || '[]'),
+        verificationCodes: Array.isArray(record.verificationCodes) ? record.verificationCodes : JSON.parse(record.verificationCodes as string || '[]'),
+        farmerNames: Array.isArray(record.farmerNames) ? record.farmerNames : JSON.parse(record.farmerNames as string || '[]'),
+        farmLocations: Array.isArray(record.farmLocations) ? record.farmLocations : JSON.parse(record.farmLocations as string || '[]'),
+        lotOrigins: Array.isArray(record.lotOrigins) ? record.lotOrigins : JSON.parse(record.lotOrigins as string || '[]'),
+        qrCodeData: typeof record.qrCodeData === 'object' ? record.qrCodeData : JSON.parse(record.qrCodeData as string || '{}')
+      }));
 
       res.json({ 
         success: true, 
-        data: mockCustodyRecords 
+        data: formattedRecords 
       });
     } catch (error) {
       console.error("Error fetching custody records:", error);

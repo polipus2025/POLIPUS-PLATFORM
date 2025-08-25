@@ -11674,8 +11674,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Credentials not generated yet" });
       }
 
-      // Get the credentials from the database
-      const credentials = await storage.getBuyerCredentials(buyer.id);
+      // Get the credentials from the database using buyer ID string
+      const credentials = await storage.getBuyerCredentials(buyer.buyerId);
       
       if (!credentials) {
         return res.status(404).json({ message: "Credentials not found" });

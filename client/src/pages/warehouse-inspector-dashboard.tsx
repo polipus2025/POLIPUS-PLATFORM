@@ -1824,15 +1824,6 @@ export default function WarehouseInspectorDashboard() {
                       <Package className="w-4 h-4 mr-2" />
                       {registerProductMutation.isPending ? "Registering..." : "Register for Custody"}
                     </Button>
-                    
-                    {/* Debug Info */}
-                    {process.env.NODE_ENV === 'development' && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        Debug: Product={!!productToRegister ? '✓' : '✗'} | 
-                        Location={!!storageLocation ? '✓' : '✗'} | 
-                        Conditions={!!storageConditions ? '✓' : '✗'}
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>

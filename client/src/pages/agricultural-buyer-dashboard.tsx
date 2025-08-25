@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,8 +36,29 @@ export default function AgriculturalBuyerDashboard() {
   const queryClient = useQueryClient();
   const [requestingBags, setRequestingBags] = useState<string | null>(null);
 
-  // Get buyer info from localStorage
-  const buyerId = localStorage.getItem("buyerId") || localStorage.getItem("userId") || "";
+  // UNIVERSAL BUYER DETECTION - Same pattern as standalone transaction dashboard
+  const [buyerId, setBuyerId] = useState<string>("");
+  
+  useEffect(() => {
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      try {
+        const parsedData = JSON.parse(userData);
+        if (parsedData?.user?.buyerId) {
+          setBuyerId(parsedData.user.buyerId);
+        }
+      } catch (error) {
+        console.error('Error parsing userData:', error);
+      }
+    }
+    
+    // Fallback to old method for backward compatibility
+    if (!buyerId) {
+      const fallbackBuyerId = localStorage.getItem("buyerId") || localStorage.getItem("userId") || "";
+      setBuyerId(fallbackBuyerId);
+    }
+  }, []);
+  
   const buyerName = localStorage.getItem("buyerName") || localStorage.getItem("firstName") + " " + localStorage.getItem("lastName");
   const company = localStorage.getItem("company") || "Agricultural Trading Company";
 

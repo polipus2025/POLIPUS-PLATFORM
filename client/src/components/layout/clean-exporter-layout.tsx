@@ -205,7 +205,7 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
               
               <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => window.location.href = '/exporter-login'}>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{user?.companyName || 'Demo Export Company'}</p>
+                  <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{user?.companyName || 'Loading...'}</p>
                   <p className="text-xs text-gray-500 group-hover:text-blue-500 transition-colors">Licensed Exporter • Click to Login Portal</p>
                 </div>
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center group-hover:from-blue-600 group-hover:to-blue-700 transition-all">

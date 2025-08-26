@@ -86,6 +86,13 @@ export default function SellersHub() {
     gcTime: 300000, // 5 minutes garbage collection
   });
 
+  // Debug: Log user data to see what we're getting
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 Sellers Hub - Current User Data:', user);
+    }
+  }, [user]);
+
   // Fetch all active offers
   const { data: offers = [], isLoading } = useQuery({
     queryKey: ['/api/sellers-hub/offers'],

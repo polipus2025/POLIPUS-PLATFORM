@@ -16517,7 +16517,11 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       // Check if another exporter has already accepted (same as farmer-buyer system)
       const existingAcceptances = await db
-        .select()
+        .select({
+          responseId: exporterOfferResponses.responseId,
+          exporterId: exporterOfferResponses.exporterId,
+          responseType: exporterOfferResponses.responseType
+        })
         .from(exporterOfferResponses)
         .where(and(
           eq(exporterOfferResponses.offerId, offerId),

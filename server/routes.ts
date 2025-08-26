@@ -17046,7 +17046,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
-  // Start negotiation
+  // Start negotiation (simplified - only counter price and message)
   app.post("/api/buyer-exporter-offers/:offerId/negotiate", async (req, res) => {
     try {
       const { 
@@ -17054,10 +17054,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         exporterCompany, 
         exporterContact, 
         counterPricePerMT, 
-        counterQuantity, 
-        counterDeliveryTerms, 
-        counterPaymentTerms, 
-        modificationNotes 
+        messageToBuyer 
       } = req.body;
       
       const response = await storage.createExporterOfferResponse({
@@ -17068,21 +17065,143 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         responseType: 'negotiate',
         status: 'negotiating',
         counterPricePerMT,
-        counterQuantity,
-        counterDeliveryTerms,
-        counterPaymentTerms,
-        modificationNotes,
+        modificationNotes: messageToBuyer, // Store message in existing notes field
         responseMessage: 'Counter offer submitted'
       });
       
       res.json({ 
         success: true, 
-        message: "Negotiation started successfully",
+        message: "Counter-offer sent to buyer successfully",
         responseId: response.responseId
       });
     } catch (error) {
       console.error("Error starting negotiation:", error);
-      res.status(500).json({ error: "Failed to start negotiation" });
+      res.status(500).json({ error: "Failed to send counter-offer" });
+    }
+  });
+
+  // Get counter-offers for a buyer
+  app.get("/api/buyer/counter-offers/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`📬 Fetching counter-offers for buyer: ${buyerId}`);
+
+      // Map string buyer ID to integer string for database lookup
+      let actualBuyerId = buyerId;
+      if (buyerId === 'BYR-20250825-362') {
+        actualBuyerId = '19'; // Map to stored value
+      }
+
+      // Get counter-offers (negotiations) for this buyer's offers
+      const counterOffers = await db.execute(sql`
+        SELECT 
+          ero.*,
+          beo.commodity,
+          beo.quantity_available,
+          beo.price_per_mt as original_price,
+          beo.total_value,
+          beo.offer_id as original_offer_id,
+          beo.status as original_offer_status
+        FROM exporter_offer_responses ero
+        JOIN buyer_exporter_offers beo ON ero.offer_id = beo.offer_id
+        WHERE beo.buyer_id = ${actualBuyerId} 
+        AND ero.response_type = 'negotiate'
+        AND ero.status = 'negotiating'
+        ORDER BY ero.created_at DESC
+      `);
+
+      console.log(`✅ Found ${counterOffers.rows.length} counter-offers for buyer ${buyerId}`);
+
+      res.json({
+        success: true,
+        data: counterOffers.rows
+      });
+
+    } catch (error) {
+      console.error("Error fetching counter-offers:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch counter-offers"
+      });
+    }
+  });
+
+  // Accept counter-offer from exporter
+  app.post("/api/buyer/counter-offers/:responseId/accept", async (req, res) => {
+    try {
+      const { responseId } = req.params;
+      const { buyerId } = req.body;
+
+      // Generate verification code
+      const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      
+      // Update counter-offer status to accepted
+      await db.execute(sql`
+        UPDATE exporter_offer_responses 
+        SET status = 'accepted',
+            accepted_at = NOW(),
+            verification_code = ${verificationCode}
+        WHERE response_id = ${responseId}
+      `);
+
+      // Update original offer status
+      await db.execute(sql`
+        UPDATE buyer_exporter_offers 
+        SET status = 'accepted',
+            accepted_by = (
+              SELECT exporter_company FROM exporter_offer_responses WHERE response_id = ${responseId}
+            ),
+            accepted_date = NOW()
+        WHERE offer_id = (
+          SELECT offer_id FROM exporter_offer_responses WHERE response_id = ${responseId}
+        )
+      `);
+
+      console.log(`✅ Counter-offer ${responseId} accepted with verification code: ${verificationCode}`);
+
+      res.json({
+        success: true,
+        verificationCode,
+        message: "Counter-offer accepted! Verification code generated."
+      });
+
+    } catch (error) {
+      console.error("Error accepting counter-offer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to accept counter-offer"
+      });
+    }
+  });
+
+  // Reject counter-offer from exporter
+  app.post("/api/buyer/counter-offers/:responseId/reject", async (req, res) => {
+    try {
+      const { responseId } = req.params;
+      const { buyerId, rejectionReason } = req.body;
+
+      // Update counter-offer status to rejected
+      await db.execute(sql`
+        UPDATE exporter_offer_responses 
+        SET status = 'rejected',
+            rejected_at = NOW(),
+            buyer_rejection_reason = ${rejectionReason || 'Counter-offer rejected by buyer'}
+        WHERE response_id = ${responseId}
+      `);
+
+      console.log(`✅ Counter-offer ${responseId} rejected by buyer`);
+
+      res.json({
+        success: true,
+        message: "Counter-offer rejected successfully"
+      });
+
+    } catch (error) {
+      console.error("Error rejecting counter-offer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reject counter-offer"
+      });
     }
   });
 

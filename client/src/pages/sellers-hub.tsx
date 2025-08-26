@@ -65,10 +65,7 @@ interface BuyerExporterOffer {
 
 interface NegotiationData {
   counterPricePerMT: number;
-  counterQuantity: string;
-  counterDeliveryTerms: string;
-  counterPaymentTerms: string;
-  modificationNotes: string;
+  messageToBuyer: string;
 }
 
 export default function SellersHub() {
@@ -187,8 +184,8 @@ export default function SellersHub() {
     },
     onSuccess: () => {
       toast({
-        title: "Negotiation Started",
-        description: "Your counter-offer has been sent to the buyer",
+        title: "Counter-Offer Sent! 📤",
+        description: "Your counter-price has been sent to the buyer for review",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/sellers-hub/offers'] });
       setShowNegotiationDialog(false);
@@ -343,23 +340,45 @@ export default function SellersHub() {
                 Chat
               </Button>
               
-              {/* Quick Accept Button */}
+              {/* Accept & Reject Buttons */}
               {!isOfferExpired(offer.expiresAt) && offer.status === 'pending' && (
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm(`Accept offer ${offer.offerId} for ${offer.commodity}?\n\nPrice: $${formatPrice(offer.pricePerMT || 0)}/MT\nQuantity: ${offer.quantityAvailable} MT\nTotal: $${(typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0).toLocaleString()}`)) {
-                      acceptOfferMutation.mutate(offer.offerId);
-                    }
-                  }}
-                  disabled={acceptOfferMutation.isPending}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  data-testid={`quick-accept-${offer.offerId}`}
-                >
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Accept
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Accept offer ${offer.offerId} for ${offer.commodity}?\n\nPrice: $${formatPrice(offer.pricePerMT || 0)}/MT\nQuantity: ${offer.quantityAvailable} MT\nTotal: $${(typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0).toLocaleString()}\n\nA verification code will be generated.`)) {
+                        acceptOfferMutation.mutate(offer.offerId);
+                      }
+                    }}
+                    disabled={acceptOfferMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    data-testid={`quick-accept-${offer.offerId}`}
+                  >
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Accept
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const reason = window.prompt("Please provide a reason for rejection:");
+                      if (reason) {
+                        rejectOfferMutation.mutate({ 
+                          offerId: offer.offerId, 
+                          reason 
+                        });
+                      }
+                    }}
+                    disabled={rejectOfferMutation.isPending}
+                    data-testid={`quick-reject-${offer.offerId}`}
+                  >
+                    <XCircle className="w-3 h-3 mr-1" />
+                    Reject
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -373,10 +392,7 @@ export default function SellersHub() {
 
     const [negotiationData, setNegotiationData] = useState<NegotiationData>({
       counterPricePerMT: typeof selectedOffer.pricePerMT === 'string' ? parseFloat(selectedOffer.pricePerMT) : selectedOffer.pricePerMT || 0,
-      counterQuantity: selectedOffer.quantityAvailable?.toString() || "",
-      counterDeliveryTerms: selectedOffer.deliveryTerms || "",
-      counterPaymentTerms: selectedOffer.paymentTerms || "",
-      modificationNotes: ""
+      messageToBuyer: ""
     });
 
     const [rejectionReason, setRejectionReason] = useState("");
@@ -559,107 +575,43 @@ export default function SellersHub() {
                 </div>
               </div>
 
-              {/* Quick Actions */}
-              <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
-                <Button 
-                  onClick={() => {
-                    if (confirm(`Accept this offer?\n\nOffer: ${selectedOffer.offerId}\nPrice: $${formatPrice(selectedOffer.pricePerMT || 0)}/MT\nQuantity: ${selectedOffer.quantityAvailable} MT\nTotal Value: $${(typeof selectedOffer.totalValue === 'string' ? parseFloat(selectedOffer.totalValue) : selectedOffer.totalValue || 0).toLocaleString()}\n\nA verification code will be generated for the buyer.`)) {
-                      acceptOfferMutation.mutate(selectedOffer.offerId);
-                      setShowNegotiationDialog(false);
-                    }
-                  }}
-                  disabled={acceptOfferMutation.isPending}
-                  className="bg-green-600 hover:bg-green-700"
-                  data-testid="chat-accept-offer"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  {acceptOfferMutation.isPending ? "Accepting..." : "Accept Offer"}
-                </Button>
-
-                <Button 
-                  variant="destructive"
-                  onClick={() => {
-                    const reason = window.prompt("Please provide a reason for rejection:");
-                    if (reason) {
-                      rejectOfferMutation.mutate({ 
-                        offerId: selectedOffer.offerId, 
-                        reason 
-                      });
-                      setShowNegotiationDialog(false);
-                    }
-                  }}
-                  disabled={rejectOfferMutation.isPending}
-                  data-testid="chat-reject-offer"
-                >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  {rejectOfferMutation.isPending ? "Rejecting..." : "Reject"}
-                </Button>
+              {/* Info: Accept/Reject on main cards */}
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-sm text-blue-800">
+                  💡 <strong>Tip:</strong> Use Accept/Reject buttons on the main offer cards for quick decisions. This chat is for negotiation and counter-offers.
+                </div>
               </div>
               
-              {/* Negotiation Form */}
+              {/* Simplified Counter-Offer Form */}
               <div className="space-y-4">
-                <div className="text-sm font-medium text-slate-700">Or send a counter-offer:</div>
+                <div className="text-sm font-medium text-slate-700">Send a counter-offer:</div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Counter Price per MT ($)</Label>
-                    <Input
-                      type="number"
-                      value={negotiationData.counterPricePerMT}
-                      onChange={(e) => setNegotiationData(prev => ({
-                        ...prev,
-                        counterPricePerMT: parseFloat(e.target.value) || 0
-                      }))}
-                      data-testid="counter-price-input"
-                    />
-                  </div>
-                  <div>
-                    <Label>Counter Quantity (MT)</Label>
-                    <Input
-                      value={negotiationData.counterQuantity}
-                      onChange={(e) => setNegotiationData(prev => ({
-                        ...prev,
-                        counterQuantity: e.target.value
-                      }))}
-                      data-testid="counter-quantity-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Counter Delivery Terms</Label>
-                    <Input
-                      value={negotiationData.counterDeliveryTerms}
-                      onChange={(e) => setNegotiationData(prev => ({
-                        ...prev,
-                        counterDeliveryTerms: e.target.value
-                      }))}
-                    />
-                  </div>
-                  <div>
-                    <Label>Counter Payment Terms</Label>
-                    <Input
-                      value={negotiationData.counterPaymentTerms}
-                      onChange={(e) => setNegotiationData(prev => ({
-                        ...prev,
-                        counterPaymentTerms: e.target.value
-                      }))}
-                    />
-                  </div>
+                <div>
+                  <Label>Counter Price per MT ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={negotiationData.counterPricePerMT}
+                    onChange={(e) => setNegotiationData(prev => ({
+                      ...prev,
+                      counterPricePerMT: parseFloat(e.target.value) || 0
+                    }))}
+                    placeholder={`Original: $${formatPrice(selectedOffer.pricePerMT || 0)}`}
+                    data-testid="counter-price-input"
+                  />
                 </div>
 
                 <div>
                   <Label>Message to Buyer</Label>
                   <Textarea
-                    value={negotiationData.modificationNotes}
+                    value={negotiationData.messageToBuyer}
                     onChange={(e) => setNegotiationData(prev => ({
                       ...prev,
-                      modificationNotes: e.target.value
+                      messageToBuyer: e.target.value
                     }))}
-                    placeholder="Explain your counter-offer or ask questions..."
+                    placeholder="Explain your counter-price or ask questions..."
                     rows={4}
-                    data-testid="modification-notes-textarea"
+                    data-testid="message-to-buyer-textarea"
                   />
                 </div>
 

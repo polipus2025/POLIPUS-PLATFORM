@@ -16321,30 +16321,48 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const validUntil = new Date();
       validUntil.setDate(validUntil.getDate() + (offerValidDays || 7));
 
-      // Create offer with all required fields and correct data types
+      // Create offer with all required fields and correct data types for future compatibility
       await db.insert(buyerExporterOffers).values({
         offerId,
         buyerId: buyer.id, // Use the numeric ID from the buyers table
         buyerCompany,
         buyerContact,
-        // Core product details
+        buyerCounty,
+        custodyId,
+        
+        // Core product details mapped correctly
         commodity: custodyLot.commodityType || 'Cocoa',
-        quantityAvailable: parseFloat(custodyLot.totalWeight), // Numeric field (just the number)
-        pricePerMT: parseFloat(pricePerUnit), // Decimal field  
-        totalValue: parseFloat(totalOfferPrice.toFixed(2)), // Decimal field
+        quantityAvailable: parseFloat(custodyLot.totalWeight), // Numeric field
+        pricePerMT: parseFloat(pricePerUnit), // Price per MT 
+        totalValue: parseFloat(totalOfferPrice.toFixed(2)), // Total value
         qualityGrade: custodyLot.qualityGrade || 'Standard',
+        
+        // Pricing details
+        pricePerUnit: parseFloat(pricePerUnit),
+        totalOfferPrice: parseFloat(totalOfferPrice.toFixed(2)),
+        
         // Terms & Conditions
         deliveryTerms,
         paymentTerms,
+        qualitySpecifications,
         deliveryTimeframe: `${offerValidDays || 7} days`,
+        
         // Location & Logistics  
         originLocation: `${custodyLot.warehouseName || 'Warehouse'}, ${custodyLot.county}`,
         county: custodyLot.county,
+        
         // Offer Management
         offerType,
         targetExporterId: offerType === 'direct' ? parseInt(targetExporterId) : null,
-        offerValidUntil: validUntil, // Fixed field mapping
-        broadcastRadius: offerType === 'broadcast' ? 50 : 0
+        offerValidUntil: validUntil, // Expiration date
+        expiresAt: validUntil, // Alternative field name for compatibility
+        broadcastRadius: offerType === 'broadcast' ? 50 : 0,
+        
+        // Status and metadata
+        status: 'pending',
+        urgentOffer: urgentOffer || false,
+        offerNotes: offerNotes || '',
+        complianceStatus: 'pending'
       });
 
       console.log(`✅ ${offerType} offer ${offerId} created successfully`);

@@ -3173,43 +3173,81 @@ export type InsertExporter = typeof exporters.$inferInsert;
 export const buyerExporterOffers = pgTable("buyer_exporter_offers", {
   id: serial("id").primaryKey(),
   offerId: text("offer_id").notNull().unique(), // BOE-YYYYMMDD-XXX format
-  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
-  buyerCompany: text("buyer_company").notNull(),
-  buyerContact: text("buyer_contact").notNull(),
+  buyerId: integer("buyer_id").references(() => buyers.id), // Fixed: Allow nullable, use integer
+  buyerCompany: text("buyer_company"),
+  buyerContact: text("buyer_contact"),
   buyerPhone: text("buyer_phone"),
+  buyerCounty: text("buyer_county"),
+  
+  // Custody and Product Info
+  custodyId: text("custody_id"),
+  productType: text("product_type"),
+  totalWeight: decimal("total_weight", { precision: 10, scale: 2 }),
+  grade: text("grade"),
   
   // Target: Direct or Broadcast
-  offerType: text("offer_type").notNull(), // direct, broadcast_county, broadcast_commodity, broadcast_all
-  targetExporterId: integer("target_exporter_id").references(() => exporters.id), // null for broadcast
-  targetExporterCompany: text("target_exporter_company"), // null for broadcast
+  offerType: text("offer_type"), // direct, broadcast_county, broadcast_commodity, broadcast_all
+  targetExporterId: integer("target_exporter_id").references(() => exporters.id), // Fixed: integer
+  targetExporterCompany: text("target_exporter_company"),
   
-  // Product Details
-  commodity: text("commodity").notNull(), // cocoa, coffee, rubber, palm_oil, rice, etc.
-  quantityAvailable: text("quantity_available").notNull(), // e.g., "500 MT"
-  pricePerMT: decimal("price_per_mt", { precision: 10, scale: 2 }).notNull(),
-  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
-  qualityGrade: text("quality_grade").notNull(),
+  // Pricing
+  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }),
+  totalOfferPrice: decimal("total_offer_price", { precision: 10, scale: 2 }),
+  currency: text("currency").default("USD"),
   
   // Terms & Conditions
-  deliveryTerms: text("delivery_terms").notNull(), // FOB, CIF, DAP, etc.
-  paymentTerms: text("payment_terms").notNull(), // advance, L/C, cash on delivery
-  deliveryTimeframe: text("delivery_timeframe").notNull(), // "15 days", "1 month"
-  minimumOrderQuantity: text("minimum_order_quantity"),
+  deliveryTerms: text("delivery_terms"),
+  paymentTerms: text("payment_terms").default("Payment upon delivery"),
+  qualitySpecifications: text("quality_specifications"),
+  offerValidUntil: timestamp("offer_valid_until"),
   
-  // Location & Logistics
-  originLocation: text("origin_location").notNull(),
-  county: text("county").notNull(),
+  // Status and Management
+  status: text("status").default("pending"), // pending, active, expired, withdrawn, accepted
+  acceptedBy: text("accepted_by"),
+  acceptedDate: timestamp("accepted_date"),
+  rejectionReason: text("rejection_reason"),
+  urgentOffer: boolean("urgent_offer").default(false),
+  offerNotes: text("offer_notes"),
+  
+  // Enhanced Product Details 
+  commodity: text("commodity"), // cocoa, coffee, rubber, palm_oil, rice, etc.
+  productDescription: text("product_description"),
+  quantityMt: decimal("quantity_mt", { precision: 10, scale: 2 }),
+  pricePerMT: decimal("price_per_mt", { precision: 10, scale: 2 }),
+  deliveryLocation: text("delivery_location"),
+  quantityAvailable: decimal("quantity_available", { precision: 10, scale: 2 }), // Fixed: numeric not text
+  expiryDate: timestamp("expiry_date"),
+  priorityLevel: text("priority_level"),
+  viewCount: integer("view_count").default(0),
+  verificationCode: text("verification_code"),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }),
+  negotiationDeadline: timestamp("negotiation_deadline"),
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  qualityGrade: text("quality_grade"),
+  inspectionDate: timestamp("inspection_date"),
+  sampleTaken: boolean("sample_taken").default(false),
+  certificateNumber: text("certificate_number"),
+  originLocation: text("origin_location"),
+  moistureContent: decimal("moisture_content", { precision: 5, scale: 2 }),
+  purityPercentage: decimal("purity_percentage", { precision: 5, scale: 2 }),
+  shippingMethod: text("shipping_method"),
+  marketPrice: decimal("market_price", { precision: 10, scale: 2 }),
+  complianceStatus: text("compliance_status").default("pending"),
+  deliveryTimeframe: text("delivery_timeframe"),
+  minimumOrderQuantity: decimal("minimum_order_quantity", { precision: 10, scale: 2 }),
+  county: text("county"),
   proposedPort: text("proposed_port"), // Monrovia, Buchanan, etc.
-  
-  // Offer Management
-  status: text("status").notNull().default("active"), // active, expired, withdrawn, all_accepted
-  expiresAt: timestamp("expires_at").notNull(),
+  expiresAt: timestamp("expires_at"),
   broadcastRadius: integer("broadcast_radius").default(0), // km for geo-targeting
   
   // Tracking
-  viewCount: integer("view_count").default(0),
   responseCount: integer("response_count").default(0),
   acceptedCount: integer("accepted_count").default(0),
+  negotiationCount: integer("negotiation_count").default(0),
+  maxResponses: integer("max_responses").default(5),
+  visibility: text("visibility").default("public"),
+  featured: boolean("featured").default(false),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

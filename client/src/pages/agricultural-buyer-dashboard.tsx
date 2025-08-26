@@ -26,7 +26,7 @@ import {
   ChevronDown,
   ChevronRight,
   Send,
-  Broadcast,
+  Radio,
   Target,
   Building2
 } from "lucide-react";
@@ -1582,7 +1582,7 @@ export default function AgriculturalBuyerDashboard() {
                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                     <RadioGroupItem value="broadcast" id="broadcast" />
                     <div className="flex items-center">
-                      <Broadcast className="w-4 h-4 mr-2 text-blue-600" />
+                      <Radio className="w-4 h-4 mr-2 text-blue-600" />
                       <Label htmlFor="broadcast" className="cursor-pointer">
                         <div>
                           <div className="font-medium">County-Wide Broadcast</div>

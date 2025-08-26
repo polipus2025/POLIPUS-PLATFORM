@@ -171,18 +171,18 @@ export default function SellersHub() {
   // Start negotiation mutation
   const negotiateMutation = useMutation({
     mutationFn: async ({ offerId, negotiationData }: { offerId: string; negotiationData: NegotiationData }) => {
-      const result = await apiRequest(`/api/buyer-exporter-offers/${offerId}/negotiate`, {
-        method: "POST",
-        body: JSON.stringify({
-          exporterId: (user as any)?.id,
-          exporterCompany: (user as any)?.companyName,
-          exporterContact: (user as any)?.contactPerson,
-          ...negotiationData
-        })
+      console.log('Sending negotiation:', { offerId, negotiationData });
+      
+      const result = await apiRequest("POST", `/api/exporter/offers/${offerId}/negotiate`, {
+        exporterId: (user as any)?.id,
+        exporterCompany: (user as any)?.companyName,
+        counterPricePerMT: negotiationData.counterPricePerMT,
+        messageToBuyer: negotiationData.messageToBuyer
       });
-      return result.json();
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Negotiation success:', data);
       toast({
         title: "Counter-Offer Sent! 📤",
         description: "Your counter-price has been sent to the buyer for review",
@@ -190,6 +190,14 @@ export default function SellersHub() {
       queryClient.invalidateQueries({ queryKey: ['/api/sellers-hub/offers'] });
       setShowNegotiationDialog(false);
       setSelectedOffer(null);
+    },
+    onError: (error) => {
+      console.error("Negotiation error:", error);
+      toast({
+        title: "Error",
+        description: `Failed to send counter-offer: ${error.message}`,
+        variant: "destructive",
+      });
     }
   });
 

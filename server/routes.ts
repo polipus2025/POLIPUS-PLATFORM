@@ -17057,8 +17057,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         ORDER BY created_at DESC
       `);
       
-      console.log(`📊 Found ${offers.length} active offers for Sellers Hub`);
-      res.json(offers);
+      console.log(`📊 Found ${offers.rows?.length || 0} active offers for Sellers Hub`);
+      res.json(offers.rows || []);
     } catch (error) {
       console.error("Error fetching offers:", error);
       res.status(500).json({ error: "Failed to fetch offers" });

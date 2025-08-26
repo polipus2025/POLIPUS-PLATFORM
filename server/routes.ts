@@ -4746,6 +4746,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current authenticated user endpoint
   app.get("/api/auth/user", async (req, res) => {
     try {
+      console.log('🔍 AUTH DEBUG - Session:', req.session);
+      console.log('🔍 AUTH DEBUG - Headers:', req.headers.authorization ? 'Token present' : 'No token');
+      
       // Check for token in Authorization header or session
       const authHeader = req.headers.authorization;
       const token = authHeader && authHeader.split(' ')[1];
@@ -4784,8 +4787,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check session for exporter authentication
       if (req.session && req.session.userType === 'exporter') {
+        console.log('🔍 AUTH DEBUG - Session exporter ID:', req.session.exporterId);
         const exporter = await storage.getExporterByExporterId(req.session.exporterId);
+        console.log('🔍 AUTH DEBUG - Found exporter:', exporter ? 'Yes' : 'No');
         if (exporter) {
+          console.log('🔍 AUTH DEBUG - Returning exporter data:', exporter.companyName);
           return res.json({
             id: exporter.id,
             username: exporter.exporterId,
@@ -4800,6 +4806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Fallback to existing authentication logic
+      console.log('🔍 AUTH DEBUG - No authentication found');
       return res.status(401).json({ message: "No authenticated user found" });
     } catch (error) {
       console.error("User auth check error:", error);

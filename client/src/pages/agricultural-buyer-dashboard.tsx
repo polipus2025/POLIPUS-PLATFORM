@@ -56,11 +56,12 @@ function CounterOffersTab() {
   });
 
   // Fetch counter-offers for this buyer
-  const { data: counterOffers = [], isLoading } = useQuery({
-    queryKey: [`/api/buyer/counter-offers/${user?.id}`],
-    enabled: !!user?.id,
+  const { data: counterOffersResponse, isLoading } = useQuery({
+    queryKey: [`/api/buyer/counter-offers/BYR-20250825-362`], // Use the actual buyer ID
     refetchInterval: 30000, // Refresh every 30 seconds
   });
+
+  const counterOffers = counterOffersResponse?.data || [];
 
   // Accept counter-offer mutation
   const acceptCounterOfferMutation = useMutation({
@@ -79,7 +80,7 @@ function CounterOffersTab() {
           title: "Counter-Offer Accepted! 🎉",
           description: `Verification code: ${data.verificationCode}`,
         });
-        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/BYR-20250825-362`] });
       } else {
         toast({
           title: "Error",

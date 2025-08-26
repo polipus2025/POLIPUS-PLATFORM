@@ -117,6 +117,14 @@ function CounterOffersTab() {
         description: "Your response has been sent to the exporter",
       });
       queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
+    },
+    onError: (error) => {
+      console.error("Reject counter-offer error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reject counter-offer",
+        variant: "destructive",
+      });
     }
   });
 

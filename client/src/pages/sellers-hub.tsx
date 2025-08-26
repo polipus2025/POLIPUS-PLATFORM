@@ -106,7 +106,7 @@ export default function SellersHub() {
   });
 
   // Fetch rejected counter-offers for fallback opportunities
-  const { data: rejectedCounterOffers = [], isLoading: rejectedLoading } = useQuery({
+  const { data: rejectedCounterOffers = [] as any[], isLoading: rejectedLoading } = useQuery({
     queryKey: [`/api/exporter/rejected-counter-offers/${(user as any)?.exporterId || (user as any)?.id}`],
     enabled: !!((user as any)?.exporterId || (user as any)?.id),
   });
@@ -170,7 +170,16 @@ export default function SellersHub() {
         description: "Your response has been sent to the buyer",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/sellers-hub/offers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/exporters/${(user as any)?.id}/offers`] });
       setSelectedOffer(null);
+    },
+    onError: (error) => {
+      console.error("Reject offer error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reject offer",
+        variant: "destructive",
+      });
     }
   });
 
@@ -881,7 +890,7 @@ export default function SellersHub() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {rejectedCounterOffers.map((rejection) => (
+                {rejectedCounterOffers.map((rejection: any) => (
                   <Card key={rejection.response_id} className="border-red-200 hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">

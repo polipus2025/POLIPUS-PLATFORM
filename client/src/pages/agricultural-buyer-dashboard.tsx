@@ -44,6 +44,207 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+// Counter Offers Tab Component
+function CounterOffersTab() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Get current user to fetch counter-offers
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+
+  // Fetch counter-offers for this buyer
+  const { data: counterOffers = [], isLoading } = useQuery({
+    queryKey: [`/api/buyer/counter-offers/${user?.id}`],
+    enabled: !!user?.id,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Accept counter-offer mutation
+  const acceptCounterOfferMutation = useMutation({
+    mutationFn: async (responseId: string) => {
+      const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/accept`, {
+        method: "POST",
+        body: JSON.stringify({
+          buyerId: user?.id
+        })
+      });
+      return result.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Counter-Offer Accepted! 🎉",
+          description: `Verification code: ${data.verificationCode}`,
+        });
+        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message,
+          variant: "destructive",
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to accept counter-offer",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Reject counter-offer mutation
+  const rejectCounterOfferMutation = useMutation({
+    mutationFn: async ({ responseId, reason }: { responseId: string; reason: string }) => {
+      const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/reject`, {
+        method: "POST",
+        body: JSON.stringify({
+          buyerId: user?.id,
+          rejectionReason: reason
+        })
+      });
+      return result.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Counter-Offer Rejected",
+        description: "Your response has been sent to the exporter",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
+    }
+  });
+
+  if (userLoading || isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <span className="ml-2 text-gray-600">Loading counter-offers...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-blue-600" />
+            Counter Offers from Exporters
+          </CardTitle>
+          <CardDescription>
+            Review and respond to counter-offers from exporters for your marketplace listings
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {counterOffers && counterOffers.length > 0 ? (
+            <div className="space-y-4">
+              {counterOffers.map((counterOffer: any) => (
+                <Card key={counterOffer.response_id} className="border border-orange-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Badge className="bg-orange-100 text-orange-800">
+                            Counter Offer
+                          </Badge>
+                          <span className="text-sm text-gray-500">
+                            From: {counterOffer.exporter_company}
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm text-gray-600">Commodity</p>
+                            <p className="font-medium">{counterOffer.commodity}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Quantity</p>
+                            <p className="font-medium">{counterOffer.quantity_available} MT</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm text-gray-600">Your Original Price</p>
+                            <p className="font-medium text-gray-700">${counterOffer.original_price}/MT</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Exporter Counter Price</p>
+                            <p className="font-bold text-lg text-orange-600">${counterOffer.counter_price_per_mt}/MT</p>
+                          </div>
+                        </div>
+
+                        {counterOffer.modification_notes && (
+                          <div>
+                            <p className="text-sm text-gray-600">Exporter's Message</p>
+                            <p className="text-sm bg-gray-50 p-3 rounded border-l-4 border-orange-400">
+                              "{counterOffer.modification_notes}"
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="text-xs text-gray-500">
+                          Received: {new Date(counterOffer.created_at).toLocaleString()}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            if (confirm(`Accept counter-offer of $${counterOffer.counter_price_per_mt}/MT from ${counterOffer.exporter_company}?`)) {
+                              acceptCounterOfferMutation.mutate(counterOffer.response_id);
+                            }
+                          }}
+                          disabled={acceptCounterOfferMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          data-testid={`accept-counter-${counterOffer.response_id}`}
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Accept
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            const reason = window.prompt("Please provide a reason for rejecting this counter-offer:");
+                            if (reason) {
+                              rejectCounterOfferMutation.mutate({ 
+                                responseId: counterOffer.response_id, 
+                                reason 
+                              });
+                            }
+                          }}
+                          disabled={rejectCounterOfferMutation.isPending}
+                          data-testid={`reject-counter-${counterOffer.response_id}`}
+                        >
+                          <XCircle className="w-3 h-3 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p>No counter-offers at this time</p>
+              <p className="text-sm mt-2">Exporter responses to your marketplace offers will appear here</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function AgriculturalBuyerDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
@@ -684,6 +885,17 @@ export default function AgriculturalBuyerDashboard() {
                 </div>
               )}
             </div>
+
+            {/* Counter Offers */}
+            <Button 
+              variant={activeTab === 'counter-offers' ? 'default' : 'ghost'} 
+              size="lg"
+              onClick={() => setActiveTab('counter-offers')}
+              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Counter Offers
+            </Button>
 
             {/* Transaction Dashboard */}
             <Button 
@@ -1405,6 +1617,11 @@ export default function AgriculturalBuyerDashboard() {
               </CardContent>
             </Card>
             </div>
+          )}
+
+          {/* Counter Offers Tab */}
+          {activeTab === 'counter-offers' && (
+            <CounterOffersTab />
           )}
 
           {/* Transaction Dashboard Tab */}

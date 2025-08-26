@@ -198,6 +198,34 @@ export default function AgriculturalBuyerDashboard() {
   // Extract data from response structure
   const verificationCodes = verificationCodesResponse?.data || [];
 
+  // Fetch existing buyer offers to check if lot already has offers
+  const { data: myOffersResponse } = useQuery({
+    queryKey: ['/api/buyer/my-offers', buyerId],
+    queryFn: () => apiRequest(`/api/buyer/my-offers/${buyerId}`),
+    enabled: !!buyerId,
+    staleTime: 30 * 1000, // Cache for 30 seconds - needs to be fresh for button updates
+  });
+  
+  // Extract offers from response
+  const existingOffers = myOffersResponse?.data || [];
+
+
+  // Helper function to check if lot already has offers
+  const hasExistingOffers = (lot: any) => {
+    if (!existingOffers || !Array.isArray(existingOffers)) return false;
+    
+    // Check if any offer exists for this custody lot
+    return existingOffers.some((offer: any) => {
+      // Match by custody ID (most reliable)
+      if (lot.custodyId && offer.custodyId === lot.custodyId) return true;
+      
+      // Match by commodity type and weight (fallback)
+      const sameType = offer.commodity === lot.commodityType;
+      const sameWeight = Math.abs(parseFloat(offer.quantityAvailable || '0') - parseFloat(lot.totalWeight || '0')) < 0.1;
+      
+      return sameType && sameWeight;
+    });
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -435,6 +463,9 @@ export default function AgriculturalBuyerDashboard() {
           description: `${offerType === 'direct' ? 'Direct' : 'Broadcast'} offer sent to exporters. Total offer value: $${response.totalOfferPrice}`,
         });
         setSellOfferDialog({ open: false, lot: null });
+        
+        // Refresh existing offers to update button status
+        queryClient.invalidateQueries({ queryKey: ['/api/buyer/my-offers', buyerId] });
       } else {
         throw new Error(response.message || 'Failed to create offer');
       }
@@ -1132,6 +1163,15 @@ export default function AgriculturalBuyerDashboard() {
                                     >
                                       <CheckCircle className="w-4 h-4 mr-2" />
                                       Request Authorization
+                                    </Button>
+                                  ) : hasExistingOffers(lot) ? (
+                                    <Button 
+                                      disabled
+                                      className="w-full bg-orange-500 hover:bg-orange-600 cursor-not-allowed"
+                                      size="sm"
+                                    >
+                                      <Clock className="w-4 h-4 mr-2" />
+                                      Offer Created - Waiting Acceptance
                                     </Button>
                                   ) : (
                                     <Button 

@@ -81,11 +81,6 @@ const ExporterDashboard = memo(() => {
     staleTime: 10000, // 10 seconds cache
   });
 
-  // Debug logging
-  console.log('🔍 Debug - acceptedDealsData:', acceptedDealsData);
-  console.log('🔍 Debug - deals array:', acceptedDealsData?.deals);
-  console.log('🔍 Debug - deals length:', acceptedDealsData?.deals?.length);
-  console.log('🔍 Debug - condition result:', acceptedDealsData?.deals && Array.isArray(acceptedDealsData.deals) && acceptedDealsData.deals.length > 0);
 
   // ⚡ MEMOIZED COMPLIANCE DATA - No recalculation
   const complianceData = useMemo(() => ({
@@ -230,14 +225,6 @@ const ExporterDashboard = memo(() => {
           </div>
 
           {/* ⚡ ACCEPTED DEALS - WAREHOUSE TRANSPORT ARRANGEMENTS */}
-          {/* Debug: Show raw data */}
-          {acceptedDealsData && (
-            <div className="mb-4 p-4 bg-yellow-50 rounded">
-              <h4>Debug Info:</h4>
-              <pre className="text-xs">{JSON.stringify(acceptedDealsData, null, 2)}</pre>
-            </div>
-          )}
-          
           {acceptedDealsData?.deals && Array.isArray(acceptedDealsData.deals) && acceptedDealsData.deals.length > 0 && (
             <Card className="mb-8">
               <CardHeader>

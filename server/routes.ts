@@ -7855,34 +7855,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/exporters', async (req, res) => {
-    try {
-      const validatedData = insertExporterSchema.parse(req.body);
-      
-      // Generate unique exporter ID
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      const exporterId = `EXP-${year}${month}${day}-${random}`;
-      
-      // Add the generated exporterId to the data
-      const exporterWithId = {
-        ...validatedData,
-        exporterId
-      };
-      
-      const exporter = await storage.createExporter(exporterWithId);
-      res.status(201).json(exporter);
-    } catch (error) {
-      console.error('Error creating exporter:', error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
-      }
-      res.status(500).json({ message: 'Failed to create exporter' });
-    }
-  });
+  // REMOVED: Duplicate exporter registration endpoint - moved to main ONBOARDING SYSTEM section
 
   // Export Order management routes
   app.get('/api/export-orders', async (req, res) => {
@@ -11837,7 +11810,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const buyer = await storage.createBuyer(buyerData);
 
       res.status(201).json({ 
-        ...buyer, 
+        success: true,
+        data: buyer,
         message: "Buyer registered successfully. Approval pending.",
         credentials: {
           buyerId: buyer.buyerId,
@@ -11847,10 +11821,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error creating buyer:", error);
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ message: "Invalid buyer data", errors: error.errors });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Invalid buyer data", 
+          errors: error.errors 
+        });
       }
-      res.status(500).json({ message: "Failed to create buyer" });
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to create buyer" 
+      });
     }
   });
 
@@ -12057,16 +12038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // EXPORTER MANAGEMENT SYSTEM ROUTES
   // ============================================================================
 
-  // Get all exporters - FOR REGULATORY ADMIN EMS
-  app.get("/api/exporters", async (req, res) => {
-    try {
-      const exporters = await storage.getExporters();
-      res.json(exporters);
-    } catch (error) {
-      console.error("Error fetching exporters:", error);
-      res.status(500).json({ message: "Failed to fetch exporters" });
-    }
-  });
+  // REMOVED: Duplicate GET exporters endpoint - using main endpoint above
 
   // Get exporter by ID - FOR EMS DETAILS VIEW
   app.get("/api/exporters/:id", async (req, res) => {
@@ -12104,16 +12076,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const exporter = await storage.createExporter(exporterData);
 
       res.status(201).json({ 
-        ...exporter,
+        success: true,
+        data: exporter,
         message: "Exporter registered successfully - awaiting compliance review"
       });
 
     } catch (error) {
       console.error("Error creating exporter:", error);
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ message: "Invalid exporter data", errors: error.errors });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Invalid exporter data", 
+          errors: error.errors 
+        });
       }
-      res.status(500).json({ message: "Failed to create exporter" });
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to create exporter" 
+      });
     }
   });
 

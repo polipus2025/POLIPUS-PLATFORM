@@ -17230,7 +17230,6 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       await db.execute(sql`
         UPDATE exporter_offer_responses 
         SET status = 'rejected',
-            rejected_at = NOW(),
             buyer_rejection_reason = ${rejectionReason || 'Counter-offer rejected by buyer'}
         WHERE response_id = ${responseId}
       `);

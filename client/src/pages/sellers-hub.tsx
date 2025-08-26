@@ -29,13 +29,7 @@ import {
 import { Link } from "wouter";
 import { format } from "date-fns";
 
-// Mock current exporter (replace with actual auth context)
-const CURRENT_EXPORTER = {
-  id: 1,
-  exporterId: "exp_exp-20250826-688",
-  company: "Global Export Solutions",
-  contact: "John Doe"
-};
+// Real exporter data from authentication system
 
 interface BuyerExporterOffer {
   id: number;
@@ -84,6 +78,14 @@ export default function SellersHub() {
   const [verificationCode, setVerificationCode] = useState("");
   const [activeTab, setActiveTab] = useState("all-offers");
 
+  // Get real authenticated exporter data
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 30000, // 30 seconds cache for speed
+    gcTime: 300000, // 5 minutes garbage collection
+  });
+
   // Fetch all active offers
   const { data: offers = [], isLoading } = useQuery({
     queryKey: ['/api/sellers-hub/offers'],
@@ -92,17 +94,18 @@ export default function SellersHub() {
 
   // Get offers specifically for this exporter
   const { data: myOffers = [] } = useQuery({
-    queryKey: [`/api/exporters/${CURRENT_EXPORTER.id}/offers`],
-    refetchInterval: 30000
+    queryKey: [`/api/exporters/${(user as any)?.id}/offers`],
+    refetchInterval: 30000,
+    enabled: !!(user as any)?.id // Only run query when we have exporter ID
   });
 
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
     mutationFn: async (offerId: string) => {
       const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/accept`, {
-        exporterId: CURRENT_EXPORTER.id,
-        exporterCompany: CURRENT_EXPORTER.company,
-        exporterContact: CURRENT_EXPORTER.contact
+        exporterId: (user as any)?.id,
+        exporterCompany: (user as any)?.companyName,
+        exporterContact: (user as any)?.contactPerson
       });
       return result.json();
     },
@@ -136,9 +139,9 @@ export default function SellersHub() {
   const rejectOfferMutation = useMutation({
     mutationFn: async ({ offerId, reason }: { offerId: string; reason: string }) => {
       const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/reject`, {
-        exporterId: CURRENT_EXPORTER.id,
-        exporterCompany: CURRENT_EXPORTER.company,
-        exporterContact: CURRENT_EXPORTER.contact,
+        exporterId: (user as any)?.id,
+        exporterCompany: (user as any)?.companyName,
+        exporterContact: (user as any)?.contactPerson,
         rejectionReason: reason
       });
       return result.json();
@@ -157,9 +160,9 @@ export default function SellersHub() {
   const negotiateMutation = useMutation({
     mutationFn: async ({ offerId, negotiationData }: { offerId: string; negotiationData: NegotiationData }) => {
       const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/negotiate`, {
-        exporterId: CURRENT_EXPORTER.id,
-        exporterCompany: CURRENT_EXPORTER.company,
-        exporterContact: CURRENT_EXPORTER.contact,
+        exporterId: (user as any)?.id,
+        exporterCompany: (user as any)?.companyName,
+        exporterContact: (user as any)?.contactPerson,
         ...negotiationData
       });
       return result.json();
@@ -547,10 +550,27 @@ export default function SellersHub() {
   // Filter offers based on active tab
   const filteredOffers = activeTab === 'my-offers' ? myOffers : offers;
 
-  if (isLoading) {
+  // Show loading state while user data or offers are loading
+  if (userLoading || isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <p className="ml-4 text-slate-600">Loading Sellers Hub...</p>
+      </div>
+    );
+  }
+
+  // If no user data, show error
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-600 text-lg mb-2">Authentication Error</p>
+          <p className="text-slate-600">Unable to load exporter profile. Please log in again.</p>
+          <Link href="/exporter-login">
+            <Button className="mt-4">Go to Login</Button>
+          </Link>
+        </div>
       </div>
     );
   }

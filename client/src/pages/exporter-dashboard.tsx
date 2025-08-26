@@ -235,7 +235,7 @@ const ExporterDashboard = memo(() => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {acceptedDealsData.deals.map((deal: any) => (
+                  {acceptedDealsData.deals?.map((deal: any) => (
                     <div key={deal.offer_id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Deal Details */}

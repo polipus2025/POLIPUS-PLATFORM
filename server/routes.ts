@@ -17061,12 +17061,10 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         offerId: req.params.offerId,
         exporterId,
         exporterCompany,
-        exporterContact,
         responseType: 'negotiate',
         status: 'negotiating',
-        counterPricePerMT,
-        modificationNotes: messageToBuyer, // Store message in existing notes field
-        responseMessage: 'Counter offer submitted'
+        counterOfferPrice: counterPricePerMT, // Use actual column name
+        responseNotes: messageToBuyer, // Use actual column name
       });
       
       res.json({ 

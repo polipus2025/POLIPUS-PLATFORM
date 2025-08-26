@@ -655,14 +655,14 @@ export interface IStorage {
   createExporter(exporter: InsertExporter): Promise<Exporter>;
   updateExporter(id: number, exporter: Partial<Exporter>): Promise<Exporter | undefined>;
   
-  getExporterCredentials(exporterId: string): Promise<ExporterCredential | undefined>;
+  getExporterCredentials(exporterId: number): Promise<ExporterCredential | undefined>;
   createExporterCredentials(credentials: InsertExporterCredential): Promise<ExporterCredential>;
-  updateExporterCredentials(exporterId: string, credentials: Partial<ExporterCredential>): Promise<ExporterCredential | undefined>;
+  updateExporterCredentials(exporterId: number, credentials: Partial<ExporterCredential>): Promise<ExporterCredential | undefined>;
   
-  getExporterDocuments(exporterId: string): Promise<ExporterDocument[]>;
+  getExporterDocuments(exporterId: number): Promise<ExporterDocument[]>;
   createExporterDocument(document: InsertExporterDocument): Promise<ExporterDocument>;
   
-  getExporterTransactions(exporterId: string): Promise<ExporterTransaction[]>;
+  getExporterTransactions(exporterId: number): Promise<ExporterTransaction[]>;
   createExporterTransaction(transaction: InsertExporterTransaction): Promise<ExporterTransaction>;
 
   // Multiple Land Mapping & Harvest Schedule System methods
@@ -2362,7 +2362,7 @@ export class DatabaseStorage implements IStorage {
     
     // Auto-generate credentials for Exporter Portal access
     if (newExporter.complianceStatus === 'approved') {
-      await this.generateExporterCredentials(newExporter.exporterId, newExporter.contactPersonFirstName + ' ' + newExporter.contactPersonLastName, newExporter.primaryEmail);
+      await this.generateExporterCredentials(newExporter.id, newExporter.exporterId, newExporter.contactPersonFirstName + ' ' + newExporter.contactPersonLastName, newExporter.primaryEmail);
     }
     
     return newExporter;
@@ -2380,17 +2380,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Auto-generate credentials when exporter is approved
-  async generateExporterCredentials(exporterId: string, contactPerson?: string, email?: string): Promise<ExporterCredential> {
-    const username = `exp_${exporterId.toLowerCase()}`;
+  async generateExporterCredentials(exporterId: number, exporterIdString: string, contactPerson?: string, email?: string): Promise<ExporterCredential> {
+    // Check if credentials already exist
+    const existingCredentials = await this.getExporterCredentials(exporterId);
+    if (existingCredentials) {
+      return existingCredentials;
+    }
+
+    const username = `exp_${exporterIdString.toLowerCase()}`;
     const tempPassword = this.generateSecurePassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
     
     const credentials: InsertExporterCredential = {
       exporterId,
       username,
-      hashedPassword,
+      passwordHash: hashedPassword,
       temporaryPassword: tempPassword,
-      mustChangePassword: true,
+      passwordChangeRequired: true,
       isActive: true,
       portalAccess: true,
       createdAt: new Date(),
@@ -2403,11 +2409,11 @@ export class DatabaseStorage implements IStorage {
     await this.createExporterTransaction({
       exporterId,
       transactionType: 'credential_generation',
-      transactionId: `CRED-${Date.now()}`,
-      amount: 0,
+      transactionDate: new Date(),
+      transactionAmount: 0,
       currency: 'USD',
-      status: 'completed',
-      description: `Portal access credentials generated for ${contactPerson || 'exporter'}`,
+      exportStatus: 'completed',
+      paymentStatus: 'completed',
       createdAt: new Date()
     });
 
@@ -2447,7 +2453,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Exporter credentials management
-  async getExporterCredentials(exporterId: string): Promise<ExporterCredential | undefined> {
+  async getExporterCredentials(exporterId: number): Promise<ExporterCredential | undefined> {
     const [credentials] = await db.select().from(exporterCredentials)
       .where(eq(exporterCredentials.exporterId, exporterId));
     return credentials || undefined;
@@ -2458,7 +2464,7 @@ export class DatabaseStorage implements IStorage {
     return newCredentials;
   }
 
-  async updateExporterCredentials(exporterId: string, credentials: Partial<ExporterCredential>): Promise<ExporterCredential | undefined> {
+  async updateExporterCredentials(exporterId: number, credentials: Partial<ExporterCredential>): Promise<ExporterCredential | undefined> {
     const [updatedCredentials] = await db.update(exporterCredentials)
       .set({ ...credentials, updatedAt: new Date() })
       .where(eq(exporterCredentials.exporterId, exporterId))
@@ -2467,7 +2473,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Exporter documents management
-  async getExporterDocuments(exporterId: string): Promise<ExporterDocument[]> {
+  async getExporterDocuments(exporterId: number): Promise<ExporterDocument[]> {
     return await db.select().from(exporterDocuments)
       .where(eq(exporterDocuments.exporterId, exporterId))
       .orderBy(desc(exporterDocuments.createdAt));
@@ -2478,7 +2484,7 @@ export class DatabaseStorage implements IStorage {
     return newDocument;
   }
 
-  async getExporterTransactions(exporterId: string): Promise<ExporterTransaction[]> {
+  async getExporterTransactions(exporterId: number): Promise<ExporterTransaction[]> {
     return await db.select().from(exporterTransactions)
       .where(eq(exporterTransactions.exporterId, exporterId))
       .orderBy(desc(exporterTransactions.createdAt));
@@ -2588,7 +2594,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(exporterCredentials.exporterId, exporterId));
   }
 
-  async updateExporterPassword(exporterId: string, newPassword: string): Promise<void> {
+  async updateExporterPassword(exporterId: number, newPassword: string): Promise<void> {
     const passwordHash = await bcrypt.hash(newPassword, 12);
     await this.updateExporterCredentials(exporterId, {
       passwordHash,
@@ -2599,17 +2605,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Approval process that triggers credential generation
-  async approveExporter(exporterId: string): Promise<void> {
-    // Get the exporter first to get the numeric ID
-    const exporter = await this.getExporterByExporterId(exporterId);
+  async approveExporter(exporterId: number): Promise<void> {
+    // Get the exporter first
+    const exporter = await this.getExporter(exporterId);
     if (!exporter) {
       throw new Error('Exporter not found');
     }
     
-    await this.updateExporter(exporter.id, { complianceStatus: 'approved' });
+    // Update exporter status and enable portal access
+    await this.updateExporter(exporter.id, { 
+      complianceStatus: 'approved',
+      portalAccess: true,
+      loginCredentialsGenerated: true,
+      approvedAt: new Date()
+    });
     
-    // Generate credentials with correct field names
-    await this.generateExporterCredentials(exporterId, exporter.contactPersonFirstName + ' ' + exporter.contactPersonLastName, exporter.primaryEmail);
+    // Generate credentials with correct parameters
+    await this.generateExporterCredentials(exporter.id, exporter.exporterId, exporter.contactPersonFirstName + ' ' + exporter.contactPersonLastName, exporter.primaryEmail);
   }
 
   // ========================================

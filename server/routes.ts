@@ -12179,7 +12179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Exporter not found" });
       }
       
-      const documents = await storage.getExporterDocuments(exporter.exporterId);
+      const documents = await storage.getExporterDocuments(exporter.id);
       res.json(documents);
     } catch (error) {
       console.error("Error fetching exporter documents:", error);
@@ -12195,7 +12195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Exporter not found" });
       }
       
-      const transactions = await storage.getExporterTransactions(exporter.exporterId);
+      const transactions = await storage.getExporterTransactions(exporter.id);
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching exporter transactions:", error);
@@ -12227,10 +12227,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Exporter not found" });
       }
 
-      await storage.approveExporter(exporter.exporterId);
+      await storage.approveExporter(exporter.id);
       
       // Get the generated credentials
-      const credentials = await storage.getExporterCredentials(exporter.exporterId);
+      const credentials = await storage.getExporterCredentials(exporter.id);
       
       res.json({
         message: "Exporter approved and credentials generated",

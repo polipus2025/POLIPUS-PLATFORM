@@ -931,10 +931,10 @@ Please provide these credentials to the exporter. They will be required to chang
                         <div className="space-y-2 text-sm">
                           <div><span className="font-medium">Exporter ID:</span> <span data-testid="text-detail-exporter-id">{selectedExporter.exporterId}</span></div>
                           <div><span className="font-medium">Business Type:</span> <span data-testid="text-detail-business-type">{selectedExporter.businessType}</span></div>
-                          <div><span className="font-medium">Business License:</span> <span data-testid="text-detail-business-license">{selectedExporter.businessLicense}</span></div>
-                          <div><span className="font-medium">Tax ID:</span> <span data-testid="text-detail-tax-id">{selectedExporter.taxIdNumber}</span></div>
-                          <div><span className="font-medium">Export License:</span> <span data-testid="text-detail-export-license">{selectedExporter.exportLicense}</span></div>
-                          <div><span className="font-medium">License Expires:</span> <span data-testid="text-detail-license-expiry">{new Date(selectedExporter.licenseExpiryDate).toLocaleDateString()}</span></div>
+                          <div><span className="font-medium">Business License:</span> <span data-testid="text-detail-business-license">{selectedExporter.businessLicenseNumber || 'Not provided'}</span></div>
+                          <div><span className="font-medium">Tax ID:</span> <span data-testid="text-detail-tax-id">{selectedExporter.taxId || 'Not provided'}</span></div>
+                          <div><span className="font-medium">Export License:</span> <span data-testid="text-detail-export-license">{selectedExporter.exportLicenseNumber || 'Not provided'}</span></div>
+                          <div><span className="font-medium">License Expires:</span> <span data-testid="text-detail-license-expiry">{selectedExporter.exportLicenseExpiryDate ? new Date(selectedExporter.exportLicenseExpiryDate).toLocaleDateString() : 'Not provided'}</span></div>
                         </div>
                       </div>
 
@@ -942,11 +942,11 @@ Please provide these credentials to the exporter. They will be required to chang
                       <div>
                         <h4 className="font-semibold mb-3">Contact Information</h4>
                         <div className="space-y-2 text-sm">
-                          <div><span className="font-medium">Contact Person:</span> <span data-testid="text-detail-contact-person">{selectedExporter.contactPerson}</span></div>
-                          <div><span className="font-medium">Email:</span> <span data-testid="text-detail-email">{selectedExporter.email}</span></div>
-                          <div><span className="font-medium">Phone:</span> <span data-testid="text-detail-phone">{selectedExporter.phoneNumber}</span></div>
-                          <div><span className="font-medium">Address:</span> <span data-testid="text-detail-address">{selectedExporter.address}</span></div>
-                          <div><span className="font-medium">District:</span> <span data-testid="text-detail-district">{selectedExporter.district}</span></div>
+                          <div><span className="font-medium">Contact Person:</span> <span data-testid="text-detail-contact-person">{selectedExporter.contactPersonFirstName} {selectedExporter.contactPersonLastName}</span></div>
+                          <div><span className="font-medium">Email:</span> <span data-testid="text-detail-email">{selectedExporter.primaryEmail || 'Not provided'}</span></div>
+                          <div><span className="font-medium">Phone:</span> <span data-testid="text-detail-phone">{selectedExporter.primaryPhone || 'Not provided'}</span></div>
+                          <div><span className="font-medium">Address:</span> <span data-testid="text-detail-address">{selectedExporter.businessAddress || 'Not provided'}</span></div>
+                          <div><span className="font-medium">District:</span> <span data-testid="text-detail-district">{selectedExporter.city || 'Not provided'}</span></div>
                           <div><span className="font-medium">County:</span> <span data-testid="text-detail-county">{selectedExporter.county}</span></div>
                         </div>
                       </div>
@@ -957,11 +957,18 @@ Please provide these credentials to the exporter. They will be required to chang
                         <div className="space-y-2 text-sm">
                           <div><span className="font-medium">Commodities:</span></div>
                           <div className="flex flex-wrap gap-1">
-                            {(selectedExporter.commodityTypes || []).map((commodity, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {commodity}
-                              </Badge>
-                            ))}
+                            {(() => {
+                              try {
+                                const commodities = selectedExporter.exportCommodities ? JSON.parse(selectedExporter.exportCommodities) : [];
+                                return commodities.map((commodity, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs">
+                                    {commodity}
+                                  </Badge>
+                                ));
+                              } catch {
+                                return <span className="text-slate-500 text-xs">No commodities specified</span>;
+                              }
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -971,7 +978,7 @@ Please provide these credentials to the exporter. They will be required to chang
                         <h4 className="font-semibold mb-3">Banking Information</h4>
                         <div className="space-y-2 text-sm">
                           <div><span className="font-medium">Bank Name:</span> <span data-testid="text-detail-bank-name">{selectedExporter.bankName || "Not provided"}</span></div>
-                          <div><span className="font-medium">Account Number:</span> <span data-testid="text-detail-account-number">{selectedExporter.accountNumber || "Not provided"}</span></div>
+                          <div><span className="font-medium">Account Number:</span> <span data-testid="text-detail-account-number">{selectedExporter.bankAccountNumber || "Not provided"}</span></div>
                         </div>
                       </div>
                     </div>
@@ -980,7 +987,7 @@ Please provide these credentials to the exporter. They will be required to chang
                     <div className="mt-6 pt-6 border-t">
                       <h4 className="font-semibold mb-3">System Information</h4>
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div><span className="font-medium">Registration Date:</span> <span data-testid="text-detail-registration-date">{new Date(selectedExporter.registrationDate).toLocaleDateString()}</span></div>
+                        <div><span className="font-medium">Registration Date:</span> <span data-testid="text-detail-registration-date">{selectedExporter.createdAt ? new Date(selectedExporter.createdAt).toLocaleDateString() : 'Not available'}</span></div>
                         <div><span className="font-medium">Portal Access:</span> <span data-testid="text-detail-portal-access">{selectedExporter.portalAccess ? "Granted" : "Pending"}</span></div>
                         <div><span className="font-medium">Credentials Generated:</span> <span data-testid="text-detail-credentials-generated">{selectedExporter.loginCredentialsGenerated ? "Yes" : "No"}</span></div>
                         <div><span className="font-medium">Last Login:</span> <span data-testid="text-detail-last-login">{selectedExporter.lastLoginAt ? new Date(selectedExporter.lastLoginAt).toLocaleDateString() : "Never"}</span></div>

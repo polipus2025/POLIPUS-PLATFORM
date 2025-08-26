@@ -3173,7 +3173,7 @@ export type InsertExporter = typeof exporters.$inferInsert;
 export const buyerExporterOffers = pgTable("buyer_exporter_offers", {
   id: serial("id").primaryKey(),
   offerId: text("offer_id").notNull().unique(), // BOE-YYYYMMDD-XXX format
-  buyerId: integer("buyer_id").references(() => buyers.id), // Fixed: Allow nullable, use integer
+  buyerId: text("buyer_id"), // Match actual database structure (character varying)
   buyerCompany: text("buyer_company"),
   buyerContact: text("buyer_contact"),
   buyerPhone: text("buyer_phone"),

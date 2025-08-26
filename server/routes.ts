@@ -16495,10 +16495,19 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       console.log(`🏃‍♂️ First-Come-First-Serve: Exporter ${exporterId} accepting offer ${offerId}`);
 
       // Check if offer is still available and get current acceptance count
+      console.log(`🔍 Looking up offer ${offerId} in buyerExporterOffers table...`);
       const [offer] = await db
-        .select()
+        .select({
+          offerId: buyerExporterOffers.offerId,
+          status: buyerExporterOffers.status,
+          buyerCompany: buyerExporterOffers.buyerCompany,
+          offerType: buyerExporterOffers.offerType,
+          targetExporterId: buyerExporterOffers.targetExporterId
+        })
         .from(buyerExporterOffers)
         .where(eq(buyerExporterOffers.offerId, offerId));
+
+      console.log(`🔍 Offer lookup result:`, offer ? `FOUND - Status: ${offer.status}` : "NOT FOUND");
 
       if (!offer) {
         return res.status(404).json({
@@ -16507,7 +16516,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         });
       }
 
-      // First-Come-First-Serve Logic - EXACTLY like farmer-buyer offers
+      // Check offer availability
       if (offer.status !== 'pending') {
         return res.status(400).json({
           success: false,
@@ -16515,26 +16524,58 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         });
       }
 
-      // Check if another exporter has already accepted (same as farmer-buyer system)
-      const existingAcceptances = await db
-        .select({
-          responseId: exporterOfferResponses.responseId,
-          exporterId: exporterOfferResponses.exporterId,
-          responseType: exporterOfferResponses.responseType
-        })
-        .from(exporterOfferResponses)
-        .where(and(
-          eq(exporterOfferResponses.offerId, offerId),
-          eq(exporterOfferResponses.responseType, 'accept')
-        ));
+      // DIFFERENT LOGIC for DIRECT vs BROADCAST offers
+      if (offer.offerType === 'direct') {
+        // DIRECT OFFERS: Check if this exporter is the intended recipient
+        console.log(`📧 Direct offer - checking if exporter ${exporterId} is the target`);
+        
+        // For direct offers, only the targeted exporter should be able to accept
+        if (offer.targetExporterId && offer.targetExporterId.toString() !== exporterId.toString()) {
+          return res.status(403).json({
+            success: false,
+            message: "This offer was not sent to you"
+          });
+        }
 
-      if (existingAcceptances.length > 0) {
-        // EXACTLY like farmer-buyer: "Another buyer has already confirmed this offer. You were too late."
-        return res.status(400).json({
-          success: false,
-          message: "Sorry! Another exporter has already accepted this offer. You were too late.",
-          clickOrder: existingAcceptances.length + 1,
-        });
+        // Check if already responded to this direct offer
+        const existingResponse = await db
+          .select()
+          .from(exporterOfferResponses)
+          .where(and(
+            eq(exporterOfferResponses.offerId, offerId),
+            eq(exporterOfferResponses.exporterId, exporterId)
+          ));
+
+        if (existingResponse.length > 0) {
+          return res.status(400).json({
+            success: false,
+            message: "You have already responded to this offer"
+          });
+        }
+
+      } else {
+        // BROADCAST OFFERS: First-Come-First-Serve Logic (like farmer-buyer)
+        console.log(`📢 Broadcast offer - applying first-come-first-serve logic`);
+        
+        const existingAcceptances = await db
+          .select({
+            responseId: exporterOfferResponses.responseId,
+            exporterId: exporterOfferResponses.exporterId,
+            responseType: exporterOfferResponses.responseType
+          })
+          .from(exporterOfferResponses)
+          .where(and(
+            eq(exporterOfferResponses.offerId, offerId),
+            eq(exporterOfferResponses.responseType, 'accept')
+          ));
+
+        if (existingAcceptances.length > 0) {
+          return res.status(400).json({
+            success: false,
+            message: "Sorry! Another exporter has already accepted this broadcast offer. You were too late.",
+            clickOrder: existingAcceptances.length + 1,
+          });
+        }
       }
 
       // First exporter to accept - they win! (EXACTLY like farmer-buyer system)
@@ -16548,9 +16589,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         offerId,
         exporterId,
         exporterCompany,
-        exporterContact: exporterCompany + " Contact",
         responseType: 'accept',
-        responseMessage: responseNotes || '',
+        responseNotes: responseNotes || '',
         clickOrder: 1,
         isWinner: true
       });
@@ -16612,9 +16652,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         offerId,
         exporterId,
         exporterCompany,
-        exporterContact: exporterCompany + " Contact",
         responseType: 'reject',
-        rejectionReason: rejectionReason
+        responseNotes: rejectionReason
       });
 
       console.log(`❌ Offer ${offerId} rejected by exporter ${exporterId}`);
@@ -17312,7 +17351,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       const rejectedOffers = await db.execute(sql`
         SELECT eor.response_id, eor.offer_id, eor.exporter_id, eor.exporter_company,
-               eor.response_type, eor.status, eor.response_notes, eor.rejection_reason, 
+               eor.response_type, eor.status, eor.response_message, 
                eor.created_at, eor.updated_at,
                beo.commodity, beo.quantity_available, beo.price_per_unit as original_price,
                beo.total_value, beo.buyer_company, beo.buyer_id

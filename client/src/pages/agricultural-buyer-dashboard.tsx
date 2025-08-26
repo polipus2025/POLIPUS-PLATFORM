@@ -149,7 +149,7 @@ function CounterOffersTab() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="space-y-3">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 mb-2">
                           <Badge className="bg-orange-100 text-orange-800">
                             Counter Offer
                           </Badge>
@@ -157,26 +157,41 @@ function CounterOffersTab() {
                             From: {counterOffer.exporter_company}
                           </span>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-gray-600">Commodity</p>
-                            <p className="font-medium">{counterOffer.commodity}</p>
+
+                        {/* Original Offer Reference */}
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r mb-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Package2 className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm font-medium text-blue-800">
+                              Your Original Marketplace Offer
+                            </span>
                           </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Quantity</p>
-                            <p className="font-medium">{counterOffer.quantity_available} MT</p>
+                          <div className="text-sm text-blue-700">
+                            <strong>Offer ID:</strong> {counterOffer.offer_id} • 
+                            <strong> Product:</strong> {counterOffer.commodity} • 
+                            <strong> Quantity:</strong> {counterOffer.quantity_available} MT •
+                            <strong> Listed Price:</strong> ${counterOffer.original_price}/MT
                           </div>
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-gray-600">Your Original Price</p>
-                            <p className="font-medium text-gray-700">${counterOffer.original_price}/MT</p>
+                        
+                        {/* Exporter's Counter-Offer Details */}
+                        <div className="bg-orange-50 border-l-4 border-orange-400 p-3 rounded-r mb-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <TrendingUp className="w-4 h-4 text-orange-600" />
+                            <span className="text-sm font-medium text-orange-800">
+                              Exporter's Counter-Offer Details
+                            </span>
                           </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Exporter Counter Price</p>
-                            <p className="font-bold text-lg text-orange-600">${counterOffer.counter_offer_price}/MT</p>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm text-orange-600">Your Original Price</p>
+                              <p className="font-medium text-gray-700">${counterOffer.original_price}/MT</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-orange-600">Exporter Counter Price</p>
+                              <p className="font-bold text-lg text-orange-700">${counterOffer.counter_offer_price}/MT</p>
+                            </div>
                           </div>
                         </div>
 

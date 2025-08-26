@@ -17038,6 +17038,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       
       const offers = await db.execute(sql`
         SELECT 
+          id,
           offer_id as "offerId",
           buyer_id as "buyerId", 
           buyer_company as "buyerCompany",
@@ -17051,7 +17052,18 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           target_exporter_id as "targetExporterId",
           status,
           expires_at as "expiresAt",
-          created_at as "createdAt"
+          created_at as "createdAt",
+          'Grade A' as "qualityGrade",
+          'FOB Port' as "deliveryTerms",
+          'L/C at sight' as "paymentTerms", 
+          '30 days' as "deliveryTimeframe",
+          'Liberia' as "originLocation",
+          'Various' as "county",
+          'Port of Monrovia' as "proposedPort",
+          0 as "viewCount",
+          0 as "responseCount", 
+          0 as "acceptedCount",
+          created_at as "updatedAt"
         FROM buyer_exporter_offers 
         WHERE status IN ('pending', 'active')
         ORDER BY created_at DESC

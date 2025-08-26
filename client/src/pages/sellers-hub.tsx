@@ -231,16 +231,16 @@ export default function SellersHub() {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-lg font-semibold text-slate-800">
-              {offer.commodity} - {offer.quantityAvailable}
+              {offer.commodity} - {parseFloat(offer.quantityAvailable || '0')} MT
             </CardTitle>
             <p className="text-sm text-slate-600 mt-1">{offer.buyerCompany}</p>
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-green-600">
-              ${offer.pricePerMT.toFixed(2)}/MT
+              ${parseFloat(offer.pricePerMT || '0').toFixed(2)}/MT
             </div>
             <div className="text-sm text-slate-500">
-              Total: ${offer.totalValue.toLocaleString()}
+              Total: ${parseFloat(offer.totalValue || '0').toLocaleString()}
             </div>
           </div>
         </div>
@@ -344,8 +344,8 @@ export default function SellersHub() {
                 <div><strong>Commodity:</strong> {selectedOffer.commodity}</div>
                 <div><strong>Quality Grade:</strong> {selectedOffer.qualityGrade}</div>
                 <div><strong>Quantity:</strong> {selectedOffer.quantityAvailable}</div>
-                <div><strong>Price per MT:</strong> ${selectedOffer.pricePerMT.toFixed(2)}</div>
-                <div><strong>Total Value:</strong> ${selectedOffer.totalValue.toLocaleString()}</div>
+                <div><strong>Price per MT:</strong> ${parseFloat(selectedOffer.pricePerMT || '0').toFixed(2)}</div>
+                <div><strong>Total Value:</strong> ${parseFloat(selectedOffer.totalValue || '0').toLocaleString()}</div>
               </div>
             </div>
 
@@ -634,7 +634,7 @@ export default function SellersHub() {
           <CardContent className="p-4 text-center">
             <DollarSign className="w-8 h-8 text-purple-500 mx-auto mb-2" />
             <div className="text-2xl font-bold text-slate-800">
-              ${offers.reduce((sum, offer) => sum + offer.totalValue, 0).toLocaleString()}
+              ${offers.reduce((sum, offer) => sum + parseFloat(offer.totalValue || '0'), 0).toLocaleString()}
             </div>
             <div className="text-sm text-slate-600">Total Value</div>
           </CardContent>

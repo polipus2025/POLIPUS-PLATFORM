@@ -173,9 +173,10 @@ export default function SellersHub() {
     mutationFn: async ({ offerId, negotiationData }: { offerId: string; negotiationData: NegotiationData }) => {
       console.log('Sending negotiation:', { offerId, negotiationData });
       
-      const result = await apiRequest("POST", `/api/exporter/offers/${offerId}/negotiate`, {
+      const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/negotiate`, {
         exporterId: (user as any)?.id,
         exporterCompany: (user as any)?.companyName,
+        exporterContact: (user as any)?.contactPerson || (user as any)?.email,
         counterPricePerMT: negotiationData.counterPricePerMT,
         messageToBuyer: negotiationData.messageToBuyer
       });

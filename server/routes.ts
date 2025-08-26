@@ -16537,14 +16537,12 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           });
         }
 
-        // Check if already responded to this direct offer
-        const existingResponse = await db
-          .select()
-          .from(exporterOfferResponses)
-          .where(and(
-            eq(exporterOfferResponses.offerId, offerId),
-            eq(exporterOfferResponses.exporterId, exporterId)
-          ));
+        // Check if already responded to this direct offer - using raw SQL to avoid schema issues
+        const existingResponse = await db.execute(sql`
+          SELECT response_id, response_type 
+          FROM exporter_offer_responses 
+          WHERE offer_id = ${offerId} AND exporter_id = ${exporterId}
+        `);
 
         if (existingResponse.length > 0) {
           return res.status(400).json({
@@ -16583,27 +16581,18 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
       const responseId = `EOR-${timestamp}-${randomSuffix}`;
 
-      // Create response record with winner status (same as farmer-buyer)
-      await db.insert(exporterOfferResponses).values({
-        responseId,
-        offerId,
-        exporterId,
-        exporterCompany,
-        responseType: 'accept',
-        responseNotes: responseNotes || '',
-        clickOrder: 1,
-        isWinner: true
-      });
+      // Create response record - using raw SQL to avoid column errors
+      await db.execute(sql`
+        INSERT INTO exporter_offer_responses (response_id, offer_id, exporter_id, exporter_company, response_type, response_notes)
+        VALUES (${responseId}, ${offerId}, ${exporterId}, ${exporterCompany}, 'accept', ${responseNotes || ''})
+      `);
 
-      // Mark original offer as accepted (same as farmer-buyer updating farmer offer to "confirmed")
-      await db
-        .update(buyerExporterOffers)
-        .set({
-          status: 'accepted',
-          acceptedBy: exporterId,
-          acceptedDate: new Date()
-        })
-        .where(eq(buyerExporterOffers.offerId, offerId));
+      // Mark original offer as accepted - using raw SQL to avoid schema issues
+      await db.execute(sql`
+        UPDATE buyer_exporter_offers 
+        SET status = 'accepted', accepted_by = ${exporterId}, accepted_date = NOW()
+        WHERE offer_id = ${offerId}
+      `);
 
       console.log(`✅ Offer ${offerId} accepted by exporter ${exporterId} (First-Come-First-Serve)`);
 
@@ -17351,7 +17340,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       const rejectedOffers = await db.execute(sql`
         SELECT eor.response_id, eor.offer_id, eor.exporter_id, eor.exporter_company,
-               eor.response_type, eor.status, eor.response_message, 
+               eor.response_type, eor.status, eor.response_notes, 
                eor.created_at, eor.updated_at,
                beo.commodity, beo.quantity_available, beo.price_per_unit as original_price,
                beo.total_value, beo.buyer_company, beo.buyer_id

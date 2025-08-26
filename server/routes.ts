@@ -17051,10 +17051,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           target_exporter_id as "targetExporterId",
           status,
           expires_at as "expiresAt",
-          created_at as "createdAt",
-          description,
-          delivery_terms as "deliveryTerms",
-          payment_terms as "paymentTerms"
+          created_at as "createdAt"
         FROM buyer_exporter_offers 
         WHERE status IN ('pending', 'active')
         ORDER BY created_at DESC

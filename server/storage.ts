@@ -64,6 +64,10 @@ import {
   exporterCredentials,
   exporterDocuments,
   exporterTransactions,
+  buyerExporterOffers,
+  exporterOfferResponses,
+  offerNegotiations,
+  buyerExporterVerifications,
   regulatoryDepartments,
   exportOrders,
   qrBatches,
@@ -212,7 +216,15 @@ import {
   type InsertQrBatch,
   type InsertQrScan,
   type InsertWarehouseBagInventory,
-  type InsertBagMovement
+  type InsertBagMovement,
+  type BuyerExporterOffer,
+  type InsertBuyerExporterOffer,
+  type ExporterOfferResponse,
+  type InsertExporterOfferResponse,
+  type OfferNegotiation,
+  type InsertOfferNegotiation,
+  type BuyerExporterVerification,
+  type InsertBuyerExporterVerification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -3703,6 +3715,276 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+
+  // ============================================================================
+  // SELLERS HUB - BUYER TO EXPORTER OFFER SYSTEM
+  // ============================================================================
+
+  // Create buyer-to-exporter offer (direct or broadcast)
+  async createBuyerExporterOffer(offer: InsertBuyerExporterOffer): Promise<BuyerExporterOffer> {
+    const offerId = `BOE-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    
+    const [newOffer] = await db.insert(buyerExporterOffers)
+      .values({ 
+        ...offer, 
+        offerId,
+        status: 'active',
+        viewCount: 0,
+        responseCount: 0,
+        acceptedCount: 0
+      })
+      .returning();
+    return newOffer;
+  }
+
+  // Get offers for specific exporter (or all for broadcast)
+  async getOffersForExporter(exporterId: number): Promise<BuyerExporterOffer[]> {
+    const offers = await db.select()
+      .from(buyerExporterOffers)
+      .where(
+        or(
+          eq(buyerExporterOffers.targetExporterId, exporterId), // Direct offers
+          eq(buyerExporterOffers.offerType, 'broadcast_all'), // Broadcast to all
+          eq(buyerExporterOffers.offerType, 'broadcast_county'), // County broadcasts
+          eq(buyerExporterOffers.offerType, 'broadcast_commodity') // Commodity broadcasts
+        )
+      )
+      .orderBy(desc(buyerExporterOffers.createdAt));
+    
+    return offers;
+  }
+
+  // Get all active offers (for Sellers Hub dashboard)
+  async getActiveOffers(): Promise<BuyerExporterOffer[]> {
+    const offers = await db.select()
+      .from(buyerExporterOffers)
+      .where(eq(buyerExporterOffers.status, 'active'))
+      .orderBy(desc(buyerExporterOffers.createdAt));
+    
+    return offers;
+  }
+
+  // Get specific offer by ID
+  async getBuyerExporterOffer(offerId: string): Promise<BuyerExporterOffer | undefined> {
+    const [offer] = await db.select()
+      .from(buyerExporterOffers)
+      .where(eq(buyerExporterOffers.offerId, offerId));
+    return offer;
+  }
+
+  // Update offer view count when exporter views details
+  async incrementOfferViewCount(offerId: string): Promise<void> {
+    await db.update(buyerExporterOffers)
+      .set({ 
+        viewCount: sql`${buyerExporterOffers.viewCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(buyerExporterOffers.offerId, offerId));
+  }
+
+  // Create exporter response to offer
+  async createExporterOfferResponse(response: InsertExporterOfferResponse): Promise<ExporterOfferResponse> {
+    const responseId = `EOR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    
+    const [newResponse] = await db.insert(exporterOfferResponses)
+      .values({ 
+        ...response, 
+        responseId,
+        respondedAt: new Date()
+      })
+      .returning();
+
+    // Update offer response count
+    await db.update(buyerExporterOffers)
+      .set({ 
+        responseCount: sql`${buyerExporterOffers.responseCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(buyerExporterOffers.offerId, response.offerId));
+
+    return newResponse;
+  }
+
+  // Accept offer (first-come-first-serve for broadcast)
+  async acceptBuyerExporterOffer(offerId: string, exporterId: number, exporterCompany: string, exporterContact: string): Promise<{ success: boolean; verificationCode?: string; message?: string }> {
+    try {
+      // Check if offer is still available
+      const offer = await this.getBuyerExporterOffer(offerId);
+      if (!offer || offer.status !== 'active') {
+        return { success: false, message: 'Offer is no longer available' };
+      }
+
+      // For broadcast offers - implement first-come-first-serve
+      if (offer.offerType.startsWith('broadcast')) {
+        // Check if someone already accepted
+        const existingAcceptance = await db.select()
+          .from(exporterOfferResponses)
+          .where(
+            and(
+              eq(exporterOfferResponses.offerId, offerId),
+              eq(exporterOfferResponses.responseType, 'accept'),
+              eq(exporterOfferResponses.status, 'accepted')
+            )
+          );
+
+        if (existingAcceptance.length > 0) {
+          return { success: false, message: 'Offer already accepted by another exporter' };
+        }
+      }
+
+      // Create acceptance response
+      const responseId = `EOR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      
+      await db.insert(exporterOfferResponses)
+        .values({
+          responseId,
+          offerId,
+          exporterId,
+          exporterCompany,
+          exporterContact,
+          responseType: 'accept',
+          status: 'accepted',
+          responseMessage: 'Offer accepted',
+          respondedAt: new Date(),
+          finalizedAt: new Date()
+        });
+
+      // Generate verification code
+      const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const verificationId = `BEV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+
+      await db.insert(buyerExporterVerifications)
+        .values({
+          verificationId,
+          responseId,
+          offerId,
+          buyerId: offer.buyerId,
+          buyerCompany: offer.buyerCompany,
+          exporterId,
+          exporterCompany,
+          finalPrice: offer.pricePerMT,
+          finalQuantity: offer.quantityAvailable,
+          finalTerms: `${offer.deliveryTerms} | ${offer.paymentTerms}`,
+          totalDealValue: offer.totalValue,
+          verificationCode,
+          codeStatus: 'active',
+          dealStatus: 'confirmed',
+          dealConfirmedAt: new Date()
+        });
+
+      // Update offer status
+      await db.update(buyerExporterOffers)
+        .set({ 
+          status: 'accepted',
+          acceptedCount: sql`${buyerExporterOffers.acceptedCount} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(buyerExporterOffers.offerId, offerId));
+
+      return { success: true, verificationCode };
+
+    } catch (error) {
+      console.error('Error accepting offer:', error);
+      return { success: false, message: 'Failed to accept offer' };
+    }
+  }
+
+  // Get exporter responses for an offer
+  async getExporterResponsesForOffer(offerId: string): Promise<ExporterOfferResponse[]> {
+    const responses = await db.select()
+      .from(exporterOfferResponses)
+      .where(eq(exporterOfferResponses.offerId, offerId))
+      .orderBy(desc(exporterOfferResponses.respondedAt));
+    
+    return responses;
+  }
+
+  // Get exporter's own responses/offers
+  async getExporterOfferHistory(exporterId: number): Promise<ExporterOfferResponse[]> {
+    const responses = await db.select()
+      .from(exporterOfferResponses)
+      .where(eq(exporterOfferResponses.exporterId, exporterId))
+      .orderBy(desc(exporterOfferResponses.respondedAt));
+    
+    return responses;
+  }
+
+  // Create negotiation message
+  async createNegotiationMessage(negotiation: InsertOfferNegotiation): Promise<OfferNegotiation> {
+    const negotiationId = `NEG-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    
+    const [newNegotiation] = await db.insert(offerNegotiations)
+      .values({ 
+        ...negotiation, 
+        negotiationId,
+        isRead: false
+      })
+      .returning();
+
+    // Update response last negotiation time
+    await db.update(exporterOfferResponses)
+      .set({ 
+        lastNegotiationAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(exporterOfferResponses.responseId, negotiation.responseId));
+
+    return newNegotiation;
+  }
+
+  // Get negotiations for a response
+  async getNegotiationsForResponse(responseId: string): Promise<OfferNegotiation[]> {
+    const negotiations = await db.select()
+      .from(offerNegotiations)
+      .where(eq(offerNegotiations.responseId, responseId))
+      .orderBy(desc(offerNegotiations.createdAt));
+    
+    return negotiations;
+  }
+
+  // Get verification by code
+  async getBuyerExporterVerification(verificationCode: string): Promise<BuyerExporterVerification | undefined> {
+    const [verification] = await db.select()
+      .from(buyerExporterVerifications)
+      .where(eq(buyerExporterVerifications.verificationCode, verificationCode));
+    return verification;
+  }
+
+  // Update verification status
+  async updateVerificationStatus(verificationCode: string, updates: Partial<BuyerExporterVerification>): Promise<void> {
+    await db.update(buyerExporterVerifications)
+      .set({ 
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(buyerExporterVerifications.verificationCode, verificationCode));
+  }
+
+  // Get buyer's sent offers
+  async getBuyerSentOffers(buyerId: number): Promise<BuyerExporterOffer[]> {
+    const offers = await db.select()
+      .from(buyerExporterOffers)
+      .where(eq(buyerExporterOffers.buyerId, buyerId))
+      .orderBy(desc(buyerExporterOffers.createdAt));
+    
+    return offers;
+  }
+
+  // Expire old offers (utility method)
+  async expireOldOffers(): Promise<void> {
+    await db.update(buyerExporterOffers)
+      .set({ 
+        status: 'expired',
+        updatedAt: new Date()
+      })
+      .where(
+        and(
+          eq(buyerExporterOffers.status, 'active'),
+          sql`${buyerExporterOffers.expiresAt} < NOW()`
+        )
+      );
+  }
+
 }
 
 export const storage = new DatabaseStorage();

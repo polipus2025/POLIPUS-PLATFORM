@@ -19,7 +19,8 @@ import {
   Sun,
   Cloud,
   CloudRain,
-  Bell
+  Bell,
+  Store
 } from 'lucide-react';
 import lacraLogo from '@assets/LACRA LOGO_1753406166355.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
@@ -79,6 +80,7 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
   const sidebarItems = [
     { href: '/exporter-dashboard', label: 'Dashboard', icon: Home, description: 'Overview & metrics' },
     { href: '/world-market-pricing', label: 'World Market', icon: DollarSign, description: 'Live commodity prices' },
+    { href: '/sellers-hub', label: 'Sellers Hub', icon: Store, badge: 'NEW', description: 'Browse buyer offers' },
     { href: '/exporter/orders', label: 'Orders', icon: Package, badge: '3', description: 'Manage export orders' },
     { href: '/exporter/marketplace', label: 'Marketplace', icon: ShoppingCart, description: 'Connect with buyers' },
     { href: '/exporter/certificates', label: 'Certificates', icon: FileText, badge: '2', description: 'Export documents' },

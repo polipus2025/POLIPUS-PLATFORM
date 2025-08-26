@@ -16836,5 +16836,201 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // ============================================================================
+  // SELLERS HUB - BUYER TO EXPORTER OFFER SYSTEM API
+  // ============================================================================
+
+  // Create buyer-to-exporter offer (both direct and broadcast)
+  app.post("/api/buyer-exporter-offers", async (req, res) => {
+    try {
+      const newOffer = await storage.createBuyerExporterOffer(req.body);
+      res.json(newOffer);
+    } catch (error) {
+      console.error("Error creating buyer-exporter offer:", error);
+      res.status(500).json({ error: "Failed to create offer" });
+    }
+  });
+
+  // Get all active offers for Sellers Hub dashboard
+  app.get("/api/sellers-hub/offers", async (req, res) => {
+    try {
+      const offers = await storage.getActiveOffers();
+      res.json(offers);
+    } catch (error) {
+      console.error("Error fetching offers:", error);
+      res.status(500).json({ error: "Failed to fetch offers" });
+    }
+  });
+
+  // Get offers for specific exporter
+  app.get("/api/exporters/:exporterId/offers", async (req, res) => {
+    try {
+      const exporterId = parseInt(req.params.exporterId);
+      const offers = await storage.getOffersForExporter(exporterId);
+      res.json(offers);
+    } catch (error) {
+      console.error("Error fetching exporter offers:", error);
+      res.status(500).json({ error: "Failed to fetch offers" });
+    }
+  });
+
+  // Get specific offer details
+  app.get("/api/buyer-exporter-offers/:offerId", async (req, res) => {
+    try {
+      const offer = await storage.getBuyerExporterOffer(req.params.offerId);
+      if (!offer) {
+        return res.status(404).json({ error: "Offer not found" });
+      }
+      
+      // Increment view count
+      await storage.incrementOfferViewCount(req.params.offerId);
+      
+      res.json(offer);
+    } catch (error) {
+      console.error("Error fetching offer details:", error);
+      res.status(500).json({ error: "Failed to fetch offer" });
+    }
+  });
+
+  // Accept offer (with first-come-first-serve for broadcast)
+  app.post("/api/buyer-exporter-offers/:offerId/accept", async (req, res) => {
+    try {
+      const { exporterId, exporterCompany, exporterContact } = req.body;
+      const result = await storage.acceptBuyerExporterOffer(
+        req.params.offerId, 
+        exporterId, 
+        exporterCompany, 
+        exporterContact
+      );
+      
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          verificationCode: result.verificationCode,
+          message: "Offer accepted successfully! Verification code generated."
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: result.message 
+        });
+      }
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+      res.status(500).json({ error: "Failed to accept offer" });
+    }
+  });
+
+  // Reject offer
+  app.post("/api/buyer-exporter-offers/:offerId/reject", async (req, res) => {
+    try {
+      const { exporterId, exporterCompany, exporterContact, rejectionReason } = req.body;
+      
+      const response = await storage.createExporterOfferResponse({
+        offerId: req.params.offerId,
+        exporterId,
+        exporterCompany,
+        exporterContact,
+        responseType: 'reject',
+        status: 'rejected',
+        responseMessage: rejectionReason || 'Offer rejected',
+        rejectionReason
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Offer rejected successfully",
+        responseId: response.responseId
+      });
+    } catch (error) {
+      console.error("Error rejecting offer:", error);
+      res.status(500).json({ error: "Failed to reject offer" });
+    }
+  });
+
+  // Start negotiation
+  app.post("/api/buyer-exporter-offers/:offerId/negotiate", async (req, res) => {
+    try {
+      const { 
+        exporterId, 
+        exporterCompany, 
+        exporterContact, 
+        counterPricePerMT, 
+        counterQuantity, 
+        counterDeliveryTerms, 
+        counterPaymentTerms, 
+        modificationNotes 
+      } = req.body;
+      
+      const response = await storage.createExporterOfferResponse({
+        offerId: req.params.offerId,
+        exporterId,
+        exporterCompany,
+        exporterContact,
+        responseType: 'negotiate',
+        status: 'negotiating',
+        counterPricePerMT,
+        counterQuantity,
+        counterDeliveryTerms,
+        counterPaymentTerms,
+        modificationNotes,
+        responseMessage: 'Counter offer submitted'
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Negotiation started successfully",
+        responseId: response.responseId
+      });
+    } catch (error) {
+      console.error("Error starting negotiation:", error);
+      res.status(500).json({ error: "Failed to start negotiation" });
+    }
+  });
+
+  // Mobile Payment Processing (Basic Integration)
+  app.post("/api/mobile-payments/process", async (req, res) => {
+    try {
+      const { 
+        verificationCode, 
+        paymentMethod, 
+        amount, 
+        currency, 
+        mobileNumber, 
+        buyerId, 
+        exporterId 
+      } = req.body;
+      
+      // Validate verification code
+      const verification = await storage.getBuyerExporterVerification(verificationCode);
+      if (!verification) {
+        return res.status(404).json({ error: "Invalid verification code" });
+      }
+      
+      // Simulate mobile payment processing
+      const paymentId = `PAY-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+      
+      // Update verification with payment status
+      await storage.updateVerificationStatus(verificationCode, {
+        paymentProcessed: true,
+        dealStatus: 'payment_completed'
+      });
+      
+      res.json({
+        success: true,
+        paymentId,
+        status: 'completed',
+        message: 'Mobile payment processed successfully',
+        amount,
+        currency,
+        processedAt: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error("Error processing mobile payment:", error);
+      res.status(500).json({ error: "Failed to process payment" });
+    }
+  });
+
   return httpServer;
 }

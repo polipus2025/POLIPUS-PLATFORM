@@ -73,6 +73,7 @@ const CarbonTracePortal = lazy(() => import("@/pages/portals/carbon-trace-portal
 
 // LAZY LOADING - Exporter pages
 const WorldMarketPricing = lazy(() => import("@/pages/world-market-pricing"));
+const SellersHub = lazy(() => import("@/pages/sellers-hub"));
 const ExporterOrders = lazy(() => import("@/pages/exporter/orders"));
 const ExporterMarketplace = lazy(() => import("@/pages/exporter/marketplace"));
 const ExporterCertificates = lazy(() => import("@/pages/exporter/certificates"));
@@ -175,6 +176,7 @@ function App() {
             {/* EXPORTER PORTAL - LAZY LOADED */}
             <Route path="/exporter-dashboard" component={createLazyRoute(ExporterDashboard)} />
             <Route path="/world-market-pricing" component={createLazyRoute(WorldMarketPricing)} />
+            <Route path="/sellers-hub" component={createLazyRoute(SellersHub)} />
             <Route path="/exporter/orders" component={createLazyRoute(ExporterOrders)} />
             <Route path="/exporter/marketplace" component={createLazyRoute(ExporterMarketplace)} />
             <Route path="/exporter/certificates" component={createLazyRoute(ExporterCertificates)} />

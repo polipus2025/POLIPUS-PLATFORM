@@ -1627,7 +1627,7 @@ export default function AgriculturalBuyerDashboard() {
                     </SelectTrigger>
                     <SelectContent>
                       {exportersLoading ? (
-                        <SelectItem value="" disabled>Loading exporters...</SelectItem>
+                        <SelectItem value="loading" disabled>Loading exporters...</SelectItem>
                       ) : availableExporters?.data?.length > 0 ? (
                         availableExporters.data.map((exporter: any) => (
                           <SelectItem key={exporter.exporterId} value={exporter.exporterId}>
@@ -1638,7 +1638,7 @@ export default function AgriculturalBuyerDashboard() {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="" disabled>No exporters available in {buyerCounty}</SelectItem>
+                        <SelectItem value="no-exporters" disabled>No exporters available in {buyerCounty}</SelectItem>
                       )}
                     </SelectContent>
                   </Select>

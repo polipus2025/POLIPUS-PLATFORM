@@ -4746,9 +4746,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current authenticated user endpoint
   app.get("/api/auth/user", async (req, res) => {
     try {
-      console.log('🔍 AUTH DEBUG - Session:', req.session);
-      console.log('🔍 AUTH DEBUG - Headers:', req.headers.authorization ? 'Token present' : 'No token');
-      
       // Check for token in Authorization header or session
       const authHeader = req.headers.authorization;
       const token = authHeader && authHeader.split(' ')[1];
@@ -4787,11 +4784,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check session for exporter authentication
       if (req.session && req.session.userType === 'exporter') {
-        console.log('🔍 AUTH DEBUG - Session exporter ID:', req.session.exporterId);
         const exporter = await storage.getExporterByExporterId(req.session.exporterId);
-        console.log('🔍 AUTH DEBUG - Found exporter:', exporter ? 'Yes' : 'No');
         if (exporter) {
-          console.log('🔍 AUTH DEBUG - Returning exporter data:', exporter.companyName);
           return res.json({
             id: exporter.id,
             username: exporter.exporterId,
@@ -4806,7 +4800,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Fallback to existing authentication logic
-      console.log('🔍 AUTH DEBUG - No authentication found');
       return res.status(401).json({ message: "No authenticated user found" });
     } catch (error) {
       console.error("User auth check error:", error);
@@ -12279,9 +12272,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.username = authResult.credentials?.username;
       req.session.mustChangePassword = authResult.credentials?.mustChangePassword;
 
+      // Generate proper JWT token
+      const token = jwt.sign(
+        {
+          userId: authResult.exporter?.id,
+          exporterId: authResult.exporter?.exporterId,
+          username: authResult.exporter?.exporterId,
+          userType: 'exporter',
+          role: 'exporter'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
       res.json({
         success: true,
         message: authResult.message,
+        token, // Include the JWT token
         exporter: {
           id: authResult.exporter?.id,
           exporterId: authResult.exporter?.exporterId,
@@ -12318,14 +12325,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Session handling removed for now to avoid undefined session issues
+      // Store session information
+      req.session.userType = 'exporter';
+      req.session.exporterId = authResult.exporter?.exporterId;
+      req.session.userId = authResult.exporter?.id;
 
-      // Generate token for legacy compatibility
-      const token = `exporter-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate proper JWT token
+      const token = jwt.sign(
+        {
+          userId: authResult.exporter?.id,
+          exporterId: authResult.exporter?.exporterId,
+          username: authResult.exporter?.exporterId,
+          userType: 'exporter',
+          role: 'exporter'
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       res.json({
         success: true,
         message: "Login successful",
+        token, // Include the JWT token
         user: {
           id: authResult.exporter?.id,
           exporterId: authResult.exporter?.exporterId,

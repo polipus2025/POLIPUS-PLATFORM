@@ -14,16 +14,16 @@ import lacraLogo from '@assets/LACRA LOGO_1753406166355.jpg';
 
 export default function ExporterLogin() {
   const [, setLocation] = useLocation();
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [credentials, setCredentials] = useState({ exporterId: '', password: '' });
   const [error, setError] = useState('');
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const loginMutation = useMutation({
-    mutationFn: async (loginData: { username: string; password: string }) => {
+    mutationFn: async (loginData: { exporterId: string; password: string }) => {
       const response = await apiRequest('/api/auth/exporter-login', {
         method: 'POST',
-        body: JSON.stringify(loginData),
+        body: JSON.stringify({ username: loginData.exporterId, password: loginData.password }),
       });
       return response;
     },
@@ -54,8 +54,8 @@ export default function ExporterLogin() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!credentials.username || !credentials.password) {
-      setError('Please enter both username and password');
+    if (!credentials.exporterId || !credentials.password) {
+      setError('Please enter both exporter ID and password');
       return;
     }
     loginMutation.mutate(credentials);
@@ -122,13 +122,13 @@ export default function ExporterLogin() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username">Exporter ID / Username</Label>
+              <Label htmlFor="exporterId">Exporter ID</Label>
               <Input
-                id="username"
+                id="exporterId"
                 type="text"
-                placeholder="EXP-2024-001"
-                value={credentials.username}
-                onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                placeholder="EXP-20250818-627"
+                value={credentials.exporterId}
+                onChange={(e) => setCredentials({ ...credentials, exporterId: e.target.value })}
                 className="bg-white/80"
                 required
               />

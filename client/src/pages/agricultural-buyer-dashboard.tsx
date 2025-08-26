@@ -102,7 +102,6 @@ function CounterOffersTab() {
   // Reject counter-offer mutation
   const rejectCounterOfferMutation = useMutation({
     mutationFn: async ({ responseId, reason }: { responseId: string; reason: string }) => {
-      console.log("🔄 Starting reject mutation for:", responseId);
       const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/reject`, {
         method: "POST",
         body: JSON.stringify({
@@ -110,21 +109,16 @@ function CounterOffersTab() {
           rejectionReason: reason
         })
       });
-      const data = await result.json();
-      console.log("📦 Reject response data:", data);
-      return data;
+      return result.json();
     },
     onSuccess: (data) => {
-      console.log("✅ Reject success handler called with data:", data);
       if (data.success) {
-        console.log("🎉 Showing success toast");
         toast({
           title: "Counter-Offer Rejected",
           description: "Your response has been sent to the exporter",
         });
         queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
       } else {
-        console.log("❌ Server returned success=false");
         toast({
           title: "Error",
           description: data.message || "Failed to reject counter-offer",

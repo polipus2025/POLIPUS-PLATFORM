@@ -114,7 +114,6 @@ export default function SellersHub() {
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
     mutationFn: async (offerId: string) => {
-      console.log("🔄 Starting accept offer mutation for:", offerId);
       const result = await apiRequest(`/api/exporter/accept-offer`, {
         method: "POST",
         body: JSON.stringify({
@@ -124,9 +123,7 @@ export default function SellersHub() {
           responseNotes: "Accepted via Sellers Hub"
         })
       });
-      const data = await result.json();
-      console.log("📦 Accept response data:", data);
-      return data;
+      return result.json();
     },
     onSuccess: (data) => {
       if (data.success) {

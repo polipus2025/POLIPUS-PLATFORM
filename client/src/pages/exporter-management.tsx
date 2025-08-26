@@ -106,18 +106,19 @@ export default function ExporterManagement() {
   const [onboardingData, setOnboardingData] = useState({
     companyName: "",
     businessType: "",
-    businessLicense: "",
-    taxIdNumber: "",
-    contactPerson: "",
-    email: "",
-    phoneNumber: "",
-    address: "",
-    district: "",
+    businessLicenseNumber: "",
+    taxId: "",
+    contactPersonFirstName: "",
+    contactPersonLastName: "",
+    primaryEmail: "",
+    primaryPhone: "",
+    businessAddress: "",
+    city: "",
     county: "",
-    exportLicense: "",
-    licenseExpiryDate: "",
-    commodityTypes: [] as string[],
-    accountNumber: "",
+    exportLicenseNumber: "",
+    exportLicenseExpiryDate: "",
+    exportCommodities: [] as string[],
+    bankAccountNumber: "",
     bankName: ""
   });
 
@@ -196,18 +197,19 @@ export default function ExporterManagement() {
       setOnboardingData({
         companyName: "",
         businessType: "",
-        businessLicense: "",
-        taxIdNumber: "",
-        contactPerson: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        district: "",
+        businessLicenseNumber: "",
+        taxId: "",
+        contactPersonFirstName: "",
+        contactPersonLastName: "",
+        primaryEmail: "",
+        primaryPhone: "",
+        businessAddress: "",
+        city: "",
         county: "",
-        exportLicense: "",
-        licenseExpiryDate: "",
-        commodityTypes: [],
-        accountNumber: "",
+        exportLicenseNumber: "",
+        exportLicenseExpiryDate: "",
+        exportCommodities: [],
+        bankAccountNumber: "",
         bankName: ""
       });
       toast({
@@ -287,9 +289,9 @@ Please provide these credentials to the exporter. They will be required to chang
   const handleCommodityTypeToggle = (commodity: string) => {
     setOnboardingData(prev => ({
       ...prev,
-      commodityTypes: prev.commodityTypes.includes(commodity)
-        ? prev.commodityTypes.filter(c => c !== commodity)
-        : [...prev.commodityTypes, commodity]
+      exportCommodities: prev.exportCommodities.includes(commodity)
+        ? prev.exportCommodities.filter(c => c !== commodity)
+        : [...prev.exportCommodities, commodity]
     }));
   };
 
@@ -306,7 +308,15 @@ Please provide these credentials to the exporter. They will be required to chang
   };
 
   const handleSubmitOnboarding = () => {
-    createExporterMutation.mutate(onboardingData);
+    // Add default values and convert commodities to JSON string
+    const exporterData = {
+      ...onboardingData,
+      country: "Liberia",
+      exportCommodities: JSON.stringify(onboardingData.exportCommodities),
+      exportLicenseExpiryDate: onboardingData.exportLicenseExpiryDate ? new Date(onboardingData.exportLicenseExpiryDate).toISOString() : null,
+      profilePhotoUrl: "https://via.placeholder.com/150x150?text=Exporter"
+    };
+    createExporterMutation.mutate(exporterData);
   };
 
   const getComplianceStatusBadge = (status: string) => {
@@ -415,8 +425,8 @@ Please provide these credentials to the exporter. They will be required to chang
                         <Input
                           id="businessLicense"
                           data-testid="input-business-license"
-                          value={onboardingData.businessLicense}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, businessLicense: e.target.value }))}
+                          value={onboardingData.businessLicenseNumber}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, businessLicenseNumber: e.target.value }))}
                           placeholder="Enter business license number"
                         />
                       </div>
@@ -425,8 +435,8 @@ Please provide these credentials to the exporter. They will be required to chang
                         <Input
                           id="taxIdNumber"
                           data-testid="input-tax-id"
-                          value={onboardingData.taxIdNumber}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, taxIdNumber: e.target.value }))}
+                          value={onboardingData.taxId}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, taxId: e.target.value }))}
                           placeholder="Enter tax ID number"
                         />
                       </div>
@@ -440,36 +450,48 @@ Please provide these credentials to the exporter. They will be required to chang
                     <h3 className="text-lg font-semibold">Contact Information</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="contactPerson">Contact Person *</Label>
+                        <Label htmlFor="contactPersonFirstName">First Name *</Label>
                         <Input
-                          id="contactPerson"
-                          data-testid="input-contact-person"
-                          value={onboardingData.contactPerson}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, contactPerson: e.target.value }))}
-                          placeholder="Enter contact person name"
+                          id="contactPersonFirstName"
+                          data-testid="input-contact-first-name"
+                          value={onboardingData.contactPersonFirstName}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, contactPersonFirstName: e.target.value }))}
+                          placeholder="Enter first name"
                         />
                       </div>
+                      <div>
+                        <Label htmlFor="contactPersonLastName">Last Name *</Label>
+                        <Input
+                          id="contactPersonLastName"
+                          data-testid="input-contact-last-name"
+                          value={onboardingData.contactPersonLastName}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, contactPersonLastName: e.target.value }))}
+                          placeholder="Enter last name"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="email">Email Address *</Label>
                         <Input
                           id="email"
                           data-testid="input-email"
                           type="email"
-                          value={onboardingData.email}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, email: e.target.value }))}
+                          value={onboardingData.primaryEmail}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, primaryEmail: e.target.value }))}
                           placeholder="Enter email address"
                         />
                       </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="phoneNumber">Phone Number *</Label>
-                      <Input
-                        id="phoneNumber"
-                        data-testid="input-phone"
-                        value={onboardingData.phoneNumber}
-                        onChange={(e) => setOnboardingData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                        placeholder="Enter phone number"
-                      />
+                      <div>
+                        <Label htmlFor="phoneNumber">Phone Number *</Label>
+                        <Input
+                          id="phoneNumber"
+                          data-testid="input-phone"
+                          value={onboardingData.primaryPhone}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, primaryPhone: e.target.value }))}
+                          placeholder="Enter phone number"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -483,20 +505,20 @@ Please provide these credentials to the exporter. They will be required to chang
                       <Textarea
                         id="address"
                         data-testid="textarea-address"
-                        value={onboardingData.address}
-                        onChange={(e) => setOnboardingData(prev => ({ ...prev, address: e.target.value }))}
+                        value={onboardingData.businessAddress}
+                        onChange={(e) => setOnboardingData(prev => ({ ...prev, businessAddress: e.target.value }))}
                         placeholder="Enter full business address"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="district">District *</Label>
+                        <Label htmlFor="city">City *</Label>
                         <Input
-                          id="district"
-                          data-testid="input-district"
-                          value={onboardingData.district}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, district: e.target.value }))}
-                          placeholder="Enter district"
+                          id="city"
+                          data-testid="input-city"
+                          value={onboardingData.city}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, city: e.target.value }))}
+                          placeholder="Enter city"
                         />
                       </div>
                       <div>
@@ -526,8 +548,8 @@ Please provide these credentials to the exporter. They will be required to chang
                         <Input
                           id="exportLicense"
                           data-testid="input-export-license"
-                          value={onboardingData.exportLicense}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, exportLicense: e.target.value }))}
+                          value={onboardingData.exportLicenseNumber}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, exportLicenseNumber: e.target.value }))}
                           placeholder="Enter export license number"
                         />
                       </div>
@@ -537,8 +559,8 @@ Please provide these credentials to the exporter. They will be required to chang
                           id="licenseExpiryDate"
                           data-testid="input-license-expiry"
                           type="date"
-                          value={onboardingData.licenseExpiryDate}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, licenseExpiryDate: e.target.value }))}
+                          value={onboardingData.exportLicenseExpiryDate}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, exportLicenseExpiryDate: e.target.value }))}
                         />
                       </div>
                     </div>
@@ -549,7 +571,7 @@ Please provide these credentials to the exporter. They will be required to chang
                           <div key={commodity} className="flex items-center space-x-2">
                             <Switch
                               data-testid={`switch-commodity-${commodity.toLowerCase()}`}
-                              checked={onboardingData.commodityTypes.includes(commodity)}
+                              checked={onboardingData.exportCommodities.includes(commodity)}
                               onCheckedChange={() => handleCommodityTypeToggle(commodity)}
                             />
                             <Label className="text-sm">{commodity}</Label>
@@ -580,8 +602,8 @@ Please provide these credentials to the exporter. They will be required to chang
                         <Input
                           id="accountNumber"
                           data-testid="input-account-number"
-                          value={onboardingData.accountNumber}
-                          onChange={(e) => setOnboardingData(prev => ({ ...prev, accountNumber: e.target.value }))}
+                          value={onboardingData.bankAccountNumber}
+                          onChange={(e) => setOnboardingData(prev => ({ ...prev, bankAccountNumber: e.target.value }))}
                           placeholder="Enter account number"
                         />
                       </div>

@@ -178,11 +178,12 @@ export default function AgriculturalBuyerDashboard() {
   // Get current buyer's county from custodyLots
   const buyerCounty = custodyLots?.data?.[0]?.county || '';
 
-  // Fetch available exporters in buyer's county
+  // Fetch available exporters for direct offers
   const { data: availableExporters, isLoading: exportersLoading } = useQuery({
-    queryKey: ['/api/buyer/available-exporters', buyerCounty],
-    queryFn: () => apiRequest(`/api/buyer/available-exporters/${buyerCounty}`),
-    enabled: !!buyerCounty && offerType === 'direct',
+    queryKey: ['/api/exporters/available'],
+    queryFn: () => apiRequest('/api/exporters/available'),
+    enabled: offerType === 'direct',
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Fetch verification codes archive
@@ -1628,12 +1629,12 @@ export default function AgriculturalBuyerDashboard() {
                     <SelectContent>
                       {exportersLoading ? (
                         <SelectItem value="loading" disabled>Loading exporters...</SelectItem>
-                      ) : availableExporters?.data?.length > 0 ? (
-                        availableExporters.data.map((exporter: any) => (
+                      ) : availableExporters?.length > 0 ? (
+                        availableExporters.map((exporter: any) => (
                           <SelectItem key={exporter.exporterId} value={exporter.exporterId}>
                             <div className="flex items-center">
                               <Building2 className="w-4 h-4 mr-2" />
-                              {exporter.companyName} - {exporter.contactPerson}
+                              {exporter.companyName} ({exporter.county})
                             </div>
                           </SelectItem>
                         ))

@@ -7842,6 +7842,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get available exporters for buyer selection (only approved, active, with portal access)
+  app.get("/api/exporters/available", async (req, res) => {
+    try {
+      const exporters = await storage.getAllExporters();
+      const availableExporters = exporters
+        .filter(exp => exp.isActive && exp.portalAccess && exp.complianceStatus === 'approved')
+        .map(exp => ({
+          id: exp.id,
+          exporterId: exp.exporterId,
+          companyName: exp.companyName,
+          county: exp.county,
+          contactPerson: `${exp.contactPersonFirstName || ''} ${exp.contactPersonLastName || ''}`.trim(),
+          primaryEmail: exp.primaryEmail
+        }));
+      res.json(availableExporters);
+    } catch (error) {
+      console.error("Error fetching available exporters:", error);
+      res.status(500).json({ error: "Failed to fetch available exporters" });
+    }
+  });
+
   app.get('/api/exporters/:id', async (req, res) => {
     try {
       const exporter = await storage.getExporter(parseInt(req.params.id));

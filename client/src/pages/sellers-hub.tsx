@@ -220,6 +220,12 @@ export default function SellersHub() {
     return `${days} day${days > 1 ? 's' : ''} remaining`;
   };
 
+  // Smart price formatting - no decimals for whole numbers
+  const formatPrice = (price: string | number): string => {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price || 0;
+    return numPrice % 1 === 0 ? numPrice.toString() : numPrice.toFixed(2);
+  };
+
   const OfferCard = ({ offer }: { offer: BuyerExporterOffer }) => (
     <Card 
       key={offer.id} 
@@ -237,7 +243,7 @@ export default function SellersHub() {
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-green-600">
-              ${(typeof offer.pricePerMT === 'string' ? parseFloat(offer.pricePerMT) : offer.pricePerMT || 0).toFixed(2)}/MT
+              ${formatPrice(offer.pricePerMT)}/MT
             </div>
             <div className="text-sm text-slate-500">
               Total: ${(typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0).toLocaleString()}
@@ -344,7 +350,7 @@ export default function SellersHub() {
                 <div><strong>Commodity:</strong> {selectedOffer.commodity}</div>
                 <div><strong>Quality Grade:</strong> {selectedOffer.qualityGrade}</div>
                 <div><strong>Quantity:</strong> {selectedOffer.quantityAvailable}</div>
-                <div><strong>Price per MT:</strong> ${(typeof selectedOffer.pricePerMT === 'string' ? parseFloat(selectedOffer.pricePerMT) : selectedOffer.pricePerMT || 0).toFixed(2)}</div>
+                <div><strong>Price per MT:</strong> ${formatPrice(selectedOffer.pricePerMT)}</div>
                 <div><strong>Total Value:</strong> ${(typeof selectedOffer.totalValue === 'string' ? parseFloat(selectedOffer.totalValue) : selectedOffer.totalValue || 0).toLocaleString()}</div>
               </div>
             </div>

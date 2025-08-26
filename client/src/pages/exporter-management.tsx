@@ -1078,11 +1078,13 @@ Please provide these credentials to the exporter. They will be required to chang
                             <div key={transaction.id} className="flex items-center justify-between p-2 border rounded">
                               <div>
                                 <p className="font-medium text-sm">{transaction.transactionType}</p>
-                                <p className="text-xs text-slate-600">{transaction.description}</p>
+                                <p className="text-xs text-slate-600">{transaction.destinationCountry || 'No destination specified'}</p>
                               </div>
                               <div className="text-right">
-                                <p className="font-medium text-sm">${transaction.amount.toLocaleString()}</p>
-                                <Badge variant="outline" className="text-xs">{transaction.status}</Badge>
+                                <p className="font-medium text-sm">
+                                  {transaction.transactionAmount ? `$${Number(transaction.transactionAmount).toLocaleString()}` : 'N/A'}
+                                </p>
+                                <Badge variant="outline" className="text-xs">{transaction.exportStatus || transaction.paymentStatus || 'pending'}</Badge>
                               </div>
                             </div>
                           ))}

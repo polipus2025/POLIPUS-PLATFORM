@@ -1653,8 +1653,8 @@ export default function AgriculturalBuyerDashboard() {
                   <Input
                     id="price-per-unit"
                     type="number"
-                    step="0.01"
-                    placeholder="0.00"
+                    step="1"
+                    placeholder="500"
                     value={pricePerUnit}
                     onChange={(e) => setPricePerUnit(e.target.value)}
                   />

@@ -28,7 +28,8 @@ import {
   Send,
   Radio,
   Target,
-  Building2
+  Building2,
+  Loader2
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -278,7 +279,9 @@ export default function AgriculturalBuyerDashboard() {
 
   const handleReceiptUpload = async () => {
     try {
-      const response = await apiRequest('POST', '/api/receipts/upload-url');
+      const response = await apiRequest('/api/receipts/upload-url', {
+        method: 'POST'
+      });
       return {
         method: "PUT" as const,
         url: response.uploadURL,
@@ -295,10 +298,14 @@ export default function AgriculturalBuyerDashboard() {
       
       try {
         setConfirmingPayment(true);
-        await apiRequest('POST', '/api/storage-fees/confirm-payment-receipt', {
-          custodyId: manualPaymentDialog.custodyId,
-          receiptUrl,
-          buyerId
+        await apiRequest('/api/storage-fees/confirm-payment-receipt', {
+          method: 'POST',
+          body: JSON.stringify({
+            custodyId: manualPaymentDialog.custodyId,
+            receiptUrl,
+            buyerId
+          }),
+          headers: { 'Content-Type': 'application/json' }
         });
         
         toast({
@@ -333,10 +340,14 @@ export default function AgriculturalBuyerDashboard() {
 
     try {
       setConfirmingPayment(true);
-      await apiRequest('POST', '/api/storage-fees/confirm-payment-reference', {
-        custodyId: manualPaymentDialog.custodyId,
-        transactionReference: transactionReference.trim(),
-        buyerId
+      await apiRequest('/api/storage-fees/confirm-payment-reference', {
+        method: 'POST',
+        body: JSON.stringify({
+          custodyId: manualPaymentDialog.custodyId,
+          transactionReference: transactionReference.trim(),
+          buyerId
+        }),
+        headers: { 'Content-Type': 'application/json' }
       });
       
       toast({

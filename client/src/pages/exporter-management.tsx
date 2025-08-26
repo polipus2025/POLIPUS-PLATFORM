@@ -313,7 +313,7 @@ Please provide these credentials to the exporter. They will be required to chang
       ...onboardingData,
       country: "Liberia",
       exportCommodities: JSON.stringify(onboardingData.exportCommodities),
-      exportLicenseExpiryDate: onboardingData.exportLicenseExpiryDate ? new Date(onboardingData.exportLicenseExpiryDate).toISOString() : null,
+      exportLicenseExpiryDate: onboardingData.exportLicenseExpiryDate ? new Date(onboardingData.exportLicenseExpiryDate) : undefined,
       profilePhotoUrl: "https://via.placeholder.com/150x150?text=Exporter"
     };
     createExporterMutation.mutate(exporterData);

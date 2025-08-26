@@ -2818,6 +2818,26 @@ export const insertExporterSchema = createInsertSchema(exporters).omit({
   suspendedAt: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Override date fields to handle both Date objects and valid date strings
+  exportLicenseExpiryDate: z.union([
+    z.date(),
+    z.string().datetime().transform((str) => new Date(str)),
+    z.string().date().transform((str) => new Date(str)),
+    z.undefined()
+  ]).optional(),
+  exportLicenseIssueDate: z.union([
+    z.date(),
+    z.string().datetime().transform((str) => new Date(str)),
+    z.string().date().transform((str) => new Date(str)),
+    z.undefined()
+  ]).optional(),
+  businessLicenseExpiryDate: z.union([
+    z.date(),
+    z.string().datetime().transform((str) => new Date(str)),
+    z.string().date().transform((str) => new Date(str)),
+    z.undefined()
+  ]).optional(),
 });
 
 export type ExporterCredential = typeof exporterCredentials.$inferSelect;

@@ -292,8 +292,67 @@ export default function SellersHub() {
         </div>
 
         <div className="mt-4 pt-3 border-t border-slate-100">
-          <div className="text-xs text-slate-500">
-            Posted {format(new Date(offer.createdAt), 'MMM d, yyyy \'at\' h:mm a')}
+          <div className="flex justify-between items-center">
+            <div className="text-xs text-slate-500">
+              Posted {format(new Date(offer.createdAt), 'MMM d, yyyy \'at\' h:mm a')}
+            </div>
+            
+            {/* Quick Action Buttons */}
+            <div className="flex gap-2">
+              {/* Call Button */}
+              {offer.buyerPhone && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Show phone number in alert for calling
+                    alert(`📞 Call Buyer:\n\nCompany: ${offer.buyerCompany}\nContact: ${offer.buyerContact}\nPhone: ${offer.buyerPhone}\n\nTap OK to call now`);
+                    window.open(`tel:${offer.buyerPhone}`, '_self');
+                  }}
+                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                  data-testid={`call-buyer-${offer.offerId}`}
+                >
+                  <Phone className="w-3 h-3 mr-1" />
+                  Call
+                </Button>
+              )}
+              
+              {/* Chat Button */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOffer(offer);
+                  setShowNegotiationDialog(true);
+                }}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                data-testid={`chat-buyer-${offer.offerId}`}
+              >
+                <MessageSquare className="w-3 h-3 mr-1" />
+                Chat
+              </Button>
+              
+              {/* Quick Accept Button */}
+              {!isOfferExpired(offer.expiresAt) && offer.status === 'pending' && (
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`Accept offer ${offer.offerId} for ${offer.commodity}?\n\nPrice: $${formatPrice(offer.pricePerMT || 0)}/MT\nQuantity: ${offer.quantityAvailable} MT\nTotal: $${(typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0).toLocaleString()}`)) {
+                      acceptOfferMutation.mutate(offer.offerId);
+                    }
+                  }}
+                  disabled={acceptOfferMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  data-testid={`quick-accept-${offer.offerId}`}
+                >
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Accept
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
@@ -441,14 +500,97 @@ export default function SellersHub() {
             </div>
           )}
 
-          {/* Negotiation Dialog */}
+          {/* Chat & Negotiation Dialog */}
           <Dialog open={showNegotiationDialog} onOpenChange={setShowNegotiationDialog}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-3xl max-h-[80vh]">
               <DialogHeader>
-                <DialogTitle>Start Negotiation</DialogTitle>
+                <DialogTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Chat & Negotiate with {selectedOffer.buyerCompany}
+                </DialogTitle>
+                <div className="text-sm text-slate-600">
+                  Offer: {selectedOffer.offerId} • {selectedOffer.commodity} • {selectedOffer.quantityAvailable} MT • ${formatPrice(selectedOffer.pricePerMT || 0)}/MT
+                </div>
               </DialogHeader>
               
+              {/* Contact Information */}
+              <div className="bg-blue-50 p-3 rounded-lg border">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium text-blue-800">Direct Contact Info:</div>
+                  {selectedOffer.buyerPhone && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        alert(`📞 Calling ${selectedOffer.buyerCompany}\n\nContact: ${selectedOffer.buyerContact}\nPhone: ${selectedOffer.buyerPhone}`);
+                        window.open(`tel:${selectedOffer.buyerPhone}`, '_self');
+                      }}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <Phone className="w-3 h-3 mr-1" />
+                      Call Now
+                    </Button>
+                  )}
+                </div>
+                <div className="flex gap-4 text-sm mt-2">
+                  <span className="flex items-center gap-1">
+                    <Mail className="w-3 h-3" />
+                    <a href={`mailto:${selectedOffer.buyerContact}`} className="text-blue-600 hover:underline">
+                      {selectedOffer.buyerContact}
+                    </a>
+                  </span>
+                  {selectedOffer.buyerPhone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="w-3 h-3" />
+                      <a href={`tel:${selectedOffer.buyerPhone}`} className="text-green-600 hover:underline">
+                        {selectedOffer.buyerPhone}
+                      </a>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex gap-3 p-4 bg-slate-50 rounded-lg">
+                <Button 
+                  onClick={() => {
+                    if (confirm(`Accept this offer?\n\nOffer: ${selectedOffer.offerId}\nPrice: $${formatPrice(selectedOffer.pricePerMT || 0)}/MT\nQuantity: ${selectedOffer.quantityAvailable} MT\nTotal Value: $${(typeof selectedOffer.totalValue === 'string' ? parseFloat(selectedOffer.totalValue) : selectedOffer.totalValue || 0).toLocaleString()}\n\nA verification code will be generated for the buyer.`)) {
+                      acceptOfferMutation.mutate(selectedOffer.offerId);
+                      setShowNegotiationDialog(false);
+                    }
+                  }}
+                  disabled={acceptOfferMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                  data-testid="chat-accept-offer"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {acceptOfferMutation.isPending ? "Accepting..." : "Accept Offer"}
+                </Button>
+
+                <Button 
+                  variant="destructive"
+                  onClick={() => {
+                    const reason = window.prompt("Please provide a reason for rejection:");
+                    if (reason) {
+                      rejectOfferMutation.mutate({ 
+                        offerId: selectedOffer.offerId, 
+                        reason 
+                      });
+                      setShowNegotiationDialog(false);
+                    }
+                  }}
+                  disabled={rejectOfferMutation.isPending}
+                  data-testid="chat-reject-offer"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  {rejectOfferMutation.isPending ? "Rejecting..." : "Reject"}
+                </Button>
+              </div>
+              
+              {/* Negotiation Form */}
               <div className="space-y-4">
+                <div className="text-sm font-medium text-slate-700">Or send a counter-offer:</div>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Counter Price per MT ($)</Label>
@@ -463,7 +605,7 @@ export default function SellersHub() {
                     />
                   </div>
                   <div>
-                    <Label>Counter Quantity</Label>
+                    <Label>Counter Quantity (MT)</Label>
                     <Input
                       value={negotiationData.counterQuantity}
                       onChange={(e) => setNegotiationData(prev => ({
@@ -499,15 +641,15 @@ export default function SellersHub() {
                 </div>
 
                 <div>
-                  <Label>Modification Notes</Label>
+                  <Label>Message to Buyer</Label>
                   <Textarea
                     value={negotiationData.modificationNotes}
                     onChange={(e) => setNegotiationData(prev => ({
                       ...prev,
                       modificationNotes: e.target.value
                     }))}
-                    placeholder="Explain your counter-offer..."
-                    rows={3}
+                    placeholder="Explain your counter-offer or ask questions..."
+                    rows={4}
                     data-testid="modification-notes-textarea"
                   />
                 </div>
@@ -523,13 +665,14 @@ export default function SellersHub() {
                     disabled={negotiateMutation.isPending}
                     data-testid="submit-negotiation-button"
                   >
-                    {negotiateMutation.isPending ? "Submitting..." : "Submit Counter-Offer"}
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    {negotiateMutation.isPending ? "Sending..." : "Send Counter-Offer"}
                   </Button>
                   <Button 
                     variant="outline" 
                     onClick={() => setShowNegotiationDialog(false)}
                   >
-                    Cancel
+                    Close Chat
                   </Button>
                 </div>
               </div>

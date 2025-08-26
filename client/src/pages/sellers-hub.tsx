@@ -127,7 +127,8 @@ export default function SellersHub() {
       return result.json();
     },
     onSuccess: (data) => {
-      if (data.success) {
+      console.log('Accept offer response:', data);
+      if (data.success || data.verificationCode) {
         setVerificationCode(data.verificationCode);
         toast({
           title: "Offer Accepted! 🎉",
@@ -138,7 +139,7 @@ export default function SellersHub() {
       } else {
         toast({
           title: "Unable to Accept",
-          description: data.message,
+          description: data.message || "Unknown error occurred",
           variant: "destructive",
         });
       }
@@ -754,7 +755,9 @@ export default function SellersHub() {
   );
 
   // Filter offers based on active tab
-  const filteredOffers = activeTab === 'my-offers' ? myOffers : offers;
+  const filteredOffers = activeTab === 'my-offers' 
+    ? myOffers  // Direct offers for this exporter
+    : offers.filter(offer => offer.offerType !== 'direct'); // Only broadcast offers in "All Offers"
 
   // Show loading state while user data or offers are loading
   if (userLoading || isLoading) {

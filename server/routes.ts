@@ -16587,6 +16587,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         VALUES (${responseId}, ${offerId}, ${exporterId}, ${exporterCompany}, 'accept', ${responseNotes || ''})
       `);
 
+      // Generate verification code for accepted deal
+      const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
       // Mark original offer as accepted - using raw SQL to avoid schema issues
       await db.execute(sql`
         UPDATE buyer_exporter_offers 
@@ -16594,11 +16597,20 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         WHERE offer_id = ${offerId}
       `);
 
+      // Update the response record with verification code
+      await db.execute(sql`
+        UPDATE exporter_offer_responses 
+        SET verification_code = ${verificationCode}
+        WHERE response_id = ${responseId}
+      `);
+
       console.log(`✅ Offer ${offerId} accepted by exporter ${exporterId} (First-Come-First-Serve)`);
+      console.log(`🔐 Verification code generated: ${verificationCode}`);
 
       res.json({
         success: true,
-        message: "Offer accepted successfully"
+        message: "Offer accepted successfully",
+        verificationCode: verificationCode
       });
 
     } catch (error) {
@@ -16606,6 +16618,53 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       res.status(500).json({
         success: false,
         message: "Failed to accept offer"
+      });
+    }
+  });
+
+  // Get exporter's accepted deals for dashboard
+  app.get("/api/exporter/:exporterId/accepted-deals", async (req, res) => {
+    try {
+      const { exporterId } = req.params;
+
+      // Get accepted deals with buyer information
+      const acceptedDeals = await db.execute(sql`
+        SELECT 
+          beo.offer_id,
+          beo.buyer_company,
+          beo.buyer_contact,
+          beo.buyer_phone,
+          beo.commodity,
+          beo.quantity_available,
+          beo.price_per_unit,
+          beo.total_value,
+          beo.county,
+          beo.proposed_port,
+          beo.accepted_date,
+          eor.verification_code,
+          eor.response_id,
+          eor.exporter_company
+        FROM buyer_exporter_offers beo
+        JOIN exporter_offer_responses eor ON beo.offer_id = eor.offer_id
+        WHERE beo.status = 'accepted' 
+        AND eor.exporter_id = ${exporterId}
+        AND eor.response_type = 'accept'
+        ORDER BY beo.accepted_date DESC
+      `);
+
+      const dealsData = acceptedDeals.rows || acceptedDeals;
+      console.log(`📦 Found ${dealsData.length} accepted deals for exporter ${exporterId}`);
+
+      res.json({
+        success: true,
+        deals: dealsData
+      });
+
+    } catch (error) {
+      console.error("Error fetching accepted deals:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch accepted deals"
       });
     }
   });

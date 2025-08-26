@@ -22,7 +22,9 @@ import {
   Truck,
   Shield,
   Award,
-  ShoppingCart
+  ShoppingCart,
+  Warehouse,
+  ArrowRight
 } from 'lucide-react';
 import { Link } from "wouter";
 import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
@@ -70,6 +72,13 @@ const ExporterDashboard = memo(() => {
     retry: false,
     staleTime: 30000, // 30 seconds cache for speed
     gcTime: 300000, // 5 minutes garbage collection
+  });
+
+  // ⚡ FETCH ACCEPTED DEALS FOR WAREHOUSE TRANSPORT
+  const { data: acceptedDealsData, isLoading: dealsLoading } = useQuery({
+    queryKey: [`/api/exporter/${(user as any)?.exporterId || (user as any)?.id}/accepted-deals`],
+    enabled: !!((user as any)?.exporterId || (user as any)?.id),
+    staleTime: 10000, // 10 seconds cache
   });
 
   // ⚡ MEMOIZED COMPLIANCE DATA - No recalculation
@@ -213,6 +222,84 @@ const ExporterDashboard = memo(() => {
               </CardContent>
             </Card>
           </div>
+
+          {/* ⚡ ACCEPTED DEALS - WAREHOUSE TRANSPORT ARRANGEMENTS */}
+          {acceptedDealsData?.deals && acceptedDealsData.deals.length > 0 && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Warehouse className="h-5 w-5 text-blue-600" />
+                  <span>Accepted Deals - Transport Required</span>
+                  <Badge className="bg-blue-100 text-blue-800">{acceptedDealsData.deals.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {acceptedDealsData.deals.map((deal: any) => (
+                    <div key={deal.offer_id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Deal Details */}
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Package className="h-4 w-4 text-green-600" />
+                            <span className="font-medium">{deal.commodity}</span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Quantity: <span className="font-medium">{deal.quantity_available} MT</span>
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Price: <span className="font-medium">${deal.price_per_unit}/MT</span>
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Total Value: <span className="font-medium text-green-600">${deal.total_value}</span>
+                          </p>
+                        </div>
+
+                        {/* Buyer Contact */}
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-gray-900">Buyer Contact</h4>
+                          <p className="text-sm">
+                            <span className="font-medium">{deal.buyer_company}</span>
+                          </p>
+                          <p className="text-sm text-gray-600">{deal.buyer_contact}</p>
+                          <p className="text-sm text-blue-600">{deal.buyer_phone}</p>
+                          <p className="text-sm text-gray-600">
+                            Location: {deal.county} → {deal.proposed_port}
+                          </p>
+                        </div>
+
+                        {/* Transport Arrangement */}
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-gray-900">Transport Details</h4>
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <p className="text-sm font-medium text-green-800">Verification Code</p>
+                            <p className="text-lg font-mono text-green-900">{deal.verification_code}</p>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            Accepted: {new Date(deal.accepted_date).toLocaleDateString()}
+                          </p>
+                          <Button size="sm" className="w-full mt-2" variant="outline">
+                            <Truck className="h-4 w-4 mr-1" />
+                            Arrange Transport
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Action Instruction */}
+                      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <ArrowRight className="h-4 w-4 text-blue-600" />
+                          <p className="text-sm text-blue-800">
+                            <span className="font-medium">Next Step:</span> Contact buyer to arrange transport from their warehouse to your export facility using verification code: <span className="font-mono">{deal.verification_code}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* ⚡ COMPLIANCE STATUS */}
           <Card className="mb-8">

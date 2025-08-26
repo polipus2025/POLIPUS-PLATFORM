@@ -3266,6 +3266,10 @@ export const exporterOfferResponses = pgTable("exporter_offer_responses", {
   responseType: text("response_type").notNull(), // accept, reject, negotiate, counter_offer
   status: text("status").notNull().default("pending"), // pending, negotiating, accepted, rejected, expired
   
+  // First-Come-First-Serve tracking (same as farmer-buyer system)
+  clickOrder: integer("click_order"), // 1 for first, 2 for second, etc.
+  isWinner: boolean("is_winner").default(false), // true for the winning exporter
+  
   // Counter Offer Details (if responseType is counter_offer)
   counterPricePerMT: decimal("counter_price_per_mt", { precision: 10, scale: 2 }),
   counterQuantity: text("counter_quantity"),

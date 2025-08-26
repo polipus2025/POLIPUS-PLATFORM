@@ -284,7 +284,7 @@ export default function AgriculturalBuyerDashboard() {
     open: boolean;
     lot: any;
   }>({ open: false, lot: null });
-  const [offerType, setOfferType] = useState<'direct' | 'broadcast'>('broadcast');
+  const [offerType, setOfferType] = useState<'direct' | 'broadcast_county' | 'broadcast_all' | 'broadcast_commodity'>('broadcast_county');
   const [selectedExporter, setSelectedExporter] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [deliveryTerms, setDeliveryTerms] = useState('');
@@ -626,7 +626,7 @@ export default function AgriculturalBuyerDashboard() {
   const openSellOfferDialog = (lot: any) => {
     setSellOfferDialog({ open: true, lot });
     // Reset form fields
-    setOfferType('broadcast');
+    setOfferType('broadcast_county');
     setSelectedExporter('');
     setPricePerUnit('');
     setDeliveryTerms('');
@@ -1864,20 +1864,9 @@ export default function AgriculturalBuyerDashboard() {
               {/* Offer Type Selection */}
               <div className="space-y-3">
                 <Label className="text-base font-medium">Offer Type</Label>
-                <RadioGroup value={offerType} onValueChange={(value: 'direct' | 'broadcast') => setOfferType(value)}>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                    <RadioGroupItem value="broadcast" id="broadcast" />
-                    <div className="flex items-center">
-                      <Radio className="w-4 h-4 mr-2 text-blue-600" />
-                      <Label htmlFor="broadcast" className="cursor-pointer">
-                        <div>
-                          <div className="font-medium">County-Wide Broadcast</div>
-                          <div className="text-sm text-gray-600">Send offer to all exporters in {buyerCounty} County</div>
-                        </div>
-                      </Label>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                <RadioGroup value={offerType} onValueChange={(value: 'direct' | 'broadcast_county' | 'broadcast_all' | 'broadcast_commodity') => setOfferType(value)}>
+                  {/* Direct Assignment */}
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-green-50 transition-colors">
                     <RadioGroupItem value="direct" id="direct" />
                     <div className="flex items-center">
                       <Target className="w-4 h-4 mr-2 text-green-600" />
@@ -1885,6 +1874,48 @@ export default function AgriculturalBuyerDashboard() {
                         <div>
                           <div className="font-medium">Direct to Specific Exporter</div>
                           <div className="text-sm text-gray-600">Send offer to a specific exporter</div>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* County Broadcast */}
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-blue-50 transition-colors">
+                    <RadioGroupItem value="broadcast_county" id="broadcast_county" />
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-2 text-blue-600" />
+                      <Label htmlFor="broadcast_county" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">County-Wide Broadcast</div>
+                          <div className="text-sm text-gray-600">Send offer to all exporters in {buyerCounty} County</div>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* Nationwide Broadcast */}
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-purple-50 transition-colors">
+                    <RadioGroupItem value="broadcast_all" id="broadcast_all" />
+                    <div className="flex items-center">
+                      <Radio className="w-4 h-4 mr-2 text-purple-600" />
+                      <Label htmlFor="broadcast_all" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">Nationwide Broadcast</div>
+                          <div className="text-sm text-gray-600">Send offer to all exporters across Liberia (First-Come-First-Serve)</div>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* Commodity-Specific Broadcast */}
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-orange-50 transition-colors">
+                    <RadioGroupItem value="broadcast_commodity" id="broadcast_commodity" />
+                    <div className="flex items-center">
+                      <Package2 className="w-4 h-4 mr-2 text-orange-600" />
+                      <Label htmlFor="broadcast_commodity" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">Commodity-Specific Broadcast</div>
+                          <div className="text-sm text-gray-600">Send to all exporters dealing with {sellOfferDialog.lot?.commodityType || 'this commodity'} (First-Come-First-Serve)</div>
                         </div>
                       </Label>
                     </div>

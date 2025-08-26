@@ -105,6 +105,12 @@ export default function SellersHub() {
     enabled: !!(user as any)?.id // Only run query when we have exporter ID
   });
 
+  // Fetch rejected counter-offers for fallback opportunities
+  const { data: rejectedCounterOffers = [], isLoading: rejectedLoading } = useQuery({
+    queryKey: [`/api/exporter/rejected-counter-offers/${(user as any)?.exporterId || (user as any)?.id}`],
+    enabled: !!((user as any)?.exporterId || (user as any)?.id),
+  });
+
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
     mutationFn: async (offerId: string) => {
@@ -210,6 +216,42 @@ export default function SellersHub() {
         variant: "destructive",
       });
     }
+  });
+
+  // Accept original price after counter-offer rejection
+  const acceptOriginalPriceMutation = useMutation({
+    mutationFn: async (responseId: string) => {
+      const result = await apiRequest(`/api/exporter/accept-original-price/${responseId}`, {
+        method: "POST",
+        body: JSON.stringify({
+          exporterId: (user as any)?.exporterId || (user as any)?.id
+        })
+      });
+      return result.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        setVerificationCode(data.verificationCode);
+        toast({
+          title: "Original Price Accepted! 🎉",
+          description: `Deal closed at original price. Verification code: ${data.verificationCode}`,
+        });
+        queryClient.invalidateQueries({ queryKey: [`/api/exporter/rejected-counter-offers/${(user as any)?.exporterId || (user as any)?.id}`] });
+      } else {
+        toast({
+          title: "Unable to Accept",
+          description: data.message,
+          variant: "destructive",
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to accept original price",
+        variant: "destructive",
+      });
+    },
   });
 
   const getOfferTypeColor = (type: string) => {
@@ -789,33 +831,122 @@ export default function SellersHub() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="all-offers" data-testid="all-offers-tab">All Offers</TabsTrigger>
           <TabsTrigger value="my-offers" data-testid="my-offers-tab">Direct & Targeted</TabsTrigger>
+          <TabsTrigger value="rejected-offers" data-testid="rejected-offers-tab">Rejected Counter-offers</TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="mt-6">
-          {filteredOffers.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                <p className="text-xl text-slate-600 mb-2">No offers available</p>
-                <p className="text-slate-500">
-                  {activeTab === 'my-offers' 
-                    ? "No direct offers targeting your company at the moment"
-                    : "Check back soon for new buyer offers"
-                  }
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredOffers.map((offer) => (
-                <OfferCard key={offer.id} offer={offer} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
+        {/* Regular Offers Content */}
+        {(activeTab === 'all-offers' || activeTab === 'my-offers') && (
+          <TabsContent value={activeTab} className="mt-6">
+            {filteredOffers.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                  <p className="text-xl text-slate-600 mb-2">No offers available</p>
+                  <p className="text-slate-500">
+                    {activeTab === 'my-offers' 
+                      ? "No direct offers targeting your company at the moment"
+                      : "Check back soon for new buyer offers"
+                    }
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredOffers.map((offer) => (
+                  <OfferCard key={offer.id} offer={offer} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        )}
+
+        {/* Rejected Counter-offers Content */}
+        {activeTab === 'rejected-offers' && (
+          <TabsContent value="rejected-offers" className="mt-6">
+            {rejectedLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                <p className="ml-4 text-slate-600">Loading rejected counter-offers...</p>
+              </div>
+            ) : rejectedCounterOffers.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <XCircle className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                  <p className="text-xl text-slate-600 mb-2">No rejected counter-offers</p>
+                  <p className="text-slate-500">When buyers reject your counter-offers, you can still accept their original price here</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {rejectedCounterOffers.map((rejection) => (
+                  <Card key={rejection.response_id} className="border-red-200 hover:shadow-lg transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg font-semibold text-slate-800">
+                            {rejection.commodity} - {rejection.buyer_company}
+                          </CardTitle>
+                          <p className="text-sm text-slate-600 mt-1">
+                            Original Offer: {rejection.offer_id}
+                          </p>
+                        </div>
+                        <Badge variant="destructive" className="text-xs">
+                          Counter-offer Rejected
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-slate-600">Quantity Available</p>
+                          <p className="font-semibold">{rejection.quantity_available} MT</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-600">Original Price</p>
+                          <p className="font-semibold text-green-600">${rejection.original_price}/MT</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-600">Your Counter Price</p>
+                          <p className="font-semibold text-red-600">${rejection.counter_offer_price}/MT</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-600">Total Value</p>
+                          <p className="font-semibold">${rejection.total_value?.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      
+                      {rejection.buyer_rejection_reason && (
+                        <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                          <p className="text-sm text-red-800">
+                            <strong>Buyer's Reason:</strong> {rejection.buyer_rejection_reason}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="pt-2">
+                        <Button 
+                          onClick={() => {
+                            if (window.confirm(`Accept original price of $${rejection.original_price}/MT for ${rejection.quantity_available} MT of ${rejection.commodity}?`)) {
+                              acceptOriginalPriceMutation.mutate(rejection.response_id);
+                            }
+                          }}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          disabled={acceptOriginalPriceMutation.isPending}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Accept Original Price (${rejection.original_price}/MT)
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Dialogs */}

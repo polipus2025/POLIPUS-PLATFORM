@@ -16255,7 +16255,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         buyerContact,
         buyerCounty,
         custodyId,
-        offerType, // 'direct' or 'broadcast'
+        offerType, // 'direct', 'broadcast_county', 'broadcast_all', 'broadcast_commodity'
         targetExporterId, // null for broadcast
         pricePerUnit,
         deliveryTerms,
@@ -16351,12 +16351,19 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         originLocation: `${custodyLot.warehouseName || 'Warehouse'}, ${custodyLot.county}`,
         county: custodyLot.county,
         
-        // Offer Management
+        // Enhanced Offer Management with targeting options
         offerType,
         targetExporterId: offerType === 'direct' ? parseInt(targetExporterId) : null,
         offerValidUntil: validUntil, // Expiration date
         expiresAt: validUntil, // Alternative field name for compatibility
-        broadcastRadius: offerType === 'broadcast' ? 50 : 0,
+        broadcastRadius: (() => {
+          switch (offerType) {
+            case 'broadcast_county': return 50; // County-wide
+            case 'broadcast_all': return 0; // Nationwide (no radius limit)
+            case 'broadcast_commodity': return 0; // Commodity-specific, no geographic limit
+            default: return 0; // Direct offers
+          }
+        })(),
         
         // Status and metadata
         status: 'pending',
@@ -16367,11 +16374,30 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       console.log(`✅ ${offerType} offer ${offerId} created successfully`);
 
+      // Enhanced response with targeting details
+      const targetingMessage = (() => {
+        switch (offerType) {
+          case 'direct': return 'Direct offer sent to specific exporter';
+          case 'broadcast_county': return `County-wide broadcast sent to all exporters in ${custodyLot.county}`;
+          case 'broadcast_all': return 'Nationwide broadcast sent to all exporters (First-Come-First-Serve)';
+          case 'broadcast_commodity': return `Commodity-specific broadcast sent to all ${custodyLot.commodityType} exporters (First-Come-First-Serve)`;
+          default: return 'Offer created successfully';
+        }
+      })();
+
       res.json({
         success: true,
-        message: `${offerType === 'direct' ? 'Direct' : 'Broadcast'} offer created successfully`,
+        message: targetingMessage,
         offerId,
-        totalOfferPrice: totalOfferPrice.toFixed(2)
+        totalOfferPrice: totalOfferPrice.toFixed(2),
+        targeting: {
+          type: offerType,
+          scope: offerType === 'direct' ? 'specific exporter' : 
+                 offerType === 'broadcast_county' ? `${custodyLot.county} County` :
+                 offerType === 'broadcast_all' ? 'Nationwide' : 
+                 `${custodyLot.commodityType} specialists`,
+          firstComeFirstServe: ['broadcast_all', 'broadcast_commodity'].includes(offerType)
+        }
       });
 
     } catch (error) {
@@ -16456,7 +16482,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
-  // Exporter accept offer
+  // Exporter accept offer with first-come-first-serve logic
   app.post("/api/exporter/accept-offer", async (req, res) => {
     try {
       const {
@@ -16466,9 +16492,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         responseNotes
       } = req.body;
 
-      console.log(`✅ Exporter ${exporterId} accepting offer ${offerId}`);
+      console.log(`🏃‍♂️ First-Come-First-Serve: Exporter ${exporterId} accepting offer ${offerId}`);
 
-      // Check if offer is still available
+      // Check if offer is still available and get current acceptance count
       const [offer] = await db
         .select()
         .from(buyerExporterOffers)
@@ -16481,6 +16507,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         });
       }
 
+      // First-Come-First-Serve Logic - EXACTLY like farmer-buyer offers
       if (offer.status !== 'pending') {
         return res.status(400).json({
           success: false,
@@ -16488,7 +16515,42 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         });
       }
 
-      // Update offer status to accepted
+      // Check if another exporter has already accepted (same as farmer-buyer system)
+      const existingAcceptances = await db
+        .select()
+        .from(exporterOfferResponses)
+        .where(and(
+          eq(exporterOfferResponses.offerId, offerId),
+          eq(exporterOfferResponses.responseType, 'accept')
+        ));
+
+      if (existingAcceptances.length > 0) {
+        // EXACTLY like farmer-buyer: "Another buyer has already confirmed this offer. You were too late."
+        return res.status(400).json({
+          success: false,
+          message: "Sorry! Another exporter has already accepted this offer. You were too late.",
+          clickOrder: existingAcceptances.length + 1,
+        });
+      }
+
+      // First exporter to accept - they win! (EXACTLY like farmer-buyer system)
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const responseId = `EOR-${timestamp}-${randomSuffix}`;
+
+      // Create response record with winner status (same as farmer-buyer)
+      await db.insert(exporterOfferResponses).values({
+        responseId,
+        offerId,
+        exporterId,
+        exporterCompany,
+        responseType: 'accept',
+        responseNotes: responseNotes || '',
+        clickOrder: 1,
+        isWinner: true
+      });
+
+      // Mark original offer as accepted (same as farmer-buyer updating farmer offer to "confirmed")
       await db
         .update(buyerExporterOffers)
         .set({
@@ -16498,21 +16560,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         })
         .where(eq(buyerExporterOffers.offerId, offerId));
 
-      // Create response record
-      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      const responseId = `EOR-${timestamp}-${randomSuffix}`;
-
-      await db.insert(exporterOfferResponses).values({
-        responseId,
-        offerId,
-        exporterId,
-        exporterCompany,
-        responseType: 'accept',
-        responseNotes
-      });
-
-      console.log(`✅ Offer ${offerId} accepted by exporter ${exporterId}`);
+      console.log(`✅ Offer ${offerId} accepted by exporter ${exporterId} (First-Come-First-Serve)`);
 
       res.json({
         success: true,
@@ -17199,6 +17247,86 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       res.status(500).json({
         success: false,
         message: "Failed to reject counter-offer"
+      });
+    }
+  });
+
+  // Exporter fallback - Accept original price after counter-offer rejection
+  app.post("/api/exporter/accept-original-price/:responseId", async (req, res) => {
+    try {
+      const { responseId } = req.params;
+      const { exporterId } = req.body;
+
+      // Check if counter-offer was rejected
+      const [counterOffer] = await db.execute(sql`
+        SELECT * FROM exporter_offer_responses 
+        WHERE response_id = ${responseId} AND status = 'rejected'
+      `);
+
+      if (!counterOffer) {
+        return res.status(404).json({
+          success: false,
+          message: "Rejected counter-offer not found"
+        });
+      }
+
+      // Generate verification code for deal closure
+      const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      
+      // Accept original price - create new record
+      await db.execute(sql`
+        UPDATE exporter_offer_responses 
+        SET status = 'original_accepted',
+            accepted_at = NOW(),
+            verification_code = ${verificationCode},
+            response_notes = 'Accepted original price after counter-offer rejection'
+        WHERE response_id = ${responseId}
+      `);
+
+      console.log(`✅ Exporter ${exporterId} accepted original price for ${responseId}`);
+
+      res.json({
+        success: true,
+        message: "Original price accepted! Deal closed.",
+        verificationCode: verificationCode
+      });
+
+    } catch (error) {
+      console.error("Error accepting original price:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to accept original price"
+      });
+    }
+  });
+
+  // Get rejected counter-offers for exporter (fallback opportunities)
+  app.get("/api/exporter/rejected-counter-offers/:exporterId", async (req, res) => {
+    try {
+      const { exporterId } = req.params;
+
+      const rejectedOffers = await db.execute(sql`
+        SELECT eor.*, beo.commodity, beo.quantity_available, beo.price_per_unit as original_price,
+               beo.total_value, beo.buyer_company, beo.buyer_id
+        FROM exporter_offer_responses eor
+        JOIN buyer_exporter_offers beo ON eor.offer_id = beo.offer_id
+        WHERE eor.exporter_id = ${exporterId} 
+          AND eor.status = 'rejected'
+        ORDER BY eor.rejected_at DESC
+      `);
+
+      console.log(`📋 Found ${rejectedOffers.length} rejected counter-offers for exporter ${exporterId}`);
+
+      res.json({
+        success: true,
+        data: rejectedOffers
+      });
+
+    } catch (error) {
+      console.error("Error fetching rejected counter-offers:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch rejected counter-offers"
       });
     }
   });

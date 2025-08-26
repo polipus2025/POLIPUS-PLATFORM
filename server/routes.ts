@@ -17034,7 +17034,33 @@ VERIFY: ${qrCodeData.verificationUrl}`;
   // Get all active offers for Sellers Hub dashboard
   app.get("/api/sellers-hub/offers", async (req, res) => {
     try {
-      const offers = await storage.getActiveOffers();
+      console.log("🔍 Fetching active offers for Sellers Hub...");
+      
+      const offers = await db.execute(sql`
+        SELECT 
+          offer_id as "offerId",
+          buyer_id as "buyerId", 
+          buyer_company as "buyerCompany",
+          buyer_contact as "buyerContact",
+          buyer_phone as "buyerPhone",
+          commodity,
+          quantity_available as "quantityAvailable",
+          price_per_unit as "pricePerMT",
+          total_value as "totalValue",
+          offer_type as "offerType",
+          target_exporter_id as "targetExporterId",
+          status,
+          expires_at as "expiresAt",
+          created_at as "createdAt",
+          description,
+          delivery_terms as "deliveryTerms",
+          payment_terms as "paymentTerms"
+        FROM buyer_exporter_offers 
+        WHERE status IN ('pending', 'active')
+        ORDER BY created_at DESC
+      `);
+      
+      console.log(`📊 Found ${offers.length} active offers for Sellers Hub`);
       res.json(offers);
     } catch (error) {
       console.error("Error fetching offers:", error);
@@ -17341,14 +17367,14 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const rejectedOffers = await db.execute(sql`
         SELECT eor.response_id, eor.offer_id, eor.exporter_id, eor.exporter_company,
                eor.response_type, eor.status, eor.response_notes, 
-               eor.created_at, eor.updated_at,
+               eor.created_at,
                beo.commodity, beo.quantity_available, beo.price_per_unit as original_price,
                beo.total_value, beo.buyer_company, beo.buyer_id
         FROM exporter_offer_responses eor
         JOIN buyer_exporter_offers beo ON eor.offer_id = beo.offer_id
         WHERE eor.exporter_id = ${exporterId} 
           AND eor.status = 'rejected'
-        ORDER BY eor.updated_at DESC
+        ORDER BY eor.created_at DESC
       `);
 
       console.log(`📋 Found ${rejectedOffers.length} rejected counter-offers for exporter ${exporterId}`);

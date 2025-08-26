@@ -16389,13 +16389,29 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const { buyerId } = req.params;
       console.log(`📋 Fetching offers for buyer: ${buyerId}`);
 
+      // Convert buyer ID format - get integer ID from string ID
+      let actualBuyerId = buyerId;
+      if (buyerId.startsWith('BYR-')) {
+        // Find buyer integer ID from buyers table
+        const buyerRecord = await db
+          .select({ id: buyers.id })
+          .from(buyers)
+          .where(eq(buyers.buyerId, buyerId))
+          .limit(1);
+        
+        if (buyerRecord.length > 0) {
+          actualBuyerId = buyerRecord[0].id;
+          console.log(`🔄 Converted buyer ID ${buyerId} to integer ID: ${actualBuyerId}`);
+        }
+      }
+
       const buyerOffers = await db
         .select()
         .from(buyerExporterOffers)
-        .where(eq(buyerExporterOffers.buyerId, buyerId))
+        .where(eq(buyerExporterOffers.buyerId, actualBuyerId))
         .orderBy(desc(buyerExporterOffers.createdAt));
 
-      console.log(`✅ Found ${buyerOffers.length} offers for buyer ${buyerId}`);
+      console.log(`✅ Found ${buyerOffers.length} offers for buyer ${buyerId} (ID: ${actualBuyerId})`);
 
       res.json({
         success: true,

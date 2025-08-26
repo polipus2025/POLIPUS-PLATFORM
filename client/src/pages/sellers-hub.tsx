@@ -24,7 +24,9 @@ import {
   Eye,
   Calendar,
   Smartphone,
-  ArrowLeft
+  ArrowLeft,
+  Mail,
+  Phone
 } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
@@ -237,13 +239,13 @@ export default function SellersHub() {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-lg font-semibold text-slate-800">
-              {offer.commodity} - {parseFloat(offer.quantityAvailable || '0')} MT
+              {offer.commodity} - {typeof offer.quantityAvailable === 'string' ? parseFloat(offer.quantityAvailable || '0') : offer.quantityAvailable || 0} MT
             </CardTitle>
             <p className="text-sm text-slate-600 mt-1">{offer.buyerCompany}</p>
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-green-600">
-              ${formatPrice(offer.pricePerMT)}/MT
+              ${formatPrice(offer.pricePerMT || 0)}/MT
             </div>
             <div className="text-sm text-slate-500">
               Total: ${(typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0).toLocaleString()}
@@ -302,10 +304,10 @@ export default function SellersHub() {
     if (!selectedOffer) return null;
 
     const [negotiationData, setNegotiationData] = useState<NegotiationData>({
-      counterPricePerMT: selectedOffer.pricePerMT,
-      counterQuantity: selectedOffer.quantityAvailable,
-      counterDeliveryTerms: selectedOffer.deliveryTerms,
-      counterPaymentTerms: selectedOffer.paymentTerms,
+      counterPricePerMT: typeof selectedOffer.pricePerMT === 'string' ? parseFloat(selectedOffer.pricePerMT) : selectedOffer.pricePerMT || 0,
+      counterQuantity: selectedOffer.quantityAvailable?.toString() || "",
+      counterDeliveryTerms: selectedOffer.deliveryTerms || "",
+      counterPaymentTerms: selectedOffer.paymentTerms || "",
       modificationNotes: ""
     });
 
@@ -329,14 +331,24 @@ export default function SellersHub() {
                   <User className="w-4 h-4 text-slate-500" />
                   <span className="font-medium">{selectedOffer.buyerCompany}</span>
                 </div>
-                <div className="text-sm text-slate-600">
-                  Contact: {selectedOffer.buyerContact}
-                </div>
-                {selectedOffer.buyerPhone && (
-                  <div className="text-sm text-slate-600">
-                    Phone: {selectedOffer.buyerPhone}
+                <div className="space-y-2 bg-blue-50 p-3 rounded-lg border">
+                  <div className="text-sm font-medium text-blue-800">Contact for Negotiation:</div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Mail className="w-4 h-4 text-blue-600" />
+                    <a href={`mailto:${selectedOffer.buyerContact}`} className="text-blue-600 hover:underline">
+                      {selectedOffer.buyerContact}
+                    </a>
                   </div>
-                )}
+                  {selectedOffer.buyerPhone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="w-4 h-4 text-green-600" />
+                      <a href={`tel:${selectedOffer.buyerPhone}`} className="text-green-600 hover:underline font-medium">
+                        {selectedOffer.buyerPhone}
+                      </a>
+                      <span className="text-xs text-slate-500">(Tap to call)</span>
+                    </div>
+                  )}
+                </div>
                 <div className="text-sm text-slate-600">
                   Location: {selectedOffer.originLocation}, {selectedOffer.county}
                 </div>
@@ -350,7 +362,7 @@ export default function SellersHub() {
                 <div><strong>Commodity:</strong> {selectedOffer.commodity}</div>
                 <div><strong>Quality Grade:</strong> {selectedOffer.qualityGrade}</div>
                 <div><strong>Quantity:</strong> {selectedOffer.quantityAvailable}</div>
-                <div><strong>Price per MT:</strong> ${formatPrice(selectedOffer.pricePerMT)}</div>
+                <div><strong>Price per MT:</strong> ${formatPrice(selectedOffer.pricePerMT || 0)}</div>
                 <div><strong>Total Value:</strong> ${(typeof selectedOffer.totalValue === 'string' ? parseFloat(selectedOffer.totalValue) : selectedOffer.totalValue || 0).toLocaleString()}</div>
               </div>
             </div>

@@ -734,23 +734,34 @@ Please provide these credentials to the exporter. They will be required to chang
                             <td data-testid={`text-exporter-id-${exporter.id}`} className="p-3 font-mono text-sm">{exporter.exporterId}</td>
                             <td className="p-3">
                               <div>
-                                <p data-testid={`text-contact-person-${exporter.id}`} className="text-sm">{exporter.contactPerson}</p>
-                                <p className="text-sm text-slate-600">{exporter.email}</p>
+                                <p data-testid={`text-contact-person-${exporter.id}`} className="text-sm">{exporter.contactPersonFirstName} {exporter.contactPersonLastName}</p>
+                                <p className="text-sm text-slate-600">{exporter.primaryEmail}</p>
                               </div>
                             </td>
                             <td data-testid={`text-county-${exporter.id}`} className="p-3">{exporter.county}</td>
                             <td className="p-3">
                               <div className="flex flex-wrap gap-1">
-                                {(exporter.commodityTypes || []).slice(0, 2).map((commodity, idx) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs">
-                                    {commodity}
-                                  </Badge>
-                                ))}
-                                {(exporter.commodityTypes || []).length > 2 && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    +{(exporter.commodityTypes || []).length - 2} more
-                                  </Badge>
-                                )}
+                                {(() => {
+                                  try {
+                                    const commodities = exporter.exportCommodities ? JSON.parse(exporter.exportCommodities) : [];
+                                    return (
+                                      <>
+                                        {commodities.slice(0, 2).map((commodity, idx) => (
+                                          <Badge key={idx} variant="secondary" className="text-xs">
+                                            {commodity}
+                                          </Badge>
+                                        ))}
+                                        {commodities.length > 2 && (
+                                          <Badge variant="secondary" className="text-xs">
+                                            +{commodities.length - 2} more
+                                          </Badge>
+                                        )}
+                                      </>
+                                    );
+                                  } catch {
+                                    return <span className="text-xs text-slate-500">No commodities</span>;
+                                  }
+                                })()}
                               </div>
                             </td>
                             <td className="p-3">
@@ -805,8 +816,15 @@ Please provide these credentials to the exporter. They will be required to chang
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h3 data-testid={`text-pending-company-${exporter.id}`} className="font-semibold">{exporter.companyName}</h3>
-                          <p className="text-sm text-slate-600">{exporter.contactPerson} • {exporter.email}</p>
-                          <p className="text-sm text-slate-600">{exporter.county} • {exporter.commodityTypes?.join(", ") || "No commodities specified"}</p>
+                          <p className="text-sm text-slate-600">{exporter.contactPersonFirstName} {exporter.contactPersonLastName} • {exporter.primaryEmail}</p>
+                          <p className="text-sm text-slate-600">{exporter.county} • {(() => {
+                            try {
+                              const commodities = exporter.exportCommodities ? JSON.parse(exporter.exportCommodities) : [];
+                              return commodities.join(", ") || "No commodities specified";
+                            } catch {
+                              return "No commodities specified";
+                            }
+                          })()}</p>
                         </div>
                         <div className="flex gap-2">
                           <Button
@@ -861,8 +879,15 @@ Please provide these credentials to the exporter. They will be required to chang
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h3 data-testid={`text-approved-company-${exporter.id}`} className="font-semibold">{exporter.companyName}</h3>
-                          <p className="text-sm text-slate-600">{exporter.contactPerson} • {exporter.email}</p>
-                          <p className="text-sm text-slate-600">{exporter.county} • {exporter.commodityTypes?.join(", ") || "No commodities specified"}</p>
+                          <p className="text-sm text-slate-600">{exporter.contactPersonFirstName} {exporter.contactPersonLastName} • {exporter.primaryEmail}</p>
+                          <p className="text-sm text-slate-600">{exporter.county} • {(() => {
+                            try {
+                              const commodities = exporter.exportCommodities ? JSON.parse(exporter.exportCommodities) : [];
+                              return commodities.join(", ") || "No commodities specified";
+                            } catch {
+                              return "No commodities specified";
+                            }
+                          })()}</p>
                           <div className="flex items-center gap-4 mt-2">
                             <Badge variant={exporter.loginCredentialsGenerated ? "default" : "secondary"}>
                               {exporter.loginCredentialsGenerated ? "Credentials Generated" : "Credentials Pending"}

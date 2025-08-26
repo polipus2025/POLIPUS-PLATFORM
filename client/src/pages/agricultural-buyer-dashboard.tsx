@@ -176,15 +176,15 @@ function CounterOffersTab() {
                           </div>
                           <div>
                             <p className="text-sm text-gray-600">Exporter Counter Price</p>
-                            <p className="font-bold text-lg text-orange-600">${counterOffer.counter_price_per_mt}/MT</p>
+                            <p className="font-bold text-lg text-orange-600">${counterOffer.counter_offer_price}/MT</p>
                           </div>
                         </div>
 
-                        {counterOffer.modification_notes && (
+                        {counterOffer.response_notes && (
                           <div>
                             <p className="text-sm text-gray-600">Exporter's Message</p>
                             <p className="text-sm bg-gray-50 p-3 rounded border-l-4 border-orange-400">
-                              "{counterOffer.modification_notes}"
+                              "{counterOffer.response_notes}"
                             </p>
                           </div>
                         )}
@@ -198,7 +198,7 @@ function CounterOffersTab() {
                         <Button
                           size="sm"
                           onClick={() => {
-                            if (confirm(`Accept counter-offer of $${counterOffer.counter_price_per_mt}/MT from ${counterOffer.exporter_company}?`)) {
+                            if (confirm(`Accept counter-offer of $${counterOffer.counter_offer_price}/MT from ${counterOffer.exporter_company}?`)) {
                               acceptCounterOfferMutation.mutate(counterOffer.response_id);
                             }
                           }}

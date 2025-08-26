@@ -23,8 +23,10 @@ import {
   TrendingUp,
   Eye,
   Calendar,
-  Smartphone
+  Smartphone,
+  ArrowLeft
 } from "lucide-react";
+import { Link } from "wouter";
 import { format } from "date-fns";
 
 // Mock current exporter (replace with actual auth context)
@@ -555,6 +557,21 @@ export default function SellersHub() {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
+      {/* Back Button */}
+      <div className="flex items-center mb-4">
+        <Link href="/exporter-dashboard">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-800"
+            data-testid="back-button"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Sellers Hub</h1>

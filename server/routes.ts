@@ -17311,7 +17311,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         JOIN buyer_exporter_offers beo ON eor.offer_id = beo.offer_id
         WHERE eor.exporter_id = ${exporterId} 
           AND eor.status = 'rejected'
-        ORDER BY eor.rejected_at DESC
+        ORDER BY eor.updated_at DESC
       `);
 
       console.log(`📋 Found ${rejectedOffers.length} rejected counter-offers for exporter ${exporterId}`);

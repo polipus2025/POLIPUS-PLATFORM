@@ -24,7 +24,11 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Send,
+  Broadcast,
+  Target,
+  Building2
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -35,6 +39,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { Upload, CreditCard } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function AgriculturalBuyerDashboard() {
   const [, navigate] = useLocation();
@@ -52,6 +59,22 @@ export default function AgriculturalBuyerDashboard() {
   }>({ open: false, custodyId: '', amount: '' });
   const [transactionReference, setTransactionReference] = useState('');
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+
+  // Sell to Exporter offer states
+  const [sellOfferDialog, setSellOfferDialog] = useState<{
+    open: boolean;
+    lot: any;
+  }>({ open: false, lot: null });
+  const [offerType, setOfferType] = useState<'direct' | 'broadcast'>('broadcast');
+  const [selectedExporter, setSelectedExporter] = useState('');
+  const [pricePerUnit, setPricePerUnit] = useState('');
+  const [deliveryTerms, setDeliveryTerms] = useState('');
+  const [paymentTerms, setPaymentTerms] = useState('');
+  const [qualitySpecifications, setQualitySpecifications] = useState('');
+  const [offerValidDays, setOfferValidDays] = useState('7');
+  const [urgentOffer, setUrgentOffer] = useState(false);
+  const [offerNotes, setOfferNotes] = useState('');
+  const [creatingOffer, setCreatingOffer] = useState(false);
 
   // UNIVERSAL BUYER DETECTION - Same pattern as standalone transaction dashboard
   const [buyerId, setBuyerId] = useState<string>("");
@@ -149,6 +172,16 @@ export default function AgriculturalBuyerDashboard() {
     enabled: !!buyerId,
     staleTime: 30 * 1000, // Cache for 30 seconds (needs fresh data for payment status)
     gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+  });
+
+  // Get current buyer's county from custodyLots
+  const buyerCounty = custodyLots?.data?.[0]?.county || '';
+
+  // Fetch available exporters in buyer's county
+  const { data: availableExporters, isLoading: exportersLoading } = useQuery({
+    queryKey: ['/api/buyer/available-exporters', buyerCounty],
+    queryFn: () => apiRequest(`/api/buyer/available-exporters/${buyerCounty}`),
+    enabled: !!buyerCounty && offerType === 'direct',
   });
 
   // Fetch verification codes archive
@@ -329,6 +362,79 @@ export default function AgriculturalBuyerDashboard() {
   const connectWithFarmer = (farmerId: string) => {
     // API call to initiate connection with farmer
     // Connecting with farmer
+  };
+
+  // Open sell offer dialog
+  const openSellOfferDialog = (lot: any) => {
+    setSellOfferDialog({ open: true, lot });
+    // Reset form fields
+    setOfferType('broadcast');
+    setSelectedExporter('');
+    setPricePerUnit('');
+    setDeliveryTerms('');
+    setPaymentTerms('');
+    setQualitySpecifications('');
+    setOfferValidDays('7');
+    setUrgentOffer(false);
+    setOfferNotes('');
+  };
+
+  // Create sell offer to exporters
+  const handleCreateSellOffer = async () => {
+    setCreatingOffer(true);
+    
+    try {
+      const lot = sellOfferDialog.lot;
+      if (!lot || !pricePerUnit || !deliveryTerms || !paymentTerms) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await apiRequest('/api/buyer/create-exporter-offer', {
+        method: 'POST',
+        body: JSON.stringify({
+          buyerId,
+          buyerCompany: localStorage.getItem('company') || 'Not specified',
+          buyerContact: localStorage.getItem('buyerName') || 'Not specified',
+          buyerCounty,
+          custodyId: lot.custodyId,
+          offerType,
+          targetExporterId: offerType === 'direct' ? selectedExporter : null,
+          pricePerUnit,
+          deliveryTerms,
+          paymentTerms,
+          qualitySpecifications,
+          offerValidDays: parseInt(offerValidDays),
+          urgentOffer,
+          offerNotes
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.success) {
+        toast({
+          title: "Offer Created Successfully",
+          description: `${offerType === 'direct' ? 'Direct' : 'Broadcast'} offer sent to exporters. Total offer value: $${response.totalOfferPrice}`,
+        });
+        setSellOfferDialog({ open: false, lot: null });
+      } else {
+        throw new Error(response.message || 'Failed to create offer');
+      }
+    } catch (error) {
+      toast({
+        title: "Offer Creation Failed",
+        description: error instanceof Error ? error.message : "Failed to create offer",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingOffer(false);
+    }
   };
 
   // Handle accepting a product offer
@@ -1017,11 +1123,12 @@ export default function AgriculturalBuyerDashboard() {
                                     </Button>
                                   ) : (
                                     <Button 
+                                      onClick={() => openSellOfferDialog(lot)}
                                       className="w-full bg-emerald-600 hover:bg-emerald-700"
                                       size="sm"
                                     >
-                                      <Handshake className="w-4 h-4 mr-2" />
-                                      Ready to Sell
+                                      <Send className="w-4 h-4 mr-2" />
+                                      Sell This Lot
                                     </Button>
                                   )}
 
@@ -1439,6 +1546,215 @@ export default function AgriculturalBuyerDashboard() {
               </p>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sell Offer Dialog */}
+      <Dialog open={sellOfferDialog.open} onOpenChange={(open) => setSellOfferDialog({ open, lot: sellOfferDialog.lot })}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Send className="w-5 h-5 mr-2" />
+              Sell Lot to Exporters
+            </DialogTitle>
+            <DialogDescription>
+              Create an offer to sell your authorized custody lot to exporters in your county.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {sellOfferDialog.lot && (
+            <div className="space-y-6">
+              {/* Lot Summary */}
+              <div className="p-4 bg-slate-50 rounded-lg border">
+                <h3 className="font-medium text-slate-800 mb-2">Lot Summary</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><span className="font-medium">Product:</span> {sellOfferDialog.lot.commodityType}</div>
+                  <div><span className="font-medium">Weight:</span> {sellOfferDialog.lot.totalWeight} {sellOfferDialog.lot.unit}</div>
+                  <div><span className="font-medium">Grade:</span> {sellOfferDialog.lot.qualityGrade || 'Standard'}</div>
+                  <div><span className="font-medium">County:</span> {sellOfferDialog.lot.county}</div>
+                </div>
+              </div>
+
+              {/* Offer Type Selection */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Offer Type</Label>
+                <RadioGroup value={offerType} onValueChange={(value: 'direct' | 'broadcast') => setOfferType(value)}>
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <RadioGroupItem value="broadcast" id="broadcast" />
+                    <div className="flex items-center">
+                      <Broadcast className="w-4 h-4 mr-2 text-blue-600" />
+                      <Label htmlFor="broadcast" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">County-Wide Broadcast</div>
+                          <div className="text-sm text-gray-600">Send offer to all exporters in {buyerCounty} County</div>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                    <RadioGroupItem value="direct" id="direct" />
+                    <div className="flex items-center">
+                      <Target className="w-4 h-4 mr-2 text-green-600" />
+                      <Label htmlFor="direct" className="cursor-pointer">
+                        <div>
+                          <div className="font-medium">Direct to Specific Exporter</div>
+                          <div className="text-sm text-gray-600">Send offer to a specific exporter</div>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Exporter Selection (for direct offers) */}
+              {offerType === 'direct' && (
+                <div className="space-y-2">
+                  <Label htmlFor="exporter-select">Select Exporter</Label>
+                  <Select value={selectedExporter} onValueChange={setSelectedExporter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose an exporter..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {exportersLoading ? (
+                        <SelectItem value="" disabled>Loading exporters...</SelectItem>
+                      ) : availableExporters?.data?.length > 0 ? (
+                        availableExporters.data.map((exporter: any) => (
+                          <SelectItem key={exporter.exporterId} value={exporter.exporterId}>
+                            <div className="flex items-center">
+                              <Building2 className="w-4 h-4 mr-2" />
+                              {exporter.companyName} - {exporter.contactPerson}
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="" disabled>No exporters available in {buyerCounty}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Offer Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price-per-unit">Price per {sellOfferDialog.lot?.unit || 'unit'} ($) *</Label>
+                  <Input
+                    id="price-per-unit"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={pricePerUnit}
+                    onChange={(e) => setPricePerUnit(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="offer-valid-days">Offer Valid (Days)</Label>
+                  <Select value={offerValidDays} onValueChange={setOfferValidDays}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3 Days</SelectItem>
+                      <SelectItem value="7">7 Days</SelectItem>
+                      <SelectItem value="14">14 Days</SelectItem>
+                      <SelectItem value="30">30 Days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="delivery-terms">Delivery Terms *</Label>
+                <Select value={deliveryTerms} onValueChange={setDeliveryTerms}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select delivery terms..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FOB Warehouse">FOB Warehouse</SelectItem>
+                    <SelectItem value="Delivered to Port">Delivered to Port</SelectItem>
+                    <SelectItem value="Delivered to Exporter">Delivered to Exporter</SelectItem>
+                    <SelectItem value="Custom Arrangement">Custom Arrangement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment-terms">Payment Terms *</Label>
+                <Select value={paymentTerms} onValueChange={setPaymentTerms}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select payment terms..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Payment on Delivery">Payment on Delivery</SelectItem>
+                    <SelectItem value="Payment in Advance">Payment in Advance</SelectItem>
+                    <SelectItem value="30 Days Net">30 Days Net</SelectItem>
+                    <SelectItem value="Letter of Credit">Letter of Credit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="quality-specs">Quality Specifications</Label>
+                <Textarea
+                  id="quality-specs"
+                  placeholder="Describe quality standards, certifications, etc..."
+                  value={qualitySpecifications}
+                  onChange={(e) => setQualitySpecifications(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="offer-notes">Additional Notes</Label>
+                <Textarea
+                  id="offer-notes"
+                  placeholder="Any additional information for exporters..."
+                  value={offerNotes}
+                  onChange={(e) => setOfferNotes(e.target.value)}
+                  rows={2}
+                />
+              </div>
+
+              {pricePerUnit && sellOfferDialog.lot && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="text-sm">
+                    <span className="font-medium text-green-800">Total Offer Value: </span>
+                    <span className="text-lg font-bold text-green-900">
+                      ${(parseFloat(pricePerUnit) * parseFloat(sellOfferDialog.lot.totalWeight)).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setSellOfferDialog({ open: false, lot: null })}
+                  disabled={creatingOffer}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateSellOffer}
+                  disabled={creatingOffer || !pricePerUnit || !deliveryTerms || !paymentTerms || (offerType === 'direct' && !selectedExporter)}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {creatingOffer ? (
+                    <>
+                      <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                      Creating Offer...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      {offerType === 'direct' ? 'Send Direct Offer' : 'Broadcast Offer'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

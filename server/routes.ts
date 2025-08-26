@@ -127,6 +127,12 @@ import {
   insertWarehouseCustodySchema,
   insertStorageFeesSchema,
   insertAuthorizationRequestSchema,
+  
+  // Buyer to Exporter Offer System
+  buyerExporterOffers,
+  exporterOfferResponses,
+  insertBuyerExporterOfferSchema,
+  insertExporterOfferResponseSchema,
   type WarehouseCustody,
   type NewWarehouseCustody,
   type StorageFees,
@@ -16161,6 +16167,336 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         success: false,
         error: 'Failed to verify payment and authorize custody',
         details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // ========================================
+  // BUYER TO EXPORTER OFFER SYSTEM
+  // ========================================
+
+  // Get available exporters for buyers (county-based)
+  app.get("/api/buyer/available-exporters/:buyerCounty", async (req, res) => {
+    try {
+      const { buyerCounty } = req.params;
+      console.log(`🏢 Fetching available exporters for county: ${buyerCounty}`);
+
+      // Get exporters in the same county
+      const availableExporters = await db
+        .select({
+          exporterId: exporters.exporterId,
+          companyName: exporters.companyName,
+          contactPerson: exporters.contactPerson,
+          email: exporters.email,
+          phone: exporters.phone,
+          county: exporters.county,
+          status: exporters.status
+        })
+        .from(exporters)
+        .where(and(
+          eq(exporters.county, buyerCounty),
+          eq(exporters.status, 'approved')
+        ));
+
+      console.log(`✅ Found ${availableExporters.length} exporters in ${buyerCounty}`);
+
+      res.json({
+        success: true,
+        data: availableExporters
+      });
+
+    } catch (error) {
+      console.error("Error fetching available exporters:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch available exporters"
+      });
+    }
+  });
+
+  // Create buyer offer to exporter (both direct and broadcast)
+  app.post("/api/buyer/create-exporter-offer", async (req, res) => {
+    try {
+      const {
+        buyerId,
+        buyerCompany,
+        buyerContact,
+        buyerCounty,
+        custodyId,
+        offerType, // 'direct' or 'broadcast'
+        targetExporterId, // null for broadcast
+        pricePerUnit,
+        deliveryTerms,
+        paymentTerms,
+        qualitySpecifications,
+        offerValidDays,
+        urgentOffer,
+        offerNotes
+      } = req.body;
+
+      console.log(`💼 Creating ${offerType} offer from buyer ${buyerId} for custody ${custodyId}`);
+
+      // Get custody lot details
+      const [custodyLot] = await db
+        .select()
+        .from(warehouseCustody)
+        .where(eq(warehouseCustody.custodyId, custodyId));
+
+      if (!custodyLot) {
+        return res.status(404).json({
+          success: false,
+          message: "Custody lot not found"
+        });
+      }
+
+      // Check if custody is authorized
+      if (custodyLot.authorizationStatus !== 'authorized') {
+        return res.status(400).json({
+          success: false,
+          message: "Custody lot must be authorized before creating offers"
+        });
+      }
+
+      // Generate offer ID
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const offerId = `BEO-${timestamp}-${randomSuffix}`;
+
+      // Calculate offer details
+      const totalWeight = parseFloat(custodyLot.totalWeight);
+      const unitPrice = parseFloat(pricePerUnit);
+      const totalOfferPrice = totalWeight * unitPrice;
+      const validUntil = new Date();
+      validUntil.setDate(validUntil.getDate() + (offerValidDays || 7));
+
+      // Create offer
+      await db.insert(buyerExporterOffers).values({
+        offerId,
+        buyerId,
+        buyerCompany,
+        buyerContact,
+        buyerCounty,
+        custodyId,
+        productType: custodyLot.productType,
+        totalWeight: custodyLot.totalWeight,
+        grade: custodyLot.grade || 'Standard',
+        offerType,
+        targetExporterId: offerType === 'direct' ? targetExporterId : null,
+        pricePerUnit,
+        totalOfferPrice: totalOfferPrice.toString(),
+        deliveryTerms,
+        paymentTerms,
+        qualitySpecifications,
+        offerValidUntil: validUntil,
+        urgentOffer: urgentOffer || false,
+        offerNotes
+      });
+
+      console.log(`✅ ${offerType} offer ${offerId} created successfully`);
+
+      res.json({
+        success: true,
+        message: `${offerType === 'direct' ? 'Direct' : 'Broadcast'} offer created successfully`,
+        offerId,
+        totalOfferPrice: totalOfferPrice.toFixed(2)
+      });
+
+    } catch (error) {
+      console.error("Error creating exporter offer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create exporter offer"
+      });
+    }
+  });
+
+  // Get buyer's active offers
+  app.get("/api/buyer/my-offers/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`📋 Fetching offers for buyer: ${buyerId}`);
+
+      const buyerOffers = await db
+        .select()
+        .from(buyerExporterOffers)
+        .where(eq(buyerExporterOffers.buyerId, buyerId))
+        .orderBy(desc(buyerExporterOffers.createdAt));
+
+      console.log(`✅ Found ${buyerOffers.length} offers for buyer ${buyerId}`);
+
+      res.json({
+        success: true,
+        data: buyerOffers
+      });
+
+    } catch (error) {
+      console.error("Error fetching buyer offers:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch buyer offers"
+      });
+    }
+  });
+
+  // Get exporter offers (both direct and broadcast for their county)
+  app.get("/api/exporter/available-offers/:exporterId/:exporterCounty", async (req, res) => {
+    try {
+      const { exporterId, exporterCounty } = req.params;
+      console.log(`📬 Fetching offers for exporter ${exporterId} in ${exporterCounty}`);
+
+      // Get offers that are either:
+      // 1. Direct offers to this specific exporter
+      // 2. Broadcast offers in the same county
+      const availableOffers = await db
+        .select()
+        .from(buyerExporterOffers)
+        .where(and(
+          eq(buyerExporterOffers.status, 'pending'),
+          or(
+            eq(buyerExporterOffers.targetExporterId, exporterId), // Direct offers
+            and(
+              eq(buyerExporterOffers.offerType, 'broadcast'),
+              eq(buyerExporterOffers.buyerCounty, exporterCounty)
+            )
+          )
+        ))
+        .orderBy(desc(buyerExporterOffers.createdAt));
+
+      console.log(`✅ Found ${availableOffers.length} offers for exporter ${exporterId}`);
+
+      res.json({
+        success: true,
+        data: availableOffers
+      });
+
+    } catch (error) {
+      console.error("Error fetching exporter offers:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch exporter offers"
+      });
+    }
+  });
+
+  // Exporter accept offer
+  app.post("/api/exporter/accept-offer", async (req, res) => {
+    try {
+      const {
+        offerId,
+        exporterId,
+        exporterCompany,
+        responseNotes
+      } = req.body;
+
+      console.log(`✅ Exporter ${exporterId} accepting offer ${offerId}`);
+
+      // Check if offer is still available
+      const [offer] = await db
+        .select()
+        .from(buyerExporterOffers)
+        .where(eq(buyerExporterOffers.offerId, offerId));
+
+      if (!offer) {
+        return res.status(404).json({
+          success: false,
+          message: "Offer not found"
+        });
+      }
+
+      if (offer.status !== 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: "Offer is no longer available"
+        });
+      }
+
+      // Update offer status to accepted
+      await db
+        .update(buyerExporterOffers)
+        .set({
+          status: 'accepted',
+          acceptedBy: exporterId,
+          acceptedDate: new Date()
+        })
+        .where(eq(buyerExporterOffers.offerId, offerId));
+
+      // Create response record
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const responseId = `EOR-${timestamp}-${randomSuffix}`;
+
+      await db.insert(exporterOfferResponses).values({
+        responseId,
+        offerId,
+        exporterId,
+        exporterCompany,
+        responseType: 'accept',
+        responseNotes
+      });
+
+      console.log(`✅ Offer ${offerId} accepted by exporter ${exporterId}`);
+
+      res.json({
+        success: true,
+        message: "Offer accepted successfully"
+      });
+
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to accept offer"
+      });
+    }
+  });
+
+  // Exporter reject offer
+  app.post("/api/exporter/reject-offer", async (req, res) => {
+    try {
+      const {
+        offerId,
+        exporterId,
+        exporterCompany,
+        rejectionReason
+      } = req.body;
+
+      console.log(`❌ Exporter ${exporterId} rejecting offer ${offerId}`);
+
+      // Update offer status
+      await db
+        .update(buyerExporterOffers)
+        .set({
+          status: 'rejected',
+          rejectionReason
+        })
+        .where(eq(buyerExporterOffers.offerId, offerId));
+
+      // Create response record
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const responseId = `EOR-${timestamp}-${randomSuffix}`;
+
+      await db.insert(exporterOfferResponses).values({
+        responseId,
+        offerId,
+        exporterId,
+        exporterCompany,
+        responseType: 'reject',
+        responseNotes: rejectionReason
+      });
+
+      console.log(`❌ Offer ${offerId} rejected by exporter ${exporterId}`);
+
+      res.json({
+        success: true,
+        message: "Offer rejected successfully"
+      });
+
+    } catch (error) {
+      console.error("Error rejecting offer:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reject offer"
       });
     }
   });

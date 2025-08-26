@@ -4370,6 +4370,87 @@ export const insertAuthorizationRequestSchema = createInsertSchema(authorization
   createdAt: true,
 });
 
+// Buyer to Exporter Offers System
+export const buyerExporterOffers = pgTable("buyer_exporter_offers", {
+  id: serial("id").primaryKey(),
+  offerId: varchar("offer_id").notNull().unique(), // BEO-YYYYMMDD-XXX
+  
+  // Buyer Information
+  buyerId: varchar("buyer_id").notNull(),
+  buyerCompany: varchar("buyer_company").notNull(),
+  buyerContact: varchar("buyer_contact").notNull(),
+  buyerCounty: varchar("buyer_county").notNull(),
+  
+  // Lot Information (from warehouse custody)
+  custodyId: varchar("custody_id").references(() => warehouseCustody.custodyId).notNull(),
+  productType: varchar("product_type").notNull(),
+  totalWeight: decimal("total_weight", { precision: 10, scale: 2 }).notNull(),
+  grade: varchar("grade").notNull(),
+  
+  // Offer Details
+  offerType: varchar("offer_type").notNull(), // 'direct' or 'broadcast'
+  targetExporterId: varchar("target_exporter_id"), // null for broadcast offers
+  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }).notNull(),
+  totalOfferPrice: decimal("total_offer_price", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").notNull().default("USD"),
+  
+  // Terms & Conditions
+  deliveryTerms: text("delivery_terms"),
+  paymentTerms: text("payment_terms").notNull().default("Payment upon delivery"),
+  qualitySpecifications: text("quality_specifications"),
+  offerValidUntil: timestamp("offer_valid_until").notNull(),
+  
+  // Status & Response
+  status: varchar("status").notNull().default("pending"), // pending, accepted, rejected, expired
+  acceptedBy: varchar("accepted_by"), // exporter ID who accepted
+  acceptedDate: timestamp("accepted_date"),
+  rejectionReason: text("rejection_reason"),
+  
+  // Additional Info
+  urgentOffer: boolean("urgent_offer").default(false),
+  offerNotes: text("offer_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Exporter responses to buyer offers
+export const exporterOfferResponses = pgTable("exporter_offer_responses", {
+  id: serial("id").primaryKey(),
+  responseId: varchar("response_id").notNull().unique(), // EOR-YYYYMMDD-XXX
+  
+  offerId: varchar("offer_id").references(() => buyerExporterOffers.offerId).notNull(),
+  exporterId: varchar("exporter_id").notNull(),
+  exporterCompany: varchar("exporter_company").notNull(),
+  
+  // Response Details
+  responseType: varchar("response_type").notNull(), // 'accept', 'reject', 'counter_offer'
+  counterOfferPrice: decimal("counter_offer_price", { precision: 10, scale: 2 }),
+  responseNotes: text("response_notes"),
+  
+  // Counter Offer Terms (if applicable)
+  counterDeliveryTerms: text("counter_delivery_terms"),
+  counterPaymentTerms: text("counter_payment_terms"),
+  counterValidUntil: timestamp("counter_valid_until"),
+  
+  responseDate: timestamp("response_date").defaultNow(),
+  status: varchar("status").notNull().default("active"), // active, withdrawn, expired
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Schema for inserts
+export const insertBuyerExporterOfferSchema = createInsertSchema(buyerExporterOffers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertExporterOfferResponseSchema = createInsertSchema(exporterOfferResponses).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Warehouse Custody System Types
 export type WarehouseCustody = typeof warehouseCustody.$inferSelect;
 export type NewWarehouseCustody = z.infer<typeof insertWarehouseCustodySchema>;
@@ -4377,5 +4458,11 @@ export type StorageFees = typeof storageFees.$inferSelect;
 export type NewStorageFees = z.infer<typeof insertStorageFeesSchema>;
 export type AuthorizationRequest = typeof authorizationRequests.$inferSelect;
 export type NewAuthorizationRequest = z.infer<typeof insertAuthorizationRequestSchema>;
+
+// Buyer to Exporter Offer System Types
+export type BuyerExporterOffer = typeof buyerExporterOffers.$inferSelect;
+export type NewBuyerExporterOffer = z.infer<typeof insertBuyerExporterOfferSchema>;
+export type ExporterOfferResponse = typeof exporterOfferResponses.$inferSelect;
+export type NewExporterOfferResponse = z.infer<typeof insertExporterOfferResponseSchema>;
 
 

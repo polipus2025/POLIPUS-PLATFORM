@@ -3165,6 +3165,169 @@ export * from './payment-schema';
 export type Exporter = typeof exporters.$inferSelect;
 export type InsertExporter = typeof exporters.$inferInsert;
 
+// ============================================================================
+// SELLERS HUB - BUYER TO EXPORTER OFFER SYSTEM
+// ============================================================================
+
+// Buyer-to-Exporter Offers (Sellers Hub Core Table)
+export const buyerExporterOffers = pgTable("buyer_exporter_offers", {
+  id: serial("id").primaryKey(),
+  offerId: text("offer_id").notNull().unique(), // BOE-YYYYMMDD-XXX format
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  buyerCompany: text("buyer_company").notNull(),
+  buyerContact: text("buyer_contact").notNull(),
+  buyerPhone: text("buyer_phone"),
+  
+  // Target: Direct or Broadcast
+  offerType: text("offer_type").notNull(), // direct, broadcast_county, broadcast_commodity, broadcast_all
+  targetExporterId: integer("target_exporter_id").references(() => exporters.id), // null for broadcast
+  targetExporterCompany: text("target_exporter_company"), // null for broadcast
+  
+  // Product Details
+  commodity: text("commodity").notNull(), // cocoa, coffee, rubber, palm_oil, rice, etc.
+  quantityAvailable: text("quantity_available").notNull(), // e.g., "500 MT"
+  pricePerMT: decimal("price_per_mt", { precision: 10, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
+  qualityGrade: text("quality_grade").notNull(),
+  
+  // Terms & Conditions
+  deliveryTerms: text("delivery_terms").notNull(), // FOB, CIF, DAP, etc.
+  paymentTerms: text("payment_terms").notNull(), // advance, L/C, cash on delivery
+  deliveryTimeframe: text("delivery_timeframe").notNull(), // "15 days", "1 month"
+  minimumOrderQuantity: text("minimum_order_quantity"),
+  
+  // Location & Logistics
+  originLocation: text("origin_location").notNull(),
+  county: text("county").notNull(),
+  proposedPort: text("proposed_port"), // Monrovia, Buchanan, etc.
+  
+  // Offer Management
+  status: text("status").notNull().default("active"), // active, expired, withdrawn, all_accepted
+  expiresAt: timestamp("expires_at").notNull(),
+  broadcastRadius: integer("broadcast_radius").default(0), // km for geo-targeting
+  
+  // Tracking
+  viewCount: integer("view_count").default(0),
+  responseCount: integer("response_count").default(0),
+  acceptedCount: integer("accepted_count").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Exporter Responses to Buyer Offers (Individual Exporter Actions)
+export const exporterOfferResponses = pgTable("exporter_offer_responses", {
+  id: serial("id").primaryKey(),
+  responseId: text("response_id").notNull().unique(), // EOR-YYYYMMDD-XXX format
+  offerId: text("offer_id").references(() => buyerExporterOffers.offerId).notNull(),
+  exporterId: integer("exporter_id").references(() => exporters.id).notNull(),
+  exporterCompany: text("exporter_company").notNull(),
+  exporterContact: text("exporter_contact").notNull(),
+  
+  // Response Type
+  responseType: text("response_type").notNull(), // accept, reject, negotiate, counter_offer
+  status: text("status").notNull().default("pending"), // pending, negotiating, accepted, rejected, expired
+  
+  // Counter Offer Details (if responseType is counter_offer)
+  counterPricePerMT: decimal("counter_price_per_mt", { precision: 10, scale: 2 }),
+  counterQuantity: text("counter_quantity"),
+  counterDeliveryTerms: text("counter_delivery_terms"),
+  counterPaymentTerms: text("counter_payment_terms"),
+  modificationNotes: text("modification_notes"),
+  
+  // Response Details
+  responseMessage: text("response_message"),
+  rejectionReason: text("rejection_reason"),
+  
+  // Verification & Transaction
+  verificationCode: text("verification_code"), // Generated when accepted
+  transactionId: text("transaction_id"), // Link to final transaction
+  
+  // Timing
+  respondedAt: timestamp("responded_at").defaultNow(),
+  lastNegotiationAt: timestamp("last_negotiation_at"),
+  finalizedAt: timestamp("finalized_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Negotiation Messages Between Buyer and Exporter
+export const offerNegotiations = pgTable("offer_negotiations", {
+  id: serial("id").primaryKey(),
+  negotiationId: text("negotiation_id").notNull().unique(), // NEG-YYYYMMDD-XXX format
+  responseId: text("response_id").references(() => exporterOfferResponses.responseId).notNull(),
+  offerId: text("offer_id").references(() => buyerExporterOffers.offerId).notNull(),
+  
+  // Participants
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  exporterId: integer("exporter_id").references(() => exporters.id).notNull(),
+  
+  // Message Details
+  senderType: text("sender_type").notNull(), // buyer, exporter
+  senderId: integer("sender_id").notNull(), // ID of sender (buyer or exporter)
+  senderName: text("sender_name").notNull(),
+  
+  messageType: text("message_type").notNull(), // text, price_proposal, terms_modification, final_offer
+  messageContent: text("message_content").notNull(),
+  
+  // Proposal Details (if applicable)
+  proposedPrice: decimal("proposed_price", { precision: 10, scale: 2 }),
+  proposedQuantity: text("proposed_quantity"),
+  proposedTerms: text("proposed_terms"),
+  
+  // Status
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Verification Codes for Accepted Buyer-Exporter Deals
+export const buyerExporterVerifications = pgTable("buyer_exporter_verifications", {
+  id: serial("id").primaryKey(),
+  verificationId: text("verification_id").notNull().unique(), // BEV-YYYYMMDD-XXX format
+  responseId: text("response_id").references(() => exporterOfferResponses.responseId).notNull(),
+  offerId: text("offer_id").references(() => buyerExporterOffers.offerId).notNull(),
+  
+  // Parties
+  buyerId: integer("buyer_id").references(() => buyers.id).notNull(),
+  buyerCompany: text("buyer_company").notNull(),
+  exporterId: integer("exporter_id").references(() => exporters.id).notNull(),
+  exporterCompany: text("exporter_company").notNull(),
+  
+  // Deal Details
+  finalPrice: decimal("final_price", { precision: 10, scale: 2 }).notNull(),
+  finalQuantity: text("final_quantity").notNull(),
+  finalTerms: text("final_terms").notNull(),
+  totalDealValue: decimal("total_deal_value", { precision: 12, scale: 2 }).notNull(),
+  
+  // Verification Code System
+  verificationCode: text("verification_code").notNull().unique(), // 8-digit alphanumeric
+  codeStatus: text("code_status").notNull().default("active"), // active, used, expired
+  
+  // Logistics Tracking
+  warehouseAssignment: text("warehouse_assignment"),
+  deliveryInstructions: text("delivery_instructions"),
+  qualityInspectionRequired: boolean("quality_inspection_required").default(true),
+  portInspectionRequired: boolean("port_inspection_required").default(true),
+  
+  // Status Tracking
+  dealStatus: text("deal_status").notNull().default("confirmed"), // confirmed, in_transit, delivered, completed, cancelled
+  warehouseDelivered: boolean("warehouse_delivered").default(false),
+  qualityApproved: boolean("quality_approved").default(false),
+  paymentProcessed: boolean("payment_processed").default(false),
+  
+  // Important Dates
+  dealConfirmedAt: timestamp("deal_confirmed_at").defaultNow(),
+  expectedDeliveryDate: timestamp("expected_delivery_date"),
+  actualDeliveryDate: timestamp("actual_delivery_date"),
+  completedAt: timestamp("completed_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Export Orders table for tracking export transactions
 export const exportOrders = pgTable("export_orders", {
   id: serial("id").primaryKey(),

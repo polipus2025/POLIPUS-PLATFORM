@@ -12325,7 +12325,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Store session information
+      // Store session information - ensure session exists
+      if (!req.session) {
+        req.session = {};
+      }
       req.session.userType = 'exporter';
       req.session.exporterId = authResult.exporter?.exporterId;
       req.session.userId = authResult.exporter?.id;

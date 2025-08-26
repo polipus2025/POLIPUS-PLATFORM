@@ -185,9 +185,32 @@ export default function SellersHub() {
       console.log('Payload:', payload);
       console.log('URL:', `/api/buyer-exporter-offers/${offerId}/negotiate`);
       
-      const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/negotiate`, payload);
-      console.log('Result:', result);
-      return result;
+      try {
+        const response = await fetch(`/api/buyer-exporter-offers/${offerId}/negotiate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${responseText}`);
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('Parsed result:', result);
+        return result;
+      } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       console.log('Negotiation success:', data);

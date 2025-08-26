@@ -171,9 +171,6 @@ export default function SellersHub() {
   // Start negotiation mutation
   const negotiateMutation = useMutation({
     mutationFn: async ({ offerId, negotiationData }: { offerId: string; negotiationData: NegotiationData }) => {
-      console.log('Sending negotiation:', { offerId, negotiationData });
-      console.log('User:', user);
-      
       const payload = {
         exporterId: (user as any)?.id,
         exporterCompany: (user as any)?.companyName,
@@ -182,38 +179,22 @@ export default function SellersHub() {
         messageToBuyer: negotiationData.messageToBuyer
       };
       
-      console.log('Payload:', payload);
-      console.log('URL:', `/api/buyer-exporter-offers/${offerId}/negotiate`);
+      const response = await fetch(`/api/buyer-exporter-offers/${offerId}/negotiate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload)
+      });
       
-      try {
-        const response = await fetch(`/api/buyer-exporter-offers/${offerId}/negotiate`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload)
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-        
-        const responseText = await response.text();
-        console.log('Response text:', responseText);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${responseText}`);
-        }
-        
-        const result = JSON.parse(responseText);
-        console.log('Parsed result:', result);
-        return result;
-      } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to send counter-offer: ${errorText}`);
       }
+      
+      return await response.json();
     },
     onSuccess: (data) => {
-      console.log('Negotiation success:', data);
       toast({
         title: "Counter-Offer Sent! 📤",
         description: "Your counter-price has been sent to the buyer for review",
@@ -223,7 +204,6 @@ export default function SellersHub() {
       setSelectedOffer(null);
     },
     onError: (error) => {
-      console.error("Negotiation error:", error);
       toast({
         title: "Error",
         description: `Failed to send counter-offer: ${error.message}`,

@@ -16273,6 +16273,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         .select()
         .from(warehouseCustody)
         .where(eq(warehouseCustody.custodyId, custodyId));
+      
+      console.log("📦 Custody lot data:", JSON.stringify(custodyLot, null, 2));
 
       if (!custodyLot) {
         return res.status(404).json({
@@ -16280,6 +16282,24 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           message: "Custody lot not found"
         });
       }
+
+      // Get the numeric buyer ID from the buyers table
+      console.log(`🔍 Looking up buyer with buyerId: ${buyerId}`);
+      const [buyer] = await db
+        .select()
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+
+      console.log("👤 Buyer lookup result:", buyer);
+
+      if (!buyer) {
+        return res.status(404).json({
+          success: false,
+          message: "Buyer not found"
+        });
+      }
+
+      console.log(`✅ Found buyer: ID ${buyer.id}, Name: ${buyer.businessName}`);
 
       // Check if custody is authorized
       if (custodyLot.authorizationStatus !== 'authorized') {
@@ -16301,27 +16321,30 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const validUntil = new Date();
       validUntil.setDate(validUntil.getDate() + (offerValidDays || 7));
 
-      // Create offer
+      // Create offer with all required fields and correct data types
       await db.insert(buyerExporterOffers).values({
         offerId,
-        buyerId,
+        buyerId: buyer.id, // Use the numeric ID from the buyers table
         buyerCompany,
         buyerContact,
-        buyerCounty,
-        custodyId,
-        productType: custodyLot.productType,
-        totalWeight: custodyLot.totalWeight,
-        grade: custodyLot.grade || 'Standard',
-        offerType,
-        targetExporterId: offerType === 'direct' ? targetExporterId : null,
-        pricePerUnit,
-        totalOfferPrice: totalOfferPrice.toString(),
+        // Core product details
+        commodity: custodyLot.commodityType || 'Cocoa',
+        quantityAvailable: parseFloat(custodyLot.totalWeight), // Numeric field (just the number)
+        pricePerMT: parseFloat(pricePerUnit), // Decimal field  
+        totalValue: parseFloat(totalOfferPrice.toFixed(2)), // Decimal field
+        qualityGrade: custodyLot.qualityGrade || 'Standard',
+        // Terms & Conditions
         deliveryTerms,
         paymentTerms,
-        qualitySpecifications,
-        offerValidUntil: validUntil,
-        urgentOffer: urgentOffer || false,
-        offerNotes
+        deliveryTimeframe: `${offerValidDays || 7} days`,
+        // Location & Logistics  
+        originLocation: `${custodyLot.warehouseName || 'Warehouse'}, ${custodyLot.county}`,
+        county: custodyLot.county,
+        // Offer Management
+        offerType,
+        targetExporterId: offerType === 'direct' ? parseInt(targetExporterId) : null,
+        offerValidUntil: validUntil, // Fixed field mapping
+        broadcastRadius: offerType === 'broadcast' ? 50 : 0
       });
 
       console.log(`✅ ${offerType} offer ${offerId} created successfully`);

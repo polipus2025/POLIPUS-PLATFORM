@@ -183,7 +183,11 @@ export default function ExporterManagement() {
   // Create exporter mutation
   const createExporterMutation = useMutation({
     mutationFn: async (exporterData: any) => {
-      return await apiRequest('POST', '/api/exporters', exporterData);
+      return await apiRequest('/api/exporters', {
+        method: 'POST',
+        body: JSON.stringify(exporterData),
+        headers: { 'Content-Type': 'application/json' }
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/exporters'] });
@@ -223,9 +227,13 @@ export default function ExporterManagement() {
   // Approve exporter mutation with automatic credential generation
   const approveExporterMutation = useMutation({
     mutationFn: async (data: { id: number; complianceStatus: string; portalAccess: boolean }) => {
-      return await apiRequest('POST', `/api/exporters/${data.id}/approve`, {
-        complianceStatus: data.complianceStatus,
-        portalAccess: data.portalAccess
+      return await apiRequest(`/api/exporters/${data.id}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({
+          complianceStatus: data.complianceStatus,
+          portalAccess: data.portalAccess
+        }),
+        headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: (data: any) => {
@@ -255,7 +263,10 @@ Please provide these credentials to the exporter. They will be required to chang
   // Generate credentials mutation
   const generateCredentialsMutation = useMutation({
     mutationFn: async (exporterId: number) => {
-      return await apiRequest('POST', `/api/exporters/${exporterId}/generate-credentials`);
+      return await apiRequest(`/api/exporters/${exporterId}/generate-credentials`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/exporters'] });

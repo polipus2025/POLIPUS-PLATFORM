@@ -172,14 +172,21 @@ export default function SellersHub() {
   const negotiateMutation = useMutation({
     mutationFn: async ({ offerId, negotiationData }: { offerId: string; negotiationData: NegotiationData }) => {
       console.log('Sending negotiation:', { offerId, negotiationData });
+      console.log('User:', user);
       
-      const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/negotiate`, {
+      const payload = {
         exporterId: (user as any)?.id,
         exporterCompany: (user as any)?.companyName,
         exporterContact: (user as any)?.contactPerson || (user as any)?.email,
         counterPricePerMT: negotiationData.counterPricePerMT,
         messageToBuyer: negotiationData.messageToBuyer
-      });
+      };
+      
+      console.log('Payload:', payload);
+      console.log('URL:', `/api/buyer-exporter-offers/${offerId}/negotiate`);
+      
+      const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/negotiate`, payload);
+      console.log('Result:', result);
       return result;
     },
     onSuccess: (data) => {

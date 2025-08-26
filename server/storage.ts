@@ -3786,26 +3786,31 @@ export class DatabaseStorage implements IStorage {
   async createExporterOfferResponse(response: any): Promise<any> {
     const responseId = `EOR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
     
-    // Use raw SQL to match actual database columns
-    const [newResponse] = await db.execute(sql`
-      INSERT INTO exporter_offer_responses (
-        response_id, offer_id, exporter_id, exporter_company, 
-        response_type, status, counter_offer_price, response_notes, created_at
-      ) VALUES (
-        ${responseId}, ${response.offerId}, ${response.exporterId}, ${response.exporterCompany},
-        ${response.responseType}, ${response.status}, ${response.counterOfferPrice}, ${response.responseNotes}, NOW()
-      ) RETURNING *
-    `);
+    try {
+      // Insert directly with proper values - simplified approach
+      await db.execute(sql`
+        INSERT INTO exporter_offer_responses (
+          response_id, offer_id, exporter_id, exporter_company, 
+          response_type, status, counter_offer_price, response_notes, created_at
+        ) VALUES (
+          ${responseId}, ${response.offerId}, ${response.exporterId}, ${response.exporterCompany},
+          ${response.responseType}, ${response.status}, ${response.counterOfferPrice}, ${response.responseNotes}, NOW()
+        )
+      `);
 
-    // Update offer response count
-    await db.update(buyerExporterOffers)
-      .set({ 
-        responseCount: sql`${buyerExporterOffers.responseCount} + 1`,
-        updatedAt: new Date()
-      })
-      .where(eq(buyerExporterOffers.offerId, response.offerId));
+      // Update offer response count
+      await db.update(buyerExporterOffers)
+        .set({ 
+          responseCount: sql`${buyerExporterOffers.responseCount} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(buyerExporterOffers.offerId, response.offerId));
 
-    return newResponse.rows[0];
+      return { responseId, success: true };
+    } catch (error) {
+      console.error('Error creating exporter offer response:', error);
+      throw error;
+    }
   }
 
   // Accept offer (first-come-first-serve for broadcast)

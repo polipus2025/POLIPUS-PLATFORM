@@ -111,10 +111,13 @@ export default function SellersHub() {
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
     mutationFn: async (offerId: string) => {
-      const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/accept`, {
-        exporterId: (user as any)?.id,
-        exporterCompany: (user as any)?.companyName,
-        exporterContact: (user as any)?.contactPerson
+      const result = await apiRequest(`/api/buyer-exporter-offers/${offerId}/accept`, {
+        method: "POST",
+        body: JSON.stringify({
+          exporterId: (user as any)?.id,
+          exporterCompany: (user as any)?.companyName,
+          exporterContact: (user as any)?.contactPerson
+        })
       });
       return result.json();
     },
@@ -147,11 +150,14 @@ export default function SellersHub() {
   // Reject offer mutation
   const rejectOfferMutation = useMutation({
     mutationFn: async ({ offerId, reason }: { offerId: string; reason: string }) => {
-      const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/reject`, {
-        exporterId: (user as any)?.id,
-        exporterCompany: (user as any)?.companyName,
-        exporterContact: (user as any)?.contactPerson,
-        rejectionReason: reason
+      const result = await apiRequest(`/api/buyer-exporter-offers/${offerId}/reject`, {
+        method: "POST",
+        body: JSON.stringify({
+          exporterId: (user as any)?.id,
+          exporterCompany: (user as any)?.companyName,
+          exporterContact: (user as any)?.contactPerson,
+          rejectionReason: reason
+        })
       });
       return result.json();
     },
@@ -168,11 +174,14 @@ export default function SellersHub() {
   // Start negotiation mutation
   const negotiateMutation = useMutation({
     mutationFn: async ({ offerId, negotiationData }: { offerId: string; negotiationData: NegotiationData }) => {
-      const result = await apiRequest("POST", `/api/buyer-exporter-offers/${offerId}/negotiate`, {
-        exporterId: (user as any)?.id,
-        exporterCompany: (user as any)?.companyName,
-        exporterContact: (user as any)?.contactPerson,
-        ...negotiationData
+      const result = await apiRequest(`/api/buyer-exporter-offers/${offerId}/negotiate`, {
+        method: "POST",
+        body: JSON.stringify({
+          exporterId: (user as any)?.id,
+          exporterCompany: (user as any)?.companyName,
+          exporterContact: (user as any)?.contactPerson,
+          ...negotiationData
+        })
       });
       return result.json();
     },

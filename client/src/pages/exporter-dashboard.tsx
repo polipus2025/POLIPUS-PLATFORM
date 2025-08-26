@@ -224,18 +224,18 @@ const ExporterDashboard = memo(() => {
           </div>
 
           {/* ⚡ ACCEPTED DEALS - WAREHOUSE TRANSPORT ARRANGEMENTS */}
-          {acceptedDealsData?.deals?.rows && acceptedDealsData.deals.rows.length > 0 && (
+          {acceptedDealsData?.deals && Array.isArray(acceptedDealsData.deals) && acceptedDealsData.deals.length > 0 && (
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Warehouse className="h-5 w-5 text-blue-600" />
                   <span>Accepted Deals - Transport Required</span>
-                  <Badge className="bg-blue-100 text-blue-800">{acceptedDealsData.deals.rows.length}</Badge>
+                  <Badge className="bg-blue-100 text-blue-800">{acceptedDealsData.deals.length}</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {acceptedDealsData.deals.rows.map((deal: any) => (
+                  {acceptedDealsData.deals.map((deal: any) => (
                     <div key={deal.offer_id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Deal Details */}

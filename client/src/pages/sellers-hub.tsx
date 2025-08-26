@@ -412,6 +412,7 @@ export default function SellersHub() {
               </Button>
               
               {/* Accept & Reject Buttons */}
+              {console.log('Offer debug:', { offerId: offer.offerId, status: offer.status, expiresAt: offer.expiresAt, isExpired: isOfferExpired(offer.expiresAt) })}
               {!isOfferExpired(offer.expiresAt) && offer.status === 'pending' && (
                 <>
                   <Button

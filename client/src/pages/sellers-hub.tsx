@@ -114,15 +114,19 @@ export default function SellersHub() {
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
     mutationFn: async (offerId: string) => {
-      const result = await apiRequest(`/api/buyer-exporter-offers/${offerId}/accept`, {
+      console.log("🔄 Starting accept offer mutation for:", offerId);
+      const result = await apiRequest(`/api/exporter/accept-offer`, {
         method: "POST",
         body: JSON.stringify({
+          offerId: offerId,
           exporterId: (user as any)?.id,
           exporterCompany: (user as any)?.companyName,
-          exporterContact: (user as any)?.contactPerson
+          responseNotes: "Accepted via Sellers Hub"
         })
       });
-      return result.json();
+      const data = await result.json();
+      console.log("📦 Accept response data:", data);
+      return data;
     },
     onSuccess: (data) => {
       if (data.success) {
@@ -153,12 +157,12 @@ export default function SellersHub() {
   // Reject offer mutation
   const rejectOfferMutation = useMutation({
     mutationFn: async ({ offerId, reason }: { offerId: string; reason: string }) => {
-      const result = await apiRequest(`/api/buyer-exporter-offers/${offerId}/reject`, {
+      const result = await apiRequest(`/api/exporter/reject-offer`, {
         method: "POST",
         body: JSON.stringify({
+          offerId: offerId,
           exporterId: (user as any)?.id,
           exporterCompany: (user as any)?.companyName,
-          exporterContact: (user as any)?.contactPerson,
           rejectionReason: reason
         })
       });

@@ -17305,7 +17305,10 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const { exporterId } = req.params;
 
       const rejectedOffers = await db.execute(sql`
-        SELECT eor.*, beo.commodity, beo.quantity_available, beo.price_per_unit as original_price,
+        SELECT eor.response_id, eor.offer_id, eor.exporter_id, eor.exporter_company, eor.exporter_contact,
+               eor.response_type, eor.status, eor.counter_price_per_mt, eor.message_to_buyer,
+               eor.buyer_response, eor.buyer_rejection_reason, eor.created_at, eor.updated_at,
+               beo.commodity, beo.quantity_available, beo.price_per_unit as original_price,
                beo.total_value, beo.buyer_company, beo.buyer_id
         FROM exporter_offer_responses eor
         JOIN buyer_exporter_offers beo ON eor.offer_id = beo.offer_id

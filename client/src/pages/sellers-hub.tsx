@@ -42,9 +42,9 @@ interface BuyerExporterOffer {
   targetExporterId?: number;
   targetExporterCompany?: string;
   commodity: string;
-  quantityAvailable: string;
-  pricePerMT: number;
-  totalValue: number;
+  quantityAvailable: string | number;
+  pricePerMT: string | number;
+  totalValue: string | number;
   qualityGrade: string;
   deliveryTerms: string;
   paymentTerms: string;
@@ -93,14 +93,14 @@ export default function SellersHub() {
     }
   }, [user]);
 
-  // Fetch all active offers
-  const { data: offers = [], isLoading } = useQuery({
+  // Fetch all active offers with proper typing
+  const { data: offers = [], isLoading } = useQuery<BuyerExporterOffer[]>({
     queryKey: ['/api/sellers-hub/offers'],
     refetchInterval: 30000 // Refresh every 30 seconds for real-time updates
   });
 
-  // Get offers specifically for this exporter
-  const { data: myOffers = [] } = useQuery({
+  // Get offers specifically for this exporter with proper typing
+  const { data: myOffers = [] } = useQuery<BuyerExporterOffer[]>({
     queryKey: [`/api/exporters/${(user as any)?.id}/offers`],
     refetchInterval: 30000,
     enabled: !!(user as any)?.id // Only run query when we have exporter ID
@@ -237,10 +237,10 @@ export default function SellersHub() {
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-green-600">
-              ${parseFloat(offer.pricePerMT || '0').toFixed(2)}/MT
+              ${(typeof offer.pricePerMT === 'string' ? parseFloat(offer.pricePerMT) : offer.pricePerMT || 0).toFixed(2)}/MT
             </div>
             <div className="text-sm text-slate-500">
-              Total: ${parseFloat(offer.totalValue || '0').toLocaleString()}
+              Total: ${(typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0).toLocaleString()}
             </div>
           </div>
         </div>
@@ -344,8 +344,8 @@ export default function SellersHub() {
                 <div><strong>Commodity:</strong> {selectedOffer.commodity}</div>
                 <div><strong>Quality Grade:</strong> {selectedOffer.qualityGrade}</div>
                 <div><strong>Quantity:</strong> {selectedOffer.quantityAvailable}</div>
-                <div><strong>Price per MT:</strong> ${parseFloat(selectedOffer.pricePerMT || '0').toFixed(2)}</div>
-                <div><strong>Total Value:</strong> ${parseFloat(selectedOffer.totalValue || '0').toLocaleString()}</div>
+                <div><strong>Price per MT:</strong> ${(typeof selectedOffer.pricePerMT === 'string' ? parseFloat(selectedOffer.pricePerMT) : selectedOffer.pricePerMT || 0).toFixed(2)}</div>
+                <div><strong>Total Value:</strong> ${(typeof selectedOffer.totalValue === 'string' ? parseFloat(selectedOffer.totalValue) : selectedOffer.totalValue || 0).toLocaleString()}</div>
               </div>
             </div>
 
@@ -634,7 +634,7 @@ export default function SellersHub() {
           <CardContent className="p-4 text-center">
             <DollarSign className="w-8 h-8 text-purple-500 mx-auto mb-2" />
             <div className="text-2xl font-bold text-slate-800">
-              ${offers.reduce((sum, offer) => sum + parseFloat(offer.totalValue || '0'), 0).toLocaleString()}
+              ${offers.reduce((sum, offer) => sum + (typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0), 0).toLocaleString()}
             </div>
             <div className="text-sm text-slate-600">Total Value</div>
           </CardContent>

@@ -111,12 +111,20 @@ function CounterOffersTab() {
       });
       return result.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Counter-Offer Rejected",
-        description: "Your response has been sent to the exporter",
-      });
-      queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Counter-Offer Rejected",
+          description: "Your response has been sent to the exporter",
+        });
+        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to reject counter-offer",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error) => {
       console.error("Reject counter-offer error:", error);

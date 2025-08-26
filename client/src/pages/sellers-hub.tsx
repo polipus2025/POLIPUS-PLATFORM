@@ -589,13 +589,18 @@ export default function SellersHub() {
                 <div>
                   <Label>Counter Price per MT ($)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    value={negotiationData.counterPricePerMT}
-                    onChange={(e) => setNegotiationData(prev => ({
-                      ...prev,
-                      counterPricePerMT: parseFloat(e.target.value) || 0
-                    }))}
+                    type="text"
+                    value={negotiationData.counterPricePerMT || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow typing numbers and decimal points
+                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        setNegotiationData(prev => ({
+                          ...prev,
+                          counterPricePerMT: value === '' ? 0 : parseFloat(value) || 0
+                        }));
+                      }
+                    }}
                     placeholder={`Original: $${formatPrice(selectedOffer.pricePerMT || 0)}`}
                     data-testid="counter-price-input"
                   />

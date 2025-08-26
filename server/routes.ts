@@ -16548,8 +16548,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         offerId,
         exporterId,
         exporterCompany,
+        exporterContact: exporterCompany + " Contact",
         responseType: 'accept',
-        responseNotes: responseNotes || '',
+        responseMessage: responseNotes || '',
         clickOrder: 1,
         isWinner: true
       });
@@ -16611,8 +16612,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         offerId,
         exporterId,
         exporterCompany,
+        exporterContact: exporterCompany + " Contact",
         responseType: 'reject',
-        responseNotes: rejectionReason
+        rejectionReason: rejectionReason
       });
 
       console.log(`❌ Offer ${offerId} rejected by exporter ${exporterId}`);
@@ -17310,8 +17312,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       const rejectedOffers = await db.execute(sql`
         SELECT eor.response_id, eor.offer_id, eor.exporter_id, eor.exporter_company,
-               eor.response_type, eor.status, eor.counter_price_per_mt, eor.response_message,
-               eor.rejection_reason, eor.created_at, eor.updated_at,
+               eor.response_type, eor.status, eor.response_notes, eor.rejection_reason, 
+               eor.created_at, eor.updated_at,
                beo.commodity, beo.quantity_available, beo.price_per_unit as original_price,
                beo.total_value, beo.buyer_company, beo.buyer_id
         FROM exporter_offer_responses eor

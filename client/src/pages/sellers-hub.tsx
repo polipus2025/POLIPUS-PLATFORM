@@ -98,12 +98,13 @@ export default function SellersHub() {
     refetchInterval: 30000 // Refresh every 30 seconds for real-time updates
   });
 
-  // Get offers specifically for this exporter with proper typing
-  const { data: myOffers = [] } = useQuery<BuyerExporterOffer[]>({
-    queryKey: [`/api/exporters/${(user as any)?.id}/offers`],
-    refetchInterval: 30000,
-    enabled: !!(user as any)?.id // Only run query when we have exporter ID
-  });
+  // Filter direct offers for this exporter from all offers
+  const myOffers = offers.filter(offer => 
+    offer.offerType === 'direct' && 
+    offer.targetExporterId && 
+    (offer.targetExporterId.toString() === (user as any)?.id?.toString() || 
+     offer.targetExporterId.toString() === (user as any)?.exporterId?.toString())
+  );
 
   // Fetch rejected counter-offers for fallback opportunities
   const { data: rejectedCounterOffers = [] as any[], isLoading: rejectedLoading } = useQuery({
@@ -114,12 +115,12 @@ export default function SellersHub() {
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
     mutationFn: async (offerId: string) => {
-      const result = await apiRequest(`/api/exporter/accept-offer`, {
+      const result = await apiRequest('/api/exporter/accept-offer', {
         method: "POST",
         body: JSON.stringify({
           offerId: offerId,
-          exporterId: (user as any)?.id,
-          exporterCompany: (user as any)?.companyName,
+          exporterId: (user as any)?.exporterId || (user as any)?.id,
+          exporterCompany: (user as any)?.companyName || 'Export Company',
           responseNotes: "Accepted via Sellers Hub"
         })
       });

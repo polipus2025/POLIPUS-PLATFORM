@@ -44,12 +44,28 @@ export default function ProfileDropdown({
 
   const normalizedUserType = normalizeUserType(userType);
 
+  const handleViewProfile = () => {
+    navigate(`/profile?type=${normalizedUserType}&id=${userId}`);
+  };
+
+  const handleEditProfile = () => {
+    navigate(`/profile/edit?type=${normalizedUserType}&id=${userId}`);
+  };
+
+  const handleSettings = () => {
+    navigate(`/profile/settings?type=${normalizedUserType}&id=${userId}`);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="profile-menu-trigger">
+        <Button 
+          variant="ghost" 
+          className="relative h-10 w-10 rounded-full" 
+          data-testid="profile-menu-trigger"
+        >
           <Avatar className="h-10 w-10">
-            <AvatarImage src={profileImageUrl} alt={userName} />
+            <AvatarImage src={profileImageUrl || ""} alt={userName || ""} />
             <AvatarFallback className="bg-blue-100 text-blue-600">
               {getInitials(userName)}
             </AvatarFallback>
@@ -59,7 +75,7 @@ export default function ProfileDropdown({
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
-            <p className="font-medium">{userName}</p>
+            <p className="font-medium">{userName || 'User'}</p>
             {userEmail && (
               <p className="w-[200px] truncate text-sm text-muted-foreground">
                 {userEmail}
@@ -70,7 +86,7 @@ export default function ProfileDropdown({
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer" 
-          onClick={() => navigate(`/profile?type=${normalizedUserType}&id=${userId}`)}
+          onClick={handleViewProfile}
           data-testid="menu-view-profile"
         >
           <User className="mr-2 h-4 w-4" />
@@ -78,7 +94,7 @@ export default function ProfileDropdown({
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="cursor-pointer" 
-          onClick={() => navigate(`/profile/edit?type=${normalizedUserType}&id=${userId}`)}
+          onClick={handleEditProfile}
           data-testid="menu-edit-profile"
         >
           <Settings className="mr-2 h-4 w-4" />
@@ -86,7 +102,7 @@ export default function ProfileDropdown({
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="cursor-pointer" 
-          onClick={() => navigate(`/profile/settings?type=${normalizedUserType}&id=${userId}`)}
+          onClick={handleSettings}
           data-testid="menu-settings"
         >
           <Settings className="mr-2 h-4 w-4" />

@@ -690,6 +690,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         return res.json(allOffers);
       }
+
+      // For Claudio's farmer ID, get his real database offers
+      if (farmerId === "FARMER-1756314707545-846") {
+        // Get real offers from database (farmer_id = 846 in database)  
+        const realOffers = await db
+          .select()
+          .from(farmerProductOffers)
+          .where(eq(farmerProductOffers.farmerId, 846))
+          .orderBy(desc(farmerProductOffers.createdAt));
+
+        // SEPARATE pending and confirmed offers for proper management
+        const pendingOffers = realOffers
+          .filter(offer => offer.status === 'available') // Only show available as pending
+          .map(offer => ({
+            id: offer.id,
+            offerId: offer.offerId,
+            farmerId: farmerId,
+            commodityType: offer.commodityType,
+            quantityAvailable: parseFloat(offer.quantityAvailable),
+            unit: offer.unit,
+            pricePerUnit: parseFloat(offer.pricePerUnit),
+            totalValue: parseFloat(offer.totalValue),
+            qualityGrade: offer.qualityGrade,
+            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
+            paymentTerms: offer.paymentTerms,
+            deliveryTerms: offer.deliveryTerms,
+            county: offer.county,
+            status: 'pending', // Always pending for available offers
+            offerCreatedAt: offer.createdAt,
+            confirmedAt: null, // No confirmation yet
+            buyerId: null, // No buyer yet
+            buyerName: null, // No buyer yet
+            buyerCompany: null,
+            verificationCode: null
+          }));
+
+        const confirmedOffers = realOffers
+          .filter(offer => offer.status === 'confirmed') // Only confirmed offers
+          .map(offer => ({
+            id: offer.id,
+            offerId: offer.offerId,
+            farmerId: farmerId,
+            commodityType: offer.commodityType,
+            quantityAvailable: parseFloat(offer.quantityAvailable),
+            unit: offer.unit,
+            pricePerUnit: parseFloat(offer.pricePerUnit),
+            totalValue: parseFloat(offer.totalValue),
+            qualityGrade: offer.qualityGrade,
+            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
+            paymentTerms: offer.paymentTerms,
+            deliveryTerms: offer.deliveryTerms,
+            county: offer.county,
+            status: 'confirmed',
+            offerCreatedAt: offer.createdAt,
+            confirmedAt: offer.confirmedAt,
+            buyerId: offer.buyerId,
+            buyerName: offer.buyerName,
+            buyerCompany: offer.buyerName ? "Agricultural Trading Company" : null,
+            verificationCode: offer.verificationCode
+          }));
+
+        // Combine confirmed and pending offers
+        const allOffers = [...confirmedOffers, ...pendingOffers];
+        
+        return res.json(allOffers);
+      }
       
       // For other farmers, return empty array for now
       res.json([]);

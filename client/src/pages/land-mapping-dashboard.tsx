@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, MapPin, TreePine, CheckCircle, AlertCircle, Clock, Users, Leaf, Sprout, Target, Eye, FileText } from "lucide-react";
-import { GeeVerificationBadge, GeeCountyMonitoringBadge } from "@/components/gee-verification-badge";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";

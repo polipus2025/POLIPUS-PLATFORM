@@ -183,10 +183,10 @@ export default function Landing() {
             
             <div className="isms-card text-center">
               <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
-                <BarChart3 className="h-6 w-6 text-white" />
+                <MapPin className="h-6 w-6 text-white" />
               </div>
-              <p className="text-slate-600 text-sm mb-1">Smart Farm</p>
-              <p className="text-2xl font-bold text-slate-900 mb-2">Tracking</p>
+              <p className="text-slate-600 text-sm mb-1">GPS Farm</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">Mapping</p>
               <p className="text-slate-600 text-sm">System</p>
             </div>
             
@@ -298,7 +298,7 @@ export default function Landing() {
               <div className="space-y-2 mb-4 flex-1">
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Farm plot registration</span>
+                  <span className="leading-tight">Farm plot mapping</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
@@ -346,7 +346,7 @@ export default function Landing() {
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-yellow-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Field data collection</span>
+                  <span className="leading-tight">GPS field mapping</span>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>

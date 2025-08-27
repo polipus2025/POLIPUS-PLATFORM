@@ -1,4 +1,4 @@
-import { Bell, Sprout, LogOut, User, Clock, Calendar, Cloud, Sun, CloudRain, Settings, Edit, UserCircle } from "lucide-react";
+import { Bell, Sprout, LogOut, User, Clock, Calendar, Cloud, Sun, CloudRain } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { Badge } from "@/components/ui/badge";
@@ -92,78 +92,6 @@ export default function Header() {
 
   const WeatherIcon = getWeatherIcon();
 
-  const handleProfileView = () => {
-    // Navigate to profile page based on user type
-    const profileRoutes = {
-      farmer: '/farmer-dashboard?tab=profile',
-      field_agent: '/field-agent-dashboard?tab=profile', 
-      buyer: '/buyer-dashboard?tab=profile',
-      exporter: '/exporter-dashboard?tab=profile',
-      inspector: '/inspector-dashboard?tab=profile',
-      regulatory: '/regulatory-dashboard?tab=profile'
-    };
-    
-    const route = profileRoutes[userType] || '/dashboard?tab=profile';
-    window.location.href = route;
-  };
-
-  const handleEditProfile = () => {
-    // Navigate to edit profile page based on user type
-    const editRoutes = {
-      farmer: '/farmer-dashboard?tab=profile&edit=true',
-      field_agent: '/field-agent-dashboard?tab=profile&edit=true',
-      buyer: '/buyer-dashboard?tab=profile&edit=true', 
-      exporter: '/exporter-dashboard?tab=profile&edit=true',
-      inspector: '/inspector-dashboard?tab=profile&edit=true',
-      regulatory: '/regulatory-dashboard?tab=profile&edit=true'
-    };
-    
-    const route = editRoutes[userType] || '/dashboard?tab=profile&edit=true';
-    window.location.href = route;
-  };
-
-  const handleSettings = () => {
-    // Navigate to settings page based on user type
-    const settingsRoutes = {
-      farmer: '/farmer-dashboard?tab=settings',
-      field_agent: '/field-agent-dashboard?tab=settings',
-      buyer: '/buyer-dashboard?tab=settings',
-      exporter: '/exporter-dashboard?tab=settings', 
-      inspector: '/inspector-dashboard?tab=settings',
-      regulatory: '/regulatory-dashboard?tab=settings'
-    };
-    
-    const route = settingsRoutes[userType] || '/dashboard?tab=settings';
-    window.location.href = route;
-  };
-
-  const handleEnsureProfile = async () => {
-    try {
-      const response = await fetch(`/api/profile/ensure-complete/${userType}/${username}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify({
-          username: username,
-          email: firstName && lastName ? `${firstName.toLowerCase()}.${lastName.toLowerCase()}@agritrace.com` : `${username}@temp.com`
-        })
-      });
-
-      const result = await response.json();
-      
-      if (result.success && result.created) {
-        toast({
-          title: "Profile Created",
-          description: "Your profile has been successfully created. You can now edit it.",
-        });
-      }
-    } catch (error) {
-      console.error("Error ensuring profile:", error);
-    }
-  };
-
   const handleLogout = async () => {
     try {
       // Call logout API endpoint
@@ -208,13 +136,6 @@ export default function Header() {
       window.location.href = "/";
     }
   };
-
-  // Ensure profile exists on component mount
-  useEffect(() => {
-    if (username && userType) {
-      handleEnsureProfile();
-    }
-  }, [username, userType]);
 
   const getUserDisplayInfo = () => {
     if (firstName && lastName) {
@@ -349,45 +270,15 @@ export default function Header() {
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuItem disabled className="flex-col items-start p-3">
-                  <div className="flex items-center w-full">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                      userType === 'farmer' ? 'bg-green-600' :
-                      userType === 'field_agent' ? 'bg-orange-600' :
-                      userType === 'buyer' ? 'bg-blue-600' :
-                      userType === 'exporter' ? 'bg-purple-600' :
-                      userType === 'inspector' ? 'bg-teal-600' :
-                      'bg-lacra-blue'
-                    }`}>
-                      <span className="text-white text-sm font-medium">{userDisplay.initials}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{userDisplay.name}</p>
-                      <p className="text-xs text-gray-500">{userDisplay.role}</p>
-                      <p className="text-xs text-blue-600 font-medium">@{username}</p>
-                    </div>
-                  </div>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>{userDisplay.name}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  <span className="text-xs text-gray-500">{userDisplay.role}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                
-                <DropdownMenuItem onClick={handleProfileView} className="cursor-pointer">
-                  <UserCircle className="mr-2 h-4 w-4 text-blue-600" />
-                  <span>View Profile</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={handleEditProfile} className="cursor-pointer">
-                  <Edit className="mr-2 h-4 w-4 text-green-600" />
-                  <span>Edit Profile</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={handleSettings} className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4 text-gray-600" />
-                  <span>General Settings</span>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>

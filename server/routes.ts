@@ -4931,28 +4931,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Return default user instead of 401 to prevent dashboard crashes
-      return res.json({
-        id: 'default-buyer',
-        username: 'guest-buyer',
-        buyerId: 'BYR-20250827-041',
-        companyName: 'Guest Company',
-        userType: 'buyer',
-        role: 'buyer',
-        isGuest: true
-      });
+      // Fallback to existing authentication logic
+      return res.status(401).json({ message: "No authenticated user found" });
     } catch (error) {
       console.error("User auth check error:", error);
-      // Return default user even on error to prevent crashes
-      res.json({
-        id: 'error-recovery',
-        username: 'guest-buyer',
-        buyerId: 'BYR-20250827-041',
-        companyName: 'Guest Company',
-        userType: 'buyer',
-        role: 'buyer',
-        isGuest: true
-      });
+      res.status(500).json({ message: "Authentication error" });
     }
   });
 
@@ -17719,101 +17702,6 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     } catch (error) {
       console.error("Error processing mobile payment:", error);
       res.status(500).json({ error: "Failed to process payment" });
-    }
-  });
-
-  // ============================================================================
-  // COMPREHENSIVE PROFILE MANAGEMENT SYSTEM - ALL USER TYPES
-  // ============================================================================
-
-  // Farmer Profile Management
-  app.get("/api/profile/farmer/:farmerId", async (req, res) => {
-    try {
-      const { farmerId } = req.params;
-      const farmer = await storage.getFarmerByFarmerId(farmerId);
-      
-      if (!farmer) {
-        return res.status(404).json({ 
-          success: false, 
-          message: "Farmer profile not found" 
-        });
-      }
-      
-      res.json({
-        success: true,
-        profile: farmer
-      });
-    } catch (error) {
-      console.error("Error fetching farmer profile:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Error fetching farmer profile" 
-      });
-    }
-  });
-
-  app.put("/api/profile/farmer/:farmerId", async (req, res) => {
-    try {
-      const { farmerId } = req.params;
-      const updateData = req.body;
-      
-      const updatedFarmer = await storage.updateFarmerProfile(farmerId, updateData);
-      
-      res.json({
-        success: true,
-        message: "Farmer profile updated successfully",
-        profile: updatedFarmer
-      });
-    } catch (error) {
-      console.error("Error updating farmer profile:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Error updating farmer profile" 
-      });
-    }
-  });
-
-  // Profile Completion Checker - Ensure all users have complete profiles
-  app.post("/api/profile/ensure-complete/:userType/:userId", async (req, res) => {
-    try {
-      const { userType, userId } = req.params;
-      const { username, email } = req.body;
-      
-      let profile;
-      let created = false;
-      
-      if (userType === 'farmer') {
-        profile = await storage.getFarmerByFarmerId(userId);
-        if (!profile) {
-          // Create farmer profile if missing
-          const newFarmerData = {
-            farmerId: userId,
-            firstName: username || 'Unknown',
-            lastName: '',
-            county: 'Unspecified County',
-            phoneNumber: '',
-            email: email || '',
-            district: '',
-            village: '',
-            community: ''
-          };
-          profile = await storage.createFarmer(newFarmerData);
-          created = true;
-        }
-      }
-      
-      res.json({
-        success: true,
-        created: created,
-        message: created ? "Profile created successfully" : "Profile already exists",
-        profile: profile
-      });
-    } catch (error) {
-      console.error("Error ensuring profile completeness:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Error ensuring profile completeness" 
-      });
     }
   });
 

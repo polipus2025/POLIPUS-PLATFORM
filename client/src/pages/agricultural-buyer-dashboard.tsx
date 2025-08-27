@@ -30,8 +30,7 @@ import {
   Target,
   Building2,
   Loader2,
-  XCircle,
-  User
+  XCircle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -45,8 +44,6 @@ import { Upload, CreditCard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Counter Offers Tab Component
 function CounterOffersTab() {
@@ -65,8 +62,7 @@ function CounterOffersTab() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Extract data from the response structure
-  const counterOffers = (counterOffersResponse as any)?.data || [];
+  const counterOffers = counterOffersResponse?.data || [];
 
   // Accept counter-offer mutation
   const acceptCounterOfferMutation = useMutation({
@@ -74,7 +70,7 @@ function CounterOffersTab() {
       const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/accept`, {
         method: "POST",
         body: JSON.stringify({
-          buyerId: (user as any)?.buyerId || (user as any)?.id || 'BYR-20250827-041'
+          buyerId: user?.id
         })
       });
       return result.json();
@@ -109,7 +105,7 @@ function CounterOffersTab() {
       const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/reject`, {
         method: "POST",
         body: JSON.stringify({
-          buyerId: (user as any)?.buyerId || (user as any)?.id || 'BYR-20250827-041',
+          buyerId: user?.id,
           rejectionReason: reason
         })
       });
@@ -121,7 +117,7 @@ function CounterOffersTab() {
           title: "Counter-Offer Rejected",
           description: "Your response has been sent to the exporter",
         });
-        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/BYR-20250827-041`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
       } else {
         toast({
           title: "Error",
@@ -825,64 +821,10 @@ export default function AgriculturalBuyerDashboard() {
               )}
               <p className="text-sm text-gray-500">Buyer ID: {buyerId}</p>
             </div>
-
-            {/* Profile Management Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="profile-menu-trigger">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={buyerProfile?.profileImageUrl} alt={buyerName} />
-                    <AvatarFallback className="bg-blue-100 text-blue-600">
-                      {buyerName ? buyerName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'BY'}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{buyerName}</p>
-                    <p className="w-[200px] truncate text-sm text-muted-foreground">
-                      {buyerProfile?.primaryEmail}
-                    </p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer" 
-                  onClick={() => navigate(`/profile?type=buyer&id=${buyerId}`)}
-                  data-testid="menu-view-profile"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  View Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer" 
-                  onClick={() => navigate(`/profile/edit?type=buyer&id=${buyerId}`)}
-                  data-testid="menu-edit-profile"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Edit Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer" 
-                  onClick={() => navigate(`/profile/settings?type=buyer&id=${buyerId}`)}
-                  data-testid="menu-settings"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer" 
-                  onClick={handleLogout}
-                  data-testid="menu-logout"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>

@@ -112,6 +112,9 @@ const InspectorFarmerLandManagement = lazy(() => import("@/pages/inspector-farme
 const FarmerLandMapping = lazy(() => import("@/pages/farmer/farmer-land-mapping"));
 const FarmerPaymentServices = lazy(() => import("@/pages/farmer/farmer-payment-services"));
 
+// PROFILE MANAGEMENT SYSTEM - Universal for all user types
+const ProfileRouter = lazy(() => import("@/pages/profile"));
+
 // ADDITIONAL AUTH PAGES
 import MonitoringLogin from "@/pages/auth/monitoring-login";
 
@@ -224,6 +227,10 @@ function App() {
             {/* UTILITY REDIRECTS - LAZY LOADED */}
             <Route path="/install-app" component={createLazyRoute(MobileAppDownload)} />
             
+            {/* PROFILE MANAGEMENT SYSTEM - Universal for all user types */}
+            <Route path="/profile/:path*" component={createLazyRoute(ProfileRouter)} />
+            <Route path="/profile" component={createLazyRoute(ProfileRouter)} />
+
             {/* POLIPUS REDIRECT */}
             <Route path="/polipus" component={FrontPage} />
             

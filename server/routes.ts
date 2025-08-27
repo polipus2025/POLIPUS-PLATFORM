@@ -13448,6 +13448,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Temporary fix for Claudio's transaction data
+  app.post("/api/fix/claudio-transaction", async (req, res) => {
+    try {
+      // Update the HELBKEZS transaction to have correct farmer ID (846 instead of 288)
+      const result = await db.execute(sql`
+        UPDATE buyer_verification_codes 
+        SET farmer_id = '846'
+        WHERE verification_code = 'HELBKEZS' AND farmer_name = 'claudio'
+      `);
+      
+      res.json({ success: true, message: "Fixed Claudio's transaction data", updated: result });
+    } catch (error) {
+      console.error("Fix error:", error);
+      res.status(500).json({ error: "Failed to fix transaction data" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Import working PDF generator - DISABLED TO FIX 12-PAGE ISSUE
@@ -14033,7 +14050,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company: company || 'Agricultural Trading Company',
         notificationId,
         offerId: notification.offerId,
-        farmerId: '288',
+        farmerId: notification.farmerId,
         farmerName: notification.farmerName,
         commodityType: notification.commodityType,
         quantityAvailable: notification.quantityAvailable,

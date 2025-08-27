@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import { MapPin, RotateCcw, Check, Satellite, Download, Shield, AlertTriangle } from "lucide-react";
 import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";

@@ -1457,6 +1457,12 @@ export class DatabaseStorage implements IStorage {
       .where(eq(farmerCredentials.id, credentialsId));
   }
 
+  async updateFarmerLastLogin(credentialsId: number): Promise<void> {
+    await db.update(farmerCredentials)
+      .set({ lastLogin: new Date() })
+      .where(eq(farmerCredentials.id, credentialsId));
+  }
+
   async updateFarmer(id: number, farmer: Partial<Farmer>): Promise<Farmer | undefined> {
     const [updatedFarmer] = await db.update(farmers).set(farmer).where(eq(farmers.id, id)).returning();
     return updatedFarmer || undefined;

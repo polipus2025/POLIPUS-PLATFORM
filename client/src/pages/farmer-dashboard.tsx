@@ -28,6 +28,7 @@ import {
   Loader2
 } from "lucide-react";
 import { Link } from "wouter";
+import ProfileDropdown from "@/components/ProfileDropdown";
 
 export default function FarmerDashboard() {
   const { toast } = useToast();
@@ -225,6 +226,16 @@ export default function FarmerDashboard() {
             Farmer ID: {farmerId} | Your farm management dashboard
           </p>
         </div>
+        <ProfileDropdown
+          userName={farmerFullName}
+          userEmail={`${farmerName.toLowerCase()}@farm.co`}
+          userType="farmer"
+          userId={farmerId}
+          onLogout={() => {
+            localStorage.clear();
+            window.location.href = "/farmer-login";
+          }}
+        />
       </div>
 
       {/* Simplified Tabbed Navigation Interface */}

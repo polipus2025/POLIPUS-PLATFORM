@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import lacraLogo from '@assets/LACRA LOGO_1753406166355.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import ProfileDropdown from "@/components/ProfileDropdown";
 
 interface CleanExporterLayoutProps {
   children: ReactNode;
@@ -261,14 +262,13 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
 
           {/* Footer */}
           <div className="p-4 border-t border-gray-200">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" 
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Exit Portal
-            </Button>
+            <ProfileDropdown
+              userName={user?.companyName || user?.username || "Exporter User"}
+              userEmail={user?.email || "exporter@company.co"}
+              userType="exporter"
+              userId={user?.exporterId || user?.id}
+              onLogout={handleLogout}
+            />
           </div>
         </div>
 

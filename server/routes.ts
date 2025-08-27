@@ -17800,5 +17800,23 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // Asset serving route for attached_assets directory
+  app.get("/api/assets/:filename", (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const filePath = `attached_assets/${filename}`;
+      
+      res.sendFile(filePath, { root: '.' }, (err) => {
+        if (err) {
+          console.error(`Error serving asset ${filename}:`, err);
+          res.status(404).json({ error: 'Asset not found' });
+        }
+      });
+    } catch (error) {
+      console.error("Error in asset serving route:", error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   return httpServer;
 }

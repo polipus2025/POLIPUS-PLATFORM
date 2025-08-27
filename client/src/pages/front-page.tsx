@@ -30,9 +30,8 @@ import {
   FileCheck,
   Building2
 } from 'lucide-react';
-// Original Polipus logo restored - using direct URL approach
-// Note: Using direct URL approach to handle space in filename
-const poliposLogo = '/api/assets/polipos logo 1_1753394173408.jpg';
+// Original Polipus logo restored - using URL-encoded path
+const poliposLogo = '/api/assets/polipos%20logo%201_1753394173408.jpg';
 
 export default function FrontPage() {
   const modules = [

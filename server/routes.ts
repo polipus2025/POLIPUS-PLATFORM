@@ -16,7 +16,7 @@ import crypto from "crypto";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
 import { createTestFarmer } from "./create-test-farmer";
 import { db } from "./db";
-import { count, eq } from "drizzle-orm";
+import { count } from "drizzle-orm";
 
 import { 
   farmers,

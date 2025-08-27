@@ -885,7 +885,7 @@ export default function SellersHub() {
                 <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
                 <p className="ml-4 text-slate-600">Loading rejected counter-offers...</p>
               </div>
-            ) : rejectedCounterOffers.length === 0 ? (
+            ) : !rejectedCounterOffers || rejectedCounterOffers.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-12">
                   <XCircle className="w-16 h-16 text-slate-400 mx-auto mb-4" />
@@ -895,7 +895,7 @@ export default function SellersHub() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {rejectedCounterOffers.map((rejection: any) => (
+                {rejectedCounterOffers?.map((rejection: any) => (
                   <Card key={rejection.response_id} className="border-red-200 hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">

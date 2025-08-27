@@ -30,8 +30,9 @@ import {
   FileCheck,
   Building2
 } from 'lucide-react';
-import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
-import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+// Temporarily comment out asset imports to prevent loading issues
+// import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
+// import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
 
 export default function FrontPage() {
   const modules = [
@@ -112,11 +113,12 @@ export default function FrontPage() {
         {/* Mobile-Responsive Polipos Logo - ISMS Style */}
         <div className="isms-card text-center mb-8 sm:mb-12">
           <div className="flex justify-center py-4 sm:py-6 relative">
-            <img 
-              src={poliposLogo} 
-              alt="Polipos - Brightening the Future" 
-              className="h-32 sm:h-48 md:h-64 w-auto object-contain"
-            />
+            <div className="h-32 sm:h-48 md:h-64 w-auto flex items-center justify-center bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl">
+              <div className="text-center">
+                <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold">POLIPUS</h1>
+                <p className="text-sm sm:text-lg md:text-xl opacity-90">Environmental Intelligence</p>
+              </div>
+            </div>
             {/* Registered trademark symbol positioned over the 's' */}
             <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>

@@ -84,6 +84,17 @@ if (MAINTENANCE_MODE) {
       
       httpServer.listen(port, host, () => {
         console.log(`🚀 POLIPUS READY: http://localhost:${port}`);
+        console.log(`🌐 PLATFORM ACCESS URLs:`);
+        console.log(`👨‍🌾 Farmer Portal: http://localhost:${port}/farmer-login`);
+        console.log(`🛒 Buyer Portal: http://localhost:${port}/agricultural-buyer-dashboard`);
+        console.log(`🚢 Exporter Portal: http://localhost:${port}/exporter-login`);
+        console.log(`🔍 Inspector Portal: http://localhost:${port}/inspector-login`);
+        console.log(`📋 Regulatory Portal: http://localhost:${port}/regulatory-login`);
+        console.log(`🏭 Warehouse Inspector: http://localhost:${port}/warehouse-inspector-login`);
+        console.log(`⚓ Port Inspector: http://localhost:${port}/port-inspector-login`);
+        console.log(`🗺️ Land Inspector: http://localhost:${port}/land-inspector-login`);
+        console.log(`👑 DG Authority: http://localhost:${port}/dg-login`);
+        console.log(`🌍 ALL PORTALS READY - Your platform is fully operational!`);
       });
       
     } catch (error) {

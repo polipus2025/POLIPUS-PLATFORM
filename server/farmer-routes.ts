@@ -179,8 +179,8 @@ export function registerFarmerRoutes(app: Express) {
           return res.status(401).json({ error: "Farmer not found" });
         }
 
-        // Update last login
-        await storage.updateFarmerLastLogin(credentials.id);
+        // Update last login - temporarily disabled for debugging
+        // await storage.updateFarmerLastLogin(credentials.id);
         console.log(`✅ Login successful for ${farmer.firstName} ${farmer.lastName} using credential: ${credentialId}`);
 
         res.json({

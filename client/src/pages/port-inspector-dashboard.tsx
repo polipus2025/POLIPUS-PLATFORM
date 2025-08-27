@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,6 @@ import {
   Shield,
   FileCheck
 } from "lucide-react";
-import { useRef } from "react";
 import { Label } from "@/components/ui/label";
 import ProfileDropdown from "@/components/ProfileDropdown";
 

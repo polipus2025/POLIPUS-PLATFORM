@@ -1,8 +1,9 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Building2, DollarSign, Settings, ArrowRight, Database, FileCheck } from "lucide-react";
+import { Shield, Building2, DollarSign, Settings, ArrowRight, Database, FileCheck, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 // Temporarily comment out asset import to debug routing
 // import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
@@ -11,6 +12,16 @@ export default function RegulatoryLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      {/* Back to Platform Button */}
+      <div className="absolute top-6 left-6">
+        <Link href="/">
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Polipus Platform
+          </Button>
+        </Link>
+      </div>
+      
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">

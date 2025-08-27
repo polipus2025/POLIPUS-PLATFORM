@@ -247,10 +247,11 @@ export default function BuyerManagement() {
       country: "Liberia", // Required field that was missing
       interestedCommodities: JSON.stringify(selectedCommodities),
       tradingRegions: JSON.stringify(selectedRegions),
-      annualTurnover: data.annualTurnover ? parseFloat(data.annualTurnover) : null,
-      creditLimit: data.creditLimit ? parseFloat(data.creditLimit) : null,
-      yearEstablished: data.yearEstablished ? parseInt(data.yearEstablished) : null,
-      numberOfEmployees: data.numberOfEmployees ? parseInt(data.numberOfEmployees) : null,
+      // Send all numeric fields as strings - backend will handle conversion
+      annualTurnover: data.annualTurnover || undefined,
+      creditLimit: data.creditLimit || undefined,
+      yearEstablished: data.yearEstablished || undefined,
+      numberOfEmployees: data.numberOfEmployees || undefined,
     };
 
     console.log("Formatted data being sent:", formattedData);

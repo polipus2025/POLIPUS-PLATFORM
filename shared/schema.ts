@@ -2473,9 +2473,11 @@ export const insertBuyerSchema = createInsertSchema(buyers).omit({
   yearEstablished: true,
   numberOfEmployees: true,
 }).extend({
-  // Override integer fields to accept strings from HTML forms
+  // Override numeric fields to accept strings from HTML forms
   yearEstablished: z.string().optional(),
   numberOfEmployees: z.string().optional(),
+  annualTurnover: z.string().optional(),
+  creditLimit: z.string().optional(),
 });
 
 export type Buyer = typeof buyers.$inferSelect;

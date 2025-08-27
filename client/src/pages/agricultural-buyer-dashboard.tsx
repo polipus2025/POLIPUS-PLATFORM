@@ -45,7 +45,8 @@ import { Upload, CreditCard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import ProfileDropdown from "@/components/ProfileDropdown";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Counter Offers Tab Component
 function CounterOffersTab() {
@@ -825,14 +826,62 @@ export default function AgriculturalBuyerDashboard() {
             </div>
 
             {/* Profile Management Dropdown */}
-            <ProfileDropdown
-              userName={buyerName}
-              userEmail={buyerProfile?.primaryEmail}
-              userType="buyer"
-              userId={buyerId}
-              profileImageUrl={buyerProfile?.profileImageUrl}
-              onLogout={handleLogout}
-            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="profile-menu-trigger">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={buyerProfile?.profileImageUrl} alt={buyerName} />
+                    <AvatarFallback className="bg-blue-100 text-blue-600">
+                      {buyerName ? buyerName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'BY'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium">{buyerName}</p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      {buyerProfile?.primaryEmail}
+                    </p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer" 
+                  onClick={() => navigate(`/profile?type=buyer&id=${buyerId}`)}
+                  data-testid="menu-view-profile"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  View Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer" 
+                  onClick={() => navigate(`/profile/edit?type=buyer&id=${buyerId}`)}
+                  data-testid="menu-edit-profile"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer" 
+                  onClick={() => navigate(`/profile/settings?type=buyer&id=${buyerId}`)}
+                  data-testid="menu-settings"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer" 
+                  onClick={handleLogout}
+                  data-testid="menu-logout"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

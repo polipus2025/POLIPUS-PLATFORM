@@ -36,7 +36,6 @@ import {
   Upload,
   CreditCard
 } from "lucide-react";
-import ProfileDropdown from "@/components/ProfileDropdown";
 
 export default function WarehouseInspectorDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
@@ -1364,16 +1363,16 @@ export default function WarehouseInspectorDashboard() {
               <Download className="w-4 h-4 mr-1" />
               Export Report
             </Button>
-            <ProfileDropdown
-              userName={inspectorUsername}
-              userEmail="inspector@warehouse.co" 
-              userType="warehouse-inspector"
-              userId={inspectorUsername}
-              onLogout={() => {
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
                 localStorage.removeItem("warehouseInspectorData");
                 window.location.href = "/inspector-portal";
               }}
-            />
+            >
+              Logout
+            </Button>
           </div>
         </div>
 

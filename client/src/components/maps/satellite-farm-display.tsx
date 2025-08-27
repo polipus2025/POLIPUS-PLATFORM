@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,11 +45,11 @@ export default function SatelliteFarmDisplay({
   showControls = true, 
   height = "400px" 
 }: SatelliteFarmDisplayProps) {
-  const mapRef = React.useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [satelliteProvider, setSatelliteProvider] = React.useState('ESRI_WORLD_IMAGERY');
-  const [mapReady, setMapReady] = React.useState(false);
-  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [satelliteProvider, setSatelliteProvider] = useState('ESRI_WORLD_IMAGERY');
+  const [mapReady, setMapReady] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Generate high-quality satellite imagery URL
   const generateSatelliteImageUrl = (lat: number, lng: number, zoom: number = 18) => {
@@ -75,7 +75,7 @@ export default function SatelliteFarmDisplay({
   };
 
   // Initialize satellite map with farm boundaries
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mapRef.current || !farmData.boundaries.length) return;
 
     const initializeSatelliteMap = async () => {

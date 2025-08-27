@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,14 +52,14 @@ export default function EUDRComplianceMapper({
   onBoundaryComplete, 
   minPoints = 3 
 }: EUDRComplianceMapperProps) {
-  const mapRef = React.useRef<HTMLDivElement>(null);
-  const [points, setPoints] = React.useState<BoundaryPoint[]>([]);
-  const [status, setStatus] = React.useState('Initializing EUDR compliance mapping...');
-  const [mapReady, setMapReady] = React.useState(false);
-  const [eudrReport, setEudrReport] = React.useState<EUDRComplianceReport | null>(null);
-  const [deforestationReport, setDeforestationReport] = React.useState<DeforestationReport | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-  const [currentLocation, setCurrentLocation] = React.useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295});
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [points, setPoints] = useState<BoundaryPoint[]>([]);
+  const [status, setStatus] = useState('Initializing EUDR compliance mapping...');
+  const [mapReady, setMapReady] = useState(false);
+  const [eudrReport, setEudrReport] = useState<EUDRComplianceReport | null>(null);
+  const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295});
 
   // Real EUDR data calculation functions
   const calculateForestCover = async (lat: number, lng: number) => {
@@ -111,7 +111,7 @@ export default function EUDRComplianceMapper({
     return { isProtected, areas };
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mapRef.current) return;
 
     // Get user's GPS location for real EUDR data
@@ -275,7 +275,7 @@ export default function EUDRComplianceMapper({
   }, []);
 
   // Analyze EUDR compliance when points change
-  React.useEffect(() => {
+  useEffect(() => {
     if (points.length >= 3) {
       analyzeEUDRCompliance();
     }
@@ -367,7 +367,7 @@ export default function EUDRComplianceMapper({
   };
 
   // Update visual markers and polygons
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mapRef.current || !mapReady) return;
 
     const mapContainer = mapRef.current.querySelector('#eudr-map-container') as HTMLElement;

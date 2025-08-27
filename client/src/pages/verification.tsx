@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Helmet } from 'react-helmet';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -119,12 +119,12 @@ interface VerificationResult {
 }
 
 export default function Verification() {
-  const [trackingNumber, setTrackingNumber] = React.useState("");
-  const [verificationResult, setVerificationResult] = React.useState<VerificationResult | null>(null);
-  const [showQRCode, setShowQRCode] = React.useState(false);
-  const [qrCodeDataURL, setQRCodeDataURL] = React.useState("");
-  const [realTimeSimulation, setRealTimeSimulation] = React.useState(false);
-  const [simulationData, setSimulationData] = React.useState({
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [qrCodeDataURL, setQRCodeDataURL] = useState("");
+  const [realTimeSimulation, setRealTimeSimulation] = useState(false);
+  const [simulationData, setSimulationData] = useState({
     verificationsProcessed: 0,
     eudrComplianceRate: 0,
     activeCertificates: 0,
@@ -134,7 +134,7 @@ export default function Verification() {
     deforestationAlerts: 0,
     sustainabilityScores: [] as number[]
   });
-  const [simulationLogs, setSimulationLogs] = React.useState<Array<{
+  const [simulationLogs, setSimulationLogs] = useState<Array<{
     timestamp: string;
     type: 'success' | 'warning' | 'error' | 'info';
     message: string;
@@ -142,8 +142,8 @@ export default function Verification() {
   }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const qrCodeRef = React.useRef<HTMLCanvasElement>(null);
-  const simulationIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  const qrCodeRef = useRef<HTMLCanvasElement>(null);
+  const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get all tracking records for admin view
   const { data: trackingRecords = [], isLoading: loadingRecords } = useQuery<TrackingRecord[]>({
@@ -157,24 +157,21 @@ export default function Verification() {
       if (!response.ok) {
         throw new Error('Failed to verify tracking number');
       }
-      const data = await response.json();
-      return data && typeof data === 'object' ? data : null;
+      return await response.json();
     },
     onSuccess: (data: VerificationResult) => {
-      if (data && data.valid !== undefined) {
-        setVerificationResult(data);
-        if (data.valid) {
-          toast({
+      setVerificationResult(data);
+      if (data.valid) {
+        toast({
           title: "Verification Successful",
           description: `Certificate ${data.record?.trackingNumber} verified successfully.`,
-          });
-        } else {
-          toast({
-            title: "Verification Failed",
-            description: "The tracking number is invalid or not found.",
-            variant: "destructive",
-          });
-        }
+        });
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: "The tracking number is invalid or not found.",
+          variant: "destructive",
+        });
       }
     },
     onError: () => {
@@ -286,10 +283,10 @@ export default function Verification() {
   
   const stopRealTimeSimulation = () => {
     setRealTimeSimulation(false);
-    simulationIntervalRef.current && (
-      clearInterval(simulationIntervalRef.current),
-      simulationIntervalRef.current = null
-    );
+    if (simulationIntervalRef.current) {
+      clearInterval(simulationIntervalRef.current);
+      simulationIntervalRef.current = null;
+    }
     setSimulationLogs(prev => [...prev, {
       timestamp: new Date().toLocaleTimeString(),
       type: 'info',
@@ -298,14 +295,16 @@ export default function Verification() {
   };
 
   // Cleanup simulation on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
-      simulationIntervalRef.current && clearInterval(simulationIntervalRef.current);
+      if (simulationIntervalRef.current) {
+        clearInterval(simulationIntervalRef.current);
+      }
     };
   }, []);
 
   // Generate QR code when showing QR dialog
-  React.useEffect(() => {
+  useEffect(() => {
     if (showQRCode && verificationResult?.record) {
       const generateQRCode = async () => {
         try {

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,18 +28,18 @@ import {
   Shield,
   FileCheck
 } from "lucide-react";
+import { useRef } from "react";
 import { Label } from "@/components/ui/label";
-import ProfileDropdown from "@/components/ProfileDropdown";
 
 export default function PortInspectorDashboard() {
-  const [selectedTab, setSelectedTab] = React.useState("overview");
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [documentInput, setDocumentInput] = React.useState("");
-  const [scanType, setScanType] = React.useState<"hash" | "qr">("hash");
-  const [verificationResult, setVerificationResult] = React.useState<any>(null);
-  const [isScanning, setIsScanning] = React.useState(false);
-  const [cameraStream, setCameraStream] = React.useState<MediaStream | null>(null);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [selectedTab, setSelectedTab] = useState("overview");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [documentInput, setDocumentInput] = useState("");
+  const [scanType, setScanType] = useState<"hash" | "qr">("hash");
+  const [verificationResult, setVerificationResult] = useState<any>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -191,7 +191,9 @@ export default function PortInspectorDashboard() {
       setCameraStream(stream);
       setIsScanning(true);
       
-      videoRef.current && (videoRef.current.srcObject = stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
     } catch (error) {
       toast({ 
         title: "Camera Error", 
@@ -250,17 +252,18 @@ export default function PortInspectorDashboard() {
               <Badge variant="outline" className="bg-blue-50 text-blue-700">
                 {inspectorData.certificationLevel || "Senior"} Level
               </Badge>
-              <ProfileDropdown
-                userName="Port Inspector"
-                userEmail="inspector@port.co"
-                userType="port-inspector"
-                userId="port-inspector-1"
-                onLogout={() => {
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
                   localStorage.removeItem("inspectorData");
                   localStorage.removeItem("inspectorToken");
                   window.location.href = "/inspector-login";
                 }}
-              />
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                Logout
+              </Button>
             </div>
           </div>
         </div>

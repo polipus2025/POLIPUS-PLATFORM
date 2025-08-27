@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { MapPin, RotateCcw, Check, Satellite, Download, Shield, AlertTriangle } from "lucide-react";
 import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
@@ -52,21 +52,21 @@ export default function RealMapBoundaryMapper({
   maxPoints = 20,
   enableRealTimeGPS = true
 }: RealMapBoundaryMapperProps) {
-  const mapRef = React.useRef<HTMLDivElement>(null);
-  const [points, setPoints] = React.useState<BoundaryPoint[]>([]);
-  const [status, setStatus] = React.useState('Loading satellite imagery...');
-  const [mapReady, setMapReady] = React.useState(false);
-  const [currentTile, setCurrentTile] = React.useState(0);
-  const [mapCenter, setMapCenter] = React.useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295});
-  const [isTrackingGPS, setIsTrackingGPS] = React.useState(false);
-  const [gpsWatchId, setGpsWatchId] = React.useState<number | null>(null);
-  const [currentGPSPosition, setCurrentGPSPosition] = React.useState<{lat: number, lng: number} | null>(null);
-  const [trackingAccuracy, setTrackingAccuracy] = React.useState<number | null>(null);
-  const [eudrReport, setEudrReport] = React.useState<EUDRComplianceReport | null>(null);
-  const [deforestationReport, setDeforestationReport] = React.useState<DeforestationReport | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-  const [showInteractiveView, setShowInteractiveView] = React.useState(false);
-  const [boundaryCompleted, setBoundaryCompleted] = React.useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [points, setPoints] = useState<BoundaryPoint[]>([]);
+  const [status, setStatus] = useState('Loading satellite imagery...');
+  const [mapReady, setMapReady] = useState(false);
+  const [currentTile, setCurrentTile] = useState(0);
+  const [mapCenter, setMapCenter] = useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295});
+  const [isTrackingGPS, setIsTrackingGPS] = useState(false);
+  const [gpsWatchId, setGpsWatchId] = useState<number | null>(null);
+  const [currentGPSPosition, setCurrentGPSPosition] = useState<{lat: number, lng: number} | null>(null);
+  const [trackingAccuracy, setTrackingAccuracy] = useState<number | null>(null);
+  const [eudrReport, setEudrReport] = useState<EUDRComplianceReport | null>(null);
+  const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showInteractiveView, setShowInteractiveView] = useState(false);
+  const [boundaryCompleted, setBoundaryCompleted] = useState(false);
 
   // REAL-TIME INTERACTIVE BOUNDARY MAPPING - Live point drawing and area calculation
   const updateInteractiveBoundaryDisplay = (currentPoints: BoundaryPoint[]) => {
@@ -318,7 +318,7 @@ export default function RealMapBoundaryMapper({
     ];
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mapRef.current) return;
 
     // Get user's GPS location or use default
@@ -704,7 +704,7 @@ export default function RealMapBoundaryMapper({
   }, []);
 
   // Update visual markers when points change - SINGLE POINT DISPLAY ONLY
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mapRef.current || !mapReady) return;
 
     // Clear ALL existing markers to prevent duplicates
@@ -1405,7 +1405,7 @@ export default function RealMapBoundaryMapper({
   const area = calculateArea(points);
 
   // Clean up GPS tracking on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (gpsWatchId !== null) {
         navigator.geolocation.clearWatch(gpsWatchId);

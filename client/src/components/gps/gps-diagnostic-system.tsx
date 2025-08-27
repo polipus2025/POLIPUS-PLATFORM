@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,7 @@ interface GPSPosition {
 }
 
 export default function GPSDiagnosticSystem() {
-  const [gpsStatus, setGpsStatus] = React.useState<GPSStatus>({
+  const [gpsStatus, setGpsStatus] = useState<GPSStatus>({
     supported: false,
     permission: 'unknown',
     accuracy: null,
@@ -48,13 +48,13 @@ export default function GPSDiagnosticSystem() {
     error: null
   });
   
-  const [currentPosition, setCurrentPosition] = React.useState<GPSPosition | null>(null);
-  const [isTracking, setIsTracking] = React.useState(false);
-  const [watchId, setWatchId] = React.useState<number | null>(null);
+  const [currentPosition, setCurrentPosition] = useState<GPSPosition | null>(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const [watchId, setWatchId] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Initialize GPS diagnostic
-  React.useEffect(() => {
+  useEffect(() => {
     initializeGPSDiagnostic();
     return () => {
       if (watchId) {

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -72,13 +72,13 @@ const LeafletMap = ({
   currentPosition: GeolocationPosition | null;
   mapCenter: [number, number];
 }) => {
-  const mapRef = React.useRef<HTMLDivElement>(null);
-  const mapInstanceRef = React.useRef<any>(null);
-  const markersRef = React.useRef<any[]>([]);
-  const polygonRef = React.useRef<any>(null);
-  const currentPositionMarkerRef = React.useRef<any>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const polygonRef = useRef<any>(null);
+  const currentPositionMarkerRef = useRef<any>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Initialize Leaflet map only on client side
     const initMap = async () => {
       if (typeof window === 'undefined' || !mapRef.current || mapInstanceRef.current) return;
@@ -197,7 +197,7 @@ const LeafletMap = ({
     };
   }, [mapCenter]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateMap = async () => {
       if (!mapInstanceRef.current || typeof window === 'undefined') return;
 
@@ -277,7 +277,7 @@ const LeafletMap = ({
     updateMap();
   }, [points]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateCurrentPosition = async () => {
       if (!mapInstanceRef.current || !currentPosition || typeof window === 'undefined') return;
 
@@ -394,15 +394,15 @@ export default function InteractiveBoundaryMapper({
   onBoundaryComplete,
   minPoints = 3
 }: InteractiveBoundaryMapperProps) {
-  const [currentBoundary, setCurrentBoundary] = React.useState<BoundaryMapping | null>(
+  const [currentBoundary, setCurrentBoundary] = useState<BoundaryMapping | null>(
     existingBoundary || null
   );
-  const [boundaryName, setBoundaryName] = React.useState('');
-  const [currentPosition, setCurrentPosition] = React.useState<GeolocationPosition | null>(null);
-  const [mapCenter, setMapCenter] = React.useState<[number, number]>([6.4281, -9.4295]); // Default to Monrovia, Liberia
+  const [boundaryName, setBoundaryName] = useState('');
+  const [currentPosition, setCurrentPosition] = useState<GeolocationPosition | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([6.4281, -9.4295]); // Default to Monrovia, Liberia
   const { toast } = useToast();
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Get current GPS position with enhanced mobile support
     if (navigator.geolocation) {
       // Watch position for real-time updates

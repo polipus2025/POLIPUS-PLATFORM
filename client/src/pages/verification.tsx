@@ -283,10 +283,10 @@ export default function Verification() {
   
   const stopRealTimeSimulation = () => {
     setRealTimeSimulation(false);
-    if (simulationIntervalRef.current) {
-      clearInterval(simulationIntervalRef.current);
-      simulationIntervalRef.current = null;
-    }
+    simulationIntervalRef.current && (
+      clearInterval(simulationIntervalRef.current),
+      simulationIntervalRef.current = null
+    );
     setSimulationLogs(prev => [...prev, {
       timestamp: new Date().toLocaleTimeString(),
       type: 'info',
@@ -295,16 +295,14 @@ export default function Verification() {
   };
 
   // Cleanup simulation on unmount
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
-      if (simulationIntervalRef.current) {
-        clearInterval(simulationIntervalRef.current);
-      }
+      simulationIntervalRef.current && clearInterval(simulationIntervalRef.current);
     };
   }, []);
 
   // Generate QR code when showing QR dialog
-  useEffect(() => {
+  React.useEffect(() => {
     if (showQRCode && verificationResult?.record) {
       const generateQRCode = async () => {
         try {

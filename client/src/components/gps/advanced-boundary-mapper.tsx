@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,8 +62,8 @@ export default function AdvancedBoundaryMapper({
   const [autoInterval, setAutoInterval] = useState(5); // seconds
   const [minDistance, setMinDistance] = useState(5); // meters
   
-  const watchIdRef = useRef<number | null>(null);
-  const autoIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const watchIdRef = React.useRef<number | null>(null);
+  const autoIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // GPS tracking options - Relaxed for global testing
   const gpsOptions = {

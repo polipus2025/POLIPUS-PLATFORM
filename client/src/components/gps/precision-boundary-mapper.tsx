@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -69,8 +69,8 @@ export default function PrecisionBoundaryMapper({
   const [recordingInterval, setRecordingInterval] = useState(5); // seconds
   const [boundaryName, setBoundaryName] = useState('');
   
-  const watchIdRef = useRef<number | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const watchIdRef = React.useRef<number | null>(null);
+  const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Create new boundary
   const createNewBoundary = () => {

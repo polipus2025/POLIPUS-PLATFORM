@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,7 @@ import {
   Ruler,
   CheckCircle,
   AlertTriangle,
-  Circle,
+  Recording,
   StopCircle
 } from 'lucide-react';
 
@@ -85,7 +85,7 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
   
   const [weatherData, setWeatherData] = useState<any>(null);
   
-  const watchIdRef = useRef<number | null>(null);
+  const watchIdRef = React.useRef<number | null>(null);
 
   useEffect(() => {
     // Start GPS tracking when component mounts
@@ -338,7 +338,7 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
                 disabled={!currentPosition}
                 className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
               >
-                <Circle className="mr-2 h-5 w-5" />
+                <Recording className="mr-2 h-5 w-5" />
                 Start Field Recording
               </Button>
               <p className="text-sm text-gray-600 mt-2">
@@ -348,7 +348,7 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
           ) : (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-green-600">
-                <Circle className="h-5 w-5 animate-pulse" />
+                <Recording className="h-5 w-5 animate-pulse" />
                 <span className="font-medium">Recording in progress...</span>
                 <Badge variant="outline">
                   <Clock className="h-3 w-3 mr-1" />

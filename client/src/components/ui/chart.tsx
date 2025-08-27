@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useContext, useId, useMemo } from "react"
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
@@ -26,7 +25,7 @@ type ChartContextProps = {
 const ChartContext = React.createContext<ChartContextProps | null>(null)
 
 function useChart() {
-  const context = useContext(ChartContext)
+  const context = React.useContext(ChartContext)
 
   if (!context) {
     throw new Error("useChart must be used within a <ChartContainer />")
@@ -44,7 +43,7 @@ const ChartContainer = React.forwardRef<
     >["children"]
   }
 >(({ id, className, children, config, ...props }, ref) => {
-  const uniqueId = useId()
+  const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
   return (
@@ -134,7 +133,7 @@ const ChartTooltipContent = React.forwardRef<
   ) => {
     const { config } = useChart()
 
-    const tooltipLabel = useMemo(() => {
+    const tooltipLabel = React.useMemo(() => {
       if (hideLabel || !payload?.length) {
         return null
       }

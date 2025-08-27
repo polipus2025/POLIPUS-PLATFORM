@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,7 +25,7 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
   const [displayData, setDisplayData] = useState<ComplianceByCounty[]>([]);
 
   // Filter county data based on selection with useMemo to prevent loop
-  const filteredCountyData = useMemo(() => {
+  const filteredCountyData = React.useMemo(() => {
     return selectedCounty === "all" 
       ? countyData 
       : countyData.filter(county => {
@@ -34,7 +34,7 @@ export default function RegionalMap({ selectedCounty = "all" }: RegionalMapProps
   }, [selectedCounty, countyData]);
 
   // Enhanced county data with satellite and agricultural intelligence
-  const enhancedCountyData = useMemo(() => {
+  const enhancedCountyData = React.useMemo(() => {
     return filteredCountyData.map((county, index) => ({
       ...county,
       satellites: Math.floor(Math.random() * 8) + 3, // 3-10 satellites per county

@@ -15,6 +15,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
 import { createTestFarmer } from "./create-test-farmer";
+import { geeService } from "./geeService";
 
 import { 
   farmers,
@@ -17502,6 +17503,228 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     } catch (error) {
       console.error("Error processing mobile payment:", error);
       res.status(500).json({ error: "Failed to process payment" });
+    }
+  });
+
+  // 🛰️ GOOGLE EARTH ENGINE SPATIAL INTELLIGENCE ENDPOINTS
+  // Additive layer for enhanced EUDR deforestation monitoring
+
+  // Enhanced deforestation analysis for individual plots
+  app.post("/api/gee/analyze-deforestation", async (req, res) => {
+    try {
+      const { coordinates, plotId, commodityType } = req.body;
+
+      if (!coordinates || !Array.isArray(coordinates)) {
+        return res.status(400).json({
+          success: false,
+          message: "Valid coordinates array is required"
+        });
+      }
+
+      console.log(`🛰️ Starting GEE deforestation analysis for plot ${plotId || 'unnamed'}`);
+
+      const analysis = await geeService.analyzeDeforestationRisk(coordinates, {
+        plotId,
+        commodityType
+      });
+
+      res.json({
+        success: true,
+        data: analysis,
+        source: "Google Earth Engine",
+        analysisType: "Enhanced EUDR Deforestation Analysis"
+      });
+
+    } catch (error) {
+      console.error("🚨 GEE analysis error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Spatial intelligence analysis failed",
+        error: error.message
+      });
+    }
+  });
+
+  // Batch analysis for multiple plots
+  app.post("/api/gee/batch-analyze", async (req, res) => {
+    try {
+      const { plots } = req.body;
+
+      if (!plots || !Array.isArray(plots)) {
+        return res.status(400).json({
+          success: false,
+          message: "Valid plots array is required"
+        });
+      }
+
+      console.log(`🛰️ Starting GEE batch analysis for ${plots.length} plots`);
+
+      const results = await geeService.batchAnalyzeDeforestation(plots);
+
+      res.json({
+        success: true,
+        data: results,
+        totalPlots: plots.length,
+        completedAnalyses: results.filter(r => !r.error).length,
+        failedAnalyses: results.filter(r => r.error).length
+      });
+
+    } catch (error) {
+      console.error("🚨 GEE batch analysis error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Batch spatial intelligence analysis failed",
+        error: error.message
+      });
+    }
+  });
+
+  // County-level deforestation monitoring
+  app.get("/api/gee/county-stats/:county", async (req, res) => {
+    try {
+      const { county } = req.params;
+      const { startDate = '2020-01-01', endDate = new Date().toISOString().split('T')[0] } = req.query;
+
+      console.log(`🌍 Getting GEE county statistics for ${county}`);
+
+      const stats = await geeService.getCountyDeforestationStats(county, {
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+
+      res.json({
+        success: true,
+        county,
+        dateRange: { startDate, endDate },
+        data: stats,
+        source: "Google Earth Engine Regional Analysis"
+      });
+
+    } catch (error) {
+      console.error("🚨 GEE county analysis error:", error);
+      res.status(500).json({
+        success: false,
+        message: "County spatial intelligence analysis failed",
+        error: error.message
+      });
+    }
+  });
+
+  // Enhanced land mapping with GEE verification
+  app.post("/api/land-mapping/gee-enhanced", async (req, res) => {
+    try {
+      const { 
+        farmerId, 
+        coordinates, 
+        plotName, 
+        commodityType, 
+        estimatedSize,
+        county 
+      } = req.body;
+
+      console.log(`🗺️ Enhanced land mapping with GEE verification for farmer ${farmerId}`);
+
+      // Run standard land mapping
+      const mappingResult = await storage.createFarmGpsMapping({
+        farmerId,
+        plotName,
+        gpsCoordinates: JSON.stringify(coordinates),
+        plotSize: estimatedSize,
+        county,
+        mappingStatus: 'pending_gee_verification',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      // Enhanced GEE analysis
+      const geeAnalysis = await geeService.analyzeDeforestationRisk(coordinates, {
+        plotId: mappingResult.mappingId,
+        commodityType
+      });
+
+      // Update mapping with GEE results
+      const enhancedMapping = {
+        ...mappingResult,
+        geeAnalysis,
+        eudrCompliant: geeAnalysis.eudrCompliant,
+        riskScore: geeAnalysis.riskScore,
+        geeVerificationCode: geeAnalysis.geeVerificationCode,
+        mappingStatus: geeAnalysis.eudrCompliant ? 'gee_verified' : 'requires_inspection'
+      };
+
+      res.json({
+        success: true,
+        data: enhancedMapping,
+        message: geeAnalysis.eudrCompliant 
+          ? "Plot mapped and GEE verified as EUDR compliant" 
+          : "Plot mapped but requires additional inspection due to deforestation risk"
+      });
+
+    } catch (error) {
+      console.error("🚨 Enhanced mapping error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Enhanced land mapping failed",
+        error: error.message
+      });
+    }
+  });
+
+  // GEE confidence boost for existing EUDR reports
+  app.get("/api/eudr/gee-confidence/:reportId", async (req, res) => {
+    try {
+      const { reportId } = req.params;
+
+      console.log(`📊 Adding GEE confidence boost to EUDR report ${reportId}`);
+
+      // Get existing EUDR report
+      const [report] = await db.execute(sql`
+        SELECT * FROM eudr_compliance 
+        WHERE compliance_id = ${reportId}
+      `);
+
+      if (!report) {
+        return res.status(404).json({
+          success: false,
+          message: "EUDR report not found"
+        });
+      }
+
+      // Parse coordinates from report
+      const coordinates = JSON.parse(report.gps_coordinates || '[]');
+      
+      // Get GEE analysis
+      const geeAnalysis = await geeService.analyzeDeforestationRisk(coordinates, {
+        plotId: reportId,
+        commodityType: report.commodity_type
+      });
+
+      // Enhanced confidence score
+      const enhancedConfidence = Math.min(
+        (report.compliance_score || 70) + (geeAnalysis.confidence * 0.3),
+        100
+      );
+
+      res.json({
+        success: true,
+        data: {
+          originalReport: report,
+          geeEnhancement: geeAnalysis,
+          enhancedConfidence,
+          confidenceBoost: enhancedConfidence - (report.compliance_score || 70),
+          recommendation: geeAnalysis.eudrCompliant 
+            ? "GEE confirms EUDR compliance" 
+            : "GEE indicates potential compliance risk"
+        }
+      });
+
+    } catch (error) {
+      console.error("🚨 GEE confidence boost error:", error);
+      res.status(500).json({
+        success: false,
+        message: "GEE confidence analysis failed",
+        error: error.message
+      });
     }
   });
 

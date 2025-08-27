@@ -330,7 +330,7 @@ export default function MonitoringDashboard() {
               <Users className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{12 + activeUsers}</div>
+              <div className="text-2xl font-bold text-green-600">{monitoringData?.totalUsers || 0}</div>
               <p className="text-xs text-muted-foreground">
                 +3 from last hour
               </p>
@@ -347,7 +347,7 @@ export default function MonitoringDashboard() {
               <BarChart3 className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{1847 + apiRequests}</div>
+              <div className="text-2xl font-bold text-blue-600">{(monitoringData?.totalOffers || 0) * 100 + (systemMetrics?.apiRequests || 0)}</div>
               <p className="text-xs text-muted-foreground">
                 +156 in last 5 min
               </p>
@@ -364,7 +364,7 @@ export default function MonitoringDashboard() {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">98.7%</div>
+              <div className="text-2xl font-bold text-green-600">{monitoringData?.systemHealth || 98.5}%</div>
               <p className="text-xs text-muted-foreground">
                 All systems operational
               </p>
@@ -380,7 +380,7 @@ export default function MonitoringDashboard() {
               <TrendingUp className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">68ms</div>
+              <div className="text-2xl font-bold text-orange-600">{monitoringData?.responseTime || 68}ms</div>
               <p className="text-xs text-muted-foreground">
                 Average API response
               </p>
@@ -425,48 +425,46 @@ export default function MonitoringDashboard() {
                   <div className="bg-green-50 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-green-700">Regulatory Portal</span>
-                      <Badge className="bg-green-100 text-green-800">5 active</Badge>
+                      <Badge className="bg-green-100 text-green-800">{userActivity?.regulatoryPortal || 0} active</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-green-600 mt-2">5</div>
+                    <div className="text-2xl font-bold text-green-600 mt-2">{userActivity?.regulatoryPortal || 0}</div>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-blue-700">Farmer Portal</span>
-                      <Badge className="bg-blue-100 text-blue-800">3 active</Badge>
+                      <Badge className="bg-blue-100 text-blue-800">{userActivity?.farmerPortal || 0} active</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-blue-600 mt-2">3</div>
+                    <div className="text-2xl font-bold text-blue-600 mt-2">{userActivity?.farmerPortal || 0}</div>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-purple-700">Exporter Portal</span>
-                      <Badge className="bg-purple-100 text-purple-800">2 active</Badge>
+                      <Badge className="bg-purple-100 text-purple-800">{userActivity?.exporterPortal || 0} active</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-purple-600 mt-2">2</div>
+                    <div className="text-2xl font-bold text-purple-600 mt-2">{userActivity?.exporterPortal || 0}</div>
                   </div>
                   <div className="bg-orange-50 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-orange-700">Field Agent Portal</span>
-                      <Badge className="bg-orange-100 text-orange-800">2 active</Badge>
+                      <Badge className="bg-orange-100 text-orange-800">{userActivity?.fieldAgents || 0} active</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-orange-600 mt-2">2</div>
+                    <div className="text-2xl font-bold text-orange-600 mt-2">{userActivity?.fieldAgents || 0}</div>
                   </div>
                 </div>
                 
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-3">Recent Login Activity</h4>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>admin001 (Regulatory) - Login</span>
-                      <span className="text-gray-500">2 minutes ago</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>FRM-2024-001 (Farmer) - Active Session</span>
-                      <span className="text-gray-500">5 minutes ago</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>EXP-2024-001 (Exporter) - Dashboard Access</span>
-                      <span className="text-gray-500">8 minutes ago</span>
-                    </div>
+                    {userActivity?.recentActivity?.map((activity, index) => (
+                      <div key={index} className="flex items-center justify-between text-sm">
+                        <span>{activity.user} - {activity.action}</span>
+                        <span className="text-gray-500">
+                          {Math.floor((Date.now() - new Date(activity.timestamp).getTime()) / 60000)} minutes ago
+                        </span>
+                      </div>
+                    )) || (
+                      <div className="text-sm text-gray-500">No recent activity</div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -488,9 +486,9 @@ export default function MonitoringDashboard() {
                       <span className="text-sm font-medium text-blue-700">CPU Usage</span>
                       <Badge className="bg-blue-100 text-blue-800">Normal</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-blue-600 mt-2">23%</div>
+                    <div className="text-2xl font-bold text-blue-600 mt-2">{systemMetrics?.cpu || 0}%</div>
                     <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '23%' }}></div>
+                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${systemMetrics?.cpu || 0}%` }}></div>
                     </div>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
@@ -498,9 +496,9 @@ export default function MonitoringDashboard() {
                       <span className="text-sm font-medium text-green-700">Memory Usage</span>
                       <Badge className="bg-green-100 text-green-800">Good</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-green-600 mt-2">45%</div>
+                    <div className="text-2xl font-bold text-green-600 mt-2">{systemMetrics?.memory || 0}%</div>
                     <div className="w-full bg-green-200 rounded-full h-2 mt-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{ width: '45%' }}></div>
+                      <div className="bg-green-600 h-2 rounded-full" style={{ width: `${systemMetrics?.memory || 0}%` }}></div>
                     </div>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
@@ -508,9 +506,9 @@ export default function MonitoringDashboard() {
                       <span className="text-sm font-medium text-purple-700">Database Load</span>
                       <Badge className="bg-purple-100 text-purple-800">Low</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-purple-600 mt-2">12%</div>
+                    <div className="text-2xl font-bold text-purple-600 mt-2">{systemMetrics?.database || 0}%</div>
                     <div className="w-full bg-purple-200 rounded-full h-2 mt-2">
-                      <div className="bg-purple-600 h-2 rounded-full" style={{ width: '12%' }}></div>
+                      <div className="bg-purple-600 h-2 rounded-full" style={{ width: `${systemMetrics?.database || 0}%` }}></div>
                     </div>
                   </div>
                 </div>

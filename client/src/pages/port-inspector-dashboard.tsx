@@ -191,9 +191,7 @@ export default function PortInspectorDashboard() {
       setCameraStream(stream);
       setIsScanning(true);
       
-      if (videoRef.current !== null) {
-        videoRef.current.srcObject = stream;
-      }
+      videoRef.current && (videoRef.current.srcObject = stream);
     } catch (error) {
       toast({ 
         title: "Camera Error", 

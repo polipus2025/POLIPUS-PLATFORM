@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import { useState, useRef } from "react";
+import * as React from "react";
 import { GPSPermissionHandler } from "@/components/gps-permission-handler";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, Search, Users, TrendingUp, MapPin, FileText, Eye, Edit, CheckCircle, Clock, User, Upload, Camera, Map, Satellite, FileDown, Shield, Download } from "lucide-react";
@@ -58,15 +58,15 @@ const globalTestingRegions = [
 ];
 
 export default function FarmersPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [selectedFarmer, setSelectedFarmer] = useState<any>(null);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
-  const [isInteractiveMappingOpen, setIsInteractiveMappingOpen] = useState(false);
-  const [farmBoundaries, setFarmBoundaries] = useState<Array<{lat: number, lng: number, point: number}>>([]);
-  const [landMapData, setLandMapData] = useState<any>({
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = React.useState(false);
+  const [selectedFarmer, setSelectedFarmer] = React.useState<any>(null);
+  const [profileImage, setProfileImage] = React.useState<string | null>(null);
+  const [isMapDialogOpen, setIsMapDialogOpen] = React.useState(false);
+  const [isInteractiveMappingOpen, setIsInteractiveMappingOpen] = React.useState(false);
+  const [farmBoundaries, setFarmBoundaries] = React.useState<Array<{lat: number, lng: number, point: number}>>([]);
+  const [landMapData, setLandMapData] = React.useState<any>({
     totalArea: 0,
     cultivatedArea: 0,
     soilType: '',
@@ -90,7 +90,7 @@ export default function FarmersPage() {
     // Convert to approximate hectares (rough conversion)
     return parseFloat((area * 111.32 * 111.32 / 10000).toFixed(2));
   };
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Download farmer report function

@@ -142,8 +142,8 @@ export default function Verification() {
   }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const qrCodeRef = useRef<HTMLCanvasElement>(null);
-  const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const qrCodeRef = React.useRef<HTMLCanvasElement>(null);
+  const simulationIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Get all tracking records for admin view
   const { data: trackingRecords = [], isLoading: loadingRecords } = useQuery<TrackingRecord[]>({

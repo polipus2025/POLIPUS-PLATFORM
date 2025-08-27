@@ -191,9 +191,7 @@ export default function PortInspectorDashboard() {
       setCameraStream(stream);
       setIsScanning(true);
       
-      // 👉️ ref could be null here
-      if (videoRef.current != null) {
-        // 👉️ TypeScript knows that ref is not null here
+      if (videoRef.current !== null) {
         videoRef.current.srcObject = stream;
       }
     } catch (error) {

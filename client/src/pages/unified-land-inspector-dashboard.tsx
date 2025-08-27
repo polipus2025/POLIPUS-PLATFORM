@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import ProfileDropdown from "@/components/ProfileDropdown";
 
 export default function UnifiedLandInspectorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -56,11 +57,16 @@ export default function UnifiedLandInspectorDashboard() {
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Link href="/auth/land-inspector-login">
-              <Button variant="outline">
-                Logout
-              </Button>
-            </Link>
+            <ProfileDropdown
+              userName={inspectorName}
+              userEmail="inspector@land.co"
+              userType="land-inspector"
+              userId={inspectorName}
+              onLogout={() => {
+                localStorage.removeItem("inspectorData");
+                window.location.href = "/auth/land-inspector-login";
+              }}
+            />
           </div>
         </div>
 

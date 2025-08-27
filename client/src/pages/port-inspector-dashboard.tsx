@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,8 @@ import {
   Shield,
   FileCheck
 } from "lucide-react";
-import { useRef } from "react";
 import { Label } from "@/components/ui/label";
+import ProfileDropdown from "@/components/ProfileDropdown";
 
 export default function PortInspectorDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
@@ -252,18 +252,17 @@ export default function PortInspectorDashboard() {
               <Badge variant="outline" className="bg-blue-50 text-blue-700">
                 {inspectorData.certificationLevel || "Senior"} Level
               </Badge>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
+              <ProfileDropdown
+                userName="Port Inspector"
+                userEmail="inspector@port.co"
+                userType="port-inspector"
+                userId="port-inspector-1"
+                onLogout={() => {
                   localStorage.removeItem("inspectorData");
                   localStorage.removeItem("inspectorToken");
                   window.location.href = "/inspector-login";
                 }}
-                className="text-red-600 border-red-200 hover:bg-red-50"
-              >
-                Logout
-              </Button>
+              />
             </div>
           </div>
         </div>

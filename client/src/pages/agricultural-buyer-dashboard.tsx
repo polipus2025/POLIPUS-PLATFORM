@@ -30,7 +30,8 @@ import {
   Target,
   Building2,
   Loader2,
-  XCircle
+  XCircle,
+  User
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -44,6 +45,7 @@ import { Upload, CreditCard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import ProfileDropdown from "@/components/ProfileDropdown";
 
 // Counter Offers Tab Component
 function CounterOffersTab() {
@@ -821,10 +823,16 @@ export default function AgriculturalBuyerDashboard() {
               )}
               <p className="text-sm text-gray-500">Buyer ID: {buyerId}</p>
             </div>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+
+            {/* Profile Management Dropdown */}
+            <ProfileDropdown
+              userName={buyerName}
+              userEmail={buyerProfile?.primaryEmail}
+              userType="buyer"
+              userId={buyerId}
+              profileImageUrl={buyerProfile?.profileImageUrl}
+              onLogout={handleLogout}
+            />
           </div>
         </div>
       </div>

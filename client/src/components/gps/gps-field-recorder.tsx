@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -85,7 +85,7 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
   
   const [weatherData, setWeatherData] = useState<any>(null);
   
-  const watchIdRef = React.useRef<number | null>(null);
+  const watchIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Start GPS tracking when component mounts

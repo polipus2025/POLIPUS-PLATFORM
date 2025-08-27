@@ -65,7 +65,7 @@ export default function PortInspectorDashboard() {
 
   const { data: regulatorySync, isLoading: loadingSync } = useQuery({
     queryKey: ['/api/port-inspector/regulatory-sync'],
-    select: (data) => data.data || []
+    select: (data: any) => data?.data || []
   });
 
   // Mutations for inspection actions
@@ -487,7 +487,7 @@ export default function PortInspectorDashboard() {
                       <div className="mt-3">
                         <h4 className="font-medium mb-2">Required Documents</h4>
                         <div className="flex flex-wrap gap-2">
-                          {inspection.documents.map((doc, index) => (
+                          {inspection.documents.map((doc: string, index: number) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               <FileText className="w-3 h-3 mr-1" />
                               {doc}

@@ -24,7 +24,7 @@ import {
   Ruler,
   CheckCircle,
   AlertTriangle,
-  Recording,
+  Radio,
   StopCircle
 } from 'lucide-react';
 
@@ -338,7 +338,7 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
                 disabled={!currentPosition}
                 className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
               >
-                <Recording className="mr-2 h-5 w-5" />
+                <Radio className="mr-2 h-5 w-5" />
                 Start Field Recording
               </Button>
               <p className="text-sm text-gray-600 mt-2">
@@ -348,7 +348,7 @@ export default function GPSFieldRecorder({ onRecordSaved, farmerId, plotId }: GP
           ) : (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-green-600">
-                <Recording className="h-5 w-5 animate-pulse" />
+                <Radio className="h-5 w-5 animate-pulse" />
                 <span className="font-medium">Recording in progress...</span>
                 <Badge variant="outline">
                   <Clock className="h-3 w-3 mr-1" />

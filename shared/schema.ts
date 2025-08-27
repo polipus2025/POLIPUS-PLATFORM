@@ -2468,6 +2468,10 @@ export const insertBuyerSchema = createInsertSchema(buyers).omit({
   profilePhotoUrl: true,
   businessCardFrontUrl: true,
   businessCardBackUrl: true,
+  annualTurnover: true,
+  creditLimit: true,
+  yearEstablished: true,
+  numberOfEmployees: true,
 });
 
 export type Buyer = typeof buyers.$inferSelect;

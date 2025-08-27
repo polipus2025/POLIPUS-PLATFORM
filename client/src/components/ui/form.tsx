@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useContext, useId } from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
 import {
@@ -42,8 +43,8 @@ const FormField = <
 }
 
 const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext)
-  const itemContext = React.useContext(FormItemContext)
+  const fieldContext = useContext(FormFieldContext)
+  const itemContext = useContext(FormItemContext)
   const { getFieldState, formState } = useFormContext()
 
   const fieldState = getFieldState(fieldContext.name, formState)
@@ -76,7 +77,7 @@ const FormItem = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
-  const id = React.useId()
+  const id = useId()
 
   return (
     <FormItemContext.Provider value={{ id }}>

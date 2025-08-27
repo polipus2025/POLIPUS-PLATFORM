@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useState, useEffect, useContext } from "react"
+import { useState, useEffect, useContext, useCallback } from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
@@ -67,7 +67,7 @@ const Carousel = React.forwardRef<
     const [canScrollPrev, setCanScrollPrev] = useState(false)
     const [canScrollNext, setCanScrollNext] = useState(false)
 
-    const onSelect = React.useCallback((api: CarouselApi) => {
+    const onSelect = useCallback((api: CarouselApi) => {
       if (!api) {
         return
       }
@@ -76,15 +76,15 @@ const Carousel = React.forwardRef<
       setCanScrollNext(api.canScrollNext())
     }, [])
 
-    const scrollPrev = React.useCallback(() => {
+    const scrollPrev = useCallback(() => {
       api?.scrollPrev()
     }, [api])
 
-    const scrollNext = React.useCallback(() => {
+    const scrollNext = useCallback(() => {
       api?.scrollNext()
     }, [api])
 
-    const handleKeyDown = React.useCallback(
+    const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === "ArrowLeft") {
           event.preventDefault()

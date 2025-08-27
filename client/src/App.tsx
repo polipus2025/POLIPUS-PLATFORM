@@ -126,7 +126,7 @@ function App() {
             <Route path="/front-page" component={FrontPage} />
             
             {/* Agricultural Traceability Portal */}
-            <Route path="/portals" component={Landing} />
+            <Route path="/portals" component={FrontPage} />
             
             {/* POLIPUS MODULE PORTALS - All 7 modules - LAZY LOADED */}
             <Route path="/live-trace" component={createLazyRoute(LiveTracePortal)} />

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,14 +32,14 @@ import { Label } from "@/components/ui/label";
 import ProfileDropdown from "@/components/ProfileDropdown";
 
 export default function PortInspectorDashboard() {
-  const [selectedTab, setSelectedTab] = useState("overview");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [documentInput, setDocumentInput] = useState("");
-  const [scanType, setScanType] = useState<"hash" | "qr">("hash");
-  const [verificationResult, setVerificationResult] = useState<any>(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [selectedTab, setSelectedTab] = React.useState("overview");
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [documentInput, setDocumentInput] = React.useState("");
+  const [scanType, setScanType] = React.useState<"hash" | "qr">("hash");
+  const [verificationResult, setVerificationResult] = React.useState<any>(null);
+  const [isScanning, setIsScanning] = React.useState(false);
+  const [cameraStream, setCameraStream] = React.useState<MediaStream | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

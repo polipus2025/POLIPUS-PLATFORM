@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import * as React from "react";
 import { Helmet } from 'react-helmet';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -119,12 +119,12 @@ interface VerificationResult {
 }
 
 export default function Verification() {
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
-  const [showQRCode, setShowQRCode] = useState(false);
-  const [qrCodeDataURL, setQRCodeDataURL] = useState("");
-  const [realTimeSimulation, setRealTimeSimulation] = useState(false);
-  const [simulationData, setSimulationData] = useState({
+  const [trackingNumber, setTrackingNumber] = React.useState("");
+  const [verificationResult, setVerificationResult] = React.useState<VerificationResult | null>(null);
+  const [showQRCode, setShowQRCode] = React.useState(false);
+  const [qrCodeDataURL, setQRCodeDataURL] = React.useState("");
+  const [realTimeSimulation, setRealTimeSimulation] = React.useState(false);
+  const [simulationData, setSimulationData] = React.useState({
     verificationsProcessed: 0,
     eudrComplianceRate: 0,
     activeCertificates: 0,

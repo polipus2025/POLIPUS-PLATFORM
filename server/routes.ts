@@ -14470,6 +14470,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
       
+      // For Claudio's farmer ID, get ALL confirmed transactions from buyer_verification_codes table  
+      if (farmerId === "FARMER-1756314707545-846") {
+        // Get all confirmed transactions from buyer_verification_codes (where buyers accept offers)
+        const confirmedTransactions = await db
+          .select()
+          .from(buyerVerificationCodes)
+          .where(eq(buyerVerificationCodes.farmerId, "846"))
+          .orderBy(desc(buyerVerificationCodes.acceptedAt));
+
+        console.log(`📂 Found ${confirmedTransactions.length} confirmed transactions in buyer_verification_codes for Claudio`);
+        
+        // Create confirmed transactions from buyer_verification_codes
+        const realConfirmedTransactions = confirmedTransactions.map(transaction => {
+          const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
+          
+          return {
+            id: transaction.id,
+            notificationId: transaction.notificationId,
+            farmerId: farmerId,
+            buyerId: transaction.buyerId,
+            buyerName: transaction.buyerName,
+            buyerCompany: transaction.company || "Agricultural Trading Company",
+            commodityType: transaction.commodityType,
+            quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
+            unit: transaction.unit,
+            pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
+            totalValue: parseFloat(transaction.totalValue || '0'),
+            qualityGrade: "Grade A",
+            paymentTerms: transaction.paymentTerms,
+            deliveryTerms: transaction.deliveryTerms,
+            verificationCode: transaction.verificationCode,
+            secondVerificationCode: transaction.secondVerificationCode,
+            paymentConfirmed: hasPaymentConfirmation,
+            paymentConfirmedAt: transaction.paymentConfirmedAt,
+            confirmedAt: transaction.acceptedAt,
+            status: "confirmed"
+          };
+        });
+
+        console.log(`✅ Returning ${realConfirmedTransactions.length} Claudio confirmed transactions from buyer_verification_codes`);
+        realConfirmedTransactions.forEach((t, i) => {
+          console.log(`  ${i+1}. ${t.commodityType} - ${t.buyerName} - $${t.totalValue} - Code: ${t.verificationCode}`);
+        });
+        
+        res.json(realConfirmedTransactions);
+        return;
+      }
+      
       // Mock farmer confirmed transactions for other farmers
       const farmerTransactions = [
         {

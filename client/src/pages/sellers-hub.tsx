@@ -107,10 +107,15 @@ export default function SellersHub() {
   );
 
   // Fetch rejected counter-offers for fallback opportunities
-  const { data: rejectedCounterOffers = [] as any[], isLoading: rejectedLoading } = useQuery({
+  const { data: rejectedCounterOffersData, isLoading: rejectedLoading } = useQuery({
     queryKey: [`/api/exporter/rejected-counter-offers/${(user as any)?.exporterId || (user as any)?.id}`],
     enabled: !!((user as any)?.exporterId || (user as any)?.id),
   });
+  
+  // Extract rejectedCounterOffers array with proper fallback
+  const rejectedCounterOffers = Array.isArray(rejectedCounterOffersData) 
+    ? rejectedCounterOffersData 
+    : (rejectedCounterOffersData as any)?.rejectedOffers || [];
 
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
@@ -895,7 +900,7 @@ export default function SellersHub() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {(rejectedCounterOffers || []).map((rejection: any) => (
+                {rejectedCounterOffers.map((rejection: any) => (
                   <Card key={rejection.response_id} className="border-red-200 hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">

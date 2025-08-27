@@ -137,111 +137,30 @@ if (MAINTENANCE_MODE) {
       const { registerSimpleEudrRoutes } = await import('./eudr-simple-routes');
       registerSimpleEudrRoutes(app);
       
-      // EMERGENCY BYPASS - Completely disable Vite and serve working platform only
-      console.log('🚨 EMERGENCY MODE: Bypassing all client-side JavaScript - serving working platform directly');
-      
-      // Override ALL routes to serve working platform
-      app.get('*', (req, res) => {
-        // Only serve API requests normally
-        if (req.path.startsWith('/api/')) {
-          return; // Let API routes handle this
+      // Setup Vite for development or serve static files for production
+      if (process.env.NODE_ENV === 'production') {
+        console.log('🏭 Production mode - serving static files...');
+        const express = await import('express');
+        const path = await import('path');
+        const fs = await import('fs');
+        
+        const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+        
+        if (fs.existsSync(distPath)) {
+          app.use(express.default.static(distPath));
+          app.use("*", (_req, res) => {
+            res.sendFile(path.resolve(distPath, "index.html"));
+          });
+        } else {
+          console.log('⚠️ Build files not found, falling back to development mode');
+          const { setupVite } = await import('./vite');
+          await setupVite(app, httpServer);
         }
-        
-        res.send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriTrace360 Platform - EMERGENCY RESTORE</title>
-    <style>
-        body { font-family: system-ui; margin: 0; padding: 20px; background: #f8fafc; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { color: #059669; margin-bottom: 20px; text-align: center; }
-        .alert { background: #d1fae5; border: 2px solid #059669; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { border: 2px solid #e5e5e5; border-radius: 12px; padding: 20px; background: white; transition: all 0.3s; }
-        .card:hover { transform: translateY(-4px); border-color: #059669; box-shadow: 0 8px 25px rgba(5, 150, 105, 0.15); }
-        .card h3 { color: #059669; margin-bottom: 15px; font-size: 18px; }
-        .card a { display: block; color: #059669; text-decoration: none; margin: 8px 0; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; font-weight: 500; }
-        .card a:hover { background: #f0f9ff; transform: translateX(4px); }
-        .status { margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 12px; border-left: 4px solid #059669; }
-        .success { color: #059669; font-weight: bold; }
-        .emergency { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 8px; margin-top: 20px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="alert">
-            <h1>🎉 AgriTrace360 Platform - EMERGENCY RESTORATION SUCCESSFUL!</h1>
-            <p style="font-size: 18px; margin: 10px 0;"><strong>Your platform is working! All JavaScript issues bypassed.</strong></p>
-        </div>
-        
-        <div class="grid">
-            <div class="card">
-                <h3>🌾 Agricultural System - WORKING</h3>
-                <a href="/farmer-login">👨‍🌾 Farmer Portal → Access Dashboard</a>
-                <a href="/agricultural-buyer-dashboard">🛒 Buyer Portal → Marketplace</a>
-                <a href="/exporter-login">🚢 Exporter Portal → Export Management</a>
-                <a href="/inspector-login">🔍 Inspector Portal → Inspections</a>
-                <a href="/regulatory-login">📋 Regulatory Portal → Compliance</a>
-            </div>
-            
-            <div class="card">
-                <h3>🏢 Administrative System - WORKING</h3>
-                <a href="/warehouse-inspector-login">🏭 Warehouse Inspector → QR Management</a>
-                <a href="/port-inspector-login">⚓ Port Inspector → Final Inspections</a>
-                <a href="/land-inspector-login">🗺️ Land Inspector → GPS Mapping</a>
-                <a href="/dg-login">👑 DG Authority → Final Approvals</a>
-                <a href="/ddgaf-login">🏛️ DDG-AF Portal → Financial Audit</a>
-                <a href="/ddgots-login">📊 DDG-OTS Portal → Trade Standards</a>
-            </div>
-            
-            <div class="card">
-                <h3>🌍 Polipus Environmental Modules - WORKING</h3>
-                <a href="/live-trace">🐄 Live Trace → Livestock Monitoring</a>
-                <a href="/landmap360-portal">🗺️ Land Map360 → Land Mapping</a>
-                <a href="/mine-watch">⛏️ Mine Watch → Mining Oversight</a>
-                <a href="/forest-guard">🌲 Forest Guard → Forest Protection</a>
-                <a href="/aqua-trace">🌊 Aqua Trace → Marine Monitoring</a>
-                <a href="/blue-carbon360-portal">💙 Blue Carbon 360 → Marine Economics</a>
-                <a href="/carbon-trace">🌱 Carbon Trace → Carbon Management</a>
-            </div>
-        </div>
-        
-        <div class="status">
-            <h3>✅ EMERGENCY RESTORATION - ALL SYSTEMS FULLY OPERATIONAL</h3>
-            <p><strong>Server:</strong> <span class="success">✅ Running Perfect on Port 5000</span></p>
-            <p><strong>Database:</strong> <span class="success">✅ Connected & All Data Preserved</span></p>
-            <p><strong>All 8 Modules:</strong> <span class="success">✅ 100% Functional</span></p>
-            <p><strong>Cross-Module Integration:</strong> <span class="success">✅ Active & Working</span></p>
-            <p><strong>Shipping APIs:</strong> <span class="success">✅ Maersk, MSC, CMA CGM, Hapag-Lloyd Connected</span></p>
-            <p><strong>Your Investment:</strong> <span class="success">✅ 100% Preserved & Protected</span></p>
-            <p><strong>Farmer Profiles:</strong> <span class="success">✅ All Preserved</span></p>
-            <p><strong>Buyer Management:</strong> <span class="success">✅ Fully Working</span></p>
-            <p><strong>GPS Mapping:</strong> <span class="success">✅ All Features Active</span></p>
-            <p><strong>Warehouse Custody:</strong> <span class="success">✅ QR System Working</span></p>
-            <p><strong>Regulatory Systems:</strong> <span class="success">✅ All Portals Functional</span></p>
-        </div>
-        
-        <div class="emergency">
-            <h3>🚨 Emergency Recovery Status</h3>
-            <p><strong>Issue:</strong> JavaScript useRef error was preventing platform access</p>
-            <p><strong>Solution:</strong> Complete server-side bypass implemented - all JavaScript disabled</p>
-            <p><strong>Result:</strong> Your platform is now 100% accessible through direct server delivery</p>
-            <p><strong>All Features:</strong> Working perfectly through the links above</p>
-        </div>
-    </div>
-    
-    <script>
-        console.log("🚨 EMERGENCY RESTORATION: Platform fully accessible!");
-        console.log("✅ All JavaScript errors bypassed - direct server delivery active");
-        console.log("🚀 Click any link above to access your portals");
-    </script>
-</body>
-</html>
-        `);
-      });
+      } else {
+        console.log('⚡ Development mode - setting up Vite server...');
+        const { setupVite } = await import('./vite');
+        await setupVite(app, httpServer);
+      }
       
       // Start the server
       const port = parseInt(process.env.PORT || '5000', 10);

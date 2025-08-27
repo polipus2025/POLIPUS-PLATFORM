@@ -895,7 +895,7 @@ export default function SellersHub() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {rejectedCounterOffers?.map((rejection: any) => (
+                {(rejectedCounterOffers || []).map((rejection: any) => (
                   <Card key={rejection.response_id} className="border-red-200 hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">

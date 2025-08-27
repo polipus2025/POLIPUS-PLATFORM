@@ -4,19 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Download, FileText } from "lucide-react";
 import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
-import { useState, useEffect } from "react";
+import * as React from "react";
 
 export default function Landing() {
   // Time, Date, and Weather State
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [weather, setWeather] = useState({
+  const [currentTime, setCurrentTime] = React.useState(new Date());
+  const [weather, setWeather] = React.useState({
     condition: 'sunny',
     temperature: '28°C',
     location: 'Monrovia, Liberia'
   });
 
   // Update time every second
-  useEffect(() => {
+  React.useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -25,7 +25,7 @@ export default function Landing() {
   }, []);
 
   // Simulate weather updates (in a real app, this would fetch from a weather API)
-  useEffect(() => {
+  React.useEffect(() => {
     const weatherConditions = [
       { condition: 'sunny', temperature: '28°C', icon: Sun },
       { condition: 'cloudy', temperature: '26°C', icon: Cloud },

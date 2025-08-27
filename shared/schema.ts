@@ -1642,6 +1642,10 @@ export const insertFarmerSchema = createInsertSchema(farmers).omit({
   id: true,
   onboardingDate: true,
   createdAt: true,
+}).extend({
+  // Override numeric fields to accept strings from HTML forms
+  farmSize: z.string().optional(),
+  farmingExperience: z.string().optional(),
 });
 
 export const insertFarmerCredentialSchema = createInsertSchema(farmerCredentials).omit({

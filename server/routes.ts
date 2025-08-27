@@ -11808,7 +11808,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get buyer credentials for approved buyers - MUST BE BEFORE GENERAL /:id ROUTE
   app.get("/api/buyers/:id/credentials", async (req, res) => {
     try {
-      const buyer = await storage.getBuyer(parseInt(req.params.id));
+      // Handle both numeric ID and buyerId string
+      const idParam = req.params.id;
+      let buyer;
+      
+      if (idParam.startsWith('BYR-')) {
+        // It's a buyerId string
+        buyer = await storage.getBuyerByBuyerId(idParam);
+      } else {
+        // It's a numeric ID
+        buyer = await storage.getBuyer(parseInt(idParam));
+      }
       
       if (!buyer) {
         return res.status(404).json({ message: "Buyer not found" });

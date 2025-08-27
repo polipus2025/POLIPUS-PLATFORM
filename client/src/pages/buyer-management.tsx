@@ -108,6 +108,10 @@ export default function BuyerManagement() {
   const [selectedBuyer, setSelectedBuyer] = useState<any>(null);
   const [selectedCommodities, setSelectedCommodities] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [credentialsDialog, setCredentialsDialog] = useState({
+    show: false,
+    credentials: null as any
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -218,13 +222,13 @@ export default function BuyerManagement() {
 
   // View existing credentials mutation
   const viewCredentialsMutation = useMutation({
-    mutationFn: (buyerId: number) => 
-      apiRequest(`/api/buyers/${buyerId}/credentials`, { method: "GET" }),
+    mutationFn: (buyerIdOrId: string | number) => 
+      apiRequest(`/api/buyers/${buyerIdOrId}/credentials`, { method: "GET" }),
     onSuccess: (data) => {
-      toast({
-        title: "Buyer Credentials",
-        description: `Username: ${data.credentials.username}, Temporary Password: ${data.credentials.temporaryPassword}`,
-        duration: 10000, // Show longer so they can copy
+      // Show credentials in a copyable dialog instead of toast
+      setCredentialsDialog({
+        show: true,
+        credentials: data.credentials
       });
     },
     onError: (error: any) => {
@@ -1107,7 +1111,7 @@ export default function BuyerManagement() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => viewCredentialsMutation.mutate(buyer.id)}
+                      onClick={() => viewCredentialsMutation.mutate(buyer.buyerId)}
                       disabled={viewCredentialsMutation.isPending}
                       data-testid={`button-view-credentials-${buyer.id}`}
                     >
@@ -1302,6 +1306,106 @@ export default function BuyerManagement() {
                 <p className="text-sm text-gray-600">
                   Registered: {new Date(selectedBuyer.createdAt).toLocaleDateString()} at {new Date(selectedBuyer.createdAt).toLocaleTimeString()}
                 </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Credentials Display Dialog */}
+      <Dialog open={credentialsDialog.show} onOpenChange={(open) => setCredentialsDialog({ show: open, credentials: null })}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Buyer Login Credentials</DialogTitle>
+          </DialogHeader>
+          
+          {credentialsDialog.credentials && (
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">
+                  {credentialsDialog.credentials.businessName}
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-blue-700 font-medium">Buyer ID</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input 
+                        value={credentialsDialog.credentials.buyerId} 
+                        readOnly 
+                        className="bg-white border-blue-200"
+                      />
+                      <Button 
+                        size="sm" 
+                        onClick={() => navigator.clipboard.writeText(credentialsDialog.credentials.buyerId)}
+                        data-testid="copy-buyer-id"
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-blue-700 font-medium">Username</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input 
+                        value={credentialsDialog.credentials.username} 
+                        readOnly 
+                        className="bg-white border-blue-200"
+                      />
+                      <Button 
+                        size="sm" 
+                        onClick={() => navigator.clipboard.writeText(credentialsDialog.credentials.username)}
+                        data-testid="copy-username"
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-blue-700 font-medium">Temporary Password</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input 
+                        value={credentialsDialog.credentials.temporaryPassword} 
+                        readOnly 
+                        className="bg-white border-blue-200 font-mono"
+                      />
+                      <Button 
+                        size="sm" 
+                        onClick={() => navigator.clipboard.writeText(credentialsDialog.credentials.temporaryPassword)}
+                        data-testid="copy-password"
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-blue-700 font-medium">Portal URL</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input 
+                        value={`${window.location.origin}${credentialsDialog.credentials.portalUrl}`} 
+                        readOnly 
+                        className="bg-white border-blue-200"
+                      />
+                      <Button 
+                        size="sm" 
+                        onClick={() => navigator.clipboard.writeText(`${window.location.origin}${credentialsDialog.credentials.portalUrl}`)}
+                        data-testid="copy-portal-url"
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-amber-800 text-sm">
+                    <strong>Important:</strong> The buyer must change their password on first login. 
+                    Credentials generated on: {new Date(credentialsDialog.credentials.generatedAt).toLocaleString()}
+                  </p>
+                </div>
               </div>
             </div>
           )}

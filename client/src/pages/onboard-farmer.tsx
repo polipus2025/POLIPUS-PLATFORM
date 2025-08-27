@@ -124,8 +124,8 @@ export default function OnboardFarmer() {
         method: "POST",
         body: JSON.stringify({
           ...data,
-          farmSize: data.boundaryData?.area || (data.farmSize ? parseFloat(data.farmSize) : null),
-          farmingExperience: data.farmingExperience ? parseInt(data.farmingExperience) : null,
+          farmSize: data.boundaryData?.area || (data.farmSize || null),
+          farmingExperience: data.farmingExperience || null,
           farmBoundaries: data.boundaryData ? data.boundaryData : null,
           landMapData: data.boundaryData ? data.boundaryData : null,
           isActive: true,

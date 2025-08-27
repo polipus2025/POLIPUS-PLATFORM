@@ -579,7 +579,6 @@ export default function BuyerManagement() {
                               <Input 
                                 type="number" 
                                 {...field} 
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
                                 data-testid="input-year-established"
                               />
                             </FormControl>
@@ -597,7 +596,6 @@ export default function BuyerManagement() {
                               <Input 
                                 type="number" 
                                 {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
                                 data-testid="input-employees"
                               />
                             </FormControl>

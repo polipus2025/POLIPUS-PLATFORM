@@ -123,12 +123,12 @@ export default function FrontPage() {
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            {/* Login Portals Buttons - Positioned to the left */}
-            <div className="absolute left-0 top-0 flex flex-col gap-2">
+            {/* Login Portal Button - Positioned to the right */}
+            <div className="absolute right-0 top-0">
               <Link href="/monitoring-login">
-                <Button className="isms-button flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Monitoring Portal
+                <Button size="sm" className="isms-button flex items-center gap-1 text-xs px-3 py-1">
+                  <Users className="h-3 w-3" />
+                  Monitoring
                 </Button>
               </Link>
             </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { Helmet } from 'react-helmet';
 import ModernBackground from '@/components/ui/modern-background';
 import ModernCard from '@/components/ui/modern-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

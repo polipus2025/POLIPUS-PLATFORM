@@ -456,6 +456,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }
 
+      // Check farmer's actual profile county (not form data)
+      const [farmerProfile] = await db
+        .select({ county: farmers.county, firstName: farmers.firstName, lastName: farmers.lastName })
+        .from(farmers)
+        .where(eq(farmers.id, dbId))
+        .limit(1);
+      
+      console.log(`👤 Farmer ${dbId} profile county: ${farmerProfile?.county || 'NOT FOUND'}`);
+      
+      if (farmerProfile?.county !== req.body.county) {
+        console.log(`⚠️ County mismatch! Profile: ${farmerProfile?.county}, Form: ${req.body.county}`);
+      }
+
       // Transform data to match schema expectations
       const transformedData = {
         farmerId: dbId, // Use numeric ID for database
@@ -473,7 +486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || '',
         farmLocation: req.body.farmLocation,
         farmerName: req.body.farmerName,
-        county: req.body.county, // Use form county - don't break existing flow
+        county: farmerProfile?.county || req.body.county, // Use ACTUAL farmer profile county
       };
       
       console.log("Transformed data:", transformedData); // Debug log

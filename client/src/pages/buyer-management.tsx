@@ -249,6 +249,8 @@ export default function BuyerManagement() {
       tradingRegions: JSON.stringify(selectedRegions),
       annualTurnover: data.annualTurnover ? parseFloat(data.annualTurnover) : null,
       creditLimit: data.creditLimit ? parseFloat(data.creditLimit) : null,
+      yearEstablished: data.yearEstablished ? parseInt(data.yearEstablished) : null,
+      numberOfEmployees: data.numberOfEmployees ? parseInt(data.numberOfEmployees) : null,
     };
 
     console.log("Formatted data being sent:", formattedData);

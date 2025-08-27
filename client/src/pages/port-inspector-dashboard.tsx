@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -191,7 +191,9 @@ export default function PortInspectorDashboard() {
       setCameraStream(stream);
       setIsScanning(true);
       
-      if (videoRef.current) {
+      // 👉️ ref could be null here
+      if (videoRef.current != null) {
+        // 👉️ TypeScript knows that ref is not null here
         videoRef.current.srcObject = stream;
       }
     } catch (error) {

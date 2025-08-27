@@ -65,7 +65,8 @@ function CounterOffersTab() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  const counterOffers = counterOffersResponse || [];
+  // Extract data from the response structure
+  const counterOffers = (counterOffersResponse as any)?.data || [];
 
   // Accept counter-offer mutation
   const acceptCounterOfferMutation = useMutation({
@@ -73,7 +74,7 @@ function CounterOffersTab() {
       const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/accept`, {
         method: "POST",
         body: JSON.stringify({
-          buyerId: user?.buyerId || user?.id || 'BYR-20250827-041'
+          buyerId: (user as any)?.buyerId || (user as any)?.id || 'BYR-20250827-041'
         })
       });
       return result.json();
@@ -108,7 +109,7 @@ function CounterOffersTab() {
       const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/reject`, {
         method: "POST",
         body: JSON.stringify({
-          buyerId: user?.buyerId || user?.id || 'BYR-20250827-041',
+          buyerId: (user as any)?.buyerId || (user as any)?.id || 'BYR-20250827-041',
           rejectionReason: reason
         })
       });

@@ -39,10 +39,13 @@ export function GeeVerificationBadge({
     queryFn: () => {
       if (!parsedCoordinates) return Promise.resolve(null);
       
-      return apiRequest("POST", "/api/gee/analyze-deforestation", {
-        coordinates: parsedCoordinates,
-        plotId,
-        commodityType
+      return apiRequest("/api/gee/analyze-deforestation", {
+        method: "POST",
+        body: JSON.stringify({
+          coordinates: parsedCoordinates,
+          plotId,
+          commodityType
+        })
       });
     },
     enabled: !!parsedCoordinates && showDetails,

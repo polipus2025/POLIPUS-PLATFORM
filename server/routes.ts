@@ -14043,7 +14043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmLocation: `${notification.county} County`,
         paymentTerms: 'Payment within 7 days of delivery',
         deliveryTerms: 'Pickup at farm location',
-        status: 'active', // No payment confirmation required - immediate processing
+        status: 'accepted', // Step 1: Accepted, awaiting payment confirmation
         acceptedAt: new Date(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       }).returning();
@@ -14070,7 +14070,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🚫 REAL-TIME DISABLED: ${disabledNotifications.length} other notifications for offer ${notification.offerId}`);
 
       console.log(`✅ Buyer ${buyerName} (${company}) accepted offer ${notificationId}`);
-      console.log(`🔐 Verification code saved: ${verificationCode}`);
+      console.log(`🔐 STEP 1: First verification code generated: ${verificationCode}`);
+      console.log(`💳 STEP 2: Waiting for buyer to confirm payment to generate second verification code`);
 
       res.json({
         message: "Offer accepted successfully with EUDR compliance tracking!",
@@ -14437,6 +14438,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const realConfirmedTransactions = confirmedTransactions.map(transaction => {
           const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
           
+          // Determine proper status based on verification step
+          let transactionStatus = transaction.status || "accepted";
+          let statusMessage = "";
+          
+          if (hasPaymentConfirmation) {
+            transactionStatus = "payment_confirmed";
+            statusMessage = "✅ Payment Confirmed - Both verification codes generated";
+          } else {
+            transactionStatus = "accepted";  
+            statusMessage = "⏳ Awaiting Payment - Buyer needs to confirm payment for 2nd verification code";
+          }
+          
           return {
             id: transaction.id,
             notificationId: transaction.notificationId,
@@ -14457,7 +14470,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentConfirmed: hasPaymentConfirmation,
             paymentConfirmedAt: transaction.paymentConfirmedAt,
             confirmedAt: transaction.acceptedAt,
-            status: "confirmed"
+            status: transactionStatus,
+            statusMessage: statusMessage,
+            step1Complete: !!transaction.verificationCode,
+            step2Complete: hasPaymentConfirmation
           };
         });
 
@@ -14485,6 +14501,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const realConfirmedTransactions = confirmedTransactions.map(transaction => {
           const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
           
+          // Determine proper status based on verification step
+          let transactionStatus = transaction.status || "accepted";
+          let statusMessage = "";
+          
+          if (hasPaymentConfirmation) {
+            transactionStatus = "payment_confirmed";
+            statusMessage = "✅ Payment Confirmed - Both verification codes generated";
+          } else {
+            transactionStatus = "accepted";  
+            statusMessage = "⏳ Awaiting Payment - Buyer needs to confirm payment for 2nd verification code";
+          }
+          
           return {
             id: transaction.id,
             notificationId: transaction.notificationId,
@@ -14505,7 +14533,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentConfirmed: hasPaymentConfirmation,
             paymentConfirmedAt: transaction.paymentConfirmedAt,
             confirmedAt: transaction.acceptedAt,
-            status: "confirmed"
+            status: transactionStatus,
+            statusMessage: statusMessage,
+            step1Complete: !!transaction.verificationCode,
+            step2Complete: hasPaymentConfirmation
           };
         });
 
@@ -14552,7 +14583,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // SECURITY: Buyer payment confirmation endpoint REMOVED - only farmers can confirm payments to prevent fraud
+  // Buyer payment confirmation endpoint - RESTORED for 2-step verification workflow
+  app.post("/api/buyer/confirm-payment/:transactionId", async (req, res) => {
+    try {
+      const { transactionId } = req.params;
+      const { buyerId, buyerName, amount } = req.body;
+      
+      console.log(`💳 Buyer ${buyerName} confirming payment for transaction: ${transactionId}`);
+
+      // Generate second verification code using the proper format
+      const secondVerificationCode = generateSecondVerificationCode();
+      const confirmationDate = new Date();
+      
+      // Find the transaction and update with payment confirmation
+      const [existingTransaction] = await db
+        .select()
+        .from(buyerVerificationCodes)
+        .where(eq(buyerVerificationCodes.id, parseInt(transactionId)));
+
+      if (!existingTransaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+
+      // Update transaction with second verification code and payment confirmation
+      const [updatedTransaction] = await db
+        .update(buyerVerificationCodes)
+        .set({
+          secondVerificationCode: secondVerificationCode,
+          paymentConfirmedAt: confirmationDate,
+          status: 'payment_confirmed'
+        })
+        .where(eq(buyerVerificationCodes.id, parseInt(transactionId)))
+        .returning();
+
+      console.log(`✅ Buyer payment confirmed for transaction ${transactionId}`);
+      console.log(`🔐 Second verification code generated: ${secondVerificationCode}`);
+      console.log(`💰 Payment amount: $${amount}`);
+
+      res.json({
+        success: true,
+        message: "Payment confirmed successfully - Second verification code generated",
+        secondVerificationCode: secondVerificationCode,
+        paymentConfirmedAt: confirmationDate.toISOString(),
+        transaction: {
+          id: transactionId,
+          buyerId: buyerId,
+          buyerName: buyerName,
+          verificationCode: existingTransaction.verificationCode,
+          secondVerificationCode: secondVerificationCode,
+          paymentConfirmed: true,
+          paymentConfirmedAt: confirmationDate.toISOString(),
+          status: "payment_confirmed"
+        }
+      });
+    } catch (error) {
+      console.error("Error confirming buyer payment:", error);
+      res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
 
   // Get farmer verification codes archive
   app.get("/api/farmer/verification-codes/:farmerId", async (req, res) => {

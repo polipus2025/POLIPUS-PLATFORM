@@ -450,6 +450,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Received offer data:", req.body); // Debug log
       
+      // Extract farmer DB ID to fetch profile county
+      const dbId = extractFarmerDbId(req.body.farmerId);
+      if (!dbId) {
+        return res.status(400).json({ error: "Invalid farmer ID format" });
+      }
+
+      // Fetch farmer's profile to get actual county (not from form default)
+      const [farmerProfile] = await db
+        .select({ county: farmers.county })
+        .from(farmers)
+        .where(eq(farmers.id, dbId))
+        .limit(1);
+
       // Transform data to match schema expectations
       const transformedData = {
         farmerId: req.body.farmerId,
@@ -467,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || '',
         farmLocation: req.body.farmLocation,
         farmerName: req.body.farmerName,
-        county: req.body.county,
+        county: farmerProfile?.county || req.body.county, // Use farmer's profile county
       };
       
       console.log("Transformed data:", transformedData); // Debug log
@@ -572,193 +585,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Utility function to extract database ID from farmer ID
+  const extractFarmerDbId = (farmerId: string): number | null => {
+    const parts = farmerId.split('-');
+    if (parts.length >= 3 && parts[0] === 'FARMER') {
+      const dbId = parseInt(parts[parts.length - 1]);
+      return isNaN(dbId) ? null : dbId;
+    }
+    return null;
+  };
+
   // Get farmer's own product offers with status tracking
   app.get("/api/farmer/my-offers/:farmerId", async (req, res) => {
     try {
       const { farmerId } = req.params;
       
-      // For Paolo's farmer ID, get both mock confirmed offers and real database offers
-      if (farmerId === "FARMER-1755883520291-288") {
-        // Get real offers from database (farmer_id = 288 in database)
-        const realOffers = await db
-          .select()
-          .from(farmerProductOffers)
-          .where(eq(farmerProductOffers.farmerId, 288))
-          .orderBy(desc(farmerProductOffers.createdAt));
-
-        // Mock confirmed offers (these represent offers that were accepted by buyers)
-        const confirmedOffers = [
-          {
-            id: 1001,
-            offerId: "FPO-20250823-456",
-            farmerId: farmerId,
-            commodityType: "Cocoa",
-            quantityAvailable: 5.0,
-            unit: "tons",
-            pricePerUnit: 4000.00,
-            totalValue: 20000.00,
-            qualityGrade: "Grade A",
-            harvestDate: "2025-08-20",
-            paymentTerms: "Payment within 7 days of delivery",
-            deliveryTerms: "Pickup at farm location",
-            county: "Margibi",
-            status: "confirmed",
-            offerCreatedAt: new Date("2025-08-23T10:30:00Z"),
-            confirmedAt: new Date("2025-08-23T23:30:13.893Z"),
-            buyerId: "margibi_buyer",
-            buyerName: "Margibi Trading Company",
-            buyerCompany: "Agricultural Trading Company",
-            verificationCode: "R83ZIELI"
-          },
-          {
-            id: 1002,
-            offerId: "FPO-20250823-789",
-            farmerId: farmerId,
-            commodityType: "Cocoa",
-            quantityAvailable: 5.0,
-            unit: "tons",
-            pricePerUnit: 4000.00,
-            totalValue: 20000.00,
-            qualityGrade: "Grade A",
-            harvestDate: "2025-08-20",
-            paymentTerms: "Payment within 7 days of delivery",
-            deliveryTerms: "Pickup at farm location",
-            county: "Margibi",
-            status: "confirmed",
-            offerCreatedAt: new Date("2025-08-23T11:00:00Z"),
-            confirmedAt: new Date("2025-08-23T23:33:13.651Z"),
-            buyerId: "margibi_buyer",
-            buyerName: "Margibi Trading Company",
-            buyerCompany: "Agricultural Trading Company",
-            verificationCode: "WQR6KFRB"
-          }
-        ];
-
-        // SEPARATE pending and confirmed offers for proper management
-        const pendingOffers = realOffers
-          .filter(offer => offer.status === 'available') // Only show available as pending
-          .map(offer => ({
-            id: offer.id,
-            offerId: offer.offerId,
-            farmerId: farmerId,
-            commodityType: offer.commodityType,
-            quantityAvailable: parseFloat(offer.quantityAvailable),
-            unit: offer.unit,
-            pricePerUnit: parseFloat(offer.pricePerUnit),
-            totalValue: parseFloat(offer.totalValue),
-            qualityGrade: offer.qualityGrade,
-            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
-            paymentTerms: offer.paymentTerms,
-            deliveryTerms: offer.deliveryTerms,
-            county: offer.county,
-            status: 'pending', // Always pending for available offers
-            offerCreatedAt: offer.createdAt,
-            confirmedAt: null, // No confirmation yet
-            buyerId: null, // No buyer yet
-            buyerName: null, // No buyer yet
-            buyerCompany: null,
-            verificationCode: null
-          }));
-
-        const confirmedRealOffers = realOffers
-          .filter(offer => offer.status === 'confirmed') // Only confirmed offers
-          .map(offer => ({
-            id: offer.id,
-            offerId: offer.offerId,
-            farmerId: farmerId,
-            commodityType: offer.commodityType,
-            quantityAvailable: parseFloat(offer.quantityAvailable),
-            unit: offer.unit,
-            pricePerUnit: parseFloat(offer.pricePerUnit),
-            totalValue: parseFloat(offer.totalValue),
-            qualityGrade: offer.qualityGrade,
-            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
-            paymentTerms: offer.paymentTerms,
-            deliveryTerms: offer.deliveryTerms,
-            county: offer.county,
-            status: 'confirmed',
-            offerCreatedAt: offer.createdAt,
-            confirmedAt: offer.confirmedAt,
-            buyerId: offer.buyerId,
-            buyerName: offer.buyerName,
-            buyerCompany: offer.buyerName ? "Agricultural Trading Company" : null,
-            verificationCode: offer.verificationCode
-          }));
-
-        // Combine confirmed offers (hardcoded + real confirmed offers) and pending offers
-        const allOffers = [...confirmedOffers, ...confirmedRealOffers, ...pendingOffers];
-        
-        return res.json(allOffers);
-      }
-
-      // For Claudio's farmer ID, get his real database offers
-      if (farmerId === "FARMER-1756314707545-846") {
-        // Get real offers from database (farmer_id = 846 in database)  
-        const realOffers = await db
-          .select()
-          .from(farmerProductOffers)
-          .where(eq(farmerProductOffers.farmerId, 846))
-          .orderBy(desc(farmerProductOffers.createdAt));
-
-        // SEPARATE pending and confirmed offers for proper management
-        const pendingOffers = realOffers
-          .filter(offer => offer.status === 'available') // Only show available as pending
-          .map(offer => ({
-            id: offer.id,
-            offerId: offer.offerId,
-            farmerId: farmerId,
-            commodityType: offer.commodityType,
-            quantityAvailable: parseFloat(offer.quantityAvailable),
-            unit: offer.unit,
-            pricePerUnit: parseFloat(offer.pricePerUnit),
-            totalValue: parseFloat(offer.totalValue),
-            qualityGrade: offer.qualityGrade,
-            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
-            paymentTerms: offer.paymentTerms,
-            deliveryTerms: offer.deliveryTerms,
-            county: offer.county,
-            status: 'pending', // Always pending for available offers
-            offerCreatedAt: offer.createdAt,
-            confirmedAt: null, // No confirmation yet
-            buyerId: null, // No buyer yet
-            buyerName: null, // No buyer yet
-            buyerCompany: null,
-            verificationCode: null
-          }));
-
-        const confirmedOffers = realOffers
-          .filter(offer => offer.status === 'confirmed') // Only confirmed offers
-          .map(offer => ({
-            id: offer.id,
-            offerId: offer.offerId,
-            farmerId: farmerId,
-            commodityType: offer.commodityType,
-            quantityAvailable: parseFloat(offer.quantityAvailable),
-            unit: offer.unit,
-            pricePerUnit: parseFloat(offer.pricePerUnit),
-            totalValue: parseFloat(offer.totalValue),
-            qualityGrade: offer.qualityGrade,
-            harvestDate: offer.harvestDate?.toISOString().split('T')[0],
-            paymentTerms: offer.paymentTerms,
-            deliveryTerms: offer.deliveryTerms,
-            county: offer.county,
-            status: 'confirmed',
-            offerCreatedAt: offer.createdAt,
-            confirmedAt: offer.confirmedAt,
-            buyerId: offer.buyerId,
-            buyerName: offer.buyerName,
-            buyerCompany: offer.buyerName ? "Agricultural Trading Company" : null,
-            verificationCode: offer.verificationCode
-          }));
-
-        // Combine confirmed and pending offers
-        const allOffers = [...confirmedOffers, ...pendingOffers];
-        
-        return res.json(allOffers);
+      // Extract database ID from farmer ID
+      const dbId = extractFarmerDbId(farmerId);
+      if (!dbId) {
+        return res.status(400).json({ error: "Invalid farmer ID format" });
       }
       
-      // For other farmers, return empty array for now
-      res.json([]);
+      // Get all offers for this farmer from database (GENERIC for any farmer)
+      const realOffers = await db
+        .select()
+        .from(farmerProductOffers)
+        .where(eq(farmerProductOffers.farmerId, dbId))
+        .orderBy(desc(farmerProductOffers.createdAt));
+
+      // SEPARATE pending and confirmed offers for proper management
+      const pendingOffers = realOffers
+        .filter(offer => offer.status === 'available') // Only show available as pending
+        .map(offer => ({
+          id: offer.id,
+          offerId: offer.offerId,
+          farmerId: farmerId,
+          commodityType: offer.commodityType,
+          quantityAvailable: parseFloat(offer.quantityAvailable),
+          unit: offer.unit,
+          pricePerUnit: parseFloat(offer.pricePerUnit),
+          totalValue: parseFloat(offer.totalValue),
+          qualityGrade: offer.qualityGrade,
+          harvestDate: offer.harvestDate?.toISOString().split('T')[0],
+          paymentTerms: offer.paymentTerms,
+          deliveryTerms: offer.deliveryTerms,
+          county: offer.county,
+          status: 'pending', // Always pending for available offers
+          offerCreatedAt: offer.createdAt,
+          confirmedAt: null, // No confirmation yet
+          buyerId: null, // No buyer yet
+          buyerName: null, // No buyer yet
+          buyerCompany: null,
+          verificationCode: null
+        }));
+
+      const confirmedOffers = realOffers
+        .filter(offer => offer.status === 'confirmed') // Only confirmed offers
+        .map(offer => ({
+          id: offer.id,
+          offerId: offer.offerId,
+          farmerId: farmerId,
+          commodityType: offer.commodityType,
+          quantityAvailable: parseFloat(offer.quantityAvailable),
+          unit: offer.unit,
+          pricePerUnit: parseFloat(offer.pricePerUnit),
+          totalValue: parseFloat(offer.totalValue),
+          qualityGrade: offer.qualityGrade,
+          harvestDate: offer.harvestDate?.toISOString().split('T')[0],
+          paymentTerms: offer.paymentTerms,
+          deliveryTerms: offer.deliveryTerms,
+          county: offer.county,
+          status: 'confirmed',
+          offerCreatedAt: offer.createdAt,
+          confirmedAt: offer.confirmedAt,
+          buyerId: offer.buyerId,
+          buyerName: offer.buyerName,
+          buyerCompany: offer.buyerName ? "Agricultural Trading Company" : null,
+          verificationCode: offer.verificationCode
+        }));
+
+      // Combine confirmed and pending offers
+      const allOffers = [...confirmedOffers, ...pendingOffers];
+      
+      res.json(allOffers);
     } catch (error) {
       console.error("Error fetching farmer offers:", error);
       res.status(500).json({ error: "Failed to fetch farmer offers" });
@@ -800,7 +709,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           qualityGrade: sql`'Grade A'`.as('qualityGrade'),
           paymentTerms: sql`'Payment within 7 days of delivery'`.as('paymentTerms'),
           deliveryTerms: sql`'Pickup at farm location'`.as('deliveryTerms'),
-          farmLocation: sql`CONCAT(${buyerNotifications.county}, ' County')`.as('farmLocation'),
+          farmLocation: sql`CASE 
+            WHEN ${buyerNotifications.county} LIKE '% County' THEN ${buyerNotifications.county}
+            ELSE CONCAT(${buyerNotifications.county}, ' County')
+          END`.as('farmLocation'),
           description: sql`${buyerNotifications.message}`.as('description'),
           createdAt: buyerNotifications.createdAt,
         })
@@ -14504,162 +14416,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmerId } = req.params;
       // Fetching farmer transactions
       
-      // For Paolo's farmer ID, get ALL confirmed transactions from buyer_verification_codes table
-      if (farmerId === "FARMER-1755883520291-288") {
-        // Get all confirmed transactions from buyer_verification_codes (where buyers accept offers)
-        const confirmedTransactions = await db
-          .select()
-          .from(buyerVerificationCodes)
-          .where(eq(buyerVerificationCodes.farmerId, "288"))
-          .orderBy(desc(buyerVerificationCodes.acceptedAt));
-
-        console.log(`📂 Found ${confirmedTransactions.length} confirmed transactions in buyer_verification_codes for Paolo`);
-        
-        // All transactions are now from real database - no mock data needed
-        
-        // Create confirmed transactions from buyer_verification_codes
-        const realConfirmedTransactions = confirmedTransactions.map(transaction => {
-          const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
-          
-          // Determine proper status based on verification step
-          let transactionStatus = transaction.status || "accepted";
-          let statusMessage = "";
-          
-          if (hasPaymentConfirmation) {
-            transactionStatus = "payment_confirmed";
-            statusMessage = "✅ Payment Confirmed - Both verification codes generated";
-          } else {
-            transactionStatus = "accepted";  
-            statusMessage = "⏳ Awaiting Payment - Buyer needs to confirm payment for 2nd verification code";
-          }
-          
-          return {
-            id: transaction.id,
-            notificationId: transaction.notificationId,
-            farmerId: farmerId,
-            buyerId: transaction.buyerId,
-            buyerName: transaction.buyerName,
-            buyerCompany: transaction.company || "Agricultural Trading Company",
-            commodityType: transaction.commodityType,
-            quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
-            unit: transaction.unit,
-            pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
-            totalValue: parseFloat(transaction.totalValue || '0'),
-            qualityGrade: "Grade A",
-            paymentTerms: transaction.paymentTerms,
-            deliveryTerms: transaction.deliveryTerms,
-            verificationCode: transaction.verificationCode,
-            secondVerificationCode: transaction.secondVerificationCode,
-            paymentConfirmed: hasPaymentConfirmation,
-            paymentConfirmedAt: transaction.paymentConfirmedAt,
-            confirmedAt: transaction.acceptedAt,
-            status: transactionStatus,
-            statusMessage: statusMessage,
-            step1Complete: !!transaction.verificationCode,
-            step2Complete: hasPaymentConfirmation
-          };
-        });
-
-        console.log(`✅ Returning ${realConfirmedTransactions.length} Paolo confirmed transactions from buyer_verification_codes`);
-        realConfirmedTransactions.forEach((t, i) => {
-          console.log(`  ${i+1}. ${t.commodityType} - ${t.buyerName} - $${t.totalValue} - Code: ${t.verificationCode}`);
-        });
-        
-        res.json(realConfirmedTransactions);
-        return;
+      // GENERIC SYSTEM: Extract database ID from any farmer ID 
+      const dbId = extractFarmerDbId(farmerId);
+      if (!dbId) {
+        return res.status(400).json({ error: "Invalid farmer ID format" });
       }
       
-      // For Claudio's farmer ID, get ALL confirmed transactions from buyer_verification_codes table  
-      if (farmerId === "FARMER-1756314707545-846") {
-        // Get all confirmed transactions from buyer_verification_codes (where buyers accept offers)
-        const confirmedTransactions = await db
-          .select()
-          .from(buyerVerificationCodes)
-          .where(eq(buyerVerificationCodes.farmerId, "846"))
-          .orderBy(desc(buyerVerificationCodes.acceptedAt));
+      // Get confirmed transactions for THIS farmer only (GENERIC for any farmer)
+      const confirmedTransactions = await db
+        .select()
+        .from(buyerVerificationCodes)
+        .where(eq(buyerVerificationCodes.farmerId, dbId.toString()))
+        .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
-        console.log(`📂 Found ${confirmedTransactions.length} confirmed transactions in buyer_verification_codes for Claudio`);
-        
-        // Create confirmed transactions from buyer_verification_codes
-        const realConfirmedTransactions = confirmedTransactions.map(transaction => {
-          const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
-          
-          // Determine proper status based on verification step
-          let transactionStatus = transaction.status || "accepted";
-          let statusMessage = "";
-          
-          if (hasPaymentConfirmation) {
-            transactionStatus = "payment_confirmed";
-            statusMessage = "✅ Payment Confirmed - Both verification codes generated";
-          } else {
-            transactionStatus = "accepted";  
-            statusMessage = "⏳ Awaiting Payment - Buyer needs to confirm payment for 2nd verification code";
-          }
-          
-          return {
-            id: transaction.id,
-            notificationId: transaction.notificationId,
-            farmerId: farmerId,
-            buyerId: transaction.buyerId,
-            buyerName: transaction.buyerName,
-            buyerCompany: transaction.company || "Agricultural Trading Company",
-            commodityType: transaction.commodityType,
-            quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
-            unit: transaction.unit,
-            pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
-            totalValue: parseFloat(transaction.totalValue || '0'),
-            qualityGrade: "Grade A",
-            paymentTerms: transaction.paymentTerms,
-            deliveryTerms: transaction.deliveryTerms,
-            verificationCode: transaction.verificationCode,
-            secondVerificationCode: transaction.secondVerificationCode,
-            paymentConfirmed: hasPaymentConfirmation,
-            paymentConfirmedAt: transaction.paymentConfirmedAt,
-            confirmedAt: transaction.acceptedAt,
-            status: transactionStatus,
-            statusMessage: statusMessage,
-            step1Complete: !!transaction.verificationCode,
-            step2Complete: hasPaymentConfirmation
-          };
-        });
-
-        console.log(`✅ Returning ${realConfirmedTransactions.length} Claudio confirmed transactions from buyer_verification_codes`);
-        realConfirmedTransactions.forEach((t, i) => {
-          console.log(`  ${i+1}. ${t.commodityType} - ${t.buyerName} - $${t.totalValue} - Code: ${t.verificationCode}`);
-        });
-        
-        res.json(realConfirmedTransactions);
-        return;
-      }
+      console.log(`📂 Found ${confirmedTransactions.length} confirmed transactions for farmer ${dbId}`);
       
-      // Mock farmer confirmed transactions for other farmers
-      const farmerTransactions = [
-        {
-          id: "fconf-001",
-          notificationId: "OFFER-ABC123",
-          farmerId: farmerId,
-          buyerId: 1,
-          buyerName: "Michael Johnson",
-          buyerCompany: "Johnson Agriculture Trading",
-          commodityType: "Cocoa",
-          quantityAvailable: 25.5,
-          unit: "tons",
-          pricePerUnit: 2450.00,
-          totalValue: 62475.00,
-          qualityGrade: "Grade A",
-          paymentTerms: "50% Advance, 50% on Delivery",
-          deliveryTerms: "FOB Farm Gate",
-          verificationCode: "X0R27R24",
-          secondVerificationCode: transaction.verificationCode, // Use same verification code
-          paymentConfirmed: true, // Always confirmed - no payment step required
-          paymentConfirmedAt: null,
-          confirmedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-          status: "confirmed"
+      // Create confirmed transactions from buyer_verification_codes
+      const realConfirmedTransactions = confirmedTransactions.map(transaction => {
+        const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
+        
+        // Determine proper status based on verification step
+        let transactionStatus = transaction.status || "accepted";
+        let statusMessage = "";
+        
+        if (hasPaymentConfirmation) {
+          transactionStatus = "payment_confirmed";
+          statusMessage = "✅ Payment Confirmed - Both verification codes generated";
+        } else {
+          transactionStatus = "accepted";  
+          statusMessage = "⏳ Awaiting Payment - Buyer needs to confirm payment for 2nd verification code";
         }
-      ];
+        
+        return {
+          id: transaction.id,
+          notificationId: transaction.notificationId,
+          farmerId: farmerId,
+          buyerId: transaction.buyerId,
+          buyerName: transaction.buyerName,
+          buyerCompany: transaction.company || "Agricultural Trading Company",
+          commodityType: transaction.commodityType,
+          quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
+          unit: transaction.unit,
+          pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
+          totalValue: parseFloat(transaction.totalValue || '0'),
+          qualityGrade: "Grade A",
+          paymentTerms: transaction.paymentTerms,
+          deliveryTerms: transaction.deliveryTerms,
+          verificationCode: transaction.verificationCode,
+          secondVerificationCode: transaction.secondVerificationCode,
+          paymentConfirmed: hasPaymentConfirmation,
+          paymentConfirmedAt: transaction.paymentConfirmedAt,
+          confirmedAt: transaction.acceptedAt,
+          status: transactionStatus,
+          statusMessage: statusMessage,
+          step1Complete: !!transaction.verificationCode,
+          step2Complete: hasPaymentConfirmation
+        };
+      });
 
-      console.log(`Returning ${farmerTransactions.length} farmer confirmed transactions`);
-      res.json(farmerTransactions);
+      console.log(`✅ Returning ${realConfirmedTransactions.length} confirmed transactions for farmer ${dbId}`);
+      
+      res.json(realConfirmedTransactions);
     } catch (error) {
       console.error("Error fetching farmer confirmed transactions:", error);
       res.status(500).json({ error: "Failed to fetch farmer confirmed transactions" });

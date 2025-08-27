@@ -29,7 +29,7 @@ import {
   FileCheck,
   Building2
 } from 'lucide-react';
-import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
+import poliposLogo from '@assets/polipos-logo.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
 
 export default function FrontPage() {

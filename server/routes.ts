@@ -450,22 +450,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Received offer data:", req.body); // Debug log
       
-      // Extract farmer DB ID to fetch profile county
+      // Extract numeric farmer ID for database
       const dbId = extractFarmerDbId(req.body.farmerId);
       if (!dbId) {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }
 
-      // Fetch farmer's profile to get actual county (not from form default)
-      const [farmerProfile] = await db
-        .select({ county: farmers.county })
-        .from(farmers)
-        .where(eq(farmers.id, dbId))
-        .limit(1);
-
       // Transform data to match schema expectations
       const transformedData = {
-        farmerId: req.body.farmerId,
+        farmerId: dbId, // Use numeric ID for database
         commodityType: req.body.commodityType,
         quantityAvailable: req.body.quantityAvailable.toString(),
         unit: req.body.unit,
@@ -480,7 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || '',
         farmLocation: req.body.farmLocation,
         farmerName: req.body.farmerName,
-        county: farmerProfile?.county || req.body.county, // Use farmer's profile county
+        county: req.body.county, // Use form county - don't break existing flow
       };
       
       console.log("Transformed data:", transformedData); // Debug log

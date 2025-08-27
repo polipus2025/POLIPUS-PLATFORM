@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'wouter';
+import { Helmet } from 'react-helmet';
 import ModernBackground from '@/components/ui/modern-background';
 import ModernCard from '@/components/ui/modern-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,8 +30,9 @@ import {
   FileCheck,
   Building2
 } from 'lucide-react';
-import poliposLogo from '@assets/polipos-logo.jpg';
+import poliposLogo from '@assets/polipos logo 1_1753394173408.jpg';
 import agriTraceLogo from '@assets/IMG-20250724-WA0007_1753362990630.jpg';
+import GlobalGPSDetector from '@/components/global-gps-detector';
 
 export default function FrontPage() {
   const modules = [
@@ -122,8 +124,9 @@ export default function FrontPage() {
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            {/* Login Portals Button - Positioned to the left */}
+            {/* GPS Active and Login Portals Buttons - Positioned to the left */}
             <div className="absolute left-0 top-0 flex flex-col gap-2">
+              <GlobalGPSDetector />
               <Link href="/monitoring-login">
                 <Button className="isms-button flex items-center gap-2">
                   <Users className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -39,13 +39,10 @@ export function GeeVerificationBadge({
     queryFn: () => {
       if (!parsedCoordinates) return Promise.resolve(null);
       
-      return apiRequest("/api/gee/analyze-deforestation", {
-        method: "POST",
-        body: JSON.stringify({
-          coordinates: parsedCoordinates,
-          plotId,
-          commodityType
-        })
+      return apiRequest("POST", "/api/gee/analyze-deforestation", {
+        coordinates: parsedCoordinates,
+        plotId,
+        commodityType
       });
     },
     enabled: !!parsedCoordinates && showDetails,

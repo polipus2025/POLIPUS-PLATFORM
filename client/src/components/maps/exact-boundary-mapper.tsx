@@ -13,11 +13,11 @@ interface ExactBoundaryMapperProps {
 }
 
 export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundaryMapperProps) {
-  const [points, setPoints] = useState<BoundaryPoint[]>([]);
-  const [isTracking, setIsTracking] = useState(false);
-  const [status, setStatus] = useState('Tap map to create boundaries');
-  const [mapCenter, setMapCenter] = useState({ lat: 6.4281, lng: -9.4295 });
-  const mapRef = useRef<HTMLDivElement>(null);
+  const [points, setPoints] = React.useState<BoundaryPoint[]>([]);
+  const [isTracking, setIsTracking] = React.useState(false);
+  const [status, setStatus] = React.useState('Tap map to create boundaries');
+  const [mapCenter, setMapCenter] = React.useState({ lat: 6.4281, lng: -9.4295 });
+  const mapRef = React.useRef<HTMLDivElement>(null);
 
   // Calculate area using shoelace formula
   const calculateArea = (mapPoints: BoundaryPoint[]) => {
@@ -132,7 +132,7 @@ export default function ExactBoundaryMapper({ onBoundaryComplete }: ExactBoundar
   };
 
   // Load satellite imagery and render points/lines
-  useEffect(() => {
+  React.useEffect(() => {
     const mapElement = mapRef.current;
     if (!mapElement) return;
 

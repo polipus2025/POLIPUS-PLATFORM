@@ -45,11 +45,11 @@ export default function SatelliteFarmDisplay({
   showControls = true, 
   height = "400px" 
 }: SatelliteFarmDisplayProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [satelliteProvider, setSatelliteProvider] = useState('ESRI_WORLD_IMAGERY');
-  const [mapReady, setMapReady] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const mapRef = React.useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [satelliteProvider, setSatelliteProvider] = React.useState('ESRI_WORLD_IMAGERY');
+  const [mapReady, setMapReady] = React.useState(false);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
 
   // Generate high-quality satellite imagery URL
   const generateSatelliteImageUrl = (lat: number, lng: number, zoom: number = 18) => {
@@ -75,7 +75,7 @@ export default function SatelliteFarmDisplay({
   };
 
   // Initialize satellite map with farm boundaries
-  useEffect(() => {
+  React.useEffect(() => {
     if (!mapRef.current || !farmData.boundaries.length) return;
 
     const initializeSatelliteMap = async () => {

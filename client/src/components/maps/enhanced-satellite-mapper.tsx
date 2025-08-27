@@ -44,16 +44,16 @@ export default function EnhancedSatelliteMapper({
   farmerId,
   farmerName 
 }: EnhancedSatelliteMapperProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [points, setPoints] = useState<BoundaryPoint[]>([]);
-  const [status, setStatus] = useState('Initializing advanced satellite mapping...');
-  const [mapReady, setMapReady] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [isTrackingGPS, setIsTrackingGPS] = useState(false);
-  const [satelliteProvider, setSatelliteProvider] = useState('ESRI_WORLD_IMAGERY');
-  const [mapZoom, setMapZoom] = useState(18);
-  const [boundaryComplete, setBoundaryComplete] = useState(false);
-  const [mapScreenshot, setMapScreenshot] = useState<string | null>(null);
+  const mapRef = React.useRef<HTMLDivElement>(null);
+  const [points, setPoints] = React.useState<BoundaryPoint[]>([]);
+  const [status, setStatus] = React.useState('Initializing advanced satellite mapping...');
+  const [mapReady, setMapReady] = React.useState(false);
+  const [currentLocation, setCurrentLocation] = React.useState<{lat: number, lng: number} | null>(null);
+  const [isTrackingGPS, setIsTrackingGPS] = React.useState(false);
+  const [satelliteProvider, setSatelliteProvider] = React.useState('ESRI_WORLD_IMAGERY');
+  const [mapZoom, setMapZoom] = React.useState(18);
+  const [boundaryComplete, setBoundaryComplete] = React.useState(false);
+  const [mapScreenshot, setMapScreenshot] = React.useState<string | null>(null);
   const { toast } = useToast();
 
   // Enhanced satellite providers with specific coordinate targeting
@@ -124,7 +124,7 @@ export default function EnhancedSatelliteMapper({
   };
 
   // Initialize satellite map with enhanced imagery
-  useEffect(() => {
+  React.useEffect(() => {
     if (!mapRef.current) return;
 
     const initializeMap = async () => {

@@ -44,8 +44,9 @@ export default function FarmerDashboard() {
     ? "FARMER-1755883520291-288" 
     : (storedFarmerId || "FARMER-1755883520291-288");
     
-  const farmerName = localStorage.getItem("farmerFirstName") || "Paolo";
-  const farmerCounty = localStorage.getItem("farmerCounty") || "Margibi";
+  const farmerName = localStorage.getItem("farmerFirstName") || "Farmer";
+  const farmerFullName = localStorage.getItem("farmerFullName") || "Farmer";
+  const farmerCounty = localStorage.getItem("farmerCounty") || "Unknown County";
   
   // Dashboard initialized for farmer: ${farmerId}
   

@@ -88,7 +88,11 @@ export default function FarmerBuyerLogin() {
         localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "farmer");
-        localStorage.setItem("farmerId", data.farmerId);
+        localStorage.setItem("farmerId", result.farmer.farmerId);
+        localStorage.setItem("credentialId", data.farmerId);
+        localStorage.setItem("farmerFirstName", result.farmer.firstName);
+        localStorage.setItem("farmerLastName", result.farmer.lastName);
+        localStorage.setItem("farmerFullName", `${result.farmer.firstName} ${result.farmer.lastName}`);
         
         window.location.href = "/farmer-dashboard";
       }

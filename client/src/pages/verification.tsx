@@ -134,7 +134,7 @@ export default function Verification() {
     deforestationAlerts: 0,
     sustainabilityScores: [] as number[]
   });
-  const [simulationLogs, setSimulationLogs] = useState<Array<{
+  const [simulationLogs, setSimulationLogs] = React.useState<Array<{
     timestamp: string;
     type: 'success' | 'warning' | 'error' | 'info';
     message: string;
@@ -157,21 +157,24 @@ export default function Verification() {
       if (!response.ok) {
         throw new Error('Failed to verify tracking number');
       }
-      return await response.json();
+      const data = await response.json();
+      return data && typeof data === 'object' ? data : null;
     },
     onSuccess: (data: VerificationResult) => {
-      setVerificationResult(data);
-      if (data.valid) {
-        toast({
+      if (data && data.valid !== undefined) {
+        setVerificationResult(data);
+        if (data.valid) {
+          toast({
           title: "Verification Successful",
           description: `Certificate ${data.record?.trackingNumber} verified successfully.`,
-        });
-      } else {
-        toast({
-          title: "Verification Failed",
-          description: "The tracking number is invalid or not found.",
-          variant: "destructive",
-        });
+          });
+        } else {
+          toast({
+            title: "Verification Failed",
+            description: "The tracking number is invalid or not found.",
+            variant: "destructive",
+          });
+        }
       }
     },
     onError: () => {

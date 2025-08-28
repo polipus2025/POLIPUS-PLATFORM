@@ -450,7 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Received offer data:", req.body); // Debug log
       
       // Extract numeric farmer ID for database
-      const dbId = extractFarmerDbId(req.body.farmerId);
+      const dbId = await extractFarmerDbId(req.body.farmerId);
       if (!dbId) {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }
@@ -590,8 +590,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Utility function to extract database ID from farmer ID
-  const extractFarmerDbId = (farmerId: string | number): number | null => {
+  // Utility function to extract database ID from farmer ID - FIXED VERSION
+  const extractFarmerDbId = async (farmerId: string | number): Promise<number | null> => {
     // Handle direct numeric farmer ID
     if (typeof farmerId === 'number') {
       return farmerId;
@@ -605,11 +605,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return directNumber;
       }
       
-      // Handle formatted farmer ID like "FARMER-123-456"
-      const parts = farmerId.split('-');
-      if (parts.length >= 3 && parts[0] === 'FARMER') {
-        const dbId = parseInt(parts[parts.length - 1]);
-        return isNaN(dbId) ? null : dbId;
+      // For formatted farmer IDs like "FARMER-1756314707545-846", look up in database
+      if (farmerId.startsWith('FARMER-')) {
+        try {
+          const [farmerRecord] = await db
+            .select({ id: farmers.id })
+            .from(farmers)
+            .where(eq(farmers.farmerId, farmerId))
+            .limit(1);
+          
+          return farmerRecord?.id || null;
+        } catch (error) {
+          console.error('Error looking up farmer by farmerId:', error);
+          return null;
+        }
       }
     }
     
@@ -622,7 +631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmerId } = req.params;
       
       // Extract database ID from farmer ID
-      const dbId = extractFarmerDbId(farmerId);
+      const dbId = await extractFarmerDbId(farmerId);
       if (!dbId) {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }
@@ -14439,7 +14448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetching farmer transactions
       
       // GENERIC SYSTEM: Extract database ID from any farmer ID 
-      const dbId = extractFarmerDbId(farmerId);
+      const dbId = await extractFarmerDbId(farmerId);
       if (!dbId) {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }

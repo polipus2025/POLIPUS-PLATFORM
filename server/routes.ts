@@ -13955,7 +13955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`📬 Returning ${realNotifications.length} REAL notifications for buyer ${buyerId}`);
       realNotifications.forEach((notif, i) => {
-        console.log(`  ${i+1}. ${notif.farmerName} - ${notif.commodityType} - ${notif.quantityAvailable} @ $${notif.pricePerUnit}`);
+        console.log(`  ${i+1}. [${notif.offerId}] ${notif.farmerName} - ${notif.commodityType} - ${notif.quantityAvailable} @ $${notif.pricePerUnit}`);
       });
       
       res.json(realNotifications);

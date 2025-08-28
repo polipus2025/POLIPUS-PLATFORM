@@ -1064,6 +1064,7 @@ export default function AgriculturalBuyerDashboard() {
                             <div>
                               <h4 className="font-semibold text-lg">{notification.commodityType}</h4>
                               <p className="text-sm text-gray-600">From: {notification.farmerName}</p>
+                              <p className="text-sm text-blue-600 font-medium">Offer ID: {notification.offerId}</p>
                               <p className="text-sm text-gray-500">{notification.county}</p>
                             </div>
                             <Badge className={!notification.response ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>

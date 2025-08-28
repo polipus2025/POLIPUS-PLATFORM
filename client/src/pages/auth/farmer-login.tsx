@@ -142,7 +142,7 @@ export default function FarmerBuyerLogin() {
         localStorage.setItem("userType", "buyer");
         localStorage.setItem("buyerId", data.buyerId);
         
-        window.location.href = "/buyer-dashboard";
+        window.location.href = "/agricultural-buyer-dashboard";
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

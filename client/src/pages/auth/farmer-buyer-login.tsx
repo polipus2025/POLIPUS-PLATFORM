@@ -47,7 +47,11 @@ export default function FarmerBuyerLogin() {
       const response = await fetch('/api/auth/farmer-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...farmerData, userType: 'farmer' })
+        body: JSON.stringify({ 
+          farmerId: farmerData.username, 
+          password: farmerData.password,
+          userType: 'farmer' 
+        })
       });
 
       const data = await response.json();
@@ -76,7 +80,11 @@ export default function FarmerBuyerLogin() {
       const response = await fetch('/api/auth/buyer-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...buyerData, userType: 'buyer' })
+        body: JSON.stringify({ 
+          username: buyerData.username, 
+          password: buyerData.password,
+          userType: 'buyer' 
+        })
       });
 
       const data = await response.json();

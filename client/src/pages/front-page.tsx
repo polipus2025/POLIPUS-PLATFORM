@@ -442,7 +442,7 @@ export default function FrontPage() {
               Platform Access Portals
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Secure authentication portals for different user types and system monitoring access.
+              Secure authentication portals for different user types - Updated with separate farmer and buyer access.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

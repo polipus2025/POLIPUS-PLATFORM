@@ -3860,7 +3860,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       
-      res.json(availableHarvests);
+      res.json([]);
     } catch (error) {
       res.status(500).json({ message: "Error fetching available harvests" });
     }

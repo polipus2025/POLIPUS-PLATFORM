@@ -31,9 +31,7 @@ import {
   Building2,
   Loader2,
   XCircle,
-  User,
-  ArrowLeft,
-  ShoppingCart
+  User
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -798,68 +796,17 @@ export default function AgriculturalBuyerDashboard() {
     navigate('/buyer-marketplace');
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/buyer-portal-login";
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-      {/* Portal Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Back Button */}
-            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => navigate('/')}>
-              <ArrowLeft className="h-4 w-4" />
-              Back to Platform
-            </Button>
-            
-            {/* Portal Title */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">Buyer Portal</h1>
-                <p className="text-sm text-slate-600">Agricultural Commerce Platform</p>
-              </div>
-            </div>
-
-            {/* Profile & Logout */}
-            <div className="flex items-center gap-3">
-              <ProfileDropdown
-                userName={company}
-                userEmail={`contact@${company.toLowerCase().replace(/\s+/g, '')}.com`}
-                userType="buyer"
-                userId={buyerId}
-                onLogout={handleLogout}
-              />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleLogout}
-                className="text-slate-600 hover:text-slate-900"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Welcome Header */}
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Agricultural Buyer Portal</h2>
-              {profileLoading ? (
-                <p className="text-gray-600">Loading company details...</p>
-              ) : (
-                <p className="text-gray-600">{company}</p>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Agricultural Buyer Portal</h1>
+            {profileLoading ? (
+              <p className="text-gray-600">Loading company details...</p>
+            ) : (
+              <p className="text-gray-600">{company}</p>
             )}
           </div>
           <div className="flex items-center space-x-4">

@@ -442,7 +442,7 @@ export default function FrontPage() {
               Platform Access Portals
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Secure authentication portals for different user types - Updated with separate farmer and buyer access.
+              Secure authentication portals for different user types and system monitoring access.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -461,28 +461,14 @@ export default function FrontPage() {
               </Link>
 
               {/* Farmer Portal */}
-              <Link href="/farmer-portal-login">
+              <Link href="/farmer-login">
                 <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-300">
                   <div className="text-center p-4">
                     <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
                       <Wheat className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Farmer Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">Agricultural producers and farm managers</p>
-                    <Button size="sm" className="w-full isms-button">Access Portal</Button>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Buyer Portal */}
-              <Link href="/buyer-portal-login">
-                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-300">
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
-                      <Building2 className="h-6 w-6 text-white" />
-                    </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Buyer Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">Agricultural commodity buyers and traders</p>
+                    <h4 className="font-bold text-slate-900 mb-2">Farmer & Buyer Portal</h4>
+                    <p className="text-xs text-slate-600 mb-3">Agricultural producers, farm managers, and commodity buyers</p>
                     <Button size="sm" className="w-full isms-button">Access Portal</Button>
                   </div>
                 </div>

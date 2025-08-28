@@ -62,6 +62,10 @@ import DGLogin from "@/pages/auth/dg-login";
 import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
 import SystemAdminLogin from "@/pages/auth/system-admin-login";
 
+// NEW SEPARATE PORTAL LOGINS
+import FarmerPortalLogin from "@/pages/auth/farmer-portal-login";
+import BuyerPortalLogin from "@/pages/auth/buyer-portal-login";
+
 // LAZY LOADING - Polipus module portals (7 modules)
 const LiveTracePortal = lazy(() => import("@/pages/portals/live-trace-portal"));
 const LandMap360Portal = lazy(() => import("@/pages/portals/land-map360-portal"));
@@ -144,6 +148,10 @@ function App() {
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
+            
+            {/* NEW SEPARATE PORTAL ROUTES */}
+            <Route path="/farmer-portal-login" component={FarmerPortalLogin} />
+            <Route path="/buyer-portal-login" component={BuyerPortalLogin} />
             <Route path="/regulatory-login" component={RegulatoryLogin} />
             <Route path="/inspector-login" component={InspectorLogin} />
             <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />

@@ -25,7 +25,9 @@ import {
   Bell,
   BarChart3,
   Home,
-  Loader2
+  Loader2,
+  ArrowLeft,
+  LogOut
 } from "lucide-react";
 import { Link } from "wouter";
 import ProfileDropdown from "@/components/ProfileDropdown";
@@ -204,21 +206,64 @@ export default function FarmerDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/farmer-portal-login";
+  };
+
   return (
-    <div className="space-y-3 sm:space-y-4 p-2 sm:p-4 max-w-7xl mx-auto">
-      {/* Back to Polipus Button */}
-      <div className="mb-4">
-        <Link href="/polipus" className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Polipus Platform
-        </Link>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+      {/* Portal Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Back Button */}
+            <Link href="/">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Platform
+              </Button>
+            </Link>
+            
+            {/* Portal Title */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                <Leaf className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900">Farmer Portal</h1>
+                <p className="text-sm text-slate-600">Agricultural Traceability System</p>
+              </div>
+            </div>
+
+            {/* Profile & Logout */}
+            <div className="flex items-center gap-3">
+              <ProfileDropdown
+                userName={farmerFullName}
+                userEmail={`${farmerName.toLowerCase()}@farm.co`}
+                userType="farmer"
+                userId={farmerId}
+                onLogout={handleLogout}
+              />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+                className="text-slate-600 hover:text-slate-900"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Mobile-Responsive Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
+      {/* Main Content */}
+      <div className="space-y-3 sm:space-y-4 p-2 sm:p-4 max-w-7xl mx-auto">
+        {/* Welcome Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-lg p-4 shadow-sm">
+          <div>
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">
             Welcome back, {farmerName}!
           </h1>

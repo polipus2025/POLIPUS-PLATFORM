@@ -461,14 +461,28 @@ export default function FrontPage() {
               </Link>
 
               {/* Farmer Portal */}
-              <Link href="/farmer-login">
+              <Link href="/farmer-portal-login">
                 <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-300">
                   <div className="text-center p-4">
                     <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
                       <Wheat className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Farmer & Buyer Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">Agricultural producers, farm managers, and commodity buyers</p>
+                    <h4 className="font-bold text-slate-900 mb-2">Farmer Portal</h4>
+                    <p className="text-xs text-slate-600 mb-3">Agricultural producers and farm managers</p>
+                    <Button size="sm" className="w-full isms-button">Access Portal</Button>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Buyer Portal */}
+              <Link href="/buyer-portal-login">
+                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-300">
+                  <div className="text-center p-4">
+                    <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                      <Building2 className="h-6 w-6 text-white" />
+                    </div>
+                    <h4 className="font-bold text-slate-900 mb-2">Buyer Portal</h4>
+                    <p className="text-xs text-slate-600 mb-3">Agricultural commodity buyers and traders</p>
                     <Button size="sm" className="w-full isms-button">Access Portal</Button>
                   </div>
                 </div>

@@ -1,369 +1,130 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShoppingCart, ArrowLeft, ArrowRight, Building2, UserPlus, Eye, EyeOff, AlertCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { Building2, ArrowLeft, ArrowRight, UserCheck, MapPin, ShoppingCart } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
-
-const buyerLoginSchema = z.object({
-  buyerId: z.string().min(1, "Buyer ID is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  companyName: z.string().optional(),
-  phoneNumber: z.string().optional(),
-});
-
-const buyerRegistrationSchema = z.object({
-  companyName: z.string().min(1, "Company name is required"),
-  contactPersonName: z.string().min(1, "Contact person name is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  email: z.string().email("Valid email is required").optional().or(z.literal("")),
-  businessAddress: z.string().min(1, "Business address is required"),
-  businessLicense: z.string().optional(),
-  commodityTypes: z.string().min(1, "Commodity types are required"),
-});
-
-type BuyerLoginForm = z.infer<typeof buyerLoginSchema>;
-type BuyerRegistrationForm = z.infer<typeof buyerRegistrationSchema>;
 
 export default function BuyerPortalLogin() {
   const [, navigate] = useLocation();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
-  const [activeTab, setActiveTab] = useState("login");
-  const { toast } = useToast();
-
-  const loginForm = useForm<BuyerLoginForm>({
-    resolver: zodResolver(buyerLoginSchema),
-    defaultValues: {
-      buyerId: "",
-      password: "",
-      companyName: "",
-      phoneNumber: "",
-    },
-  });
-
-  const registrationForm = useForm<BuyerRegistrationForm>({
-    resolver: zodResolver(buyerRegistrationSchema),
-    defaultValues: {
-      companyName: "",
-      contactPersonName: "",
-      phoneNumber: "",
-      email: "",
-      businessAddress: "",
-      businessLicense: "",
-      commodityTypes: "",
-    },
-  });
-
-  const onLoginSubmit = async (data: BuyerLoginForm) => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const result = await apiRequest("/api/buyers/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-
-      if (result.success) {
-        toast({
-          title: "Login Successful",
-          description: `Welcome back to ${result.buyer.companyName}!`,
-        });
-        
-        localStorage.setItem('buyer_token', result.token);
-        localStorage.setItem('buyer_id', result.buyer.buyerId);
-        localStorage.setItem('buyer_company', result.buyer.companyName);
-        
-        navigate('/buyer-dashboard');
-      } else {
-        setError(result.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("An error occurred during login. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onRegistrationSubmit = async (data: BuyerRegistrationForm) => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const result = await apiRequest("/api/buyers/register", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-
-      if (result.success) {
-        toast({
-          title: "Registration Successful",
-          description: `Welcome ${data.companyName}! Your Buyer ID is: ${result.buyer.buyerId}`,
-          duration: 8000,
-        });
-        
-        localStorage.setItem('buyer_token', result.token);
-        localStorage.setItem('buyer_id', result.buyer.buyerId);
-        localStorage.setItem('buyer_company', result.buyer.companyName);
-        
-        navigate('/buyer-dashboard');
-      } else {
-        setError(result.message || "Registration failed");
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-      setError("An error occurred during registration. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       {/* Back to Platform Button */}
       <div className="absolute top-6 left-6">
-        <Link href="/">
+        <Link href="/farmer-buyer-portal-select">
           <Button variant="outline" size="sm" className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Polipus Platform
+            Back to Portal Selection
           </Button>
         </Link>
       </div>
       
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
-            <img 
-              src={lacraLogo} 
-              alt="LACRA Logo" 
-              className="w-16 h-16 object-contain rounded-full"
-            />
+            <Building2 className="w-10 h-10 text-blue-600" />
           </div>
           <h1 className="text-4xl font-bold text-slate-900 mb-2">Buyer Portal</h1>
-          <p className="text-slate-700 text-lg">Agricultural Commerce Platform</p>
-          <p className="text-slate-600 text-sm mt-2">Liberia Agriculture Commodity Regulatory Authority</p>
+          <p className="text-slate-700 text-lg">Agricultural Commodity Buyer Access</p>
+          <p className="text-slate-600 text-sm mt-2">AgriTrace360™ - Commodity Trading & Compliance</p>
         </div>
 
-        {/* Main Card */}
-        <Card className="bg-white shadow-xl border-slate-200">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
-              <ShoppingCart className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl text-slate-900">
-              {activeTab === "login" ? "Buyer Login" : "Register New Buyer"}
-            </CardTitle>
-            <CardDescription className="text-slate-600">
-              {activeTab === "login" 
-                ? "Access your agricultural commerce dashboard" 
-                : "Join the LACRA agricultural marketplace"
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Tab Buttons */}
-            <div className="flex rounded-lg bg-slate-100 p-1">
-              <button
-                onClick={() => setActiveTab("login")}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                  activeTab === "login"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
+        {/* Access Options Cards */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Existing Buyer Login */}
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group" 
+                onClick={() => navigate('/agricultural-buyer-dashboard')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <UserCheck className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                <UserCheck className="w-5 h-5" />
+                Registered Buyer
+              </CardTitle>
+              <CardDescription className="text-slate-600">
+                Existing commodity buyer login
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-blue-500 text-blue-600 bg-blue-50">
+                Buyer Level Access
+              </Badge>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>• Commodity sourcing & marketplace access</li>
+                <li>• Transaction management & payments</li>
+                <li>• Quality verification & compliance</li>
+                <li>• Export documentation & networks</li>
+              </ul>
+              <Button 
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
+                onClick={(e) => { e.stopPropagation(); navigate('/agricultural-buyer-dashboard'); }}
               >
-                Login
-              </button>
-              <button
-                onClick={() => setActiveTab("register")}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                  activeTab === "register"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
+                Access Buyer Dashboard
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* New Buyer Registration */}
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
+                onClick={() => navigate('/buyer-registration')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <ShoppingCart className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                New Buyer
+              </CardTitle>
+              <CardDescription className="text-slate-600">
+                Commodity buyer registration & verification
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-cyan-500 text-cyan-600 bg-cyan-50">
+                Registration Process
+              </Badge>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>• Complete buyer profile setup</li>
+                <li>• Business verification process</li>
+                <li>• Financial credential validation</li>
+                <li>• Access to commodity marketplace</li>
+              </ul>
+              <Button 
+                className="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white group"
+                onClick={(e) => { e.stopPropagation(); navigate('/buyer-registration'); }}
               >
-                Register
-              </button>
-            </div>
+                Register as New Buyer
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Login Form */}
-            {activeTab === "login" && (
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="buyerId">Buyer ID</Label>
-                  <Input
-                    id="buyerId"
-                    placeholder="Enter your Buyer ID"
-                    {...loginForm.register("buyerId")}
-                    data-testid="input-buyer-id"
-                  />
-                  {loginForm.formState.errors.buyerId && (
-                    <p className="text-sm text-red-600">{loginForm.formState.errors.buyerId.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      {...loginForm.register("password")}
-                      data-testid="input-password"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-slate-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-slate-500" />
-                      )}
-                    </Button>
-                  </div>
-                  {loginForm.formState.errors.password && (
-                    <p className="text-sm text-red-600">{loginForm.formState.errors.password.message}</p>
-                  )}
-                </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-                  disabled={isLoading}
-                  data-testid="button-login"
-                >
-                  {isLoading ? "Signing In..." : "Sign In"}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </form>
-            )}
-
-            {/* Registration Form */}
-            {activeTab === "register" && (
-              <form onSubmit={registrationForm.handleSubmit(onRegistrationSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input
-                    id="companyName"
-                    placeholder="Company name"
-                    {...registrationForm.register("companyName")}
-                    data-testid="input-company-name"
-                  />
-                  {registrationForm.formState.errors.companyName && (
-                    <p className="text-sm text-red-600">{registrationForm.formState.errors.companyName.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contactPersonName">Contact Person Name</Label>
-                  <Input
-                    id="contactPersonName"
-                    placeholder="Contact person name"
-                    {...registrationForm.register("contactPersonName")}
-                    data-testid="input-contact-name"
-                  />
-                  {registrationForm.formState.errors.contactPersonName && (
-                    <p className="text-sm text-red-600">{registrationForm.formState.errors.contactPersonName.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <Input
-                    id="phoneNumber"
-                    placeholder="Phone number"
-                    {...registrationForm.register("phoneNumber")}
-                    data-testid="input-phone"
-                  />
-                  {registrationForm.formState.errors.phoneNumber && (
-                    <p className="text-sm text-red-600">{registrationForm.formState.errors.phoneNumber.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email (Optional)</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Email address"
-                    {...registrationForm.register("email")}
-                    data-testid="input-email"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="businessAddress">Business Address</Label>
-                  <Input
-                    id="businessAddress"
-                    placeholder="Business address"
-                    {...registrationForm.register("businessAddress")}
-                    data-testid="input-address"
-                  />
-                  {registrationForm.formState.errors.businessAddress && (
-                    <p className="text-sm text-red-600">{registrationForm.formState.errors.businessAddress.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="businessLicense">Business License (Optional)</Label>
-                  <Input
-                    id="businessLicense"
-                    placeholder="Business license number"
-                    {...registrationForm.register("businessLicense")}
-                    data-testid="input-license"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="commodityTypes">Commodity Types</Label>
-                  <Input
-                    id="commodityTypes"
-                    placeholder="e.g., Coffee, Cocoa, Rice, Cassava"
-                    {...registrationForm.register("commodityTypes")}
-                    data-testid="input-commodities"
-                  />
-                  {registrationForm.formState.errors.commodityTypes && (
-                    <p className="text-sm text-red-600">{registrationForm.formState.errors.commodityTypes.message}</p>
-                  )}
-                </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-                  disabled={isLoading}
-                  data-testid="button-register"
-                >
-                  {isLoading ? "Creating Account..." : "Create Buyer Account"}
-                  <UserPlus className="w-4 h-4 ml-2" />
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+        {/* Help Section */}
+        <div className="text-center">
+          <Card className="bg-white shadow-lg border-slate-200">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Need Assistance?</h3>
+              <p className="text-slate-600 text-sm mb-4">
+                Contact LACRA trade department or your designated commodity representative for account setup and market access.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-500">
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  LACRA Trade Department
+                </span>
+                <span>•</span>
+                <span>📞 Support: +231-XXX-XXXX</span>
+                <span>•</span>
+                <span>📧 buyers@lacra.gov.lr</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

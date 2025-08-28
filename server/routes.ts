@@ -591,12 +591,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Utility function to extract database ID from farmer ID
-  const extractFarmerDbId = (farmerId: string): number | null => {
-    const parts = farmerId.split('-');
-    if (parts.length >= 3 && parts[0] === 'FARMER') {
-      const dbId = parseInt(parts[parts.length - 1]);
-      return isNaN(dbId) ? null : dbId;
+  const extractFarmerDbId = (farmerId: string | number): number | null => {
+    // Handle direct numeric farmer ID
+    if (typeof farmerId === 'number') {
+      return farmerId;
     }
+    
+    // Handle string farmer ID
+    if (typeof farmerId === 'string') {
+      // Check if it's already a pure number string
+      const directNumber = parseInt(farmerId);
+      if (!isNaN(directNumber) && directNumber.toString() === farmerId) {
+        return directNumber;
+      }
+      
+      // Handle formatted farmer ID like "FARMER-123-456"
+      const parts = farmerId.split('-');
+      if (parts.length >= 3 && parts[0] === 'FARMER') {
+        const dbId = parseInt(parts[parts.length - 1]);
+        return isNaN(dbId) ? null : dbId;
+      }
+    }
+    
     return null;
   };
 

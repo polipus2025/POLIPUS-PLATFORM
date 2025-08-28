@@ -249,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Satellite analysis completed successfully"
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Satellite analysis error:", error);
       res.status(500).json({ 
         success: false, 
@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return the new plot in the same format as the GET endpoint
       res.status(201).json(newPlot);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Database insert error:", error);
       res.status(500).json({
         success: false,
@@ -399,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalPlots: farmerPlots.rows?.length || 0,
         landMappingAvailable: !!(farmer.landMapData || farmer.farmBoundaries || farmerPlots.rows?.length > 0),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer land data:", error);
       res.status(500).json({ 
         success: false, 
@@ -580,7 +580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notificationsSent: notifications.length,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating farmer product offer:", error);
       res.status(400).json({ 
         success: false, 
@@ -673,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allOffers = [...confirmedOffers, ...pendingOffers];
       
       res.json(allOffers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer offers:", error);
       res.status(500).json({ error: "Failed to fetch farmer offers" });
     }
@@ -730,7 +730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notifications,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer notifications:", error);
       res.status(500).json({ 
         success: false, 
@@ -898,7 +898,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error responding to notification:", error);
       res.status(500).json({ 
         success: false, 
@@ -937,7 +937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offers: offersWithTransactions,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer offers:", error);
       res.status(500).json({ 
         success: false, 
@@ -972,7 +972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transactions,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer transactions:", error);
       res.status(500).json({ 
         success: false, 
@@ -1004,7 +1004,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isValid: true,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error verifying transaction:", error);
       res.status(500).json({ 
         success: false, 
@@ -1043,7 +1043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalBuyers: availableBuyers.length,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching available buyers:", error);
       res.status(500).json({ 
         success: false, 
@@ -1112,9 +1112,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error creating test farmer:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error?.message || 'Unknown error' });
     }
   });
   
@@ -1122,7 +1122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/download/platform-documentation", async (req, res) => {
     try {
       await generateComprehensivePlatformDocumentation(res);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating platform documentation:", error);
       res.status(500).json({ message: "Failed to generate documentation" });
     }
@@ -1133,7 +1133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const commodities = await storage.getSoftCommodities();
       res.json(commodities);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching soft commodities:", error);
       res.status(500).json({ message: "Failed to fetch commodity prices" });
     }
@@ -1149,12 +1149,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const commodityData = {
         ...req.body,
-        updatedBy: req.user.id
+        updatedBy: req.user?.userId || 0
       };
 
       const commodity = await storage.createSoftCommodity(commodityData);
       res.json(commodity);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating soft commodity:", error);
       res.status(500).json({ message: "Failed to create commodity price" });
     }
@@ -1171,13 +1171,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const commodityData = {
         ...req.body,
-        updatedBy: req.user.id,
+        updatedBy: req.user?.userId || 0,
         updatedAt: new Date()
       };
 
       const commodity = await storage.updateSoftCommodity(id, commodityData);
       res.json(commodity);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating soft commodity:", error);
       res.status(500).json({ message: "Failed to update commodity price" });
     }
@@ -1194,7 +1194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       await storage.deleteSoftCommodity(id);
       res.json({ message: "Commodity price deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting soft commodity:", error);
       res.status(500).json({ message: "Failed to delete commodity price" });
     }
@@ -1213,7 +1213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products: productConfigurationData[key as keyof typeof productConfigurationData].products.length
       }));
       res.json({ success: true, data: categories });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching product categories:", error);
       res.status(500).json({ success: false, message: "Failed to fetch product categories" });
     }
@@ -1230,7 +1230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ success: true, data: categoryData });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching category products:", error);
       res.status(500).json({ success: false, message: "Failed to fetch category products" });
     }
@@ -1242,9 +1242,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category, subCategory } = req.params;
       const packagingOptions = QrBatchService.getPackagingOptions(category, subCategory);
       res.json({ success: true, data: packagingOptions });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching packaging options:", error);
-      res.status(404).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: error?.message || 'Unknown error' });
     }
   });
 
@@ -1254,9 +1254,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category, subCategory, packagingType, weight } = req.body;
       const validation = QrBatchService.validatePackaging(category, subCategory, packagingType, weight);
       res.json({ success: validation.valid, ...validation });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error validating packaging:", error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: error?.message || 'Unknown error' });
     }
   });
 
@@ -1269,7 +1269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const prices = await commodityDataService.getCommodityPrices();
       res.json({ success: true, data: prices });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching commodity prices:", error);
       res.status(500).json({ success: false, message: "Failed to fetch commodity prices" });
     }
@@ -1280,7 +1280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const analytics = await commodityDataService.getCommodityAnalytics();
       res.json({ success: true, data: analytics });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching commodity analytics:", error);
       res.status(500).json({ success: false, message: "Failed to fetch commodity analytics" });
     }
@@ -1291,7 +1291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const recommendations = await commodityDataService.getTradingRecommendations();
       res.json({ success: true, data: recommendations });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching trading recommendations:", error);
       res.status(500).json({ success: false, message: "Failed to fetch trading recommendations" });
     }
@@ -1302,7 +1302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const intelligence = await commodityDataService.getMarketIntelligence();
       res.json({ success: true, data: intelligence });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching market intelligence:", error);
       res.status(500).json({ success: false, message: "Failed to fetch market intelligence" });
     }
@@ -1313,7 +1313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const prices = await commodityDataService.getCommodityPrices();
       res.json({ success: true, data: prices });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching commodity prices:", error);
       res.status(500).json({ success: false, message: "Failed to fetch commodity prices" });
     }
@@ -1324,7 +1324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const indicators = await commodityDataService.getMarketIndicators();
       res.json({ success: true, data: indicators });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching market indicators:", error);
       res.status(500).json({ success: false, message: "Failed to fetch market indicators" });
     }
@@ -1335,7 +1335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const alerts = await commodityDataService.getPriceAlerts();
       res.json({ success: true, data: alerts });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching price alerts:", error);
       res.status(500).json({ success: false, message: "Failed to fetch price alerts" });
     }
@@ -1346,7 +1346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const recommendations = await commodityDataService.getTradingRecommendations();
       res.json({ success: true, data: recommendations });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching trading recommendations:", error);
       res.status(500).json({ success: false, message: "Failed to fetch trading recommendations" });
     }
@@ -1396,7 +1396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: link,
         message: `Transaction ${transactionId} linked successfully - ready for QR batch generation` 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating transaction QR link:", error);
       res.status(500).json({ success: false, message: "Failed to create transaction link" });
     }
@@ -1446,7 +1446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       res.json({ success: true, data: pendingTransactions });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching pending transactions:", error);
       res.status(500).json({ success: false, message: "Failed to fetch pending transactions" });
     }
@@ -1461,7 +1461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const batches = await storage.getQrBatches();
       res.json({ success: true, data: batches });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching QR batches:", error);
       res.status(500).json({ success: false, message: "Failed to fetch QR batches" });
     }
@@ -1472,7 +1472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const batches = await storage.getQrBatchesByWarehouse(req.params.warehouseId);
       res.json({ success: true, data: batches });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching warehouse QR batches:", error);
       res.status(500).json({ success: false, message: "Failed to fetch warehouse QR batches" });
     }
@@ -1483,7 +1483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const batches = await storage.getQrBatchesByBuyer(req.params.buyerId);
       res.json({ success: true, data: batches });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer QR batches:", error);
       res.status(500).json({ success: false, message: "Failed to fetch buyer QR batches" });
     }
@@ -1497,7 +1497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ success: false, message: "QR batch not found" });
       }
       res.json({ success: true, data: batch });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching QR batch:", error);
       res.status(500).json({ success: false, message: "Failed to fetch QR batch" });
     }
@@ -1600,7 +1600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const result = await QrBatchService.createQrBatchFromTransaction(mockTransactionData);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating QR batch from transaction:", error);
       res.status(500).json({ success: false, message: "Failed to create QR batch from transaction" });
     }
@@ -1675,7 +1675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating QR batch:", error);
       res.status(500).json({ success: false, message: "Failed to create QR batch" });
     }
@@ -1703,7 +1703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error verifying QR code:", error);
       res.status(500).json({ success: false, message: "Failed to verify QR code" });
     }
@@ -1714,7 +1714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const inventory = await storage.getWarehouseBagInventory();
       res.json({ success: true, data: inventory });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching warehouse inventory:", error);
       res.status(500).json({ success: false, message: "Failed to fetch warehouse inventory" });
     }
@@ -1725,7 +1725,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const inventory = await storage.getWarehouseBagInventoryByWarehouse(req.params.warehouseId);
       res.json({ success: true, data: inventory });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching warehouse inventory:", error);
       res.status(500).json({ success: false, message: "Failed to fetch warehouse inventory" });
     }
@@ -1736,7 +1736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const movements = await storage.getBagMovements();
       res.json({ success: true, data: movements });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching bag movements:", error);
       res.status(500).json({ success: false, message: "Failed to fetch bag movements" });
     }
@@ -1747,7 +1747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const movements = await storage.getBagMovementsByWarehouse(req.params.warehouseId);
       res.json({ success: true, data: movements });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching warehouse bag movements:", error);
       res.status(500).json({ success: false, message: "Failed to fetch warehouse bag movements" });
     }
@@ -1758,7 +1758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const movements = await storage.getBagMovementsByBatch(req.params.batchCode);
       res.json({ success: true, data: movements });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching batch movements:", error);
       res.status(500).json({ success: false, message: "Failed to fetch batch movements" });
     }
@@ -1789,7 +1789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Failed to reserve bags - insufficient inventory or batch not found" 
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error reserving bags:", error);
       res.status(500).json({ success: false, message: "Failed to reserve bags" });
     }
@@ -1820,7 +1820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Failed to distribute bags - insufficient reserved bags or batch not found" 
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error distributing bags:", error);
       res.status(500).json({ success: false, message: "Failed to distribute bags" });
     }
@@ -1851,7 +1851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Failed to return bags - batch not found" 
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error returning bags:", error);
       res.status(500).json({ success: false, message: "Failed to return bags" });
     }
@@ -1862,7 +1862,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const scans = await storage.getQrScans();
       res.json({ success: true, data: scans });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching QR scans:", error);
       res.status(500).json({ success: false, message: "Failed to fetch QR scans" });
     }
@@ -1873,7 +1873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const scans = await storage.getQrScansByBatch(req.params.batchCode);
       res.json({ success: true, data: scans });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching batch scans:", error);
       res.status(500).json({ success: false, message: "Failed to fetch batch scans" });
     }
@@ -2006,7 +2006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate credentials
-      if (!agriTraceAdminCredentials[username] || agriTraceAdminCredentials[username].password !== password) {
+      if (!agriTraceAdminCredentials[username as keyof typeof agriTraceAdminCredentials] || agriTraceAdminCredentials[username as keyof typeof agriTraceAdminCredentials]?.password !== password) {
         return res.status(401).json({ 
           success: false, 
           message: "Invalid AgriTrace admin credentials" 
@@ -2035,15 +2035,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username,
           userType: 'agritrace_admin',
           role: 'system_administrator',
-          firstName: agriTraceAdminCredentials[username].firstName,
-          lastName: agriTraceAdminCredentials[username].lastName,
+          firstName: agriTraceAdminCredentials[username as keyof typeof agriTraceAdminCredentials]?.firstName || 'Unknown',
+          lastName: agriTraceAdminCredentials[username as keyof typeof agriTraceAdminCredentials]?.lastName || 'User',
           scope: 'AgriTrace360™ Module Only',
           platform: 'AgriTrace360™ System Administrator',
           systemName: 'AgriTrace Control Center',
           moduleScope: 'Agricultural Traceability Only'
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('AgriTrace admin login error:', error);
       res.status(500).json({
         success: false,
@@ -2066,7 +2066,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       req.user = decoded;
       next();
-    } catch (error) {
+    } catch (error: any) {
       res.status(403).json({ message: "Invalid or expired token" });
     }
   };
@@ -2076,7 +2076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const dashboardData = await agriTraceAdmin.getAgriTraceDashboardData();
       res.json(dashboardData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('AgriTrace dashboard error:', error);
       res.status(500).json({ message: 'Failed to fetch AgriTrace dashboard data' });
     }
@@ -2087,7 +2087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const configurations = await agriTraceAdmin.getAgriTraceConfigurations(req.query.category as string);
       res.json(configurations);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching AgriTrace configurations:', error);
       res.status(500).json({ message: 'Failed to fetch configurations' });
     }
@@ -2096,9 +2096,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agritrace-admin/configurations', authenticateAgriTraceAdmin, async (req, res) => {
     try {
       const { configKey, configValue } = req.body;
-      await agriTraceAdmin.updateAgriTraceConfiguration(configKey, configValue, req.user.username);
+      await agriTraceAdmin.updateAgriTraceConfiguration(configKey, configValue, req.user?.username || 'unknown');
       res.json({ success: true, message: 'AgriTrace configuration updated' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating AgriTrace configuration:', error);
       res.status(500).json({ message: error.message || 'Failed to update configuration' });
     }
@@ -2109,7 +2109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const features = await agriTraceAdmin.getAgriTraceFeatureFlags();
       res.json(features);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching AgriTrace features:', error);
       res.status(500).json({ message: 'Failed to fetch feature flags' });
     }
@@ -2118,9 +2118,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agritrace-admin/features/toggle', authenticateAgriTraceAdmin, async (req, res) => {
     try {
       const { flagName, isEnabled } = req.body;
-      await agriTraceAdmin.toggleAgriTraceFeature(flagName, isEnabled, req.user.username);
+      await agriTraceAdmin.toggleAgriTraceFeature(flagName, isEnabled, req.user?.username || 'unknown');
       res.json({ success: true, message: 'AgriTrace feature toggled' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling AgriTrace feature:', error);
       res.status(500).json({ message: error.message || 'Failed to toggle feature' });
     }
@@ -2132,7 +2132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hours = parseInt(req.query.hours as string) || 24;
       const health = await agriTraceAdmin.getAgriTraceHealth(hours);
       res.json(health);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching AgriTrace health:', error);
       res.status(500).json({ message: 'Failed to fetch system health' });
     }
@@ -2143,7 +2143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const controls = await agriTraceAdmin.getAgriTraceControls();
       res.json(controls);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching AgriTrace controls:', error);
       res.status(500).json({ message: 'Failed to fetch controls' });
     }
@@ -2153,12 +2153,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const control = {
         ...req.body,
-        appliedBy: req.user.username
+        appliedBy: req.user?.username || 'unknown'
       };
       
       const newControl = await agriTraceAdmin.applyAgriTraceControl(control);
       res.json(newControl);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error applying AgriTrace control:', error);
       res.status(500).json({ message: 'Failed to apply control' });
     }
@@ -2170,7 +2170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hours = parseInt(req.query.hours as string) || 24;
       const metrics = await agriTraceAdmin.getAgriTracePerformanceMetrics(hours);
       res.json(metrics);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching AgriTrace metrics:', error);
       res.status(500).json({ message: 'Failed to fetch performance metrics' });
     }
@@ -2196,7 +2196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       req.user = decoded;
       next();
-    } catch (error) {
+    } catch (error: any) {
       res.status(403).json({ message: "Invalid or expired token" });
     }
   };
@@ -2207,7 +2207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category } = req.query;
       const configurations = await superBackend.getSystemConfigurations(category as string);
       res.json({ success: true, data: configurations });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('config_api', 'Failed to get configurations', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve configurations" });
     }
@@ -2218,7 +2218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { configKey, configValue } = req.body;
       await superBackend.updateSystemConfiguration(configKey, configValue, String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Configuration updated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('config_api', 'Failed to update configuration', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to update configuration" });
     }
@@ -2230,7 +2230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { active } = req.query;
       const controls = await superBackend.getRealTimeControls(active !== 'false');
       res.json({ success: true, data: controls });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('control_api', 'Failed to get controls', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve controls" });
     }
@@ -2244,7 +2244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const newControl = await superBackend.applyRealTimeControl(control);
       res.json({ success: true, data: newControl, message: "Control applied successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('control_api', 'Failed to apply control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to apply control" });
     }
@@ -2255,7 +2255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       await superBackend.deactivateControl(parseInt(id), String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Control deactivated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('control_api', 'Failed to deactivate control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to deactivate control" });
     }
@@ -2266,7 +2266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const healthCheck = await superBackend.performHealthCheck();
       res.json({ success: true, data: healthCheck });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('health_api', 'Health check failed', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Health check failed" });
     }
@@ -2277,7 +2277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { hours } = req.query;
       const healthData = await superBackend.getSystemHealth(parseInt(hours as string) || 24);
       res.json({ success: true, data: healthData });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('health_api', 'Failed to get system health', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve system health" });
     }
@@ -2292,7 +2292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parseInt(hours as string) || 24
       );
       res.json({ success: true, data: metrics });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('performance_api', 'Failed to get performance metrics', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve performance metrics" });
     }
@@ -2303,7 +2303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { metricType, metricName, value, unit, tags } = req.body;
       await superBackend.recordPerformanceMetric(metricType, metricName, value, unit, tags);
       res.json({ success: true, message: "Performance metric recorded" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('performance_api', 'Failed to record metric', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to record metric" });
     }
@@ -2314,7 +2314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const flags = await superBackend.getFeatureFlags();
       res.json({ success: true, data: flags });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('feature_flag_api', 'Failed to get feature flags', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve feature flags" });
     }
@@ -2328,7 +2328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const newFlag = await superBackend.createFeatureFlag(flag);
       res.json({ success: true, data: newFlag, message: "Feature flag created successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('feature_flag_api', 'Failed to create feature flag', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to create feature flag" });
     }
@@ -2340,7 +2340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { isEnabled } = req.body;
       await superBackend.toggleFeatureFlag(flagName, isEnabled, String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Feature flag updated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('feature_flag_api', 'Failed to toggle feature flag', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to update feature flag" });
     }
@@ -2351,7 +2351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const accessControls = await superBackend.getAccessControlMatrix();
       res.json({ success: true, data: accessControls });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('access_control_api', 'Failed to get access controls', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve access controls" });
     }
@@ -2365,7 +2365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const newControl = await superBackend.addAccessControl(control);
       res.json({ success: true, data: newControl, message: "Access control added successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('access_control_api', 'Failed to add access control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to add access control" });
     }
@@ -2376,7 +2376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const controls = await superBackend.getEmergencyControls();
       res.json({ success: true, data: controls });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('emergency_api', 'Failed to get emergency controls', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve emergency controls" });
     }
@@ -2387,7 +2387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { controlName } = req.params;
       await superBackend.triggerEmergencyControl(controlName, String(req.user?.userId || 'system'));
       res.json({ success: true, message: "Emergency control triggered successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('emergency_api', 'Failed to trigger emergency control', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to trigger emergency control" });
     }
@@ -2399,7 +2399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { limit } = req.query;
       const operations = await superBackend.getSystemOperations(parseInt(limit as string) || 50);
       res.json({ success: true, data: operations });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('operations_api', 'Failed to get operations', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve operations" });
     }
@@ -2413,7 +2413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       const newOperation = await superBackend.createSystemOperation(operation);
       res.json({ success: true, data: newOperation, message: "Operation created successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('operations_api', 'Failed to create operation', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to create operation" });
     }
@@ -2425,7 +2425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, progress, logs } = req.body;
       await superBackend.updateOperationStatus(parseInt(id), status, progress, logs);
       res.json({ success: true, message: "Operation updated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('operations_api', 'Failed to update operation', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to update operation" });
     }
@@ -2441,7 +2441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parseInt(hours as string) || 24
       );
       res.json({ success: true, data: logs });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('logs_api', 'Failed to get logs', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve logs" });
     }
@@ -2452,7 +2452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const stats = await superBackend.getSystemStats();
       res.json({ success: true, data: stats });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('stats_api', 'Failed to get stats', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to retrieve system stats" });
     }
@@ -2480,7 +2480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         message: `Maintenance mode ${enabled ? 'enabled' : 'disabled'} successfully` 
       });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('maintenance_api', 'Failed to toggle maintenance mode', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to toggle maintenance mode" });
     }
@@ -2491,6 +2491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { serviceName } = req.body;
       
       const operation = await superBackend.createSystemOperation({
+        status: 'in_progress',
         operationType: 'restart',
         operationName: `Restart ${serviceName}`,
         targetEnvironment: process.env.NODE_ENV || 'development',
@@ -2502,7 +2503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await superBackend.updateOperationStatus(operation.id, 'completed', 100, `${serviceName} restarted successfully`);
 
       res.json({ success: true, message: `${serviceName} restart initiated`, operationId: operation.id });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('restart_api', 'Failed to restart service', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to restart service" });
     }
@@ -2513,6 +2514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { cacheType } = req.body;
       
       const operation = await superBackend.createSystemOperation({
+        status: 'in_progress',
         operationType: 'update',
         operationName: `Clear ${cacheType} cache`,
         targetEnvironment: process.env.NODE_ENV || 'development',
@@ -2524,7 +2526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await superBackend.updateOperationStatus(operation.id, 'completed', 100, `${cacheType} cache cleared successfully`);
 
       res.json({ success: true, message: `${cacheType} cache cleared successfully`, operationId: operation.id });
-    } catch (error) {
+    } catch (error: any) {
       await superBackend.logError('cache_api', 'Failed to clear cache', error as Error, String(req.user?.userId));
       res.status(500).json({ success: false, message: "Failed to clear cache" });
     }
@@ -2536,7 +2538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await superBackend.recordSystemHealth();
       await superBackend.recordPerformanceMetric('system', 'uptime', process.uptime(), 'seconds');
       await superBackend.recordPerformanceMetric('system', 'memory_usage', process.memoryUsage().heapUsed / 1024 / 1024, 'MB');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Background monitoring error:', error);
     }
   }, 60000); // Every minute
@@ -2690,7 +2692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       res.status(500).json({
         success: false,
@@ -2741,7 +2743,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: 'Invalid monitoring credentials'
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({
         success: false,
         message: 'Server error during monitoring authentication'
@@ -2773,7 +2775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseTime: Math.floor(Math.random() * 20) + 50,
         uptime: 99.8
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Monitoring overview error:', error);
       res.status(500).json({ message: 'Failed to fetch monitoring overview' });
     }
@@ -2816,7 +2818,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         ]
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('User activity monitoring error:', error);
       res.status(500).json({ message: 'Failed to fetch user activity' });
     }
@@ -2846,7 +2848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         apiRequests: auditCount + (certificationCount * 100),
         activeConnections: harvestCount + 5
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('System metrics monitoring error:', error);
       res.status(500).json({ message: 'Failed to fetch system metrics' });
     }
@@ -2883,7 +2885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         ]
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Audit logs monitoring error:', error);
       res.status(500).json({ message: 'Failed to fetch audit logs' });
     }
@@ -2959,7 +2961,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           permissions: regulator.permissions
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("DG Login error:", error);
       res.status(500).json({ success: false, message: "Login failed" });
     }
@@ -3031,7 +3033,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           permissions: regulator.permissions
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("DDGOTS Login error:", error);
       res.status(500).json({ success: false, message: "Login failed" });
     }
@@ -3103,7 +3105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           permissions: regulator.permissions
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("DDGAF Login error:", error);
       res.status(500).json({ success: false, message: "Login failed" });
     }
@@ -3164,7 +3166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('LiveTrace regulatory login error:', error);
       res.status(500).json({
         success: false,
@@ -3257,7 +3259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('LiveTrace farmer login error:', error);
       res.status(500).json({
         success: false,
@@ -3316,7 +3318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('LiveTrace field agent login error:', error);
       res.status(500).json({
         success: false,
@@ -3375,7 +3377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('LiveTrace exporter login error:', error);
       res.status(500).json({
         success: false,
@@ -3485,7 +3487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Regulatory login error:', error);
       res.status(500).json({ 
         success: false, 
@@ -3589,7 +3591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -3713,7 +3715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -3767,7 +3769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(transformedOffers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching available offers for buyer:", error);
       res.status(500).json({ error: "Failed to fetch available offers" });
     }
@@ -3788,7 +3790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Return ONLY real data from database - no mock data
       res.json(realOffers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching available harvests:", error);
       res.status(500).json({ message: "Failed to fetch available harvests" });
     }
@@ -3822,7 +3824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .orderBy(farmerProductOffers.createdAt);
 
       res.json(realOffers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching marketplace data:", error);
       res.status(500).json({ message: "Failed to fetch marketplace data" });
     }
@@ -3861,7 +3863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       
       res.json([]);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Error fetching available harvests" });
     }
   });
@@ -3898,7 +3900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       
       res.json(exporters);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching connected exporters:", error);
       res.status(500).json({ message: "Error fetching connected exporters" });
     }
@@ -3956,7 +3958,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       
       res.json(transactions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer transactions:", error);
       res.status(500).json({ message: "Error fetching buyer transactions" });
     }
@@ -3978,7 +3980,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(metrics);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer business metrics:", error);
       res.status(500).json({ message: "Error fetching buyer business metrics" });
     }
@@ -4079,7 +4081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -4188,7 +4190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mustChangePassword: credentials.mustChangePassword
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Land Inspector login error:", error);
       res.status(500).json({ 
         success: false, 
@@ -4335,7 +4337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mustChangePassword: credentials.mustChangePassword
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Port Inspector login error:", error);
       res.status(500).json({ 
         success: false, 
@@ -4369,30 +4371,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'WH-GRANDGEDEH-001': { password: 'grandgedeh123', name: 'Rebecca Williams - Grand Gedeh Inspector', county: 'Grand Gedeh County', warehouseId: 'WH-GRANDGEDEH-001' }
       };
 
-      if (warehouseInspectorCredentials[username] && warehouseInspectorCredentials[username].password === password) {
+      if (warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials] && warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].password === password) {
         const token = jwt.sign(
           { 
             userId: username,
             username: username,
             userType: 'warehouse_inspector',
-            county: warehouseInspectorCredentials[username].county,
-            warehouseId: warehouseInspectorCredentials[username].warehouseId
+            county: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county,
+            warehouseId: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].warehouseId
           },
           JWT_SECRET,
           { expiresIn: '24h' }
         );
         
-        console.log(`✅ Warehouse inspector ${username} authenticated successfully for ${warehouseInspectorCredentials[username].county}`);
+        console.log(`✅ Warehouse inspector ${username} authenticated successfully for ${warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county}`);
         
         // Get warehouse details from database
         const warehouseResult = await db.execute(sql`
           SELECT warehouse_name, county, address, manager_name 
           FROM county_warehouses 
-          WHERE warehouse_id = ${warehouseInspectorCredentials[username].warehouseId}
+          WHERE warehouse_id = ${warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].warehouseId}
         `);
         
         const warehouseDetails = warehouseResult.rows[0] || {};
-        const warehouseName = warehouseDetails.warehouse_name || `${warehouseInspectorCredentials[username].county} Central Warehouse`;
+        const warehouseName = warehouseDetails.warehouse_name || `${warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county} Central Warehouse`;
         
         return res.json({
           success: true,
@@ -4400,10 +4402,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           inspector: {
             id: username,
             username: username,
-            name: warehouseInspectorCredentials[username].name,
+            name: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].name,
             userType: 'warehouse_inspector',
-            county: warehouseInspectorCredentials[username].county,
-            warehouseId: warehouseInspectorCredentials[username].warehouseId,
+            county: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county,
+            warehouseId: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].warehouseId,
             warehouseFacility: warehouseName,
             warehouseName: warehouseName,
             address: warehouseDetails.address,
@@ -4417,7 +4419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Invalid warehouse inspector credentials" 
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Warehouse inspector login error:", error);
       res.status(500).json({ 
         success: false, 
@@ -4525,7 +4527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mustChangePassword: credentials.mustChangePassword
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Inspector login error:", error);
       res.status(500).json({ 
         success: false, 
@@ -4596,7 +4598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Password changed successfully"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Password change error:", error);
       res.status(500).json({ 
         success: false, 
@@ -4708,7 +4710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('LandMap360 login error:', error);
       res.status(500).json({ 
         success: false, 
@@ -4809,7 +4811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Invalid credentials" 
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Blue Carbon 360 login error:', error);
       res.status(500).json({ 
         success: false, 
@@ -4827,7 +4829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         message: "Logged out successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -4857,7 +4859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.createAuthUser(userData);
       res.status(201).json({ success: true, user });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ 
           success: false, 
@@ -4931,7 +4933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fallback to existing authentication logic
       return res.status(401).json({ message: "No authenticated user found" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("User auth check error:", error);
       res.status(500).json({ message: "Authentication error" });
     }
@@ -4964,7 +4966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
@@ -4977,7 +4979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const metrics = await storage.getDashboardMetrics();
       res.json(metrics);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch dashboard metrics" });
     }
   });
@@ -4987,7 +4989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Global testing data - removed county restrictions
       const data = await storage.getComplianceDataByCounty();
       res.json(data);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch compliance data by county" });
     }
   });
@@ -5019,7 +5021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       res.json(statistics);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch advanced statistics" });
     }
   });
@@ -5079,7 +5081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ]
       };
       res.json(auditData);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
@@ -5102,7 +5104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pendingArea: "158,432"
       };
       res.json(stats);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch LandMap360 dashboard stats" });
     }
   });
@@ -5120,7 +5122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         batteryLevel: 87
       };
       res.json(stats);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch surveyor stats" });
     }
   });
@@ -5140,7 +5142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       res.json(surveys);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch recent surveys" });
     }
   });
@@ -5158,7 +5160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       res.json(disputes);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch disputes" });
     }
   });
@@ -5214,7 +5216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ]
       };
       res.json(activeShipments);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch active shipments" });
     }
   });
@@ -5278,7 +5280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ]
       };
       res.json(vehicleTracking);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch vehicle tracking data" });
     }
   });
@@ -5316,7 +5318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filteredLocations = locations; // Removed geographic filtering for global testing
       
       res.json(filteredLocations);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching GIS locations:", error);
       res.status(500).json({ message: "Failed to fetch GIS locations" });
     }
@@ -5336,7 +5338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedAt: new Date().toISOString()
       };
       res.json(updatedPlot);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating farm plot:", error);
       res.status(500).json({ message: "Failed to update farm plot" });
     }
@@ -5346,7 +5348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const plotId = req.params.id;
       res.json({ success: true, message: `Farm plot ${plotId} deleted successfully` });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting farm plot:", error);
       res.status(500).json({ message: "Failed to delete farm plot" });
     }
@@ -5365,7 +5367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedAt: new Date()
       };
       res.json(plot);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating farm plot:", error);
       res.status(500).json({ message: "Failed to update farm plot" });
     }
@@ -5376,7 +5378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       // In a real implementation, this would delete from database
       res.json({ success: true, message: `Farm plot ${id} deleted` });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting farm plot:", error);
       res.status(500).json({ message: "Failed to delete farm plot" });
     }
@@ -5403,7 +5405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       res.json(routes);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching transportation routes:", error);
       res.status(500).json({ message: "Failed to fetch transportation routes" });
     }
@@ -5425,7 +5427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(scanResult);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to process QR scan" });
     }
   });
@@ -5446,7 +5448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(movementUpdate);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to update vehicle movement" });
     }
   });
@@ -5485,7 +5487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ]
       };
       res.json(routeData);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch route optimization data" });
     }
   });
@@ -5522,7 +5524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ]
       };
       res.json(alerts);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch transportation alerts" });
     }
   });
@@ -5543,7 +5545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastVerified: new Date().toISOString()
       };
       res.json(verification);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to verify documents" });
     }
   });
@@ -5582,7 +5584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       res.json(fleetData);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch fleet overview" });
     }
   });
@@ -5602,7 +5604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(commodities);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch commodities" });
     }
   });
@@ -5617,7 +5619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(commodity);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch commodity" });
     }
   });
@@ -5672,7 +5674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(201).json(commodity);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -5745,7 +5747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         commodity: updatedCommodity
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating compliance status:", error);
       res.status(500).json({ message: "Failed to update compliance status" });
     }
@@ -5762,7 +5764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(commodity);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to update commodity" });
     }
   });
@@ -5777,7 +5779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to delete commodity" });
     }
   });
@@ -5802,7 +5804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(inspections);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch inspections" });
     }
   });
@@ -5817,7 +5819,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(inspection);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch inspection" });
     }
   });
@@ -5827,7 +5829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertInspectionSchema.parse(req.body);
       const inspection = await storage.createInspection(validatedData);
       res.status(201).json(inspection);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -5846,7 +5848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(inspection);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to update inspection" });
     }
   });
@@ -5864,7 +5866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(certifications);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch certifications" });
     }
   });
@@ -5879,7 +5881,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(certification);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch certification" });
     }
   });
@@ -5889,7 +5891,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertCertificationSchema.parse(req.body);
       const certification = await storage.createCertification(validatedData);
       res.status(201).json(certification);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -5908,7 +5910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(certification);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to update certification" });
     }
   });
@@ -5926,7 +5928,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(alerts);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch alerts" });
     }
   });
@@ -5941,7 +5943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(404).json({ message: "Alert not found" });
       }
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to mark alert as read" });
     }
   });
@@ -5951,7 +5953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertAlertSchema.parse(req.body);
       const alert = await storage.createAlert(validatedData);
       res.status(201).json(alert);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -5969,7 +5971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to mark alert as read" });
     }
   });
@@ -6038,7 +6040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Generated ${createdAlerts.length} sample alerts for real-time dashboard simulation`,
         alerts: createdAlerts
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating sample alerts:', error);
       res.status(500).json({ message: "Failed to generate sample alerts" });
     }
@@ -6049,7 +6051,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reports = await storage.getReports();
       res.json(reports);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch reports" });
     }
   });
@@ -6058,7 +6060,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const report = await storage.createReport(req.body);
       res.status(201).json(report);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating report:", error);
       res.status(500).json({ message: "Failed to create report" });
     }
@@ -6131,7 +6133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(exportData);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating export data:", error);
       res.status(500).json({ message: "Failed to generate export data" });
     }
@@ -6229,7 +6231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(exportData);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating export report data:", error);
       res.status(500).json({ message: "Failed to generate export report data" });
     }
@@ -6240,7 +6242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertReportSchema.parse(req.body);
       const report = await storage.createReport(validatedData);
       res.status(201).json(report);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -6263,7 +6265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(farmers);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch farmers" });
     }
   });
@@ -6282,7 +6284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(farmers);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch farmers" });
     }
   });
@@ -6297,7 +6299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(farmer);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch farmer" });
     }
   });
@@ -6368,7 +6370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         eudrStatus: 'APPROVED',
         message: 'Farmer registered with automatic EUDR compliance pack generated'
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         console.error("Farmer validation errors:", error.errors);
         return res.status(400).json({ 
@@ -6399,7 +6401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✅ Farm plots API: Found ${farmPlots.length} plots`);
       res.json(farmPlots);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Farm plots API error:", error);
       res.status(500).json({ message: "Failed to fetch farm plots", error: error.message });
     }
@@ -6418,7 +6420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Land plot not found" });
       }
       res.json(farmPlot);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch land plot" });
     }
   });
@@ -6459,7 +6461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           console.log(`✅ Synced plot for farmer ${farmer.farmerId}`);
           
-        } catch (error) {
+        } catch (error: any) {
           errorCount++;
           results.push({
             farmerId: farmer.farmerId,
@@ -6481,7 +6483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         results
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Sync operation failed:", error);
       res.status(500).json({ 
         success: false, 
@@ -6506,7 +6508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(cropPlans);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch crop plans" });
     }
   });
@@ -6516,7 +6518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertCropPlanSchema.parse(req.body);
       const cropPlan = await storage.createCropPlan(validatedData);
       res.status(201).json(cropPlan);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -6549,7 +6551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(mappings);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer land mappings:", error);
       res.status(500).json({ message: "Failed to fetch farmer land mappings" });
     }
@@ -6565,7 +6567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(mapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching land mapping:", error);
       res.status(500).json({ message: "Failed to fetch land mapping" });
     }
@@ -6576,7 +6578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertFarmerLandMappingSchema.parse(req.body);
       const mapping = await storage.createFarmerLandMapping(validatedData);
       res.status(201).json(mapping);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         console.error("Land mapping validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid land mapping data", errors: error.errors });
@@ -6596,7 +6598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(mapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating land mapping:", error);
       res.status(500).json({ message: "Failed to update land mapping" });
     }
@@ -6612,7 +6614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ message: "Land mapping deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting land mapping:", error);
       res.status(500).json({ message: "Failed to delete land mapping" });
     }
@@ -6634,7 +6636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ ...mapping, message: "Land mapping approved successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving land mapping:", error);
       res.status(500).json({ message: "Failed to approve land mapping" });
     }
@@ -6671,7 +6673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(schedules);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching harvest schedules:", error);
       res.status(500).json({ message: "Failed to fetch harvest schedules" });
     }
@@ -6690,7 +6692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(schedule);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching harvest schedule:", error);
       res.status(500).json({ message: "Failed to fetch harvest schedule" });
     }
@@ -6701,7 +6703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertHarvestScheduleSchema.parse(req.body);
       const schedule = await storage.createHarvestSchedule(validatedData);
       res.status(201).json(schedule);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         console.error("Harvest schedule validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid harvest schedule data", errors: error.errors });
@@ -6721,7 +6723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(schedule);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating harvest schedule:", error);
       res.status(500).json({ message: "Failed to update harvest schedule" });
     }
@@ -6737,7 +6739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ message: "Harvest schedule deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting harvest schedule:", error);
       res.status(500).json({ message: "Failed to delete harvest schedule" });
     }
@@ -6759,7 +6761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ ...schedule, message: "Harvest schedule approved successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving harvest schedule:", error);
       res.status(500).json({ message: "Failed to approve harvest schedule" });
     }
@@ -6782,7 +6784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(inspections);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching land mapping inspections:", error);
       res.status(500).json({ message: "Failed to fetch land mapping inspections" });
     }
@@ -6798,7 +6800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(inspection);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching land mapping inspection:", error);
       res.status(500).json({ message: "Failed to fetch land mapping inspection" });
     }
@@ -6809,7 +6811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertLandMappingInspectionSchema.parse(req.body);
       const inspection = await storage.createLandMappingInspection(validatedData);
       res.status(201).json(inspection);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         console.error("Land mapping inspection validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid inspection data", errors: error.errors });
@@ -6829,7 +6831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(inspection);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating land mapping inspection:", error);
       res.status(500).json({ message: "Failed to update land mapping inspection" });
     }
@@ -6852,7 +6854,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(monitoring);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching harvest schedule monitoring:", error);
       res.status(500).json({ message: "Failed to fetch harvest schedule monitoring" });
     }
@@ -6868,7 +6870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(monitoring);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching harvest schedule monitoring:", error);
       res.status(500).json({ message: "Failed to fetch harvest schedule monitoring" });
     }
@@ -6879,7 +6881,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertHarvestScheduleMonitoringSchema.parse(req.body);
       const monitoring = await storage.createHarvestScheduleMonitoring(validatedData);
       res.status(201).json(monitoring);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         console.error("Harvest schedule monitoring validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid monitoring data", errors: error.errors });
@@ -6899,7 +6901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(monitoring);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating harvest schedule monitoring:", error);
       res.status(500).json({ message: "Failed to update harvest schedule monitoring" });
     }
@@ -6920,7 +6922,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(integrations);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch LRA integrations" });
     }
   });
@@ -6930,7 +6932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertLraIntegrationSchema.parse(req.body);
       const integration = await storage.createLraIntegration(validatedData);
       res.status(201).json(integration);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -6951,7 +6953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(integrations);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch MOA integrations" });
     }
   });
@@ -6961,7 +6963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertMoaIntegrationSchema.parse(req.body);
       const integration = await storage.createMoaIntegration(validatedData);
       res.status(201).json(integration);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -6982,7 +6984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(integrations);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch Customs integrations" });
     }
   });
@@ -6992,7 +6994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertCustomsIntegrationSchema.parse(req.body);
       const integration = await storage.createCustomsIntegration(validatedData);
       res.status(201).json(integration);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
@@ -7015,7 +7017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(logs);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch government sync logs" });
     }
   });
@@ -7031,7 +7033,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(400).json(result);
       }
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ success: false, message: "Failed to sync with LRA" });
     }
   });
@@ -7046,7 +7048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(400).json(result);
       }
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ success: false, message: "Failed to sync with MOA" });
     }
   });
@@ -7061,7 +7063,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(400).json(result);
       }
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ success: false, message: "Failed to sync with Customs" });
     }
   });
@@ -7072,7 +7074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const commodityId = parseInt(req.params.commodityId);
       const status = await storage.getGovernmentComplianceStatus(commodityId);
       res.json(status);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch government compliance status" });
     }
   });
@@ -7086,7 +7088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timeframe as string
       );
       res.json(data);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch analytics data" });
     }
   });
@@ -7096,7 +7098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertAnalyticsDataSchema.parse(req.body);
       const analytics = await storage.createAnalyticsData(validatedData);
       res.status(201).json(analytics);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid analytics data", errors: error.errors });
       }
@@ -7109,7 +7111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { timeframe = "monthly" } = req.query;
       const trends = await storage.generateComplianceTrends(timeframe as string);
       res.json(trends);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to generate compliance trends" });
     }
   });
@@ -7121,7 +7123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmerId ? parseInt(farmerId as string) : undefined
       );
       res.json(performance);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to generate farm performance analytics" });
     }
   });
@@ -7131,7 +7133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { county } = req.query;
       const regional = await storage.generateRegionalAnalytics(county as string);
       res.json(regional);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to generate regional analytics" });
     }
   });
@@ -7140,7 +7142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const health = await storage.generateSystemHealthMetrics();
       res.json(health);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to generate system health metrics" });
     }
   });
@@ -7156,7 +7158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endDate ? new Date(endDate as string) : undefined
       );
       res.json(logs);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
@@ -7166,7 +7168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertAuditLogSchema.parse(req.body);
       const log = await storage.createAuditLog(validatedData);
       res.status(201).json(log);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid audit log data", errors: error.errors });
       }
@@ -7179,7 +7181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status } = req.query;
       const audits = await storage.getSystemAudits(status as string);
       res.json(audits);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch system audits" });
     }
   });
@@ -7194,7 +7196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(audit);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch system audit" });
     }
   });
@@ -7204,7 +7206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertSystemAuditSchema.parse(req.body);
       const audit = await storage.createSystemAudit(validatedData);
       res.status(201).json(audit);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid system audit data", errors: error.errors });
       }
@@ -7222,7 +7224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(audit);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to update system audit" });
     }
   });
@@ -7232,7 +7234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { confidentialityLevel } = req.query;
       const reports = await storage.getAuditReports(confidentialityLevel as string);
       res.json(reports);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch audit reports" });
     }
   });
@@ -7247,7 +7249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(report);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch audit report" });
     }
   });
@@ -7257,7 +7259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertAuditReportSchema.parse(req.body);
       const report = await storage.createAuditReport(validatedData);
       res.status(201).json(report);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid audit report data", errors: error.errors });
       }
@@ -7275,7 +7277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(report);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to update audit report" });
     }
   });
@@ -7293,7 +7295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(mappings);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching GPS mappings:', error);
       res.status(500).json({ message: 'Failed to fetch GPS mappings' });
     }
@@ -7306,7 +7308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'GPS mapping not found' });
       }
       res.json(mapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching GPS mapping:', error);
       res.status(500).json({ message: 'Failed to fetch GPS mapping' });
     }
@@ -7317,7 +7319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertFarmGpsMappingSchema.parse(req.body);
       const mapping = await storage.createFarmGpsMapping(validatedData);
       res.status(201).json(mapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating GPS mapping:', error);
       res.status(500).json({ message: 'Failed to create GPS mapping' });
     }
@@ -7330,7 +7332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'GPS mapping not found' });
       }
       res.json(updatedMapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating GPS mapping:', error);
       res.status(500).json({ message: 'Failed to update GPS mapping' });
     }
@@ -7351,7 +7353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(monitorings);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching deforestation monitoring:', error);
       res.status(500).json({ message: 'Failed to fetch deforestation monitoring' });
     }
@@ -7364,7 +7366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Deforestation monitoring not found' });
       }
       res.json(monitoring);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching deforestation monitoring:', error);
       res.status(500).json({ message: 'Failed to fetch deforestation monitoring' });
     }
@@ -7375,7 +7377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertDeforestationMonitoringSchema.parse(req.body);
       const monitoring = await storage.createDeforestationMonitoring(validatedData);
       res.status(201).json(monitoring);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating deforestation monitoring:', error);
       res.status(500).json({ message: 'Failed to create deforestation monitoring' });
     }
@@ -7397,7 +7399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(compliances);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching EUDR compliance:', error);
       res.status(500).json({ message: 'Failed to fetch EUDR compliance' });
     }
@@ -7410,7 +7412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'EUDR compliance not found' });
       }
       res.json(compliance);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching EUDR compliance:', error);
       res.status(500).json({ message: 'Failed to fetch EUDR compliance' });
     }
@@ -7421,7 +7423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertEudrComplianceSchema.parse(req.body);
       const compliance = await storage.createEudrCompliance(validatedData);
       res.status(201).json(compliance);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating EUDR compliance:', error);
       res.status(500).json({ message: 'Failed to create EUDR compliance' });
     }
@@ -7440,7 +7442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(zones);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching geofencing zones:', error);
       res.status(500).json({ message: 'Failed to fetch geofencing zones' });
     }
@@ -7453,7 +7455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Geofencing zone not found' });
       }
       res.json(zone);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching geofencing zone:', error);
       res.status(500).json({ message: 'Failed to fetch geofencing zone' });
     }
@@ -7464,7 +7466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertGeofencingZoneSchema.parse(req.body);
       const zone = await storage.createGeofencingZone(validatedData);
       res.status(201).json(zone);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating geofencing zone:', error);
       res.status(500).json({ message: 'Failed to create geofencing zone' });
     }
@@ -7480,7 +7482,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validation = await storage.validateGpsCoordinates(coordinates);
       res.json(validation);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error validating GPS coordinates:', error);
       res.status(500).json({ message: 'Failed to validate GPS coordinates' });
     }
@@ -7490,7 +7492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const complianceCheck = await storage.checkEudrCompliance(parseInt(req.params.farmGpsMappingId));
       res.json(complianceCheck);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking EUDR compliance:', error);
       res.status(500).json({ message: 'Failed to check EUDR compliance' });
     }
@@ -7500,7 +7502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const deforestationCheck = await storage.detectDeforestation(parseInt(req.params.farmGpsMappingId));
       res.json(deforestationCheck);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error detecting deforestation:', error);
       res.status(500).json({ message: 'Failed to detect deforestation' });
     }
@@ -7510,7 +7512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const report = await storage.generateTraceabilityReport(parseInt(req.params.commodityId));
       res.json(report);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating traceability report:', error);
       res.status(500).json({ message: 'Failed to generate traceability report' });
     }
@@ -7534,7 +7536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       next();
-    } catch (error) {
+    } catch (error: any) {
       return res.status(401).json({ message: 'Invalid token' });
     }
   };
@@ -7554,7 +7556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(standards);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching international standards:', error);
       res.status(500).json({ message: 'Failed to fetch international standards' });
     }
@@ -7581,7 +7583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(overview);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating international standards overview:', error);
       res.status(500).json({ message: 'Failed to generate overview' });
     }
@@ -7594,7 +7596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'International standard not found' });
       }
       res.json(standard);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching international standard:', error);
       res.status(500).json({ message: 'Failed to fetch international standard' });
     }
@@ -7605,7 +7607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertInternationalStandardSchema.parse(req.body);
       const standard = await storage.createInternationalStandard(validatedData);
       res.status(201).json(standard);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating international standard:', error);
       res.status(500).json({ message: 'Failed to create international standard' });
     }
@@ -7624,7 +7626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(syncResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error syncing with standards database:', error);
       res.status(500).json({ message: 'Failed to sync with standards database' });
     }
@@ -7647,7 +7649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(compliance);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching standards compliance:', error);
       res.status(500).json({ message: 'Failed to fetch standards compliance' });
     }
@@ -7658,7 +7660,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertCommodityStandardsComplianceSchema.parse(req.body);
       const compliance = await storage.createStandardsCompliance(validatedData);
       res.status(201).json(compliance);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating standards compliance:', error);
       res.status(500).json({ message: 'Failed to create standards compliance' });
     }
@@ -7686,7 +7688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(complianceResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking standards compliance:', error);
       res.status(500).json({ message: 'Failed to check standards compliance' });
     }
@@ -7705,7 +7707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(integrations);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching standards API integrations:', error);
       res.status(500).json({ message: 'Failed to fetch standards API integrations' });
     }
@@ -7716,7 +7718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertStandardsApiIntegrationSchema.parse(req.body);
       const integration = await storage.createStandardsApiIntegration(validatedData);
       res.status(201).json(integration);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating standards API integration:', error);
       res.status(500).json({ message: 'Failed to create standards API integration' });
     }
@@ -7735,7 +7737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(logs);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching standards sync logs:', error);
       res.status(500).json({ message: 'Failed to fetch standards sync logs' });
     }
@@ -7746,7 +7748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertStandardsSyncLogSchema.parse(req.body);
       const log = await storage.createStandardsSyncLog(validatedData);
       res.status(201).json(log);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating standards sync log:', error);
       res.status(500).json({ message: 'Failed to create standards sync log' });
     }
@@ -7767,7 +7769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(records);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tracking records:', error);
       res.status(500).json({ message: 'Failed to fetch tracking records' });
     }
@@ -7783,7 +7785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(record);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tracking record:', error);
       res.status(500).json({ message: 'Failed to fetch tracking record' });
     }
@@ -7794,7 +7796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTrackingRecordSchema.parse(req.body);
       const record = await storage.createTrackingRecord(validatedData);
       res.status(201).json(record);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -7814,7 +7816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(record);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating tracking record:', error);
       res.status(500).json({ message: 'Failed to update tracking record' });
     }
@@ -7847,7 +7849,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timeline,
         verifications
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying tracking record:', error);
       res.status(500).json({ message: 'Failed to verify tracking record' });
     }
@@ -7859,7 +7861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trackingRecordId = parseInt(req.params.trackingRecordId);
       const timeline = await storage.getTrackingTimeline(trackingRecordId);
       res.json(timeline);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tracking timeline:', error);
       res.status(500).json({ message: 'Failed to fetch tracking timeline' });
     }
@@ -7870,7 +7872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTrackingTimelineSchema.parse(req.body);
       const event = await storage.createTrackingTimelineEvent(validatedData);
       res.status(201).json(event);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -7885,7 +7887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trackingRecordId = parseInt(req.params.trackingRecordId);
       const verifications = await storage.getTrackingVerifications(trackingRecordId);
       res.json(verifications);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tracking verifications:', error);
       res.status(500).json({ message: 'Failed to fetch tracking verifications' });
     }
@@ -7896,7 +7898,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTrackingVerificationSchema.parse(req.body);
       const verification = await storage.createTrackingVerification(validatedData);
       res.status(201).json(verification);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -7913,7 +7915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         trackingRecordId ? parseInt(trackingRecordId as string) : undefined
       );
       res.json(alerts);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tracking alerts:', error);
       res.status(500).json({ message: 'Failed to fetch tracking alerts' });
     }
@@ -7924,7 +7926,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTrackingAlertSchema.parse(req.body);
       const alert = await storage.createTrackingAlert(validatedData);
       res.status(201).json(alert);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -7941,7 +7943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         trackingRecordId ? parseInt(trackingRecordId as string) : undefined
       );
       res.json(reports);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tracking reports:', error);
       res.status(500).json({ message: 'Failed to fetch tracking reports' });
     }
@@ -7952,7 +7954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTrackingReportSchema.parse(req.body);
       const report = await storage.createTrackingReport(validatedData);
       res.status(201).json(report);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -7966,7 +7968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const exporters = await storage.getExporters();
       res.json(exporters);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching exporters:', error);
       res.status(500).json({ message: 'Failed to fetch exporters' });
     }
@@ -7987,7 +7989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           primaryEmail: exp.primaryEmail
         }));
       res.json(availableExporters);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching available exporters:", error);
       res.status(500).json({ error: "Failed to fetch available exporters" });
     }
@@ -8000,7 +8002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Exporter not found' });
       }
       res.json(exporter);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching exporter:', error);
       res.status(500).json({ message: 'Failed to fetch exporter' });
     }
@@ -8021,7 +8023,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(orders);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching export orders:', error);
       res.status(500).json({ message: 'Failed to fetch export orders' });
     }
@@ -8034,7 +8036,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Export order not found' });
       }
       res.json(order);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching export order:', error);
       res.status(500).json({ message: 'Failed to fetch export order' });
     }
@@ -8045,7 +8047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertExportOrderSchema.parse(req.body);
       const order = await storage.createExportOrder(validatedData);
       res.status(201).json(order);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating export order:', error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
@@ -8062,7 +8064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Export order not found' });
       }
       res.json(order);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating export order:', error);
       res.status(500).json({ message: 'Failed to update export order' });
     }
@@ -8076,7 +8078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Export order not found' });
       }
       res.json(order);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating export order:', error);
       res.status(500).json({ message: 'Failed to update export order' });
     }
@@ -8090,7 +8092,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Export order not found' });
       }
       res.json({ message: 'Export order deleted successfully' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting export order:', error);
       res.status(500).json({ message: 'Failed to delete export order' });
     }
@@ -8129,7 +8131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.status(201).json({ mobileRequest, alert });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating mobile alert request:', error);
       res.status(500).json({ message: 'Failed to create mobile alert request' });
     }
@@ -8178,7 +8180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       
       res.json(sampleRequests);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching mobile alert requests:', error);
       res.status(500).json({ message: 'Failed to fetch mobile alert requests' });
     }
@@ -8199,7 +8201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(updatedRequest);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving mobile alert request:', error);
       res.status(500).json({ message: 'Failed to approve request' });
     }
@@ -8220,7 +8222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(updatedRequest);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error rejecting mobile alert request:', error);
       res.status(500).json({ message: 'Failed to reject request' });
     }
@@ -8241,7 +8243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(metrics);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: 'Failed to fetch director metrics' });
     }
   });
@@ -8252,7 +8254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const requests = await storage.getInspectionRequests();
       res.json(requests);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch inspection requests" });
     }
   });
@@ -8272,7 +8274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.status(201).json(request);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to create inspection request" });
     }
   });
@@ -8290,7 +8292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(request);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to approve inspection request" });
     }
   });
@@ -8308,7 +8310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(request);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to reject inspection request" });
     }
   });
@@ -8318,7 +8320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const requests = await storage.getFarmerRegistrationRequests();
       res.json(requests);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch farmer registration requests" });
     }
   });
@@ -8338,7 +8340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.status(201).json(request);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to create farmer registration request" });
     }
   });
@@ -8356,7 +8358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(request);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to approve farmer registration request" });
     }
   });
@@ -8374,7 +8376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(request);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to reject farmer registration request" });
     }
   });
@@ -8390,7 +8392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { recipientId } = req.params;
       const messages = await storage.getMessages(recipientId);
       res.json(messages);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
     }
@@ -8403,7 +8405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messages = await storage.getMessages(recipientId);
       const unreadCount = messages.filter(msg => !msg.isRead).length;
       res.json({ count: unreadCount });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching unread count:", error);
       res.status(500).json({ message: "Failed to fetch unread count" });
     }
@@ -8420,7 +8422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(message);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching message:", error);
       res.status(500).json({ message: "Failed to fetch message" });
     }
@@ -8437,7 +8439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const message = await storage.sendMessage(messageData);
       res.status(201).json(message);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
       res.status(500).json({ message: "Failed to send message" });
     }
@@ -8454,7 +8456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const reply = await storage.replyToMessage(parentMessageId, replyData);
       res.status(201).json(reply);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending reply:", error);
       res.status(500).json({ message: "Failed to send reply" });
     }
@@ -8468,7 +8470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.markMessageAsRead(messageId, recipientId);
       res.json({ message: "Message marked as read" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error marking message as read:", error);
       res.status(500).json({ message: "Failed to mark message as read" });
     }
@@ -8487,7 +8489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ message: "Message deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting message:", error);
       res.status(500).json({ message: "Failed to delete message" });
     }
@@ -8498,7 +8500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const templates = await storage.getMessageTemplates();
       res.json(templates);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching message templates:", error);
       res.status(500).json({ message: "Failed to fetch message templates" });
     }
@@ -8514,7 +8516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const template = await storage.createMessageTemplate(templateData);
       res.status(201).json(template);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating message template:", error);
       res.status(500).json({ message: "Failed to create message template" });
     }
@@ -8563,7 +8565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Export permit submitted: ${permitId} by ${permitData.exporterName}`);
       
       res.json(submissionResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting export permit:", error);
       res.status(500).json({ 
         success: false,
@@ -8615,7 +8617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(permitStatus);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching permit status:", error);
       res.status(500).json({ message: "Failed to fetch permit status" });
     }
@@ -8674,7 +8676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(filteredPermits);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching export permits:", error);
       res.status(500).json({ message: "Failed to fetch export permits" });
     }
@@ -8687,7 +8689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const verifications = await storage.getCertificateVerifications();
       res.json(verifications);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching certificate verifications:', error);
       res.status(500).json({ message: 'Failed to fetch certificate verifications' });
     }
@@ -8700,7 +8702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Certificate verification not found' });
       }
       res.json(verification);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching certificate verification:', error);
       res.status(500).json({ message: 'Failed to fetch certificate verification' });
     }
@@ -8731,7 +8733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       res.json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying certificate:', error);
       res.status(500).json({ message: 'Failed to verify certificate' });
     }
@@ -8756,7 +8758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const verification = await storage.createCertificateVerification(validatedData);
       res.status(201).json(verification);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -8771,7 +8773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = req.body;
       const verification = await storage.updateCertificateVerification(id, updates);
       res.json(verification);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating certificate verification:', error);
       res.status(500).json({ message: 'Failed to update certificate verification' });
     }
@@ -8782,7 +8784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const verifications = await storage.getUserVerifications();
       res.json(verifications);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user verifications:', error);
       res.status(500).json({ message: 'Failed to fetch user verifications' });
     }
@@ -8793,7 +8795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.userId);
       const verifications = await storage.getUserVerificationsByUser(userId);
       res.json(verifications);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user verifications:', error);
       res.status(500).json({ message: 'Failed to fetch user verifications' });
     }
@@ -8804,7 +8806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertUserVerificationSchema.parse(req.body);
       const verification = await storage.createUserVerification(validatedData);
       res.status(201).json(verification);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -8819,7 +8821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = req.body;
       const verification = await storage.updateUserVerification(id, updates);
       res.json(verification);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating user verification:', error);
       res.status(500).json({ message: 'Failed to update user verification' });
     }
@@ -8838,7 +8840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(events);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching tracking events:', error);
       res.status(500).json({ message: 'Failed to fetch tracking events' });
     }
@@ -8849,7 +8851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTrackingEventSchema.parse(req.body);
       const event = await storage.createTrackingEvent(validatedData);
       res.status(201).json(event);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
       }
@@ -8864,7 +8866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = req.body;
       const event = await storage.updateTrackingEvent(id, updates);
       res.json(event);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating tracking event:', error);
       res.status(500).json({ message: 'Failed to update tracking event' });
     }
@@ -8883,7 +8885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(logs);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching verification logs:', error);
       res.status(500).json({ message: 'Failed to fetch verification logs' });
     }
@@ -8932,7 +8934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(dashboard);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching verification dashboard:', error);
       res.status(500).json({ message: 'Failed to fetch verification dashboard' });
     }
@@ -9003,7 +9005,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         data: sampleData
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating sample data:', error);
       res.status(500).json({ message: 'Failed to generate sample data' });
     }
@@ -9117,7 +9119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         avgDailyMovement: 3.2
       };
       res.json(stats);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch farmer livestock stats" });
     }
   });
@@ -9167,7 +9169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       res.json(gpsData);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch GPS tracking data" });
     }
   });
@@ -9197,7 +9199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       res.json(feedData);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch feed management data" });
     }
   });
@@ -9247,7 +9249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       res.json(healthAlerts);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch health alerts" });
     }
   });
@@ -9270,7 +9272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         marketplaceListings,
         economicImpactRecords
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching Blue Carbon 360 stats:", error);
       res.status(500).json({ error: "Failed to fetch dashboard statistics" });
     }
@@ -9328,7 +9330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ].slice(offset, offset + limit);
       
       res.json({ data: projects, totalCount: 25 });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching conservation projects:", error);
       res.status(500).json({ error: "Failed to fetch conservation projects" });
     }
@@ -9378,7 +9380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ].slice(offset, offset + limit);
       
       res.json({ data: listings, totalCount: 15 });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching carbon marketplace:", error);
       res.status(500).json({ error: "Failed to fetch marketplace listings" });
     }
@@ -9391,7 +9393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const devices = await storage.getInspectorDevices();
       res.json(devices);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector devices:", error);
       res.status(500).json({ message: "Failed to fetch inspector devices" });
     }
@@ -9404,7 +9406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Device not found" });
       }
       res.json(device);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector device:", error);
       res.status(500).json({ message: "Failed to fetch inspector device" });
     }
@@ -9414,7 +9416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const devices = await storage.getInspectorDevicesByInspector(req.params.inspectorId);
       res.json(devices);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector devices:", error);
       res.status(500).json({ message: "Failed to fetch inspector devices" });
     }
@@ -9424,7 +9426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const devices = await storage.getActiveInspectorDevices();
       res.json(devices);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching active inspector devices:", error);
       res.status(500).json({ message: "Failed to fetch active inspector devices" });
     }
@@ -9435,7 +9437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deviceData = insertInspectorDeviceSchema.parse(req.body);
       const newDevice = await storage.createInspectorDevice(deviceData);
       res.status(201).json(newDevice);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating inspector device:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid device data", errors: error.errors });
@@ -9451,7 +9453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Device not found" });
       }
       res.json(updatedDevice);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating inspector device:", error);
       res.status(500).json({ message: "Failed to update inspector device" });
     }
@@ -9462,7 +9464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const locations = await storage.getInspectorLocationHistory(req.params.deviceId);
       res.json(locations);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching location history:", error);
       res.status(500).json({ message: "Failed to fetch location history" });
     }
@@ -9475,7 +9477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No location found" });
       }
       res.json(location);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching current location:", error);
       res.status(500).json({ message: "Failed to fetch current location" });
     }
@@ -9486,7 +9488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const locationData = insertInspectorLocationHistorySchema.parse(req.body);
       const newLocation = await storage.createInspectorLocationEntry(locationData);
       res.status(201).json(newLocation);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating location entry:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid location data", errors: error.errors });
@@ -9500,7 +9502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const alerts = await storage.getInspectorDeviceAlerts();
       res.json(alerts);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector alerts:", error);
       res.status(500).json({ message: "Failed to fetch inspector alerts" });
     }
@@ -9510,7 +9512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const alerts = await storage.getUnreadInspectorDeviceAlerts();
       res.json(alerts);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching unread alerts:", error);
       res.status(500).json({ message: "Failed to fetch unread alerts" });
     }
@@ -9520,7 +9522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const alerts = await storage.getInspectorDeviceAlertsByDevice(req.params.deviceId);
       res.json(alerts);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching device alerts:", error);
       res.status(500).json({ message: "Failed to fetch device alerts" });
     }
@@ -9531,7 +9533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const alertData = insertInspectorDeviceAlertSchema.parse(req.body);
       const newAlert = await storage.createInspectorDeviceAlert(alertData);
       res.status(201).json(newAlert);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating inspector alert:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid alert data", errors: error.errors });
@@ -9544,7 +9546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.markInspectorDeviceAlertAsRead(parseInt(req.params.id));
       res.json({ message: "Alert marked as read" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error marking alert as read:", error);
       res.status(500).json({ message: "Failed to mark alert as read" });
     }
@@ -9555,7 +9557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { resolvedBy, resolution } = req.body;
       await storage.resolveInspectorDeviceAlert(parseInt(req.params.id), resolvedBy, resolution);
       res.json({ message: "Alert resolved successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error resolving alert:", error);
       res.status(500).json({ message: "Failed to resolve alert" });
     }
@@ -9566,7 +9568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const checkIns = await storage.getInspectorCheckIns();
       res.json(checkIns);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector check-ins:", error);
       res.status(500).json({ message: "Failed to fetch inspector check-ins" });
     }
@@ -9576,7 +9578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const checkIns = await storage.getTodayInspectorCheckIns();
       res.json(checkIns);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching today's check-ins:", error);
       res.status(500).json({ message: "Failed to fetch today's check-ins" });
     }
@@ -9586,7 +9588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const checkIns = await storage.getInspectorCheckInsByDevice(req.params.deviceId);
       res.json(checkIns);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching device check-ins:", error);
       res.status(500).json({ message: "Failed to fetch device check-ins" });
     }
@@ -9596,7 +9598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const checkIns = await storage.getInspectorCheckInsByInspector(req.params.inspectorId);
       res.json(checkIns);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector check-ins:", error);
       res.status(500).json({ message: "Failed to fetch inspector check-ins" });
     }
@@ -9607,7 +9609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const checkInData = insertInspectorCheckInSchema.parse(req.body);
       const newCheckIn = await storage.createInspectorCheckIn(checkInData);
       res.status(201).json(newCheckIn);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating inspector check-in:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid check-in data", errors: error.errors });
@@ -9785,7 +9787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       doc.end();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ EUDR Certificate generation failed:', error);
       res.status(500).json({ error: 'Failed to generate EUDR certificate' });
     }
@@ -9838,7 +9840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.pipe(res);
       doc.end();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Professional certificate generation error:', error);
       res.status(500).json({ error: 'Failed to generate professional certificate: ' + error.message });
     }
@@ -10144,7 +10146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           doc.rect(ddLogoSection.x + 8, ddLogoSection.y + 45, 40, 28).fill('#ef4444');
           doc.fontSize(7).fillColor('#ffffff').font('Helvetica-Bold').text('ECOENVIRO', ddLogoSection.x + 15, ddLogoSection.y + 57);
         }
-      } catch (error) {
+      } catch (error: any) {
         doc.rect(ddLogoSection.x + 8, ddLogoSection.y + 8, 40, 28).fill('#22c55e');
         doc.fontSize(8).fillColor('#ffffff').font('Helvetica-Bold').text('LACRA', ddLogoSection.x + 20, ddLogoSection.y + 20);
         doc.rect(ddLogoSection.x + 8, ddLogoSection.y + 45, 40, 28).fill('#ef4444');
@@ -10224,7 +10226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           doc.rect(raLogoSection.x + 8, raLogoSection.y + 45, 40, 28).fill('#ef4444');
         }
-      } catch (error) {
+      } catch (error: any) {
         doc.rect(raLogoSection.x + 8, raLogoSection.y + 8, 40, 28).fill('#22c55e');
         doc.rect(raLogoSection.x + 8, raLogoSection.y + 45, 40, 28).fill('#ef4444');
       }
@@ -10345,7 +10347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           doc.rect(page3LogoSection.x + 8, page3LogoSection.y + 45, 40, 28).fill('#ef4444');
         }
-      } catch (error) {
+      } catch (error: any) {
         doc.rect(page3LogoSection.x + 8, page3LogoSection.y + 8, 40, 28).fill('#22c55e');
         doc.rect(page3LogoSection.x + 8, page3LogoSection.y + 45, 40, 28).fill('#ef4444');
       }
@@ -10380,7 +10382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           doc.rect(page4LogoSection.x + 8, page4LogoSection.y + 45, 40, 28).fill('#ef4444');
         }
-      } catch (error) {
+      } catch (error: any) {
         doc.rect(page4LogoSection.x + 8, page4LogoSection.y + 8, 40, 28).fill('#22c55e');
         doc.rect(page4LogoSection.x + 8, page4LogoSection.y + 45, 40, 28).fill('#ef4444');
       }
@@ -10478,7 +10480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           doc.rect(eiaLogoSection.x + 8, eiaLogoSection.y + 45, 40, 28).fill('#ef4444');
         }
-      } catch (error) {
+      } catch (error: any) {
         doc.rect(eiaLogoSection.x + 8, eiaLogoSection.y + 8, 40, 28).fill('#22c55e');
         doc.rect(eiaLogoSection.x + 8, eiaLogoSection.y + 45, 40, 28).fill('#ef4444');
       }
@@ -10548,7 +10550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           doc.rect(fcLogoSection.x + 8, fcLogoSection.y + 45, 40, 28).fill('#ef4444');
         }
-      } catch (error) {
+      } catch (error: any) {
         doc.rect(fcLogoSection.x + 8, fcLogoSection.y + 8, 40, 28).fill('#22c55e');
         doc.rect(fcLogoSection.x + 8, fcLogoSection.y + 45, 40, 28).fill('#ef4444');
       }
@@ -10698,7 +10700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       doc.end();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Visual certificate generation error:', error);
       res.status(500).json({ error: 'Visual certificate generation failed', details: error.message });
     }
@@ -10721,7 +10723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       doc.text('Test PDF Working - Simple Success!', 50, 50);
       doc.end();
-    } catch (error) {
+    } catch (error: any) {
       console.error('PDF test error:', error);
       res.status(500).json({ error: 'PDF test failed', details: error.message });
     }
@@ -10886,7 +10888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       doc.end();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Complete PDF generation failed:', error);
       res.status(500).json({ error: 'Failed to generate complete PDF' });
     }
@@ -10936,7 +10938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.pipe(res);
       doc.end();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ FSC-style complete pack generation failed:', error);
       res.status(500).json({ error: 'Failed to generate FSC-style complete pack: ' + error.message });
     }
@@ -10950,7 +10952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const services = await paymentService.getPaymentServices();
       res.json(services);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching payment services:", error);
       res.status(500).json({ message: "Failed to fetch payment services" });
     }
@@ -10966,7 +10968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(service);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching payment service:", error);
       res.status(500).json({ message: "Failed to fetch payment service" });
     }
@@ -11006,7 +11008,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transaction
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating payment intent:", error);
       res.status(500).json({ 
         success: false,
@@ -11036,7 +11038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error confirming payment:", error);
       res.status(500).json({ 
         success: false,
@@ -11052,7 +11054,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const workflows = await db.select().from(agriTraceWorkflows);
       res.json(workflows);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching agritrace workflows:', error);
       res.status(500).json({ message: 'Failed to fetch workflows' });
     }
@@ -11064,7 +11066,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lacraAdminId } = req.body;
       const workflow = await agriTraceService.initializeNationalMappingPlan(lacraAdminId);
       res.json(workflow);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error initializing national mapping:', error);
       res.status(500).json({ message: 'Failed to initialize national mapping plan' });
     }
@@ -11076,7 +11078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inspectorData = req.body;
       const workflow = await agriTraceService.registerInspector(inspectorData);
       res.json(workflow);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error registering inspector:', error);
       res.status(500).json({ message: 'Failed to register inspector' });
     }
@@ -11088,7 +11090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const farmerData = req.body;
       const workflow = await agriTraceService.onboardFarmer(farmerData);
       res.json(workflow);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error onboarding farmer:', error);
       res.status(500).json({ message: 'Failed to onboard farmer' });
     }
@@ -11100,7 +11102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { workflowId, commodities } = req.body;
       const result = await agriTraceService.registerCommodities(workflowId, commodities);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error registering commodities:', error);
       res.status(500).json({ message: 'Failed to register commodities' });
     }
@@ -11112,7 +11114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { workflowId } = req.body;
       const result = await agriTraceService.performEudrCompliance(workflowId);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error performing EUDR compliance check:', error);
       res.status(500).json({ message: 'Failed to perform EUDR compliance check' });
     }
@@ -11124,7 +11126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { workflowId, qualityData } = req.body;
       const result = await agriTraceService.performQualityAssessment(workflowId, qualityData);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error performing quality assessment:', error);
       res.status(500).json({ message: 'Failed to perform quality assessment' });
     }
@@ -11136,7 +11138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { workflowId } = req.body;
       const result = await agriTraceService.generateCertification(workflowId);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating certification:', error);
       res.status(500).json({ message: 'Failed to generate certification' });
     }
@@ -11148,7 +11150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { workflowId, harvestData } = req.body;
       const result = await agriTraceService.recordHarvest(workflowId, harvestData);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error recording harvest:', error);
       res.status(500).json({ message: 'Failed to record harvest' });
     }
@@ -11160,7 +11162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { workflowId, transportData } = req.body;
       const result = await agriTraceService.trackTransportation(workflowId, transportData);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error tracking transportation:', error);
       res.status(500).json({ message: 'Failed to track transportation' });
     }
@@ -11172,7 +11174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { workflowId } = req.body;
       const result = await agriTraceService.generateEudrPack(workflowId);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating EUDR pack:', error);
       res.status(500).json({ message: 'Failed to generate EUDR pack' });
     }
@@ -11184,7 +11186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const workflowId = parseInt(req.params.id);
       const status = await agriTraceService.getWorkflowStatus(workflowId);
       res.json(status);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching workflow status:', error);
       res.status(500).json({ message: 'Failed to fetch workflow status' });
     }
@@ -11223,7 +11225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ message: "Certificate types seeded successfully", count: certificateTypesData.length });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error seeding certificate types:', error);
       res.status(500).json({ message: 'Failed to seed certificate types' });
     }
@@ -11237,7 +11239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .orderBy(desc(certificateApprovals.priority), desc(certificateApprovals.createdAt));
       
       res.json(pendingApprovals);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching pending approvals:', error);
       res.status(500).json({ message: 'Failed to fetch pending approvals' });
     }
@@ -11274,7 +11276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
 
       res.json(approval[0]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting certificate for approval:', error);
       res.status(500).json({ message: 'Failed to submit certificate for approval' });
     }
@@ -11297,7 +11299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .returning();
 
       res.json(approval);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving certificate:', error);
       res.status(500).json({ message: 'Failed to approve certificate' });
     }
@@ -11320,7 +11322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .returning();
 
       res.json(approval);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error rejecting certificate:', error);
       res.status(500).json({ message: 'Failed to reject certificate' });
     }
@@ -11341,7 +11343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .returning();
 
       res.json({ message: 'Certificate sent successfully', approval });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending certificate:', error);
       res.status(500).json({ message: 'Failed to send certificate' });
     }
@@ -11356,7 +11358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const inspectors = await storage.getInspectors();
       res.json(inspectors);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspectors:", error);
       res.status(500).json({ message: "Failed to fetch inspectors" });
     }
@@ -11370,7 +11372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Inspector not found" });
       }
       res.json(inspector);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector:", error);
       res.status(500).json({ message: "Failed to fetch inspector" });
     }
@@ -11381,7 +11383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const inspectors = await storage.getInspectorsByCounty(req.params.county);
       res.json(inspectors);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspectors by county:", error);
       res.status(500).json({ message: "Failed to fetch inspectors by county" });
     }
@@ -11408,7 +11410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lockedUntil: credentials.lockedUntil,
         createdAt: credentials.createdAt
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector credentials:", error);
       res.status(500).json({ message: "Failed to fetch inspector credentials" });
     }
@@ -11454,7 +11456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mustChangePassword: true
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error resetting inspector password:", error);
       res.status(500).json({ message: "Failed to reset inspector password" });
     }
@@ -11525,7 +11527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mustChangePassword: true
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating inspector:", error);
       if (error.name === 'ZodError') {
         return res.status(400).json({ message: "Invalid inspector data", errors: error.errors });
@@ -11560,7 +11562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json(updatedInspector);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating inspector:", error);
       res.status(500).json({ message: "Failed to update inspector" });
     }
@@ -11582,7 +11584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ message: "Inspector activated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error activating inspector:", error);
       res.status(500).json({ message: "Failed to activate inspector" });
     }
@@ -11604,7 +11606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ message: "Inspector deactivated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deactivating inspector:", error);
       res.status(500).json({ message: "Failed to deactivate inspector" });
     }
@@ -11626,7 +11628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ message: "Inspector login enabled successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error enabling inspector login:", error);
       res.status(500).json({ message: "Failed to enable inspector login" });
     }
@@ -11648,7 +11650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ message: "Inspector login disabled successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error disabling inspector login:", error);
       res.status(500).json({ message: "Failed to disable inspector login" });
     }
@@ -11664,7 +11666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const activities = await storage.getInspectorActivitiesByInspector(inspector.inspectorId);
       res.json(activities);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector activities:", error);
       res.status(500).json({ message: "Failed to fetch inspector activities" });
     }
@@ -11680,7 +11682,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const assignments = await storage.getInspectorAreaAssignmentsByInspector(inspector.inspectorId);
       res.json(assignments);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector area assignments:", error);
       res.status(500).json({ message: "Failed to fetch inspector area assignments" });
     }
@@ -11711,7 +11713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.status(201).json(assignment);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating area assignment:", error);
       if (error.name === 'ZodError') {
         return res.status(400).json({ message: "Invalid area assignment data", errors: error.errors });
@@ -11726,7 +11728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       res.json({ uploadURL });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting profile picture upload URL:", error);
       res.status(500).json({ message: "Failed to get upload URL" });
     }
@@ -11766,7 +11768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         objectPath: objectPath,
         message: "Profile picture updated successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile picture:", error);
       res.status(500).json({ error: "Internal server error" });
     }
@@ -11781,7 +11783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const buyers = await storage.getBuyers();
       res.json(buyers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyers:", error);
       res.status(500).json({ message: "Failed to fetch buyers" });
     }
@@ -11832,7 +11834,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           generatedAt: credentials.createdAt
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error retrieving buyer credentials:", error);
       res.status(500).json({ message: "Failed to retrieve credentials" });
     }
@@ -11846,7 +11848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Buyer not found" });
       }
       res.json(buyer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer:", error);
       res.status(500).json({ message: "Failed to fetch buyer" });
     }
@@ -11878,7 +11880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         complianceStatus: buyer.complianceStatus,
         verificationStatus: buyer.verificationStatus
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer profile:", error);
       res.status(500).json({ message: "Failed to fetch buyer profile" });
     }
@@ -11911,7 +11913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verificationStatus: exporter.verificationStatus,
         exportLicenseNumber: exporter.exportLicenseNumber
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching exporter profile:", error);
       res.status(500).json({ message: "Failed to fetch exporter profile" });
     }
@@ -11943,7 +11945,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verificationStatus: inspector.verificationStatus,
         licenseNumber: inspector.licenseNumber
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inspector profile:", error);
       res.status(500).json({ message: "Failed to fetch inspector profile" });
     }
@@ -11980,7 +11982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "Pending regulatory approval"
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating buyer:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -12016,7 +12018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...updatedBuyer,
         message: "Buyer approved successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving buyer:", error);
       res.status(500).json({ message: "Failed to approve buyer" });
     }
@@ -12070,7 +12072,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           portalUrl: "/farmer-buyer-portal/login"
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating buyer credentials:", error);
       res.status(500).json({ message: "Failed to generate credentials" });
     }
@@ -12092,7 +12094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json(updatedBuyer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating buyer:", error);
       if (error.name === 'ZodError') {
         return res.status(400).json({ message: "Invalid buyer data", errors: error.errors });
@@ -12111,7 +12113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const documents = await storage.getBuyerDocuments(buyer.buyerId);
       res.json(documents);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer documents:", error);
       res.status(500).json({ message: "Failed to fetch buyer documents" });
     }
@@ -12133,7 +12135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const document = await storage.createBuyerDocument(validatedData);
       res.status(201).json(document);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating buyer document:", error);
       if (error.name === 'ZodError') {
         return res.status(400).json({ message: "Invalid document data", errors: error.errors });
@@ -12152,7 +12154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const transactions = await storage.getBuyerTransactions(buyer.buyerId);
       res.json(transactions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer transactions:", error);
       res.status(500).json({ message: "Failed to fetch buyer transactions" });
     }
@@ -12174,7 +12176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const transaction = await storage.createBuyerTransaction(validatedData);
       res.status(201).json(transaction);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating buyer transaction:", error);
       if (error.name === 'ZodError') {
         return res.status(400).json({ message: "Invalid transaction data", errors: error.errors });
@@ -12189,7 +12191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       res.json({ uploadURL });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting document upload URL:", error);
       res.status(500).json({ message: "Failed to get upload URL" });
     }
@@ -12209,7 +12211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Exporter not found" });
       }
       res.json(exporter);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching exporter:", error);
       res.status(500).json({ message: "Failed to fetch exporter" });
     }
@@ -12242,7 +12244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Exporter registered successfully - awaiting compliance review"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating exporter:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -12278,7 +12280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...updatedExporter,
         message: "Exporter approved successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving exporter:", error);
       res.status(500).json({ message: "Failed to approve exporter" });
     }
@@ -12326,7 +12328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating exporter credentials:", error);
       res.status(500).json({ message: "Failed to generate credentials" });
     }
@@ -12342,7 +12344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const documents = await storage.getExporterDocuments(exporter.id);
       res.json(documents);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching exporter documents:", error);
       res.status(500).json({ message: "Failed to fetch documents" });
     }
@@ -12358,7 +12360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const transactions = await storage.getExporterTransactions(exporter.id);
       res.json(transactions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching exporter transactions:", error);
       res.status(500).json({ message: "Failed to fetch transactions" });
     }
@@ -12370,7 +12372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       res.json({ uploadURL });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting document upload URL:", error);
       res.status(500).json({ message: "Failed to get upload URL" });
     }
@@ -12401,7 +12403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           portalUrl: "/login?portal=exporter"
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving exporter:", error);
       res.status(500).json({ message: "Failed to approve exporter" });
     }
@@ -12458,7 +12460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         mustChangePassword: authResult.credentials?.mustChangePassword
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error authenticating exporter:", error);
       res.status(500).json({ message: "Authentication failed" });
     }
@@ -12523,7 +12525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         token,
         mustChangePassword: authResult.credentials?.passwordChangeRequired
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error authenticating exporter (legacy):", error);
       res.status(500).json({ 
         success: false,
@@ -12554,7 +12556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         message: "Password updated successfully" 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error changing password:", error);
       res.status(500).json({ message: "Failed to change password" });
     }
@@ -12582,7 +12584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         mustChangePassword: req.session.mustChangePassword
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching session:", error);
       res.status(500).json({ message: "Failed to fetch session" });
     }
@@ -12597,7 +12599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         res.json({ success: true, message: "Logged out successfully" });
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error logging out:", error);
       res.status(500).json({ message: "Failed to logout" });
     }
@@ -12617,7 +12619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString(),
         source: "Alpha Vantage & Nasdaq Data Link"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching commodity prices:", error);
       res.status(500).json({ 
         success: false, 
@@ -12636,7 +12638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: indicators,
         lastUpdated: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching market indicators:", error);
       res.status(500).json({ 
         success: false, 
@@ -12654,7 +12656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: alerts,
         lastUpdated: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching price alerts:", error);
       res.status(500).json({ 
         success: false, 
@@ -12673,7 +12675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString(),
         disclaimer: "This is not financial advice. Please consult a qualified financial advisor."
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching trading recommendations:", error);
       res.status(500).json({ 
         success: false, 
@@ -12710,7 +12712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString(),
         dataSources: ["Alpha Vantage API", "Nasdaq Data Link API"]
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching market intelligence:", error);
       res.status(500).json({ 
         success: false, 
@@ -12796,7 +12798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(verificationResult);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Document verification error:", error);
       res.status(500).json({ 
         success: false, 
@@ -12822,7 +12824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: verificationHistory.length
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching verification history:", error);
       res.status(500).json({ 
         success: false, 
@@ -12957,7 +12959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json(filteredOffers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer offers:", error);
       res.status(500).json({ error: "Failed to fetch buyer offers" });
     }
@@ -13031,7 +13033,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expectedFinalDecision: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting purchase request:", error);
       res.status(500).json({ message: "Failed to submit purchase request" });
     }
@@ -13120,7 +13122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       res.json(purchaseRequests);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching purchase requests:", error);
       res.status(500).json({ message: "Failed to fetch purchase requests" });
     }
@@ -13231,7 +13233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(coordination);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching coordination details:", error);
       res.status(500).json({ message: "Failed to fetch coordination details" });
     }
@@ -13270,7 +13272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       res.json(pendingReviews);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching DDGOTS pending reviews:", error);
       res.status(500).json({ message: "Failed to fetch pending reviews" });
     }
@@ -13305,7 +13307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Proposal ${decision} by DDGOTS`,
         reviewResult
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing DDGOTS review:", error);
       res.status(500).json({ message: "Failed to process review" });
     }
@@ -13343,7 +13345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       res.json(assignedInspections);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching assigned inspections:", error);
       res.status(500).json({ message: "Failed to fetch assigned inspections" });
     }
@@ -13378,7 +13380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Inspection results submitted successfully',
         inspectionReport
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting inspection results:", error);
       res.status(500).json({ message: "Failed to submit inspection results" });
     }
@@ -13389,7 +13391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const commodities = await storage.getSoftCommodities();
       res.json(commodities);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching soft commodities:", error);
       res.status(500).json({ error: "Failed to fetch commodities" });
     }
@@ -13399,7 +13401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const commodity = await storage.createSoftCommodity(req.body);
       res.json(commodity);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating soft commodity:", error);
       res.status(500).json({ error: "Failed to create commodity" });
     }
@@ -13413,7 +13415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Commodity not found" });
       }
       res.json(commodity);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating soft commodity:", error);
       res.status(500).json({ error: "Failed to update commodity" });
     }
@@ -13424,7 +13426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       await storage.deleteSoftCommodity(id);
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting soft commodity:", error);
       res.status(500).json({ error: "Failed to delete commodity" });
     }
@@ -13441,7 +13443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
       
       res.json({ success: true, message: "Fixed Claudio's transaction data", updated: result });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Fix error:", error);
       res.status(500).json({ error: "Failed to fix transaction data" });
     }
@@ -13478,7 +13480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const farmers = await storage.getFarmers();
       res.json(farmers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmers:", error);
       res.status(500).json({ message: "Failed to fetch farmers" });
     }
@@ -13490,7 +13492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const farmerId = parseInt(req.params.farmerId);
       const landMappings = await storage.getFarmerLandMappingsByFarmer(farmerId);
       res.json(landMappings);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer land mappings:", error);
       res.status(500).json({ message: "Failed to fetch land mappings" });
     }
@@ -13502,7 +13504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertFarmerLandMappingSchema.parse(req.body);
       const landMapping = await storage.createFarmerLandMapping(validatedData);
       res.json(landMapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating land mapping:", error);
       res.status(500).json({ message: "Failed to create land mapping" });
     }
@@ -13514,7 +13516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mappingId = parseInt(req.params.mappingId);
       const inspections = await storage.getLandMappingInspectionsByLandMapping(mappingId);
       res.json(inspections);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching land mapping inspections:", error);
       res.status(500).json({ message: "Failed to fetch inspections" });
     }
@@ -13526,7 +13528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertLandMappingInspectionSchema.parse(req.body);
       const inspection = await storage.createLandMappingInspection(validatedData);
       res.json(inspection);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating land mapping inspection:", error);
       res.status(500).json({ message: "Failed to create inspection" });
     }
@@ -13539,7 +13541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertFarmerLandMappingSchema.parse(req.body);
       const landMapping = await storage.updateFarmerLandMapping(mappingId, validatedData);
       res.json(landMapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating land mapping:", error);
       res.status(500).json({ message: "Failed to update land mapping" });
     }
@@ -13551,7 +13553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mappingId = parseInt(req.params.mappingId);
       await storage.deleteFarmerLandMapping(mappingId);
       res.json({ message: "Land mapping deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting land mapping:", error);
       res.status(500).json({ message: "Failed to delete land mapping" });
     }
@@ -13566,7 +13568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Land mapping not found" });
       }
       res.json(landMapping);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching land mapping:", error);
       res.status(500).json({ message: "Failed to fetch land mapping" });
     }
@@ -13578,7 +13580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get pending export inspections for port
       const inspections = await storage.getPortInspectorPendingInspections();
       res.json({ success: true, data: inspections });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching pending inspections:", error);
       res.status(500).json({ success: false, message: "Failed to fetch inspections" });
     }
@@ -13588,7 +13590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const shipments = await storage.getActiveShipments();
       res.json({ success: true, data: shipments });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching active shipments:", error);
       res.status(500).json({ success: false, message: "Failed to fetch shipments" });
     }
@@ -13598,7 +13600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const stats = await storage.getComplianceStatistics();
       res.json({ success: true, data: stats });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching compliance stats:", error);
       res.status(500).json({ success: false, message: "Failed to fetch compliance statistics" });
     }
@@ -13608,7 +13610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const syncStatus = await storage.getRegulatoryDepartmentSync();
       res.json({ success: true, data: syncStatus });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching regulatory sync:", error);
       res.status(500).json({ success: false, message: "Failed to fetch regulatory sync" });
     }
@@ -13619,7 +13621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { inspectionId } = req.params;
       const result = await storage.startPortInspection(inspectionId);
       res.json({ success: true, data: result });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error starting inspection:", error);
       res.status(500).json({ success: false, message: "Failed to start inspection" });
     }
@@ -13631,7 +13633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, notes, violations } = req.body;
       const result = await storage.completePortInspection(inspectionId, { status, notes, violations });
       res.json({ success: true, data: result });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error completing inspection:", error);
       res.status(500).json({ success: false, message: "Failed to complete inspection" });
     }
@@ -13642,7 +13644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const inspections = await storage.getWarehouseInspectorPendingInspections();
       res.json({ success: true, data: inspections });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching pending warehouse inspections:", error);
       res.status(500).json({ success: false, message: "Failed to fetch inspections" });
     }
@@ -13652,7 +13654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const compliance = await storage.getStorageComplianceData();
       res.json({ success: true, data: compliance });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching storage compliance:", error);
       res.status(500).json({ success: false, message: "Failed to fetch compliance data" });
     }
@@ -13662,7 +13664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const inventory = await storage.getWarehouseInventoryStatus();
       res.json({ success: true, data: inventory });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching inventory status:", error);
       res.status(500).json({ success: false, message: "Failed to fetch inventory status" });
     }
@@ -13672,7 +13674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const qualityControls = await storage.getWarehouseQualityControls();
       res.json({ success: true, data: qualityControls });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching quality controls:", error);
       res.status(500).json({ success: false, message: "Failed to fetch quality controls" });
     }
@@ -13683,7 +13685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { inspectionId } = req.params;
       const result = await storage.startWarehouseInspection(inspectionId);
       res.json({ success: true, data: result });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error starting warehouse inspection:", error);
       res.status(500).json({ success: false, message: "Failed to start inspection" });
     }
@@ -13695,7 +13697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, notes, violations } = req.body;
       const result = await storage.completeWarehouseInspection(inspectionId, { status, notes, violations });
       res.json({ success: true, data: result });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error completing warehouse inspection:", error);
       res.status(500).json({ success: false, message: "Failed to complete inspection" });
     }
@@ -13718,31 +13720,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'WH-GRANDGEDEH-001': { password: 'grandgedeh123', name: 'Rebecca Williams - Grand Gedeh Inspector', county: 'Grand Gedeh County', warehouseId: 'WH-GRANDGEDEH-001' }
       };
 
-      if (warehouseInspectorCredentials[username] && warehouseInspectorCredentials[username].password === password) {
-        console.log(`✅ Warehouse inspector ${username} authenticated successfully for ${warehouseInspectorCredentials[username].county}`);
+      if (warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials] && warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].password === password) {
+        console.log(`✅ Warehouse inspector ${username} authenticated successfully for ${warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county}`);
         
         res.json({
           success: true,
           inspector: {
             id: username,
-            name: warehouseInspectorCredentials[username].name,
+            name: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].name,
             department: "Warehouse Operations",
-            county: warehouseInspectorCredentials[username].county,
-            warehouseId: warehouseInspectorCredentials[username].warehouseId,
-            facility: `${warehouseInspectorCredentials[username].county} Warehouse`,
+            county: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county,
+            warehouseId: warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].warehouseId,
+            facility: `${warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county} Warehouse`,
             credentials: `WH-CERT-2024-${username.substring(-3)}`,
             clearanceLevel: "Level 3",
             specializations: ["Storage Compliance", "Quality Control", "Temperature Management", "Pest Control"],
             contact: {
               phone: "+231-77-555-0103",
-              email: `warehouse.${warehouseInspectorCredentials[username].county.toLowerCase().replace(' ', '')}@lacra.gov.lr`
+              email: `warehouse.${warehouseInspectorCredentials[username as keyof typeof warehouseInspectorCredentials].county.toLowerCase().replace(' ', '')}@lacra.gov.lr`
             }
           }
         });
       } else {
         res.status(401).json({ success: false, message: "Invalid warehouse inspector credentials" });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Warehouse inspector login error:", error);
       res.status(500).json({ success: false, message: "Login failed" });
     }
@@ -13869,7 +13871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notificationsSent: notifications.length,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating farmer product offer:", error);
       res.status(400).json({ 
         success: false, 
@@ -13925,7 +13927,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(realNotifications);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer notifications:", error);
       res.status(500).json({ error: "Failed to fetch notifications" });
     }
@@ -14111,7 +14113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "Complete delivery according to EUDR requirements"
         ]
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting offer:", error);
       res.status(500).json({ error: "Failed to accept offer" });
     }
@@ -14326,7 +14328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Returning ${confirmedTransactions.length} confirmed transactions`);
       res.json(confirmedTransactions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching confirmed transactions:", error);
       res.status(500).json({ error: "Failed to fetch confirmed transactions" });
     }
@@ -14408,7 +14410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         message: `Found ${myOrders.length} confirmed orders`
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching verification codes:", error);
       res.status(500).json({ error: "Failed to fetch verification codes" });
     }
@@ -14481,7 +14483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ Returning ${realConfirmedTransactions.length} confirmed transactions for farmer ${dbId}`);
       
       res.json(realConfirmedTransactions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer confirmed transactions:", error);
       res.status(500).json({ error: "Failed to fetch farmer confirmed transactions" });
     }
@@ -14540,7 +14542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "payment_confirmed"
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error confirming buyer payment:", error);
       res.status(500).json({ error: "Failed to confirm payment" });
     }
@@ -14593,7 +14595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           res.json(paoloVerificationCodes);
           return;
-        } catch (error) {
+        } catch (error: any) {
           console.log("Error fetching Paolo's verification codes:", error);
         }
       }
@@ -14634,7 +14636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Returning ${farmerCodes.length} farmer verification codes`);
       res.json(farmerCodes);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer verification codes:", error);
       res.status(500).json({ error: "Failed to fetch farmer verification codes" });
     }
@@ -14788,7 +14790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         warehouseRouted: warehouseRouted
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error confirming farmer payment:", error);
       res.status(500).json({ 
         success: false, 
@@ -14836,7 +14838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✅ Successfully seeded ${liberianCountyWarehouses.length} county warehouses`);
       res.json({ success: true, message: "County warehouses seeded successfully", count: liberianCountyWarehouses.length });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error seeding county warehouses:", error);
       res.status(500).json({ error: "Failed to seed county warehouses" });
     }
@@ -14850,7 +14852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
       
       res.json({ data: warehousesResult.rows });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching county warehouses:", error);
       res.status(500).json({ error: "Failed to fetch county warehouses" });
     }
@@ -14876,7 +14878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✅ Updated warehouse profile for ${warehouseId}`);
       res.json({ success: true, message: "Warehouse profile updated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating warehouse profile:", error);
       res.status(500).json({ error: "Failed to update warehouse profile" });
     }
@@ -14901,7 +14903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           warehouseId = decoded.warehouseId;
           console.log(`Filtering transactions for warehouse: ${warehouseId}`);
-        } catch (error) {
+        } catch (error: any) {
           console.log("No valid token, returning all transactions");
         }
       }
@@ -14964,7 +14966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Returning ${warehouseTransactions.length} warehouse transactions`);
       res.json({ data: warehouseTransactions });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching warehouse transactions:", error);
       res.status(500).json({ error: "Failed to fetch warehouse transactions" });
     }
@@ -14985,7 +14987,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           warehouseId = decoded.warehouseId;
           console.log(`Filtering verification codes for warehouse: ${warehouseId}`);
-        } catch (error) {
+        } catch (error: any) {
           console.log("No valid token, returning all verification codes");
         }
       }
@@ -15067,7 +15069,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Returning ${warehouseCodes.length} warehouse verification codes`);
       res.json({ data: warehouseCodes });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching warehouse verification codes:", error);
       res.status(500).json({ error: "Failed to fetch warehouse verification codes" });
     }
@@ -15088,7 +15090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           warehouseId = decoded.warehouseId;
           console.log(`Filtering QR batches for warehouse: ${warehouseId}`);
-        } catch (error) {
+        } catch (error: any) {
           console.log("No valid token, returning all QR batches");
         }
       }
@@ -15142,7 +15144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Returning ${qrBatches.length} QR batches`);
       res.json({ success: true, data: qrBatches });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching QR batches:", error);
       res.status(500).json({ error: "Failed to fetch QR batches" });
     }
@@ -15163,7 +15165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           warehouseId = decoded.warehouseId;
           console.log(`Filtering bag requests for warehouse: ${warehouseId}`);
-        } catch (error) {
+        } catch (error: any) {
           console.log("No valid token, returning all bag requests");
         }
       }
@@ -15232,7 +15234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const token = authHeader.substring(7);
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           inspectorId = decoded.userId;
-        } catch (error) {
+        } catch (error: any) {
           return res.status(401).json({ error: "Invalid authentication token" });
         }
       }
@@ -15327,7 +15329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           warehouseId = decoded.warehouseId;
           console.log(`Filtering available transactions for warehouse: ${warehouseId}`);
-        } catch (error) {
+        } catch (error: any) {
           console.log("No valid token, returning all available transactions");
         }
       }
@@ -15389,7 +15391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Returning ${availableTransactions.length} available transactions for QR batch`);
       res.json({ data: availableTransactions });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching available transactions:", error);
       res.status(500).json({ error: "Failed to fetch available transactions" });
     }
@@ -15577,7 +15579,7 @@ International compliance standards met`;
         packagingType: packagingType,
         totalPackages: totalPackages
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating QR batch:", error);
       res.status(500).json({ error: "Failed to generate QR batch" });
     }
@@ -15598,7 +15600,7 @@ International compliance standards met`;
           const decoded = jwt.verify(token, JWT_SECRET) as any;
           warehouseId = decoded.warehouseId;
           console.log(`Filtering bag collections for warehouse: ${warehouseId}`);
-        } catch (error) {
+        } catch (error: any) {
           console.log("No valid token, returning all bag collections");
         }
       }
@@ -15659,7 +15661,7 @@ International compliance standards met`;
 
       console.log(`Returning ${bagCollections.length} bag collections`);
       res.json({ data: bagCollections });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching bag collections:", error);
       res.status(500).json({ error: "Failed to fetch bag collections" });
     }
@@ -15718,7 +15720,7 @@ International compliance standards met`;
 
       console.log("EUDR compliant code validation successful");
       res.json(validationResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error validating EUDR code:", error);
       res.status(500).json({ error: "Failed to validate code" });
     }
@@ -15753,7 +15755,7 @@ International compliance standards met`;
 
       console.log("Batch generation successful:", batchCode);
       res.json(batchResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating batch:", error);
       res.status(500).json({ error: "Failed to generate batch" });
     }
@@ -15824,7 +15826,7 @@ International compliance standards met`;
         message: `QR code generated successfully for batch ${batchCode}`
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating QR code:", error);
       res.status(500).json({ 
         error: "Failed to generate QR code",
@@ -15869,7 +15871,7 @@ International compliance standards met`;
         data: custodyRecord, 
         message: "Product successfully registered for warehouse custody" 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error registering product:", error);
       res.status(500).json({ 
         success: false, 
@@ -15926,7 +15928,7 @@ International compliance standards met`;
         message: `Found ${qrBatch.commodity_type} from ${qrBatch.buyer_name || 'Batch Buyer'}`
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ QR lookup error:', error);
       res.status(500).json({ 
         success: false, 
@@ -15985,7 +15987,7 @@ International compliance standards met`;
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ QR lookup error:', error);
       res.status(500).json({
         success: false,
@@ -16092,7 +16094,7 @@ International compliance standards met`;
         message: `✅ ${qrCodeDetails.length} lots validated for ${baseProduct} with ${basePackaging} packaging`
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Multi-lot validation error:', error);
       res.status(500).json({
         success: false,
@@ -16261,7 +16263,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: `${custodyType === 'multi_lot' ? 'Multi-lot' : 'Single lot'} custody registered successfully - $${storageAmount} storage fee calculated`
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Custody registration error:', error);
       res.status(500).json({
         success: false,
@@ -16294,7 +16296,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: `Custody ${custodyId} authorized successfully`
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to authorize custody:', error);
       res.status(500).json({
         success: false,
@@ -16343,7 +16345,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         success: true, 
         data: custodyRecordsWithFees 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching custody records:", error);
       res.status(500).json({ 
         success: false, 
@@ -16391,7 +16393,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: `Payment verified and custody ${custodyId} authorized successfully`
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to verify payment and authorize custody:', error);
       res.status(500).json({
         success: false,
@@ -16435,7 +16437,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         data: availableExporters
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching available exporters:", error);
       res.status(500).json({
         success: false,
@@ -16598,7 +16600,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating exporter offer:", error);
       res.status(500).json({
         success: false,
@@ -16631,7 +16633,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         data: buyerOffers
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer offers:", error);
       res.status(500).json({
         success: false,
@@ -16671,7 +16673,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         data: availableOffers
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching exporter offers:", error);
       res.status(500).json({
         success: false,
@@ -16811,7 +16813,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         verificationCode: verificationCode
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting offer:", error);
       res.status(500).json({
         success: false,
@@ -16858,7 +16860,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         deals: dealsData
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching accepted deals:", error);
       res.status(500).json({
         success: false,
@@ -16909,7 +16911,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: "Offer rejected successfully"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error rejecting offer:", error);
       res.status(500).json({
         success: false,
@@ -16964,7 +16966,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         totalLots: custodyLotsWithFees.length
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching buyer custody lots:", error);
       res.status(500).json({
         success: false,
@@ -17056,7 +17058,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         paymentReference: finalPaymentReference
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing storage fee payment:", error);
       res.status(500).json({
         success: false,
@@ -17129,7 +17131,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: "Authorization request submitted successfully"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating authorization request:", error);
       res.status(500).json({
         success: false,
@@ -17146,7 +17148,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const objectStorageService = new (await import('./objectStorage')).ObjectStorageService();
       const uploadURL = await objectStorageService.getReceiptUploadURL();
       res.json({ uploadURL });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting receipt upload URL:', error);
       res.status(500).json({ message: 'Failed to get upload URL' });
     }
@@ -17178,7 +17180,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         success: true, 
         message: 'Receipt uploaded successfully. Awaiting warehouse verification.' 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error confirming payment via receipt:', error);
       res.status(500).json({ message: 'Failed to confirm payment' });
     }
@@ -17206,7 +17208,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         success: true, 
         message: 'Transaction reference submitted successfully. Awaiting warehouse verification.' 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error confirming payment via reference:', error);
       res.status(500).json({ message: 'Failed to confirm payment' });
     }
@@ -17233,7 +17235,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         .where(eq(storageFees.confirmationStatus, 'pending'));
 
       res.json(pendingConfirmations);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching pending confirmations:', error);
       res.status(500).json({ message: 'Failed to fetch pending confirmations' });
     }
@@ -17267,7 +17269,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         success: true, 
         message: `Payment confirmation ${status} successfully.` 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying payment:', error);
       res.status(500).json({ message: 'Failed to verify payment' });
     }
@@ -17282,7 +17284,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     try {
       const newOffer = await storage.createBuyerExporterOffer(req.body);
       res.json(newOffer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating buyer-exporter offer:", error);
       res.status(500).json({ error: "Failed to create offer" });
     }
@@ -17328,7 +17330,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       
       console.log(`📊 Found ${offers.rows?.length || 0} active offers for Sellers Hub`);
       res.json(offers.rows || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching offers:", error);
       res.status(500).json({ error: "Failed to fetch offers" });
     }
@@ -17340,7 +17342,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const exporterId = parseInt(req.params.exporterId);
       const offers = await storage.getOffersForExporter(exporterId);
       res.json(offers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching exporter offers:", error);
       res.status(500).json({ error: "Failed to fetch offers" });
     }
@@ -17358,7 +17360,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       await storage.incrementOfferViewCount(req.params.offerId);
       
       res.json(offer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching offer details:", error);
       res.status(500).json({ error: "Failed to fetch offer" });
     }
@@ -17387,7 +17389,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           message: result.message 
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting offer:", error);
       res.status(500).json({ error: "Failed to accept offer" });
     }
@@ -17414,7 +17416,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: "Offer rejected successfully",
         responseId: response.responseId
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error rejecting offer:", error);
       res.status(500).json({ error: "Failed to reject offer" });
     }
@@ -17446,7 +17448,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: "Counter-offer sent to buyer successfully",
         responseId: response.responseId
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error starting negotiation:", error);
       res.status(500).json({ error: "Failed to send counter-offer" });
     }
@@ -17489,7 +17491,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         data: counterOffers.rows
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching counter-offers:", error);
       res.status(500).json({
         success: false,
@@ -17537,7 +17539,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: "Counter-offer accepted! Verification code generated."
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting counter-offer:", error);
       res.status(500).json({
         success: false,
@@ -17567,7 +17569,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: "Counter-offer rejected successfully"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error rejecting counter-offer:", error);
       res.status(500).json({
         success: false,
@@ -17616,7 +17618,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         verificationCode: verificationCode
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting original price:", error);
       res.status(500).json({
         success: false,
@@ -17650,7 +17652,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         data: rejectedOffers
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching rejected counter-offers:", error);
       res.status(500).json({
         success: false,
@@ -17697,7 +17699,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         processedAt: new Date().toISOString()
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing mobile payment:", error);
       res.status(500).json({ error: "Failed to process payment" });
     }
@@ -17724,7 +17726,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         success: true,
         profile: farmer
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching farmer profile:", error);
       res.status(500).json({ 
         success: false, 
@@ -17745,7 +17747,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: "Farmer profile updated successfully",
         profile: updatedFarmer
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating farmer profile:", error);
       res.status(500).json({ 
         success: false, 
@@ -17789,7 +17791,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         message: created ? "Profile created successfully" : "Profile already exists",
         profile: profile
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error ensuring profile completeness:", error);
       res.status(500).json({ 
         success: false, 
@@ -17810,7 +17812,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           res.status(404).json({ error: 'Asset not found' });
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in asset serving route:", error);
       res.status(500).json({ error: 'Internal server error' });
     }

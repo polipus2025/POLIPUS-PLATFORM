@@ -81,7 +81,7 @@ export default function FarmerBuyerLogin() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          username: buyerData.username, 
+          buyerId: buyerData.username, 
           password: buyerData.password,
           userType: 'buyer' 
         })

@@ -318,7 +318,7 @@ export default function Landing() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/farmer-buyer-portal-select">
+                <a href="/farmer-buyer-login">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

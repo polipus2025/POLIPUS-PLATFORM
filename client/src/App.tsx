@@ -65,6 +65,7 @@ import SystemAdminLogin from "@/pages/auth/system-admin-login";
 // NEW SEPARATE PORTAL LOGINS
 import FarmerPortalLogin from "@/pages/auth/farmer-portal-login";
 import BuyerPortalLogin from "@/pages/auth/buyer-portal-login";
+import FarmerBuyerLogin from "@/pages/auth/farmer-buyer-login";
 
 // LAZY LOADING - Polipus module portals (7 modules)
 const LiveTracePortal = lazy(() => import("@/pages/portals/live-trace-portal"));
@@ -149,8 +150,8 @@ function App() {
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
             
-            {/* FARMER BUYER PORTAL SELECTION PAGE */}
-            <Route path="/farmer-buyer-portal-select" component={createLazyRoute(lazy(() => import("@/pages/farmer-buyer-portal-select")))} />
+            {/* FARMER BUYER COMBINED LOGIN PAGE */}
+            <Route path="/farmer-buyer-login" component={FarmerBuyerLogin} />
             
             {/* NEW SEPARATE PORTAL ROUTES */}
             <Route path="/farmer-portal-login" component={FarmerPortalLogin} />

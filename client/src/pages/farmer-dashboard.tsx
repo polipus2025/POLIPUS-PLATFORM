@@ -25,7 +25,9 @@ import {
   Bell,
   BarChart3,
   Home,
-  Loader2
+  Loader2,
+  Handshake,
+  User
 } from "lucide-react";
 import { Link } from "wouter";
 import ProfileDropdown from "@/components/ProfileDropdown";
@@ -257,9 +259,9 @@ export default function FarmerDashboard() {
             <Clock className="h-3 w-3 lg:h-4 lg:w-4" />
             <span className="hidden sm:inline">Pending Offers</span>
           </TabsTrigger>
-          <TabsTrigger value="verification-codes" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 bg-blue-50 text-blue-600">
-            <CheckCircle className="h-3 w-3 lg:h-4 lg:w-4" />
-            <span className="hidden sm:inline">Verification Codes</span>
+          <TabsTrigger value="verification-codes" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 bg-green-50 text-green-600">
+            <Handshake className="h-3 w-3 lg:h-4 lg:w-4" />
+            <span className="hidden sm:inline">Accepted Offers</span>
           </TabsTrigger>
           <TabsTrigger value="confirmed-transactions" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
             <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
@@ -911,63 +913,113 @@ export default function FarmerDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <CheckCircle className="w-5 h-5 mr-2 text-blue-600" />
-                Verification Codes
+                <Handshake className="w-5 h-5 mr-2 text-green-600" />
+                Accepted Offers
               </CardTitle>
               <CardDescription>
-                Transaction verification codes from approved offers
+                Offers accepted by buyers with payment confirmation workflow
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {farmerCodes?.map((code: any) => (
-                  <Card key={code.verificationCode} className="border-blue-200 bg-blue-50">
+                  <Card key={code.verificationCode} className="border-green-200 bg-green-50">
                     <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <code className="px-3 py-2 bg-blue-100 text-blue-700 rounded text-lg font-mono font-bold">
-                              {code.verificationCode}
-                            </code>
-                            <Badge variant="outline" className={`${
-                              code.status === 'payment_confirmed' ? 'bg-green-100 text-green-700 border-green-300' : 
-                              'bg-blue-100 text-blue-700 border-blue-300'
-                            }`}>
-                              {code.status === 'payment_confirmed' ? 'PAID' : code.status}
-                            </Badge>
-                            {code.paymentStatus && (
-                              <Badge variant="outline" className={`text-xs ${
-                                code.paymentStatus.includes('CONFIRMED') ? 'text-green-600 border-green-300' : 'text-orange-600 border-orange-300'
-                              }`}>
-                                {code.paymentStatus}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-700 font-medium">Buyer: {code.buyerName}</p>
-                          <p className="text-sm text-gray-600">{code.commodityType} • {code.quantityAvailable} {code.unit}</p>
-                          <p className="text-sm text-blue-600 font-medium">Total Value: ${code.totalValue?.toLocaleString()}</p>
-                          
-                          {/* Show second verification code if payment confirmed */}
-                          {code.secondVerificationCode && (
-                            <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded">
-                              <p className="text-xs text-gray-600 mb-1">Second Verification Code:</p>
-                              <code className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm font-mono font-bold">
-                                {code.secondVerificationCode}
+                      {/* Offer Header */}
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h4 className="font-semibold text-lg text-green-800">{code.commodityType} Offer</h4>
+                          <p className="text-sm text-blue-600 font-medium">Offer ID: {code.offerId}</p>
+                        </div>
+                        <Badge className={`${
+                          code.status === 'payment_confirmed' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
+                        }`}>
+                          {code.status === 'payment_confirmed' ? 'PAYMENT CONFIRMED' : 'BUYER ACCEPTED'}
+                        </Badge>
+                      </div>
+
+                      {/* Buyer Details Section */}
+                      <div className="bg-white border border-green-300 rounded-lg p-3 mb-4">
+                        <h5 className="font-medium text-green-700 mb-2 flex items-center">
+                          <User className="w-4 h-4 mr-1" />
+                          Buyer Information
+                        </h5>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                          <p><strong>Name:</strong> {code.buyerName}</p>
+                          <p><strong>Company:</strong> {code.company}</p>
+                          <p><strong>Location:</strong> {code.county}</p>
+                          <p><strong>Contact:</strong> Via platform messaging</p>
+                        </div>
+                      </div>
+
+                      {/* Offer Details */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">Quantity</p>
+                          <p className="font-medium">{code.quantityAvailable} {code.unit}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Price per {code.unit}</p>
+                          <p className="font-medium">${code.pricePerUnit?.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Total Value</p>
+                          <p className="font-medium text-green-600">${code.totalValue?.toLocaleString()}</p>
+                        </div>
+                      </div>
+
+                      {/* Verification Code & Payment Section */}
+                      <div className="border-t pt-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div>
+                              <p className="text-xs text-gray-600">First Verification Code</p>
+                              <code className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded font-mono">
+                                {code.verificationCode}
                               </code>
                             </div>
-                          )}
+                            {code.secondVerificationCode && (
+                              <div>
+                                <p className="text-xs text-gray-600">Second Code (After Payment)</p>
+                                <code className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded font-mono">
+                                  {code.secondVerificationCode}
+                                </code>
+                              </div>
+                            )}
+                          </div>
                           
-                          {/* Payment confirmation details */}
-                          {code.paymentConfirmedAt && (
-                            <p className="text-xs text-green-600 font-medium mt-1">
-                              ✅ Payment confirmed: {new Date(code.paymentConfirmedAt).toLocaleString()}
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">
-                            Generated: {new Date(code.generatedAt).toLocaleDateString()}
-                          </p>
+                          {/* Payment Confirmation Button/Status */}
+                          <div className="text-right">
+                            {code.status === 'payment_confirmed' ? (
+                              <div className="text-center">
+                                <p className="text-xs text-green-600 font-medium mb-1">
+                                  ✅ Payment Confirmed
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(code.paymentConfirmedAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            ) : (
+                              <Button
+                                onClick={() => handleConfirmPayment(code.id)}
+                                disabled={confirmingPayment === code.id}
+                                className="bg-green-600 hover:bg-green-700 text-white text-sm"
+                                data-testid="button-confirm-payment"
+                              >
+                                {confirmingPayment === code.id ? (
+                                  <>
+                                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                                    Confirming...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Confirm Payment Received
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -975,9 +1027,9 @@ export default function FarmerDashboard() {
                 ))}
                 {(!farmerCodes || farmerCodes.length === 0) && (
                   <div className="text-center py-8 text-gray-500">
-                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No verification codes yet</p>
-                    <p className="text-sm">Codes will appear here when buyers accept your offers</p>
+                    <Handshake className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No Accepted Offers Yet</p>
+                    <p className="text-sm">Offers accepted by buyers will appear here with buyer details</p>
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import WorkingApp from "./WorkingApp";
 import "./index.css";
 
 // Safety check for DOM readiness
@@ -16,7 +16,7 @@ function initializeApp() {
 
   try {
     const root = createRoot(rootElement);
-    root.render(<App />);
+    root.render(<WorkingApp />);
   } catch (error) {
     console.error("Failed to initialize React app:", error);
     // Fallback: Show basic error message

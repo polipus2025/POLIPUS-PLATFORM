@@ -14589,14 +14589,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For Paolo's farmer ID, return his verification codes with payment confirmation details
       if (farmerId === "FARMER-1755883520291-288") {
         try {
-          // Get Paolo's verification codes from buyer_verification_codes table
+          // Get Paolo's verification codes with REAL-TIME buyer information
           const paoloCodesResult = await db.execute(sql`
-            SELECT id, verification_code, buyer_name, commodity_type, 
-                   quantity_available, unit, total_value, accepted_at, status,
-                   second_verification_code, payment_confirmed_at
-            FROM buyer_verification_codes 
-            WHERE farmer_id = '288' 
-            ORDER BY accepted_at DESC
+            SELECT bvc.id, bvc.verification_code, bvc.buyer_name, bvc.commodity_type, 
+                   bvc.quantity_available, bvc.unit, bvc.total_value, bvc.accepted_at, bvc.status,
+                   bvc.second_verification_code, bvc.payment_confirmed_at, bvc.offer_id,
+                   b.business_name as company, b.county, bvc.buyer_id
+            FROM buyer_verification_codes bvc
+            LEFT JOIN buyers b ON bvc.buyer_id = b.id
+            WHERE bvc.farmer_id = '288' 
+            ORDER BY bvc.accepted_at DESC
           `);
           
           const paoloVerificationCodes = paoloCodesResult.rows.map((row: any) => {
@@ -14608,10 +14610,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               secondVerificationCode: row.second_verification_code,
               farmerId: farmerId,
               buyerName: row.buyer_name || 'Margibi Trading Company',
+              // REAL-TIME BUYER INFORMATION from JOIN
+              company: row.company || row.business_name || 'Company Name Not Available',
+              county: row.county || 'Location Not Available',
+              offerId: row.offer_id,
               commodityType: row.commodity_type,
               quantityAvailable: parseFloat(row.quantity_available),
               unit: row.unit || 'tons',
               totalValue: parseFloat(row.total_value),
+              pricePerUnit: parseFloat(row.price_per_unit) || (parseFloat(row.total_value) / parseFloat(row.quantity_available)),
               generatedAt: new Date(row.accepted_at),
               paymentConfirmedAt: row.payment_confirmed_at ? new Date(row.payment_confirmed_at) : null,
               status: 'active', // Always active - no payment confirmation needed

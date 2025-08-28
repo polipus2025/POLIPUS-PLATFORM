@@ -77,6 +77,12 @@ const ProfileRouter = lazy(() => import("@/pages/profile"));
 const WorldMarketPricing = lazy(() => import("@/pages/world-market-pricing"));
 const SellersHub = lazy(() => import("@/pages/sellers-hub"));
 
+// AGRICULTURAL PAGES - Required for land inspector navigation
+const OnboardFarmer = lazy(() => import("@/pages/onboard-farmer"));
+const CreateLandPlot = lazy(() => import("@/pages/create-land-plot"));
+const EudrAssessment = lazy(() => import("@/pages/eudr-assessment"));
+const GenerateReports = lazy(() => import("@/pages/generate-reports"));
+
 function App() {
   return (
     <ErrorBoundary>
@@ -118,6 +124,12 @@ function App() {
             {/* AGRICULTURAL DASHBOARD ROUTES */}
             <Route path="/farmer-dashboard" component={createLazyRoute(FarmerDashboard)} />
             <Route path="/agricultural-buyer-dashboard" component={createLazyRoute(BuyerDashboard)} />
+            
+            {/* AGRICULTURAL PAGES - Land Inspector Navigation */}
+            <Route path="/onboard-farmer" component={createLazyRoute(OnboardFarmer)} />
+            <Route path="/create-land-plot" component={createLazyRoute(CreateLandPlot)} />
+            <Route path="/eudr-assessment" component={createLazyRoute(EudrAssessment)} />
+            <Route path="/generate-reports" component={createLazyRoute(GenerateReports)} />
             
             {/* INSPECTOR PORTALS */}
             <Route path="/warehouse-inspector-dashboard" component={createLazyRoute(WarehouseInspectorDashboard)} />

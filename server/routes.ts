@@ -14586,15 +14586,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.log(`🔍 DEBUG: Farmer ${farmerId} -> DB ID: ${dbId}`);
       
-      // Get only accepted offers that are waiting for payment confirmation
-      // These have verification codes but NO second verification code yet
+      // Get only accepted offers that are waiting for farmer payment confirmation
+      // These have verification codes with status 'active' (buyer accepted, farmer hasn't confirmed payment yet)
       const acceptedOffers = await db
         .select()
         .from(buyerVerificationCodes)
         .where(
           and(
             eq(buyerVerificationCodes.farmerId, dbId.toString()),
-            eq(buyerVerificationCodes.status, 'bags_requested'),
+            eq(buyerVerificationCodes.status, 'active'),
             isNull(buyerVerificationCodes.secondVerificationCode)
           )
         )

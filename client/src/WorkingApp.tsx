@@ -9,7 +9,7 @@ import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 
 // Import authentication pages
-import FarmerLogin from "@/pages/auth/farmer-login";
+import FarmerBuyerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import InspectorLogin from "@/pages/auth/inspector-login";
@@ -31,7 +31,7 @@ function Router() {
       <Route path="/landing" component={Landing} />
       
       {/* Authentication Routes */}
-      <Route path="/farmer-login" component={FarmerLogin} />
+      <Route path="/farmer-login" component={FarmerBuyerLogin} />
       <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
       <Route path="/farmer-portal-login" component={FarmerPortalLogin} />
       <Route path="/buyer-portal-login" component={BuyerPortalLogin} />

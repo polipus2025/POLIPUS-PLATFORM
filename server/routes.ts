@@ -509,8 +509,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
       // Creating automatic buyer notifications
       
-      // Get ALL active buyers from database - UNIVERSAL NOTIFICATION SYSTEM
-      const allBuyers = await db
+      // Get ONLY buyers in the SAME COUNTY as farmer - COUNTY-BASED FILTERING
+      const sameCountyBuyers = await db
         .select({
           id: buyers.id,
           buyerId: buyers.buyerId,
@@ -524,6 +524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyers.isActive, true), // Only active buyers
+            eq(buyers.county, finalCounty), // ONLY SAME COUNTY BUYERS
             or(
               eq(buyers.complianceStatus, 'approved'),
               eq(buyers.complianceStatus, 'pending') // Include pending for marketplace access
@@ -531,11 +532,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         );
       
-      console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
+      console.log(`📬 Creating notifications for ${sameCountyBuyers.length} same-county buyers in ${finalCounty}`);
       
-      // Create notification for each approved buyer - FIXED WITH DIRECT SQL
+      // Create notification for each same-county buyer - COUNTY-BASED FILTERING
       const notifications = [];
-      for (const buyer of allBuyers) {
+      for (const buyer of sameCountyBuyers) {
         const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}-BUYER-${buyer.id}`;
         
         try {
@@ -13825,8 +13826,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // AUTOMATIC BUYER NOTIFICATION SYSTEM - REAL DATA ONLY
       // Creating automatic buyer notifications
       
-      // Get ALL active buyers from database - UNIVERSAL NOTIFICATION SYSTEM
-      const allBuyers = await db
+      // Get ONLY buyers in the SAME COUNTY as farmer - COUNTY-BASED FILTERING
+      const sameCountyBuyers = await db
         .select({
           id: buyers.id,
           buyerId: buyers.buyerId,
@@ -13840,6 +13841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyers.isActive, true), // Only active buyers
+            eq(buyers.county, finalCounty), // ONLY SAME COUNTY BUYERS
             or(
               eq(buyers.complianceStatus, 'approved'),
               eq(buyers.complianceStatus, 'pending') // Include pending for marketplace access
@@ -13847,11 +13849,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         );
       
-      console.log(`📬 Creating notifications for ${allBuyers.length} approved buyers`);
+      console.log(`📬 Creating notifications for ${sameCountyBuyers.length} same-county buyers in ${finalCounty}`);
       
-      // Create notification for each approved buyer - FIXED WITH DIRECT SQL
+      // Create notification for each same-county buyer - COUNTY-BASED FILTERING
       const notifications = [];
-      for (const buyer of allBuyers) {
+      for (const buyer of sameCountyBuyers) {
         const notificationId = `BN-${validatedData.farmerName.toUpperCase()}-${validatedData.commodityType.toUpperCase().replace(' ', '-')}-${offer.id}-BUYER-${buyer.id}`;
         
         try {

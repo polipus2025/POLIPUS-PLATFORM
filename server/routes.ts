@@ -15,7 +15,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
 import { createTestFarmer } from "./create-test-farmer";
-import { count } from "drizzle-orm";
+import { count, eq, desc, sql, and, or, ne, isNull, isNotNull } from "drizzle-orm";
 
 import { 
   farmers,
@@ -149,7 +149,6 @@ import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { db } from './db';
-import { eq, desc, ne, sql, and, or } from "drizzle-orm";
 import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables
@@ -14460,35 +14459,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }
       
-      // Get confirmed transactions for THIS farmer only (GENERIC for any farmer)
+      // Get ONLY payment-confirmed transactions for THIS farmer 
+      // These must have second verification codes (farmer confirmed payment receipt)
       const confirmedTransactions = await db
         .select()
         .from(buyerVerificationCodes)
-        .where(eq(buyerVerificationCodes.farmerId, dbId.toString()))
+        .where(
+          and(
+            eq(buyerVerificationCodes.farmerId, dbId.toString()),
+            isNotNull(buyerVerificationCodes.secondVerificationCode),
+            isNotNull(buyerVerificationCodes.paymentConfirmedAt)
+          )
+        )
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
       console.log(`📂 Found ${confirmedTransactions.length} confirmed transactions for farmer ${dbId}`);
       
-      // Create confirmed transactions from buyer_verification_codes
-      const realConfirmedTransactions = confirmedTransactions.map(transaction => {
-        const hasPaymentConfirmation = transaction.secondVerificationCode && transaction.paymentConfirmedAt;
-        
-        // Determine proper status based on verification step
-        let transactionStatus = transaction.status || "accepted";
-        let statusMessage = "";
-        
-        if (hasPaymentConfirmation) {
-          transactionStatus = "payment_confirmed";
-          statusMessage = "✅ Payment Confirmed - Both verification codes generated";
-        } else {
-          transactionStatus = "accepted";  
-          statusMessage = "⏳ Awaiting Payment - Buyer needs to confirm payment for 2nd verification code";
-        }
-        
+      // Create confirmed transactions from payment-confirmed buyer_verification_codes
+      const realConfirmedTransactions = confirmedTransactions.map(transaction => {        
         return {
           id: transaction.id,
           notificationId: transaction.notificationId,
           farmerId: farmerId,
+          farmerOfferId: transaction.offerId, // CRITICAL: Include farmer offer ID for traceability
           buyerId: transaction.buyerId,
           buyerName: transaction.buyerName,
           buyerCompany: transaction.company || "Agricultural Trading Company",
@@ -14502,13 +14495,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           deliveryTerms: transaction.deliveryTerms,
           verificationCode: transaction.verificationCode,
           secondVerificationCode: transaction.secondVerificationCode,
-          paymentConfirmed: hasPaymentConfirmation,
+          paymentConfirmed: true, // Always true - these are payment-confirmed transactions
           paymentConfirmedAt: transaction.paymentConfirmedAt,
           confirmedAt: transaction.acceptedAt,
-          status: transactionStatus,
-          statusMessage: statusMessage,
-          step1Complete: !!transaction.verificationCode,
-          step2Complete: hasPaymentConfirmation
+          status: "payment_confirmed", // Always payment confirmed
+          statusMessage: "✅ Payment Confirmed - Both verification codes generated",
+          step1Complete: true, // Always true
+          step2Complete: true // Always true
         };
       });
 
@@ -14577,6 +14570,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error confirming buyer payment:", error);
       res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
+  // NEW: Get farmer accepted offers (waiting for payment confirmation)
+  app.get("/api/farmer/accepted-offers/:farmerId", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      console.log(`🤝 Fetching accepted offers awaiting payment for farmer: ${farmerId}`);
+      
+      // GENERIC SYSTEM: Extract database ID from any farmer ID 
+      const dbId = await extractFarmerDbId(farmerId);
+      if (!dbId) {
+        return res.status(400).json({ error: "Invalid farmer ID format" });
+      }
+      
+      // Get only accepted offers that are waiting for payment confirmation
+      // These have verification codes but NO second verification code yet
+      const acceptedOffers = await db
+        .select()
+        .from(buyerVerificationCodes)
+        .where(
+          and(
+            eq(buyerVerificationCodes.farmerId, dbId.toString()),
+            eq(buyerVerificationCodes.status, 'bags_requested'),
+            isNull(buyerVerificationCodes.secondVerificationCode)
+          )
+        )
+        .orderBy(desc(buyerVerificationCodes.acceptedAt));
+
+      console.log(`🤝 Found ${acceptedOffers.length} accepted offers awaiting payment for farmer ${dbId}`);
+      
+      // Format accepted offers with farmer offer ID included
+      const formattedOffers = acceptedOffers.map(offer => ({
+        id: offer.id,
+        farmerId: farmerId,
+        farmerOfferId: offer.offerId, // CRITICAL: Include farmer offer ID for traceability
+        buyerId: offer.buyerId,
+        buyerName: offer.buyerName,
+        buyerCompany: offer.company || "Agricultural Trading Company",
+        commodityType: offer.commodityType,
+        quantityAvailable: parseFloat(offer.quantityAvailable || '0'),
+        unit: offer.unit,
+        pricePerUnit: parseFloat(offer.pricePerUnit || '0'),
+        totalValue: parseFloat(offer.totalValue || '0'),
+        verificationCode: offer.verificationCode,
+        secondVerificationCode: null, // Always null for accepted offers
+        paymentConfirmed: false, // Always false for accepted offers
+        paymentConfirmedAt: null,
+        county: offer.county,
+        farmLocation: offer.farmLocation,
+        paymentTerms: offer.paymentTerms,
+        deliveryTerms: offer.deliveryTerms,
+        acceptedAt: offer.acceptedAt,
+        expiresAt: offer.expiresAt,
+        status: 'accepted', // Status for UI
+        statusMessage: "⏳ Awaiting Payment - Buyer needs to make payment for 2nd verification code"
+      }));
+
+      console.log(`✅ Returning ${formattedOffers.length} accepted offers for farmer ${dbId}`);
+      res.json(formattedOffers);
+    } catch (error: any) {
+      console.error("Error fetching farmer accepted offers:", error);
+      res.status(500).json({ error: "Failed to fetch accepted offers" });
     }
   });
 
@@ -14708,8 +14764,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Farmer ${farmerId} confirming payment for transaction: ${transactionId}`);
 
-      // Generate second verification code
-      const secondVerificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      // Generate second verification code using proper format
+      const secondVerificationCode = generateSecondVerificationCode();
       const confirmationDate = new Date();
       
       // For Paolo's transactions, update the real database record
@@ -14742,7 +14798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .set({
             secondVerificationCode: secondVerificationCode,
             paymentConfirmedAt: confirmationDate,
-            status: 'active' // No payment confirmation required
+            status: 'payment_confirmed' // Payment confirmed by farmer
           })
           .where(eq(buyerVerificationCodes.id, actualId))
           .returning();

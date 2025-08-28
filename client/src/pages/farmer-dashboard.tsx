@@ -82,7 +82,16 @@ export default function FarmerDashboard() {
     refetchOnMount: false, // Don't always refetch on mount
   });
 
-  // Fetch farmer verification codes archive
+  // Fetch farmer accepted offers (waiting for payment confirmation)
+  const { data: acceptedOffers, isLoading: acceptedOffersLoading } = useQuery({
+    queryKey: ['/api/farmer/accepted-offers', farmerId],
+    queryFn: () => apiRequest(`/api/farmer/accepted-offers/${farmerId}`),
+    enabled: !!farmerId,
+    staleTime: 30 * 1000, // Cache for 30 seconds
+    gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+  });
+
+  // Fetch farmer verification codes archive (keeping for backward compatibility)
   const { data: farmerCodes, isLoading: farmerCodesLoading } = useQuery({
     queryKey: ['/api/farmer/verification-codes', farmerId],
     queryFn: () => apiRequest(`/api/farmer/verification-codes/${farmerId}`),
@@ -126,6 +135,7 @@ export default function FarmerDashboard() {
       
       // Invalidate and refetch the farmer data
       queryClient.invalidateQueries({ queryKey: ['/api/farmer/confirmed-transactions', farmerId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/farmer/accepted-offers', farmerId] });
       queryClient.invalidateQueries({ queryKey: ['/api/farmer/verification-codes', farmerId] });
       setConfirmingPayment(null);
     },
@@ -921,20 +931,21 @@ export default function FarmerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {farmerCodes?.map((code: any) => (
-                  <Card key={code.verificationCode} className="border-green-200 bg-green-50">
+              {acceptedOffersLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading accepted offers...</div>
+              ) : acceptedOffers && acceptedOffers.length > 0 ? (
+                <div className="space-y-4">
+                  {acceptedOffers.map((offer: any) => (
+                  <Card key={offer.id} className="border-green-200 bg-green-50">
                     <CardContent className="p-4">
                       {/* Offer Header */}
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h4 className="font-semibold text-lg text-green-800">{code.commodityType} Offer</h4>
-                          <p className="text-sm text-blue-600 font-medium">Offer ID: {code.offerId}</p>
+                          <h4 className="font-semibold text-lg text-green-800">{offer.commodityType} Offer</h4>
+                          <p className="text-sm text-blue-600 font-medium">Farmer Offer ID: {offer.farmerOfferId}</p>
                         </div>
-                        <Badge className={`${
-                          code.status === 'payment_confirmed' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'
-                        }`}>
-                          {code.status === 'payment_confirmed' ? 'PAYMENT CONFIRMED' : 'BUYER ACCEPTED'}
+                        <Badge className="bg-blue-600 text-white">
+                          BUYER ACCEPTED
                         </Badge>
                       </div>
 
@@ -945,9 +956,9 @@ export default function FarmerDashboard() {
                           Buyer Information
                         </h5>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                          <p><strong>Name:</strong> {code.buyerName}</p>
-                          <p><strong>Company:</strong> {code.company}</p>
-                          <p><strong>Location:</strong> {code.county}</p>
+                          <p><strong>Name:</strong> {offer.buyerName}</p>
+                          <p><strong>Company:</strong> {offer.buyerCompany}</p>
+                          <p><strong>Location:</strong> {offer.county}</p>
                           <p><strong>Contact:</strong> Via platform messaging</p>
                         </div>
                       </div>
@@ -956,15 +967,15 @@ export default function FarmerDashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm">
                         <div>
                           <p className="text-gray-600">Quantity</p>
-                          <p className="font-medium">{code.quantityAvailable} {code.unit}</p>
+                          <p className="font-medium">{offer.quantityAvailable} {offer.unit}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Price per {code.unit}</p>
-                          <p className="font-medium">${code.pricePerUnit?.toLocaleString()}</p>
+                          <p className="text-gray-600">Price per {offer.unit}</p>
+                          <p className="font-medium">${offer.pricePerUnit?.toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-gray-600">Total Value</p>
-                          <p className="font-medium text-green-600">${code.totalValue?.toLocaleString()}</p>
+                          <p className="font-medium text-green-600">${offer.totalValue?.toLocaleString()}</p>
                         </div>
                       </div>
 
@@ -975,14 +986,14 @@ export default function FarmerDashboard() {
                             <div>
                               <p className="text-xs text-gray-600">First Verification Code</p>
                               <code className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded font-mono">
-                                {code.verificationCode}
+                                {offer.verificationCode}
                               </code>
                             </div>
-                            {code.secondVerificationCode && (
+                            {offer.secondVerificationCode && (
                               <div>
                                 <p className="text-xs text-gray-600">Second Code (After Payment)</p>
                                 <code className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded font-mono">
-                                  {code.secondVerificationCode}
+                                  {offer.secondVerificationCode}
                                 </code>
                               </div>
                             )}
@@ -990,23 +1001,23 @@ export default function FarmerDashboard() {
                           
                           {/* Payment Confirmation Button/Status */}
                           <div className="text-right">
-                            {code.status === 'payment_confirmed' ? (
+                            {offer.paymentConfirmed ? (
                               <div className="text-center">
                                 <p className="text-xs text-green-600 font-medium mb-1">
                                   ✅ Payment Confirmed
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {new Date(code.paymentConfirmedAt).toLocaleDateString()}
+                                  {new Date(offer.paymentConfirmedAt).toLocaleDateString()}
                                 </p>
                               </div>
                             ) : (
                               <Button
-                                onClick={() => handleConfirmPayment(code.id)}
-                                disabled={confirmingPayment === code.id}
+                                onClick={() => handleConfirmPayment(offer.id)}
+                                disabled={confirmingPayment === offer.id}
                                 className="bg-green-600 hover:bg-green-700 text-white text-sm"
                                 data-testid="button-confirm-payment"
                               >
-                                {confirmingPayment === code.id ? (
+                                {confirmingPayment === offer.id ? (
                                   <>
                                     <Clock className="h-4 w-4 mr-2 animate-spin" />
                                     Confirming...
@@ -1025,14 +1036,14 @@ export default function FarmerDashboard() {
                     </CardContent>
                   </Card>
                 ))}
-                {(!farmerCodes || farmerCodes.length === 0) && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Handshake className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No Accepted Offers Yet</p>
-                    <p className="text-sm">Offers accepted by buyers will appear here with buyer details</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Handshake className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>No Accepted Offers Yet</p>
+                  <p className="text-sm">Offers accepted by buyers will appear here with buyer details</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -1059,6 +1070,7 @@ export default function FarmerDashboard() {
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="font-semibold text-green-900">{transaction.commodityType}</p>
+                          <p className="text-sm text-blue-600 font-medium">Farmer Offer ID: {transaction.farmerOfferId}</p>
                           <p className="text-sm text-gray-600">Buyer: {transaction.buyerName} ({transaction.buyerCompany})</p>
                         </div>
                         <div className="flex flex-col gap-1">

@@ -15,7 +15,6 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
 import { createTestFarmer } from "./create-test-farmer";
-import { db } from "./db";
 import { count } from "drizzle-orm";
 
 import { 
@@ -3863,7 +3862,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(availableHarvests);
     } catch (error) {
-      console.error("Error fetching available harvests:", error);
       res.status(500).json({ message: "Error fetching available harvests" });
     }
   });

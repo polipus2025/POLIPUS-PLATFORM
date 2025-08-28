@@ -7,7 +7,6 @@ import "./index.css";
 function initializeApp() {
   const rootElement = document.getElementById("root");
   if (!rootElement) {
-    console.error("Root element not found");
     return;
   }
 
@@ -18,7 +17,6 @@ function initializeApp() {
     const root = createRoot(rootElement);
     root.render(<App />);
   } catch (error) {
-    console.error("Failed to initialize React app:", error);
     // Fallback: Show basic error message
     rootElement.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; font-family: system-ui;">

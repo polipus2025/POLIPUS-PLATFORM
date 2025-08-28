@@ -108,54 +108,55 @@ export default function FarmerBuyerLogin() {
         </Link>
       </div>
 
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-3xl">
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Agricultural Portal Access</h1>
-          <p className="text-slate-600">Choose your portal to access AgriTrace360™</p>
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Agricultural Portal Access</h1>
+          <p className="text-slate-600 text-sm">Choose your portal to access AgriTrace360™</p>
         </div>
 
         {/* Two Login Boxes Side by Side */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4">
           
           {/* FARMER LOGIN BOX */}
-          <Card className="bg-white shadow-xl border-slate-200">
-            <CardHeader className="space-y-1 pb-4">
-              <div className="text-center mb-3">
-                <div className="mx-auto w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-3">
-                  <Wheat className="w-6 h-6 text-white" />
+          <Card className="bg-white shadow-lg border-slate-200">
+            <CardHeader className="space-y-1 pb-2 p-4">
+              <div className="text-center mb-2">
+                <div className="mx-auto w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-2">
+                  <Wheat className="w-5 h-5 text-white" />
                 </div>
               </div>
-              <CardTitle className="text-xl text-center text-slate-900 flex items-center justify-center gap-2">
-                <Wheat className="w-4 h-4" />
+              <CardTitle className="text-lg text-center text-slate-900 flex items-center justify-center gap-1">
+                <Wheat className="w-3 h-3" />
                 Farmer Portal
               </CardTitle>
-              <CardDescription className="text-center text-slate-600 text-sm">
-                Agricultural producer authentication
+              <CardDescription className="text-center text-slate-600 text-xs">
+                Producer authentication
               </CardDescription>
               
               {/* Access Level Badge */}
-              <div className="flex justify-center mt-3">
-                <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50 text-xs">
-                  <Wheat className="w-3 h-3 mr-1" />
-                  Producer Level
+              <div className="flex justify-center mt-2">
+                <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50 text-xs px-2 py-0">
+                  Producer
                 </Badge>
               </div>
             </CardHeader>
             
-            <CardContent className="space-y-3 pt-0">
+            <CardContent className="space-y-2 pt-0 p-4">
               {/* Test Credentials Info */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
-                <p className="text-xs text-green-700 font-medium">Test Credentials:</p>
-                <p className="text-xs text-green-600">Username: <code className="bg-green-100 px-1 rounded text-xs">farmer_test</code></p>
-                <p className="text-xs text-green-600">Password: <code className="bg-green-100 px-1 rounded text-xs">farmer123</code></p>
+              <div className="bg-green-50 border border-green-200 rounded p-1 text-center">
+                <p className="text-xs text-green-700 font-medium mb-1">Test Credentials:</p>
+                <div className="text-xs text-green-600 space-y-0.5">
+                  <div>Username: <code className="bg-green-100 px-1 rounded text-xs">farmer_test</code></div>
+                  <div>Password: <code className="bg-green-100 px-1 rounded text-xs">farmer123</code></div>
+                </div>
               </div>
               
-              <form onSubmit={handleFarmerLogin} className="space-y-3">
-                <div className="space-y-1">
-                  <Label htmlFor="farmer-username" className="text-slate-700 text-sm">Username</Label>
+              <form onSubmit={handleFarmerLogin} className="space-y-2">
+                <div className="space-y-0.5">
+                  <Label htmlFor="farmer-username" className="text-slate-700 text-xs">Username</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <User className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-400 w-3 h-3" />
                     <Input
                       id="farmer-username"
                       name="username"
@@ -163,15 +164,15 @@ export default function FarmerBuyerLogin() {
                       placeholder="farmer_test"
                       value={farmerData.username}
                       onChange={handleFarmerInputChange}
-                      className="pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-9"
+                      className="pl-7 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-8 text-sm"
                       data-testid="farmer-input-username"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Label htmlFor="farmer-password" className="text-slate-700 text-sm">Password</Label>
+                <div className="space-y-0.5">
+                  <Label htmlFor="farmer-password" className="text-slate-700 text-xs">Password</Label>
                   <Input
                     id="farmer-password"
                     name="password"
@@ -179,7 +180,7 @@ export default function FarmerBuyerLogin() {
                     placeholder="••••••••"
                     value={farmerData.password}
                     onChange={handleFarmerInputChange}
-                    className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-9"
+                    className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-8 text-sm"
                     data-testid="farmer-input-password"
                     required
                   />
@@ -194,67 +195,68 @@ export default function FarmerBuyerLogin() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-8 text-sm"
                   disabled={farmerLoading}
                   data-testid="farmer-button-login"
                 >
-                  {farmerLoading ? 'Authenticating...' : 'Access Farmer Portal'}
+                  {farmerLoading ? 'Authenticating...' : 'Access Portal'}
                 </Button>
               </form>
 
               {/* Additional Options */}
-              <div className="text-center pt-3 border-t border-slate-100">
-                <p className="text-xs text-slate-600 mb-2">New farmer?</p>
+              <div className="text-center pt-2 border-t border-slate-100">
+                <p className="text-xs text-slate-600 mb-1">New farmer?</p>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => navigate('/farmer-registration')}
-                  className="w-full h-8 text-xs"
+                  className="w-full h-7 text-xs"
                 >
-                  Register New Farm
+                  Register Farm
                 </Button>
               </div>
             </CardContent>
           </Card>
 
           {/* BUYER LOGIN BOX */}
-          <Card className="bg-white shadow-xl border-slate-200">
-            <CardHeader className="space-y-1 pb-4">
-              <div className="text-center mb-3">
-                <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-3">
-                  <Building2 className="w-6 h-6 text-white" />
+          <Card className="bg-white shadow-lg border-slate-200">
+            <CardHeader className="space-y-1 pb-2 p-4">
+              <div className="text-center mb-2">
+                <div className="mx-auto w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-2">
+                  <Building2 className="w-5 h-5 text-white" />
                 </div>
               </div>
-              <CardTitle className="text-xl text-center text-slate-900 flex items-center justify-center gap-2">
-                <Building2 className="w-4 h-4" />
+              <CardTitle className="text-lg text-center text-slate-900 flex items-center justify-center gap-1">
+                <Building2 className="w-3 h-3" />
                 Buyer Portal
               </CardTitle>
-              <CardDescription className="text-center text-slate-600 text-sm">
+              <CardDescription className="text-center text-slate-600 text-xs">
                 Commodity buyer authentication
               </CardDescription>
               
               {/* Access Level Badge */}
-              <div className="flex justify-center mt-3">
-                <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 text-xs">
-                  <Building2 className="w-3 h-3 mr-1" />
-                  Buyer Level
+              <div className="flex justify-center mt-2">
+                <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 text-xs px-2 py-0">
+                  Buyer
                 </Badge>
               </div>
             </CardHeader>
             
-            <CardContent className="space-y-3 pt-0">
+            <CardContent className="space-y-2 pt-0 p-4">
               {/* Test Credentials Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-center">
-                <p className="text-xs text-blue-700 font-medium">Test Credentials:</p>
-                <p className="text-xs text-blue-600">Username: <code className="bg-blue-100 px-1 rounded text-xs">buyer_test</code></p>
-                <p className="text-xs text-blue-600">Password: <code className="bg-blue-100 px-1 rounded text-xs">buyer123</code></p>
+              <div className="bg-blue-50 border border-blue-200 rounded p-1 text-center">
+                <p className="text-xs text-blue-700 font-medium mb-1">Test Credentials:</p>
+                <div className="text-xs text-blue-600 space-y-0.5">
+                  <div>Username: <code className="bg-blue-100 px-1 rounded text-xs">buyer_test</code></div>
+                  <div>Password: <code className="bg-blue-100 px-1 rounded text-xs">buyer123</code></div>
+                </div>
               </div>
               
-              <form onSubmit={handleBuyerLogin} className="space-y-3">
-                <div className="space-y-1">
-                  <Label htmlFor="buyer-username" className="text-slate-700 text-sm">Username</Label>
+              <form onSubmit={handleBuyerLogin} className="space-y-2">
+                <div className="space-y-0.5">
+                  <Label htmlFor="buyer-username" className="text-slate-700 text-xs">Username</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <User className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-400 w-3 h-3" />
                     <Input
                       id="buyer-username"
                       name="username"
@@ -262,15 +264,15 @@ export default function FarmerBuyerLogin() {
                       placeholder="buyer_test"
                       value={buyerData.username}
                       onChange={handleBuyerInputChange}
-                      className="pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-9"
+                      className="pl-7 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-8 text-sm"
                       data-testid="buyer-input-username"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Label htmlFor="buyer-password" className="text-slate-700 text-sm">Password</Label>
+                <div className="space-y-0.5">
+                  <Label htmlFor="buyer-password" className="text-slate-700 text-xs">Password</Label>
                   <Input
                     id="buyer-password"
                     name="password"
@@ -278,7 +280,7 @@ export default function FarmerBuyerLogin() {
                     placeholder="••••••••"
                     value={buyerData.password}
                     onChange={handleBuyerInputChange}
-                    className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-9"
+                    className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 h-8 text-sm"
                     data-testid="buyer-input-password"
                     required
                   />
@@ -293,24 +295,24 @@ export default function FarmerBuyerLogin() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white h-8 text-sm"
                   disabled={buyerLoading}
                   data-testid="buyer-button-login"
                 >
-                  {buyerLoading ? 'Authenticating...' : 'Access Buyer Portal'}
+                  {buyerLoading ? 'Authenticating...' : 'Access Portal'}
                 </Button>
               </form>
 
               {/* Additional Options */}
-              <div className="text-center pt-3 border-t border-slate-100">
-                <p className="text-xs text-slate-600 mb-2">New buyer?</p>
+              <div className="text-center pt-2 border-t border-slate-100">
+                <p className="text-xs text-slate-600 mb-1">New buyer?</p>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => navigate('/buyer-registration')}
-                  className="w-full h-8 text-xs"
+                  className="w-full h-7 text-xs"
                 >
-                  Register New Business
+                  Register Business
                 </Button>
               </div>
             </CardContent>
@@ -318,9 +320,9 @@ export default function FarmerBuyerLogin() {
         </div>
 
         {/* Help Section */}
-        <div className="text-center mt-6 text-slate-500 text-xs">
-          <p>Need help? Contact your local agricultural extension officer or LACRA representative</p>
-          <p className="text-xs mt-1">📞 +231-XXX-XXXX • 📧 support@lacra.gov.lr</p>
+        <div className="text-center mt-4 text-slate-500 text-xs">
+          <p>Need help? Contact LACRA support</p>
+          <p className="text-xs mt-0.5">📞 +231-XXX-XXXX • 📧 support@lacra.gov.lr</p>
         </div>
       </div>
     </div>

@@ -14584,6 +14584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!dbId) {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }
+      console.log(`🔍 DEBUG: Farmer ${farmerId} -> DB ID: ${dbId}`);
       
       // Get only accepted offers that are waiting for payment confirmation
       // These have verification codes but NO second verification code yet

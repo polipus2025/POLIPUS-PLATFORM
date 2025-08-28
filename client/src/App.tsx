@@ -1,60 +1,40 @@
-import React, { Suspense, lazy, memo, useEffect } from "react";
-import { Switch, Route, useLocation } from "wouter";
+import React, { Suspense, lazy } from "react";
+import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { useRoutePreloader, NavigationMetrics } from "@/components/InstantNavigation";
-import { usePerformanceMonitor } from "@/hooks/usePerformance";
 
-// Ultra-fast skeleton loading component
-const SkeletonLoader = memo(() => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white animate-pulse">
-    <div className="w-full h-16 bg-gradient-to-r from-blue-100 to-indigo-100 animate-pulse"></div>
-    <div className="flex">
-      <div className="w-64 h-screen bg-gradient-to-b from-gray-100 to-gray-50 animate-pulse"></div>
-      <div className="flex-1 p-6 space-y-4">
-        <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-100 rounded animate-pulse"></div>
-        <div className="grid grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg animate-pulse"></div>
-          ))}
-        </div>
-      </div>
+// Simple loading component
+const PageLoader = () => (
+  <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+      <p className="mt-4 text-gray-600">Loading portal...</p>
     </div>
   </div>
-));
+);
 
-// Performance-optimized route wrapper with instant loading
+// Simplified route wrapper
 const createLazyRoute = (LazyComponent: React.LazyExoticComponent<any>) => {
-  return memo(() => (
-    <Suspense fallback={<SkeletonLoader />}>
+  return () => (
+    <Suspense fallback={<PageLoader />}>
       <LazyComponent />
     </Suspense>
-  ));
+  );
 };
 
-// Route preloader for instant navigation
-const preloadRoute = (importFn: () => Promise<any>) => {
-  const handleMouseEnter = () => {
-    importFn().catch(() => {});
-  };
-  return handleMouseEnter;
-};
-
-// DIRECT IMPORT - Essential pages only
+// ESSENTIAL PAGES - Direct imports for instant loading
 import FrontPage from "@/pages/front-page";
 import Landing from "@/pages/landing";
 import FarmerLogin from "@/pages/auth/farmer-login";
 import FarmerLoginPortal from "@/pages/farmer-login-portal";
 
-// LAZY LOADING - Heavy dashboard pages
+// LAZY LOADING - Heavy dashboard pages only
 const FarmerDashboard = lazy(() => import("@/pages/farmer-dashboard"));
 const BuyerDashboard = lazy(() => import("@/pages/agricultural-buyer-dashboard"));
 const WarehouseInspectorDashboard = lazy(() => import("@/pages/warehouse-inspector-dashboard"));
-
-// LAZY LOADING - Heavy agricultural system portals
 const PortInspectorDashboard = lazy(() => import("@/pages/port-inspector-dashboard"));
 const ExporterDashboard = lazy(() => import("@/pages/exporter-dashboard"));
 const UnifiedLandInspectorDashboard = lazy(() => import("@/pages/unified-land-inspector-dashboard"));
@@ -63,11 +43,17 @@ const DDGAFDashboard = lazy(() => import("@/pages/ddgaf-dashboard"));
 const DDGOTSDashboard = lazy(() => import("@/pages/ddgots-dashboard"));
 const DGDashboard = lazy(() => import("@/pages/dg-dashboard"));
 const AgriTraceAdminPortal = lazy(() => import("@/pages/agritrace-admin-portal"));
-const BuyerManagement = lazy(() => import("@/pages/buyer-management"));
-const InspectorManagement = lazy(() => import("@/pages/inspector-management"));
-const ExporterManagement = lazy(() => import("@/pages/exporter-management"));
 
-// AGRICULTURAL LOGIN PAGES
+// POLIPUS MODULE PORTALS - 7 modules
+const LiveTracePortal = lazy(() => import("@/pages/portals/live-trace-portal"));
+const LandMap360Portal = lazy(() => import("@/pages/portals/land-map360-portal"));
+const MineWatchPortal = lazy(() => import("@/pages/portals/mine-watch-portal"));
+const ForestGuardPortal = lazy(() => import("@/pages/portals/forest-guard-portal"));
+const AquaTracePortal = lazy(() => import("@/pages/portals/aqua-trace-portal"));
+const BlueCarbon360Portal = lazy(() => import("@/pages/portals/blue-carbon360-portal"));
+const CarbonTracePortal = lazy(() => import("@/pages/portals/carbon-trace-portal"));
+
+// AUTH PAGES - Direct imports for fast access
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import InspectorLogin from "@/pages/auth/inspector-login";
 import WarehouseInspectorLogin from "@/pages/auth/warehouse-inspector-login";
@@ -79,68 +65,19 @@ import DDGOTSLogin from "@/pages/auth/ddgots-login";
 import DGLogin from "@/pages/auth/dg-login";
 import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
 import SystemAdminLogin from "@/pages/auth/system-admin-login";
-
-// LAZY LOADING - Polipus module portals (7 modules)
-const LiveTracePortal = lazy(() => import("@/pages/portals/live-trace-portal"));
-const LandMap360Portal = lazy(() => import("@/pages/portals/land-map360-portal"));
-const MineWatchPortal = lazy(() => import("@/pages/portals/mine-watch-portal"));
-const ForestGuardPortal = lazy(() => import("@/pages/portals/forest-guard-portal"));
-const AquaTracePortal = lazy(() => import("@/pages/portals/aqua-trace-portal"));
-const BlueCarbon360Portal = lazy(() => import("@/pages/portals/blue-carbon360-portal"));
-const CarbonTracePortal = lazy(() => import("@/pages/portals/carbon-trace-portal"));
-
-// LAZY LOADING - Exporter pages
-const WorldMarketPricing = lazy(() => import("@/pages/world-market-pricing"));
-const SellersHub = lazy(() => import("@/pages/sellers-hub"));
-const ExporterOrders = lazy(() => import("@/pages/exporter/orders"));
-const ExporterMarketplace = lazy(() => import("@/pages/exporter/marketplace"));
-const ExporterCertificates = lazy(() => import("@/pages/exporter/certificates"));
-const ExporterMessages = lazy(() => import("@/pages/exporter/messages"));
-const ExporterShipments = lazy(() => import("@/pages/exporter/shipments"));
-const ExporterAnalytics = lazy(() => import("@/pages/exporter/analytics"));
-const ExporterPaymentServices = lazy(() => import("@/pages/exporter/exporter-payment-services"));
-
-// LAZY LOADING - Agricultural portal pages
-const OnboardFarmer = lazy(() => import("@/pages/onboard-farmer"));
-const CreateLandPlot = lazy(() => import("@/pages/create-land-plot"));
-const EudrAssessment = lazy(() => import("@/pages/eudr-assessment"));
-const GenerateReports = lazy(() => import("@/pages/generate-reports"));
-const FarmersList = lazy(() => import("@/pages/farmers-list"));
-const LandPlotsList = lazy(() => import("@/pages/land-plots-list"));
-const LandPlotDetails = lazy(() => import("@/pages/land-plot-details"));
-
-// LAZY LOADING - Additional heavy pages
-const EudrCompliance = lazy(() => import("@/pages/eudr-compliance"));
-const MobileAppDashboard = lazy(() => import("@/pages/mobile-app-dashboard"));
-const BuyerDashboardOld = lazy(() => import("@/pages/buyer-dashboard"));
-const Dashboard = lazy(() => import("@/pages/dashboard"));
-const MonitoringDashboard = lazy(() => import("@/pages/monitoring-dashboard"));
-const IntegratedDashboard = lazy(() => import("@/pages/integrated-dashboard"));
-
-// LAZY LOADING - Specialized agricultural pages
-const FarmPlots = lazy(() => import("@/pages/farm-plots"));
-const LandMappingDashboard = lazy(() => import("@/pages/land-mapping-dashboard"));
-const FieldAgentDashboard = lazy(() => import("@/pages/field-agent-dashboard"));
-const MobileAppDownload = lazy(() => import("@/pages/mobile-app-download"));
-const PwaTest = lazy(() => import("@/pages/pwa-test"));
-const BuyerExporterNetwork = lazy(() => import("@/pages/buyer-exporter-network"));
-const InspectorFarmerLandManagement = lazy(() => import("@/pages/inspector-farmer-land-management"));
-
-// LAZY LOADING - Farmer subpages
-const FarmerLandMapping = lazy(() => import("@/pages/farmer/farmer-land-mapping"));
-const FarmerPaymentServices = lazy(() => import("@/pages/farmer/farmer-payment-services"));
-
-// PROFILE MANAGEMENT SYSTEM - Universal for all user types
-const ProfileRouter = lazy(() => import("@/pages/profile"));
-
-// ADDITIONAL AUTH PAGES
 import MonitoringLogin from "@/pages/auth/monitoring-login";
 
+// MANAGEMENT PAGES
+const BuyerManagement = lazy(() => import("@/pages/buyer-management"));
+const InspectorManagement = lazy(() => import("@/pages/inspector-management"));
+const ExporterManagement = lazy(() => import("@/pages/exporter-management"));
+
+// ADDITIONAL PAGES - Lazy loaded
+const ProfileRouter = lazy(() => import("@/pages/profile"));
+const WorldMarketPricing = lazy(() => import("@/pages/world-market-pricing"));
+const SellersHub = lazy(() => import("@/pages/sellers-hub"));
+
 function App() {
-  // Initialize performance monitoring and route preloading
-  usePerformanceMonitor('App');
-  useRoutePreloader();
-  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -153,7 +90,7 @@ function App() {
             {/* Agricultural Traceability Portal */}
             <Route path="/portals" component={Landing} />
             
-            {/* POLIPUS MODULE PORTALS - All 7 modules - LAZY LOADED */}
+            {/* POLIPUS MODULE PORTALS - All 7 modules */}
             <Route path="/live-trace" component={createLazyRoute(LiveTracePortal)} />
             <Route path="/landmap360-portal" component={createLazyRoute(LandMap360Portal)} />
             <Route path="/mine-watch" component={createLazyRoute(MineWatchPortal)} />
@@ -161,7 +98,6 @@ function App() {
             <Route path="/aqua-trace" component={createLazyRoute(AquaTracePortal)} />
             <Route path="/blue-carbon360" component={createLazyRoute(BlueCarbon360Portal)} />
             <Route path="/carbon-trace" component={createLazyRoute(CarbonTracePortal)} />
-            
             
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />
@@ -177,17 +113,18 @@ function App() {
             <Route path="/dg-login" component={DGLogin} />
             <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
             <Route path="/system-admin-login" component={SystemAdminLogin} />
+            <Route path="/monitoring-login" component={MonitoringLogin} />
             
-            {/* AGRICULTURAL DASHBOARD ROUTES - LAZY LOADED */}
+            {/* AGRICULTURAL DASHBOARD ROUTES */}
             <Route path="/farmer-dashboard" component={createLazyRoute(FarmerDashboard)} />
-            <Route path="/buyer-dashboard" component={createLazyRoute(BuyerDashboard)} />
+            <Route path="/agricultural-buyer-dashboard" component={createLazyRoute(BuyerDashboard)} />
             
-            {/* AGRICULTURAL INSPECTOR PORTALS - LAZY LOADED */}
+            {/* INSPECTOR PORTALS */}
             <Route path="/warehouse-inspector-dashboard" component={createLazyRoute(WarehouseInspectorDashboard)} />
             <Route path="/port-inspector-dashboard" component={createLazyRoute(PortInspectorDashboard)} />
             <Route path="/unified-land-inspector-dashboard" component={createLazyRoute(UnifiedLandInspectorDashboard)} />
             
-            {/* REGULATORY PORTALS - LAZY LOADED */}
+            {/* REGULATORY PORTALS */}
             <Route path="/regulatory-portal-classic" component={createLazyRoute(RegulatoryPortalClassic)} />
             <Route path="/ddgaf-dashboard" component={createLazyRoute(DDGAFDashboard)} />
             <Route path="/ddgots-dashboard" component={createLazyRoute(DDGOTSDashboard)} />
@@ -198,58 +135,15 @@ function App() {
             <Route path="/inspector-management" component={createLazyRoute(InspectorManagement)} />
             <Route path="/exporter-management" component={createLazyRoute(ExporterManagement)} />
             
-            {/* EXPORTER PORTAL - LAZY LOADED */}
+            {/* EXPORTER PORTAL */}
             <Route path="/exporter-dashboard" component={createLazyRoute(ExporterDashboard)} />
             <Route path="/world-market-pricing" component={createLazyRoute(WorldMarketPricing)} />
             <Route path="/sellers-hub" component={createLazyRoute(SellersHub)} />
-            <Route path="/exporter/orders" component={createLazyRoute(ExporterOrders)} />
-            <Route path="/exporter/marketplace" component={createLazyRoute(ExporterMarketplace)} />
-            <Route path="/exporter/certificates" component={createLazyRoute(ExporterCertificates)} />
-            <Route path="/exporter/messages" component={createLazyRoute(ExporterMessages)} />
-            <Route path="/exporter/shipments" component={createLazyRoute(ExporterShipments)} />
-            <Route path="/exporter/analytics" component={createLazyRoute(ExporterAnalytics)} />
-            <Route path="/exporter-payment-services" component={createLazyRoute(ExporterPaymentServices)} />
             
-            {/* SYSTEM ADMIN PORTAL - LAZY LOADED */}
+            {/* SYSTEM ADMIN PORTAL */}
             <Route path="/agritrace-admin-portal" component={createLazyRoute(AgriTraceAdminPortal)} />
             
-            {/* AGRICULTURAL PORTAL PAGES - LAZY LOADED */}
-            <Route path="/onboard-farmer" component={createLazyRoute(OnboardFarmer)} />
-            <Route path="/create-land-plot" component={createLazyRoute(CreateLandPlot)} />
-            <Route path="/eudr-assessment" component={createLazyRoute(EudrAssessment)} />
-            <Route path="/generate-reports" component={createLazyRoute(GenerateReports)} />
-            <Route path="/farmers-list" component={createLazyRoute(FarmersList)} />
-            <Route path="/land-plots-list" component={createLazyRoute(LandPlotsList)} />
-            <Route path="/land-plot-details/:id" component={createLazyRoute(LandPlotDetails)} />
-            
-            {/* ADDITIONAL AGRICULTURAL PAGES - LAZY LOADED */}
-            <Route path="/eudr-compliance" component={createLazyRoute(EudrCompliance)} />
-            <Route path="/mobile-app-dashboard" component={createLazyRoute(MobileAppDashboard)} />
-            <Route path="/buyer-dashboard-old" component={createLazyRoute(BuyerDashboardOld)} />
-            <Route path="/dashboard" component={createLazyRoute(Dashboard)} />
-            <Route path="/monitoring-dashboard" component={createLazyRoute(MonitoringDashboard)} />
-            <Route path="/integrated-dashboard" component={createLazyRoute(IntegratedDashboard)} />
-            
-            {/* SPECIALIZED AGRICULTURAL PAGES - LAZY LOADED */}
-            <Route path="/farm-plots" component={createLazyRoute(FarmPlots)} />
-            <Route path="/land-mapping-dashboard" component={createLazyRoute(LandMappingDashboard)} />
-            <Route path="/field-agent-dashboard" component={createLazyRoute(FieldAgentDashboard)} />
-            <Route path="/mobile-app-download" component={createLazyRoute(MobileAppDownload)} />
-            <Route path="/pwa-test" component={createLazyRoute(PwaTest)} />
-            <Route path="/buyer-exporter-network" component={createLazyRoute(BuyerExporterNetwork)} />
-            <Route path="/inspector-farmer-land-management" component={createLazyRoute(InspectorFarmerLandManagement)} />
-            
-            {/* FARMER SUBPAGES - LAZY LOADED */}
-            <Route path="/farmer-land-mapping" component={createLazyRoute(FarmerLandMapping)} />
-            <Route path="/farmer-payment-services" component={createLazyRoute(FarmerPaymentServices)} />
-            
-            {/* ADDITIONAL AUTH PAGES */}
-            <Route path="/monitoring-login" component={MonitoringLogin} />
-            
-            {/* UTILITY REDIRECTS - LAZY LOADED */}
-            <Route path="/install-app" component={createLazyRoute(MobileAppDownload)} />
-            
-            {/* PROFILE MANAGEMENT SYSTEM - Universal for all user types */}
+            {/* PROFILE MANAGEMENT SYSTEM */}
             <Route path="/profile/:path*" component={createLazyRoute(ProfileRouter)} />
             <Route path="/profile" component={createLazyRoute(ProfileRouter)} />
 
@@ -260,7 +154,6 @@ function App() {
             <Route component={FrontPage} />
           </Switch>
           <Toaster />
-          <NavigationMetrics />
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>

@@ -1,16 +1,61 @@
-import { useLocation } from "wouter";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, ArrowLeft, ArrowRight, UserCheck, MapPin, ShoppingCart } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { AlertCircle, Building2, ShoppingCart, User, ArrowLeft } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 
 export default function BuyerPortalLogin() {
   const [, navigate] = useLocation();
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    userType: 'buyer'
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/buyer-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('buyerToken', data.token);
+        localStorage.setItem('buyerUser', JSON.stringify(data.buyer));
+        navigate('/agricultural-buyer-dashboard');
+      } else {
+        setError(data.message || 'Login failed');
+      }
+    } catch (error) {
+      setError('Network error - please try again');
+      console.error('Buyer Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      {/* Back to Platform Button */}
+      {/* Back to Portal Selection Button */}
       <div className="absolute top-6 left-6">
         <Link href="/farmer-buyer-portal-select">
           <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -19,111 +64,114 @@ export default function BuyerPortalLogin() {
           </Button>
         </Link>
       </div>
-      
-      <div className="w-full max-w-4xl">
+
+      <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
-            <Building2 className="w-10 h-10 text-blue-600" />
+        <div className="text-center mb-6">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
+            <Building2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Buyer Portal</h1>
-          <p className="text-slate-700 text-lg">Agricultural Commodity Buyer Access</p>
-          <p className="text-slate-600 text-sm mt-2">AgriTrace360™ - Commodity Trading & Compliance</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Buyer Portal</h1>
+          <p className="text-slate-600">Agricultural Commodity Buyer Access</p>
         </div>
 
-        {/* Access Options Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* Existing Buyer Login */}
-          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group" 
-                onClick={() => navigate('/agricultural-buyer-dashboard')}>
-            <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <UserCheck className="w-8 h-8 text-white" />
-              </div>
-              <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
-                <UserCheck className="w-5 h-5" />
-                Registered Buyer
-              </CardTitle>
-              <CardDescription className="text-slate-600">
-                Existing commodity buyer login
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Badge variant="outline" className="w-full justify-center border-blue-500 text-blue-600 bg-blue-50">
-                Buyer Level Access
+        <Card className="bg-white shadow-xl border-slate-200">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center text-slate-900 flex items-center justify-center gap-2">
+              <ShoppingCart className="w-5 h-5" />
+              Buyer Access
+            </CardTitle>
+            <CardDescription className="text-center text-slate-600">
+              Commodity buyer authentication
+            </CardDescription>
+            
+            {/* Access Level Badge */}
+            <div className="flex justify-center mt-4">
+              <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50">
+                <Building2 className="w-4 h-4 mr-1" />
+                Buyer Level
               </Badge>
-              <ul className="text-sm text-slate-600 space-y-2">
-                <li>• Commodity sourcing & marketplace access</li>
-                <li>• Transaction management & payments</li>
-                <li>• Quality verification & compliance</li>
-                <li>• Export documentation & networks</li>
-              </ul>
-              <Button 
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/agricultural-buyer-dashboard'); }}
-              >
-                Access Buyer Dashboard
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            {/* Test Credentials Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+              <p className="text-sm text-blue-700 font-medium">Test Credentials:</p>
+              <p className="text-xs text-blue-600">Username: <code className="bg-blue-100 px-1 rounded">buyer_test</code></p>
+              <p className="text-xs text-blue-600">Password: <code className="bg-blue-100 px-1 rounded">buyer123</code></p>
+            </div>
+            
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-slate-700">Username</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="buyer_test"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
+                    data-testid="input-username"
+                    required
+                  />
+                </div>
+              </div>
 
-          {/* New Buyer Registration */}
-          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
-                onClick={() => navigate('/buyer-registration')}>
-            <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <ShoppingCart className="w-8 h-8 text-white" />
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-slate-700">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
+                  data-testid="input-password"
+                  required
+                />
               </div>
-              <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                New Buyer
-              </CardTitle>
-              <CardDescription className="text-slate-600">
-                Commodity buyer registration & verification
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Badge variant="outline" className="w-full justify-center border-cyan-500 text-cyan-600 bg-cyan-50">
-                Registration Process
-              </Badge>
-              <ul className="text-sm text-slate-600 space-y-2">
-                <li>• Complete buyer profile setup</li>
-                <li>• Business verification process</li>
-                <li>• Financial credential validation</li>
-                <li>• Access to commodity marketplace</li>
-              </ul>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
               <Button 
-                className="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/buyer-registration'); }}
+                type="submit" 
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                disabled={isLoading}
+                data-testid="button-login"
               >
-                Register as New Buyer
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                {isLoading ? 'Authenticating...' : 'Access Buyer Portal'}
               </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </form>
+
+            {/* Additional Options */}
+            <div className="text-center pt-4 border-t border-slate-100">
+              <p className="text-sm text-slate-600 mb-2">New buyer?</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/buyer-registration')}
+                className="w-full"
+              >
+                Register New Business
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Help Section */}
-        <div className="text-center">
-          <Card className="bg-white shadow-lg border-slate-200">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Need Assistance?</h3>
-              <p className="text-slate-600 text-sm mb-4">
-                Contact LACRA trade department or your designated commodity representative for account setup and market access.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-500">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  LACRA Trade Department
-                </span>
-                <span>•</span>
-                <span>📞 Support: +231-XXX-XXXX</span>
-                <span>•</span>
-                <span>📧 buyers@lacra.gov.lr</span>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="text-center mt-6 text-slate-500 text-sm">
+          <p>Need help? Contact LACRA trade department</p>
+          <p className="text-xs mt-1">📞 +231-XXX-XXXX • 📧 buyers@lacra.gov.lr</p>
         </div>
       </div>
     </div>

@@ -149,6 +149,9 @@ function App() {
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
             
+            {/* FARMER BUYER PORTAL SELECTION PAGE */}
+            <Route path="/farmer-buyer-portal-select" component={createLazyRoute(lazy(() => import("@/pages/farmer-buyer-portal-select")))} />
+            
             {/* NEW SEPARATE PORTAL ROUTES */}
             <Route path="/farmer-portal-login" component={FarmerPortalLogin} />
             <Route path="/buyer-portal-login" component={BuyerPortalLogin} />

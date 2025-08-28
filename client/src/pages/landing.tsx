@@ -288,10 +288,10 @@ export default function Landing() {
                   <Leaf className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Farmer Portal
+                  Farmer & Buyer Portal
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
-                  Agricultural producers & farm managers
+                  Agricultural producers & buyers
                 </p>
               </div>
               
@@ -318,51 +318,7 @@ export default function Landing() {
                 asChild 
                 className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
               >
-                <a href="/farmer-portal-login">
-                  Access Portal
-                  <ArrowRight className="ml-1 h-3 w-3" />
-                </a>
-              </Button>
-            </div>
-
-            {/* Buyer Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
-              <div className="text-center pb-3">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Package className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Buyer Portal
-                </h3>
-                <p className="text-slate-600 text-xs leading-tight">
-                  Agricultural commodity buyers & traders
-                </p>
-              </div>
-              
-              <div className="space-y-2 mb-4 flex-1">
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Commodity sourcing</span>
-                </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Transaction management</span>
-                </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-cyan-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Quality verification</span>
-                </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-600 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Export documentation</span>
-                </div>
-              </div>
-              
-              <Button 
-                asChild 
-                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
-              >
-                <a href="/buyer-portal-login">
+                <a href="/farmer-buyer-portal-select">
                   Access Portal
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </a>

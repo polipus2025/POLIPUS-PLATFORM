@@ -1,28 +1,46 @@
-import React, { Suspense, lazy } from "react";
-import { Switch, Route } from "wouter";
+import React, { Suspense, lazy, memo, useEffect } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { useRoutePreloader, NavigationMetrics } from "@/components/InstantNavigation";
+import { usePerformanceMonitor } from "@/hooks/usePerformance";
 
-// Loading component for lazy pages
-const PageLoadingSpinner = () => (
-  <div className="min-h-screen bg-white flex items-center justify-center">
-    <div className="flex flex-col items-center space-y-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p className="text-gray-600 text-sm">Caricamento portale...</p>
+// Ultra-fast skeleton loading component
+const SkeletonLoader = memo(() => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white animate-pulse">
+    <div className="w-full h-16 bg-gradient-to-r from-blue-100 to-indigo-100 animate-pulse"></div>
+    <div className="flex">
+      <div className="w-64 h-screen bg-gradient-to-b from-gray-100 to-gray-50 animate-pulse"></div>
+      <div className="flex-1 p-6 space-y-4">
+        <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-100 rounded animate-pulse"></div>
+        <div className="grid grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg animate-pulse"></div>
+          ))}
+        </div>
+      </div>
     </div>
   </div>
-);
+));
 
-// Wrapper function for lazy routes
+// Performance-optimized route wrapper with instant loading
 const createLazyRoute = (LazyComponent: React.LazyExoticComponent<any>) => {
-  return () => (
-    <Suspense fallback={<PageLoadingSpinner />}>
+  return memo(() => (
+    <Suspense fallback={<SkeletonLoader />}>
       <LazyComponent />
     </Suspense>
-  );
+  ));
+};
+
+// Route preloader for instant navigation
+const preloadRoute = (importFn: () => Promise<any>) => {
+  const handleMouseEnter = () => {
+    importFn().catch(() => {});
+  };
+  return handleMouseEnter;
 };
 
 // DIRECT IMPORT - Essential pages only
@@ -119,6 +137,10 @@ const ProfileRouter = lazy(() => import("@/pages/profile"));
 import MonitoringLogin from "@/pages/auth/monitoring-login";
 
 function App() {
+  // Initialize performance monitoring and route preloading
+  usePerformanceMonitor('App');
+  useRoutePreloader();
+  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -238,6 +260,7 @@ function App() {
             <Route component={FrontPage} />
           </Switch>
           <Toaster />
+          <NavigationMetrics />
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>

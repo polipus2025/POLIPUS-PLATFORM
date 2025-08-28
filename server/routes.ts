@@ -14596,7 +14596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                    bvc.second_verification_code, bvc.payment_confirmed_at, bvc.offer_id,
                    b.business_name as company, b.county, bvc.buyer_id
             FROM buyer_verification_codes bvc
-            LEFT JOIN buyers b ON bvc.buyer_id = b.id
+            LEFT JOIN buyers b ON bvc.buyer_id = b.id::text
             WHERE bvc.farmer_id = '288' 
             ORDER BY bvc.accepted_at DESC
           `);

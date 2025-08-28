@@ -464,8 +464,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`👤 Farmer ${dbId} profile county: ${farmerProfile?.county || 'NOT FOUND'}`);
       
+      // Use farmer profile county if available, otherwise use form county
+      const finalCounty = farmerProfile?.county && farmerProfile.county !== 'County Not Specified' 
+        ? farmerProfile.county 
+        : req.body.county;
+      
       if (farmerProfile?.county !== req.body.county) {
-        console.log(`⚠️ County mismatch! Profile: ${farmerProfile?.county}, Form: ${req.body.county}`);
+        console.log(`📍 County resolved: Profile: ${farmerProfile?.county}, Form: ${req.body.county}, Final: ${finalCounty}`);
       }
 
       // Transform data to match schema expectations
@@ -485,7 +490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || '',
         farmLocation: req.body.farmLocation,
         farmerName: req.body.farmerName,
-        county: farmerProfile?.county || req.body.county, // Use ACTUAL farmer profile county
+        county: finalCounty // USE RESOLVED COUNTY FOR CONSISTENCY
       };
       
       console.log("Transformed data:", transformedData); // Debug log
@@ -13801,7 +13806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || '',
         farmLocation: req.body.farmLocation,
         farmerName: req.body.farmerName,
-        county: req.body.county,
+        county: finalCounty // USE RESOLVED COUNTY INSTEAD OF FORM DATA
       };
       
       console.log("Transformed data:", transformedData); // Debug log

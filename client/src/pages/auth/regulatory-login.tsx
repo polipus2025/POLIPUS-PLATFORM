@@ -153,7 +153,7 @@ export default function RegulatoryLogin() {
             <p className="text-slate-600">Alternative portal access for system administrators and regulatory staff</p>
           </div>
           
-          <div className="grid md:grid-cols-1 gap-6 max-w-md mx-auto">
+          <div className="grid md:grid-cols-2 gap-6">
             {/* System Administrator Portal */}
             <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group" 
                   onClick={() => navigate('/system-admin-login')}>
@@ -189,6 +189,40 @@ export default function RegulatoryLogin() {
               </CardContent>
             </Card>
 
+            {/* Office & Administration Portal */}
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
+                  onClick={() => navigate('/regulatory-classic-login')}>
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FolderOpen className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                  <FolderOpen className="w-5 h-5" />
+                  Office & Administration
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Document Management Services
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Badge variant="outline" className="w-full justify-center border-blue-500 text-blue-600 bg-blue-50">
+                  Administrative Access
+                </Badge>
+                <ul className="text-sm text-slate-600 space-y-2">
+                  <li>• Document management & archiving</li>
+                  <li>• Office workflow administration</li>
+                  <li>• Digital scanning services</li>
+                  <li>• Administrative coordination</li>
+                </ul>
+                <Button 
+                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white group"
+                  onClick={(e) => { e.stopPropagation(); navigate('/regulatory-classic-login'); }}
+                >
+                  Access Office Portal
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
 

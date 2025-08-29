@@ -3,15 +3,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Helmet } from "react-helmet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Leaf, MapPin, AlertCircle, Eye, EyeOff, UserPlus, ShoppingCart, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Leaf, MapPin, AlertCircle, Eye, EyeOff, UserPlus, ShoppingCart, Users, ArrowLeft, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 
 const LIBERIAN_COUNTIES = [
@@ -156,67 +158,64 @@ export default function FarmerBuyerLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-3 sm:p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <Helmet>
         <title>Farmer & Buyer Portal Login - AgriTrace360™ LACRA</title>
         <meta name="description" content="Secure login portal for farmers and buyers in Liberia" />
       </Helmet>
 
-      <div className="w-full max-w-6xl">
-        {/* Header Section */}
+      {/* Back to Platform Button */}
+      <div className="absolute top-6 left-6">
+        <Link href="/">
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Polipus Platform
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="w-full max-w-4xl">
+        {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center items-center gap-3 mb-4">
-            <div className="w-16 h-16 rounded-lg overflow-hidden">
-              <img 
-                src={lacraLogo} 
-                alt="LACRA Official Logo" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
-              <Users className="h-8 w-8 text-white" />
-            </div>
+          <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
+            <Users className="w-10 h-10 text-slate-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Farmer & Buyer Portal
-          </h1>
-          <p className="text-gray-600">
-            Liberia Agriculture Commodity Regulatory Authority
-          </p>
-          <p className="text-sm text-gray-500">
-            AgriTrace360™ Agricultural Management System
-          </p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">LACRA Farmer & Buyer Portal</h1>
+          <p className="text-slate-700 text-lg">Agricultural Management Access System</p>
+          <p className="text-slate-600 text-sm mt-2">Liberia Agriculture Commodity Regulatory Authority</p>
         </div>
 
-        {/* Dual Login Boxes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Access Cards */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           
-          {/* Farmer Login Box */}
-          <Card className="shadow-2xl border-0">
-            <CardHeader className="text-center pb-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-t-lg">
-              <div className="flex justify-center items-center gap-3 mb-4">
-                <div className="p-3 bg-white bg-opacity-20 rounded-full">
-                  <Leaf className="h-8 w-8 text-white" />
-                </div>
+          {/* Farmer Login Card */}
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4">
+                <Leaf className="w-8 h-8 text-white" />
               </div>
-              <CardTitle className="text-2xl font-bold">
-                Farmer Login
+              <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                <Leaf className="w-5 h-5" />
+                Farmer Portal
               </CardTitle>
-              <p className="text-green-100 mt-2">
-                Agricultural producers and farm managers
-              </p>
+              <CardDescription className="text-slate-600">
+                Agricultural Producers & Farm Managers
+              </CardDescription>
             </CardHeader>
-
-            <CardContent className="p-6">
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-green-500 text-green-600 bg-green-50">
+                Agricultural Operations Access
+              </Badge>
+              
               {error && (
-                <Alert className="mb-6 border-red-200 bg-red-50">
+                <Alert className="border-red-200 bg-red-50">
                   <AlertCircle className="h-4 w-4 text-red-600" />
                   <AlertDescription className="text-red-800">{error}</AlertDescription>
                 </Alert>
               )}
 
               {/* Farmer Login Form */}
-              <form onSubmit={farmerForm.handleSubmit(onFarmerSubmit)} className="space-y-4">
+              <form onSubmit={farmerForm.handleSubmit(onFarmerSubmit)} className="space-y-3">
                   <div>
                     <Label htmlFor="farmerId">Farmer ID *</Label>
                     <Input
@@ -293,53 +292,44 @@ export default function FarmerBuyerLogin() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white group"
                   disabled={isLoading}
                   data-testid="button-farmer-login"
                 >
-                  {isLoading ? "Logging in..." : "Login as Farmer"}
+                  {isLoading ? "Logging in..." : "Access Farmer Portal"}
                 </Button>
               </form>
-              
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Need help with farmer registration?
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Contact your local agricultural extension officer for assistance.
-                  </p>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
-          {/* Buyer Login Box */}
-          <Card className="shadow-2xl border-0">
-            <CardHeader className="text-center pb-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg">
-              <div className="flex justify-center items-center gap-3 mb-4">
-                <div className="p-3 bg-white bg-opacity-20 rounded-full">
-                  <ShoppingCart className="h-8 w-8 text-white" />
-                </div>
+          {/* Buyer Login Card */}
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
+                <ShoppingCart className="w-8 h-8 text-white" />
               </div>
-              <CardTitle className="text-2xl font-bold">
-                Buyer Login
+              <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                Buyer Portal
               </CardTitle>
-              <p className="text-blue-100 mt-2">
-                Agricultural commodity buyers and traders
-              </p>
+              <CardDescription className="text-slate-600">
+                Agricultural Commodity Buyers & Traders
+              </CardDescription>
             </CardHeader>
-
-            <CardContent className="p-6">
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-blue-500 text-blue-600 bg-blue-50">
+                Commercial Operations Access
+              </Badge>
+              
               {error && (
-                <Alert className="mb-6 border-red-200 bg-red-50">
+                <Alert className="border-red-200 bg-red-50">
                   <AlertCircle className="h-4 w-4 text-red-600" />
                   <AlertDescription className="text-red-800">{error}</AlertDescription>
                 </Alert>
               )}
 
               {/* Buyer Login Form */}
-              <form onSubmit={buyerForm.handleSubmit(onBuyerSubmit)} className="space-y-4">
+              <form onSubmit={buyerForm.handleSubmit(onBuyerSubmit)} className="space-y-3">
                   <div>
                     <Label htmlFor="buyerId">Buyer ID *</Label>
                     <Input
@@ -406,26 +396,36 @@ export default function FarmerBuyerLogin() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
                   disabled={isLoading}
                   data-testid="button-buyer-login"
                 >
-                  {isLoading ? "Logging in..." : "Login as Buyer"}
+                  {isLoading ? "Logging in..." : "Access Buyer Portal"}
                 </Button>
               </form>
-              
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Need help with buyer registration?
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Visit the nearest LACRA office for buyer registration assistance.
-                  </p>
-                </div>
-              </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Security Notice */}
+        <div className="bg-white shadow-lg border border-slate-200 rounded-lg p-6 text-center">
+          <Shield className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Secure Agricultural Access Portal</h3>
+          <p className="text-slate-600 text-sm mb-4">
+            Each portal provides specialized access controls and agricultural management tools. 
+            All sessions are secured with JWT authentication and comprehensive audit logging.
+          </p>
+          <div className="flex justify-center space-x-6 text-xs text-slate-500">
+            <span>✓ Farmer Authentication</span>
+            <span>✓ GPS Location Verification</span>
+            <span>✓ Real-time Data Sync</span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-6 text-slate-400 text-sm">
+          <p>AgriTrace360™ Agricultural Management Portal System</p>
+          <p className="text-xs mt-1">Authorized Personnel Only • All Access Attempts are Logged</p>
         </div>
       </div>
     </div>

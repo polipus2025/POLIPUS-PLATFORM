@@ -185,12 +185,6 @@ export default function OfficeAdministrationLogin() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="office_admin">Office Administrator</SelectItem>
-                    <SelectItem value="director">Director</SelectItem>
-                    <SelectItem value="inspector">Chief Inspector</SelectItem>
-                    <SelectItem value="compliance_officer">Compliance Officer</SelectItem>
-                    <SelectItem value="field_coordinator">Field Coordinator</SelectItem>
-                    <SelectItem value="administrator">Administrator</SelectItem>
-                    <SelectItem value="analyst">Data Analyst</SelectItem>
                   </SelectContent>
                 </Select>
                 {form.formState.errors.role && (

@@ -129,7 +129,7 @@ export default function FrontPage() {
             {/* Monitoring Portal Button - Positioned to the right */}
             <div className="absolute right-0 top-0 flex flex-col gap-2">
               <Link href="/monitoring-login">
-                <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white text-sm px-3 py-2 flex items-center gap-1.5">
+                <Button className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white text-sm px-3 py-2 flex items-center gap-1.5">
                   <Users className="h-3 w-3" />
                   Monitoring
                 </Button>
@@ -224,7 +224,7 @@ export default function FrontPage() {
                             )}
                           </Badge>
                         </div>
-                        <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white mt-4">
+                        <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white mt-4">
                           <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                           Enter Platform
                         </Button>
@@ -293,7 +293,7 @@ export default function FrontPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Link href="/mobile-app-download">
-                <Button className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white flex items-center gap-2" data-testid="button-download-app">
+                <Button className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white flex items-center gap-2" data-testid="button-download-app">
                   <Download className="h-4 w-4" />
                   Download App
                 </Button>

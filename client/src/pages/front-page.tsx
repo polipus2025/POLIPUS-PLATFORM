@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'wouter';
 import { Helmet } from 'react-helmet';
 import ModernBackground from '@/components/ui/modern-background';
@@ -34,6 +34,20 @@ import {
 const poliposLogo = '/api/assets/polipos%20logo%201_1753394173408.jpg';
 
 export default function FrontPage() {
+  // Clear any stored authentication tokens that might cause redirects
+  useEffect(() => {
+    // Only clear monitoring-related tokens, preserve other legitimate auth states
+    const userType = localStorage.getItem("userType");
+    if (userType === "monitoring") {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userType");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("username");
+      console.log("🧹 Cleared monitoring tokens to prevent auto-redirect");
+    }
+  }, []);
+
   const modules = [
     {
       id: 1,

@@ -72,6 +72,7 @@ import DDGAFLogin from "@/pages/auth/ddgaf-login";
 import DDGOTSLogin from "@/pages/auth/ddgots-login";
 import DGLogin from "@/pages/auth/dg-login";
 import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
+import OfficeAdministrationLogin from "@/pages/auth/regulatory-classic-login";
 import SystemAdminLogin from "@/pages/auth/system-admin-login";
 import MonitoringLogin from "@/pages/auth/monitoring-login";
 
@@ -149,6 +150,7 @@ function App() {
             <Route path="/ddgots-login" component={DDGOTSLogin} />
             <Route path="/dg-login" component={DGLogin} />
             <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
+            <Route path="/office-administration-login" component={OfficeAdministrationLogin} />
             <Route path="/system-admin-login" component={SystemAdminLogin} />
             <Route path="/monitoring-login" component={MonitoringLogin} />
             

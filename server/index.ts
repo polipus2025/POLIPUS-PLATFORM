@@ -89,7 +89,8 @@ if (MAINTENANCE_MODE) {
         console.log(`🛒 Buyer Portal: http://localhost:${port}/agricultural-buyer-dashboard`);
         console.log(`🚢 Exporter Portal: http://localhost:${port}/exporter-login`);
         console.log(`🔍 Inspector Portal: http://localhost:${port}/inspector-login`);
-        console.log(`🏢 Office & Administration Portal: http://localhost:${port}/regulatory-login`);
+        console.log(`📋 Regulatory Portal: http://localhost:${port}/regulatory-login`);
+        console.log(`🏢 Office & Administration: http://localhost:${port}/office-administration-login`);
         console.log(`🏭 Warehouse Inspector: http://localhost:${port}/warehouse-inspector-login`);
         console.log(`⚓ Port Inspector: http://localhost:${port}/port-inspector-login`);
         console.log(`🗺️ Land Inspector: http://localhost:${port}/land-inspector-login`);

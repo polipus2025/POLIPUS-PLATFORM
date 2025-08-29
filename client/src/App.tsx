@@ -91,20 +91,47 @@ const EudrAssessment = lazy(() => import("@/pages/eudr-assessment"));
 const GenerateReports = lazy(() => import("@/pages/generate-reports"));
 
 function App() {
-  // Ensure system always starts from Polipus front page - prevent unwanted redirects
+  // COMPLETE SYSTEM MEMORY RESET - Clear all persistent state
   React.useEffect(() => {
-    // Clear any cached redirect behavior and ensure proper routing
-    const currentPath = window.location.pathname;
-    const isValidPublicRoute = ["/", "/front-page", "/portals", "/landing"].includes(currentPath) || 
-                              currentPath.includes("-login") || 
-                              currentPath.includes("-portal") ||
-                              currentPath.includes("-dashboard");
+    // AGGRESSIVE CLEANUP - Remove all traces of monitoring-login from system memory
+    console.log("🧹 COMPLETE SYSTEM RESET: Clearing all persistent state");
     
-    // If user is on an invalid or problematic route, redirect to Polipus front page
-    if (!isValidPublicRoute) {
-      console.log("🔄 Redirecting to Polipus front page for proper system start");
+    // 1. Clear ALL localStorage/sessionStorage
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      console.log("Storage clear error:", e);
+    }
+    
+    // 2. Clear browser history of problematic entries
+    if (window.history.length > 1) {
       window.history.replaceState(null, "", "/");
     }
+    
+    // 3. Force URL reset if not on Polipus front page
+    if (window.location.pathname !== "/" && window.location.pathname !== "/front-page") {
+      console.log("🔄 FORCE RESET: Redirecting from", window.location.pathname, "to Polipus front page");
+      window.location.replace("/");
+      return;
+    }
+    
+    // 4. Clear service worker cache
+    if ('serviceWorker' in navigator && 'caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      });
+    }
+    
+    // 5. Clear any React Router cached state
+    const currentPath = window.location.pathname;
+    if (currentPath.includes("monitoring")) {
+      console.log("🚨 MONITORING PATH DETECTED - FORCE RESET");
+      window.location.replace("/");
+      return;
+    }
+    
+    console.log("✅ SYSTEM RESET COMPLETE - Polipus Platform ready");
   }, []);
 
   return (

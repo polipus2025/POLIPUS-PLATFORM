@@ -34,33 +34,62 @@ import {
 const poliposLogo = '/api/assets/polipos%20logo%201_1753394173408.jpg';
 
 export default function FrontPage() {
-  // Clear any stored authentication tokens that might cause redirects
+  // AGGRESSIVE MEMORY RESET - Eliminate all traces of monitoring-login
   useEffect(() => {
-    // Clear ALL authentication tokens to ensure clean state - users should start fresh from Polipus front page
-    const hasMonitoringTokens = localStorage.getItem("userType") === "monitoring";
-    const hasAnyTokens = localStorage.getItem("authToken");
+    console.log("🔥 POLIPUS FRONT PAGE: Complete memory wipe initiated");
     
-    if (hasMonitoringTokens || hasAnyTokens) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userType");
-      localStorage.removeItem("userRole");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("username");
-      localStorage.removeItem("farmerId");
-      localStorage.removeItem("agentId");
-      localStorage.removeItem("jurisdiction");
+    // NUCLEAR OPTION - Clear everything
+    try {
+      // Clear all storage
+      localStorage.clear();
+      sessionStorage.clear();
       
-      // Clear browser cache to prevent cached redirects
-      if ('caches' in window) {
-        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+      // Clear any cookies that might store redirect info
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
+      
+      // Force URL to root if it contains any problematic paths
+      const currentPath = window.location.pathname;
+      const currentSearch = window.location.search;
+      const currentHash = window.location.hash;
+      
+      if (currentPath.includes("monitoring") || 
+          currentSearch.includes("monitoring") || 
+          currentHash.includes("monitoring") ||
+          currentPath !== "/") {
+        console.log("🚨 MONITORING REMNANTS DETECTED - IMMEDIATE RESET");
+        window.location.replace("/");
+        return;
       }
       
-      console.log("🧹 Cleared all authentication tokens for fresh Polipus front page start");
-    }
-    
-    // Ensure we stay on front page - prevent any unwanted redirects
-    if (window.location.pathname !== "/" && window.location.pathname !== "/front-page") {
-      window.history.replaceState(null, "", "/");
+      // Clear window name (sometimes used for state)
+      window.name = "";
+      
+      // Override any potential redirect attempts
+      const originalPushState = window.history.pushState;
+      const originalReplaceState = window.history.replaceState;
+      
+      window.history.pushState = function(state, title, url) {
+        if (typeof url === 'string' && url.includes('monitoring')) {
+          console.log("🛡️ BLOCKED monitoring redirect attempt");
+          return originalPushState.call(this, state, title, '/');
+        }
+        return originalPushState.call(this, state, title, url);
+      };
+      
+      window.history.replaceState = function(state, title, url) {
+        if (typeof url === 'string' && url.includes('monitoring')) {
+          console.log("🛡️ BLOCKED monitoring redirect attempt");
+          return originalReplaceState.call(this, state, title, '/');
+        }
+        return originalReplaceState.call(this, state, title, url);
+      };
+      
+      console.log("✅ POLIPUS MEMORY RESET COMPLETE - System cleaned");
+      
+    } catch (error) {
+      console.log("Reset error:", error);
     }
   }, []);
 

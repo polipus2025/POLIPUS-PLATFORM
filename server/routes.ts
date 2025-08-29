@@ -18140,5 +18140,30 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // SYSTEM MEMORY RESET ROUTE - Clear all server-side session data
+  app.post('/api/clear-system-memory', (req, res) => {
+    try {
+      // Clear any session data if exists
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.log('Session destroy error:', err);
+          }
+        });
+      }
+      
+      // Clear any cookies
+      res.clearCookie('connect.sid');
+      res.clearCookie('authToken');
+      res.clearCookie('userType');
+      
+      console.log('🧹 SERVER MEMORY CLEARED - All session data removed');
+      res.json({ success: true, message: 'System memory cleared' });
+    } catch (error) {
+      console.error('Memory clear error:', error);
+      res.status(500).json({ error: 'Failed to clear system memory' });
+    }
+  });
+
   return httpServer;
 }

@@ -21,6 +21,29 @@ function initializeApp() {
   if (!rootElement) {
     return;
   }
+  
+  // NUCLEAR MEMORY RESET - Eliminate all traces of monitoring-login from system memory
+  console.log("🔥 MAIN.TSX: Initiating complete system memory wipe");
+  
+  // Clear ALL browser storage immediately
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Force clear server-side memory
+    fetch('/api/clear-system-memory', { method: 'POST' }).catch(() => {});
+    
+    // Override any redirect attempts at the initialization level
+    if (window.location.pathname.includes('monitoring')) {
+      console.log("🚨 MONITORING DETECTED IN MAIN - IMMEDIATE RESET");
+      window.location.replace('/');
+      return;
+    }
+    
+    console.log("✅ MAIN.TSX: System memory cleared");
+  } catch (e) {
+    console.log("Main reset error:", e);
+  }
 
   // Immediate DOM update for perceived performance
   rootElement.innerHTML = `

@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import { 
   FolderOpen, 
   Archive, 
-  Scanner, 
+  ScanLine, 
   FileText, 
   Settings, 
   Users, 
@@ -86,7 +86,7 @@ export default function OfficeAdministrationPortal() {
   const stats = [
     { title: 'Active Documents', value: '1,247', icon: FileText, color: 'blue' },
     { title: 'Archived Records', value: '3,892', icon: Archive, color: 'green' },
-    { title: 'Scanned Today', value: '156', icon: Scanner, color: 'orange' },
+    { title: 'Scanned Today', value: '156', icon: ScanLine, color: 'orange' },
     { title: 'Pending Reviews', value: '23', icon: Clock, color: 'red' }
   ];
 
@@ -323,7 +323,7 @@ export default function OfficeAdministrationPortal() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Scanner className="h-5 w-5" />
+                  <ScanLine className="h-5 w-5" />
                   Document Scanning Services
                 </CardTitle>
               </CardHeader>
@@ -361,7 +361,7 @@ export default function OfficeAdministrationPortal() {
                         </Select>
                       </div>
                       <Button className="w-full">
-                        <Scanner className="h-4 w-4 mr-2" />
+                        <ScanLine className="h-4 w-4 mr-2" />
                         Start Scanning
                       </Button>
                     </div>

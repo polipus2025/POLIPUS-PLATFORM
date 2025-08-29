@@ -65,21 +65,25 @@ export default function MonitoringLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-3 sm:p-4">
-      <div className="w-full max-w-sm sm:max-w-md">
-        <Card className="bg-white shadow-2xl border-0">
-          <CardHeader className="text-center pb-2">
-            <Link href="/" className="inline-block mb-4">
-              <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Return to Platform
-              </Button>
-            </Link>
-            <div className="flex justify-center mb-4">
-              <div className="bg-blue-600 p-4 rounded-full">
-                <Activity className="h-12 w-12 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 relative">
+      <div className="absolute top-4 left-4">
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="flex items-center gap-2 text-white hover:bg-white/10 hover:text-white">
+            <ArrowLeft className="h-4 w-4" />
+            Return to Platform
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="min-h-screen flex items-center justify-center p-3 sm:p-4">
+        <div className="w-full max-w-sm sm:max-w-md">
+          <Card className="bg-white shadow-2xl border-0">
+            <CardHeader className="text-center pb-2">
+              <div className="flex justify-center mb-4">
+                <div className="bg-blue-600 p-4 rounded-full">
+                  <Activity className="h-12 w-12 text-white" />
+                </div>
               </div>
-            </div>
             <CardTitle className="text-2xl font-bold text-gray-900">
               Platform Monitoring Portal
             </CardTitle>
@@ -163,6 +167,7 @@ export default function MonitoringLogin() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );

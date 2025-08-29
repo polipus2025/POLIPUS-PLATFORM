@@ -752,7 +752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: buyerNotifications.createdAt,
         })
         .from(buyerNotifications)
-        .where(eq(buyerNotifications.buyerId, buyer.id.toString()))
+        .where(eq(buyerNotifications.buyerId, buyer.id))
         .orderBy(desc(buyerNotifications.createdAt));
 
       res.json({
@@ -819,8 +819,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingConfirmations = await db
         .select()
         .from(buyerNotifications)
-        .where(eq(buyerNotifications.offerId, notification.offerId))
-        .where(eq(buyerNotifications.response, "confirmed"));
+        .where(and(
+          eq(buyerNotifications.offerId, notification.offerId),
+          eq(buyerNotifications.response, "confirmed")
+        ));
 
       if (response === "confirmed") {
         if (existingConfirmations.length > 0) {
@@ -866,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [buyer] = await db
           .select()
           .from(buyers)
-          .where(eq(buyers.buyerId, notification.buyerId));
+          .where(eq(buyers.buyerId, notification.buyerId.toString()));
 
         // Create transaction with unique verification code
         const transactionId = generateTransactionId();
@@ -899,8 +901,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             responseDate: new Date(),
             isWinner: false,
           })
-          .where(eq(buyerNotifications.offerId, notification.offerId))
-          .where(ne(buyerNotifications.notificationId, notificationId));
+          .where(and(
+            eq(buyerNotifications.offerId, notification.offerId),
+            ne(buyerNotifications.notificationId, notificationId)
+          ));
 
         res.json({
           success: true,
@@ -2126,7 +2130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agritrace-admin/configurations', authenticateAgriTraceAdmin, async (req, res) => {
     try {
       const { configKey, configValue } = req.body;
-      await agriTraceAdmin.updateAgriTraceConfiguration(configKey, configValue, req.user?.username || 'unknown');
+      await agriTraceAdmin.updateAgriTraceConfiguration(configKey, configValue, req.user?.firstName || 'unknown');
       res.json({ success: true, message: 'AgriTrace configuration updated' });
     } catch (error: any) {
       console.error('Error updating AgriTrace configuration:', error);
@@ -2148,7 +2152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agritrace-admin/features/toggle', authenticateAgriTraceAdmin, async (req, res) => {
     try {
       const { flagName, isEnabled } = req.body;
-      await agriTraceAdmin.toggleAgriTraceFeature(flagName, isEnabled, req.user?.username || 'unknown');
+      await agriTraceAdmin.toggleAgriTraceFeature(flagName, isEnabled, req.user?.firstName || 'unknown');
       res.json({ success: true, message: 'AgriTrace feature toggled' });
     } catch (error: any) {
       console.error('Error toggling AgriTrace feature:', error);
@@ -2183,7 +2187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const control = {
         ...req.body,
-        appliedBy: req.user?.username || 'unknown'
+        appliedBy: req.user?.firstName || 'unknown'
       };
       
       const newControl = await agriTraceAdmin.applyAgriTraceControl(control);
@@ -4926,8 +4930,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 username: exporter.exporterId,
                 exporterId: exporter.exporterId,
                 companyName: exporter.companyName,
-                contactPerson: exporter.contactPerson,
-                email: exporter.email,
+                contactPerson: exporter.companyName,
+                email: exporter.businessEmail,
                 userType: 'exporter',
                 role: 'exporter'
               });
@@ -4935,7 +4939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Handle other user types
-          const user = await storage.getUserById(decoded.userId);
+          const user = await storage.getUser(decoded.userId);
           if (user) {
             return res.json(user);
           }
@@ -4953,8 +4957,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             username: exporter.exporterId,
             exporterId: exporter.exporterId,
             companyName: exporter.companyName,
-            contactPerson: exporter.contactPerson,
-            email: exporter.email,
+            contactPerson: exporter.companyName,
+            email: exporter.businessEmail,
             userType: 'exporter',
             role: 'exporter'
           });
@@ -11474,7 +11478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createInspectorActivity({
         inspectorId: inspectorId,
         activityType: 'password_reset',
-        description: `Password reset by admin: ${req.user?.username || 'System Admin'}`,
+        description: `Password reset by admin: ${req.user?.firstName || 'System Admin'}`,
         county: inspector.inspectionAreaCounty
       });
 
@@ -11545,7 +11549,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createInspectorActivity({
         inspectorId: inspector.inspectorId,
         activityType: 'profile_created',
-        description: `Inspector profile created by ${req.user?.username || 'System Admin'}`,
+        description: `Inspector profile created by ${req.user?.firstName || 'System Admin'}`,
         county: inspector.inspectionAreaCounty
       });
 
@@ -11587,7 +11591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createInspectorActivity({
         inspectorId: updatedInspector.inspectorId,
         activityType: 'profile_update',
-        description: `Inspector profile updated by ${req.user?.username || 'System Admin'}`,
+        description: `Inspector profile updated by ${req.user?.firstName || 'System Admin'}`,
         county: updatedInspector.inspectionAreaCounty
       });
 
@@ -11608,7 +11612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createInspectorActivity({
           inspectorId: inspector.inspectorId,
           activityType: 'status_change',
-          description: `Inspector activated by ${req.user?.username || 'System Admin'}`,
+          description: `Inspector activated by ${req.user?.firstName || 'System Admin'}`,
           county: inspector.inspectionAreaCounty
         });
       }
@@ -11630,7 +11634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createInspectorActivity({
           inspectorId: inspector.inspectorId,
           activityType: 'status_change',
-          description: `Inspector deactivated by ${req.user?.username || 'System Admin'}`,
+          description: `Inspector deactivated by ${req.user?.firstName || 'System Admin'}`,
           county: inspector.inspectionAreaCounty
         });
       }
@@ -11652,7 +11656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createInspectorActivity({
           inspectorId: inspector.inspectorId,
           activityType: 'login_status_change',
-          description: `Login access enabled by ${req.user?.username || 'System Admin'}`,
+          description: `Login access enabled by ${req.user?.firstName || 'System Admin'}`,
           county: inspector.inspectionAreaCounty
         });
       }
@@ -11674,7 +11678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createInspectorActivity({
           inspectorId: inspector.inspectorId,
           activityType: 'login_status_change',
-          description: `Login access disabled by ${req.user?.username || 'System Admin'}`,
+          description: `Login access disabled by ${req.user?.firstName || 'System Admin'}`,
           county: inspector.inspectionAreaCounty
         });
       }
@@ -11729,7 +11733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertInspectorAreaAssignmentSchema.parse({
         ...req.body,
         inspectorId: inspector.inspectorId,
-        assignedBy: req.user?.username || 'System Admin'
+        assignedBy: req.user?.firstName || 'System Admin'
       });
 
       const assignment = await storage.createInspectorAreaAssignment(validatedData);
@@ -12160,7 +12164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertBuyerDocumentSchema.parse({
         ...req.body,
         buyerId: buyer.buyerId,
-        uploadedBy: req.user?.username || 'System Admin'
+        uploadedBy: req.user?.firstName || 'System Admin'
       });
 
       const document = await storage.createBuyerDocument(validatedData);
@@ -12201,7 +12205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertBuyerTransactionSchema.parse({
         ...req.body,
         buyerId: buyer.buyerId,
-        recordedBy: req.user?.username || 'System Admin'
+        recordedBy: req.user?.firstName || 'System Admin'
       });
 
       const transaction = await storage.createBuyerTransaction(validatedData);

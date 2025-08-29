@@ -182,6 +182,19 @@ export default function MonitoringDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* System Health Check Button */}
+            <Link href="/system-monitoring">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-blue-600/20 border-blue-400/50 text-blue-100 hover:bg-blue-600/30"
+                data-testid="system-health-button"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Run System Health Check
+              </Button>
+            </Link>
+            
             {/* Super Backend Dashboard Access */}
             <a href="/super-backend" target="_blank" rel="noopener noreferrer">
               <Button 

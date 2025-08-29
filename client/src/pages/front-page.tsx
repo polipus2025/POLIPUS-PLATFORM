@@ -445,59 +445,67 @@ export default function FrontPage() {
               Secure authentication portals for different user types and system monitoring access.
             </p>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
               {/* Regulatory Portal */}
-              <Link href="/regulatory-login">
-                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-300">
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
-                      <Shield className="h-6 w-6 text-white" />
+              <Link href="/regulatory-login" className="h-full">
+                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-300 h-full">
+                  <div className="text-center p-4 h-full flex flex-col justify-between">
+                    <div>
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+                        <Shield className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className="font-bold text-slate-900 mb-2">Regulatory Portal</h4>
+                      <p className="text-xs text-slate-600 mb-3">LACRA administrators and compliance officers</p>
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Regulatory Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">LACRA administrators and compliance officers</p>
-                    <Button size="sm" className="w-full isms-button">Access Portal</Button>
+                    <Button size="sm" className="w-full isms-button mt-auto">Access Portal</Button>
                   </div>
                 </div>
               </Link>
 
               {/* Farmer Portal */}
-              <Link href="/farmer-login">
-                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-300">
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
-                      <Wheat className="h-6 w-6 text-white" />
+              <Link href="/farmer-login" className="h-full">
+                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-300 h-full">
+                  <div className="text-center p-4 h-full flex flex-col justify-between">
+                    <div>
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+                        <Wheat className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className="font-bold text-slate-900 mb-2">Farmer & Buyer Portal</h4>
+                      <p className="text-xs text-slate-600 mb-3">Agricultural producers, farm managers, and commodity buyers</p>
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Farmer & Buyer Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">Agricultural producers, farm managers, and commodity buyers</p>
-                    <Button size="sm" className="w-full isms-button">Access Portal</Button>
+                    <Button size="sm" className="w-full isms-button mt-auto">Access Portal</Button>
                   </div>
                 </div>
               </Link>
 
               {/* Inspector Portal */}
-              <Link href="/inspector-login">
-                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-300">
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
-                      <MapPin className="h-6 w-6 text-white" />
+              <Link href="/inspector-login" className="h-full">
+                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-300 h-full">
+                  <div className="text-center p-4 h-full flex flex-col justify-between">
+                    <div>
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+                        <MapPin className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className="font-bold text-slate-900 mb-2">Inspector Portal</h4>
+                      <p className="text-xs text-slate-600 mb-3">Inspection and field operations staff</p>
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Inspector Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">Inspection and field operations staff</p>
-                    <Button size="sm" className="w-full isms-button">Access Portal</Button>
+                    <Button size="sm" className="w-full isms-button mt-auto">Access Portal</Button>
                   </div>
                 </div>
               </Link>
 
               {/* Monitoring Portal */}
-              <Link href="/monitoring-login">
-                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-purple-300">
-                  <div className="text-center p-4">
-                    <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
-                      <BarChart3 className="h-6 w-6 text-white" />
+              <Link href="/monitoring-login" className="h-full">
+                <div className="isms-card hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-purple-300 h-full">
+                  <div className="text-center p-4 h-full flex flex-col justify-between">
+                    <div>
+                      <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
+                        <BarChart3 className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className="font-bold text-slate-900 mb-2">Monitoring Portal</h4>
+                      <p className="text-xs text-slate-600 mb-3">System monitoring and analytics access</p>
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">Monitoring Portal</h4>
-                    <p className="text-xs text-slate-600 mb-3">System monitoring and analytics access</p>
-                    <Button size="sm" className="w-full isms-button">Access Portal</Button>
+                    <Button size="sm" className="w-full isms-button mt-auto">Access Portal</Button>
                   </div>
                 </div>
               </Link>

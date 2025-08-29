@@ -3447,6 +3447,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'office.admin': { password: 'office123', role: 'office_admin', firstName: 'Office', lastName: 'Administrator' }
       };
 
+      console.log("🔍 Checking credentials...");
+      console.log("🔑 Looking for username:", username);
+      console.log("🔑 Available usernames:", Object.keys(testCredentials));
+      console.log("🔍 Password match:", testCredentials[username]?.password === password);
+      console.log("🔍 Expected role:", testCredentials[username]?.role);
+      console.log("🔍 Received role:", role);
+      
       if (testCredentials[username] && testCredentials[username].password === password) {
         // Determine userType based on role
         const userTypeForToken = testCredentials[username].role === 'office_admin' ? 'office_admin' : 'regulatory';

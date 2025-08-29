@@ -200,33 +200,35 @@ export default function FrontPage() {
                   key={module.id} 
                   className="isms-card transition-all duration-300 h-64 sm:h-80 flex flex-col hover:shadow-lg hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
                 >
-                  <Link href={module.route} className="flex-1 relative block group">
-                    <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 h-full justify-center p-3 sm:p-4">
-                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'isms-icon-bg-green' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <Link href={module.route} className="h-full flex flex-col relative block group">
+                    <div className="flex flex-col items-center text-center h-full p-3 sm:p-4">
+                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'isms-icon-bg-green' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
                         <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
-                        {module.description && (
-                          <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
-                            {module.description}
-                          </p>
-                        )}
-                        <Badge className={module.isAgriTrace ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
-                          {module.isAgriTrace ? (
-                            <>
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Active
-                            </>
-                          ) : (
-                            "Coming Soon"
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
+                          {module.description && (
+                            <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
+                              {module.description}
+                            </p>
                           )}
-                        </Badge>
+                          <Badge className={module.isAgriTrace ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
+                            {module.isAgriTrace ? (
+                              <>
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Active
+                              </>
+                            ) : (
+                              "Coming Soon"
+                            )}
+                          </Badge>
+                        </div>
+                        <Button className="w-full text-xs sm:text-sm isms-button mt-4">
+                          <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                          Enter Platform
+                        </Button>
                       </div>
-                      <Button className="w-full text-xs sm:text-sm isms-button">
-                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                        Enter Platform
-                      </Button>
                     </div>
                   </Link>
                 </div>

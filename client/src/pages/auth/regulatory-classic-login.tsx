@@ -33,8 +33,8 @@ export default function OfficeAdministrationLogin() {
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "office.admin",
-      password: "office123",
+      username: "",
+      password: "",
       role: "office_admin",
       department: "",
     },
@@ -60,9 +60,9 @@ export default function OfficeAdministrationLogin() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          username: "office.admin",
-          password: "office123",
-          role: "office_admin",
+          username: data.username,
+          password: data.password,
+          role: data.role,
           department: data.department,
           userType: "office_admin"
         }),
@@ -166,7 +166,7 @@ export default function OfficeAdministrationLogin() {
                   type="text"
                   {...form.register("username")}
                   className="mt-1"
-                  placeholder="Enter your username"
+                  placeholder="office.admin"
                   data-testid="input-username"
                 />
                 {form.formState.errors.username && (
@@ -221,7 +221,7 @@ export default function OfficeAdministrationLogin() {
                     type={showPassword ? "text" : "password"}
                     {...form.register("password")}
                     className="pr-10"
-                    placeholder="Enter your password"
+                    placeholder="office123"
                     data-testid="input-password"
                   />
                   <button

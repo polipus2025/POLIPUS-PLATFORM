@@ -159,6 +159,20 @@ const SystemMonitoring = memo(() => {
             Comprehensive health monitoring for the entire Polipus Environmental Intelligence Platform. 
             Run diagnostics to check all systems and get expert repair advice.
           </p>
+          
+          {/* Back to Monitoring Dashboard Button */}
+          <div className="flex justify-center mt-4">
+            <a href="/monitoring-dashboard">
+              <Button 
+                variant="outline"
+                className="bg-slate-600 hover:bg-slate-700 text-white border-slate-500"
+                data-testid="back-to-monitoring-button"
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                Back to Monitoring Dashboard
+              </Button>
+            </a>
+          </div>
         </div>
 
         {/* Quick Actions */}

@@ -43,6 +43,7 @@ export default function OfficeAdministrationLogin() {
   const selectedRole = form.watch("role");
 
   const onSubmit = async (data: LoginForm) => {
+    console.log("Form submitted with data:", data);
     setIsLoading(true);
     setError("");
 
@@ -54,20 +55,25 @@ export default function OfficeAdministrationLogin() {
 
     try {
       // Direct fetch call to bypass apiRequest issues
+      const requestBody = {
+        username: data.username,
+        password: data.password,
+        role: data.role,
+        department: data.department,
+        userType: "office_admin"
+      };
+      console.log("Sending request:", requestBody);
+      
       const res = await fetch("/api/auth/regulatory-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          username: data.username,
-          password: data.password,
-          role: data.role,
-          department: data.department,
-          userType: "office_admin"
-        }),
+        body: JSON.stringify(requestBody),
         credentials: "include"
       });
+      
+      console.log("Response status:", res.status);
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -158,7 +164,7 @@ export default function OfficeAdministrationLogin() {
               </Alert>
             )}
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log("Form validation errors:", errors))} className="space-y-4">
               <div>
                 <Label htmlFor="username">Username *</Label>
                 <Input

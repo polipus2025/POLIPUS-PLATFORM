@@ -105,12 +105,12 @@ export default function FrontPage() {
 
 
   return (
-    <div className="min-h-screen isms-gradient" style={{ overflowY: 'auto', height: 'auto' }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100" style={{ overflowY: 'auto', height: 'auto' }}>
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
 
-        {/* Mobile-Responsive Polipos Logo - ISMS Style */}
-        <div className="isms-card text-center mb-8 sm:mb-12">
+        {/* Mobile-Responsive Polipos Logo - Inspector Style */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center mb-8 sm:mb-12">
           <div className="flex justify-center py-4 sm:py-6 relative">
             <div className="h-32 sm:h-48 md:h-64 w-auto flex items-center justify-center rounded-xl overflow-hidden">
               <img 
@@ -129,7 +129,7 @@ export default function FrontPage() {
             {/* Monitoring Portal Button - Positioned to the right */}
             <div className="absolute right-0 top-0 flex flex-col gap-2">
               <Link href="/monitoring-login">
-                <Button className="isms-button text-sm px-3 py-2 flex items-center gap-1.5">
+                <Button className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white text-sm px-3 py-2 flex items-center gap-1.5">
                   <Users className="h-3 w-3" />
                   Monitoring
                 </Button>
@@ -140,10 +140,10 @@ export default function FrontPage() {
           </div>
         </div>
 
-        {/* Mobile-Responsive Platform Statistics - ISMS Style */}
+        {/* Mobile-Responsive Platform Statistics - Inspector Style */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
-          <div className="isms-card text-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-2 sm:mb-3">
+          <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mx-auto mb-2 sm:mb-3">
               <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">Active Modules</p>
@@ -151,8 +151,8 @@ export default function FrontPage() {
             <p className="text-slate-600 text-xs sm:text-sm">Operational</p>
           </div>
           
-          <div className="isms-card text-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-2 sm:mb-3">
+          <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-2 sm:mb-3">
               <span className="text-white font-bold text-sm sm:text-lg">EU</span>
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">AgriTrace360</p>
@@ -160,8 +160,8 @@ export default function FrontPage() {
             <p className="text-slate-600 text-xs sm:text-sm">Compliance</p>
           </div>
 
-          <div className="isms-card text-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-2 sm:mb-3">
+          <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-2 sm:mb-3">
               <Settings className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">In Development</p>
@@ -169,8 +169,8 @@ export default function FrontPage() {
             <p className="text-slate-600 text-xs sm:text-sm">Modules</p>
           </div>
 
-          <div className="isms-card text-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-2 sm:mb-3">
+          <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mx-auto mb-2 sm:mb-3">
               <Globe className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">Platform Reach</p>
@@ -179,10 +179,10 @@ export default function FrontPage() {
           </div>
         </div>
 
-        {/* Mobile-Responsive Platform Modules - ISMS Style */}
-        <div className="isms-card">
+        {/* Mobile-Responsive Platform Modules - Inspector Style */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6">
           <div className="flex items-center gap-3 mb-6 sm:mb-8">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center">
               <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
@@ -198,11 +198,11 @@ export default function FrontPage() {
               return (
                 <div 
                   key={module.id} 
-                  className="isms-card transition-all duration-300 h-64 sm:h-80 flex flex-col hover:shadow-lg hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
+                  className="bg-white shadow-xl border-slate-200 rounded-lg transition-all duration-300 h-64 sm:h-80 flex flex-col hover:shadow-2xl hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
                 >
                   <Link href={module.route} className="h-full flex flex-col relative block group">
                     <div className="flex flex-col items-center text-center h-full p-3 sm:p-4">
-                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'isms-icon-bg-green' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
+                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'bg-gradient-to-br from-green-500 to-green-600' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
                         <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                       </div>
                       <div className="flex-1 flex flex-col justify-between">
@@ -224,7 +224,7 @@ export default function FrontPage() {
                             )}
                           </Badge>
                         </div>
-                        <Button className="w-full text-xs sm:text-sm isms-button mt-4">
+                        <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white mt-4">
                           <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                           Enter Platform
                         </Button>
@@ -239,7 +239,7 @@ export default function FrontPage() {
 
 
         {/* Cross-Module Integration Dashboard */}
-        <div className="isms-card mt-8 sm:mt-12 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 mt-8 sm:mt-12 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-300">
           <div className="text-center">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
@@ -279,9 +279,9 @@ export default function FrontPage() {
         </div>
 
         {/* Mobile App Download Section */}
-        <div className="isms-card mt-8 sm:mt-12">
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 mt-8 sm:mt-12">
           <div className="text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl isms-icon-bg-green flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <Smartphone className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
             <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
@@ -293,7 +293,7 @@ export default function FrontPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Link href="/mobile-app-download">
-                <Button className="isms-button flex items-center gap-2" data-testid="button-download-app">
+                <Button className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white flex items-center gap-2" data-testid="button-download-app">
                   <Download className="h-4 w-4" />
                   Download App
                 </Button>

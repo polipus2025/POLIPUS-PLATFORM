@@ -469,7 +469,7 @@ export default function AgriculturalBuyerDashboard() {
     localStorage.removeItem('buyerName');
     localStorage.removeItem('userType');
     localStorage.removeItem('company');
-    navigate('/auth/farmer-login');
+    navigate('/farmer-login');
   };
 
   // Handle warehouse storage fee payment

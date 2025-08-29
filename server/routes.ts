@@ -3437,7 +3437,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testCredentials: Record<string, { password: string; role: string; firstName: string; lastName: string }> = {
         admin001: { password: 'password123', role: 'regulatory_admin', firstName: 'Admin', lastName: 'User' },
         admin: { password: 'admin123', role: 'regulatory_admin', firstName: 'Administrator', lastName: 'LACRA' },
-        inspector001: { password: 'password123', role: 'inspector', firstName: 'Inspector', lastName: 'User' }
+        inspector001: { password: 'password123', role: 'inspector', firstName: 'Inspector', lastName: 'User' },
+        regulator: { password: 'Reg2025!', role: 'regulatory_admin', firstName: 'Regulatory', lastName: 'Officer' }
       };
 
       if (testCredentials[username] && testCredentials[username].password === password) {

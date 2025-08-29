@@ -47,23 +47,32 @@ export default function RegulatoryClassicLogin() {
     setError("");
 
     try {
-      // For demonstration purposes, using simple validation
-      // In production, this would authenticate against a secure system
-      if (data.username === "regulator" && data.password === "Reg2025!" && data.role) {
+      // Call backend authentication API
+      const response = await apiRequest("POST", "/api/auth/regulatory-login", {
+        username: data.username,
+        password: data.password,
+        role: data.role,
+        department: data.department,
+        userType: "regulatory"
+      });
+
+      if (response.success) {
         toast({
           title: "Login Successful",
           description: "Welcome to LACRA Regulatory Portal (Classic)",
         });
         
-        localStorage.setItem("authToken", "regulatory-classic-token");
-        localStorage.setItem("userRole", "regulatory_officer");
-        localStorage.setItem("userType", "regulatory");
-        localStorage.setItem("username", data.username);
+        // Store the real JWT token from backend
+        localStorage.setItem("authToken", response.token);
+        localStorage.setItem("userRole", response.user.role);
+        localStorage.setItem("userType", response.user.userType);
+        localStorage.setItem("username", response.user.username);
         localStorage.setItem("selectedRole", data.role);
+        localStorage.setItem("userId", response.user.id);
         
         window.location.href = "/regulatory-portal-classic";
       } else {
-        throw new Error("Invalid credentials or role selection");
+        throw new Error(response.message || "Authentication failed");
       }
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";

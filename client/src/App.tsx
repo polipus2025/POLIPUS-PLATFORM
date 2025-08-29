@@ -48,6 +48,7 @@ const DDGAFDashboard = lazy(() => import("@/pages/ddgaf-dashboard"));
 const DDGOTSDashboard = lazy(() => import("@/pages/ddgots-dashboard"));
 const DGDashboard = lazy(() => import("@/pages/dg-dashboard"));
 const AgriTraceAdminPortal = lazy(() => import("@/pages/agritrace-admin-portal"));
+const SystemMonitoring = lazy(() => import("@/pages/system-monitoring"));
 
 // POLIPUS MODULE PORTALS - 7 modules
 const LiveTracePortal = lazy(() => import("@/pages/portals/live-trace-portal"));
@@ -125,6 +126,9 @@ function App() {
             <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
             <Route path="/system-admin-login" component={SystemAdminLogin} />
             <Route path="/monitoring-login" component={MonitoringLogin} />
+            
+            {/* SYSTEM MONITORING */}
+            <Route path="/system-monitoring" component={createLazyRoute(SystemMonitoring)} />
             
             {/* AGRICULTURAL DASHBOARD ROUTES */}
             <Route path="/farmer-dashboard" component={createLazyRoute(FarmerDashboard)} />

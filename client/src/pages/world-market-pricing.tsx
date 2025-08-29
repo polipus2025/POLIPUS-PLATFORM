@@ -144,7 +144,14 @@ const WorldMarketPricing = memo(() => {
                 <RefreshCw className="h-3 w-3 mr-1" />
                 Live Updates
               </Badge>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  alert(`🔔 Price Alert Setup\n\nCommodity: Cocoa\nCurrent Price: $7,823/MT\n\nAlert Options:\n• Above $8,000/MT\n• Below $7,500/MT\n• 5% price change\n\nFeature coming soon!`);
+                }}
+                data-testid="set-alerts-button"
+              >
                 <Bell className="h-4 w-4 mr-2" />
                 Set Alerts
               </Button>

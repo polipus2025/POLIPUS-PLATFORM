@@ -204,13 +204,22 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
                 <Badge variant="destructive" className="text-xs">3</Badge>
               </div>
               
-              <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => window.location.href = '/exporter-login'}>
+              <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{user?.companyName || 'Loading...'}</p>
-                  <p className="text-xs text-gray-500 group-hover:text-blue-500 transition-colors">Licensed Exporter • Click to Login Portal</p>
+                  <p className="text-sm font-medium text-gray-900">{user?.companyName || 'Loading...'}</p>
+                  <p className="text-xs text-gray-500">Licensed Exporter Portal</p>
                 </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center group-hover:from-blue-600 group-hover:to-blue-700 transition-all">
-                  <User className="w-5 h-5 text-white" />
+                <div className="relative">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border-red-200"
+                    data-testid="logout-button"
+                  >
+                    <LogOut className="w-4 h-4 mr-1" />
+                    Logout
+                  </Button>
                 </div>
               </div>
             </div>

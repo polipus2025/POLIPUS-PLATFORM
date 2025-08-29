@@ -293,7 +293,15 @@ const ExporterDashboard = memo(() => {
                           <p className="text-xs text-gray-500">
                             Accepted: {new Date(deal.accepted_date).toLocaleDateString()}
                           </p>
-                          <Button size="sm" className="w-full mt-2" variant="outline">
+                          <Button 
+                            size="sm" 
+                            className="w-full mt-2" 
+                            variant="outline"
+                            onClick={() => {
+                              alert(`🚛 Transport Arrangement\n\nContact Details:\nBuyer: ${deal.buyer_company}\nPhone: ${deal.buyer_phone}\nVerification Code: ${deal.verification_code}\n\nNext: Call buyer to arrange pickup from their warehouse to your export facility.`);
+                            }}
+                            data-testid={`arrange-transport-${deal.offer_id}`}
+                          >
                             <Truck className="h-4 w-4 mr-1" />
                             Arrange Transport
                           </Button>

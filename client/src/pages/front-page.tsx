@@ -327,44 +327,6 @@ export default function FrontPage() {
           </div>
         </div>
 
-        {/* Platform Documentation Download - After Mobile App Section */}
-        <div className="isms-card mt-8 sm:mt-12 bg-gradient-to-r from-blue-50 to-emerald-50 border-2 border-blue-200">
-          <div className="text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
-              Platform Documentation
-            </h3>
-            <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Download comprehensive technical documentation covering the world's first environmental intelligence ecosystem with all 8 integrated modules, 200+ satellite sources, shipping tracking & monitoring system integration, and complete monitoring capabilities.
-            </p>
-            <Button 
-              onClick={() => window.open('/api/download/platform-documentation', '_blank')}
-              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-            >
-              <Download className="h-5 w-5 mr-2" />
-              Download Complete Documentation PDF
-            </Button>
-            <div className="mt-4 flex items-center justify-center gap-6 text-xs sm:text-sm text-slate-500">
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>Complete 24-Page Analysis</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>All 8 Modules</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>200+ Satellites</span>
-              </div>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              Comprehensive environmental intelligence analysis • Generated: {new Date().toLocaleDateString()}
-            </p>
-          </div>
-        </div>
 
       </div>
     </div>

@@ -255,8 +255,47 @@ export default function OfficeAdministrationLogin() {
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
                 disabled={isLoading}
                 data-testid="button-login"
+                onClick={(e) => {
+                  console.log("Button clicked!");
+                  console.log("Form values:", form.getValues());
+                  console.log("Form errors:", form.formState.errors);
+                }}
               >
                 {isLoading ? "Logging in..." : "Access Office & Administration Portal"}
+              </Button>
+
+              {/* Debug test button */}
+              <Button 
+                type="button"
+                onClick={async () => {
+                  console.log("Testing direct API call...");
+                  try {
+                    const res = await fetch("/api/auth/regulatory-login", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        username: "office.admin",
+                        password: "office123", 
+                        role: "office_admin",
+                        userType: "office_admin"
+                      })
+                    });
+                    console.log("Direct test response:", res.status);
+                    const data = await res.json();
+                    console.log("Direct test data:", data);
+                    if (data.success) {
+                      localStorage.setItem("authToken", data.token);
+                      window.location.href = "/office-administration-portal";
+                    }
+                  } catch (err) {
+                    console.error("Direct test error:", err);
+                  }
+                }}
+                className="w-full mt-2 bg-blue-600 hover:bg-blue-700"
+              >
+                🔧 Direct Test Login (Debug)
               </Button>
             </form>
 

@@ -33,9 +33,9 @@ export default function OfficeAdministrationLogin() {
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
-      password: "",
-      role: "",
+      username: "office.admin",
+      password: "office123",
+      role: "office_admin",
       department: "",
     },
   });
@@ -60,9 +60,9 @@ export default function OfficeAdministrationLogin() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          username: data.username,
-          password: data.password,
-          role: data.role,
+          username: "office.admin",
+          password: "office123",
+          role: "office_admin",
           department: data.department,
           userType: "office_admin"
         }),

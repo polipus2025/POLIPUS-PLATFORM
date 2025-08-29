@@ -45,7 +45,7 @@ export default function DDGAFDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('ddgafToken');
     localStorage.removeItem('ddgafUser');
-    navigate('/auth/regulatory-login');
+    navigate('/regulatory-login');
   };
 
   // Mock data for DDGAF operations

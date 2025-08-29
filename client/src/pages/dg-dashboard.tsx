@@ -49,7 +49,7 @@ export default function DGDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('dgToken');
     localStorage.removeItem('dgUser');
-    navigate('/auth/regulatory-login');
+    navigate('/regulatory-login');
   };
 
   // Mock executive data for demonstration

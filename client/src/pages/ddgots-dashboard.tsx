@@ -96,7 +96,7 @@ export default function DDGOTSDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('ddgotsToken');
     localStorage.removeItem('ddgotsUser');
-    navigate('/auth/regulatory-login');
+    navigate('/regulatory-login');
   };
 
   const handleInspectorManagement = () => {

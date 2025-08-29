@@ -411,17 +411,71 @@ export default function CreateLandPlot() {
                               <Button 
                                 type="button"
                                 className="bg-yellow-600 hover:bg-yellow-700"
-                                onClick={() => {
-                                  toast({
-                                    title: "Generating EUDR Report",
-                                    description: "Creating compliance certificate...",
-                                  });
-                                  setTimeout(() => {
+                                onClick={async () => {
+                                  try {
+                                    toast({
+                                      title: "Generating EUDR Report",
+                                      description: "Creating compliance certificate based on satellite analysis...",
+                                    });
+
+                                    // First generate EUDR compliance data
+                                    const eudrData = {
+                                      farmerId: selectedFarmerId,
+                                      farmerName: selectedFarmer?.firstName + " " + selectedFarmer?.lastName,
+                                      plotId: `PLOT-${selectedFarmerId}-${Date.now()}`,
+                                      plotName: landPlotData.plotName,
+                                      county: selectedFarmer?.county || 'Monrovia',
+                                      plotSize: satelliteAnalysis.totalArea.toFixed(2),
+                                      complianceScore: 100 - (satelliteAnalysis.deforestationRisk || 2),
+                                      riskLevel: 'low',
+                                      deforestationRisk: satelliteAnalysis.deforestationRisk || 2.1,
+                                      createdAt: new Date().toISOString()
+                                    };
+
+                                    // Generate EUDR compliance record
+                                    const eudrResponse = await fetch('/api/eudr-generate', {
+                                      method: 'POST',
+                                      headers: {
+                                        'Content-Type': 'application/json'
+                                      },
+                                      body: JSON.stringify(eudrData)
+                                    });
+
+                                    if (!eudrResponse.ok) {
+                                      throw new Error('Failed to generate EUDR compliance record');
+                                    }
+
+                                    const eudrResult = await eudrResponse.json();
+                                    
+                                    // Download the actual PDF
+                                    const pdfResponse = await fetch(`/api/eudr-certificate/${eudrResult.eudrReportId}`);
+                                    
+                                    if (!pdfResponse.ok) {
+                                      throw new Error('Failed to generate PDF report');
+                                    }
+
+                                    const blob = await pdfResponse.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.style.display = 'none';
+                                    a.href = url;
+                                    a.download = `EUDR-Compliance-${landPlotData.plotName || 'Report'}-${Date.now()}.pdf`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    window.URL.revokeObjectURL(url);
+                                    document.body.removeChild(a);
+
                                     toast({
                                       title: "✅ EUDR Report Downloaded",
                                       description: "EU Deforestation Regulation compliance report saved successfully.",
                                     });
-                                  }, 1000);
+                                  } catch (error: any) {
+                                    toast({
+                                      title: "Download Failed",
+                                      description: error.message,
+                                      variant: "destructive",
+                                    });
+                                  }
                                 }}
                               >
                                 <Download className="w-4 h-4 mr-2" />

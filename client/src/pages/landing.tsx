@@ -244,7 +244,7 @@ export default function Landing() {
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Regulatory Portal
+                  Regulatory
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
                   LACRA administrators
@@ -288,7 +288,7 @@ export default function Landing() {
                   <Leaf className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Farmer & Buyer Portal
+                  Farmer & Buyer
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
                   Agricultural producers & buyers
@@ -332,7 +332,7 @@ export default function Landing() {
                   <Users className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Inspector Portal
+                  Inspector
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
                   Extension officers
@@ -376,7 +376,7 @@ export default function Landing() {
                   <Package className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Exporter Portal
+                  Exporter
                 </h3>
                 <p className="text-slate-600 text-xs leading-tight">
                   Commodity exporters

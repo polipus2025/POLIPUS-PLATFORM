@@ -139,7 +139,7 @@ export default function OfficeAdministrationLogin() {
               Office & Administration Portal
             </CardTitle>
             <p className="text-gray-600 mt-2">
-              Administrative Management System
+              Document Management & Administration Services
             </p>
             <p className="text-sm text-gray-500">
               Liberia Agriculture Commodity Regulatory Authority
@@ -208,11 +208,11 @@ export default function OfficeAdministrationLogin() {
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="export_control">Export Control</SelectItem>
-                      <SelectItem value="field_operations">Field Operations</SelectItem>
-                      <SelectItem value="compliance_monitoring">Compliance Monitoring</SelectItem>
-                      <SelectItem value="data_analytics">Data Analytics</SelectItem>
-                      <SelectItem value="administration">Administration</SelectItem>
+                      <SelectItem value="office_admin">Office Administrator</SelectItem>
+                      <SelectItem value="document_management">Document Management</SelectItem>
+                      <SelectItem value="archive_services">Archive Services</SelectItem>
+                      <SelectItem value="workflow_management">Workflow Management</SelectItem>
+                      <SelectItem value="administrative_support">Administrative Support</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -249,7 +249,7 @@ export default function OfficeAdministrationLogin() {
                 disabled={isLoading}
                 data-testid="button-login"
               >
-                {isLoading ? "Logging in..." : "Access Regulatory Portal"}
+                {isLoading ? "Logging in..." : "Access Office & Administration Portal"}
               </Button>
             </form>
 
@@ -259,9 +259,9 @@ export default function OfficeAdministrationLogin() {
                   Demo Credentials (for testing):
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
-                  <p>Username: <span className="font-mono">regulator</span></p>
-                  <p>Password: <span className="font-mono">Reg2025!</span></p>
-                  <p>Role: <span className="italic">Any role from dropdown</span></p>
+                  <p>Username: <span className="font-mono">office.admin</span></p>
+                  <p>Password: <span className="font-mono">dg123</span></p>
+                  <p>Role: <span className="italic">Office Administrator</span></p>
                 </div>
               </div>
             </div>

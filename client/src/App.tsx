@@ -151,6 +151,13 @@ function App() {
             <Route path="/exporter-dashboard" component={createLazyRoute(ExporterDashboard)} />
             <Route path="/world-market-pricing" component={createLazyRoute(WorldMarketPricing)} />
             <Route path="/sellers-hub" component={createLazyRoute(SellersHub)} />
+            <Route path="/exporter/orders" component={createLazyRoute(lazy(() => import('./pages/exporter/orders')))} />
+            <Route path="/exporter/marketplace" component={createLazyRoute(lazy(() => import('./pages/exporter/marketplace')))} />
+            <Route path="/exporter/certificates" component={createLazyRoute(lazy(() => import('./pages/exporter/certificates')))} />
+            <Route path="/exporter/messages" component={createLazyRoute(lazy(() => import('./pages/exporter/messages')))} />
+            <Route path="/exporter/shipments" component={createLazyRoute(lazy(() => import('./pages/exporter/shipments')))} />
+            <Route path="/exporter/analytics" component={createLazyRoute(lazy(() => import('./pages/exporter/analytics')))} />
+            <Route path="/exporter-payment-services" component={createLazyRoute(lazy(() => import('./pages/exporter/exporter-payment-services')))} />
             
             {/* SYSTEM ADMIN PORTAL */}
             <Route path="/agritrace-admin-portal" component={createLazyRoute(AgriTraceAdminPortal)} />

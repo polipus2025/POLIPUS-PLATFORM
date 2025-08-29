@@ -195,9 +195,9 @@ const ExporterDashboard = memo(() => {
                   <div>
                     <h3 className="font-medium text-gray-900">Export Orders</h3>
                     <p className="text-sm text-gray-600">Manage your export orders</p>
-                    <span className="text-gray-500 text-sm">
-                      Coming Soon
-                    </span>
+                    <Link href="/exporter/orders" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                      View Orders →
+                    </Link>
                   </div>
                 </div>
               </CardContent>
@@ -212,9 +212,9 @@ const ExporterDashboard = memo(() => {
                   <div>
                     <h3 className="font-medium text-gray-900">Marketplace</h3>
                     <p className="text-sm text-gray-600">Browse available commodities</p>
-                    <span className="text-gray-500 text-sm">
-                      Coming Soon
-                    </span>
+                    <Link href="/exporter/marketplace" className="text-green-600 hover:text-green-800 text-sm font-medium">
+                      Explore Market →
+                    </Link>
                   </div>
                 </div>
               </CardContent>
@@ -229,9 +229,9 @@ const ExporterDashboard = memo(() => {
                   <div>
                     <h3 className="font-medium text-gray-900">Certificates</h3>
                     <p className="text-sm text-gray-600">Download export certificates</p>
-                    <span className="text-gray-500 text-sm">
-                      Coming Soon
-                    </span>
+                    <Link href="/exporter/certificates" className="text-purple-600 hover:text-purple-800 text-sm font-medium">
+                      View Certificates →
+                    </Link>
                   </div>
                 </div>
               </CardContent>

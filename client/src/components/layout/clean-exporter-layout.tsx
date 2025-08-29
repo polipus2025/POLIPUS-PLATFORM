@@ -82,13 +82,13 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
     { href: '/exporter-dashboard', label: 'Dashboard', icon: Home, description: 'Overview & metrics' },
     { href: '/world-market-pricing', label: 'World Market', icon: DollarSign, description: 'Live commodity prices' },
     { href: '/sellers-hub', label: 'Sellers Hub', icon: Store, badge: 'NEW', description: 'Browse buyer offers' },
-    { href: '#', label: 'Orders', icon: Package, badge: 'Soon', description: 'Manage export orders' },
-    { href: '#', label: 'Marketplace', icon: ShoppingCart, badge: 'Soon', description: 'Connect with buyers' },
-    { href: '#', label: 'Certificates', icon: FileText, badge: 'Soon', description: 'Export documents' },
-    { href: '#', label: 'Messages', icon: MessageSquare, badge: 'Soon', description: 'Secure communication' },
-    { href: '#', label: 'Shipments', icon: Ship, badge: 'Soon', description: 'Track deliveries' },
-    { href: '#', label: 'Analytics', icon: BarChart3, badge: 'Soon', description: 'Business insights' },
-    { href: '#', label: 'Payments', icon: CreditCard, badge: 'Soon', description: 'Payment services' },
+    { href: '/exporter/orders', label: 'Orders', icon: Package, badge: '3', description: 'Manage export orders' },
+    { href: '/exporter/marketplace', label: 'Marketplace', icon: ShoppingCart, description: 'Connect with buyers' },
+    { href: '/exporter/certificates', label: 'Certificates', icon: FileText, badge: '2', description: 'Export documents' },
+    { href: '/exporter/messages', label: 'Messages', icon: MessageSquare, badge: '5', description: 'Secure communication' },
+    { href: '/exporter/shipments', label: 'Shipments', icon: Ship, description: 'Track deliveries' },
+    { href: '/exporter/analytics', label: 'Analytics', icon: BarChart3, description: 'Business insights' },
+    { href: '/exporter-payment-services', label: 'Payments', icon: CreditCard, description: 'Payment services' },
   ];
 
   const isActiveRoute = (href: string) => {

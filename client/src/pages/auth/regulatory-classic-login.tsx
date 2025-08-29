@@ -46,6 +46,12 @@ export default function RegulatoryClassicLogin() {
     setIsLoading(true);
     setError("");
 
+    // Clear any existing tokens before attempting login
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userType");
+    localStorage.removeItem("username");
+
     try {
       // Call backend authentication API
       const response = await apiRequest("/api/auth/regulatory-login", {

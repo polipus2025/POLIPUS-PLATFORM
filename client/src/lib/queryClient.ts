@@ -28,9 +28,10 @@ export async function apiRequest(
     }
   }
   
-  // Add authorization header if token exists
+  // Add authorization header if token exists (but not for auth endpoints)
+  const isAuthEndpoint = url.includes('/auth/');
   const token = localStorage.getItem('authToken');
-  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeaders: Record<string, string> = (token && !isAuthEndpoint) ? { Authorization: `Bearer ${token}` } : {};
   
   try {
     const res = await fetch(url, {

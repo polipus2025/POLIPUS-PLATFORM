@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Building2, AlertCircle, Eye, EyeOff, ArrowLeft, FileCheck } from "lucide-react";
+import { Building2, AlertCircle, Eye, EyeOff, ArrowLeft, FileCheck, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -24,7 +24,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function RegulatoryClassicLogin() {
+export default function OfficeAdministrationLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -64,7 +64,7 @@ export default function RegulatoryClassicLogin() {
           password: data.password,
           role: data.role,
           department: data.department,
-          userType: "regulatory"
+          userType: "office_admin"
         }),
         credentials: "include"
       });
@@ -79,7 +79,7 @@ export default function RegulatoryClassicLogin() {
       if (response.success) {
         toast({
           title: "Login Successful",
-          description: "Welcome to LACRA Regulatory Portal (Classic)",
+          description: "Welcome to LACRA Office & Administration Portal",
         });
         
         // Store the real JWT token from backend
@@ -90,7 +90,7 @@ export default function RegulatoryClassicLogin() {
         localStorage.setItem("selectedRole", data.role);
         localStorage.setItem("userId", response.user.id);
         
-        window.location.href = "/regulatory-portal-classic";
+        window.location.href = "/office-administration-portal";
       } else {
         throw new Error(response.message || "Authentication failed");
       }
@@ -110,8 +110,8 @@ export default function RegulatoryClassicLogin() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
       <Helmet>
-        <title>Regulatory Portal (Classic) Login - LACRA</title>
-        <meta name="description" content="Classic regulatory portal access for LACRA officers" />
+        <title>Office & Administration Portal - LACRA</title>
+        <meta name="description" content="Office & Administration portal access for administrative management and documentation" />
       </Helmet>
 
       <div className="w-full max-w-md">
@@ -131,22 +131,22 @@ export default function RegulatoryClassicLogin() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
-                <Shield className="h-8 w-8 text-white" />
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full">
+                <FolderOpen className="h-8 w-8 text-white" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">
-              LACRA Regulatory Portal
+              Office & Administration Portal
             </CardTitle>
             <p className="text-gray-600 mt-2">
-              Classic Unified Access
+              Administrative Management System
             </p>
             <p className="text-sm text-gray-500">
               Liberia Agriculture Commodity Regulatory Authority
             </p>
             <div className="flex items-center justify-center gap-2 mt-3">
               <FileCheck className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-gray-500">Original Interface</span>
+              <span className="text-sm text-gray-500">Administrative Interface</span>
             </div>
           </CardHeader>
 

@@ -44,6 +44,7 @@ const PortInspectorDashboard = lazy(() => import("@/pages/port-inspector-dashboa
 const ExporterDashboard = lazy(() => import("@/pages/exporter-dashboard"));
 const UnifiedLandInspectorDashboard = lazy(() => import("@/pages/unified-land-inspector-dashboard"));
 const RegulatoryPortalClassic = lazy(() => import("@/pages/regulatory-portal-classic"));
+const OfficeAdministrationPortal = lazy(() => import("@/pages/office-administration-portal"));
 const DDGAFDashboard = lazy(() => import("@/pages/ddgaf-dashboard"));
 const DDGOTSDashboard = lazy(() => import("@/pages/ddgots-dashboard"));
 const DGDashboard = lazy(() => import("@/pages/dg-dashboard"));
@@ -172,6 +173,7 @@ function App() {
             
             {/* REGULATORY PORTALS */}
             <Route path="/regulatory-portal-classic" component={createLazyRoute(RegulatoryPortalClassic)} />
+            <Route path="/office-administration-portal" component={createLazyRoute(OfficeAdministrationPortal)} />
             <Route path="/ddgaf-dashboard" component={createLazyRoute(DDGAFDashboard)} />
             <Route path="/ddgots-dashboard" component={createLazyRoute(DDGOTSDashboard)} />
             <Route path="/dg-dashboard" component={createLazyRoute(DGDashboard)} />

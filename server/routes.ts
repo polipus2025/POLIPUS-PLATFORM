@@ -3438,15 +3438,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         admin001: { password: 'password123', role: 'regulatory_admin', firstName: 'Admin', lastName: 'User' },
         admin: { password: 'admin123', role: 'regulatory_admin', firstName: 'Administrator', lastName: 'LACRA' },
         inspector001: { password: 'password123', role: 'inspector', firstName: 'Inspector', lastName: 'User' },
-        regulator: { password: 'Reg2025!', role: 'regulatory_admin', firstName: 'Regulatory', lastName: 'Officer' }
+        'office.admin': { password: 'dg123', role: 'office_admin', firstName: 'Office', lastName: 'Administrator' }
       };
 
       if (testCredentials[username] && testCredentials[username].password === password) {
+        // Determine userType based on role
+        const userTypeForToken = testCredentials[username].role === 'office_admin' ? 'office_admin' : 'regulatory';
+        
         const token = jwt.sign(
           { 
             userId: 1,
             username: username,
-            userType: 'regulatory',
+            userType: userTypeForToken,
             role: testCredentials[username].role
           },
           JWT_SECRET,
@@ -3459,7 +3462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           user: {
             id: 1,
             username: username,
-            userType: 'regulatory',
+            userType: userTypeForToken,
             role: testCredentials[username].role,
             firstName: testCredentials[username].firstName,
             lastName: testCredentials[username].lastName
@@ -3487,8 +3490,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if user role is valid for regulatory access
-      if (!['regulatory_admin', 'regulatory_staff', 'admin', 'inspector', 'director'].includes(user.role)) {
+      // Check if user role is valid for regulatory or office admin access
+      if (!['regulatory_admin', 'regulatory_staff', 'admin', 'inspector', 'director', 'office_admin'].includes(user.role)) {
         return res.status(403).json({ 
           success: false, 
           message: "Access denied for this role" 

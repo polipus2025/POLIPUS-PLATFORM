@@ -50,6 +50,48 @@ export default function CreateLandPlot() {
   const farmersList = (farmers as any[]) || [];
   const selectedFarmer = farmersList.find((f: any) => f.id.toString() === selectedFarmerId);
 
+  // Generate EUDR Report mutation
+  const generateEudrReport = useMutation({
+    mutationFn: async (plotData: any) => {
+      console.log("🛰️ Generating EUDR compliance report for plot:", plotData.plotId);
+      
+      const eudrPayload = {
+        farmerId: plotData.farmerId,
+        farmerName: plotData.farmerName,
+        plotId: plotData.plotId,
+        plotName: plotData.plotName,
+        coordinates: plotData.gpsCoordinates,
+        farmBoundaries: plotData.farmBoundaries,
+        plotSize: plotData.plotSize,
+        county: plotData.county,
+        landMapData: plotData.landMapData,
+        satelliteAnalysis: plotData.landMapData?.satelliteAnalysis
+      };
+      
+      return await apiRequest("/api/eudr-compliance", {
+        method: "POST",
+        body: JSON.stringify(eudrPayload)
+      });
+    },
+    onSuccess: (eudrResult: any) => {
+      console.log("✅ EUDR report generated successfully!", eudrResult);
+      
+      toast({
+        title: "🛰️ EUDR Compliance Report Generated",
+        description: "EU Deforestation Regulation compliance report has been automatically created and saved.",
+      });
+    },
+    onError: (error: any) => {
+      console.error("❌ EUDR report generation failed:", error);
+      
+      toast({
+        title: "EUDR Report Generation Failed",
+        description: "Land plot was created but EUDR compliance report could not be generated. Please contact administrator.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Create land plot mutation
   const createLandPlot = useMutation({
     mutationFn: async (data: any) => {
@@ -105,15 +147,18 @@ export default function CreateLandPlot() {
       });
       
       console.log("✅ Plot creation result:", result);
-      return result;
+      return { result, plotPayload };
     },
-    onSuccess: (result) => {
+    onSuccess: ({ result, plotPayload }) => {
       console.log("🎉 Plot created successfully!", result);
       
       toast({
         title: "✅ Land Plot Created Successfully",
-        description: `Plot "${landPlotData.plotName}" has been mapped and approved by inspector. Auto-synchronized to farmer portal.`,
+        description: `Plot "${landPlotData.plotName}" has been mapped and approved by inspector. Generating EUDR compliance report...`,
       });
+
+      // Automatically generate EUDR report after successful land plot creation
+      generateEudrReport.mutate(plotPayload);
       
       // Reset form and satellite analysis
       setLandPlotData({
@@ -132,8 +177,10 @@ export default function CreateLandPlot() {
       setSelectedFarmerId("");
       setSatelliteAnalysis(null);
 
-      // Force refresh of all related data
-      window.location.reload();
+      // Force refresh of all related data after EUDR generation
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // Wait 2 seconds for EUDR generation to complete
     },
     onError: (error: any) => {
       toast({
@@ -710,15 +757,43 @@ export default function CreateLandPlot() {
           </div>
 
           {/* Submit Button */}
-          <div className="mt-8 flex justify-end">
+          <div className="mt-8 space-y-4">
             <Button 
               type="submit" 
               size="lg" 
-              disabled={createLandPlot.isPending || !selectedFarmerId}
-              className="min-w-48"
+              disabled={createLandPlot.isPending || generateEudrReport.isPending || !selectedFarmerId}
+              className="min-w-48 w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
             >
-              {createLandPlot.isPending ? "Creating Land Plot..." : "Create Land Plot"}
+              {createLandPlot.isPending ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Creating Land Plot...
+                </>
+              ) : generateEudrReport.isPending ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Generating EUDR Report...
+                </>
+              ) : (
+                <>
+                  <Target className="w-4 h-4 mr-2" />
+                  🗺️ Create Land Plot & Generate EUDR Report
+                </>
+              )}
             </Button>
+
+            {/* EUDR Generation Status */}
+            {generateEudrReport.isPending && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+                  <div>
+                    <div className="text-sm font-medium text-blue-800">🛰️ Generating EUDR Compliance Report</div>
+                    <div className="text-xs text-blue-600">Processing boundary data and satellite analysis for EU Deforestation Regulation compliance...</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </div>

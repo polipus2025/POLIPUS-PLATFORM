@@ -3438,7 +3438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         admin001: { password: 'password123', role: 'regulatory_admin', firstName: 'Admin', lastName: 'User' },
         admin: { password: 'admin123', role: 'regulatory_admin', firstName: 'Administrator', lastName: 'LACRA' },
         inspector001: { password: 'password123', role: 'inspector', firstName: 'Inspector', lastName: 'User' },
-        'office.admin': { password: 'dg123', role: 'office_admin', firstName: 'Office', lastName: 'Administrator' }
+        'office.admin': { password: 'office123', role: 'office_admin', firstName: 'Office', lastName: 'Administrator' }
       };
 
       if (testCredentials[username] && testCredentials[username].password === password) {

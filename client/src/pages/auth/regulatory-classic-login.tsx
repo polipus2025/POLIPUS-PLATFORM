@@ -260,7 +260,7 @@ export default function OfficeAdministrationLogin() {
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
                   <p>Username: <span className="font-mono">office.admin</span></p>
-                  <p>Password: <span className="font-mono">dg123</span></p>
+                  <p>Password: <span className="font-mono">office123</span></p>
                   <p>Role: <span className="italic">Office Administrator</span></p>
                 </div>
               </div>

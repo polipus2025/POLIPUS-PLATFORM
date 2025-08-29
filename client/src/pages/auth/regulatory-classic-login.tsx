@@ -53,17 +53,28 @@ export default function RegulatoryClassicLogin() {
     localStorage.removeItem("username");
 
     try {
-      // Call backend authentication API
-      const response = await apiRequest("/api/auth/regulatory-login", {
+      // Direct fetch call to bypass apiRequest issues
+      const res = await fetch("/api/auth/regulatory-login", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           username: data.username,
           password: data.password,
           role: data.role,
           department: data.department,
           userType: "regulatory"
-        })
+        }),
+        credentials: "include"
       });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`${res.status}: ${errorText}`);
+      }
+
+      const response = await res.json();
 
       if (response.success) {
         toast({

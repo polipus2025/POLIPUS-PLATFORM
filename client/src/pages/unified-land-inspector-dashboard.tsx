@@ -64,7 +64,7 @@ export default function UnifiedLandInspectorDashboard() {
               userId={inspectorName}
               onLogout={() => {
                 localStorage.removeItem("inspectorData");
-                window.location.href = "/auth/land-inspector-login";
+                window.location.href = "/inspector-login";
               }}
             />
           </div>

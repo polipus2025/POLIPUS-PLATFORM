@@ -1371,7 +1371,7 @@ export default function WarehouseInspectorDashboard() {
               userId={inspectorUsername}
               onLogout={() => {
                 localStorage.removeItem("warehouseInspectorData");
-                window.location.href = "/inspector-portal";
+                window.location.href = "/inspector-login";
               }}
             />
           </div>

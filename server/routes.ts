@@ -3422,11 +3422,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/regulatory-login", async (req, res) => {
+    console.log("🔍 REGULATORY LOGIN REQUEST RECEIVED");
+    console.log("📥 Request body:", JSON.stringify(req.body, null, 2));
+    console.log("📝 Headers:", JSON.stringify(req.headers, null, 2));
+    
     try {
       const { username, password, role, department, userType } = req.body;
+      console.log("🔑 Extracted credentials:", { username, password: "***", role, department, userType });
       
       // Validate input
       if (!username || !password || !role) {
+        console.log("❌ Validation failed - missing required fields");
         return res.status(400).json({ 
           success: false, 
           message: "Username, password, and role are required" 

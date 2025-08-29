@@ -10,11 +10,14 @@ import { useQuery } from '@tanstack/react-query';
 
 // ⚡ MEMOIZED CERTIFICATES COMPONENT FOR SPEED
 const ExporterCertificates = memo(() => {
-  // ⚡ GET USER DATA
+  // ⚡ INSTANT USER DATA
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
     retry: false,
-    staleTime: 30000,
+    staleTime: 300000, // 5 minutes cache
+    gcTime: 1800000, // 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
   // ⚡ MEMOIZED CERTIFICATES DATA
   const certificates = useMemo(() => [

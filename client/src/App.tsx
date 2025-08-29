@@ -6,12 +6,17 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
-// Simple loading component
+// ⚡ SUPER FAST LOADING COMPONENT - Optimized for perceived performance
 const PageLoader = () => (
-  <div className="min-h-screen bg-white flex items-center justify-center">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-      <p className="mt-4 text-gray-600">Loading portal...</p>
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+    <div className="text-center space-y-4 animate-fadeIn">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
+      <div className="space-y-2">
+        <p className="text-slate-700 font-medium">Loading portal...</p>
+        <div className="w-32 h-1 bg-slate-200 rounded-full mx-auto">
+          <div className="h-1 bg-blue-600 rounded-full animate-pulse" style={{width: '70%'}}></div>
+        </div>
+      </div>
     </div>
   </div>
 );

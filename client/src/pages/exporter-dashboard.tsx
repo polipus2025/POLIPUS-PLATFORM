@@ -1,4 +1,4 @@
-import { useState, Suspense, memo, useMemo, lazy, useCallback } from 'react';
+import React, { useState, Suspense, memo, useMemo, lazy, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,12 +33,34 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 // ⚡ LAZY LOAD COMPONENTS - Instant performance boost
 const SoftCommodityPricing = lazy(() => import('@/components/SoftCommodityPricing').then(module => ({ default: module.SoftCommodityPricing })));
 
-// ⚡ PERFORMANCE OPTIMIZED SKELETON LOADER
+// ⚡ PREFETCH CRITICAL PAGES - Load likely destinations in background
+const prefetchPages = () => {
+  // Prefetch likely pages user will visit
+  import('./exporter/orders');
+  import('./exporter/marketplace');
+  import('./exporter/certificates');
+};
+
+// ⚡ PRELOAD STRATEGY - Start prefetching after component mount
+const usePagePrefetch = () => {
+  React.useEffect(() => {
+    // Prefetch after 2 seconds to not interfere with initial load
+    const timer = setTimeout(prefetchPages, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+};
+
+// ⚡ PERFORMANCE OPTIMIZED SKELETON LOADER - Enhanced with transitions
 const FastSkeleton = memo(() => (
   <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-    <div className="text-center space-y-4">
+    <div className="text-center space-y-4 animate-pulse">
       <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <p className="text-slate-600 font-medium">Loading Exporter Portal...</p>
+      <div className="space-y-2">
+        <p className="text-slate-600 font-medium">Loading Exporter Portal...</p>
+        <div className="w-48 h-2 bg-slate-200 rounded-full mx-auto">
+          <div className="h-2 bg-blue-600 rounded-full animate-pulse" style={{width: '60%'}}></div>
+        </div>
+      </div>
     </div>
   </div>
 ));
@@ -65,16 +87,21 @@ StatusBadge.displayName = 'StatusBadge';
 // ⚡ MAIN EXPORTER DASHBOARD COMPONENT - OPTIMIZED FOR SPEED
 const ExporterDashboard = memo(() => {
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // ⚡ ACTIVATE PREFETCHING STRATEGY
+  usePagePrefetch();
 
-  // ⚡ OPTIMIZED QUERY with stale time for speed
+  // ⚡ SUPER OPTIMIZED QUERY - Maximum performance
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['/api/auth/user'],
     retry: false,
-    staleTime: 30000, // 30 seconds cache for speed
-    gcTime: 300000, // 5 minutes garbage collection
+    staleTime: 300000, // 5 minutes cache for maximum speed
+    gcTime: 1800000, // 30 minutes garbage collection
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    refetchOnMount: false, // Only fetch if stale
   });
 
-  // ⚡ FETCH ACCEPTED DEALS FOR WAREHOUSE TRANSPORT
+  // ⚡ SUPER FAST DEALS QUERY - Aggressive caching
   const { data: acceptedDealsData, isLoading: dealsLoading } = useQuery<{
     success: boolean;
     deals: Array<{
@@ -92,7 +119,10 @@ const ExporterDashboard = memo(() => {
   }>({
     queryKey: [`/api/exporter/${(user as any)?.exporterId || (user as any)?.id}/accepted-deals`],
     enabled: !!((user as any)?.exporterId || (user as any)?.id),
-    staleTime: 10000, // 10 seconds cache
+    staleTime: 120000, // 2 minutes cache for speed
+    gcTime: 600000, // 10 minutes garbage collection
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
 

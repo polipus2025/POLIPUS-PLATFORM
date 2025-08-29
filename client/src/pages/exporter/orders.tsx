@@ -10,11 +10,14 @@ import { useQuery } from '@tanstack/react-query';
 
 // ⚡ MEMOIZED ORDER COMPONENT FOR PERFORMANCE
 const ExporterOrders = memo(() => {
-  // ⚡ GET USER DATA
+  // ⚡ SUPER FAST USER DATA
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
     retry: false,
-    staleTime: 30000,
+    staleTime: 300000, // 5 minutes for speed
+    gcTime: 1800000, // 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
   // ⚡ MEMOIZED ORDERS DATA - No recalculation
   const mockOrders = useMemo(() => [

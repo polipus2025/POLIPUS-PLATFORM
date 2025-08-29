@@ -1,4 +1,4 @@
-import { useState, memo, useMemo, useCallback } from 'react';
+import React, { useState, memo, useMemo, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,15 +9,29 @@ import { Link } from 'wouter';
 import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
 import { useQuery } from '@tanstack/react-query';
 
+// ⚡ VIRTUAL SCROLLING HOOK for large lists
+const useVirtualScrolling = (items: any[], itemHeight = 120) => {
+  const [visibleItems, setVisibleItems] = React.useState(20); // Show 20 items initially
+  
+  const loadMore = React.useCallback(() => {
+    setVisibleItems(prev => Math.min(prev + 20, items.length));
+  }, [items.length]);
+  
+  return { visibleItems: items.slice(0, visibleItems), loadMore, hasMore: visibleItems < items.length };
+};
+
 // ⚡ MEMOIZED MARKETPLACE COMPONENT FOR SPEED
 const ExporterMarketplace = memo(() => {
   const [searchTerm, setSearchTerm] = useState('');
   
-  // ⚡ GET USER DATA
+  // ⚡ LIGHTNING FAST USER DATA
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
     retry: false,
-    staleTime: 30000,
+    staleTime: 300000, // 5 minutes cache
+    gcTime: 1800000, // 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   // ⚡ REAL VERIFIED BUYERS DATA - 200+ GLOBAL COMPANIES
@@ -1399,6 +1413,9 @@ const ExporterMarketplace = memo(() => {
       buyer.commodities.some(commodity => commodity.toLowerCase().includes(searchTerm.toLowerCase())) ||
       buyer.country.toLowerCase().includes(searchTerm.toLowerCase())
     ), [realBuyers, searchTerm]);
+  
+  // ⚡ VIRTUAL SCROLLING FOR PERFORMANCE - Show only visible items
+  const { visibleItems, loadMore, hasMore } = useVirtualScrolling(filteredBuyers);
 
   // ⚡ MEMOIZED STATUS COLOR FUNCTION
   const getStatusColor = useMemo(() => {
@@ -1516,7 +1533,7 @@ const ExporterMarketplace = memo(() => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredBuyers.map((buyer) => (
+              {visibleItems.map((buyer) => (
                 <div key={buyer.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-white">
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -1578,6 +1595,19 @@ const ExporterMarketplace = memo(() => {
                 </div>
               ))}
             </div>
+            
+            {/* ⚡ VIRTUAL SCROLLING LOAD MORE BUTTON */}
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <Button 
+                  onClick={loadMore}
+                  variant="outline"
+                  className="px-8 py-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  Load More Buyers ({filteredBuyers.length - visibleItems.length} remaining)
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

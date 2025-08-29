@@ -42,15 +42,20 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
     location: 'Monrovia, Liberia'
   });
 
-  // Update time every second
+  // ⚡ OPTIMIZED TIME UPDATES - Prevent unnecessary re-renders
   useEffect(() => {
-    const timer = setInterval(() => {
+    let animationId: number;
+    const updateTime = () => {
       setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
+      animationId = requestAnimationFrame(() => {
+        setTimeout(updateTime, 1000);
+      });
+    };
+    updateTime();
+    return () => cancelAnimationFrame(animationId);
   }, []);
 
-  // Simulate weather updates
+  // ⚡ OPTIMIZED WEATHER UPDATES - Less frequent updates for performance
   useEffect(() => {
     const weatherConditions = [
       { condition: 'sunny', temperature: '28°C' },
@@ -59,10 +64,17 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
       { condition: 'rainy', temperature: '24°C' }
     ];
     
+    // Update weather less frequently to reduce re-renders
     const weatherTimer = setInterval(() => {
       const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
-      setWeather(prev => ({ ...prev, ...randomWeather }));
-    }, 300000); // 5 minutes
+      setWeather(prev => {
+        // Only update if actually different to prevent unnecessary re-renders
+        if (prev.condition !== randomWeather.condition || prev.temperature !== randomWeather.temperature) {
+          return { ...prev, ...randomWeather };
+        }
+        return prev;
+      });
+    }, 600000); // 10 minutes instead of 5 for better performance
     return () => clearInterval(weatherTimer);
   }, []);
 

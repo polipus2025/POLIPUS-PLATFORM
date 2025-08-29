@@ -91,47 +91,27 @@ const EudrAssessment = lazy(() => import("@/pages/eudr-assessment"));
 const GenerateReports = lazy(() => import("@/pages/generate-reports"));
 
 function App() {
-  // COMPLETE SYSTEM MEMORY RESET - Clear all persistent state
+  // TARGETED MEMORY RESET - Only block problematic monitoring redirects
   React.useEffect(() => {
-    // AGGRESSIVE CLEANUP - Remove all traces of monitoring-login from system memory
-    console.log("🧹 COMPLETE SYSTEM RESET: Clearing all persistent state");
-    
-    // 1. Clear ALL localStorage/sessionStorage
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch (e) {
-      console.log("Storage clear error:", e);
-    }
-    
-    // 2. Clear browser history of problematic entries
-    if (window.history.length > 1) {
-      window.history.replaceState(null, "", "/");
-    }
-    
-    // 3. Force URL reset if not on Polipus front page
-    if (window.location.pathname !== "/" && window.location.pathname !== "/front-page") {
-      console.log("🔄 FORCE RESET: Redirecting from", window.location.pathname, "to Polipus front page");
-      window.location.replace("/");
-      return;
-    }
-    
-    // 4. Clear service worker cache
-    if ('serviceWorker' in navigator && 'caches' in window) {
-      caches.keys().then(names => {
-        names.forEach(name => caches.delete(name));
-      });
-    }
-    
-    // 5. Clear any React Router cached state
     const currentPath = window.location.pathname;
-    if (currentPath.includes("monitoring")) {
-      console.log("🚨 MONITORING PATH DETECTED - FORCE RESET");
+    
+    // Only clear monitoring-related tokens and block monitoring-login specifically
+    if (currentPath.includes("monitoring-login") || localStorage.getItem("userType") === "monitoring") {
+      console.log("🚨 MONITORING LOGIN DETECTED - Redirecting to Polipus front page");
+      
+      // Clear only monitoring-related storage
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userType");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("username");
+      
+      // Redirect away from monitoring-login only
       window.location.replace("/");
       return;
     }
     
-    console.log("✅ SYSTEM RESET COMPLETE - Polipus Platform ready");
+    console.log("✅ Login access allowed for:", currentPath);
   }, []);
 
   return (

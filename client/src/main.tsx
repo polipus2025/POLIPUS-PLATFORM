@@ -22,27 +22,25 @@ function initializeApp() {
     return;
   }
   
-  // NUCLEAR MEMORY RESET - Eliminate all traces of monitoring-login from system memory
-  console.log("🔥 MAIN.TSX: Initiating complete system memory wipe");
-  
-  // Clear ALL browser storage immediately
+  // TARGETED MONITORING BLOCK - Only prevent monitoring-login access
   try {
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Force clear server-side memory
-    fetch('/api/clear-system-memory', { method: 'POST' }).catch(() => {});
-    
-    // Override any redirect attempts at the initialization level
-    if (window.location.pathname.includes('monitoring')) {
-      console.log("🚨 MONITORING DETECTED IN MAIN - IMMEDIATE RESET");
+    // Only redirect if specifically accessing monitoring-login
+    if (window.location.pathname === '/monitoring-login') {
+      console.log("🚨 MONITORING-LOGIN BLOCKED - Redirecting to Polipus front page");
       window.location.replace('/');
       return;
     }
     
-    console.log("✅ MAIN.TSX: System memory cleared");
+    // Clear server-side monitoring sessions only if monitoring userType detected
+    if (localStorage.getItem("userType") === "monitoring") {
+      fetch('/api/clear-system-memory', { method: 'POST' }).catch(() => {});
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userType");
+    }
+    
+    console.log("✅ MAIN.TSX: System initialized - all legitimate login portals accessible");
   } catch (e) {
-    console.log("Main reset error:", e);
+    console.log("Main init error:", e);
   }
 
   // Immediate DOM update for perceived performance

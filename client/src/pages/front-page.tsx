@@ -34,63 +34,40 @@ import {
 const poliposLogo = '/api/assets/polipos%20logo%201_1753394173408.jpg';
 
 export default function FrontPage() {
-  // AGGRESSIVE MEMORY RESET - Eliminate all traces of monitoring-login
+  // TARGETED CLEANUP - Only clear monitoring-related data when on front page
   useEffect(() => {
-    console.log("🔥 POLIPUS FRONT PAGE: Complete memory wipe initiated");
-    
-    // NUCLEAR OPTION - Clear everything
-    try {
-      // Clear all storage
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Clear any cookies that might store redirect info
-      document.cookie.split(";").forEach(function(c) { 
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-      });
-      
-      // Force URL to root if it contains any problematic paths
-      const currentPath = window.location.pathname;
-      const currentSearch = window.location.search;
-      const currentHash = window.location.hash;
-      
-      if (currentPath.includes("monitoring") || 
-          currentSearch.includes("monitoring") || 
-          currentHash.includes("monitoring") ||
-          currentPath !== "/") {
-        console.log("🚨 MONITORING REMNANTS DETECTED - IMMEDIATE RESET");
-        window.location.replace("/");
-        return;
-      }
-      
-      // Clear window name (sometimes used for state)
-      window.name = "";
-      
-      // Override any potential redirect attempts
-      const originalPushState = window.history.pushState;
-      const originalReplaceState = window.history.replaceState;
-      
-      window.history.pushState = function(state, title, url) {
-        if (typeof url === 'string' && url.includes('monitoring')) {
-          console.log("🛡️ BLOCKED monitoring redirect attempt");
-          return originalPushState.call(this, state, title, '/');
-        }
-        return originalPushState.call(this, state, title, url);
-      };
-      
-      window.history.replaceState = function(state, title, url) {
-        if (typeof url === 'string' && url.includes('monitoring')) {
-          console.log("🛡️ BLOCKED monitoring redirect attempt");
-          return originalReplaceState.call(this, state, title, '/');
-        }
-        return originalReplaceState.call(this, state, title, url);
-      };
-      
-      console.log("✅ POLIPUS MEMORY RESET COMPLETE - System cleaned");
-      
-    } catch (error) {
-      console.log("Reset error:", error);
+    // Only clear monitoring tokens, preserve legitimate auth for other portals
+    const userType = localStorage.getItem("userType");
+    if (userType === "monitoring") {
+      console.log("🧹 Clearing monitoring tokens on front page load");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userType");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("username");
     }
+    
+    // Override only monitoring-related redirect attempts
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
+    
+    window.history.pushState = function(state, title, url) {
+      if (typeof url === 'string' && url.includes('monitoring-login')) {
+        console.log("🛡️ BLOCKED monitoring-login redirect attempt");
+        return originalPushState.call(this, state, title, '/');
+      }
+      return originalPushState.call(this, state, title, url);
+    };
+    
+    window.history.replaceState = function(state, title, url) {
+      if (typeof url === 'string' && url.includes('monitoring-login')) {
+        console.log("🛡️ BLOCKED monitoring-login redirect attempt");
+        return originalReplaceState.call(this, state, title, '/');
+      }
+      return originalReplaceState.call(this, state, title, url);
+    };
+    
+    console.log("✅ Front page ready - all login portals accessible");
   }, []);
 
   const modules = [

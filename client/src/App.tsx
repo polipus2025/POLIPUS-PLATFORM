@@ -62,7 +62,7 @@ const BlueCarbon360Portal = lazy(() => import("@/pages/portals/blue-carbon360-po
 const CarbonTracePortal = lazy(() => import("@/pages/portals/carbon-trace-portal"));
 
 // AUTH PAGES - Direct imports for fast access
-import RegulatoryLogin from "@/pages/auth/regulatory-login";
+import OfficeAdministrationLogin from "@/pages/auth/regulatory-classic-login";
 import InspectorLogin from "@/pages/auth/inspector-login";
 import WarehouseInspectorLogin from "@/pages/auth/warehouse-inspector-login";
 import PortInspectorLogin from "@/pages/auth/port-inspector-login";
@@ -139,7 +139,7 @@ function App() {
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
-            <Route path="/regulatory-login" component={RegulatoryLogin} />
+            <Route path="/regulatory-login" component={OfficeAdministrationLogin} />
             <Route path="/inspector-login" component={InspectorLogin} />
             <Route path="/warehouse-inspector-login" component={WarehouseInspectorLogin} />
             <Route path="/port-inspector-login" component={PortInspectorLogin} />

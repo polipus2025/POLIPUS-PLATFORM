@@ -420,7 +420,7 @@ export default function CreateLandPlot() {
 
                                     // First generate EUDR compliance data
                                     const eudrData = {
-                                      farmerId: selectedFarmerId,
+                                      farmerId: parseInt(selectedFarmerId) || 1,
                                       farmerName: selectedFarmer?.firstName + " " + selectedFarmer?.lastName,
                                       plotId: `PLOT-${selectedFarmerId}-${Date.now()}`,
                                       plotName: landPlotData.plotName,

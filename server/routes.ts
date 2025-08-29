@@ -3422,6 +3422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/regulatory-login", async (req, res) => {
+    console.log("🔍 LOGIN REQUEST - Body:", JSON.stringify(req.body, null, 2));
     try {
       const { username, password, role, department, userType } = req.body;
       

@@ -43,6 +43,7 @@ export default function OfficeAdministrationLogin() {
   const selectedRole = form.watch("role");
 
   const onSubmit = async (data: LoginForm) => {
+    console.log("📝 FORM SUBMIT - Data:", data);
     setIsLoading(true);
     setError("");
 

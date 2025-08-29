@@ -387,6 +387,72 @@ function EUDRReportsSection() {
 
   const reports = (eudrReports as any[]) || [];
 
+  // Generate test EUDR reports for demonstration
+  const generateTestReports = async () => {
+    try {
+      toast({
+        title: "Generating Test EUDR Reports",
+        description: "Creating sample compliance reports for testing...",
+      });
+
+      const sampleReports = [
+        {
+          farmerId: "LR-FARM-001",
+          farmerName: "John Kpargoi",
+          plotId: "PLOT-001", 
+          county: "Margibi",
+          plotSize: "2.5",
+          complianceScore: 95,
+          riskLevel: "low",
+          deforestationRisk: "0.2",
+          landUse: "cocoa",
+          createdAt: new Date().toISOString()
+        },
+        {
+          farmerId: "LR-FARM-002", 
+          farmerName: "Mary Pewu",
+          plotId: "PLOT-002",
+          county: "Bong",
+          plotSize: "1.8",
+          complianceScore: 87,
+          riskLevel: "medium", 
+          deforestationRisk: "1.1",
+          landUse: "coffee",
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      for (const report of sampleReports) {
+        await fetch('/api/eudr-compliance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            farmerId: parseInt(report.farmerId.split('-')[2]),
+            farmGpsMappingId: parseInt(report.plotId.split('-')[1]),
+            complianceScore: report.complianceScore,
+            riskLevel: report.riskLevel,
+            deforestationRisk: parseFloat(report.deforestationRisk),
+            landUse: report.landUse,
+            reportData: JSON.stringify(report)
+          })
+        });
+      }
+
+      await refetch();
+      
+      toast({
+        title: "✅ Test Reports Generated",
+        description: "Sample EUDR compliance reports are now available for download testing.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Generate Test Reports",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const downloadReport = async (report: any) => {
     try {
       toast({
@@ -450,10 +516,16 @@ function EUDRReportsSection() {
                 Automatically generated EUDR reports from land plot mapping activities
               </p>
             </div>
-            <Button onClick={() => refetch()} variant="outline">
-              <Shield className="w-4 h-4 mr-2" />
-              Refresh Reports
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={generateTestReports} variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100">
+                <Plus className="w-4 h-4 mr-2" />
+                Generate Test Reports
+              </Button>
+              <Button onClick={() => refetch()} variant="outline">
+                <Shield className="w-4 h-4 mr-2" />
+                Refresh Reports
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>

@@ -36,15 +36,31 @@ const poliposLogo = '/api/assets/polipos%20logo%201_1753394173408.jpg';
 export default function FrontPage() {
   // Clear any stored authentication tokens that might cause redirects
   useEffect(() => {
-    // Only clear monitoring-related tokens, preserve other legitimate auth states
-    const userType = localStorage.getItem("userType");
-    if (userType === "monitoring") {
+    // Clear ALL authentication tokens to ensure clean state - users should start fresh from Polipus front page
+    const hasMonitoringTokens = localStorage.getItem("userType") === "monitoring";
+    const hasAnyTokens = localStorage.getItem("authToken");
+    
+    if (hasMonitoringTokens || hasAnyTokens) {
       localStorage.removeItem("authToken");
       localStorage.removeItem("userType");
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
-      console.log("🧹 Cleared monitoring tokens to prevent auto-redirect");
+      localStorage.removeItem("farmerId");
+      localStorage.removeItem("agentId");
+      localStorage.removeItem("jurisdiction");
+      
+      // Clear browser cache to prevent cached redirects
+      if ('caches' in window) {
+        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+      }
+      
+      console.log("🧹 Cleared all authentication tokens for fresh Polipus front page start");
+    }
+    
+    // Ensure we stay on front page - prevent any unwanted redirects
+    if (window.location.pathname !== "/" && window.location.pathname !== "/front-page") {
+      window.history.replaceState(null, "", "/");
     }
   }, []);
 

@@ -91,6 +91,22 @@ const EudrAssessment = lazy(() => import("@/pages/eudr-assessment"));
 const GenerateReports = lazy(() => import("@/pages/generate-reports"));
 
 function App() {
+  // Ensure system always starts from Polipus front page - prevent unwanted redirects
+  React.useEffect(() => {
+    // Clear any cached redirect behavior and ensure proper routing
+    const currentPath = window.location.pathname;
+    const isValidPublicRoute = ["/", "/front-page", "/portals", "/landing"].includes(currentPath) || 
+                              currentPath.includes("-login") || 
+                              currentPath.includes("-portal") ||
+                              currentPath.includes("-dashboard");
+    
+    // If user is on an invalid or problematic route, redirect to Polipus front page
+    if (!isValidPublicRoute) {
+      console.log("🔄 Redirecting to Polipus front page for proper system start");
+      window.history.replaceState(null, "", "/");
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

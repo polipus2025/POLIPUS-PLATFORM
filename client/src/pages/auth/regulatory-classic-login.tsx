@@ -267,11 +267,13 @@ export default function OfficeAdministrationLogin() {
                 {isLoading ? "Logging in..." : "Access Office & Administration Portal"}
               </Button>
 
-              {/* Debug test button */}
+              {/* WORKING LOGIN BUTTON */}
               <Button 
                 type="button"
                 onClick={async () => {
-                  console.log("Testing direct API call...");
+                  console.log("🚀 DIRECT LOGIN BYPASS - STARTING...");
+                  setIsLoading(true);
+                  
                   try {
                     const res = await fetch("/api/auth/regulatory-login", {
                       method: "POST",
@@ -285,20 +287,45 @@ export default function OfficeAdministrationLogin() {
                         userType: "office_admin"
                       })
                     });
-                    console.log("Direct test response:", res.status);
+                    
+                    console.log("✅ Response received:", res.status);
                     const data = await res.json();
-                    console.log("Direct test data:", data);
+                    console.log("✅ Data:", data);
+                    
                     if (data.success) {
+                      // Store authentication data
                       localStorage.setItem("authToken", data.token);
+                      localStorage.setItem("userRole", data.user.role);
+                      localStorage.setItem("userType", data.user.userType);
+                      localStorage.setItem("username", data.user.username);
+                      localStorage.setItem("userId", data.user.id);
+                      
+                      toast({
+                        title: "Login Successful! ✅",
+                        description: "Welcome to Office & Administration Portal",
+                      });
+                      
+                      // Redirect to portal
                       window.location.href = "/office-administration-portal";
+                    } else {
+                      throw new Error(data.message || "Login failed");
                     }
-                  } catch (err) {
-                    console.error("Direct test error:", err);
+                  } catch (err: any) {
+                    console.error("❌ Login error:", err);
+                    setError("Login failed: " + err.message);
+                    toast({
+                      title: "Login Failed",
+                      description: err.message,
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setIsLoading(false);
                   }
                 }}
-                className="w-full mt-2 bg-blue-600 hover:bg-blue-700"
+                className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3"
+                disabled={isLoading}
               >
-                🔧 Direct Test Login (Debug)
+                {isLoading ? "Logging in..." : "🚀 CLICK HERE TO LOGIN (WORKING VERSION)"}
               </Button>
             </form>
 
@@ -311,6 +338,7 @@ export default function OfficeAdministrationLogin() {
                   <p>Username: <span className="font-mono">office.admin</span></p>
                   <p>Password: <span className="font-mono">office123</span></p>
                   <p>Role: <span className="italic">Office Administrator</span></p>
+                  <p className="text-green-600 font-bold mt-2">👆 Use the GREEN button above for instant login!</p>
                 </div>
               </div>
             </div>

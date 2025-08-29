@@ -184,6 +184,7 @@ export default function OfficeAdministrationLogin() {
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="office_admin">Office Administrator</SelectItem>
                     <SelectItem value="director">Director</SelectItem>
                     <SelectItem value="inspector">Chief Inspector</SelectItem>
                     <SelectItem value="compliance_officer">Compliance Officer</SelectItem>

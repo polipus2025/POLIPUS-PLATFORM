@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Leaf, MapPin, AlertCircle, Eye, EyeOff, UserPlus, ShoppingCart, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -43,7 +42,6 @@ export default function FarmerBuyerLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const [activeTab, setActiveTab] = useState("farmer");
   const { toast } = useToast();
 
   const farmerForm = useForm<FarmerLoginForm>({
@@ -164,55 +162,61 @@ export default function FarmerBuyerLogin() {
         <meta name="description" content="Secure login portal for farmers and buyers in Liberia" />
       </Helmet>
 
-      <div className="w-full max-w-lg">
-        <Card className="shadow-2xl border-0">
-          <CardHeader className="text-center pb-6">
-            <div className="flex justify-center items-center gap-3 mb-4">
-              <div className="w-16 h-16 rounded-lg overflow-hidden">
-                <img 
-                  src={lacraLogo} 
-                  alt="LACRA Official Logo" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
-                <Users className="h-8 w-8 text-white" />
-              </div>
+      <div className="w-full max-w-6xl">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <div className="w-16 h-16 rounded-lg overflow-hidden">
+              <img 
+                src={lacraLogo} 
+                alt="LACRA Official Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
-              Farmer & Buyer Portal
-            </CardTitle>
-            <p className="text-gray-600 mt-2">
-              Liberia Agriculture Commodity Regulatory Authority
-            </p>
-            <p className="text-sm text-gray-500">
-              AgriTrace360™ Agricultural Management System
-            </p>
-          </CardHeader>
+            <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Farmer & Buyer Portal
+          </h1>
+          <p className="text-gray-600">
+            Liberia Agriculture Commodity Regulatory Authority
+          </p>
+          <p className="text-sm text-gray-500">
+            AgriTrace360™ Agricultural Management System
+          </p>
+        </div>
 
-          <CardContent>
-            {error && (
-              <Alert className="mb-6 border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-800">{error}</AlertDescription>
-              </Alert>
-            )}
+        {/* Dual Login Boxes */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Farmer Login Box */}
+          <Card className="shadow-2xl border-0">
+            <CardHeader className="text-center pb-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-t-lg">
+              <div className="flex justify-center items-center gap-3 mb-4">
+                <div className="p-3 bg-white bg-opacity-20 rounded-full">
+                  <Leaf className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl font-bold">
+                Farmer Login
+              </CardTitle>
+              <p className="text-green-100 mt-2">
+                Agricultural producers and farm managers
+              </p>
+            </CardHeader>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="farmer" className="flex items-center gap-2">
-                  <Leaf className="h-4 w-4" />
-                  Farmer Login
-                </TabsTrigger>
-                <TabsTrigger value="buyer" className="flex items-center gap-2">
-                  <ShoppingCart className="h-4 w-4" />
-                  Buyer Login
-                </TabsTrigger>
-              </TabsList>
+            <CardContent className="p-6">
+              {error && (
+                <Alert className="mb-6 border-red-200 bg-red-50">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800">{error}</AlertDescription>
+                </Alert>
+              )}
 
-              {/* Farmer Login Tab */}
-              <TabsContent value="farmer" className="space-y-4">
-                <form onSubmit={farmerForm.handleSubmit(onFarmerSubmit)} className="space-y-4">
+              {/* Farmer Login Form */}
+              <form onSubmit={farmerForm.handleSubmit(onFarmerSubmit)} className="space-y-4">
                   <div>
                     <Label htmlFor="farmerId">Farmer ID *</Label>
                     <Input
@@ -287,20 +291,55 @@ export default function FarmerBuyerLogin() {
                     )}
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-                    disabled={isLoading}
-                    data-testid="button-farmer-login"
-                  >
-                    {isLoading ? "Logging in..." : "Login as Farmer"}
-                  </Button>
-                </form>
-              </TabsContent>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  disabled={isLoading}
+                  data-testid="button-farmer-login"
+                >
+                  {isLoading ? "Logging in..." : "Login as Farmer"}
+                </Button>
+              </form>
+              
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Need help with farmer registration?
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Contact your local agricultural extension officer for assistance.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-              {/* Buyer Login Tab */}
-              <TabsContent value="buyer" className="space-y-4">
-                <form onSubmit={buyerForm.handleSubmit(onBuyerSubmit)} className="space-y-4">
+          {/* Buyer Login Box */}
+          <Card className="shadow-2xl border-0">
+            <CardHeader className="text-center pb-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg">
+              <div className="flex justify-center items-center gap-3 mb-4">
+                <div className="p-3 bg-white bg-opacity-20 rounded-full">
+                  <ShoppingCart className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl font-bold">
+                Buyer Login
+              </CardTitle>
+              <p className="text-blue-100 mt-2">
+                Agricultural commodity buyers and traders
+              </p>
+            </CardHeader>
+
+            <CardContent className="p-6">
+              {error && (
+                <Alert className="mb-6 border-red-200 bg-red-50">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800">{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Buyer Login Form */}
+              <form onSubmit={buyerForm.handleSubmit(onBuyerSubmit)} className="space-y-4">
                   <div>
                     <Label htmlFor="buyerId">Buyer ID *</Label>
                     <Input
@@ -365,30 +404,29 @@ export default function FarmerBuyerLogin() {
                     )}
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-                    disabled={isLoading}
-                    data-testid="button-buyer-login"
-                  >
-                    {isLoading ? "Logging in..." : "Login as Buyer"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-
-            <div className="mt-6 pt-4 border-t border-gray-200">
-              <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">
-                  Need help with registration?
-                </p>
-                <p className="text-sm text-gray-500">
-                  Contact your local agricultural extension officer or visit the nearest LACRA office for farmer registration assistance.
-                </p>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  disabled={isLoading}
+                  data-testid="button-buyer-login"
+                >
+                  {isLoading ? "Logging in..." : "Login as Buyer"}
+                </Button>
+              </form>
+              
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Need help with buyer registration?
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Visit the nearest LACRA office for buyer registration assistance.
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

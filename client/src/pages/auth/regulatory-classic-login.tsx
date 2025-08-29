@@ -48,12 +48,15 @@ export default function RegulatoryClassicLogin() {
 
     try {
       // Call backend authentication API
-      const response = await apiRequest("POST", "/api/auth/regulatory-login", {
-        username: data.username,
-        password: data.password,
-        role: data.role,
-        department: data.department,
-        userType: "regulatory"
+      const response = await apiRequest("/api/auth/regulatory-login", {
+        method: "POST",
+        body: JSON.stringify({
+          username: data.username,
+          password: data.password,
+          role: data.role,
+          department: data.department,
+          userType: "regulatory"
+        })
       });
 
       if (response.success) {

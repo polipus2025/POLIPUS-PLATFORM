@@ -3422,17 +3422,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/regulatory-login", async (req, res) => {
-    console.log("🔍 REGULATORY LOGIN REQUEST RECEIVED");
-    console.log("📥 Request body:", JSON.stringify(req.body, null, 2));
-    console.log("📝 Headers:", JSON.stringify(req.headers, null, 2));
-    
     try {
       const { username, password, role, department, userType } = req.body;
-      console.log("🔑 Extracted credentials:", { username, password: "***", role, department, userType });
       
       // Validate input
       if (!username || !password || !role) {
-        console.log("❌ Validation failed - missing required fields");
         return res.status(400).json({ 
           success: false, 
           message: "Username, password, and role are required" 
@@ -3447,13 +3441,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'office.admin': { password: 'office123', role: 'office_admin', firstName: 'Office', lastName: 'Administrator' }
       };
 
-      console.log("🔍 Checking credentials...");
-      console.log("🔑 Looking for username:", username);
-      console.log("🔑 Available usernames:", Object.keys(testCredentials));
-      console.log("🔍 Password match:", testCredentials[username]?.password === password);
-      console.log("🔍 Expected role:", testCredentials[username]?.role);
-      console.log("🔍 Received role:", role);
-      
       if (testCredentials[username] && testCredentials[username].password === password) {
         // Determine userType based on role
         const userTypeForToken = testCredentials[username].role === 'office_admin' ? 'office_admin' : 'regulatory';

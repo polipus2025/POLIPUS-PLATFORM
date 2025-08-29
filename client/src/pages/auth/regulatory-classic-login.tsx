@@ -43,10 +43,6 @@ export default function OfficeAdministrationLogin() {
   const selectedRole = form.watch("role");
 
   const onSubmit = async (data: LoginForm) => {
-    console.log("🚀 FORM SUBMIT TRIGGERED");
-    console.log("📋 Form data received:", data);
-    console.log("🔍 Form validation state:", form.formState.errors);
-    
     setIsLoading(true);
     setError("");
 
@@ -57,26 +53,20 @@ export default function OfficeAdministrationLogin() {
     localStorage.removeItem("username");
 
     try {
-      // Direct fetch call to bypass apiRequest issues
-      const requestBody = {
-        username: data.username,
-        password: data.password,
-        role: data.role,
-        department: data.department,
-        userType: "office_admin"
-      };
-      console.log("Sending request:", requestBody);
-      
       const res = await fetch("/api/auth/regulatory-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          username: data.username,
+          password: data.password,
+          role: data.role,
+          department: data.department,
+          userType: "office_admin"
+        }),
         credentials: "include"
       });
-      
-      console.log("Response status:", res.status);
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -167,7 +157,7 @@ export default function OfficeAdministrationLogin() {
               </Alert>
             )}
 
-            <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log("Form validation errors:", errors))} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div>
                 <Label htmlFor="username">Username *</Label>
                 <Input
@@ -258,11 +248,6 @@ export default function OfficeAdministrationLogin() {
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
                 disabled={isLoading}
                 data-testid="button-login"
-                onClick={(e) => {
-                  console.log("Button clicked!");
-                  console.log("Form values:", form.getValues());
-                  console.log("Form errors:", form.formState.errors);
-                }}
               >
                 {isLoading ? "Logging in..." : "Access Office & Administration Portal"}
               </Button>

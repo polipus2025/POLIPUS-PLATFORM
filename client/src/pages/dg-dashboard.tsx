@@ -21,7 +21,14 @@ import {
   Globe,
   Target,
   Award,
-  Eye
+  Eye,
+  DollarSign,
+  Truck,
+  Sprout,
+  Trees,
+  MapPin,
+  Link,
+  RefreshCw
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -594,6 +601,150 @@ export default function DGDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Government Integration Section */}
+            <Card className="bg-white shadow-lg border-0 mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Link className="w-5 h-5 text-purple-600" />
+                  Government Integration
+                </CardTitle>
+                <CardDescription>
+                  External government agency API integration (Future connectivity)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  
+                  {/* LRA - Liberia Revenue Authority */}
+                  <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-md transition-all duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 bg-green-500 rounded-lg">
+                            <DollarSign className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-sm font-semibold">LRA</CardTitle>
+                            <p className="text-xs text-slate-600">Revenue Authority</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">Ready</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button size="sm" variant="outline" className="w-full" disabled>
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        Connect API
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Customs */}
+                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-md transition-all duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 bg-blue-500 rounded-lg">
+                            <Truck className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-sm font-semibold">Customs</CardTitle>
+                            <p className="text-xs text-slate-600">Import/Export</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">Ready</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button size="sm" variant="outline" className="w-full" disabled>
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        Connect API
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Minister of Agriculture */}
+                  <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200 hover:shadow-md transition-all duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 bg-amber-500 rounded-lg">
+                            <Sprout className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-sm font-semibold">MOA</CardTitle>
+                            <p className="text-xs text-slate-600">Minister of Agriculture</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">Ready</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button size="sm" variant="outline" className="w-full" disabled>
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        Connect API
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* FDA - Forest Development Authority */}
+                  <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 hover:shadow-md transition-all duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 bg-emerald-500 rounded-lg">
+                            <Trees className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-sm font-semibold">FDA</CardTitle>
+                            <p className="text-xs text-slate-600">Forest Development Authority</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">Ready</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button size="sm" variant="outline" className="w-full" disabled>
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        Connect API
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* LLA - Liberia Land Authority */}
+                  <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-md transition-all duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 bg-purple-500 rounded-lg">
+                            <MapPin className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-sm font-semibold">LLA</CardTitle>
+                            <p className="text-xs text-slate-600">Liberia Land Authority</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">Ready</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button size="sm" variant="outline" className="w-full" disabled>
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        Connect API
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Alert className="mt-4 border-blue-200 bg-blue-50">
+                  <Settings className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-800">
+                    Government API integrations will be activated when external agencies provide connection endpoints. All systems are ready for future connectivity.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

@@ -438,11 +438,12 @@ export default function AgriculturalBuyerDashboard() {
   const verificationCodes = verificationCodesResponse?.data || [];
 
   // Fetch existing buyer offers to check if lot already has offers
-  const { data: myOffersResponse } = useQuery({
+  const { data: myOffersResponse, refetch: refetchOffers } = useQuery({
     queryKey: ['/api/buyer/my-offers', buyerId],
     queryFn: () => apiRequest(`/api/buyer/my-offers/${buyerId}`),
     enabled: !!buyerId,
-    staleTime: 30 * 1000, // Cache for 30 seconds - needs to be fresh for button updates
+    staleTime: 10 * 1000, // Cache for 10 seconds - needs to be fresh for button updates
+    refetchOnWindowFocus: true, // Refetch when user switches back to window
   });
   
   // Extract offers from response
@@ -455,6 +456,13 @@ export default function AgriculturalBuyerDashboard() {
     
     // Check if any offer exists for this custody lot
     return existingOffers.some((offer: any) => {
+      // Debug log for troubleshooting
+      console.log('🔍 Checking offer:', { 
+        offerCustodyId: offer.custodyId, 
+        lotCustodyId: lot.custodyId, 
+        match: offer.custodyId === lot.custodyId 
+      });
+      
       // Match by custody ID (most reliable)
       if (lot.custodyId && offer.custodyId === lot.custodyId) return true;
       
@@ -703,8 +711,9 @@ export default function AgriculturalBuyerDashboard() {
         });
         setSellOfferDialog({ open: false, lot: null });
         
-        // Refresh existing offers to update button status
-        queryClient.invalidateQueries({ queryKey: ['/api/buyer/my-offers', buyerId] });
+        // Refresh existing offers to update button status immediately
+        await queryClient.invalidateQueries({ queryKey: ['/api/buyer/my-offers', buyerId] });
+        await queryClient.refetchQueries({ queryKey: ['/api/buyer/my-offers', buyerId] });
       } else {
         throw new Error(response.message || 'Failed to create offer');
       }

@@ -204,11 +204,11 @@ export default function FrontPage() {
 
           <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">
             <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-2 sm:mb-3">
-              <Settings className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+              <Satellite className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
-            <p className="text-slate-600 text-xs sm:text-sm mb-1">In Development</p>
-            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">0</p>
-            <p className="text-slate-600 text-xs sm:text-sm">Modules</p>
+            <p className="text-slate-600 text-xs sm:text-sm mb-1">Satellite Network</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">200+</p>
+            <p className="text-slate-600 text-xs sm:text-sm">Connected</p>
           </div>
 
           <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">

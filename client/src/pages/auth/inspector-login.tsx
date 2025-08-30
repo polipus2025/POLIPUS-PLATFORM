@@ -41,7 +41,9 @@ export default function InspectorLogin() {
           description: `Welcome ${data.username}!`,
         });
         
-        navigate(`/${type}-inspector-dashboard`);
+        // Navigate to correct dashboard routes
+        const dashboardRoute = type === 'land' ? '/unified-land-inspector-dashboard' : `/${type}-inspector-dashboard`;
+        navigate(dashboardRoute);
       } else {
         toast({
           title: "Login Failed",

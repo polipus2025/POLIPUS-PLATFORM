@@ -10,8 +10,8 @@ const startTime = performance.now();
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('⚡ Service Worker registered for ultra-fast caching'))
-      .catch(() => console.log('Service Worker registration failed'));
+      .then(() => {})
+      .catch(() => {});
   });
 }
 
@@ -22,26 +22,7 @@ function initializeApp() {
     return;
   }
   
-  // TARGETED MONITORING BLOCK - Only prevent monitoring-login access
-  try {
-    // Only redirect if specifically accessing monitoring-login
-    if (window.location.pathname === '/monitoring-login') {
-      console.log("🚨 MONITORING-LOGIN BLOCKED - Redirecting to Polipus front page");
-      window.location.replace('/');
-      return;
-    }
-    
-    // Clear server-side monitoring sessions only if monitoring userType detected
-    if (localStorage.getItem("userType") === "monitoring") {
-      fetch('/api/clear-system-memory', { method: 'POST' }).catch(() => {});
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userType");
-    }
-    
-    console.log("✅ MAIN.TSX: System initialized - all legitimate login portals accessible");
-  } catch (e) {
-    console.log("Main init error:", e);
-  }
+  // App initialization - authentication handling moved to App.tsx
 
   // Immediate DOM update for perceived performance
   rootElement.innerHTML = `
@@ -80,9 +61,7 @@ function initializeApp() {
         setTimeout(() => loader.remove(), 300);
       }
       
-      // Log performance metrics
-      const loadTime = performance.now() - startTime;
-      console.log(`⚡ Platform loaded in ${Math.round(loadTime)}ms`);
+      // Performance metrics calculated but not logged to console
     }, 100);
     
   } catch (error) {

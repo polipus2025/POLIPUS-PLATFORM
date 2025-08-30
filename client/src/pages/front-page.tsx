@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'wouter';
 import { Helmet } from 'react-helmet';
-import ModernBackground from '@/components/ui/modern-background';
-import ModernCard from '@/components/ui/modern-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,40 +32,17 @@ import {
 const poliposLogo = '/api/assets/polipos%20logo%201_1753394173408.jpg';
 
 export default function FrontPage() {
-  // TARGETED CLEANUP - Only clear monitoring-related data when on front page
+  // Clean front page initialization - redirect protection handled in App.tsx
   useEffect(() => {
-    // Only clear monitoring tokens, preserve legitimate auth for other portals
+    // Only clear monitoring tokens if detected, preserve legitimate auth for other portals
     const userType = localStorage.getItem("userType");
     if (userType === "monitoring") {
-      console.log("🧹 Clearing monitoring tokens on front page load");
       localStorage.removeItem("authToken");
       localStorage.removeItem("userType");
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
     }
-    
-    // Override only monitoring-related redirect attempts
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
-    
-    window.history.pushState = function(state, title, url) {
-      if (typeof url === 'string' && url.includes('monitoring-login')) {
-        console.log("🛡️ BLOCKED monitoring-login redirect attempt");
-        return originalPushState.call(this, state, title, '/');
-      }
-      return originalPushState.call(this, state, title, url);
-    };
-    
-    window.history.replaceState = function(state, title, url) {
-      if (typeof url === 'string' && url.includes('monitoring-login')) {
-        console.log("🛡️ BLOCKED monitoring-login redirect attempt");
-        return originalReplaceState.call(this, state, title, '/');
-      }
-      return originalReplaceState.call(this, state, title, url);
-    };
-    
-    console.log("✅ Front page ready - all login portals accessible");
   }, []);
 
   const modules = [

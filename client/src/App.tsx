@@ -100,8 +100,6 @@ function App() {
     if (currentPath.includes("inspector-login") || 
         currentPath.includes("monitoring-login") || 
         localStorage.getItem("userType") === "monitoring") {
-      console.log("🚨 INSPECTOR/MONITORING LOGIN DETECTED - Redirecting to Polipus front page");
-      
       // Clear problematic authentication storage
       localStorage.removeItem("authToken");
       localStorage.removeItem("userType");
@@ -117,8 +115,6 @@ function App() {
       window.location.replace("/");
       return;
     }
-    
-    console.log("✅ Main Polipus page protection active for:", currentPath);
   }, []);
 
   return (

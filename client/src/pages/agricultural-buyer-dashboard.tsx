@@ -1161,69 +1161,88 @@ export default function AgriculturalBuyerDashboard() {
                   <div className="text-center py-8 text-gray-500">Loading your orders...</div>
                 ) : verificationCodes && verificationCodes.length > 0 ? (
                   <div className="space-y-4">
-                    {verificationCodes.map((acceptance: any) => (
-                      <Card key={acceptance.verificationCode} className="border border-blue-200 hover:shadow-md transition-shadow">
+                    {verificationCodes.map((transaction: any) => (
+                      <Card key={transaction.verificationCode} className="border border-blue-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h4 className="font-semibold text-lg">{acceptance.commodityType}</h4>
-                              <p className="text-sm text-gray-600">From: {acceptance.farmerName}</p>
-                              <p className="text-sm text-gray-500">{acceptance.farmLocation}</p>
+                              <h4 className="font-semibold text-lg">{transaction.commodityType}</h4>
+                              <p className="text-sm text-gray-600">From: {transaction.farmerName}</p>
+                              <p className="text-sm text-gray-500">{transaction.farmLocation}</p>
+                              <p className="text-xs text-blue-600 font-mono">Offer ID: {transaction.farmerOfferId}</p>
                             </div>
-                            <Badge className={
-                              acceptance.status === 'bags_requested' ? "bg-purple-100 text-purple-800" :
-                              acceptance.status === 'payment_confirmed' ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
-                            }>
-                              {acceptance.status === 'bags_requested' ? 'Bag Request Complete' :
-                               acceptance.status === 'payment_confirmed' ? 'Payment Confirmed' : 'Ready for Bags'}
-                            </Badge>
+                            
+                            {/* DUAL STATUS SYSTEM */}
+                            <div className="flex flex-col gap-2">
+                              <Badge className={
+                                transaction.paymentStatus === 'confirmed' ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                              }>
+                                {transaction.paymentStatusLabel}
+                              </Badge>
+                              <Badge className={
+                                transaction.bagRequestStatus === 'requested' ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                              }>
+                                {transaction.bagRequestLabel}
+                              </Badge>
+                            </div>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
                               <p className="text-sm text-gray-600">Quantity</p>
-                              <p className="font-medium">{acceptance.quantity} {acceptance.unit}</p>
+                              <p className="font-medium">{transaction.quantity} {transaction.unit}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Total Value</p>
-                              <p className="font-medium text-green-600">${acceptance.totalValue}</p>
+                              <p className="font-medium text-green-600">${transaction.totalValue}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">County</p>
-                              <p className="font-medium">{acceptance.county}</p>
+                              <p className="font-medium">{transaction.county}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Verification Code</p>
-                              <p className="font-mono text-sm bg-gray-100 p-1 rounded">{acceptance.verificationCode}</p>
+                              <p className="font-mono text-sm bg-gray-100 p-1 rounded">{transaction.verificationCode}</p>
+                            </div>
+                          </div>
+
+                          {/* DUAL STATUS DETAILS */}
+                          <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">💳 Payment Status</p>
+                              <p className="text-sm">{transaction.paymentStatusLabel}</p>
+                              {transaction.secondVerificationCode && (
+                                <p className="text-xs font-mono bg-green-100 p-1 rounded mt-1">
+                                  2nd Code: {transaction.secondVerificationCode}
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">📦 Bag Request</p>
+                              <p className="text-sm">{transaction.bagRequestLabel}</p>
+                              {transaction.bagRequestStatus === 'requested' && (
+                                <p className="text-xs text-purple-600 mt-1">Bags requested from warehouse</p>
+                              )}
                             </div>
                           </div>
 
                           <div className="mb-4">
                             <p className="text-sm text-gray-600">Payment Terms</p>
-                            <p className="text-sm">{acceptance.paymentTerms}</p>
+                            <p className="text-sm">{transaction.paymentTerms}</p>
                           </div>
 
                           <div className="flex justify-between items-center pt-3 border-t">
                             <div className="text-xs text-gray-500">
-                              Accepted: {new Date(acceptance.confirmedAt).toLocaleString()}
+                              Confirmed: {new Date(transaction.confirmedAt).toLocaleString()}
                             </div>
-                            {acceptance.status === 'bags_requested' ? (
+                            {transaction.canRequestBag ? (
                               <Button 
-                                disabled
-                                className="bg-gray-400 cursor-not-allowed"
-                                data-testid={`button-bags-requested-${acceptance.verificationCode}`}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Requested
-                              </Button>
-                            ) : (
-                              <Button 
-                                onClick={() => handleRequestBags(acceptance.verificationCode, acceptance)}
-                                disabled={requestingBags === acceptance.verificationCode}
+                                onClick={() => handleRequestBags(transaction.verificationCode, transaction)}
+                                disabled={requestingBags === transaction.verificationCode}
                                 className="bg-blue-600 hover:bg-blue-700"
-                                data-testid={`button-request-bags-${acceptance.verificationCode}`}
+                                data-testid={`button-request-bags-${transaction.verificationCode}`}
                               >
-                                {requestingBags === acceptance.verificationCode ? (
+                                {requestingBags === transaction.verificationCode ? (
                                   <>
                                     <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
                                     Requesting...
@@ -1234,6 +1253,15 @@ export default function AgriculturalBuyerDashboard() {
                                     Request Bags to Warehouse
                                   </>
                                 )}
+                              </Button>
+                            ) : (
+                              <Button 
+                                disabled
+                                className="bg-gray-400 cursor-not-allowed"
+                                data-testid={`button-bags-already-requested-${transaction.verificationCode}`}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Bags Already Requested
                               </Button>
                             )}
                           </div>

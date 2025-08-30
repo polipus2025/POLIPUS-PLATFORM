@@ -14658,13 +14658,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get buyer verification codes archive (MY ORDERS for buyers)
+  // Get buyer confirmed transactions (RESTRUCTURED - all accepted offers with dual status system)
   app.get("/api/buyer/verification-codes/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
-      console.log(`Fetching verification codes for buyer: ${buyerId}`);
+      console.log(`🔄 Fetching confirmed transactions for buyer: ${buyerId}`);
       
-      // FIXED: Get the internal buyer ID first, then fetch verification codes
+      // Get the internal buyer ID first, then fetch verification codes
       const [buyer] = await db
         .select({ id: buyers.id })
         .from(buyers)
@@ -14674,11 +14674,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Buyer not found" });
       }
       
-      // Fetch verification codes using internal buyer ID
+      // Fetch ALL accepted offers (active, payment_confirmed, bags_requested) using internal buyer ID
       const verificationCodes = await db
         .select({
           id: buyerVerificationCodes.id,
           verification_code: buyerVerificationCodes.verificationCode,
+          second_verification_code: buyerVerificationCodes.secondVerificationCode,
           buyer_id: buyerVerificationCodes.buyerId,
           farmer_id: buyerVerificationCodes.farmerId,
           farmer_name: buyerVerificationCodes.farmerName,
@@ -14693,46 +14694,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
           payment_terms: buyerVerificationCodes.paymentTerms,
           delivery_terms: buyerVerificationCodes.deliveryTerms,
           accepted_at: buyerVerificationCodes.acceptedAt,
+          payment_confirmed_at: buyerVerificationCodes.paymentConfirmedAt,
           expires_at: buyerVerificationCodes.expiresAt,
           offer_id: buyerVerificationCodes.offerId,
           notification_id: buyerVerificationCodes.notificationId,
         })
         .from(buyerVerificationCodes)
-        .where(eq(buyerVerificationCodes.buyerId, buyer.id.toString()))
+        .where(
+          and(
+            eq(buyerVerificationCodes.buyerId, buyer.id.toString()),
+            // Include all accepted offers regardless of payment status
+            ne(buyerVerificationCodes.status, 'pending')
+          )
+        )
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
-      // Transform to match expected "My Orders" format for buyer
-      const myOrders = verificationCodes.map(code => ({
-        id: code.id,
-        transactionId: code.verification_code, // Use verification code as transaction ID
-        offerId: code.offer_id,
-        farmerId: code.farmer_id,
-        farmerName: code.farmer_name,
-        commodityType: code.commodity_type,
-        quantity: parseFloat(code.quantity_available),
-        unit: code.unit || 'tons',
-        pricePerUnit: parseFloat(code.price_per_unit),
-        totalValue: parseFloat(code.total_value),
-        status: code.status, // Use actual database status (confirmed, bags_requested, etc.)
-        county: code.county,
-        farmLocation: code.farm_location,
-        paymentTerms: code.payment_terms,
-        deliveryTerms: code.delivery_terms,
-        verificationCode: code.verification_code,
-        confirmedAt: code.accepted_at,
-        expiresAt: code.expires_at,
-        orderStatus: code.status === 'bags_requested' ? 'Bags Requested' : 'Confirmed'
-      }));
+      // Transform to NEW "Confirmed Transactions" format with dual status system
+      const confirmedTransactions = verificationCodes.map(code => {
+        // Determine payment status
+        const hasPaymentConfirmation = code.second_verification_code && code.payment_confirmed_at;
+        const paymentStatus = hasPaymentConfirmation ? 'confirmed' : 'pending';
+        
+        // Determine bag request status  
+        const bagsRequested = code.status === 'bags_requested';
+        
+        return {
+          id: code.id,
+          transactionId: code.verification_code, // Use verification code as transaction ID
+          farmerOfferId: code.offer_id, // 🔒 LOCKED: Always show Farmer Offer ID for traceability
+          farmerId: code.farmer_id,
+          farmerName: code.farmer_name,
+          commodityType: code.commodity_type,
+          quantity: parseFloat(code.quantity_available),
+          unit: code.unit || 'tons',
+          pricePerUnit: parseFloat(code.price_per_unit),
+          totalValue: parseFloat(code.total_value),
+          county: code.county,
+          farmLocation: code.farm_location,
+          paymentTerms: code.payment_terms,
+          deliveryTerms: code.delivery_terms,
+          
+          // Primary verification code (always present)
+          verificationCode: code.verification_code,
+          
+          // DUAL STATUS SYSTEM
+          paymentStatus: paymentStatus, // 'pending' or 'confirmed'
+          paymentStatusLabel: hasPaymentConfirmation 
+            ? '✅ Farmer Confirmed Payment' 
+            : '⏳ Pending Farmer Confirmation',
+          secondVerificationCode: code.second_verification_code || null,
+          paymentConfirmedAt: code.payment_confirmed_at,
+          
+          bagRequestStatus: bagsRequested ? 'requested' : 'available',
+          bagRequestLabel: bagsRequested 
+            ? '📦 Bags Requested' 
+            : '📦 Request Bag Available',
+          canRequestBag: !bagsRequested, // Can request if not already requested
+          
+          // Transaction meta
+          confirmedAt: code.accepted_at,
+          expiresAt: code.expires_at,
+          status: code.status // Keep original status for backend logic
+        };
+      });
 
-      console.log(`✅ Returning ${myOrders.length} confirmed orders (verification codes) for buyer ${buyerId}`);
-      myOrders.forEach((order, i) => {
-        console.log(`  ${i+1}. ${order.commodityType} - ${order.farmerName} - ${order.quantity} ${order.unit} - $${order.totalValue} - Code: ${order.verificationCode}`);
+      console.log(`✅ Returning ${confirmedTransactions.length} confirmed transactions for buyer ${buyerId}`);
+      confirmedTransactions.forEach((transaction, i) => {
+        console.log(`  ${i+1}. [${transaction.farmerOfferId}] ${transaction.commodityType} - ${transaction.farmerName} - ${transaction.quantity} ${transaction.unit} - $${transaction.totalValue}`);
+        console.log(`     💳 Payment: ${transaction.paymentStatusLabel} | 📦 Bags: ${transaction.bagRequestLabel}`);
       });
       
       res.json({ 
-        data: myOrders,
+        data: confirmedTransactions,
         success: true,
-        message: `Found ${myOrders.length} confirmed orders`
+        message: `Found ${confirmedTransactions.length} confirmed transactions`
       });
     } catch (error: any) {
       console.error("Error fetching verification codes:", error);

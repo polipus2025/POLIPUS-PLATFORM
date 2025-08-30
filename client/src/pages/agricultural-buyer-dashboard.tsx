@@ -1479,78 +1479,57 @@ export default function AgriculturalBuyerDashboard() {
                                       <CheckCircle className="w-4 h-4 mr-2" />
                                       Request Authorization
                                     </Button>
-                                  ) : (() => {
-                                    const offerStatus = getOfferStatus(lot);
-                                    
-                                    if (!offerStatus) {
-                                      // No offer exists - show "Sell This Lot" button
-                                      return (
-                                        <Button 
-                                          onClick={() => openSellOfferDialog(lot)}
-                                          className="w-full bg-emerald-600 hover:bg-emerald-700"
-                                          size="sm"
-                                        >
-                                          <Send className="w-4 h-4 mr-2" />
-                                          Sell This Lot
-                                        </Button>
-                                      );
-                                    }
-                                    
-                                    if (offerStatus.status === 'accepted') {
-                                      // Offer accepted - show success state
-                                      return (
-                                        <div className="space-y-2">
-                                          <Button 
-                                            disabled
-                                            className="w-full bg-green-600 hover:bg-green-700 cursor-default"
-                                            size="sm"
-                                          >
-                                            <CheckCircle className="w-4 h-4 mr-2" />
-                                            ✅ Accepted by {offerStatus.acceptedBy}
-                                          </Button>
-                                          <div className="text-xs text-center space-y-1">
-                                            <p className="font-mono text-green-700 bg-green-50 px-2 py-1 rounded border">
-                                              🔗 Custody: {lot.custodyId}
-                                            </p>
-                                            <p className="font-mono text-blue-700 bg-blue-50 px-2 py-1 rounded border">
-                                              🎯 Code: {offerStatus.verificationCode}
-                                            </p>
-                                          </div>
-                                        </div>
-                                      );
-                                    }
-                                    
-                                    if (offerStatus.status === 'rejected') {
-                                      // Offer rejected - allow new offer
-                                      return (
-                                        <div className="space-y-2">
-                                          <Button 
-                                            onClick={() => openSellOfferDialog(lot)}
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700"
-                                            size="sm"
-                                          >
-                                            <Send className="w-4 h-4 mr-2" />
-                                            Create New Offer
-                                          </Button>
-                                          <p className="text-xs text-red-600 text-center">
-                                            Previous offer was rejected
-                                          </p>
-                                        </div>
-                                      );
-                                    }
-                                    
-                                    // Default: pending status
-                                    return (
+                                  ) : getOfferStatus(lot)?.status === 'accepted' ? (
+                                    <div className="space-y-2">
                                       <Button 
                                         disabled
-                                        className="w-full bg-orange-500 hover:bg-orange-600 cursor-not-allowed"
+                                        className="w-full bg-green-600 hover:bg-green-700 cursor-default"
                                         size="sm"
                                       >
-                                        <Clock className="w-4 h-4 mr-2" />
-                                        Offer Created - Waiting Acceptance
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        ✅ Accepted by {getOfferStatus(lot)?.acceptedBy}
                                       </Button>
-                                    );
-                                  })()
+                                      <div className="text-xs text-center space-y-1">
+                                        <p className="font-mono text-green-700 bg-green-50 px-2 py-1 rounded border">
+                                          🔗 Custody: {lot.custodyId}
+                                        </p>
+                                        <p className="font-mono text-blue-700 bg-blue-50 px-2 py-1 rounded border">
+                                          🎯 Code: {getOfferStatus(lot)?.verificationCode}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ) : getOfferStatus(lot)?.status === 'rejected' ? (
+                                    <div className="space-y-2">
+                                      <Button 
+                                        onClick={() => openSellOfferDialog(lot)}
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                        size="sm"
+                                      >
+                                        <Send className="w-4 h-4 mr-2" />
+                                        Create New Offer
+                                      </Button>
+                                      <p className="text-xs text-red-600 text-center">
+                                        Previous offer was rejected
+                                      </p>
+                                    </div>
+                                  ) : getOfferStatus(lot) ? (
+                                    <Button 
+                                      disabled
+                                      className="w-full bg-orange-500 hover:bg-orange-600 cursor-not-allowed"
+                                      size="sm"
+                                    >
+                                      <Clock className="w-4 h-4 mr-2" />
+                                      Offer Created - Waiting Acceptance
+                                    </Button>
+                                  ) : (
+                                    <Button 
+                                      onClick={() => openSellOfferDialog(lot)}
+                                      className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                      size="sm"
+                                    >
+                                      <Send className="w-4 h-4 mr-2" />
+                                      Sell This Lot
+                                    </Button>
                                   )}
 
                                   {/* QR Code Info */}

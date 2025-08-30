@@ -518,6 +518,7 @@ export default function SellersHub() {
             <div className="space-y-4">
               <h3 className="font-semibold text-lg border-b pb-2">Product Details</h3>
               <div className="space-y-2">
+                <div><strong>🔗 Custody ID:</strong> <span className="font-mono text-blue-600">{selectedOffer.custodyId}</span></div>
                 <div><strong>Commodity:</strong> {selectedOffer.commodity}</div>
                 <div><strong>Quality Grade:</strong> {selectedOffer.qualityGrade}</div>
                 <div><strong>Quantity:</strong> {selectedOffer.quantityAvailable}</div>

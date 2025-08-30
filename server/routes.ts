@@ -7597,7 +7597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         complianceStatus: complianceStatus,
         pdfDownloadUrl: `/api/eudr-certificate/${compliance.id}`,
         reportData: {
-          farmerId,
+          farmerId: rawFarmerId,
           farmerName,
           plotId,
           plotName,

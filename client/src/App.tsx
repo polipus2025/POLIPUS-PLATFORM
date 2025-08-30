@@ -118,23 +118,6 @@ function App() {
       return;
     }
     
-    // Override window.location.href to prevent redirects to inspector login
-    const originalWindowLocation = window.location.href;
-    Object.defineProperty(window.location, 'href', {
-      set: function(url) {
-        if (typeof url === 'string' && url.includes('inspector-login')) {
-          console.log("🛡️ BLOCKED redirect to inspector-login, redirecting to main page");
-          window.location.replace("/");
-          return;
-        }
-        // Allow other redirects
-        window.location.replace(url);
-      },
-      get: function() {
-        return originalWindowLocation;
-      }
-    });
-    
     console.log("✅ Main Polipus page protection active for:", currentPath);
   }, []);
 

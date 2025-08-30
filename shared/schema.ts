@@ -272,6 +272,7 @@ export const warehouseBagRequests = pgTable("warehouse_bag_requests", {
   company: text("company").notNull(),
   farmerId: text("farmer_id").notNull(),
   farmerName: text("farmer_name").notNull(),
+  productOfferId: text("product_offer_id"), // CRITICAL: Product Offer ID for traceability 
   commodityType: text("commodity_type").notNull(),
   quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
   unit: text("unit").notNull(),

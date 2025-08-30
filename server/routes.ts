@@ -14531,6 +14531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company: actualCompany,
         farmerId: existingCode[0].farmerId,
         farmerName,
+        productOfferId: existingCode[0].offerId, // CRITICAL: Include Product Offer ID for traceability
         commodityType,
         quantity: Math.ceil(parseFloat(quantity)), // Convert to integer (rounded up)
         unit: existingCode[0].unit,
@@ -15569,6 +15570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           company: warehouseBagRequests.company,
           farmerId: warehouseBagRequests.farmerId,
           farmerName: warehouseBagRequests.farmerName,
+          productOfferId: warehouseBagRequests.productOfferId, // CRITICAL: Include Product Offer ID for traceability
           commodityType: warehouseBagRequests.commodityType,
           quantity: warehouseBagRequests.quantity,
           unit: warehouseBagRequests.unit,

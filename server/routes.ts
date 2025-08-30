@@ -14150,9 +14150,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { buyerId } = req.params;
       console.log(`Fetching notifications for buyer ID: ${buyerId}`);
       
-      // First, get the buyer's integer ID from the buyers table
+      // First, get the buyer's integer ID AND county from the buyers table
       const [buyer] = await db
-        .select({ id: buyers.id })
+        .select({ 
+          id: buyers.id,
+          county: buyers.county 
+        })
         .from(buyers)
         .where(eq(buyers.buyerId, buyerId));
       
@@ -14160,9 +14163,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Buyer not found" });
       }
       
-      console.log(`Found buyer integer ID: ${buyer.id} for buyerId: ${buyerId}`);
+      console.log(`Found buyer integer ID: ${buyer.id} for buyerId: ${buyerId} in county: ${buyer.county}`);
       
-      // Get ALL notifications from database for this buyer using integer ID (including taken ones)
+      // Get ONLY notifications from farmers in the SAME COUNTY as the buyer
       const realNotifications = await db
         .select({
           notificationId: buyerNotifications.notificationId,
@@ -14178,8 +14181,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: buyerNotifications.createdAt
         })
         .from(buyerNotifications)
-        .where(eq(buyerNotifications.buyerId, buyer.id))
-        // FIXED: Return ALL notifications so frontend can show proper status
+        .where(
+          and(
+            eq(buyerNotifications.buyerId, buyer.id),
+            eq(buyerNotifications.county, buyer.county) // CRITICAL FIX: County-based filtering
+          )
+        )
         .orderBy(desc(buyerNotifications.createdAt));
 
       console.log(`📬 Returning ${realNotifications.length} REAL notifications for buyer ${buyerId}`);

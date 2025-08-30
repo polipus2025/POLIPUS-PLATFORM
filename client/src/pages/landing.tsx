@@ -67,26 +67,6 @@ export default function Landing() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-8">
               <div className="flex items-center gap-2 sm:gap-4">
-                {/* Liberian Flag */}
-                <div className="w-12 h-8 sm:w-16 sm:h-11 rounded-md overflow-hidden shadow-md border border-gray-200">
-                  <svg viewBox="0 0 190 100" className="w-full h-full">
-                    {/* Red and white stripes */}
-                    <rect width="190" height="100" fill="#BF0A30"/>
-                    <rect y="9.09" width="190" height="9.09" fill="white"/>
-                    <rect y="27.27" width="190" height="9.09" fill="white"/>
-                    <rect y="45.45" width="190" height="9.09" fill="white"/>
-                    <rect y="63.64" width="190" height="9.09" fill="white"/>
-                    <rect y="81.82" width="190" height="9.09" fill="white"/>
-                    
-                    {/* Blue canton */}
-                    <rect width="76" height="54.55" fill="#002B7F"/>
-                    
-                    {/* White star */}
-                    <polygon points="38,13 40.85,21.15 49.5,21.15 42.83,26.35 45.68,34.5 38,29.3 30.32,34.5 33.17,26.35 26.5,21.15 35.15,21.15" 
-                             fill="white"/>
-                  </svg>
-                </div>
-                
                 <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg overflow-hidden">
                   <img 
                     src={lacraLogo} 

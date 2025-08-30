@@ -595,6 +595,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Product offer submitted successfully and saved to marketplace!`,
         offer,
         notificationsSent: notifications.length,
+        resolvedCounty: finalCounty, // 🔒 FIXED: Send backend resolved county
+        buyersNotified: sameCountyBuyers.map(buyer => buyer.businessName)
       });
 
     } catch (error: any) {
@@ -14201,6 +14203,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Product offer submitted successfully and saved to marketplace!`,
         offer,
         notificationsSent: notifications.length,
+        resolvedCounty: finalCounty, // 🔒 FIXED: Send backend resolved county
+        buyersNotified: sameCountyBuyers.map(buyer => buyer.businessName)
       });
 
     } catch (error: any) {

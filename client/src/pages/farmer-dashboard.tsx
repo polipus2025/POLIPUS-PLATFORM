@@ -197,7 +197,7 @@ export default function FarmerDashboard() {
 
       toast({
         title: "Product Offer Submitted Successfully!",
-        description: `${response.notificationsSent} buyers in ${farmerCounty} County have been notified. Buyers notified: ${response.buyersNotified?.join(', ') || 'None'}`
+        description: `${response.notificationsSent} buyers in ${response.resolvedCounty} County have been notified. Buyers notified: ${response.buyersNotified?.join(', ') || 'None'}`
       });
 
       // Invalidate cache to show new pending offer

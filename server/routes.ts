@@ -14259,7 +14259,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyerNotifications.buyerId, buyer.id),
-            eq(buyerNotifications.county, buyer.county) // CRITICAL FIX: County-based filtering
+            // 🔒 FLEXIBLE COUNTY MATCHING: "Nimba" matches "Nimba County"  
+            or(
+              eq(buyerNotifications.county, buyer.county), // Exact match
+              eq(buyerNotifications.county, `${buyer.county} County`), // Add "County" suffix
+              eq(buyerNotifications.county, buyer.county.replace(' County', '')) // Remove "County" suffix
+            ) // COUNTY FLEXIBLE MATCHING
           )
         )
         .orderBy(desc(buyerNotifications.createdAt));

@@ -26,8 +26,8 @@ export default function InspectorLogin() {
           <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
             <Shield className="w-10 h-10 text-slate-600" />
           </div>
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Inspector Login Portal</h1>
-          <p className="text-slate-700 text-lg">Choose your inspector type to login</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">LACRA Inspector Portal</h1>
+          <p className="text-slate-700 text-lg">Field Operations Access System</p>
           <p className="text-slate-600 text-sm mt-2">Liberia Agriculture Commodity Regulatory Authority</p>
         </div>
 
@@ -48,16 +48,22 @@ export default function InspectorLogin() {
                 Agricultural Land & GPS Mapping
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-green-500 text-green-600 bg-green-50">
+                Field Operations Access
+              </Badge>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>• GPS mapping and land verification</li>
+                <li>• Farm plot inspections</li>
+                <li>• Agricultural compliance monitoring</li>
+                <li>• Field data collection</li>
+              </ul>
               <Button 
-                className="w-full h-16 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold text-xl"
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white group"
                 onClick={(e) => { e.stopPropagation(); navigate('/land-inspector-login'); }}
               >
-                <div className="flex items-center justify-center space-x-3">
-                  <Shield className="w-6 h-6" />
-                  <span>LOGIN</span>
-                  <ArrowRight className="w-6 h-6" />
-                </div>
+                Access Land Inspector Portal
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </CardContent>
           </Card>
@@ -77,16 +83,22 @@ export default function InspectorLogin() {
                 Maritime & Export Operations
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-blue-500 text-blue-600 bg-blue-50">
+                Port Operations Access
+              </Badge>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>• Export cargo inspections</li>
+                <li>• Port facility compliance</li>
+                <li>• Maritime documentation</li>
+                <li>• Shipping quality control</li>
+              </ul>
               <Button 
-                className="w-full h-16 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-xl"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
                 onClick={(e) => { e.stopPropagation(); navigate('/port-inspector-login'); }}
               >
-                <div className="flex items-center justify-center space-x-3">
-                  <Shield className="w-6 h-6" />
-                  <span>LOGIN</span>
-                  <ArrowRight className="w-6 h-6" />
-                </div>
+                Access Port Inspector Portal
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </CardContent>
           </Card>
@@ -106,24 +118,40 @@ export default function InspectorLogin() {
                 Storage & Quality Control
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
+            <CardContent className="space-y-4">
+              <Badge variant="outline" className="w-full justify-center border-purple-500 text-purple-600 bg-purple-50">
+                Storage Operations Access
+              </Badge>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>• Storage facility compliance</li>
+                <li>• Inventory quality control</li>
+                <li>• Temperature monitoring</li>
+                <li>• Regulatory documentation</li>
+              </ul>
               <Button 
-                className="w-full h-16 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold text-xl"
+                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white group"
                 onClick={(e) => { e.stopPropagation(); navigate('/warehouse-inspector-login'); }}
               >
-                <div className="flex items-center justify-center space-x-3">
-                  <Shield className="w-6 h-6" />
-                  <span>LOGIN</span>
-                  <ArrowRight className="w-6 h-6" />
-                </div>
+                Access Warehouse Portal
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        {/* Clean Footer */}
-        <div className="text-center mt-6">
-          <p className="text-slate-600 text-sm">Secure authentication required for all inspector portals</p>
+        {/* Security Notice */}
+        <div className="bg-white shadow-lg border border-slate-200 rounded-lg p-6 text-center">
+          <Shield className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Secure Inspector Access Portal</h3>
+          <p className="text-slate-600 text-sm mb-4">
+            Each inspector portal provides specialized access controls and field operation tools. 
+            All sessions are secured with JWT authentication and comprehensive audit logging.
+          </p>
+          <div className="flex justify-center space-x-6 text-xs text-slate-500">
+            <span>✓ Field Device Authentication</span>
+            <span>✓ GPS Location Verification</span>
+            <span>✓ Real-time Data Sync</span>
+          </div>
         </div>
 
         {/* Footer */}

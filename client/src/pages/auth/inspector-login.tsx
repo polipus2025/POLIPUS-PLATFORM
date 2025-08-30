@@ -22,7 +22,14 @@ export default function InspectorLogin() {
     setLoadingStates(prev => ({ ...prev, [type]: true }));
     
     try {
-      const response = await fetch(`/api/auth/${type}-inspector-login`, {
+      // Fix endpoint URL mapping for different inspector types
+      const endpointMap = {
+        'warehouse': '/api/auth/warehouse-inspector/login',
+        'port': '/api/auth/port-inspector-login', 
+        'land': '/api/auth/land-inspector-login'
+      };
+      
+      const response = await fetch(endpointMap[type] || `/api/auth/${type}-inspector-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),

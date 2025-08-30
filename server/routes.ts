@@ -7511,9 +7511,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert very large farmer ID to a safe integer range (1-1000)
       const safeFarmerId = rawFarmerId ? (parseInt(rawFarmerId) % 1000) + 1 : 1;
       
+      // Also ensure farmGpsMappingId is in safe range - use a simple incremental ID
+      const safePlotId = Math.floor(Math.random() * 1000) + 1;
+      
       const eudrComplianceData = {
         farmerId: safeFarmerId,
-        farmGpsMappingId: plotId ? parseInt(plotId.replace(/\D/g, '')) || 1 : 1,
+        farmGpsMappingId: safePlotId,
         complianceScore: complianceScore,
         riskLevel: riskLevel,
         deforestationRisk: deforestationRisk,

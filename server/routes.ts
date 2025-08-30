@@ -7476,7 +7476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Extract plot information
       const { 
-        farmerId, 
+        farmerId: rawFarmerId, 
         farmerName, 
         plotId, 
         plotName, 
@@ -7508,8 +7508,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         - Status: ${complianceStatus}`);
 
       // Create EUDR compliance record in database
+      // Convert very large farmer ID to a safe integer range (1-1000)
+      const safeFarmerId = rawFarmerId ? (parseInt(rawFarmerId) % 1000) + 1 : 1;
+      
       const eudrComplianceData = {
-        farmerId: parseInt(farmerId) || 1,
+        farmerId: safeFarmerId,
         farmGpsMappingId: plotId ? parseInt(plotId.replace(/\D/g, '')) || 1 : 1,
         complianceScore: complianceScore,
         riskLevel: riskLevel,

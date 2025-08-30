@@ -1947,7 +1947,7 @@ export default function AgriculturalBuyerDashboard() {
                   <div><span className="font-medium">Product:</span> {sellOfferDialog.lot.commodityType}</div>
                   <div><span className="font-medium">Weight:</span> {sellOfferDialog.lot.totalWeight} {sellOfferDialog.lot.unit}</div>
                   <div><span className="font-medium">Grade:</span> {sellOfferDialog.lot.qualityGrade || 'Standard'}</div>
-                  <div><span className="font-medium">County:</span> {sellOfferDialog.lot.county}</div>
+                  <div><span className="font-medium">County:</span> {buyerCounty}</div>
                 </div>
               </div>
 

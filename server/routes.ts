@@ -17319,10 +17319,10 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       // Generate verification code for accepted deal
       const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-      // Mark original offer as accepted - using raw SQL to avoid schema issues
+      // Mark original offer as accepted with verification code - using raw SQL to avoid schema issues
       await db.execute(sql`
         UPDATE buyer_exporter_offers 
-        SET status = 'accepted', accepted_by = ${exporterId}, accepted_date = NOW()
+        SET status = 'accepted', accepted_by = ${exporterId}, accepted_date = NOW(), verification_code = ${verificationCode}
         WHERE offer_id = ${offerId}
       `);
 

@@ -238,14 +238,13 @@ export function registerPaymentConfirmationFix(app: Express) {
       const { notificationId, buyerId, buyerName, company } = req.body;
       console.log(`🔒 2-STEP WORKFLOW: Buyer ${buyerId} accepting notification ${notificationId} - AWAITING FARMER PAYMENT CONFIRMATION`);
 
-      // Direct SQL to avoid Drizzle errors and create accepted offer awaiting farmer confirmation
+      // Use exact column names from existing working table
       const result = await db.execute(sql`
         INSERT INTO buyer_verification_codes (
-          notification_id, buyer_id, buyer_name, farmer_id, farmer_name, 
-          farm_location, commodity_type, quantity_available, price_per_unit,
-          total_value, unit, payment_terms, delivery_terms,
-          verification_code, accepted_at, payment_confirmed, 
-          awaiting_payment_confirmation, company, offer_id
+          "notificationId", "buyerId", "buyerName", "farmerId", "farmerName", 
+          "farmLocation", "commodityType", "quantityAvailable", "pricePerUnit",
+          "totalValue", unit, "paymentTerms", "deliveryTerms",
+          "verificationCode", "awaitingPaymentConfirmation", "offerId"
         )
         SELECT 
           bn.notification_id,
@@ -263,9 +262,7 @@ export function registerPaymentConfirmationFix(app: Express) {
           'Pickup at farm location',
           ${generateFirstVerificationCode()},
           NOW(),
-          false,
           true,
-          ${company || ''},
           bn.offer_id
         FROM buyer_notifications bn
         WHERE bn.notification_id = ${notificationId}

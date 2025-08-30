@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Shield, Building2, User } from "lucide-react";
+import { AlertCircle, Shield, Building2, User, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
@@ -54,6 +54,19 @@ export default function DGLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      {/* Back to Regulatory Login Button */}
+      <div className="absolute top-6 left-6">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-2"
+          onClick={() => navigate('/regulatory-login')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Login Page
+        </Button>
+      </div>
+      
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6">

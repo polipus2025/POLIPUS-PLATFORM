@@ -17073,7 +17073,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         
         // Enhanced Offer Management with targeting options
         offerType,
-        targetExporterId: offerType === 'direct' ? parseInt(targetExporterId) : null,
+        targetExporterId: offerType === 'direct' ? targetExporterId : null,
         offerValidUntil: validUntil, // Expiration date
         expiresAt: validUntil, // Alternative field name for compatibility
         broadcastRadius: (() => {
@@ -17135,16 +17135,25 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const { buyerId } = req.params;
       console.log(`📋 Fetching offers for buyer: ${buyerId}`);
 
-      // Map string buyer ID to integer string for database lookup
-      let actualBuyerId = buyerId;
-      if (buyerId === 'BYR-20250825-362') {
-        actualBuyerId = '19'; // Map to stored value
+      // Get the numeric buyer ID from the buyers table
+      const [buyer] = await db
+        .select()
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+
+      if (!buyer) {
+        return res.status(404).json({
+          success: false,
+          message: "Buyer not found"
+        });
       }
+
+      console.log(`🔍 Using numeric buyer ID: ${buyer.id} for buyerId: ${buyerId}`);
 
       const buyerOffers = await db
         .select()
         .from(buyerExporterOffers)
-        .where(eq(buyerExporterOffers.buyerId, actualBuyerId))
+        .where(eq(buyerExporterOffers.buyerId, buyer.id.toString()))
         .orderBy(desc(buyerExporterOffers.createdAt));
       console.log(`✅ Found ${buyerOffers.length} offers for buyer ${buyerId}`);
 

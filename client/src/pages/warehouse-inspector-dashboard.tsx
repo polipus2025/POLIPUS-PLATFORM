@@ -132,6 +132,12 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data?.data || []
   });
 
+  // 🚛 Fetch pending dispatch requests for warehouse confirmation
+  const { data: pendingDispatchRequests, isLoading: dispatchRequestsLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'],
+    select: (data: any) => data?.data || []
+  });
+
   // Product registration mutation
   const registerProductMutation = useMutation({
     mutationFn: async (registrationData: any) => {
@@ -931,6 +937,38 @@ export default function WarehouseInspectorDashboard() {
       toast({
         title: "❌ QR Batch Generation Failed",
         description: "Failed to generate QR batch. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // 🚛 Warehouse Dispatch Confirmation Mutation
+  const dispatchConfirmationMutation = useMutation({
+    mutationFn: async (data: { requestId: string; confirmationNotes?: string }) => {
+      return await apiRequest('/api/warehouse-inspector/confirm-dispatch', {
+        method: 'POST',
+        body: JSON.stringify({
+          dispatchRequestId: data.requestId,
+          warehouseId: inspectorData.warehouseId,
+          inspectorId: inspectorData.username,
+          confirmationNotes: data.confirmationNotes
+        })
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "✅ Dispatch Confirmed & QR Generated!",
+        description: `Dispatch confirmed and QR code generated: ${data.batchCode}`,
+      });
+      // Refresh pending dispatch requests
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/qr-batches'] });
+    },
+    onError: (error: any) => {
+      console.error('Dispatch confirmation error:', error);
+      toast({
+        title: "❌ Dispatch Confirmation Failed",
+        description: error.message || "Failed to confirm dispatch. Please try again.",
         variant: "destructive"
       });
     }

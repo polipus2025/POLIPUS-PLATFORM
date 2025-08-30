@@ -38,6 +38,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ObjectUploader } from "@/components/ObjectUploader";
@@ -802,34 +803,45 @@ export default function AgriculturalBuyerDashboard() {
     paymentValidationMutation.mutate({ notificationId, metadata });
   };
 
+  // 🚛 WAREHOUSE DISPATCH SCHEDULING STATE
+  const [dispatchDialog, setDispatchDialog] = useState({
+    open: false,
+    transaction: null as any
+  });
+  const [selectedDispatchDate, setSelectedDispatchDate] = useState<Date | undefined>(undefined);
+
   // 🚛 WAREHOUSE DISPATCH SCHEDULING MUTATION
   const warehouseDispatchMutation = useMutation({
-    mutationFn: async (transaction: any) => {
+    mutationFn: async (data: { transaction: any; dispatchDate: Date }) => {
       return apiRequest("POST", "/api/buyer/schedule-warehouse-dispatch", {
-        transactionId: transaction.id || transaction.notificationId,
-        verificationCode: transaction.verificationCode,
+        transactionId: data.transaction.id || data.transaction.notificationId,
+        verificationCode: data.transaction.verificationCode,
         buyerId: buyerId,
         buyerName,
         company,
-        commodityType: transaction.commodityType,
-        quantity: transaction.quantityAvailable || transaction.quantity,
-        unit: transaction.unit,
-        totalValue: transaction.totalValue,
-        county: transaction.county,
-        farmLocation: transaction.farmLocation
+        commodityType: data.transaction.commodityType,
+        quantity: data.transaction.quantityAvailable || data.transaction.quantity,
+        unit: data.transaction.unit,
+        totalValue: data.transaction.totalValue,
+        county: data.transaction.county,
+        farmLocation: data.transaction.farmLocation,
+        dispatchDate: data.dispatchDate.toISOString().split('T')[0] // YYYY-MM-DD format
       });
     },
     onSuccess: (response) => {
       toast({
-        title: "Dispatch Scheduled",
-        description: `Warehouse dispatch scheduled. Request ID: ${response.requestId}`,
+        title: "✅ Dispatch Scheduled",
+        description: `Warehouse dispatch scheduled for ${selectedDispatchDate?.toLocaleDateString()}. Request ID: ${response.requestId}`,
       });
+      // Reset and close dialog
+      setDispatchDialog({ open: false, transaction: null });
+      setSelectedDispatchDate(undefined);
       // Refresh transactions to update status
       queryClient.invalidateQueries({ queryKey: ['/api/buyer/confirmed-transactions', buyerId] });
     },
     onError: (error: any) => {
       toast({
-        title: "Scheduling Failed",
+        title: "❌ Scheduling Failed",
         description: error.message || "Failed to schedule warehouse dispatch",
         variant: "destructive",
       });
@@ -838,7 +850,25 @@ export default function AgriculturalBuyerDashboard() {
 
   // 🚛 HANDLE WAREHOUSE DISPATCH SCHEDULING
   const handleScheduleDispatch = (transaction: any) => {
-    warehouseDispatchMutation.mutate(transaction);
+    setDispatchDialog({ open: true, transaction });
+    setSelectedDispatchDate(undefined);
+  };
+
+  // 🚛 CONFIRM DISPATCH SCHEDULING WITH DATE
+  const handleConfirmDispatchSchedule = () => {
+    if (!selectedDispatchDate) {
+      toast({
+        title: "Date Required",
+        description: "Please select a dispatch date",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    warehouseDispatchMutation.mutate({
+      transaction: dispatchDialog.transaction,
+      dispatchDate: selectedDispatchDate
+    });
   };
 
   // Handle requesting bags from warehouse
@@ -2333,6 +2363,91 @@ export default function AgriculturalBuyerDashboard() {
                     <>
                       <Send className="w-4 h-4 mr-2" />
                       {offerType === 'direct' ? 'Send Direct Offer' : 'Broadcast Offer'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Warehouse Dispatch Date Selection Dialog */}
+      <Dialog 
+        open={dispatchDialog.open} 
+        onOpenChange={(open) => setDispatchDialog(prev => ({...prev, open}))}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Truck className="w-5 h-5 mr-2 text-blue-600" />
+              Schedule Warehouse Dispatch
+            </DialogTitle>
+            <DialogDescription>
+              Select the date when you want to schedule warehouse dispatch for this transaction.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {dispatchDialog.transaction && (
+            <div className="space-y-6">
+              {/* Transaction Summary */}
+              <div className="p-4 bg-slate-50 rounded-lg border">
+                <h3 className="font-medium text-slate-800 mb-2">Transaction Summary</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><span className="font-medium">Product:</span> {dispatchDialog.transaction.commodityType}</div>
+                  <div><span className="font-medium">Quantity:</span> {dispatchDialog.transaction.quantityAvailable || dispatchDialog.transaction.quantity} {dispatchDialog.transaction.unit}</div>
+                  <div><span className="font-medium">Value:</span> ${dispatchDialog.transaction.totalValue}</div>
+                  <div><span className="font-medium">County:</span> {dispatchDialog.transaction.county}</div>
+                </div>
+              </div>
+
+              {/* Date Selection */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Select Dispatch Date</Label>
+                <div className="border rounded-lg p-3">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDispatchDate}
+                    onSelect={setSelectedDispatchDate}
+                    disabled={(date) => date < new Date() || date < new Date(Date.now() + 24 * 60 * 60 * 1000)} // At least tomorrow
+                    className="rounded-md border-0"
+                  />
+                </div>
+                {selectedDispatchDate && (
+                  <p className="text-sm text-green-600 font-medium">
+                    Selected: {selectedDispatchDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setDispatchDialog({ open: false, transaction: null })}
+                  disabled={warehouseDispatchMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmDispatchSchedule}
+                  disabled={!selectedDispatchDate || warehouseDispatchMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {warehouseDispatchMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Scheduling...
+                    </>
+                  ) : (
+                    <>
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Schedule Dispatch
                     </>
                   )}
                 </Button>

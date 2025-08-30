@@ -4669,6 +4669,53 @@ export const insertAuthorizationRequestSchema = createInsertSchema(authorization
   createdAt: true,
 });
 
+// Warehouse Dispatch Requests Table (Buyer-Exporter Workflow)
+export const warehouseDispatchRequests = pgTable("warehouse_dispatch_requests", {
+  id: serial("id").primaryKey(),
+  requestId: varchar("request_id").notNull().unique(), // WDR-YYYYMMDD-XXX
+  transactionId: varchar("transaction_id").notNull(),
+  verificationCode: varchar("verification_code").notNull(),
+  
+  // Buyer Information
+  buyerId: varchar("buyer_id").notNull(),
+  buyerName: varchar("buyer_name").notNull(),
+  buyerCompany: varchar("buyer_company"),
+  
+  // Product Details
+  commodityType: varchar("commodity_type").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  unit: varchar("unit").notNull(),
+  totalValue: decimal("total_value", { precision: 15, scale: 2 }).notNull(),
+  county: varchar("county").notNull(),
+  farmLocation: varchar("farm_location"),
+  
+  // Dispatch Scheduling
+  dispatchDate: timestamp("dispatch_date").notNull(), // Buyer selected date
+  status: varchar("status").notNull().default("pending"), // pending, confirmed, qr_generated, completed
+  
+  // Warehouse Confirmation
+  confirmedBy: varchar("confirmed_by"), // warehouse inspector who confirmed
+  confirmedAt: timestamp("confirmed_at"),
+  confirmationNotes: text("confirmation_notes"),
+  
+  // QR Generation
+  qrBatchCode: varchar("qr_batch_code"), // Generated QR code batch
+  qrGeneratedAt: timestamp("qr_generated_at"),
+  processedBy: varchar("processed_by"), // warehouse inspector who processed
+  
+  // Timestamps
+  requestedAt: timestamp("requested_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert Schema for Warehouse Dispatch Requests
+export const insertWarehouseDispatchRequestSchema = createInsertSchema(warehouseDispatchRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Warehouse Custody System Types
 export type WarehouseCustody = typeof warehouseCustody.$inferSelect;
 export type NewWarehouseCustody = z.infer<typeof insertWarehouseCustodySchema>;
@@ -4676,5 +4723,7 @@ export type StorageFees = typeof storageFees.$inferSelect;
 export type NewStorageFees = z.infer<typeof insertStorageFeesSchema>;
 export type AuthorizationRequest = typeof authorizationRequests.$inferSelect;
 export type NewAuthorizationRequest = z.infer<typeof insertAuthorizationRequestSchema>;
+export type WarehouseDispatchRequest = typeof warehouseDispatchRequests.$inferSelect;
+export type NewWarehouseDispatchRequest = z.infer<typeof insertWarehouseDispatchRequestSchema>;
 
 

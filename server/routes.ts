@@ -17505,35 +17505,37 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         unit, 
         totalValue, 
         county, 
-        farmLocation 
+        farmLocation,
+        dispatchDate 
       } = req.body;
       
-      console.log(`🚛 Warehouse dispatch scheduled by buyer ${buyerId} for transaction ${transactionId}`);
+      console.log(`🚛 Warehouse dispatch scheduled by buyer ${buyerId} for transaction ${transactionId} on ${dispatchDate}`);
 
       // Generate warehouse dispatch request ID
       const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const requestId = `WDR-${timestamp}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
 
-      // Create warehouse dispatch request (independent of payment status)
+      // Create warehouse dispatch request with scheduled date (independent of payment status)
       await db.execute(sql`
         INSERT INTO warehouse_dispatch_requests (
           request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
           commodity_type, quantity, unit, total_value, county, farm_location, 
-          status, requested_at, created_at
+          dispatch_date, status, requested_at, created_at
         ) VALUES (
           ${requestId}, ${transactionId}, ${verificationCode}, ${buyerId}, ${buyerName}, ${company},
           ${commodityType}, ${quantity}, ${unit}, ${totalValue}, ${county}, ${farmLocation},
-          ${'pending'}, NOW(), NOW()
+          ${dispatchDate}, ${'pending'}, NOW(), NOW()
         )
       `);
 
-      console.log(`📦 Warehouse dispatch request ${requestId} created - ready for QR generation`);
+      console.log(`📦 Warehouse dispatch request ${requestId} created for ${dispatchDate} - awaiting warehouse confirmation`);
 
       res.json({
         success: true,
         message: "Warehouse dispatch scheduled successfully",
         requestId: requestId,
-        status: "pending_qr_generation"
+        dispatchDate: dispatchDate,
+        status: "pending_warehouse_confirmation"
       });
 
     } catch (error: any) {
@@ -17657,7 +17659,7 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         SELECT 
           request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
           commodity_type, quantity, unit, total_value, county, farm_location,
-          requested_at, created_at
+          dispatch_date, requested_at, created_at
         FROM warehouse_dispatch_requests 
         WHERE status = 'pending'
         ORDER BY requested_at DESC
@@ -17678,6 +17680,7 @@ GENERATED: ${new Date().toLocaleDateString()}`;
           totalValue: row.total_value,
           county: row.county,
           farmLocation: row.farm_location,
+          dispatchDate: row.dispatch_date,
           requestedAt: row.requested_at
         }))
       });
@@ -17687,6 +17690,111 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       res.status(500).json({
         success: false,
         message: "Failed to fetch pending dispatch requests"
+      });
+    }
+  });
+
+  // Warehouse confirms dispatch date and auto-generates QR code  
+  app.post("/api/warehouse-inspector/confirm-dispatch", async (req, res) => {
+    try {
+      const { dispatchRequestId, warehouseId, inspectorId, confirmationNotes } = req.body;
+      
+      console.log(`🚛 Warehouse confirming dispatch request ${dispatchRequestId}`);
+
+      // Get dispatch request details
+      const [dispatchRequest] = await db.execute(sql`
+        SELECT * FROM warehouse_dispatch_requests 
+        WHERE request_id = ${dispatchRequestId} AND status = 'pending'
+      `);
+
+      if (!dispatchRequest) {
+        return res.status(404).json({
+          success: false,
+          message: "Dispatch request not found or already processed"
+        });
+      }
+
+      // Generate QR batch code using same format as Farmer-Buyer
+      const batchCode = `BE-DISPATCH-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+      
+      // Create QR data in same format as Farmer-Buyer system
+      const qrCodeData = {
+        type: "buyer_exporter_dispatch",
+        batchCode: batchCode,
+        dispatchRequestId: dispatchRequestId,
+        buyerId: dispatchRequest.buyer_id,
+        buyerName: dispatchRequest.buyer_name,
+        buyerCompany: dispatchRequest.buyer_company,
+        commodityType: dispatchRequest.commodity_type,
+        quantity: dispatchRequest.quantity,
+        unit: dispatchRequest.unit,
+        totalValue: dispatchRequest.total_value,
+        county: dispatchRequest.county,
+        warehouseId: warehouseId,
+        verificationCode: dispatchRequest.verification_code,
+        dispatchDate: dispatchRequest.dispatch_date,
+        timestamp: new Date().toISOString(),
+        processedBy: inspectorId
+      };
+
+      // Generate human-readable QR data (same format as Farmer-Buyer)
+      const readableQrData = `AGRITRACE360 BUYER-EXPORTER DISPATCH
+BATCH: ${batchCode}
+BUYER: ${dispatchRequest.buyer_name} (${dispatchRequest.buyer_company})
+COMMODITY: ${dispatchRequest.commodity_type}
+QUANTITY: ${dispatchRequest.quantity} ${dispatchRequest.unit}
+VALUE: $${dispatchRequest.total_value}
+COUNTY: ${dispatchRequest.county}
+DISPATCH DATE: ${new Date(dispatchRequest.dispatch_date).toLocaleDateString()}
+VERIFICATION: ${dispatchRequest.verification_code}
+GENERATED: ${new Date().toLocaleDateString()}`;
+
+      // Generate QR code image using same service as Farmer-Buyer
+      const { QrBatchService } = await import('./qr-batch-service');
+      const qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
+
+      // Create QR batch entry in same table as Farmer-Buyer QR codes
+      await db.execute(sql`
+        INSERT INTO qr_batches (
+          batch_code, warehouse_id, buyer_id, buyer_name,
+          commodity_type, total_bags, bag_weight, total_weight,
+          quality_grade, harvest_date, qr_code_data, qr_code_url,
+          status, created_at, type
+        ) VALUES (
+          ${batchCode}, ${warehouseId}, ${dispatchRequest.buyer_id}, ${dispatchRequest.buyer_name},
+          ${dispatchRequest.commodity_type}, ${1}, ${dispatchRequest.quantity}, ${dispatchRequest.quantity},
+          ${'Grade A'}, NOW(), ${readableQrData}, ${qrCodeUrl},
+          ${'generated'}, NOW(), ${'buyer_exporter_dispatch'}
+        )
+      `);
+
+      // Update dispatch request status to confirmed and add QR batch code
+      await db.execute(sql`
+        UPDATE warehouse_dispatch_requests 
+        SET status = 'confirmed', 
+            qr_batch_code = ${batchCode}, 
+            confirmed_by = ${inspectorId},
+            confirmed_at = NOW(),
+            confirmation_notes = ${confirmationNotes || ''},
+            qr_generated_at = NOW()
+        WHERE request_id = ${dispatchRequestId}
+      `);
+
+      console.log(`✅ Dispatch ${dispatchRequestId} confirmed and QR code ${batchCode} generated`);
+
+      res.json({
+        success: true,
+        message: "Dispatch confirmed and QR code generated successfully",
+        batchCode: batchCode,
+        qrCodeUrl: qrCodeUrl,
+        dispatchRequestId: dispatchRequestId
+      });
+
+    } catch (error: any) {
+      console.error("Error confirming dispatch:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to confirm dispatch"
       });
     }
   });

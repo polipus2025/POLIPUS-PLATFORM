@@ -61,6 +61,7 @@ export default function FrontPage() {
       icon: Truck,
       color: 'bg-blue-500',
       route: '/live-trace',
+      isActive: true,
       description: 'Livestock movement monitoring and control system'
     },
     {
@@ -69,6 +70,7 @@ export default function FrontPage() {
       icon: MapPin,
       color: 'bg-purple-500',
       route: '/landmap360-portal',
+      isActive: true,
       description: 'Land mapping and dispute prevention services'
     },
     {
@@ -77,6 +79,7 @@ export default function FrontPage() {
       icon: Shield,
       color: 'bg-orange-500',
       route: '/mine-watch',
+      isActive: true,
       description: 'Mineral resource protection and community safeguarding'
     },
     {
@@ -85,6 +88,7 @@ export default function FrontPage() {
       icon: TreePine,
       color: 'bg-teal-500',
       route: '/forest-guard',
+      isActive: true,
       description: 'Forest protection and carbon credit management'
     },
     {
@@ -93,6 +97,7 @@ export default function FrontPage() {
       icon: Waves,
       color: 'bg-indigo-500',
       route: '/aqua-trace',
+      isActive: true,
       description: 'Ocean & river monitoring with fishing rights protection'
     },
     {
@@ -184,7 +189,7 @@ export default function FrontPage() {
               <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">Active Modules</p>
-            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">3/8</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">8/8</p>
             <p className="text-slate-600 text-xs sm:text-sm">Operational</p>
           </div>
           
@@ -202,7 +207,7 @@ export default function FrontPage() {
               <Settings className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">In Development</p>
-            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">5</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">0</p>
             <p className="text-slate-600 text-xs sm:text-sm">Modules</p>
           </div>
 

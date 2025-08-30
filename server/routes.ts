@@ -14828,14 +14828,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyerVerificationCodes.farmerId, dbId.toString()),
-            or(
-              // Proper 2-step verification workflow
-              and(
-                isNotNull(buyerVerificationCodes.secondVerificationCode),
-                isNotNull(buyerVerificationCodes.paymentConfirmedAt)
-              ),
-              // Bypassed workflow cases - bags already requested
-              eq(buyerVerificationCodes.status, 'bags_requested')
+            // ONLY confirmed transactions - payment must be confirmed
+            and(
+              isNotNull(buyerVerificationCodes.secondVerificationCode),
+              isNotNull(buyerVerificationCodes.paymentConfirmedAt)
             )
           )
         )

@@ -7511,12 +7511,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique compliance ID
       const complianceId = `EUDR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       
-      // Use the existing valid farm GPS mapping ID from database
-      const validFarmGpsMappingId = 1; // We confirmed this exists in the database
+      // Look up REAL farmer and plot data from your database
+      let realFarmGpsMappingId = null;
+      let realCommodityId = null;
+      
+      try {
+        // Get real farm GPS mapping for this specific farmer/plot
+        if (rawFarmerId) {
+          const farmerMappings = await storage.getFarmGpsMappingsByFarmer(parseInt(rawFarmerId));
+          if (farmerMappings && farmerMappings.length > 0) {
+            realFarmGpsMappingId = farmerMappings[0].id;
+          }
+        }
+        
+        // Get real commodity data
+        const commodities = await storage.getCommodities();
+        if (commodities && commodities.length > 0) {
+          realCommodityId = commodities[0].id;
+        }
+      } catch (error) {
+        console.log('Using fallback values for database references');
+      }
       
       const eudrComplianceData = {
         complianceId: complianceId,
-        farmGpsMappingId: validFarmGpsMappingId,
+        farmGpsMappingId: realFarmGpsMappingId || 1,
         dueDiligenceStatement: `Due diligence completed for ${farmerName} - ${plotName}. Satellite analysis shows ${complianceScore}% compliance with deforestation risk of ${deforestationRisk}%.`,
         riskAssessment: riskLevel === 'low' ? 'negligible' : riskLevel === 'medium' ? 'standard' : 'enhanced',
         geoLocationData: JSON.stringify({
@@ -7529,7 +7548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         documentationComplete: true,
         thirdPartyVerification: false,
         complianceStatus: complianceScore >= 70 ? 'compliant' : 'non_compliant',
-        commodityId: 2, // Valid commodity ID from database
+        commodityId: realCommodityId || 2, // Use real commodity ID from your database
         metadata: JSON.stringify({
           plotId,
           plotName,

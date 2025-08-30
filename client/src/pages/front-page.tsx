@@ -101,6 +101,7 @@ export default function FrontPage() {
       icon: DollarSign,
       color: 'bg-cyan-500',
       route: '/blue-carbon360',
+      isActive: true,
       description: 'Conservation economics and real economic benefits'
     },
     {
@@ -109,6 +110,7 @@ export default function FrontPage() {
       icon: Globe,
       color: 'bg-emerald-500',
       route: '/carbon-trace',
+      isActive: true,
       description: 'Environmental monitoring and carbon credit certification'
     }
   ];
@@ -182,7 +184,7 @@ export default function FrontPage() {
               <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">Active Modules</p>
-            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">1/8</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">3/8</p>
             <p className="text-slate-600 text-xs sm:text-sm">Operational</p>
           </div>
           
@@ -200,7 +202,7 @@ export default function FrontPage() {
               <Settings className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">In Development</p>
-            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">7</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">5</p>
             <p className="text-slate-600 text-xs sm:text-sm">Modules</p>
           </div>
 
@@ -248,8 +250,8 @@ export default function FrontPage() {
                               {module.description}
                             </p>
                           )}
-                          <Badge className={module.isAgriTrace ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
-                            {module.isAgriTrace ? (
+                          <Badge className={(module.isAgriTrace || module.isActive) ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
+                            {(module.isAgriTrace || module.isActive) ? (
                               <>
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Active

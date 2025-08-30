@@ -898,18 +898,7 @@ export default function AgriculturalBuyerDashboard() {
                         activeTab === 'notifications' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
                       }`}
                     >
-                      Product Offers
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveTab('confirmed');
-                        setFarmersMenuOpen(false);
-                      }}
-                      className={`w-full text-left px-5 py-3 font-medium text-sm hover:bg-slate-50 transition-all ${
-                        activeTab === 'confirmed' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
-                      }`}
-                    >
-                      Confirmed Transactions
+                      🛒 Product Offers
                     </button>
                     <button
                       onClick={() => {
@@ -920,7 +909,18 @@ export default function AgriculturalBuyerDashboard() {
                         activeTab === 'orders' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
                       }`}
                     >
-                      My Orders
+                      📋 My Orders (1st Code)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab('confirmed');
+                        setFarmersMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-5 py-3 font-medium text-sm hover:bg-slate-50 transition-all ${
+                        activeTab === 'confirmed' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
+                      }`}
+                    >
+                      ✅ Confirmed Deals (2nd Code)
                     </button>
                   </div>
                 </div>
@@ -1046,10 +1046,10 @@ export default function AgriculturalBuyerDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Package2 className="w-5 h-5 mr-2" />
-                  Product Offers from Farmers
+                  🛒 Product Offers from Farmers
                 </CardTitle>
                 <CardDescription>
-                  Real-time notifications when farmers in your county submit product offers. First to accept wins!
+                  🚀 STAGE 0: Real-time notifications when farmers in your county submit product offers. First to accept wins!
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1149,11 +1149,11 @@ export default function AgriculturalBuyerDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Truck className="w-5 h-5 mr-2" />
-                  My Orders - Request Bags to Warehouse
+                  <Clock className="w-5 h-5 mr-2 text-blue-600" />
+                  📋 My Orders (1st Verification Code)
                 </CardTitle>
                 <CardDescription>
-                  Accepted offers ready for bag requests. Click "Request Bags" to send acceptance details to your county warehouse.
+                  🔄 STAGE 1: Offers you've accepted - awaiting farmer payment confirmation and bag requests
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1604,10 +1604,10 @@ export default function AgriculturalBuyerDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                  Confirmed Transactions Archive
+                  ✅ Confirmed Deals (2nd Verification Code)
                 </CardTitle>
                 <CardDescription>
-                  Complete history of accepted offers with payment and delivery details
+                  🎯 STAGE 2: Final deals where farmer confirmed payment - complete transaction archive
                 </CardDescription>
               </CardHeader>
               <CardContent>

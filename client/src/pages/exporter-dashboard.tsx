@@ -1,6 +1,8 @@
 import React, { useState, Suspense, memo, useMemo, lazy, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -148,6 +150,39 @@ const ExporterDashboard = memo(() => {
   const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab);
   }, []);
+
+  // 🛡️ TOAST FOR USER FEEDBACK
+  const { toast } = useToast();
+
+  // 💳 PAYMENT CONFIRMATION MUTATION
+  const paymentConfirmMutation = useMutation({
+    mutationFn: async ({ offerId, totalValue }: { offerId: string; totalValue: string }) => {
+      return apiRequest("POST", "/api/exporter/confirm-payment", {
+        offerId,
+        totalValue,
+        exporterId: (user as any)?.exporterId || (user as any)?.id,
+        exporterCompany: (user as any)?.companyName || 'Licensed Exporter'
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Confirmed",
+        description: "Buyer has been notified of your payment confirmation",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Confirmation Failed",
+        description: error.message || "Failed to send payment confirmation",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // 💳 HANDLE PAYMENT CONFIRMATION
+  const handleConfirmPayment = useCallback((offerId: string, totalValue: string) => {
+    paymentConfirmMutation.mutate({ offerId, totalValue });
+  }, [paymentConfirmMutation]);
 
   // ⚡ OPTIMIZED LOADING STATE
   if (userLoading) {
@@ -304,13 +339,24 @@ const ExporterDashboard = memo(() => {
                         <div className="space-y-2">
                           <h4 className="font-medium text-gray-900">Buyer Contact</h4>
                           <p className="text-sm">
-                            <span className="font-medium">{deal.buyer_company}</span>
+                            <span className="font-medium">{deal.buyer_business_name || deal.buyer_company}</span>
                           </p>
-                          <p className="text-sm text-gray-600">{deal.buyer_contact}</p>
-                          <p className="text-sm text-blue-600">{deal.buyer_phone}</p>
                           <p className="text-sm text-gray-600">
-                            Location: {deal.county} → {deal.proposed_port}
+                            {deal.contact_person_first_name && deal.contact_person_last_name 
+                              ? `${deal.contact_person_first_name} ${deal.contact_person_last_name}`
+                              : deal.buyer_contact}
                           </p>
+                          <p className="text-sm text-blue-600">
+                            {deal.buyer_phone_verified || deal.buyer_phone}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Location: {deal.buyer_county || deal.county}, {deal.buyer_country || 'Liberia'}
+                          </p>
+                          {deal.custody_id && (
+                            <p className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                              🔗 Custody: {deal.custody_id}
+                            </p>
+                          )}
                         </div>
 
                         {/* Transport Arrangement */}
@@ -323,18 +369,30 @@ const ExporterDashboard = memo(() => {
                           <p className="text-xs text-gray-500">
                             Accepted: {new Date(deal.accepted_date).toLocaleDateString()}
                           </p>
-                          <Button 
-                            size="sm" 
-                            className="w-full mt-2" 
-                            variant="outline"
-                            onClick={() => {
-                              alert(`🚛 Transport Arrangement\n\nContact Details:\nBuyer: ${deal.buyer_company}\nPhone: ${deal.buyer_phone}\nVerification Code: ${deal.verification_code}\n\nNext: Call buyer to arrange pickup from their warehouse to your export facility.`);
-                            }}
-                            data-testid={`arrange-transport-${deal.offer_id}`}
-                          >
-                            <Truck className="h-4 w-4 mr-1" />
-                            Arrange Transport
-                          </Button>
+                          <div className="space-y-2">
+                            <Button 
+                              size="sm" 
+                              className="w-full" 
+                              variant="outline"
+                              onClick={() => {
+                                alert(`🚛 Transport Arrangement\n\nContact Details:\nBuyer: ${deal.buyer_company}\nPhone: ${deal.buyer_phone}\nVerification Code: ${deal.verification_code}\n\nNext: Call buyer to arrange pickup from their warehouse to your export facility.`);
+                              }}
+                              data-testid={`arrange-transport-${deal.offer_id}`}
+                            >
+                              <Truck className="h-4 w-4 mr-1" />
+                              Arrange Transport
+                            </Button>
+                            
+                            <Button 
+                              size="sm" 
+                              className="w-full bg-green-600 hover:bg-green-700 text-white" 
+                              onClick={() => handleConfirmPayment(deal.offer_id, deal.total_value)}
+                              data-testid={`confirm-payment-${deal.offer_id}`}
+                            >
+                              <DollarSign className="h-4 w-4 mr-1" />
+                              Confirm Payment Sent
+                            </Button>
+                          </div>
                         </div>
                       </div>
 

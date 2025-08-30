@@ -769,6 +769,78 @@ export default function AgriculturalBuyerDashboard() {
     }
   };
 
+  // 💳 PAYMENT VALIDATION MUTATION
+  const paymentValidationMutation = useMutation({
+    mutationFn: async ({ notificationId, metadata }: { notificationId: string; metadata: string }) => {
+      return apiRequest("POST", "/api/buyer/validate-payment", {
+        notificationId,
+        metadata,
+        buyerId: buyerId,
+        buyerName,
+        company
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Validated",
+        description: "Payment has been confirmed as received",
+      });
+      // Refresh notifications to update status
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/notifications', buyerId] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Validation Failed",
+        description: error.message || "Failed to validate payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // 💳 HANDLE PAYMENT VALIDATION
+  const handleValidatePayment = (notificationId: string, metadata: string) => {
+    paymentValidationMutation.mutate({ notificationId, metadata });
+  };
+
+  // 🚛 WAREHOUSE DISPATCH SCHEDULING MUTATION
+  const warehouseDispatchMutation = useMutation({
+    mutationFn: async (transaction: any) => {
+      return apiRequest("POST", "/api/buyer/schedule-warehouse-dispatch", {
+        transactionId: transaction.id || transaction.notificationId,
+        verificationCode: transaction.verificationCode,
+        buyerId: buyerId,
+        buyerName,
+        company,
+        commodityType: transaction.commodityType,
+        quantity: transaction.quantityAvailable || transaction.quantity,
+        unit: transaction.unit,
+        totalValue: transaction.totalValue,
+        county: transaction.county,
+        farmLocation: transaction.farmLocation
+      });
+    },
+    onSuccess: (response) => {
+      toast({
+        title: "Dispatch Scheduled",
+        description: `Warehouse dispatch scheduled. Request ID: ${response.requestId}`,
+      });
+      // Refresh transactions to update status
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/confirmed-transactions', buyerId] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Scheduling Failed",
+        description: error.message || "Failed to schedule warehouse dispatch",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // 🚛 HANDLE WAREHOUSE DISPATCH SCHEDULING
+  const handleScheduleDispatch = (transaction: any) => {
+    warehouseDispatchMutation.mutate(transaction);
+  };
+
   // Handle requesting bags from warehouse
   const handleRequestBags = async (verificationCode: string, acceptanceData: any) => {
     if (requestingBags) return;
@@ -1082,14 +1154,29 @@ export default function AgriculturalBuyerDashboard() {
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h4 className="font-semibold text-lg">{notification.commodityType}</h4>
-                              <p className="text-sm text-gray-600">From: {notification.farmerName}</p>
-                              <p className="text-sm text-blue-600 font-medium">Offer ID: {notification.offerId}</p>
-                              <p className="text-sm text-gray-500">{notification.county}</p>
+                              {notification.type === 'payment_confirmation' ? (
+                                <>
+                                  <h4 className="font-semibold text-lg text-green-600">{notification.title}</h4>
+                                  <p className="text-sm text-gray-600">{notification.message}</p>
+                                </>
+                              ) : (
+                                <>
+                                  <h4 className="font-semibold text-lg">{notification.commodityType}</h4>
+                                  <p className="text-sm text-gray-600">From: {notification.farmerName}</p>
+                                  <p className="text-sm text-blue-600 font-medium">Offer ID: {notification.offerId}</p>
+                                  <p className="text-sm text-gray-500">{notification.county}</p>
+                                </>
+                              )}
                             </div>
-                            <Badge className={!notification.response ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                              {!notification.response ? 'Available' : 'Taken'}
-                            </Badge>
+                            {notification.type === 'payment_confirmation' ? (
+                              <Badge className="bg-green-100 text-green-800">
+                                Payment Confirmation
+                              </Badge>
+                            ) : (
+                              <Badge className={!notification.response ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                {!notification.response ? 'Available' : 'Taken'}
+                              </Badge>
+                            )}
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -1132,7 +1219,16 @@ export default function AgriculturalBuyerDashboard() {
                             <div className="text-xs text-gray-500">
                               Posted: {new Date(notification.createdAt).toLocaleString()}
                             </div>
-                            {!notification.response ? (
+                            {notification.type === 'payment_confirmation' ? (
+                              <Button 
+                                onClick={() => handleValidatePayment(notification.notificationId, notification.metadata)}
+                                className="bg-blue-600 hover:bg-blue-700"
+                                data-testid={`button-validate-payment-${notification.notificationId}`}
+                              >
+                                <DollarSign className="w-4 h-4 mr-2" />
+                                Validate Payment Received
+                              </Button>
+                            ) : !notification.response ? (
                               <Button 
                                 onClick={() => handleAcceptOffer(notification.notificationId)}
                                 className="bg-green-600 hover:bg-green-700"
@@ -1761,6 +1857,25 @@ export default function AgriculturalBuyerDashboard() {
                               <Badge variant="outline" className="text-green-600 border-green-600">
                                 ID: {transaction.notificationId || transaction.id}
                               </Badge>
+                            </div>
+                          </div>
+                          
+                          {/* Warehouse Dispatch Scheduling - Independent Flow */}
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-gray-700">🚛 Warehouse Dispatch</p>
+                                <p className="text-xs text-gray-500">Schedule pickup from warehouse to exporter (independent of payment)</p>
+                              </div>
+                              <Button 
+                                size="sm" 
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                onClick={() => handleScheduleDispatch(transaction)}
+                                data-testid={`schedule-dispatch-${transaction.id}`}
+                              >
+                                <Truck className="w-4 h-4 mr-1" />
+                                Schedule Dispatch
+                              </Button>
                             </div>
                           </div>
                         </CardContent>

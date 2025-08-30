@@ -17333,6 +17333,38 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         WHERE response_id = ${responseId}
       `);
 
+      // Create buyer notification for offer acceptance
+      try {
+        const [offerDetails] = await db.execute(sql`
+          SELECT buyer_id, buyer_company, commodity, quantity_available, total_value
+          FROM buyer_exporter_offers 
+          WHERE offer_id = ${offerId}
+        `);
+        
+        if (offerDetails) {
+          const notificationId = `BEN-${timestamp}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+          
+          await db.execute(sql`
+            INSERT INTO buyer_notifications (
+              notification_id, buyer_id, title, message, type, created_at, metadata
+            ) VALUES (
+              ${notificationId},
+              ${offerDetails.buyer_id},
+              ${'🎉 Offer Accepted by Exporter'},
+              ${'Your offer for ' + offerDetails.commodity + ' (' + offerDetails.quantity_available + ' MT, $' + offerDetails.total_value + ') has been accepted by ' + exporterCompany + '. Verification code: ' + verificationCode},
+              ${'offer_accepted'},
+              NOW(),
+              ${'{"offerId":"' + offerId + '","exporterId":"' + exporterId + '","verificationCode":"' + verificationCode + '"}'}
+            )
+          `);
+          
+          console.log(`📨 Buyer notification created for acceptance of offer ${offerId}`);
+        }
+      } catch (notificationError) {
+        console.error("Error creating buyer notification:", notificationError);
+        // Don't fail the main transaction for notification errors
+      }
+
       console.log(`✅ Offer ${offerId} accepted by exporter ${exporterId} (First-Come-First-Serve)`);
       console.log(`🔐 Verification code generated: ${verificationCode}`);
 
@@ -17351,12 +17383,320 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // Exporter payment confirmation - Independent flow
+  app.post("/api/exporter/confirm-payment", async (req, res) => {
+    try {
+      const { offerId, totalValue, exporterId, exporterCompany } = req.body;
+      
+      console.log(`💳 Payment confirmation from exporter ${exporterId} for offer ${offerId}`);
+
+      // Get buyer information for notification
+      const [offerDetails] = await db.execute(sql`
+        SELECT buyer_id, buyer_company, commodity, quantity_available
+        FROM buyer_exporter_offers 
+        WHERE offer_id = ${offerId} AND status = 'accepted'
+      `);
+
+      if (!offerDetails) {
+        return res.status(404).json({
+          success: false,
+          message: "Accepted offer not found"
+        });
+      }
+
+      // Create payment confirmation notification for buyer
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const notificationId = `BPC-${timestamp}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      
+      await db.execute(sql`
+        INSERT INTO buyer_notifications (
+          notification_id, buyer_id, title, message, type, created_at, metadata
+        ) VALUES (
+          ${notificationId},
+          ${offerDetails.buyer_id},
+          ${'💳 Payment Confirmation from Exporter'},
+          ${'${exporterCompany} has confirmed payment of $${totalValue} for your ${offerDetails.commodity} order (${offerDetails.quantity_available} MT). Please validate if payment was received.'},
+          ${'payment_confirmation'},
+          NOW(),
+          ${'{"offerId":"' + offerId + '","exporterId":"' + exporterId + '","totalValue":"' + totalValue + '","status":"awaiting_validation"}'}
+        )
+      `);
+
+      console.log(`📨 Payment confirmation notification sent to buyer for offer ${offerId}`);
+
+      res.json({
+        success: true,
+        message: "Payment confirmation sent to buyer",
+        notificationId
+      });
+
+    } catch (error: any) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to confirm payment"
+      });
+    }
+  });
+
+  // Buyer payment validation - Complete the independent flow
+  app.post("/api/buyer/validate-payment", async (req, res) => {
+    try {
+      const { notificationId, metadata, buyerId, buyerName, company } = req.body;
+      
+      console.log(`✅ Payment validation from buyer ${buyerId} for notification ${notificationId}`);
+
+      // Parse metadata to get offer details
+      let offerInfo;
+      try {
+        offerInfo = JSON.parse(metadata);
+      } catch (parseError) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid notification metadata"
+        });
+      }
+
+      const { offerId, exporterId, totalValue } = offerInfo;
+
+      // Update the notification status to validated
+      await db.execute(sql`
+        UPDATE buyer_notifications 
+        SET metadata = ${JSON.stringify({ ...offerInfo, status: "validated", validatedAt: new Date().toISOString() })}
+        WHERE notification_id = ${notificationId} AND type = 'payment_confirmation'
+      `);
+
+      // Update the offer status to payment confirmed
+      await db.execute(sql`
+        UPDATE buyer_exporter_offers 
+        SET payment_status = 'confirmed', payment_confirmed_at = NOW()
+        WHERE offer_id = ${offerId}
+      `);
+
+      console.log(`💳 Payment validated for offer ${offerId} - Independent confirmation complete`);
+
+      res.json({
+        success: true,
+        message: "Payment validation completed",
+        offerId,
+        status: "payment_confirmed"
+      });
+
+    } catch (error: any) {
+      console.error("Error validating payment:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to validate payment"
+      });
+    }
+  });
+
+  // Buyer warehouse dispatch scheduling - Independent flow (no payment dependency)
+  app.post("/api/buyer/schedule-warehouse-dispatch", async (req, res) => {
+    try {
+      const { 
+        transactionId, 
+        verificationCode, 
+        buyerId, 
+        buyerName, 
+        company, 
+        commodityType, 
+        quantity, 
+        unit, 
+        totalValue, 
+        county, 
+        farmLocation 
+      } = req.body;
+      
+      console.log(`🚛 Warehouse dispatch scheduled by buyer ${buyerId} for transaction ${transactionId}`);
+
+      // Generate warehouse dispatch request ID
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const requestId = `WDR-${timestamp}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+
+      // Create warehouse dispatch request (independent of payment status)
+      await db.execute(sql`
+        INSERT INTO warehouse_dispatch_requests (
+          request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
+          commodity_type, quantity, unit, total_value, county, farm_location, 
+          status, requested_at, created_at
+        ) VALUES (
+          ${requestId}, ${transactionId}, ${verificationCode}, ${buyerId}, ${buyerName}, ${company},
+          ${commodityType}, ${quantity}, ${unit}, ${totalValue}, ${county}, ${farmLocation},
+          ${'pending'}, NOW(), NOW()
+        )
+      `);
+
+      console.log(`📦 Warehouse dispatch request ${requestId} created - ready for QR generation`);
+
+      res.json({
+        success: true,
+        message: "Warehouse dispatch scheduled successfully",
+        requestId: requestId,
+        status: "pending_qr_generation"
+      });
+
+    } catch (error: any) {
+      console.error("Error scheduling warehouse dispatch:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to schedule warehouse dispatch"
+      });
+    }
+  });
+
+  // Generate Buyer-Exporter QR codes for warehouse dispatch (same format as Farmer-Buyer)
+  app.post("/api/warehouse-inspector/generate-dispatch-qr", async (req, res) => {
+    try {
+      const { dispatchRequestId, warehouseId, inspectorId } = req.body;
+      
+      console.log(`📦 Generating Buyer-Exporter QR code for dispatch request ${dispatchRequestId}`);
+
+      // Get dispatch request details
+      const [dispatchRequest] = await db.execute(sql`
+        SELECT * FROM warehouse_dispatch_requests 
+        WHERE request_id = ${dispatchRequestId} AND status = 'pending'
+      `);
+
+      if (!dispatchRequest) {
+        return res.status(404).json({
+          success: false,
+          message: "Dispatch request not found or already processed"
+        });
+      }
+
+      // Generate QR batch code using same format as Farmer-Buyer
+      const batchCode = `BE-DISPATCH-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+      
+      // Create QR data in same format as Farmer-Buyer system
+      const qrCodeData = {
+        type: "buyer_exporter_dispatch",
+        batchCode: batchCode,
+        dispatchRequestId: dispatchRequestId,
+        buyerId: dispatchRequest.buyer_id,
+        buyerName: dispatchRequest.buyer_name,
+        buyerCompany: dispatchRequest.buyer_company,
+        commodityType: dispatchRequest.commodity_type,
+        quantity: dispatchRequest.quantity,
+        unit: dispatchRequest.unit,
+        totalValue: dispatchRequest.total_value,
+        county: dispatchRequest.county,
+        warehouseId: warehouseId,
+        verificationCode: dispatchRequest.verification_code,
+        timestamp: new Date().toISOString(),
+        processedBy: inspectorId
+      };
+
+      // Generate human-readable QR data (same format as Farmer-Buyer)
+      const readableQrData = `AGRITRACE360 BUYER-EXPORTER DISPATCH
+BATCH: ${batchCode}
+BUYER: ${dispatchRequest.buyer_name} (${dispatchRequest.buyer_company})
+COMMODITY: ${dispatchRequest.commodity_type}
+QUANTITY: ${dispatchRequest.quantity} ${dispatchRequest.unit}
+VALUE: $${dispatchRequest.total_value}
+COUNTY: ${dispatchRequest.county}
+VERIFICATION: ${dispatchRequest.verification_code}
+GENERATED: ${new Date().toLocaleDateString()}`;
+
+      // Generate QR code image using same service as Farmer-Buyer
+      const { QrBatchService } = await import('./qr-batch-service');
+      const qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
+
+      // Create QR batch entry in same table as Farmer-Buyer QR codes
+      await db.execute(sql`
+        INSERT INTO qr_batches (
+          batch_code, warehouse_id, buyer_id, buyer_name,
+          commodity_type, total_bags, bag_weight, total_weight,
+          quality_grade, harvest_date, qr_code_data, qr_code_url,
+          status, created_at, type
+        ) VALUES (
+          ${batchCode}, ${warehouseId}, ${dispatchRequest.buyer_id}, ${dispatchRequest.buyer_name},
+          ${dispatchRequest.commodity_type}, ${1}, ${dispatchRequest.quantity}, ${dispatchRequest.quantity},
+          ${'Grade A'}, NOW(), ${readableQrData}, ${qrCodeUrl},
+          ${'generated'}, NOW(), ${'buyer_exporter_dispatch'}
+        )
+      `);
+
+      // Update dispatch request status
+      await db.execute(sql`
+        UPDATE warehouse_dispatch_requests 
+        SET status = 'qr_generated', qr_batch_code = ${batchCode}, processed_at = NOW()
+        WHERE request_id = ${dispatchRequestId}
+      `);
+
+      console.log(`✅ Buyer-Exporter QR code generated: ${batchCode}`);
+
+      res.json({
+        success: true,
+        message: "Dispatch QR code generated successfully",
+        batchCode: batchCode,
+        qrCodeUrl: qrCodeUrl,
+        dispatchRequestId: dispatchRequestId
+      });
+
+    } catch (error: any) {
+      console.error("Error generating dispatch QR code:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate dispatch QR code"
+      });
+    }
+  });
+
+  // Get pending dispatch requests for QR generation
+  app.get("/api/warehouse-inspector/pending-dispatch-requests", async (req, res) => {
+    try {
+      const { warehouseId } = req.query;
+      
+      let whereClause = "WHERE status = 'pending'";
+      if (warehouseId) {
+        // Filter by warehouse if specified (county-based)
+      }
+
+      const pendingRequests = await db.execute(sql`
+        SELECT 
+          request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
+          commodity_type, quantity, unit, total_value, county, farm_location,
+          requested_at, created_at
+        FROM warehouse_dispatch_requests 
+        WHERE status = 'pending'
+        ORDER BY requested_at DESC
+      `);
+
+      res.json({
+        success: true,
+        data: pendingRequests.rows.map((row: any) => ({
+          requestId: row.request_id,
+          transactionId: row.transaction_id,
+          verificationCode: row.verification_code,
+          buyerId: row.buyer_id,
+          buyerName: row.buyer_name,
+          buyerCompany: row.buyer_company,
+          commodityType: row.commodity_type,
+          quantity: row.quantity,
+          unit: row.unit,
+          totalValue: row.total_value,
+          county: row.county,
+          farmLocation: row.farm_location,
+          requestedAt: row.requested_at
+        }))
+      });
+
+    } catch (error: any) {
+      console.error("Error fetching pending dispatch requests:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch pending dispatch requests"
+      });
+    }
+  });
+
   // Get exporter's accepted deals for dashboard
   app.get("/api/exporter/:exporterId/accepted-deals", async (req, res) => {
     try {
       const { exporterId } = req.params;
 
-      // Get accepted deals with buyer information
+      // Get accepted deals with complete buyer information and custody ID
       const acceptedDeals = await db.execute(sql`
         SELECT 
           beo.offer_id,
@@ -17372,9 +17712,20 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           beo.accepted_date,
           eor.verification_code,
           eor.response_id,
-          eor.exporter_company
+          eor.exporter_company,
+          -- Get complete buyer information
+          b.business_name as buyer_business_name,
+          b.contact_person_first_name,
+          b.contact_person_last_name,
+          b.primary_phone as buyer_phone_verified,
+          b.county as buyer_county,
+          b.country as buyer_country,
+          -- Get custody ID
+          wc.custody_id
         FROM buyer_exporter_offers beo
         JOIN exporter_offer_responses eor ON beo.offer_id = eor.offer_id
+        LEFT JOIN buyers b ON beo.buyer_id = b.buyer_id
+        LEFT JOIN warehouse_custody wc ON b.buyer_id = wc.buyer_id
         WHERE beo.status = 'accepted' 
         AND eor.exporter_id = ${exporterId}
         AND eor.response_type = 'accept'

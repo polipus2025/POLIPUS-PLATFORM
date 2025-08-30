@@ -1623,14 +1623,28 @@ export default function AgriculturalBuyerDashboard() {
                               <h4 className="font-semibold text-lg text-green-800">{transaction.commodityType}</h4>
                               <p className="text-sm text-gray-600">Farmer: {transaction.farmerName}</p>
                               <p className="text-sm text-gray-500">{transaction.farmLocation}</p>
+                              <p className="text-xs text-blue-600 font-mono font-bold">🔒 Offer ID: {transaction.farmerOfferId || transaction.offerId || 'N/A'}</p>
                             </div>
-                            <Badge className="bg-green-600 text-white">Confirmed</Badge>
+                            
+                            {/* DUAL STATUS SYSTEM FOR ARCHIVE */}
+                            <div className="flex flex-col gap-2">
+                              <Badge className={
+                                transaction.paymentStatus === 'confirmed' || transaction.paymentConfirmed ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                              }>
+                                {transaction.paymentStatusLabel || (transaction.paymentConfirmed ? '✅ Farmer Confirmed Payment' : '⏳ Pending Farmer Confirmation')}
+                              </Badge>
+                              <Badge className={
+                                transaction.bagRequestStatus === 'requested' || transaction.awaitingPaymentConfirmation === false ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                              }>
+                                {transaction.bagRequestLabel || (transaction.awaitingPaymentConfirmation === false ? '📦 Bags Requested' : '📦 Request Bag Available')}
+                              </Badge>
+                            </div>
                           </div>
                           
                           <div className="grid grid-cols-3 gap-4 mb-4">
                             <div>
                               <p className="text-sm text-gray-600">Quantity</p>
-                              <p className="font-medium">{transaction.quantityAvailable} {transaction.unit}</p>
+                              <p className="font-medium">{transaction.quantityAvailable || transaction.quantity} {transaction.unit}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Total Value</p>
@@ -1639,6 +1653,26 @@ export default function AgriculturalBuyerDashboard() {
                             <div>
                               <p className="text-sm text-gray-600">Verification Code</p>
                               <p className="font-mono font-bold text-blue-600">{transaction.verificationCode}</p>
+                            </div>
+                          </div>
+
+                          {/* DUAL STATUS DETAILS SECTION */}
+                          <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div>
+                              <p className="text-sm font-medium text-green-700">💳 Payment Status</p>
+                              <p className="text-sm">{transaction.paymentStatusLabel || (transaction.paymentConfirmed ? '✅ Farmer Confirmed Payment' : '⏳ Pending Farmer Confirmation')}</p>
+                              {transaction.secondVerificationCode && (
+                                <p className="text-xs font-mono bg-green-100 p-1 rounded mt-1">
+                                  2nd Code: {transaction.secondVerificationCode}
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-green-700">📦 Bag Request Status</p>
+                              <p className="text-sm">{transaction.bagRequestLabel || (transaction.awaitingPaymentConfirmation === false ? '📦 Bags Requested' : '📦 Available for Request')}</p>
+                              {transaction.bagRequestStatus === 'requested' && (
+                                <p className="text-xs text-purple-600 mt-1">Warehouse processing</p>
+                              )}
                             </div>
                           </div>
 
@@ -1658,18 +1692,8 @@ export default function AgriculturalBuyerDashboard() {
                               Confirmed: {new Date(transaction.confirmedAt).toLocaleString()}
                             </div>
                             <div className="flex items-center space-x-2">
-                              {transaction.paymentConfirmed ? (
-                                <Badge className="bg-green-600 text-white">
-                                  ✓ Payment Confirmed by Farmer
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  Awaiting Farmer Payment Confirmation
-                                </Badge>
-                              )}
                               <Badge variant="outline" className="text-green-600 border-green-600">
-                                ID: {transaction.notificationId}
+                                ID: {transaction.notificationId || transaction.id}
                               </Badge>
                             </div>
                           </div>

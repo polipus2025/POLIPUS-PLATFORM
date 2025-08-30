@@ -128,7 +128,12 @@ export default function FrontPage() {
                 src={poliposLogo} 
                 alt="Polipus Environmental Intelligence Platform" 
                 className="h-full w-auto object-contain max-w-full"
-                style={{ maxHeight: '100%', width: 'auto' }}
+                style={{ 
+                  maxHeight: '100%', 
+                  width: 'auto',
+                  filter: 'brightness(1.1) contrast(1.15) saturate(1.1) drop-shadow(0 4px 12px rgba(0,0,0,0.15))',
+                  transition: 'all 0.3s ease-in-out'
+                }}
               />
             </div>
             {/* Liberian Flag positioned in the middle of the box on the upper side */}

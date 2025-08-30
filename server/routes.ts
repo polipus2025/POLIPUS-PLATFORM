@@ -14283,11 +14283,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 3. Buyer accepts the offer - first come, first served
   app.post("/api/buyer/accept-offer", async (req, res) => {
-    try {
+    // 🔒 ATOMIC TRANSACTION: Prevent race conditions
+    return await db.transaction(async (tx) => {
       const { notificationId, buyerId, buyerName, company } = req.body;
 
       // PERMANENT FIX: Get the correct internal buyer ID for all future buyers
-      const [buyerRecord] = await db
+      const [buyerRecord] = await tx
         .select({ 
           internalId: buyers.id,
           buyerCode: buyers.buyerId,
@@ -14304,8 +14305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✅ BUYER LOOKUP: ${buyerId} → Internal ID: ${buyerRecord.internalId}`);
 
-      // REAL-TIME CHECK: Verify offer is still available (atomic check)
-      const [currentNotification] = await db
+      // 🔒 ATOMIC CHECK: Verify offer is still available within transaction
+      const [currentNotification] = await tx
         .select({
           response: buyerNotifications.response,
           offerId: buyerNotifications.offerId
@@ -14327,7 +14328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if the farmer offer is still available for acceptance
-      const [farmerOffer] = await db
+      const [farmerOffer] = await tx
         .select({ status: farmerProductOffers.status })
         .from(farmerProductOffers)
         .where(eq(farmerProductOffers.offerId, currentNotification.offerId));
@@ -14342,7 +14343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
 
       // Get the notification details for storing verification code
-      const [notification] = await db
+      const [notification] = await tx
         .select({
           notificationId: buyerNotifications.notificationId,
           offerId: buyerNotifications.offerId,
@@ -14361,7 +14362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // CRITICAL: Update the original farmer offer to "confirmed" status with buyer info and verification code
-      await db
+      await tx
         .update(farmerProductOffers)
         .set({
           status: "confirmed",
@@ -14375,7 +14376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔄 Updated farmer offer ${notification.offerId} to confirmed status with buyer: ${buyerName}`);
 
       // Store verification code in database - PERMANENT FIX: Use internal buyer ID
-      const [savedCode] = await db.insert(buyerVerificationCodes).values({
+      const [savedCode] = await tx.insert(buyerVerificationCodes).values({
         verificationCode,
         buyerId: buyerRecord.internalId.toString(), // FIXED: Always use internal ID for future compatibility
         buyerName: buyerName || 'Agricultural Trading Company',
@@ -14398,12 +14399,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
 
       // CRITICAL: Update THIS notification to confirmed and ALL OTHER notifications for same offer to DISABLED
-      await db.update(buyerNotifications)
+      await tx.update(buyerNotifications)
         .set({ response: 'confirmed' })
         .where(eq(buyerNotifications.notificationId, notificationId));
         
       // REAL-TIME DISABLE: Mark all OTHER notifications for this offer as unavailable
-      const disabledNotifications = await db.update(buyerNotifications)
+      const disabledNotifications = await tx.update(buyerNotifications)
         .set({ 
           response: 'offer_taken',
           responseDate: new Date()
@@ -14461,10 +14462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "Complete delivery according to EUDR requirements"
         ]
       });
-    } catch (error: any) {
-      console.error("Error accepting offer:", error);
-      res.status(500).json({ error: "Failed to accept offer" });
-    }
+    }); // 🔒 End transaction
   });
 
   // API endpoint for buyer to request bags from county warehouse

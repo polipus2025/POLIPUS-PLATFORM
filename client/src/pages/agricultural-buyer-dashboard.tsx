@@ -1121,9 +1121,22 @@ export default function AgriculturalBuyerDashboard() {
                                 <CheckCircle className="w-4 h-4 mr-2" />
                                 Accept Offer
                               </Button>
+                            ) : notification.response === 'offer_taken' ? (
+                              <Button 
+                                disabled
+                                className="bg-gray-400 cursor-not-allowed"
+                                data-testid={`button-offer-taken-${notification.id}`}
+                              >
+                                <XCircle className="w-4 h-4 mr-2" />
+                                Offer Taken by Another Buyer
+                              </Button>
+                            ) : notification.response === 'confirmed' ? (
+                              <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                                ✅ You Accepted This Offer
+                              </Badge>
                             ) : (
                               <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">
-                                {notification.response === 'confirmed' ? '✅ You Accepted This' : '❌ Taken by Another Buyer'}
+                                Already Responded
                               </Badge>
                             )}
                           </div>

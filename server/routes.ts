@@ -14752,16 +14752,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid farmer ID format" });
       }
       
-      // Get ONLY payment-confirmed transactions for THIS farmer 
-      // These must have second verification codes (farmer confirmed payment receipt)
+      // Get payment-confirmed transactions AND bags_requested transactions for THIS farmer 
+      // Include both: proper 2-step verification AND bypassed workflow cases
       const confirmedTransactions = await db
         .select()
         .from(buyerVerificationCodes)
         .where(
           and(
             eq(buyerVerificationCodes.farmerId, dbId.toString()),
-            isNotNull(buyerVerificationCodes.secondVerificationCode),
-            isNotNull(buyerVerificationCodes.paymentConfirmedAt)
+            or(
+              // Proper 2-step verification workflow
+              and(
+                isNotNull(buyerVerificationCodes.secondVerificationCode),
+                isNotNull(buyerVerificationCodes.paymentConfirmedAt)
+              ),
+              // Bypassed workflow cases - bags already requested
+              eq(buyerVerificationCodes.status, 'bags_requested')
+            )
           )
         )
         .orderBy(desc(buyerVerificationCodes.acceptedAt));

@@ -7526,7 +7526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           satelliteAnalysis: satelliteAnalysis
         }),
         eudrDeadlineCompliance: complianceScore >= 70,
-        traceabilityScore: complianceScore.toString(),
+        traceabilityScore: complianceScore,
         documentationComplete: true,
         thirdPartyVerification: false,
         complianceStatus: complianceScore >= 70 ? 'compliant' : 'non_compliant',
@@ -7559,6 +7559,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       };
 
+      // Debug: Log the data being sent to database
+      console.log('🔍 EUDR Data being sent to database:', JSON.stringify(eudrComplianceData, null, 2));
+      
       // Save to database
       const compliance = await storage.createEudrCompliance(eudrComplianceData);
       

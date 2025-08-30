@@ -149,7 +149,6 @@ import {
 import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
-import { db } from './db';
 import { AgriTraceWorkflowService } from './agritrace-workflow';
 
 // JWT Secret - in production, this should be in environment variables

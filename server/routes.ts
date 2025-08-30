@@ -7550,12 +7550,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         complianceStatus: complianceScore >= 70 ? 'compliant' : 'non_compliant',
         commodityId: realCommodityId || 2, // Use real commodity ID from your database
         metadata: JSON.stringify({
-          plotId,
-          plotName,
-          farmerName,
+          plotId: plotId || 'UNKNOWN',
+          plotName: plotName || 'UNKNOWN',
+          farmerName: farmerName || 'UNKNOWN',
+          farmerId: rawFarmerId || 'UNKNOWN',
           county: county || 'Monrovia',
           plotSize: plotSize || '2.0',
-          coordinates,
+          coordinates: coordinates || '6.3156, -10.8074',
           forestLossData,
           satelliteAnalysis,
           complianceScore,
@@ -7570,15 +7571,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           landUse: landMapData?.landUse || 'agricultural',
           forestCoverLoss: forestLossData.coverLoss,
           geospatialData: {
-            boundaries: farmBoundaries,
+            boundaries: farmBoundaries || [],
             satelliteImagery: satelliteAnalysis,
             riskZones: forestLossData.riskZones
           }
         })
       };
 
-      // Debug: Log the data being sent to database
-      console.log('🔍 EUDR Data being sent to database:', JSON.stringify(eudrComplianceData, null, 2));
+      // Data ready for database insertion
       
       // Save to database
       const compliance = await storage.createEudrCompliance(eudrComplianceData);
@@ -7588,7 +7588,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 5. PDF REPORT GENERATION FOR EU DOCUMENTATION
       // The PDF will be available via /api/eudr-certificate/:packId endpoint
 
-      res.json({
+      // Successfully created EUDR compliance record
+      const responseData = {
         success: true,
         eudrReportId: compliance.id,
         complianceScore: complianceScore,
@@ -7597,17 +7598,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         complianceStatus: complianceStatus,
         pdfDownloadUrl: `/api/eudr-certificate/${compliance.id}`,
         reportData: {
-          farmerId: rawFarmerId,
-          farmerName,
-          plotId,
-          plotName,
+          farmerId: rawFarmerId || 'UNKNOWN',
+          farmerName: farmerName || 'UNKNOWN',
+          plotId: plotId || 'UNKNOWN',
+          plotName: plotName || 'UNKNOWN',
           county: county || 'Monrovia',
           plotSize: plotSize || '2.0',
           eudrCompliant: complianceScore >= 70,
           assessmentDate: new Date().toISOString()
         },
         message: '🛰️ EUDR compliance report generated successfully with satellite analysis'
-      });
+      };
+      
+      res.json(responseData);
 
     } catch (error: any) {
       console.error('❌ EUDR generation error:', error);

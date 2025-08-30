@@ -71,13 +71,25 @@ export function registerPaymentConfirmationFix(app: Express) {
       console.log(`✅ PAYMENT CONFIRMED: Generated second verification code ${secondVerificationCode}`);
       console.log(`🔄 Transaction ${transactionId} moved to confirmed status`);
 
+      // Find the buyer ID to notify them of the status change
+      const [updatedRecord] = await db
+        .select()
+        .from(buyerVerificationCodes)
+        .where(eq(buyerVerificationCodes.id, actualId));
+
+      if (updatedRecord) {
+        console.log(`📢 BUYER NOTIFICATION: Payment confirmed for buyer ${updatedRecord.buyerId} - they should refresh "Confirmed Deals"`);
+      }
+
       res.json({
         success: true,
         message: "Payment confirmed successfully!",
         secondVerificationCode: secondVerificationCode,
         paymentConfirmed: true,
         paymentConfirmedAt: confirmationDate.toISOString(),
-        status: "payment_confirmed"
+        status: "payment_confirmed",
+        buyerNotified: true,
+        buyerId: updatedRecord?.buyerId || null
       });
 
     } catch (error: any) {

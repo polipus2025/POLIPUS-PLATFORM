@@ -156,6 +156,25 @@ export default function FrontPage() {
                 style={{ maxHeight: '100%', width: 'auto' }}
               />
             </div>
+            {/* Liberian Flag positioned on the right side above the logo */}
+            <div className="absolute top-2 sm:top-4 right-4 sm:right-8 w-12 h-8 sm:w-16 sm:h-11 rounded-md overflow-hidden shadow-md border border-gray-200">
+              <svg viewBox="0 0 190 100" className="w-full h-full">
+                {/* Red and white stripes */}
+                <rect width="190" height="100" fill="#BF0A30"/>
+                <rect y="9.09" width="190" height="9.09" fill="white"/>
+                <rect y="27.27" width="190" height="9.09" fill="white"/>
+                <rect y="45.45" width="190" height="9.09" fill="white"/>
+                <rect y="63.64" width="190" height="9.09" fill="white"/>
+                <rect y="81.82" width="190" height="9.09" fill="white"/>
+                
+                {/* Blue canton */}
+                <rect width="76" height="54.55" fill="#002B7F"/>
+                
+                {/* White star */}
+                <polygon points="38,13 40.85,21.15 49.5,21.15 42.83,26.35 45.68,34.5 38,29.3 30.32,34.5 33.17,26.35 26.5,21.15 35.15,21.15" 
+                         fill="white"/>
+              </svg>
+            </div>
             {/* Registered trademark symbol positioned over the 's' */}
             <span className="absolute top-8 sm:top-12 md:top-16 right-[calc(50%-140px)] sm:right-[calc(50%-240px)] md:right-[calc(50%-380px)] text-sm sm:text-lg md:text-xl font-black text-slate-800 drop-shadow-sm">®</span>
           </div>

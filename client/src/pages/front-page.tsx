@@ -291,7 +291,7 @@ export default function FrontPage() {
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
               Access the comprehensive integrated dashboard showing real-time connectivity and data exchange 
-              between all 7 modules. Monitor cross-module integration status and system-wide performance.
+              between all 8 modules. Monitor cross-module integration status and system-wide performance.
             </p>
             <Link href="/integrated-dashboard">
               <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white flex items-center gap-2 mx-auto">
@@ -302,7 +302,7 @@ export default function FrontPage() {
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm text-slate-600">
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>7 Modules Connected</span>
+                <span>8 Modules Connected</span>
               </div>
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />

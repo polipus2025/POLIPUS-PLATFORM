@@ -3764,17 +3764,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Agricultural Buyer API Routes
   
-  // Get available offers for a specific buyer ID
+  // Get available offers for a specific buyer ID - COUNTY FILTERED
   app.get("/api/buyer/available-offers/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
       console.log(`🔍 Fetching available offers for buyer: ${buyerId}`);
       
-      // Get all available farmer offers (status = 'available')
+      // Get buyer's county for filtering
+      const [buyer] = await db
+        .select({ county: buyers.county })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+        
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+      
+      console.log(`🔒 COUNTY LOCK: Filtering offers for buyer in ${buyer.county}`);
+      
+      // Get ONLY available farmer offers from the SAME COUNTY
       const availableOffers = await db
         .select()
         .from(farmerProductOffers)
-        .where(eq(farmerProductOffers.status, 'available'))
+        .where(
+          and(
+            eq(farmerProductOffers.status, 'available'),
+            eq(farmerProductOffers.county, buyer.county) // CRITICAL COUNTY FILTER
+          )
+        )
         .orderBy(desc(farmerProductOffers.createdAt));
       
       console.log(`📦 Found ${availableOffers.length} available offers for buyer ${buyerId}`);
@@ -3814,20 +3831,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get available harvests from farmers
+  // Get available harvests from farmers - COUNTY FILTERED
   app.get("/api/buyer/available-harvests", async (req, res) => {
     try {
-      // Fetch real farmer product offers from database
-      // Fetching product offers
+      const { buyerId } = req.query;
+      
+      if (!buyerId) {
+        return res.status(400).json({ error: "buyerId parameter required for county filtering" });
+      }
+      
+      // Get buyer's county for filtering
+      const [buyer] = await db
+        .select({ county: buyers.county })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId as string));
+        
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+      
+      console.log(`🔒 COUNTY LOCK: Filtering harvests for buyer in ${buyer.county}`);
+      
+      // Fetch ONLY farmer offers from the SAME COUNTY as buyer
       const realOffers = await db
         .select()
         .from(farmerProductOffers)
+        .where(eq(farmerProductOffers.county, buyer.county)) // CRITICAL COUNTY FILTER
         .orderBy(desc(farmerProductOffers.createdAt));
       
-      console.log("📦 Found", realOffers.length, "real offers in database");
+      console.log("📦 Found", realOffers.length, `county-filtered offers for ${buyer.county}`);
       console.log("📋 First offer:", realOffers[0] ? JSON.stringify(realOffers[0], null, 2) : "none");
 
-      // Return ONLY real data from database - no mock data
+      // Return ONLY county-filtered data
       res.json(realOffers);
     } catch (error: any) {
       console.error("Error fetching available harvests:", error);
@@ -3835,10 +3870,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Also update marketplace endpoint to include Paolo Jr's data
+  // COUNTY-FILTERED Marketplace: Buyers only see farmers from same county
   app.get("/api/buyer/marketplace", async (req, res) => {
     try {
-      // Fetch real farmer product offers from database  
+      const { buyerId } = req.query;
+      
+      if (!buyerId) {
+        return res.status(400).json({ error: "buyerId parameter required" });
+      }
+      
+      // Get buyer's county for filtering
+      const [buyer] = await db
+        .select({ county: buyers.county })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId as string));
+        
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+      
+      console.log(`🔒 COUNTY LOCK: Filtering marketplace for buyer in ${buyer.county}`);
+      
+      // Fetch ONLY farmer offers from the SAME COUNTY as buyer
       const realOffers = await db
         .select({
           id: farmerProductOffers.id,
@@ -3860,8 +3913,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           deliveryTerms: farmerProductOffers.deliveryTerms
         })
         .from(farmerProductOffers)
+        .where(eq(farmerProductOffers.county, buyer.county)) // CRITICAL COUNTY FILTER
         .orderBy(farmerProductOffers.createdAt);
 
+      console.log(`📦 Returning ${realOffers.length} county-filtered offers for ${buyer.county}`);
       res.json(realOffers);
     } catch (error: any) {
       console.error("Error fetching marketplace data:", error);

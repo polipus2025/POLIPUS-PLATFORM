@@ -7508,20 +7508,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         - Status: ${complianceStatus}`);
 
       // Create EUDR compliance record in database
+      // Generate unique compliance ID
+      const complianceId = `EUDR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      
       // Convert very large farmer ID to a safe integer range (1-1000)
       const safeFarmerId = rawFarmerId ? (parseInt(rawFarmerId) % 1000) + 1 : 1;
-      
-      // Also ensure farmGpsMappingId is in safe range - use a simple incremental ID
       const safePlotId = Math.floor(Math.random() * 1000) + 1;
       
       const eudrComplianceData = {
-        farmerId: safeFarmerId,
+        complianceId: complianceId,
         farmGpsMappingId: safePlotId,
-        complianceScore: complianceScore,
-        riskLevel: riskLevel,
-        deforestationRisk: deforestationRisk,
-        lastAssessment: new Date(),
-        reportData: JSON.stringify({
+        dueDiligenceStatement: `Due diligence completed for ${farmerName} - ${plotName}. Satellite analysis shows ${complianceScore}% compliance with deforestation risk of ${deforestationRisk}%.`,
+        riskAssessment: riskLevel === 'low' ? 'negligible' : riskLevel === 'medium' ? 'standard' : 'enhanced',
+        geoLocationData: JSON.stringify({
+          coordinates: coordinates || `${6.3156}, ${-10.8074}`,
+          plotBoundaries: farmBoundaries,
+          satelliteAnalysis: satelliteAnalysis
+        }),
+        eudrDeadlineCompliance: complianceScore >= 70,
+        traceabilityScore: complianceScore.toString(),
+        documentationComplete: true,
+        thirdPartyVerification: false,
+        complianceStatus: complianceScore >= 70 ? 'compliant' : 'non_compliant',
+        commodityId: 1, // Default commodity reference
+        metadata: JSON.stringify({
           plotId,
           plotName,
           farmerName,
@@ -7530,19 +7540,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           coordinates,
           forestLossData,
           satelliteAnalysis,
+          complianceScore,
+          deforestationRisk,
+          riskLevel,
           complianceDetails: {
             eudrCompliant: complianceScore >= 70,
             forestRisk: deforestationRisk < 5 ? 'Low' : deforestationRisk < 15 ? 'Medium' : 'High',
             assessmentDate: new Date().toISOString(),
             validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // Valid for 1 year
+          },
+          landUse: landMapData?.landUse || 'agricultural',
+          forestCoverLoss: forestLossData.coverLoss,
+          geospatialData: {
+            boundaries: farmBoundaries,
+            satelliteImagery: satelliteAnalysis,
+            riskZones: forestLossData.riskZones
           }
-        }),
-        landUse: landMapData?.landUse || 'agricultural',
-        forestCoverLoss: forestLossData.coverLoss,
-        geospatialData: JSON.stringify({
-          boundaries: farmBoundaries,
-          satelliteImagery: satelliteAnalysis,
-          riskZones: forestLossData.riskZones
         })
       };
 

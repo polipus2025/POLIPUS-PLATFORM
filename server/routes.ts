@@ -14364,11 +14364,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Notification not found" });
       }
 
-      // CRITICAL: Update the original farmer offer to "confirmed" status with buyer info and verification code
+      // CRITICAL: Update the original farmer offer to "accepted" status - awaiting farmer payment confirmation
       await tx
         .update(farmerProductOffers)
         .set({
-          status: "confirmed",
+          status: "accepted", // ✅ FIXED: accepted (not confirmed) - farmer must confirm payment first
           buyerId: buyerId ? buyerId.toString() : buyerId,
           buyerName: buyerName || 'Agricultural Trading Company',
           verificationCode: verificationCode, // Save verification code to farmer offer
@@ -14376,7 +14376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .where(eq(farmerProductOffers.offerId, notification.offerId));
 
-      console.log(`🔄 Updated farmer offer ${notification.offerId} to confirmed status with buyer: ${buyerName}`);
+      console.log(`🔄 Updated farmer offer ${notification.offerId} to accepted status with buyer: ${buyerName} - awaiting farmer payment confirmation`);
 
       // Store verification code in database - PERMANENT FIX: Use internal buyer ID
       const [savedCode] = await tx.insert(buyerVerificationCodes).values({

@@ -34,7 +34,9 @@ import {
   Layers,
   DollarSign,
   Upload,
-  CreditCard
+  CreditCard,
+  XCircle,
+  Loader2
 } from "lucide-react";
 import ProfileDropdown from "@/components/ProfileDropdown";
 
@@ -1468,7 +1470,7 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Main Navigation Tabs - Moved to middle position */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 bg-white shadow-sm rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-10 bg-white shadow-sm rounded-lg p-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Package className="w-4 h-4 mr-2" />
               Overview
@@ -1504,6 +1506,10 @@ export default function WarehouseInspectorDashboard() {
             <TabsTrigger value="quality" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4 mr-2" />
               Quality
+            </TabsTrigger>
+            <TabsTrigger value="dispatch" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Truck className="w-4 h-4 mr-2" />
+              Dispatch
             </TabsTrigger>
           </TabsList>
 
@@ -3012,6 +3018,130 @@ export default function WarehouseInspectorDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Dispatch Tab - Warehouse Dispatch Confirmation System */}
+          <TabsContent value="dispatch" className="space-y-6">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center">
+                    <Truck className="w-6 h-6 mr-3 text-blue-600" />
+                    🚛 Pending Dispatch Requests
+                  </CardTitle>
+                  <CardDescription>
+                    Buyer-scheduled warehouse dispatch requests awaiting confirmation. Confirming will automatically generate QR codes.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {dispatchRequestsLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <span className="ml-3 text-gray-600">Loading dispatch requests...</span>
+                    </div>
+                  ) : pendingDispatchRequests && pendingDispatchRequests.length > 0 ? (
+                    <div className="space-y-4">
+                      {pendingDispatchRequests.map((request: any) => (
+                        <Card key={request.request_id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="text-lg font-semibold text-blue-600">
+                                    Request ID: {request.request_id}
+                                  </h3>
+                                  <Badge className="bg-orange-100 text-orange-800">
+                                    Pending Confirmation
+                                  </Badge>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <span className="font-medium text-gray-700">Buyer:</span> {request.buyer_name}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">Company:</span> {request.buyer_company}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">Commodity:</span> {request.commodity_type}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">Quantity:</span> {request.quantity} {request.unit}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">County:</span> {request.county}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">Farm Location:</span> {request.farm_location}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">Total Value:</span> ${request.total_value}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-gray-700">Scheduled Date:</span> 
+                                    <span className="text-blue-600 font-medium ml-1">
+                                      {new Date(request.dispatch_date).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4 text-blue-600" />
+                                    <span className="text-sm font-medium text-blue-800">
+                                      Verification Code: {request.verification_code}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex justify-between items-center pt-4 border-t">
+                              <div className="text-xs text-gray-500">
+                                Requested: {new Date(request.requested_at).toLocaleString()}
+                              </div>
+                              <div className="flex gap-3">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-red-300 text-red-700 hover:bg-red-50"
+                                  data-testid={`button-reject-dispatch-${request.request_id}`}
+                                >
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Reject
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() => dispatchConfirmationMutation.mutate({ 
+                                    requestId: request.request_id,
+                                    confirmationNotes: "Warehouse dispatch confirmed and QR code generated"
+                                  })}
+                                  disabled={dispatchConfirmationMutation.isPending}
+                                  data-testid={`button-confirm-dispatch-${request.request_id}`}
+                                >
+                                  {dispatchConfirmationMutation.isPending ? (
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                  )}
+                                  Confirm & Generate QR
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Truck className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Pending Dispatch Requests</h3>
+                      <p className="text-gray-500">All dispatch requests have been processed or no new requests are available.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
         </Tabs>
       </div>
 

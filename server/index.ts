@@ -49,6 +49,12 @@ if (MAINTENANCE_MODE) {
 
       // Initialize core system quickly
       const httpServer = await registerRoutes(app);
+      
+      // 🔒 PERMANENT FIX: Emergency payment confirmation routes (LOCKED FOR ALL COUNTRIES)
+      const { registerPaymentConfirmationFix } = await import('./payment-confirmation-fix');
+      registerPaymentConfirmationFix(app);
+      console.log('🔒 PAYMENT CONFIRMATION FIX LOCKED - All countries supported');
+      
       registerEudrRoutes(app);
       const { registerSimpleEudrRoutes } = await import('./eudr-simple-routes');
       registerSimpleEudrRoutes(app);

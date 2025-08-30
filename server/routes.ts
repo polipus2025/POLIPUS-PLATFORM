@@ -14594,12 +14594,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ===============================
+  // ===============================  
   // TRANSACTION ARCHIVES APIs
   // ===============================
+  // 🔒 LOCKED: All payment confirmation routes moved to payment-confirmation-fix.ts
+  // ⚠️  DO NOT RE-ENABLE - Drizzle syntax errors cause failures
 
-  // Get buyer confirmed transactions archive [DISABLED - USING EMERGENCY FIX]
-  /* DISABLED - BROKEN ROUTE - USING EMERGENCY FIX
+  // Get buyer confirmed transactions archive [PERMANENTLY DISABLED - USING STABLE FIX]
+  /* 🔒 PERMANENTLY DISABLED - STABLE EMERGENCY FIX IN payment-confirmation-fix.ts
   app.get("/api/buyer/confirmed-transactions/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;

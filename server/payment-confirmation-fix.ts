@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { db } from "./db";
-import { eq, and, isNotNull } from "drizzle-orm";
-import { buyerVerificationCodes } from "@shared/schema";
+import { eq, and, isNotNull, sql } from "drizzle-orm";
+import { buyerVerificationCodes, buyers } from "@shared/schema";
 
 // EMERGENCY FIX: Clean payment confirmation route that bypasses main routes.ts syntax errors
 export function registerPaymentConfirmationFix(app: Express) {
@@ -98,6 +98,70 @@ export function registerPaymentConfirmationFix(app: Express) {
         success: false,
         error: "Failed to confirm payment" 
       });
+    }
+  });
+
+  // EMERGENCY: Get confirmed transactions with offer ID for buyer portal (Clean Implementation)
+  app.get("/api/buyer/confirmed-transactions/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`🚨 EMERGENCY FIX: Fetching confirmed transactions for buyer: ${buyerId}`);
+      
+      // Get the internal buyer ID first (Fixed Drizzle syntax)
+      const [buyer] = await db
+        .select({ id: buyers.id })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+      
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+      
+      // Get confirmed transactions with offer ID (Fixed Drizzle syntax)
+      const confirmedTransactions = await db
+        .select()
+        .from(buyerVerificationCodes)
+        .where(
+          and(
+            eq(buyerVerificationCodes.buyerId, buyer.id.toString()),
+            isNotNull(buyerVerificationCodes.secondVerificationCode)
+          )
+        )
+        .orderBy(buyerVerificationCodes.acceptedAt);
+      
+      // Format the transactions for frontend with offer ID included
+      const formattedTransactions = confirmedTransactions.map(transaction => ({
+        id: transaction.id,
+        notificationId: transaction.notificationId,
+        buyerId: transaction.buyerId,
+        farmerId: transaction.farmerId,
+        farmerName: transaction.farmerName,
+        farmLocation: transaction.farmLocation,
+        commodityType: transaction.commodityType,
+        quantityAvailable: parseFloat(transaction.quantityAvailable || '0'),
+        unit: transaction.unit || 'kg',
+        pricePerUnit: parseFloat(transaction.pricePerUnit || '0'),
+        totalValue: parseFloat(transaction.totalValue || '0'),
+        qualityGrade: "Grade A", // Default quality grade
+        paymentTerms: transaction.paymentTerms,
+        deliveryTerms: transaction.deliveryTerms,
+        verificationCode: transaction.verificationCode,
+        secondVerificationCode: transaction.secondVerificationCode,
+        confirmedAt: transaction.acceptedAt,
+        status: "confirmed",
+        paymentConfirmed: true,
+        paymentConfirmedAt: transaction.paymentConfirmedAt,
+        awaitingPaymentConfirmation: false,
+        farmerOfferId: transaction.offerId, // CRITICAL: Include farmer offer ID
+        offerId: transaction.offerId // Also include as offerId for backward compatibility
+      }));
+
+      console.log(`✅ EMERGENCY FIX: Returning ${formattedTransactions.length} confirmed transactions with offer IDs`);
+      res.json(formattedTransactions);
+      
+    } catch (error: any) {
+      console.error("🚨 EMERGENCY CONFIRMED TRANSACTIONS ERROR:", error);
+      res.status(500).json({ error: "Failed to fetch confirmed transactions" });
     }
   });
 }

@@ -14598,7 +14598,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TRANSACTION ARCHIVES APIs
   // ===============================
 
-  // Get buyer confirmed transactions archive
+  // Get buyer confirmed transactions archive [DISABLED - USING EMERGENCY FIX]
+  /* DISABLED - BROKEN ROUTE - USING EMERGENCY FIX
   app.get("/api/buyer/confirmed-transactions/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
@@ -14635,6 +14636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentConfirmedAt: buyerVerificationCodes.paymentConfirmedAt,
           status: buyerVerificationCodes.status,
           acceptedAt: buyerVerificationCodes.acceptedAt,
+          offerId: buyerVerificationCodes.offerId, // CRITICAL: Include offer ID
         })
         .from(buyerVerificationCodes)
         .where(
@@ -14678,6 +14680,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           verificationCode: transaction.verificationCode,
           secondVerificationCode: transaction.secondVerificationCode,
           confirmedAt: transaction.acceptedAt,
+          farmerOfferId: transaction.offerId, // CRITICAL: Include farmer offer ID
+          offerId: transaction.offerId, // Also include as offerId
           status: "confirmed",
           paymentConfirmed: true, // Always true - no payment confirmation required
           paymentConfirmedAt: transaction.acceptedAt, // Use acceptance date
@@ -14692,6 +14696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch confirmed transactions" });
     }
   });
+  */
 
   // Get buyer confirmed transactions (RESTRUCTURED - all accepted offers with dual status system)
   app.get("/api/buyer/verification-codes/:buyerId", async (req, res) => {
@@ -14848,7 +14853,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: transaction.id,
           notificationId: transaction.notificationId,
           farmerId: farmerId,
-          farmerOfferId: transaction.offerId, // CRITICAL: Include farmer offer ID for traceability
+          farmerOfferId: transaction.offerId || transaction.offer_id, // CRITICAL: Include farmer offer ID for traceability
+          offerId: transaction.offerId || transaction.offer_id, // Also include as offerId for backward compatibility
           buyerId: transaction.buyerId,
           buyerName: transaction.buyerName,
           buyerCompany: transaction.company || "Agricultural Trading Company",

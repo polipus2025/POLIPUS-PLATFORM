@@ -137,7 +137,7 @@ export default function FrontPage() {
               />
             </div>
             {/* Liberian Flag positioned in the middle of the box on the upper side */}
-            <div className="absolute -top-2 sm:-top-1 left-1/2 transform -translate-x-1/2 w-16 h-11 sm:w-24 sm:h-16 rounded-md overflow-hidden shadow-md border border-gray-200">
+            <div className="absolute -top-6 sm:-top-4 left-1/2 transform -translate-x-1/2 w-16 h-11 sm:w-24 sm:h-16 rounded-md overflow-hidden shadow-md border border-gray-200">
               <svg viewBox="0 0 190 100" className="w-full h-full">
                 {/* Red and white stripes */}
                 <rect width="190" height="100" fill="#BF0A30"/>

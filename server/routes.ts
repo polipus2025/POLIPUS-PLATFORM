@@ -14962,7 +14962,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyerVerificationCodes.farmerId, dbId.toString()),
-            eq(buyerVerificationCodes.status, 'active'),
+            or(
+              eq(buyerVerificationCodes.status, 'active'),
+              eq(buyerVerificationCodes.status, 'bags_requested')  // ✅ Include bags requested offers
+            ),
             isNull(buyerVerificationCodes.secondVerificationCode)
           )
         )

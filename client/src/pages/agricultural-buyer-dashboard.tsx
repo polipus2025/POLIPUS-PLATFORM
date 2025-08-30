@@ -69,13 +69,12 @@ function CounterOffersTab() {
   // Accept counter-offer mutation
   const acceptCounterOfferMutation = useMutation({
     mutationFn: async (responseId: string) => {
-      const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/accept`, {
+      return await apiRequest(`/api/buyer/counter-offers/${responseId}/accept`, {
         method: "POST",
         body: JSON.stringify({
           buyerId: user?.id
         })
       });
-      return result.json();
     },
     onSuccess: (data) => {
       if (data.success) {
@@ -104,14 +103,13 @@ function CounterOffersTab() {
   // Reject counter-offer mutation
   const rejectCounterOfferMutation = useMutation({
     mutationFn: async ({ responseId, reason }: { responseId: string; reason: string }) => {
-      const result = await apiRequest(`/api/buyer/counter-offers/${responseId}/reject`, {
+      return await apiRequest(`/api/buyer/counter-offers/${responseId}/reject`, {
         method: "POST",
         body: JSON.stringify({
           buyerId: user?.id,
           rejectionReason: reason
         })
       });
-      return result.json();
     },
     onSuccess: (data) => {
       if (data.success) {

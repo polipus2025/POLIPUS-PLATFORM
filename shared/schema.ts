@@ -122,6 +122,7 @@ export const qrBatches = pgTable("qr_batches", {
   buyerName: text("buyer_name").notNull(),
   farmerId: text("farmer_id").notNull(),
   farmerName: text("farmer_name").notNull(),
+  productOfferId: text("product_offer_id"), // 🔒 LOCKED: Product Offer ID for complete traceability
   
   // Enhanced Product Information
   commodityType: text("commodity_type").notNull(), // cocoa, coffee, palm_oil, etc.
@@ -298,6 +299,7 @@ export const warehouseTransactions = pgTable("warehouse_transactions", {
   buyerName: text("buyer_name").notNull(),
   farmerId: text("farmer_id").notNull(),
   farmerName: text("farmer_name").notNull(),
+  productOfferId: text("product_offer_id"), // CRITICAL: Product Offer ID for complete traceability
   commodityType: text("commodity_type").notNull(),
   quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
   unit: text("unit").notNull(),

@@ -15303,7 +15303,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         warehouseTransactionsResult = await db.execute(sql`
           SELECT 
             wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
-            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name, 
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.product_offer_id, 
             wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
             wt.received_at, wt.status, wt.processed_by, wt.processed_at, wt.notes,
             wt.qr_batch_generated, wt.batch_code,
@@ -15317,7 +15318,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         warehouseTransactionsResult = await db.execute(sql`
           SELECT 
             wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
-            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name, 
+            wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.product_offer_id, 
             wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
             wt.received_at, wt.status, wt.processed_by, wt.processed_at, wt.notes,
             wt.qr_batch_generated, wt.batch_code,
@@ -15335,6 +15337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmerName: row.farmer_name,
         buyerId: row.buyer_id,
         buyerName: row.buyer_name,
+        productOfferId: row.product_offer_id, // 🔒 LOCKED: Product Offer ID traceability
         commodityType: row.commodity_type,
         quantity: parseFloat(row.quantity),
         unit: row.unit,
@@ -15670,6 +15673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             buyerName: request.buyerName,
             farmerId: request.farmerId,
             farmerName: request.farmerName,
+            productOfferId: request.productOfferId, // 🔒 LOCKED: Product Offer ID traceability
             commodityType: request.commodityType,
             quantity: request.quantity,
             unit: request.unit,
@@ -15730,6 +15734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           SELECT 
             wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
             wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.product_offer_id,
             wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
             wt.status, wt.qr_batch_generated, wt.batch_code,
             cw.warehouse_name, cw.warehouse_id
@@ -15746,6 +15751,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           SELECT 
             wt.id, wt.transaction_id, wt.verification_code, wt.payment_verification_code,
             wt.buyer_id, wt.buyer_name, wt.farmer_id, wt.farmer_name,
+            wt.product_offer_id,
             wt.commodity_type, wt.quantity, wt.unit, wt.total_value, wt.county,
             wt.status, wt.qr_batch_generated, wt.batch_code,
             cw.warehouse_name, cw.warehouse_id
@@ -15764,6 +15770,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmerName: row.farmer_name,
         buyerId: row.buyer_id,
         buyerName: row.buyer_name,
+        productOfferId: row.product_offer_id, // 🔒 LOCKED: Product Offer ID traceability for QR batches
         commodityType: row.commodity_type,
         quantity: parseFloat(row.quantity),
         unit: row.unit,
@@ -15931,6 +15938,7 @@ International compliance standards met`;
             INSERT INTO qr_batches (
               batch_code, warehouse_id, warehouse_name,
               buyer_id, buyer_name, farmer_id, farmer_name,
+              product_offer_id,
               commodity_type, total_bags, bag_weight, 
               total_weight, quality_grade, harvest_date, 
               inspection_data, eudr_compliance, gps_coordinates,
@@ -15938,6 +15946,7 @@ International compliance standards met`;
             ) VALUES (
               ${batchCode}, ${transaction.warehouse_id}, ${warehouseName},
               ${transaction.buyer_id}, ${transaction.buyer_name}, ${transaction.farmer_id}, ${transaction.farmer_name},
+              ${transaction.product_offer_id},
               ${transaction.commodity_type}, ${totalPackages}, ${packageWeight}, 
               ${totalQuantity}, 'Grade A', NOW(),
               ${JSON.stringify({ inspected: true, quality: 'excellent' })},

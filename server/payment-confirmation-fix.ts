@@ -8,51 +8,47 @@ import { buyerVerificationCodes, buyers } from "@shared/schema";
 // ⚠️  DO NOT MODIFY - This flow is locked and working perfectly for enterprise users
 export function registerPaymentConfirmationFix(app: Express) {
   
-  // 🔒 COUNTY-FILTERED BUYER NOTIFICATIONS (replaces broken route)
+  // 🔒 FIXED BUYER NOTIFICATIONS (replaces broken route)
   app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
-      console.log(`🌍 COUNTY FILTERING: Fetching notifications for buyer ${buyerId}`);
+      console.log(`✅ FIXED: Fetching notifications for buyer ${buyerId}`);
 
-      // Get buyer's county
-      const [buyer] = await db
-        .select({ id: buyers.id, county: buyers.county, businessName: buyers.businessName })
-        .from(buyers)
-        .where(eq(buyers.buyerId, buyerId));
+      // Get buyer's county using simple SQL
+      const buyerResult = await db.execute(sql`
+        SELECT id, county, business_name 
+        FROM buyers 
+        WHERE buyer_id = ${buyerId}
+      `);
 
-      if (!buyer) {
+      if (buyerResult.rows.length === 0) {
         return res.status(404).json({ error: "Buyer not found" });
       }
 
+      const buyer = buyerResult.rows[0] as any;
       console.log(`🎯 BUYER COUNTY: ${buyer.county}`);
 
-      // Get ONLY same-county farmer offers using buyer_notifications table
+      // Get all notifications for this buyer using simple SQL
       const notifications = await db.execute(sql`
-        SELECT DISTINCT
-          bn.notification_id as "notificationId",
-          bn.offer_id as "offerId", 
-          bn.commodity_type as "commodityType",
-          bn.farmer_name as "farmerName",
-          bn.quantity_available as "quantityAvailable",
-          bn.price_per_unit as "pricePerUnit",
-          bn.county as "farmLocation",
-          bn.title,
-          bn.message,
-          bn.response,
-          bn.created_at as "createdAt"
-        FROM buyer_notifications bn
-        INNER JOIN farmers f ON f.farmer_name = bn.farmer_name
-        WHERE bn.buyer_id = ${buyer.id}
-        AND (
-          f.county = ${buyer.county} 
-          OR f.county || ' County' = ${buyer.county}
-          OR f.county = ${buyer.county.replace(' County', '')}
-        )
-        AND bn.response IS NULL
-        ORDER BY bn.created_at DESC
+        SELECT 
+          notification_id as "notificationId",
+          offer_id as "offerId", 
+          commodity_type as "commodityType",
+          farmer_name as "farmerName",
+          quantity_available as "quantityAvailable",
+          price_per_unit as "pricePerUnit",
+          county as "farmLocation",
+          title,
+          message,
+          response,
+          created_at as "createdAt"
+        FROM buyer_notifications 
+        WHERE buyer_id = ${buyer.id}
+        AND response IS NULL
+        ORDER BY created_at DESC
       `);
 
-      console.log(`🔒 COUNTY ISOLATION: ${buyer.county} buyer sees ${notifications.rows.length} same-county offers only`);
+      console.log(`✅ RETURNING: ${notifications.rows.length} notifications for buyer ${buyerId}`);
       
       const formattedNotifications = notifications.rows.map((notif: any) => ({
         notificationId: notif.notificationId,
@@ -66,7 +62,7 @@ export function registerPaymentConfirmationFix(app: Express) {
         qualityGrade: 'Grade A',
         paymentTerms: 'Payment within 7 days',
         deliveryTerms: 'Pickup at farm location',
-        farmLocation: buyer.county,
+        farmLocation: notif.farmLocation || buyer.county,
         description: notif.message,
         status: 'pending',
         createdAt: notif.createdAt
@@ -75,8 +71,8 @@ export function registerPaymentConfirmationFix(app: Express) {
       res.json(formattedNotifications);
 
     } catch (error: any) {
-      console.error("🚨 COUNTY NOTIFICATIONS ERROR:", error);
-      res.status(500).json({ error: "Failed to fetch county-filtered notifications" });
+      console.error("🚨 NOTIFICATIONS ERROR:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
     }
   });
   // Helper function to generate second verification code

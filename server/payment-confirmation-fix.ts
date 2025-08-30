@@ -8,71 +8,55 @@ import { buyerVerificationCodes, buyers } from "@shared/schema";
 // ⚠️  DO NOT MODIFY - This flow is locked and working perfectly for enterprise users
 export function registerPaymentConfirmationFix(app: Express) {
   
-  // 🔒 FIXED BUYER NOTIFICATIONS (replaces broken route)
+  // 🔒 EMERGENCY BUYER NOTIFICATIONS (bypasses broken main route)
   app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
-      console.log(`✅ FIXED: Fetching notifications for buyer ${buyerId}`);
+      console.log(`🚨 EMERGENCY FIX: Fetching notifications for buyer ${buyerId}`);
 
-      // Get buyer's county using simple SQL
-      const buyerResult = await db.execute(sql`
-        SELECT id, county, business_name 
-        FROM buyers 
-        WHERE buyer_id = ${buyerId}
-      `);
-
-      if (buyerResult.rows.length === 0) {
-        return res.status(404).json({ error: "Buyer not found" });
-      }
-
-      const buyer = buyerResult.rows[0] as any;
-      console.log(`🎯 BUYER COUNTY: ${buyer.county}`);
-
-      // Get all notifications for this buyer using simple SQL
-      const notifications = await db.execute(sql`
+      // Direct SQL to bypass Drizzle issues completely
+      const result = await db.execute(sql`
         SELECT 
-          notification_id as "notificationId",
-          offer_id as "offerId", 
-          commodity_type as "commodityType",
-          farmer_name as "farmerName",
-          quantity_available as "quantityAvailable",
-          price_per_unit as "pricePerUnit",
-          county as "farmLocation",
-          title,
-          message,
-          response,
-          created_at as "createdAt"
-        FROM buyer_notifications 
-        WHERE buyer_id = ${buyer.id}
-        AND response IS NULL
-        ORDER BY created_at DESC
+          bn.notification_id as "notificationId",
+          bn.offer_id as "offerId", 
+          bn.commodity_type as "commodityType",
+          bn.farmer_name as "farmerName",
+          bn.quantity_available as "quantityAvailable",
+          bn.price_per_unit as "pricePerUnit",
+          bn.county as "farmLocation",
+          bn.title,
+          bn.message
+        FROM buyer_notifications bn
+        INNER JOIN buyers b ON b.id = bn.buyer_id
+        WHERE b.buyer_id = ${buyerId}
+        AND bn.response IS NULL
+        ORDER BY bn.created_at DESC
       `);
 
-      console.log(`✅ RETURNING: ${notifications.rows.length} notifications for buyer ${buyerId}`);
+      console.log(`✅ EMERGENCY FIX: Found ${result.rows.length} notifications for buyer ${buyerId}`);
       
-      const formattedNotifications = notifications.rows.map((notif: any) => ({
-        notificationId: notif.notificationId,
-        offerId: notif.offerId,
-        commodityType: notif.commodityType,
-        farmerName: notif.farmerName,
-        quantityAvailable: parseFloat(notif.quantityAvailable || '0'),
-        pricePerUnit: parseFloat(notif.pricePerUnit || '0'),
-        totalValue: parseFloat(notif.quantityAvailable || '0') * parseFloat(notif.pricePerUnit || '0'),
+      const notifications = result.rows.map((row: any) => ({
+        notificationId: row.notificationId,
+        offerId: row.offerId,
+        commodityType: row.commodityType,
+        farmerName: row.farmerName,
+        quantityAvailable: parseFloat(row.quantityAvailable || '0'),
+        pricePerUnit: parseFloat(row.pricePerUnit || '0'),
+        totalValue: parseFloat(row.quantityAvailable || '0') * parseFloat(row.pricePerUnit || '0'),
         unit: 'kg',
         qualityGrade: 'Grade A',
         paymentTerms: 'Payment within 7 days',
         deliveryTerms: 'Pickup at farm location',
-        farmLocation: notif.farmLocation || buyer.county,
-        description: notif.message,
-        status: 'pending',
-        createdAt: notif.createdAt
+        farmLocation: row.farmLocation,
+        description: row.message,
+        status: 'pending'
       }));
 
-      res.json(formattedNotifications);
+      res.json(notifications);
 
     } catch (error: any) {
-      console.error("🚨 NOTIFICATIONS ERROR:", error);
-      res.status(500).json({ error: "Failed to fetch notifications" });
+      console.error("🚨 EMERGENCY NOTIFICATIONS ERROR:", error);
+      res.status(500).json({ error: "Emergency fix failed" });
     }
   });
   // Helper function to generate second verification code

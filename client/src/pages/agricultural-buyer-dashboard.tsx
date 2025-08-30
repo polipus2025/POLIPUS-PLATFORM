@@ -909,7 +909,7 @@ export default function AgriculturalBuyerDashboard() {
                         activeTab === 'orders' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
                       }`}
                     >
-                      📋 My Orders (1st Code)
+                      📋 My Orders
                     </button>
                     <button
                       onClick={() => {
@@ -920,7 +920,7 @@ export default function AgriculturalBuyerDashboard() {
                         activeTab === 'confirmed' ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' : 'text-slate-700'
                       }`}
                     >
-                      ✅ Confirmed Deals (2nd Code)
+                      ✅ Confirmed Deals
                     </button>
                   </div>
                 </div>
@@ -1150,7 +1150,7 @@ export default function AgriculturalBuyerDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Clock className="w-5 h-5 mr-2 text-blue-600" />
-                  📋 My Orders (1st Verification Code)
+                  📋 My Orders
                 </CardTitle>
                 <CardDescription>
                   🔄 STAGE 1: Offers you've accepted - awaiting farmer payment confirmation and bag requests
@@ -1604,7 +1604,7 @@ export default function AgriculturalBuyerDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                  ✅ Confirmed Deals (2nd Verification Code)
+                  ✅ Confirmed Deals
                 </CardTitle>
                 <CardDescription>
                   🎯 STAGE 2: Final deals where farmer confirmed payment - complete transaction archive

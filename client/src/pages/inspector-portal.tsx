@@ -15,147 +15,96 @@ export default function InspectorPortal() {
             <Shield className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Inspector Portal Access
+            Inspector Login Portal
           </h1>
           <p className="text-lg text-gray-600">
-            Select your inspector type to access the appropriate portal
+            Choose your inspector type to login to your portal
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Land Inspector Card */}
-          <Card className="shadow-xl border-0 hover:shadow-2xl transition-shadow duration-300">
-            <CardHeader className="text-center pb-4">
-              <div className="mx-auto mb-4 w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
-                <MapPin className="w-8 h-8 text-white" />
+          {/* Land Inspector Login */}
+          <Card className="shadow-xl border-0 hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group"
+                onClick={() => navigate("/land-inspector-login")}>
+            <CardHeader className="text-center pb-6">
+              <div className="mx-auto mb-4 w-20 h-20 bg-green-600 rounded-full flex items-center justify-center group-hover:bg-green-700 transition-colors">
+                <MapPin className="w-10 h-10 text-white" />
               </div>
-              <CardTitle className="text-xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
                 Land Inspector
               </CardTitle>
-              <CardDescription className="text-gray-600">
-                Agricultural Land & Crop Inspection System
+              <CardDescription className="text-gray-600 text-base">
+                Agricultural Land & Crop Inspection
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Farm plot inspections</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Crop quality assessments</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Land compliance monitoring</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Field data collection</span>
-                </div>
-              </div>
-              
+            <CardContent className="text-center">
               <Button
                 onClick={() => navigate("/land-inspector-login")}
-                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-bold text-lg"
                 data-testid="button-land-inspector"
               >
-                <div className="flex items-center space-x-2">
-                  <span>Access Land Inspector Portal</span>
-                  <ArrowRight className="w-4 h-4" />
+                <div className="flex items-center justify-center space-x-3">
+                  <Shield className="w-5 h-5" />
+                  <span>LOGIN</span>
+                  <ArrowRight className="w-5 h-5" />
                 </div>
               </Button>
             </CardContent>
           </Card>
 
-          {/* Port Inspector Card */}
-          <Card className="shadow-xl border-0 hover:shadow-2xl transition-shadow duration-300">
-            <CardHeader className="text-center pb-4">
-              <div className="mx-auto mb-4 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                <Ship className="w-8 h-8 text-white" />
+          {/* Port Inspector Login */}
+          <Card className="shadow-xl border-0 hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group"
+                onClick={() => navigate("/port-inspector-login")}>
+            <CardHeader className="text-center pb-6">
+              <div className="mx-auto mb-4 w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-700 transition-colors">
+                <Ship className="w-10 h-10 text-white" />
               </div>
-              <CardTitle className="text-xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
                 Port Inspector
               </CardTitle>
-              <CardDescription className="text-gray-600">
-                Maritime Port & Export Inspection System
+              <CardDescription className="text-gray-600 text-base">
+                Maritime Port & Export Inspection
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Export cargo inspections</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Port facility compliance</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Maritime documentation</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Shipping quality control</span>
-                </div>
-              </div>
-              
+            <CardContent className="text-center">
               <Button
                 onClick={() => navigate("/port-inspector-login")}
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg"
                 data-testid="button-port-inspector"
               >
-                <div className="flex items-center space-x-2">
-                  <span>Access Port Inspector Portal</span>
-                  <ArrowRight className="w-4 h-4" />
+                <div className="flex items-center justify-center space-x-3">
+                  <Shield className="w-5 h-5" />
+                  <span>LOGIN</span>
+                  <ArrowRight className="w-5 h-5" />
                 </div>
               </Button>
             </CardContent>
           </Card>
 
-          {/* Warehouse Inspector Card */}
-          <Card className="shadow-xl border-0 hover:shadow-2xl transition-shadow duration-300">
-            <CardHeader className="text-center pb-4">
-              <div className="mx-auto mb-4 w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center">
-                <Warehouse className="w-8 h-8 text-white" />
+          {/* Warehouse Inspector Login */}
+          <Card className="shadow-xl border-0 hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group"
+                onClick={() => navigate("/warehouse-inspector-login")}>
+            <CardHeader className="text-center pb-6">
+              <div className="mx-auto mb-4 w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center group-hover:bg-purple-700 transition-colors">
+                <Warehouse className="w-10 h-10 text-white" />
               </div>
-              <CardTitle className="text-xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
                 Warehouse Inspector
               </CardTitle>
-              <CardDescription className="text-gray-600">
-                Storage Facility & Warehouse Compliance System
+              <CardDescription className="text-gray-600 text-base">
+                Storage Facility & Warehouse Compliance
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Storage facility compliance</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Inventory quality control</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Temperature monitoring</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-700">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Regulatory documentation</span>
-                </div>
-              </div>
-              
+            <CardContent className="text-center">
               <Button
                 onClick={() => navigate("/warehouse-inspector-login")}
-                className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+                className="w-full h-14 bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg"
                 data-testid="button-warehouse-inspector"
               >
-                <div className="flex items-center space-x-2">
-                  <span>Access Warehouse Portal</span>
-                  <ArrowRight className="w-4 h-4" />
+                <div className="flex items-center justify-center space-x-3">
+                  <Shield className="w-5 h-5" />
+                  <span>LOGIN</span>
+                  <ArrowRight className="w-5 h-5" />
                 </div>
               </Button>
             </CardContent>

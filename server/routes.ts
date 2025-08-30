@@ -17989,25 +17989,41 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const { buyerId } = req.params;
       console.log(`📬 Fetching counter-offers for buyer: ${buyerId}`);
 
-      // Map string buyer ID to integer string for database lookup
-      let actualBuyerId = buyerId;
-      if (buyerId === 'BYR-20250825-362') {
-        actualBuyerId = '19'; // Map to stored value
+      // Get the numeric buyer ID from the buyers table
+      const [buyer] = await db
+        .select()
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+
+      if (!buyer) {
+        return res.status(404).json({
+          success: false,
+          message: "Buyer not found"
+        });
       }
 
-      // Get counter-offers (negotiations) for this buyer's offers
+      console.log(`🔍 Using numeric buyer ID: ${buyer.id} for counter-offers lookup`);
+
+      // Get counter-offers (negotiations) for this buyer's offers using simple approach
       const counterOffers = await db.execute(sql`
         SELECT 
-          ero.*,
+          ero.response_id,
+          ero.offer_id,
+          ero.exporter_id,
+          ero.exporter_company,
+          ero.counter_offer_price,
+          ero.response_notes,
+          ero.response_date,
+          ero.status,
           beo.commodity,
           beo.quantity_available,
           beo.price_per_mt as original_price,
           beo.total_value,
-          beo.offer_id as original_offer_id,
-          beo.status as original_offer_status
+          beo.custody_id,
+          beo.origin_location
         FROM exporter_offer_responses ero
-        JOIN buyer_exporter_offers beo ON ero.offer_id = beo.offer_id
-        WHERE beo.buyer_id = ${actualBuyerId} 
+        INNER JOIN buyer_exporter_offers beo ON ero.offer_id = beo.offer_id
+        WHERE beo.buyer_id = ${buyer.id.toString()}
         AND ero.response_type = 'negotiate'
         AND ero.status = 'negotiating'
         ORDER BY ero.created_at DESC

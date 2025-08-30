@@ -14585,7 +14585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Buyer not found" });
       }
       
-      // Fetch real confirmed transactions from database using internal buyer ID
+      // 🎯 STAGE 2: Fetch ONLY payment-confirmed transactions (Confirmed Deals)
       const realTransactions = await db
         .select({
           id: buyerVerificationCodes.id,
@@ -14608,7 +14608,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           acceptedAt: buyerVerificationCodes.acceptedAt,
         })
         .from(buyerVerificationCodes)
-        .where(eq(buyerVerificationCodes.buyerId, buyer.id.toString()))
+        .where(
+          and(
+            eq(buyerVerificationCodes.buyerId, buyer.id.toString()),
+            // 🎯 CRITICAL: Only show offers WITH payment confirmation (Stage 2)
+            isNotNull(buyerVerificationCodes.secondVerificationCode) // HAS second verification code
+          )
+        )
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
 
       // Format the transactions for the frontend with REAL payment status
@@ -14674,7 +14680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Buyer not found" });
       }
       
-      // Fetch ALL accepted offers (active, payment_confirmed, bags_requested) using internal buyer ID
+      // 🔄 STAGE 1: Fetch ONLY offers with 1st code but NO payment confirmation (My Orders)
       const verificationCodes = await db
         .select({
           id: buyerVerificationCodes.id,
@@ -14703,8 +14709,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyerVerificationCodes.buyerId, buyer.id.toString()),
-            // Include all accepted offers regardless of payment status
-            ne(buyerVerificationCodes.status, 'pending')
+            // 🎯 CRITICAL: Only show offers WITHOUT payment confirmation (Stage 1)
+            ne(buyerVerificationCodes.status, 'pending'),
+            isNull(buyerVerificationCodes.secondVerificationCode) // NO second verification code
           )
         )
         .orderBy(desc(buyerVerificationCodes.acceptedAt));
@@ -15106,29 +15113,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For Paolo's transactions, update the real database record
       if (farmerId === "FARMER-1755883520291-288") {
-        // Handle ID offset: frontend sends 1000+ IDs for database transactions
-        let actualId = parseInt(transactionId);
-        if (actualId > 1000) {
-          // This is a database transaction ID with offset, need to find the verification code by offer
-          const offerDatabaseId = actualId - 1000;
-          const [offer] = await db
+        // 🔄 FIXED: Handle Farmer Offer ID format (FPO-xxxx) directly
+        let actualId;
+        
+        if (transactionId.startsWith('FPO-')) {
+          // Direct lookup by Farmer Offer ID
+          console.log(`🔍 Looking up verification record for Offer ID: ${transactionId}`);
+          const [verificationRecord] = await db
             .select()
-            .from(farmerProductOffers)
-            .where(eq(farmerProductOffers.id, offerDatabaseId));
+            .from(buyerVerificationCodes)
+            .where(eq(buyerVerificationCodes.offerId, transactionId));
           
-          if (offer) {
-            // Find verification code by offer ID
-            const [verificationRecord] = await db
+          if (verificationRecord) {
+            actualId = verificationRecord.id;
+            console.log(`✅ Found verification record with ID: ${actualId}`);
+          } else {
+            console.log(`❌ No verification record found for Offer ID: ${transactionId}`);
+            return res.status(404).json({ error: "Transaction not found for Farmer Offer ID: " + transactionId });
+          }
+        } else {
+          // Fallback: Handle integer ID offset for backward compatibility
+          actualId = parseInt(transactionId);
+          if (actualId > 1000) {
+            const offerDatabaseId = actualId - 1000;
+            const [offer] = await db
               .select()
-              .from(buyerVerificationCodes)
-              .where(eq(buyerVerificationCodes.offerId, offer.offerId));
+              .from(farmerProductOffers)
+              .where(eq(farmerProductOffers.id, offerDatabaseId));
             
-            if (verificationRecord) {
-              actualId = verificationRecord.id;
+            if (offer) {
+              const [verificationRecord] = await db
+                .select()
+                .from(buyerVerificationCodes)
+                .where(eq(buyerVerificationCodes.offerId, offer.offerId));
+              
+              if (verificationRecord) {
+                actualId = verificationRecord.id;
+              }
             }
           }
         }
         
+        // Validate actualId before database update
+        if (!actualId || isNaN(actualId)) {
+          console.log(`❌ Invalid actualId: ${actualId}`);
+          return res.status(400).json({ error: "Invalid transaction ID for update" });
+        }
+        
+        console.log(`🔄 Updating verification code record with ID: ${actualId}`);
         const [updatedTransaction] = await db
           .update(buyerVerificationCodes)
           .set({

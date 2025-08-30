@@ -19,7 +19,6 @@ import {
   BarChart3,
   PhoneCall,
   MessageCircle,
-  Calendar,
   FileText,
   Settings,
   LogOut,
@@ -770,38 +769,7 @@ export default function AgriculturalBuyerDashboard() {
     }
   };
 
-  // 💳 PAYMENT VALIDATION MUTATION
-  const paymentValidationMutation = useMutation({
-    mutationFn: async ({ notificationId, metadata }: { notificationId: string; metadata: string }) => {
-      return apiRequest("POST", "/api/buyer/validate-payment", {
-        notificationId,
-        metadata,
-        buyerId: buyerId,
-        buyerName,
-        company
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Payment Validated",
-        description: "Payment has been confirmed as received",
-      });
-      // Refresh notifications to update status
-      queryClient.invalidateQueries({ queryKey: ['/api/buyer/notifications', buyerId] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Validation Failed",
-        description: error.message || "Failed to validate payment",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // 💳 HANDLE PAYMENT VALIDATION
-  const handleValidatePayment = (notificationId: string, metadata: string) => {
-    paymentValidationMutation.mutate({ notificationId, metadata });
-  };
+  // Payment validation functionality removed as requested
 
   // 🚛 WAREHOUSE DISPATCH SCHEDULING STATE
   const [dispatchDialog, setDispatchDialog] = useState({
@@ -813,19 +781,23 @@ export default function AgriculturalBuyerDashboard() {
   // 🚛 WAREHOUSE DISPATCH SCHEDULING MUTATION
   const warehouseDispatchMutation = useMutation({
     mutationFn: async (data: { transaction: any; dispatchDate: Date }) => {
-      return apiRequest("POST", "/api/buyer/schedule-warehouse-dispatch", {
-        transactionId: data.transaction.id || data.transaction.notificationId,
-        verificationCode: data.transaction.verificationCode,
-        buyerId: buyerId,
-        buyerName,
-        company,
-        commodityType: data.transaction.commodityType,
-        quantity: data.transaction.quantityAvailable || data.transaction.quantity,
-        unit: data.transaction.unit,
-        totalValue: data.transaction.totalValue,
-        county: data.transaction.county,
-        farmLocation: data.transaction.farmLocation,
-        dispatchDate: data.dispatchDate.toISOString().split('T')[0] // YYYY-MM-DD format
+      return apiRequest("/api/buyer/schedule-warehouse-dispatch", {
+        method: "POST",
+        body: JSON.stringify({
+          transactionId: data.transaction.id || data.transaction.notificationId,
+          verificationCode: data.transaction.verificationCode,
+          buyerId: buyerId,
+          buyerName,
+          company,
+          commodityType: data.transaction.commodityType,
+          quantity: data.transaction.quantityAvailable || data.transaction.quantity,
+          unit: data.transaction.unit,
+          totalValue: data.transaction.totalValue,
+          county: data.transaction.county,
+          farmLocation: data.transaction.farmLocation,
+          dispatchDate: data.dispatchDate.toISOString().split('T')[0] // YYYY-MM-DD format
+        }),
+        headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: (response) => {
@@ -1184,7 +1156,7 @@ export default function AgriculturalBuyerDashboard() {
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              {notification.type === 'payment_confirmation' ? (
+                              {notification.type === 'delivery_request' ? (
                                 <>
                                   <h4 className="font-semibold text-lg text-green-600">{notification.title}</h4>
                                   <p className="text-sm text-gray-600">{notification.message}</p>
@@ -1198,9 +1170,9 @@ export default function AgriculturalBuyerDashboard() {
                                 </>
                               )}
                             </div>
-                            {notification.type === 'payment_confirmation' ? (
+                            {notification.type === 'delivery_request' ? (
                               <Badge className="bg-green-100 text-green-800">
-                                Payment Confirmation
+                                Delivery Request
                               </Badge>
                             ) : (
                               <Badge className={!notification.response ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
@@ -1249,14 +1221,14 @@ export default function AgriculturalBuyerDashboard() {
                             <div className="text-xs text-gray-500">
                               Posted: {new Date(notification.createdAt).toLocaleString()}
                             </div>
-                            {notification.type === 'payment_confirmation' ? (
+                            {notification.type === 'delivery_request' ? (
                               <Button 
-                                onClick={() => handleValidatePayment(notification.notificationId, notification.metadata)}
+                                onClick={() => handleScheduleDispatch(notification)}
                                 className="bg-blue-600 hover:bg-blue-700"
-                                data-testid={`button-validate-payment-${notification.notificationId}`}
+                                data-testid={`button-schedule-dispatch-${notification.notificationId}`}
                               >
-                                <DollarSign className="w-4 h-4 mr-2" />
-                                Validate Payment Received
+                                <Truck className="w-4 h-4 mr-2" />
+                                Schedule Warehouse Pickup
                               </Button>
                             ) : !notification.response ? (
                               <Button 

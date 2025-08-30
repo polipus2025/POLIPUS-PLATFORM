@@ -59,7 +59,20 @@ export function registerPaymentConfirmationFix(app: Express) {
       res.status(500).json({ error: "Emergency fix failed" });
     }
   });
-  // Helper function to generate second verification code
+  // Helper function to generate first verification code (buyer accepts)
+  function generateFirstVerificationCode(): string {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += Math.random() < 0.5 ? 
+        letters.charAt(Math.floor(Math.random() * letters.length)) :
+        numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return code;
+  }
+
+  // Helper function to generate second verification code (farmer confirms)
   function generateSecondVerificationCode(): string {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numbers = '0123456789';
@@ -216,6 +229,81 @@ export function registerPaymentConfirmationFix(app: Express) {
     } catch (error: any) {
       console.error("🚨 EMERGENCY CONFIRMED TRANSACTIONS ERROR:", error);
       res.status(500).json({ error: "Failed to fetch confirmed transactions" });
+    }
+  });
+
+  // 🔒 EMERGENCY BUYER ACCEPT OFFER (with proper 2-step workflow)
+  app.post("/api/buyer/accept-offer", async (req, res) => {
+    try {
+      const { notificationId, buyerId, buyerName, company } = req.body;
+      console.log(`🔒 2-STEP WORKFLOW: Buyer ${buyerId} accepting notification ${notificationId} - AWAITING FARMER PAYMENT CONFIRMATION`);
+
+      // Direct SQL to avoid Drizzle errors and create accepted offer awaiting farmer confirmation
+      const result = await db.execute(sql`
+        INSERT INTO buyer_verification_codes (
+          notification_id, buyer_id, buyer_name, farmer_id, farmer_name, 
+          farm_location, commodity_type, quantity_available, price_per_unit,
+          total_value, unit, payment_terms, delivery_terms,
+          verification_code, accepted_at, payment_confirmed, 
+          awaiting_payment_confirmation, company, offer_id
+        )
+        SELECT 
+          bn.notification_id,
+          bn.buyer_id,
+          ${buyerName},
+          bn.farmer_id,
+          bn.farmer_name,
+          bn.county,
+          bn.commodity_type,
+          bn.quantity_available,
+          bn.price_per_unit,
+          bn.quantity_available * bn.price_per_unit,
+          'tons',
+          'Payment within 7 days of delivery',
+          'Pickup at farm location',
+          ${generateFirstVerificationCode()},
+          NOW(),
+          false,
+          true,
+          ${company || ''},
+          bn.offer_id
+        FROM buyer_notifications bn
+        WHERE bn.notification_id = ${notificationId}
+        AND bn.buyer_id = (SELECT id FROM buyers WHERE buyer_id = ${buyerId})
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Notification not found or already processed" });
+      }
+
+      const transaction = result.rows[0] as any;
+
+      // Mark notification as responded to
+      await db.execute(sql`
+        UPDATE buyer_notifications 
+        SET response = 'accepted', updated_at = NOW()
+        WHERE notification_id = ${notificationId}
+      `);
+
+      console.log(`✅ STEP 1 COMPLETE: Offer accepted, awaiting farmer payment confirmation`);
+      console.log(`📋 First Verification Code: ${transaction.verification_code}`);
+      console.log(`⏳ Farmer must confirm payment to complete transaction`);
+
+      res.json({
+        success: true,
+        message: "Offer accepted! Now waiting for farmer to confirm payment received.",
+        verificationCode: transaction.verification_code,
+        status: "accepted_awaiting_payment",
+        paymentConfirmed: false,
+        awaitingPaymentConfirmation: true,
+        transactionId: transaction.id,
+        offerId: transaction.offer_id
+      });
+
+    } catch (error: any) {
+      console.error("🚨 EMERGENCY ACCEPT ERROR:", error);
+      res.status(500).json({ error: "Failed to accept offer" });
     }
   });
 }

@@ -15984,6 +15984,13 @@ Farm Size: 2.5 hectares
 Certificate: LACRA-CERT-${transaction.farmer_id}
 Status: CERTIFIED ORGANIC
 
+BUYER INFORMATION
+Buyer: ${transaction.buyer_name}
+Buyer ID: ${transaction.buyer_id}
+Offer ID: ${transaction.product_offer_id}
+Purchase Agreement: VERIFIED
+Contract Status: ACTIVE
+
 QUALITY ASSURANCE
 Inspector: WH-INS-001
 Warehouse: ${warehouseName}

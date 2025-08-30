@@ -170,7 +170,7 @@ export default function FarmerDashboard() {
     const pricePerUnit = parseFloat(formData.get('pricePerUnit') as string);
     
     const offerData = {
-      farmerId: parseInt(farmerId.split('-')[2]) || 1,
+      farmerId: farmerId, // 🔒 FIXED: Send full farmer ID string for proper backend lookup
       commodityType: formData.get('commodityType') as string,
       quantityAvailable: quantityAvailable.toString(),
       unit: formData.get('unit') as string || 'tons',

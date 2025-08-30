@@ -14329,7 +14329,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if the farmer offer is still available for acceptance
       const [farmerOffer] = await tx
-        .select({ status: farmerProductOffers.status })
+        .select({ 
+          status: farmerProductOffers.status,
+          farmerId: farmerProductOffers.farmerId 
+        })
         .from(farmerProductOffers)
         .where(eq(farmerProductOffers.offerId, currentNotification.offerId));
         
@@ -14383,7 +14386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company: company || 'Agricultural Trading Company',
         notificationId,
         offerId: notification.offerId,
-        farmerId: notification.farmerId,
+        farmerId: farmerOffer.farmerId, // ✅ Get farmer_id from farmer offer table
         farmerName: notification.farmerName,
         commodityType: notification.commodityType,
         quantityAvailable: notification.quantityAvailable,

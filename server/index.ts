@@ -50,10 +50,10 @@ if (MAINTENANCE_MODE) {
       // Initialize core system quickly
       const httpServer = await registerRoutes(app);
       
-      // 🔒 PERMANENT FIX: Emergency payment confirmation routes (LOCKED FOR ALL COUNTRIES)
+      // 🔒 PERMANENT FIX: Emergency payment confirmation routes (LOCKED - NO CHANGES)
       const { registerPaymentConfirmationFix } = await import('./payment-confirmation-fix');
       registerPaymentConfirmationFix(app);
-      console.log('🔒 PAYMENT CONFIRMATION FIX LOCKED - All countries supported');
+      console.log('🔒 PAYMENT CONFIRMATION WORKFLOW LOCKED - All counties supported');
       
       registerEudrRoutes(app);
       const { registerSimpleEudrRoutes } = await import('./eudr-simple-routes');

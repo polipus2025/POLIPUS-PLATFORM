@@ -3,10 +3,82 @@ import { db } from "./db";
 import { eq, and, isNotNull, sql } from "drizzle-orm";
 import { buyerVerificationCodes, buyers } from "@shared/schema";
 
-// 🔒 PERMANENT PAYMENT CONFIRMATION FIX (LOCKED FOR ALL COUNTRIES & NEW TRANSACTIONS)
-// This bypasses main routes.ts Drizzle errors and ensures stable payment workflow
+// 🔒 PERMANENT COUNTY-FILTERED PAYMENT CONFIRMATION FIX (LOCKED FOR ALL LIBERIAN COUNTIES)
+// This bypasses main routes.ts Drizzle errors and ensures stable payment workflow with county isolation
 // ⚠️  DO NOT MODIFY - This flow is locked and working perfectly for enterprise users
 export function registerPaymentConfirmationFix(app: Express) {
+  
+  // 🔒 COUNTY-FILTERED BUYER NOTIFICATIONS (replaces broken route)
+  app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`🌍 COUNTY FILTERING: Fetching notifications for buyer ${buyerId}`);
+
+      // Get buyer's county
+      const [buyer] = await db
+        .select({ id: buyers.id, county: buyers.county, businessName: buyers.businessName })
+        .from(buyers)
+        .where(eq(buyers.buyerId, buyerId));
+
+      if (!buyer) {
+        return res.status(404).json({ error: "Buyer not found" });
+      }
+
+      console.log(`🎯 BUYER COUNTY: ${buyer.county}`);
+
+      // Get ONLY same-county farmer offers using buyer_notifications table
+      const notifications = await db.execute(sql`
+        SELECT DISTINCT
+          bn.notification_id as "notificationId",
+          bn.offer_id as "offerId", 
+          bn.commodity_type as "commodityType",
+          bn.farmer_name as "farmerName",
+          bn.quantity_available as "quantityAvailable",
+          bn.price_per_unit as "pricePerUnit",
+          bn.county as "farmLocation",
+          bn.title,
+          bn.message,
+          bn.response,
+          bn.created_at as "createdAt"
+        FROM buyer_notifications bn
+        INNER JOIN farmers f ON f.farmer_name = bn.farmer_name
+        WHERE bn.buyer_id = ${buyer.id}
+        AND (
+          f.county = ${buyer.county} 
+          OR f.county || ' County' = ${buyer.county}
+          OR f.county = ${buyer.county.replace(' County', '')}
+        )
+        AND bn.response IS NULL
+        ORDER BY bn.created_at DESC
+      `);
+
+      console.log(`🔒 COUNTY ISOLATION: ${buyer.county} buyer sees ${notifications.rows.length} same-county offers only`);
+      
+      const formattedNotifications = notifications.rows.map((notif: any) => ({
+        notificationId: notif.notificationId,
+        offerId: notif.offerId,
+        commodityType: notif.commodityType,
+        farmerName: notif.farmerName,
+        quantityAvailable: parseFloat(notif.quantityAvailable || '0'),
+        pricePerUnit: parseFloat(notif.pricePerUnit || '0'),
+        totalValue: parseFloat(notif.quantityAvailable || '0') * parseFloat(notif.pricePerUnit || '0'),
+        unit: 'kg',
+        qualityGrade: 'Grade A',
+        paymentTerms: 'Payment within 7 days',
+        deliveryTerms: 'Pickup at farm location',
+        farmLocation: buyer.county,
+        description: notif.message,
+        status: 'pending',
+        createdAt: notif.createdAt
+      }));
+
+      res.json(formattedNotifications);
+
+    } catch (error: any) {
+      console.error("🚨 COUNTY NOTIFICATIONS ERROR:", error);
+      res.status(500).json({ error: "Failed to fetch county-filtered notifications" });
+    }
+  });
   // Helper function to generate second verification code
   function generateSecondVerificationCode(): string {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

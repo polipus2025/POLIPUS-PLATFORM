@@ -727,7 +727,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // 2. Get notifications for a specific buyer
-  app.get("/api/buyer-notifications/:buyerId", async (req, res) => {
+  // 🔒 DISABLED - OLD NOTIFICATION ROUTE (NO COUNTY FILTERING) - REPLACED BY COUNTY FILTERING SYSTEM
+  /* app.get("/api/buyer-notifications/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
       console.log(`Fetching old buyer notifications for buyer: ${buyerId}`);
@@ -785,6 +786,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  */
 
   // 3. Buyer confirms/rejects notification (First-Click-Wins Logic)
   app.post("/api/buyer-notifications/:notificationId/respond", async (req, res) => {
@@ -14222,8 +14224,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 2. Get buyer notifications
 
-  // 2. Get buyer notifications  
-  app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
+  // 🔒 DISABLED - OLD BUYER NOTIFICATIONS (NO PROPER COUNTY FILTERING) - REPLACED BY COUNTY FILTERING SYSTEM
+  // ⚠️  DO NOT RE-ENABLE - This route bypasses county isolation and shows all offers
+  /* app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
       console.log(`Fetching notifications for buyer ID: ${buyerId}`);
@@ -14283,6 +14286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch notifications" });
     }
   });
+  */
 
   // 3. Buyer accepts the offer - first come, first served
   app.post("/api/buyer/accept-offer", async (req, res) => {

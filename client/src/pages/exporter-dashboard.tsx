@@ -154,35 +154,7 @@ const ExporterDashboard = memo(() => {
   // 🛡️ TOAST FOR USER FEEDBACK
   const { toast } = useToast();
 
-  // 💳 PAYMENT CONFIRMATION MUTATION
-  const paymentConfirmMutation = useMutation({
-    mutationFn: async ({ offerId, totalValue }: { offerId: string; totalValue: string }) => {
-      return apiRequest("POST", "/api/exporter/confirm-payment", {
-        offerId,
-        totalValue,
-        exporterId: (user as any)?.exporterId || (user as any)?.id,
-        exporterCompany: (user as any)?.companyName || 'Licensed Exporter'
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Payment Confirmed",
-        description: "Buyer has been notified of your payment confirmation",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Confirmation Failed",
-        description: error.message || "Failed to send payment confirmation",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // 💳 HANDLE PAYMENT CONFIRMATION
-  const handleConfirmPayment = useCallback((offerId: string, totalValue: string) => {
-    paymentConfirmMutation.mutate({ offerId, totalValue });
-  }, [paymentConfirmMutation]);
+  // Payment confirmation functionality removed as requested
 
   // ⚡ OPTIMIZED LOADING STATE
   if (userLoading) {
@@ -383,15 +355,7 @@ const ExporterDashboard = memo(() => {
                               Arrange Transport
                             </Button>
                             
-                            <Button 
-                              size="sm" 
-                              className="w-full bg-green-600 hover:bg-green-700 text-white" 
-                              onClick={() => handleConfirmPayment(deal.offer_id, deal.total_value)}
-                              data-testid={`confirm-payment-${deal.offer_id}`}
-                            >
-                              <DollarSign className="h-4 w-4 mr-1" />
-                              Confirm Payment Sent
-                            </Button>
+                            {/* Payment confirmation button removed as requested */}
                           </div>
                         </div>
                       </div>

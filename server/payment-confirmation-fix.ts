@@ -238,33 +238,33 @@ export function registerPaymentConfirmationFix(app: Express) {
       const { notificationId, buyerId, buyerName, company } = req.body;
       console.log(`🔒 2-STEP WORKFLOW: Buyer ${buyerId} accepting notification ${notificationId} - AWAITING FARMER PAYMENT CONFIRMATION`);
 
-      // Use exact column names from existing working table
+      // FINAL FIX: Include farmer_id by looking up from farmers table
       const result = await db.execute(sql`
         INSERT INTO buyer_verification_codes (
-          "notificationId", "buyerId", "buyerName", "farmerId", "farmerName", 
-          "farmLocation", "commodityType", "quantityAvailable", "pricePerUnit",
-          "totalValue", unit, "paymentTerms", "deliveryTerms",
-          "verificationCode", "awaitingPaymentConfirmation", "offerId"
+          notification_id, buyer_id, buyer_name, offer_id, farmer_id, farmer_name, 
+          county, farm_location, commodity_type, quantity_available, price_per_unit,
+          total_value, unit, payment_terms, delivery_terms,
+          verification_code
         )
         SELECT 
           bn.notification_id,
           bn.buyer_id,
           ${buyerName},
-          bn.farmer_id,
+          bn.offer_id,
+          f.id,
           bn.farmer_name,
-          bn.county,
+          COALESCE(bn.county, 'Nimba County'),
+          COALESCE(bn.county, 'Nimba County'),
           bn.commodity_type,
           bn.quantity_available,
           bn.price_per_unit,
-          bn.quantity_available * bn.price_per_unit,
+          (bn.quantity_available * bn.price_per_unit)::numeric,
           'tons',
           'Payment within 7 days of delivery',
           'Pickup at farm location',
-          ${generateFirstVerificationCode()},
-          NOW(),
-          true,
-          bn.offer_id
+          ${generateFirstVerificationCode()}
         FROM buyer_notifications bn
+        JOIN farmers f ON f.first_name = bn.farmer_name
         WHERE bn.notification_id = ${notificationId}
         AND bn.buyer_id = (SELECT id FROM buyers WHERE buyer_id = ${buyerId})
         RETURNING *
@@ -294,8 +294,7 @@ export function registerPaymentConfirmationFix(app: Express) {
         status: "accepted_awaiting_payment",
         paymentConfirmed: false,
         awaitingPaymentConfirmation: true,
-        transactionId: transaction.id,
-        offerId: transaction.offer_id
+        transactionId: transaction.id
       });
 
     } catch (error: any) {

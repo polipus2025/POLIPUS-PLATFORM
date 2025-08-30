@@ -393,13 +393,16 @@ export default function AgriculturalBuyerDashboard() {
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 
-  // Fetch confirmed transactions archive
+  // Fetch confirmed transactions archive - REAL-TIME FOR ALL BUYERS
   const { data: confirmedTransactions, isLoading: confirmedLoading } = useQuery({
     queryKey: ['/api/buyer/confirmed-transactions', buyerId],
     queryFn: () => apiRequest(`/api/buyer/confirmed-transactions/${buyerId}`),
     enabled: !!buyerId,
-    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 0, // REAL-TIME: No caching - always fresh data
+    gcTime: 0, // REAL-TIME: No memory cache
+    refetchInterval: 3000, // REAL-TIME: Refresh every 3 seconds
+    refetchOnWindowFocus: true, // REAL-TIME: Refresh when window gains focus
+    refetchIntervalInBackground: true, // REAL-TIME: Keep refreshing in background
   });
 
   // Fetch warehouse custody lots for this buyer

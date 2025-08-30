@@ -150,6 +150,7 @@ import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';
 import { AgriTraceWorkflowService } from './agritrace-workflow';
+import { registerPaymentConfirmationFix } from './payment-confirmation-fix';
 
 // JWT Secret - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
@@ -217,6 +218,9 @@ import { satelliteService, type SatelliteAnalysisResult } from './satellite-serv
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register farmer routes
   registerFarmerRoutes(app);
+
+  // 🚨 EMERGENCY FIX: Clean payment confirmation route
+  registerPaymentConfirmationFix(app);
   
   // Register crop scheduling routes
   app.use('/api', cropSchedulingRoutes);

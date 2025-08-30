@@ -530,7 +530,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyers.isActive, true), // Only active buyers
-            eq(buyers.county, finalCounty), // ONLY SAME COUNTY BUYERS
+            // 🔒 FLEXIBLE COUNTY MATCHING: "Nimba" matches "Nimba County"
+            or(
+              eq(buyers.county, finalCounty), // Exact match
+              eq(buyers.county, `${finalCounty} County`), // Add "County" suffix
+              eq(buyers.county, finalCounty.replace(' County', '')) // Remove "County" suffix
+            ), // COUNTY FLEXIBLE MATCHING
             or(
               eq(buyers.complianceStatus, 'approved'),
               eq(buyers.complianceStatus, 'pending') // Include pending for marketplace access
@@ -14131,7 +14136,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(buyers.isActive, true), // Only active buyers
-            eq(buyers.county, finalCounty), // ONLY SAME COUNTY BUYERS
+            // 🔒 FLEXIBLE COUNTY MATCHING: "Nimba" matches "Nimba County"
+            or(
+              eq(buyers.county, finalCounty), // Exact match
+              eq(buyers.county, `${finalCounty} County`), // Add "County" suffix
+              eq(buyers.county, finalCounty.replace(' County', '')) // Remove "County" suffix
+            ), // COUNTY FLEXIBLE MATCHING
             or(
               eq(buyers.complianceStatus, 'approved'),
               eq(buyers.complianceStatus, 'pending') // Include pending for marketplace access

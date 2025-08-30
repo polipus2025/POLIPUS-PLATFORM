@@ -120,7 +120,7 @@ export default function SellersHub() {
   // Accept offer mutation
   const acceptOfferMutation = useMutation({
     mutationFn: async (offerId: string) => {
-      const result = await apiRequest('/api/exporter/accept-offer', {
+      return await apiRequest('/api/exporter/accept-offer', {
         method: "POST",
         body: JSON.stringify({
           offerId: offerId,
@@ -129,7 +129,6 @@ export default function SellersHub() {
           responseNotes: "Accepted via Sellers Hub"
         })
       });
-      return result.json();
     },
     onSuccess: (data) => {
       console.log('Accept offer response:', data);
@@ -161,7 +160,7 @@ export default function SellersHub() {
   // Reject offer mutation
   const rejectOfferMutation = useMutation({
     mutationFn: async ({ offerId, reason }: { offerId: string; reason: string }) => {
-      const result = await apiRequest(`/api/exporter/reject-offer`, {
+      return await apiRequest(`/api/exporter/reject-offer`, {
         method: "POST",
         body: JSON.stringify({
           offerId: offerId,
@@ -170,7 +169,6 @@ export default function SellersHub() {
           rejectionReason: reason
         })
       });
-      return result.json();
     },
     onSuccess: () => {
       toast({
@@ -238,13 +236,12 @@ export default function SellersHub() {
   // Accept original price after counter-offer rejection
   const acceptOriginalPriceMutation = useMutation({
     mutationFn: async (responseId: string) => {
-      const result = await apiRequest(`/api/exporter/accept-original-price/${responseId}`, {
+      return await apiRequest(`/api/exporter/accept-original-price/${responseId}`, {
         method: "POST",
         body: JSON.stringify({
           exporterId: (user as any)?.exporterId || (user as any)?.id
         })
       });
-      return result.json();
     },
     onSuccess: (data) => {
       if (data.success) {

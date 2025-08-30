@@ -1,12 +1,64 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, MapPin, Ship, Warehouse, ArrowRight, CheckCircle, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Shield, MapPin, Ship, Warehouse, ArrowRight, CheckCircle, ArrowLeft, User, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function InspectorLogin() {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+  
+  const [landCredentials, setLandCredentials] = useState({ username: "", password: "" });
+  const [portCredentials, setPortCredentials] = useState({ username: "", password: "" });
+  const [warehouseCredentials, setWarehouseCredentials] = useState({ username: "", password: "" });
+  const [loadingStates, setLoadingStates] = useState({ land: false, port: false, warehouse: false });
+
+  const handleLogin = async (type: 'land' | 'port' | 'warehouse', credentials: {username: string, password: string}) => {
+    setLoadingStates(prev => ({ ...prev, [type]: true }));
+    
+    try {
+      const response = await fetch(`/api/auth/${type}-inspector-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("userType", `${type}_inspector`);
+        localStorage.setItem("userId", data.userId);
+        localStorage.setItem("username", data.username);
+        
+        toast({
+          title: "Login Successful",
+          description: `Welcome ${data.username}!`,
+        });
+        
+        navigate(`/${type}-inspector-dashboard`);
+      } else {
+        toast({
+          title: "Login Failed",
+          description: data.message || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "Connection failed. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingStates(prev => ({ ...prev, [type]: false }));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
@@ -33,11 +85,10 @@ export default function InspectorLogin() {
 
         {/* Inspector Access Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {/* Land Inspector Portal */}
-          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group" 
-                onClick={() => navigate('/land-inspector-login')}>
+          {/* Land Inspector Login */}
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
             <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4">
                 <MapPin className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
@@ -58,21 +109,53 @@ export default function InspectorLogin() {
                 <li>• Agricultural compliance monitoring</li>
                 <li>• Field data collection</li>
               </ul>
-              <Button 
-                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/land-inspector-login'); }}
-              >
-                Access Land Inspector Portal
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              
+              {/* Login Form */}
+              <div className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="land-username" className="text-sm font-medium">Username</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="land-username"
+                      type="text"
+                      placeholder="Enter username"
+                      value={landCredentials.username}
+                      onChange={(e) => setLandCredentials(prev => ({ ...prev, username: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="land-password" className="text-sm font-medium">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="land-password"
+                      type="password"
+                      placeholder="Enter password"
+                      value={landCredentials.password}
+                      onChange={(e) => setLandCredentials(prev => ({ ...prev, password: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                  onClick={() => handleLogin('land', landCredentials)}
+                  disabled={loadingStates.land || !landCredentials.username || !landCredentials.password}
+                >
+                  {loadingStates.land ? "Logging in..." : "Access Land Inspector Portal"}
+                  {!loadingStates.land && <ArrowRight className="w-4 h-4 ml-2" />}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Port Inspector Portal */}
-          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
-                onClick={() => navigate('/port-inspector-login')}>
+          {/* Port Inspector Login */}
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
             <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
                 <Ship className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
@@ -93,21 +176,53 @@ export default function InspectorLogin() {
                 <li>• Maritime documentation</li>
                 <li>• Shipping quality control</li>
               </ul>
-              <Button 
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/port-inspector-login'); }}
-              >
-                Access Port Inspector Portal
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              
+              {/* Login Form */}
+              <div className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="port-username" className="text-sm font-medium">Username</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="port-username"
+                      type="text"
+                      placeholder="Enter username"
+                      value={portCredentials.username}
+                      onChange={(e) => setPortCredentials(prev => ({ ...prev, username: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="port-password" className="text-sm font-medium">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="port-password"
+                      type="password"
+                      placeholder="Enter password"
+                      value={portCredentials.password}
+                      onChange={(e) => setPortCredentials(prev => ({ ...prev, password: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                  onClick={() => handleLogin('port', portCredentials)}
+                  disabled={loadingStates.port || !portCredentials.username || !portCredentials.password}
+                >
+                  {loadingStates.port ? "Logging in..." : "Access Port Inspector Portal"}
+                  {!loadingStates.port && <ArrowRight className="w-4 h-4 ml-2" />}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Warehouse Inspector Portal */}
-          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group"
-                onClick={() => navigate('/warehouse-inspector-login')}>
+          {/* Warehouse Inspector Login */}
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
             <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
                 <Warehouse className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
@@ -128,13 +243,46 @@ export default function InspectorLogin() {
                 <li>• Temperature monitoring</li>
                 <li>• Regulatory documentation</li>
               </ul>
-              <Button 
-                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white group"
-                onClick={(e) => { e.stopPropagation(); navigate('/warehouse-inspector-login'); }}
-              >
-                Access Warehouse Portal
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              
+              {/* Login Form */}
+              <div className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="warehouse-username" className="text-sm font-medium">Username</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="warehouse-username"
+                      type="text"
+                      placeholder="Enter username"
+                      value={warehouseCredentials.username}
+                      onChange={(e) => setWarehouseCredentials(prev => ({ ...prev, username: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="warehouse-password" className="text-sm font-medium">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="warehouse-password"
+                      type="password"
+                      placeholder="Enter password"
+                      value={warehouseCredentials.password}
+                      onChange={(e) => setWarehouseCredentials(prev => ({ ...prev, password: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                  onClick={() => handleLogin('warehouse', warehouseCredentials)}
+                  disabled={loadingStates.warehouse || !warehouseCredentials.username || !warehouseCredentials.password}
+                >
+                  {loadingStates.warehouse ? "Logging in..." : "Access Warehouse Portal"}
+                  {!loadingStates.warehouse && <ArrowRight className="w-4 h-4 ml-2" />}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

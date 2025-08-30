@@ -156,8 +156,8 @@ export default function FrontPage() {
                 style={{ maxHeight: '100%', width: 'auto' }}
               />
             </div>
-            {/* Liberian Flag positioned on the right side above the logo */}
-            <div className="absolute top-2 sm:top-4 right-4 sm:right-8 w-12 h-8 sm:w-16 sm:h-11 rounded-md overflow-hidden shadow-md border border-gray-200">
+            {/* Liberian Flag positioned on the left side above the logo */}
+            <div className="absolute top-2 sm:top-4 left-4 sm:left-8 w-12 h-8 sm:w-16 sm:h-11 rounded-md overflow-hidden shadow-md border border-gray-200">
               <svg viewBox="0 0 190 100" className="w-full h-full">
                 {/* Red and white stripes */}
                 <rect width="190" height="100" fill="#BF0A30"/>

@@ -92,27 +92,50 @@ const EudrAssessment = lazy(() => import("@/pages/eudr-assessment"));
 const GenerateReports = lazy(() => import("@/pages/generate-reports"));
 
 function App() {
-  // TARGETED MEMORY RESET - Only block problematic monitoring redirects
+  // COMPREHENSIVE REDIRECT PROTECTION - Always redirect to main Polipus page
   React.useEffect(() => {
     const currentPath = window.location.pathname;
     
-    // Only clear monitoring-related tokens and block monitoring-login specifically
-    if (currentPath.includes("monitoring-login") || localStorage.getItem("userType") === "monitoring") {
-      console.log("🚨 MONITORING LOGIN DETECTED - Redirecting to Polipus front page");
+    // Block ALL inspector login redirects and force main page
+    if (currentPath.includes("inspector-login") || 
+        currentPath.includes("monitoring-login") || 
+        localStorage.getItem("userType") === "monitoring") {
+      console.log("🚨 INSPECTOR/MONITORING LOGIN DETECTED - Redirecting to Polipus front page");
       
-      // Clear only monitoring-related storage
+      // Clear problematic authentication storage
       localStorage.removeItem("authToken");
       localStorage.removeItem("userType");
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
+      localStorage.removeItem("inspectorData");
+      localStorage.removeItem("warehouseInspectorData");
+      localStorage.removeItem("portInspectorData");
+      localStorage.removeItem("landInspectorData");
       
-      // Redirect away from monitoring-login only
+      // Always redirect to main Polipus page
       window.location.replace("/");
       return;
     }
     
-    console.log("✅ Login access allowed for:", currentPath);
+    // Override window.location.href to prevent redirects to inspector login
+    const originalWindowLocation = window.location.href;
+    Object.defineProperty(window.location, 'href', {
+      set: function(url) {
+        if (typeof url === 'string' && url.includes('inspector-login')) {
+          console.log("🛡️ BLOCKED redirect to inspector-login, redirecting to main page");
+          window.location.replace("/");
+          return;
+        }
+        // Allow other redirects
+        window.location.replace(url);
+      },
+      get: function() {
+        return originalWindowLocation;
+      }
+    });
+    
+    console.log("✅ Main Polipus page protection active for:", currentPath);
   }, []);
 
   return (

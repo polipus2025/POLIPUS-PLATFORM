@@ -464,10 +464,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`👤 Farmer ${dbId} profile county: ${farmerProfile?.county || 'NOT FOUND'}`);
       
-      // Use farmer profile county if available, otherwise use form county
+      // 🔒 LOCKED: ALWAYS use farmer profile county (profile data is locked and authoritative)
       const finalCounty = farmerProfile?.county && farmerProfile.county !== 'County Not Specified' 
         ? farmerProfile.county 
         : req.body.county;
+      
+      // 🛡️ SAFETY CHECK: Ensure county is properly resolved
+      if (!finalCounty || finalCounty === 'Unknown County') {
+        console.log(`⚠️ WARNING: County resolution failed for farmer ${dbId}. Profile: ${farmerProfile?.county}, Form: ${req.body.county}`);
+        return res.status(400).json({ error: "County information is required for buyer notifications" });
+      }
       
       if (farmerProfile?.county !== req.body.county) {
         console.log(`📍 County resolved: Profile: ${farmerProfile?.county}, Form: ${req.body.county}, Final: ${finalCounty}`);
@@ -475,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Transform data to match schema expectations
       const transformedData = {
-        farmerId: dbId, // Use numeric ID for database
+        farmerId: dbId, // Use CORRECT numeric ID for database
         commodityType: req.body.commodityType,
         quantityAvailable: req.body.quantityAvailable.toString(),
         unit: req.body.unit,

@@ -7529,7 +7529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         documentationComplete: true,
         thirdPartyVerification: false,
         complianceStatus: complianceScore >= 70 ? 'compliant' : 'non_compliant',
-        commodityId: 1, // Default commodity reference
+        commodityId: 2, // Valid commodity ID from database
         metadata: JSON.stringify({
           plotId,
           plotName,

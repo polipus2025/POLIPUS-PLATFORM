@@ -96,9 +96,8 @@ function App() {
   React.useEffect(() => {
     const currentPath = window.location.pathname;
     
-    // Block ALL inspector login redirects and force main page
-    if (currentPath.includes("inspector-login") || 
-        currentPath.includes("monitoring-login") || 
+    // Block only monitoring login redirects while preserving legitimate inspector access
+    if (currentPath.includes("monitoring-login") || 
         localStorage.getItem("userType") === "monitoring") {
       // Clear problematic authentication storage
       localStorage.removeItem("authToken");

@@ -271,14 +271,14 @@ export default function Landing() {
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 flex-1">
                 <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
                   <span>Compliance monitoring</span>
                 </div>
                 <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
-                  <span>System analytics</span>
+                  <span>System analytics dashboard</span>
                 </div>
                 <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div>
@@ -286,7 +286,11 @@ export default function Landing() {
                 </div>
                 <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-slate-500 mt-2 flex-shrink-0"></div>
-                  <span>User management</span>
+                  <span>User management portal</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
+                  <span>Real-time monitoring system</span>
                 </div>
               </div>
               

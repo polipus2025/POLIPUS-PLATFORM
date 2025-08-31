@@ -64,7 +64,7 @@ function CounterOffersTab() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  const counterOffers = counterOffersResponse?.data || [];
+  const counterOffers = (counterOffersResponse as any)?.data || [];
 
   // Accept counter-offer mutation
   const acceptCounterOfferMutation = useMutation({
@@ -72,7 +72,7 @@ function CounterOffersTab() {
       return await apiRequest(`/api/buyer/counter-offers/${responseId}/accept`, {
         method: "POST",
         body: JSON.stringify({
-          buyerId: user?.id
+          buyerId: (user as any)?.id
         })
       });
     },
@@ -106,7 +106,7 @@ function CounterOffersTab() {
       return await apiRequest(`/api/buyer/counter-offers/${responseId}/reject`, {
         method: "POST",
         body: JSON.stringify({
-          buyerId: user?.id,
+          buyerId: (user as any)?.id,
           rejectionReason: reason
         })
       });
@@ -117,7 +117,7 @@ function CounterOffersTab() {
           title: "Counter-Offer Rejected",
           description: "Your response has been sent to the exporter",
         });
-        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${user?.id}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/buyer/counter-offers/${(user as any)?.id}`] });
       } else {
         toast({
           title: "Error",
@@ -1623,26 +1623,18 @@ export default function AgriculturalBuyerDashboard() {
                                       <CheckCircle className="w-4 h-4 mr-2" />
                                       Request Authorization
                                     </Button>
-                                  ) : getOfferStatus(lot)?.status === 'accepted' ? (
+                                  ) : lot.authorizationStatus === 'authorized' && lot.storageFees?.paymentStatus === 'paid' ? (
                                     <div className="space-y-2">
-                                      <Button 
-                                        disabled
-                                        className="w-full bg-green-600 hover:bg-green-700 cursor-default"
-                                        size="sm"
-                                      >
-                                        <CheckCircle className="w-4 h-4 mr-2" />
-                                        ✅ Accepted by {getOfferStatus(lot)?.acceptedBy}
-                                      </Button>
                                       <div className="text-xs text-center space-y-1">
                                         <p className="font-mono text-green-700 bg-green-50 px-2 py-1 rounded border">
                                           🔗 Custody: {lot.custodyId}
                                         </p>
                                         <p className="font-mono text-blue-700 bg-blue-50 px-2 py-1 rounded border">
-                                          🎯 Code: {getOfferStatus(lot)?.verificationCode}
+                                          ✅ Ready for Pickup
                                         </p>
                                       </div>
                                       
-                                      {/* Dispatch Scheduling for Accepted Offers */}
+                                      {/* Dispatch Scheduling for Authorized & Paid Products */}
                                       <Button 
                                         size="sm"
                                         className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" 

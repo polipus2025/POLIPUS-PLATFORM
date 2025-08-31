@@ -48,12 +48,16 @@ if (MAINTENANCE_MODE) {
       });
 
       // Initialize core system quickly
+      let httpServer;
       try {
-        const httpServer = await registerRoutes(app);
+        httpServer = await registerRoutes(app);
       } catch (error) {
         console.log('⚠️ Complex routes failed, using simple routes...');
         const simpleRoutes = await import('./simple-routes');
         app.use('/api', simpleRoutes.default);
+        // Create fallback HTTP server
+        const { createServer } = await import('http');
+        httpServer = createServer(app);
       }
       
       registerEudrRoutes(app);

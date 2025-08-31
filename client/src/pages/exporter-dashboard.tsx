@@ -345,41 +345,14 @@ const ExporterDashboard = memo(() => {
                             Accepted: {new Date(deal.accepted_date).toLocaleDateString()}
                           </p>
                           <div className="space-y-2">
-                            <Button 
-                              size="sm" 
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
-                              onClick={async () => {
-                                const dispatchDate = prompt('Schedule pickup date (YYYY-MM-DD):');
-                                if (!dispatchDate) return;
-                                
-                                try {
-                                  const response = await fetch('/api/exporter/schedule-dispatch', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                      offerId: deal.offer_id,
-                                      verificationCode: deal.verification_code,
-                                      dispatchDate,
-                                      custodyId: deal.custody_id
-                                    })
-                                  });
-                                  
-                                  const result = await response.json();
-                                  if (result.success) {
-                                    alert(`✅ Dispatch Scheduled!\n\nRequest ID: ${result.requestId}\nPickup Date: ${dispatchDate}\nWarehouse will be notified to prepare your order.`);
-                                    window.location.reload();
-                                  } else {
-                                    alert(`❌ Error: ${result.message}`);
-                                  }
-                                } catch (error) {
-                                  alert('❌ Failed to schedule dispatch. Please try again.');
-                                }
-                              }}
-                              data-testid={`schedule-dispatch-${deal.offer_id}`}
-                            >
-                              <Calendar className="h-4 w-4 mr-1" />
-                              Schedule Warehouse Pickup
-                            </Button>
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                              <div className="flex items-center space-x-2">
+                                <ArrowRight className="h-4 w-4 text-blue-600" />
+                                <p className="text-sm text-blue-800">
+                                  <span className="font-medium">Ready for pickup:</span> Contact buyer to arrange product transfer using verification code: <span className="font-mono">{deal.verification_code}</span>
+                                </p>
+                              </div>
+                            </div>
                             
                             <Button 
                               size="sm" 

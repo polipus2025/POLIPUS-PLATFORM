@@ -311,6 +311,14 @@ export default function AgriculturalBuyerDashboard() {
   const [offerNotes, setOfferNotes] = useState('');
   const [creatingOffer, setCreatingOffer] = useState(false);
 
+  // Dispatch scheduling state
+  const [showDispatchDialog, setShowDispatchDialog] = useState(false);
+  const [selectedProductForDispatch, setSelectedProductForDispatch] = useState<any>(null);
+  const [dispatchFormData, setDispatchFormData] = useState({
+    dispatchDate: "",
+    exporterWarehouseAddress: ""
+  });
+
   // UNIVERSAL BUYER DETECTION - Same pattern as standalone transaction dashboard
   const [buyerId, setBuyerId] = useState<string>("");
   
@@ -842,6 +850,44 @@ export default function AgriculturalBuyerDashboard() {
       dispatchDate: selectedDispatchDate
     });
   };
+
+  // Buyer dispatch scheduling mutation
+  const buyerDispatchMutation = useMutation({
+    mutationFn: async (data: { lot: any; dispatchDate: string; warehouseAddress: string }) => {
+      return await apiRequest('/api/buyer/schedule-dispatch', {
+        method: 'POST',
+        body: JSON.stringify({
+          custodyId: data.lot.custodyId,
+          verificationCode: getOfferStatus(data.lot)?.verificationCode,
+          dispatchDate: data.dispatchDate,
+          buyerId: buyerId,
+          commodityType: data.lot.commodityType,
+          quantity: data.lot.totalWeight,
+          unit: data.lot.unit,
+          exporterWarehouseAddress: data.warehouseAddress,
+          buyerName: buyerName,
+          buyerCompany: company
+        })
+      });
+    },
+    onSuccess: (response: any) => {
+      toast({
+        title: "✅ Warehouse Pickup Scheduled!",
+        description: `Request ID: ${response.requestId}. Warehouse has been notified to prepare your products.`,
+      });
+      setShowDispatchDialog(false);
+      setDispatchFormData({ dispatchDate: "", exporterWarehouseAddress: "" });
+      setSelectedProductForDispatch(null);
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/custody-lots', buyerId] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to schedule warehouse pickup",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Handle requesting bags from warehouse
   const handleRequestBags = async (verificationCode: string, acceptanceData: any) => {
@@ -1595,6 +1641,20 @@ export default function AgriculturalBuyerDashboard() {
                                           🎯 Code: {getOfferStatus(lot)?.verificationCode}
                                         </p>
                                       </div>
+                                      
+                                      {/* Dispatch Scheduling for Accepted Offers */}
+                                      <Button 
+                                        size="sm"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" 
+                                        onClick={() => {
+                                          setSelectedProductForDispatch(lot);
+                                          setShowDispatchDialog(true);
+                                        }}
+                                        data-testid={`schedule-warehouse-pickup-${lot.custodyId}`}
+                                      >
+                                        <Truck className="h-4 w-4 mr-2" />
+                                        Schedule Warehouse Pickup
+                                      </Button>
                                     </div>
                                   ) : getOfferStatus(lot)?.status === 'rejected' ? (
                                     <div className="space-y-2">
@@ -2397,6 +2457,21 @@ export default function AgriculturalBuyerDashboard() {
                 )}
               </div>
 
+              {/* Exporter Warehouse Address */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Exporter Warehouse Address</Label>
+                <Textarea
+                  placeholder="Enter the complete address where products should be delivered for export processing..."
+                  value={dispatchFormData.exporterWarehouseAddress}
+                  onChange={(e) => setDispatchFormData(prev => ({ ...prev, exporterWarehouseAddress: e.target.value }))}
+                  rows={3}
+                  data-testid="textarea-exporter-address"
+                />
+                <p className="text-xs text-gray-500">
+                  This address will be used by the warehouse for pickup coordination
+                </p>
+              </div>
+
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t">
                 <Button
@@ -2407,11 +2482,34 @@ export default function AgriculturalBuyerDashboard() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleConfirmDispatchSchedule}
-                  disabled={!selectedDispatchDate || warehouseDispatchMutation.isPending}
+                  onClick={() => {
+                    if (!selectedDispatchDate) {
+                      toast({
+                        title: "Date Required",
+                        description: "Please select a dispatch date",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    if (!dispatchFormData.exporterWarehouseAddress.trim()) {
+                      toast({
+                        title: "Address Required", 
+                        description: "Please enter the exporter warehouse address",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    
+                    buyerDispatchMutation.mutate({
+                      lot: dispatchDialog.transaction,
+                      dispatchDate: selectedDispatchDate.toISOString().split('T')[0],
+                      warehouseAddress: dispatchFormData.exporterWarehouseAddress
+                    });
+                  }}
+                  disabled={!selectedDispatchDate || !dispatchFormData.exporterWarehouseAddress.trim() || buyerDispatchMutation.isPending}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {warehouseDispatchMutation.isPending ? (
+                  {buyerDispatchMutation.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Scheduling...

@@ -18036,6 +18036,75 @@ GENERATED: ${new Date().toLocaleDateString()}`;
     }
   });
 
+  // Buyer schedule dispatch for warehouse pickup 
+  app.post("/api/buyer/schedule-dispatch", async (req, res) => {
+    try {
+      const {
+        custodyId,
+        verificationCode,
+        dispatchDate,
+        buyerId,
+        commodityType,
+        quantity,
+        unit,
+        exporterWarehouseAddress,
+        buyerName,
+        buyerCompany
+      } = req.body;
+
+      console.log(`🛒 Buyer ${buyerId} scheduling warehouse dispatch for custody ${custodyId}`);
+
+      // Get custody details
+      const custodyResult = await db.execute(sql`
+        SELECT wc.*, beo.total_value, beo.county, beo.farm_location
+        FROM warehouse_custody wc
+        LEFT JOIN buyer_exporter_offers beo ON wc.custody_id = ${custodyId}
+        WHERE wc.custody_id = ${custodyId}
+      `);
+      
+      const custody = custodyResult.rows?.[0] || custodyResult[0];
+
+      if (!custody) {
+        return res.status(404).json({
+          success: false,
+          message: "Custody record not found"
+        });
+      }
+
+      // Generate dispatch request ID
+      const requestId = `WDR-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
+
+      // Create buyer dispatch request
+      await db.execute(sql`
+        INSERT INTO warehouse_dispatch_requests (
+          request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
+          commodity_type, quantity, unit, total_value, county, farm_location, dispatch_date,
+          exporter_warehouse_address, requested_at
+        ) VALUES (
+          ${requestId}, ${custodyId}, ${verificationCode}, ${buyerId}, 
+          ${buyerName || 'Buyer'}, ${buyerCompany || 'Company'}, ${commodityType}, 
+          ${quantity}, ${unit || 'MT'}, ${custody.total_value || 0}, ${custody.county || 'Montserrado'}, 
+          ${custody.farm_location || 'Location not specified'}, ${dispatchDate}, ${exporterWarehouseAddress}, NOW()
+        )
+      `);
+
+      console.log(`✅ Buyer dispatch request ${requestId} created successfully`);
+
+      res.json({
+        success: true,
+        message: "Warehouse pickup scheduled successfully",
+        requestId: requestId
+      });
+
+    } catch (error: any) {
+      console.error("Error scheduling buyer dispatch:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to schedule warehouse pickup"
+      });
+    }
+  });
+
   // Exporter reject offer
   app.post("/api/exporter/reject-offer", async (req, res) => {
     try {

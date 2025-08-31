@@ -540,7 +540,7 @@ export default function DDGOTSDashboard() {
                 <p className="text-slate-600">Review inspection booking requests and assign port inspectors</p>
               </div>
               <Badge variant="outline" className="border-red-500 text-red-600 bg-red-50 px-3 py-1">
-                {pendingAssignments?.length || 0} Pending Assignments
+                {pendingAssignments?.data?.length || 0} Pending Assignments
               </Badge>
             </div>
 
@@ -550,7 +550,7 @@ export default function DDGOTSDashboard() {
               </div>
             ) : (
               <div className="grid gap-6">
-                {(pendingAssignments || []).map((booking: any, index: number) => (
+                {(pendingAssignments?.data || []).map((booking: any, index: number) => (
                   <Card key={booking.bookingId || index} className="bg-white shadow-lg border-0">
                     <CardHeader className="pb-4">
                       <div className="flex justify-between items-start">
@@ -623,7 +623,7 @@ export default function DDGOTSDashboard() {
                               <SelectValue placeholder={`Select Port Inspector at ${booking.portFacility}`} />
                             </SelectTrigger>
                             <SelectContent>
-                              {(portInspectors || []).map((inspector: any) => (
+                              {(portInspectors?.data || []).map((inspector: any) => (
                                 <SelectItem key={inspector.inspectorId} value={inspector.inspectorId}>
                                   🚢 {inspector.fullName} - {inspector.certificationLevel} • {inspector.specializations}
                                 </SelectItem>
@@ -665,7 +665,7 @@ export default function DDGOTSDashboard() {
                   </Card>
                 ))}
                 
-                {(!pendingAssignments || pendingAssignments.length === 0) && (
+                {(!pendingAssignments?.data || pendingAssignments.data.length === 0) && (
                   <Card className="bg-slate-50 border-2 border-dashed border-slate-300">
                     <CardContent className="flex flex-col items-center justify-center h-40 text-center">
                       <ClipboardCheck className="w-12 h-12 text-slate-400 mb-4" />

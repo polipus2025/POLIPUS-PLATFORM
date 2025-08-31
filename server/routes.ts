@@ -17795,20 +17795,20 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       res.json({
         success: true,
         data: pendingRequests.rows.map((row: any) => ({
-          requestId: row.request_id,
-          transactionId: row.transaction_id,
-          verificationCode: row.verification_code,
-          buyerId: row.buyer_id,
-          buyerName: row.buyer_name,
-          buyerCompany: row.buyer_company,
-          commodityType: row.commodity_type,
+          requestId: row.requestId,
+          transactionId: row.transactionId,
+          verificationCode: row.verificationCode,
+          buyerId: row.buyerId,
+          buyerName: row.buyerName,
+          buyerCompany: row.buyerCompany,
+          commodityType: row.commodityType,
           quantity: row.quantity,
           unit: row.unit,
-          totalValue: row.total_value,
+          totalValue: row.totalValue,
           county: row.county,
-          farmLocation: row.farm_location,
-          dispatchDate: row.dispatch_date,
-          requestedAt: row.requested_at
+          farmLocation: row.farmLocation,
+          dispatchDate: row.dispatchDate,
+          requestedAt: row.requestedAt
         }))
       });
 

@@ -216,7 +216,7 @@ export default function PortInspectorDashboard() {
       case 'high': return 'bg-red-100 text-red-800';
       case 'medium': return 'bg-yellow-100 text-yellow-800';
       case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-slate-800';
     }
   };
 
@@ -226,22 +226,22 @@ export default function PortInspectorDashboard() {
       case 'in_progress': return 'bg-blue-100 text-blue-800';
       case 'pending': return 'bg-orange-100 text-orange-800';
       case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-slate-800';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
                 <Ship className="w-8 h-8 text-blue-600" />
                 Port Inspector Dashboard
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-slate-600 mt-1">
                 {portFacility} • Export Inspection & Regulatory Oversight
               </p>
             </div>
@@ -269,11 +269,11 @@ export default function PortInspectorDashboard() {
 
         {/* Statistics Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Inspections</p>
+                  <p className="text-sm font-medium text-slate-600">Pending Inspections</p>
                   <p className="text-2xl font-bold text-orange-600">{dashboardStats.pendingInspections}</p>
                 </div>
                 <ClipboardCheck className="w-8 h-8 text-orange-600" />
@@ -281,11 +281,11 @@ export default function PortInspectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Shipments</p>
+                  <p className="text-sm font-medium text-slate-600">Active Shipments</p>
                   <p className="text-2xl font-bold text-blue-600">{dashboardStats.activeShipments}</p>
                 </div>
                 <Container className="w-8 h-8 text-blue-600" />
@@ -293,11 +293,11 @@ export default function PortInspectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Compliance Rate</p>
+                  <p className="text-sm font-medium text-slate-600">Compliance Rate</p>
                   <p className="text-2xl font-bold text-green-600">{dashboardStats.complianceRate}%</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-600" />
@@ -305,11 +305,11 @@ export default function PortInspectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Exporters</p>
+                  <p className="text-sm font-medium text-slate-600">Active Exporters</p>
                   <p className="text-2xl font-bold text-purple-600">{dashboardStats.exportersActive}</p>
                 </div>
                 <Building2 className="w-8 h-8 text-purple-600" />
@@ -333,7 +333,7 @@ export default function PortInspectorDashboard() {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Export Inspections */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ClipboardCheck className="w-5 h-5" />
@@ -343,31 +343,31 @@ export default function PortInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     {loadingInspections ? (
-                      <p className="text-center text-gray-500">Loading inspections...</p>
+                      <p className="text-center text-slate-500">Loading inspections...</p>
                     ) : pendingInspections && pendingInspections.length > 0 ? (
                       pendingInspections.slice(0, 3).map((inspection: any) => (
                         <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <p className="font-medium">{inspection.exporterName}</p>
-                            <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
+                            <p className="text-sm text-slate-600">{inspection.commodity} • {inspection.quantity}</p>
                           </div>
                           <div className="text-right">
                             <Badge className={getPriorityColor(inspection.priority)}>
                               {inspection.priority}
                             </Badge>
-                            <p className="text-xs text-gray-500 mt-1">{inspection.scheduledDate}</p>
+                            <p className="text-xs text-slate-500 mt-1">{inspection.scheduledDate}</p>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-center text-gray-500">No pending inspections</p>
+                      <p className="text-center text-slate-500">No pending inspections</p>
                     )}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Regulatory Department Status */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Globe className="w-5 h-5" />
@@ -377,13 +377,13 @@ export default function PortInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     {loadingSync ? (
-                      <p className="text-center text-gray-500">Loading regulatory sync...</p>
+                      <p className="text-center text-slate-500">Loading regulatory sync...</p>
                     ) : regulatorySync && regulatorySync.length > 0 ? (
                       regulatorySync.map((dept: any) => (
                         <div key={dept.department} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <p className="font-medium">{dept.department}</p>
-                            <p className="text-sm text-gray-600">Last sync: {dept.lastSync}</p>
+                            <p className="text-sm text-slate-600">Last sync: {dept.lastSync}</p>
                           </div>
                           <div className="text-right">
                             <Badge className="bg-green-100 text-green-800">Connected</Badge>
@@ -394,7 +394,7 @@ export default function PortInspectorDashboard() {
                         </div>
                       ))
                     ) : (
-                      <p className="text-center text-gray-500">No regulatory connections</p>
+                      <p className="text-center text-slate-500">No regulatory connections</p>
                     )}
                   </div>
                 </CardContent>
@@ -404,7 +404,7 @@ export default function PortInspectorDashboard() {
 
           {/* Export Inspections Tab */}
           <TabsContent value="inspections" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Export Inspection Queue</CardTitle>
@@ -424,7 +424,7 @@ export default function PortInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {loadingInspections ? (
-                    <p className="text-center text-gray-500">Loading inspections...</p>
+                    <p className="text-center text-slate-500">Loading inspections...</p>
                   ) : pendingInspections && pendingInspections.length > 0 ? (
                     pendingInspections.map((inspection: any) => (
                       <div key={inspection.id} className="border rounded-lg p-4">
@@ -465,22 +465,22 @@ export default function PortInspectorDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                           <h4 className="font-medium mb-2">Exporter Details</h4>
-                          <p className="text-sm text-gray-600">ID: {inspection.exporterId}</p>
+                          <p className="text-sm text-slate-600">ID: {inspection.exporterId}</p>
                           <p className="font-medium">{inspection.exporterName}</p>
                         </div>
                         
                         <div>
                           <h4 className="font-medium mb-2">Shipment Details</h4>
-                          <p className="text-sm text-gray-600">Commodity: {inspection.commodity}</p>
-                          <p className="text-sm text-gray-600">Quantity: {inspection.quantity}</p>
-                          <p className="text-sm text-gray-600">Containers: {inspection.containers.join(", ")}</p>
+                          <p className="text-sm text-slate-600">Commodity: {inspection.commodity}</p>
+                          <p className="text-sm text-slate-600">Quantity: {inspection.quantity}</p>
+                          <p className="text-sm text-slate-600">Containers: {inspection.containers.join(", ")}</p>
                         </div>
                         
                         <div>
                           <h4 className="font-medium mb-2">Shipping Details</h4>
-                          <p className="text-sm text-gray-600">Vessel: {inspection.vesselName}</p>
-                          <p className="text-sm text-gray-600">Destination: {inspection.destination}</p>
-                          <p className="text-sm text-gray-600">Scheduled: {inspection.scheduledDate}</p>
+                          <p className="text-sm text-slate-600">Vessel: {inspection.vesselName}</p>
+                          <p className="text-sm text-slate-600">Destination: {inspection.destination}</p>
+                          <p className="text-sm text-slate-600">Scheduled: {inspection.scheduledDate}</p>
                         </div>
                       </div>
                       
@@ -498,7 +498,7 @@ export default function PortInspectorDashboard() {
                     </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No pending inspections</p>
+                    <p className="text-center text-slate-500">No pending inspections</p>
                   )}
                 </div>
               </CardContent>
@@ -509,7 +509,7 @@ export default function PortInspectorDashboard() {
           <TabsContent value="verification" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Document Scanner */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="w-5 h-5" />
@@ -595,7 +595,7 @@ export default function PortInspectorDashboard() {
                         playsInline
                         className="w-full max-w-sm mx-auto rounded-lg border"
                       />
-                      <p className="text-sm text-gray-600 text-center mt-2">
+                      <p className="text-sm text-slate-600 text-center mt-2">
                         Position document QR code or hash code in camera view
                       </p>
                     </div>
@@ -604,7 +604,7 @@ export default function PortInspectorDashboard() {
               </Card>
 
               {/* Verification Result */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CheckCircle className="w-5 h-5" />
@@ -630,27 +630,27 @@ export default function PortInspectorDashboard() {
                           <div className="border rounded-lg p-3">
                             <div className="space-y-2">
                               <div className="flex justify-between">
-                                <span className="text-gray-600">Document Type:</span>
+                                <span className="text-slate-600">Document Type:</span>
                                 <span className="font-medium">{verificationResult.document.type}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600">Recipient:</span>
+                                <span className="text-slate-600">Recipient:</span>
                                 <span className="font-medium">{verificationResult.document.recipient}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600">Issue Date:</span>
+                                <span className="text-slate-600">Issue Date:</span>
                                 <span className="font-medium">
                                   {new Date(verificationResult.document.issueDate).toLocaleDateString()}
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600">Certificate #:</span>
+                                <span className="text-slate-600">Certificate #:</span>
                                 <span className="font-medium font-mono text-xs">
                                   {verificationResult.document.certificateNumber}
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-600">Issuer:</span>
+                                <span className="text-slate-600">Issuer:</span>
                                 <span className="font-medium">{verificationResult.document.issuer}</span>
                               </div>
                             </div>
@@ -682,14 +682,14 @@ export default function PortInspectorDashboard() {
                         </div>
                       )}
 
-                      <div className="text-xs text-gray-500 border-t pt-3">
+                      <div className="text-xs text-slate-500 border-t pt-3">
                         <p>Verified at: {new Date(verificationResult.verification.verifiedAt).toLocaleString()}</p>
                         <p>Method: {verificationResult.verification.method}</p>
                         <p>Database: {verificationResult.verification.database}</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center text-gray-500">
+                    <div className="text-center text-slate-500">
                       <Shield className="w-12 h-12 mx-auto mb-3 opacity-50" />
                       <p>No document verification performed</p>
                       <p className="text-sm">Use the scanner to verify document authenticity</p>
@@ -700,7 +700,7 @@ export default function PortInspectorDashboard() {
             </div>
 
             {/* Verification History */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Eye className="w-5 h-5" />
@@ -714,7 +714,7 @@ export default function PortInspectorDashboard() {
                       <div key={verification.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <p className="font-medium text-sm">{verification.description}</p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-slate-600">
                             {new Date(verification.timestamp).toLocaleString()}
                           </p>
                         </div>
@@ -728,7 +728,7 @@ export default function PortInspectorDashboard() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No verification history</p>
+                    <p className="text-center text-slate-500">No verification history</p>
                   )}
                 </div>
               </CardContent>
@@ -737,7 +737,7 @@ export default function PortInspectorDashboard() {
 
           {/* Active Shipments Tab */}
           <TabsContent value="shipments" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle>Active Export Shipments</CardTitle>
                 <CardDescription>
@@ -747,7 +747,7 @@ export default function PortInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {loadingShipments ? (
-                    <p className="text-center text-gray-500">Loading shipments...</p>
+                    <p className="text-center text-slate-500">Loading shipments...</p>
                   ) : activeShipments && activeShipments.length > 0 ? (
                     activeShipments.map((shipment: any) => (
                       <div key={shipment.id} className="border rounded-lg p-4">
@@ -765,19 +765,19 @@ export default function PortInspectorDashboard() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-600">Commodity</p>
+                          <p className="text-slate-600">Commodity</p>
                           <p className="font-medium">{shipment.commodity}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Quantity</p>
+                          <p className="text-slate-600">Quantity</p>
                           <p className="font-medium">{shipment.quantity}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Vessel</p>
+                          <p className="text-slate-600">Vessel</p>
                           <p className="font-medium">{shipment.vesselName}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Departure</p>
+                          <p className="text-slate-600">Departure</p>
                           <p className="font-medium">{shipment.departureTime}</p>
                         </div>
                       </div>
@@ -795,7 +795,7 @@ export default function PortInspectorDashboard() {
                     </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No active shipments</p>
+                    <p className="text-center text-slate-500">No active shipments</p>
                   )}
                 </div>
               </CardContent>
@@ -804,7 +804,7 @@ export default function PortInspectorDashboard() {
 
           {/* Compliance Tab */}
           <TabsContent value="compliance" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle>Export Compliance Overview</CardTitle>
                 <CardDescription>
@@ -814,7 +814,7 @@ export default function PortInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {loadingCompliance ? (
-                    <p className="text-center text-gray-500">Loading compliance data...</p>
+                    <p className="text-center text-slate-500">Loading compliance data...</p>
                   ) : complianceStats && complianceStats.length > 0 ? (
                     complianceStats.map((check: any, index: number) => (
                       <div key={index} className="border rounded-lg p-4">
@@ -829,15 +829,15 @@ export default function PortInspectorDashboard() {
                       
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-600">Total Reviewed</p>
+                          <p className="text-slate-600">Total Reviewed</p>
                           <p className="font-medium">{check.total}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Compliant</p>
+                          <p className="text-slate-600">Compliant</p>
                           <p className="font-medium text-green-600">{check.compliant}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Non-Compliant</p>
+                          <p className="text-slate-600">Non-Compliant</p>
                           <p className="font-medium text-red-600">{check.nonCompliant}</p>
                         </div>
                       </div>
@@ -851,7 +851,7 @@ export default function PortInspectorDashboard() {
                     </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No compliance data available</p>
+                    <p className="text-center text-slate-500">No compliance data available</p>
                   )}
                 </div>
               </CardContent>
@@ -860,7 +860,7 @@ export default function PortInspectorDashboard() {
 
           {/* Regulatory Sync Tab */}
           <TabsContent value="regulatory" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle>Three-Tier Regulatory Integration</CardTitle>
                 <CardDescription>
@@ -870,7 +870,7 @@ export default function PortInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {loadingSync ? (
-                    <p className="text-center text-gray-500">Loading regulatory sync...</p>
+                    <p className="text-center text-slate-500">Loading regulatory sync...</p>
                   ) : regulatorySync && regulatorySync.length > 0 ? (
                     regulatorySync.map((dept: any) => (
                       <div key={dept.department} className="border rounded-lg p-4">
@@ -883,15 +883,15 @@ export default function PortInspectorDashboard() {
                       
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-600">Last Sync</p>
+                          <p className="text-slate-600">Last Sync</p>
                           <p className="font-medium">{dept.lastSync}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Pending Reports</p>
+                          <p className="text-slate-600">Pending Reports</p>
                           <p className="font-medium">{dept.pendingReports}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Critical Alerts</p>
+                          <p className="text-slate-600">Critical Alerts</p>
                           <p className={`font-medium ${dept.criticalAlerts > 0 ? 'text-red-600' : 'text-green-600'}`}>
                             {dept.criticalAlerts}
                           </p>
@@ -906,7 +906,7 @@ export default function PortInspectorDashboard() {
                     </div>
                   ))
                   ) : (
-                    <p className="text-center text-gray-500">No regulatory sync data available</p>
+                    <p className="text-center text-slate-500">No regulatory sync data available</p>
                   )}
                 </div>
               </CardContent>

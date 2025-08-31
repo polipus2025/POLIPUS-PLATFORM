@@ -361,12 +361,12 @@ export default function WarehouseInspectorDashboard() {
     });
 
     if (isLoading) {
-      return <p className="text-center text-gray-500">Loading custody records...</p>;
+      return <p className="text-center text-slate-500">Loading custody records...</p>;
     }
 
     if (!custodyRecords || custodyRecords.length === 0) {
       return (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-slate-500">
           <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
           <p>No products currently in custody</p>
           <p className="text-sm">Scan QR codes to register products</p>
@@ -399,7 +399,7 @@ export default function WarehouseInspectorDashboard() {
                   </Badge>
                 )}
               </div>
-              <div className="text-right text-sm text-gray-600">
+              <div className="text-right text-sm text-slate-600">
                 <p>Day {record.actualStorageDays || 0} of {record.maxStorageDays}</p>
               </div>
             </div>
@@ -407,10 +407,10 @@ export default function WarehouseInspectorDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <h4 className="font-medium mb-1">Product Details</h4>
-                <p className="text-sm text-gray-600">Buyer: {record.buyerName}</p>
-                <p className="text-sm text-gray-600">Type: {record.commodityType}</p>
-                <p className="text-sm text-gray-600">Weight: {record.totalWeight} {record.unit}</p>
-                <p className="text-sm text-gray-600">Packages: {record.totalPackages} {record.packagingType}</p>
+                <p className="text-sm text-slate-600">Buyer: {record.buyerName}</p>
+                <p className="text-sm text-slate-600">Type: {record.commodityType}</p>
+                <p className="text-sm text-slate-600">Weight: {record.totalWeight} {record.unit}</p>
+                <p className="text-sm text-slate-600">Packages: {record.totalPackages} {record.packagingType}</p>
                 {record.custodyType === 'multi_lot' && (
                   <Badge className="bg-purple-100 text-purple-800 text-xs mt-1">Multi-Lot</Badge>
                 )}
@@ -418,9 +418,9 @@ export default function WarehouseInspectorDashboard() {
               
               <div>
                 <h4 className="font-medium mb-1">Storage & Payment Info</h4>
-                <p className="text-sm text-gray-600">Location: {record.storageLocation || 'Not assigned'}</p>
-                <p className="text-sm text-gray-600">Conditions: {record.storageConditions || 'Standard'}</p>
-                <p className="text-sm text-gray-600">Rate: ${record.storageRate}/metric ton (one-time)</p>
+                <p className="text-sm text-slate-600">Location: {record.storageLocation || 'Not assigned'}</p>
+                <p className="text-sm text-slate-600">Conditions: {record.storageConditions || 'Standard'}</p>
+                <p className="text-sm text-slate-600">Rate: ${record.storageRate}/metric ton (one-time)</p>
                 <p className="text-sm font-semibold text-green-600">
                   Total Payment: ${(parseFloat(record.totalWeight) * parseFloat(record.storageRate)).toFixed(2)}
                 </p>
@@ -480,7 +480,7 @@ export default function WarehouseInspectorDashboard() {
                         
                         {/* Transaction Reference */}
                         {record.storageFees.paymentReference && (
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-slate-600">
                             Ref: {record.storageFees.paymentReference}
                           </p>
                         )}
@@ -494,12 +494,12 @@ export default function WarehouseInspectorDashboard() {
                 <h4 className="font-medium mb-1">Origin</h4>
                 {record.custodyType === 'multi_lot' ? (
                   <>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-slate-600">
                       Farmers: {Array.isArray(record.farmerNames) 
                         ? record.farmerNames.join(', ') 
                         : record.farmerNames}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-slate-600">
                       Locations: {Array.isArray(record.farmLocations) 
                         ? record.farmLocations.join(', ') 
                         : record.farmLocations}
@@ -507,28 +507,28 @@ export default function WarehouseInspectorDashboard() {
                   </>
                 ) : (
                   <>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-slate-600">
                       Farmer: {Array.isArray(record.farmerNames) 
                         ? record.farmerNames[0] 
                         : record.farmerNames}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-slate-600">
                       Location: {Array.isArray(record.farmLocations) 
                         ? record.farmLocations[0] 
                         : record.farmLocations}
                     </p>
                   </>
                 )}
-                <p className="text-sm text-gray-600">Grade: {record.qualityGrade || 'Standard'}</p>
+                <p className="text-sm text-slate-600">Grade: {record.qualityGrade || 'Standard'}</p>
               </div>
               
               <div>
                 <h4 className="font-medium mb-1">Status</h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-slate-600">
                   Registered: {new Date(record.registrationDate).toLocaleDateString()}
                 </p>
                 {record.authorizedDate && (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-slate-600">
                     Authorized: {new Date(record.authorizedDate).toLocaleDateString()}
                   </p>
                 )}
@@ -666,7 +666,7 @@ export default function WarehouseInspectorDashboard() {
                 <p className="font-semibold text-lg text-green-600">
                   Total Payment: ${(parseFloat(selectedRecord.totalWeight) * parseFloat(selectedRecord.storageRate)).toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-slate-600">
                   {selectedRecord.totalWeight} tons × ${selectedRecord.storageRate}/metric ton
                 </p>
               </div>
@@ -674,7 +674,7 @@ export default function WarehouseInspectorDashboard() {
 
             {/* Product Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <Package className="w-5 h-5 mr-2 text-blue-600" />
@@ -684,26 +684,26 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Commodity Type</label>
+                      <label className="text-sm font-medium text-slate-600">Commodity Type</label>
                       <p className="text-sm">{selectedRecord.commodityType}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Total Weight</label>
+                      <label className="text-sm font-medium text-slate-600">Total Weight</label>
                       <p className="text-sm font-semibold">{selectedRecord.totalWeight} {selectedRecord.unit || 'tons'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Total Packages</label>
+                      <label className="text-sm font-medium text-slate-600">Total Packages</label>
                       <p className="text-sm">{selectedRecord.totalPackages} {selectedRecord.packagingType || 'bags'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Quality Grade</label>
+                      <label className="text-sm font-medium text-slate-600">Quality Grade</label>
                       <p className="text-sm">{selectedRecord.qualityGrade || 'Standard'}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <MapPin className="w-5 h-5 mr-2 text-green-600" />
@@ -713,7 +713,7 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-slate-600">
                         {selectedRecord.custodyType === 'multi_lot' ? 'Farmers' : 'Farmer'}
                       </label>
                       <p className="text-sm">
@@ -723,7 +723,7 @@ export default function WarehouseInspectorDashboard() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-slate-600">
                         {selectedRecord.custodyType === 'multi_lot' ? 'Farm Locations' : 'Farm Location'}
                       </label>
                       <p className="text-sm">
@@ -733,7 +733,7 @@ export default function WarehouseInspectorDashboard() {
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">County</label>
+                      <label className="text-sm font-medium text-slate-600">County</label>
                       <p className="text-sm">{selectedRecord.county}</p>
                     </div>
                   </div>
@@ -743,7 +743,7 @@ export default function WarehouseInspectorDashboard() {
 
             {/* Buyer & Storage Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <Users className="w-5 h-5 mr-2 text-orange-600" />
@@ -753,22 +753,22 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Buyer Name</label>
+                      <label className="text-sm font-medium text-slate-600">Buyer Name</label>
                       <p className="text-sm">{selectedRecord.buyerName}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Company</label>
+                      <label className="text-sm font-medium text-slate-600">Company</label>
                       <p className="text-sm">{selectedRecord.buyerCompany}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Buyer ID</label>
+                      <label className="text-sm font-medium text-slate-600">Buyer ID</label>
                       <p className="text-sm">{selectedRecord.buyerId}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <Warehouse className="w-5 h-5 mr-2 text-purple-600" />
@@ -778,19 +778,19 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Warehouse</label>
+                      <label className="text-sm font-medium text-slate-600">Warehouse</label>
                       <p className="text-sm">{selectedRecord.warehouseName}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Storage Location</label>
+                      <label className="text-sm font-medium text-slate-600">Storage Location</label>
                       <p className="text-sm">{selectedRecord.storageLocation || 'Not assigned'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Storage Conditions</label>
+                      <label className="text-sm font-medium text-slate-600">Storage Conditions</label>
                       <p className="text-sm">{selectedRecord.storageConditions || 'Standard'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Storage Rate</label>
+                      <label className="text-sm font-medium text-slate-600">Storage Rate</label>
                       <p className="text-sm font-semibold text-green-600">
                         ${selectedRecord.storageRate}/metric ton (one-time)
                       </p>
@@ -801,7 +801,7 @@ export default function WarehouseInspectorDashboard() {
             </div>
 
             {/* QR Codes & Verification */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
                   <QrCode className="w-5 h-5 mr-2 text-indigo-600" />
@@ -813,13 +813,13 @@ export default function WarehouseInspectorDashboard() {
                   {selectedRecord.custodyType === 'multi_lot' ? (
                     <>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Consolidated QR Code</label>
+                        <label className="text-sm font-medium text-slate-600">Consolidated QR Code</label>
                         <p className="text-sm font-mono bg-gray-100 p-2 rounded">
                           {selectedRecord.consolidatedQrCode || 'Generated automatically'}
                         </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Original QR Codes</label>
+                        <label className="text-sm font-medium text-slate-600">Original QR Codes</label>
                         <div className="space-y-1">
                           {Array.isArray(selectedRecord.productQrCodes) && selectedRecord.productQrCodes.map((qr: string, index: number) => (
                             <p key={index} className="text-sm font-mono bg-gray-50 p-1 rounded">{qr}</p>
@@ -829,7 +829,7 @@ export default function WarehouseInspectorDashboard() {
                     </>
                   ) : (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Product QR Code</label>
+                      <label className="text-sm font-medium text-slate-600">Product QR Code</label>
                       <p className="text-sm font-mono bg-gray-100 p-2 rounded">
                         {Array.isArray(selectedRecord.productQrCodes) ? selectedRecord.productQrCodes[0] : selectedRecord.productQrCodes}
                       </p>
@@ -840,31 +840,31 @@ export default function WarehouseInspectorDashboard() {
             </Card>
 
             {/* Dates & Status */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-gray-600" />
+                  <Clock className="w-5 h-5 mr-2 text-slate-600" />
                   Timeline & Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Registration Date</label>
+                    <label className="text-sm font-medium text-slate-600">Registration Date</label>
                     <p className="text-sm">{new Date(selectedRecord.registrationDate).toLocaleString()}</p>
                   </div>
                   {selectedRecord.authorizedDate && (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Authorization Date</label>
+                      <label className="text-sm font-medium text-slate-600">Authorization Date</label>
                       <p className="text-sm">{new Date(selectedRecord.authorizedDate).toLocaleString()}</p>
                     </div>
                   )}
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Storage Duration</label>
+                    <label className="text-sm font-medium text-slate-600">Storage Duration</label>
                     <p className="text-sm">{selectedRecord.actualStorageDays || 0} / {selectedRecord.maxStorageDays || 30} days</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Current Status</label>
+                    <label className="text-sm font-medium text-slate-600">Current Status</label>
                     <p className="text-sm">{selectedRecord.custodyStatus}</p>
                   </div>
                 </div>
@@ -1382,16 +1382,16 @@ export default function WarehouseInspectorDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h1 className="text-3xl font-bold text-slate-900 flex items-center">
               <Warehouse className="w-8 h-8 mr-3 text-blue-600" />
               Warehouse Inspector Dashboard
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-slate-600 mt-1">
               {warehouseFacility} • Inspector: {inspectorUsername} • {inspectorCounty}
             </p>
           </div>
@@ -1419,48 +1419,48 @@ export default function WarehouseInspectorDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Inspections</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.pendingInspections}</p>
+                  <p className="text-sm font-medium text-slate-600">Pending Inspections</p>
+                  <p className="text-2xl font-bold text-slate-900">{dashboardStats.pendingInspections}</p>
                 </div>
                 <ClipboardCheck className="w-8 h-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Storage Units</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.storageUnits}</p>
+                  <p className="text-sm font-medium text-slate-600">Storage Units</p>
+                  <p className="text-2xl font-bold text-slate-900">{dashboardStats.storageUnits}</p>
                 </div>
                 <Package className="w-8 h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Compliance Rate</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.complianceRate}%</p>
+                  <p className="text-sm font-medium text-slate-600">Compliance Rate</p>
+                  <p className="text-2xl font-bold text-slate-900">{dashboardStats.complianceRate}%</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Temperature Alerts</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.temperatureAlerts}</p>
+                  <p className="text-sm font-medium text-slate-600">Temperature Alerts</p>
+                  <p className="text-2xl font-bold text-slate-900">{dashboardStats.temperatureAlerts}</p>
                 </div>
                 <Thermometer className="w-8 h-8 text-orange-600" />
               </div>
@@ -1517,7 +1517,7 @@ export default function WarehouseInspectorDashboard() {
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Overview Cards - Only visible on Overview tab */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <Package className="w-5 h-5 mr-2 text-blue-600" />
@@ -1527,30 +1527,30 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     {loadingInspections ? (
-                      <p className="text-center text-gray-500">Loading inspections...</p>
+                      <p className="text-center text-slate-500">Loading inspections...</p>
                     ) : pendingInspections && pendingInspections.length > 0 ? (
                       pendingInspections.slice(0, 3).map((inspection: any) => (
                         <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <p className="font-medium">{inspection.storageFacility}</p>
-                            <p className="text-sm text-gray-600">{inspection.commodity} • {inspection.quantity}</p>
+                            <p className="text-sm text-slate-600">{inspection.commodity} • {inspection.quantity}</p>
                           </div>
                           <div className="text-right">
                             <Badge className={getPriorityColor(inspection.priority)}>
                               {inspection.priority}
                             </Badge>
-                            <p className="text-xs text-gray-500 mt-1">{inspection.scheduledDate}</p>
+                            <p className="text-xs text-slate-500 mt-1">{inspection.scheduledDate}</p>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-center text-gray-500">No pending inspections</p>
+                      <p className="text-center text-slate-500">No pending inspections</p>
                     )}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
@@ -1560,30 +1560,30 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     {loadingQuality ? (
-                      <p className="text-center text-gray-500">Loading quality data...</p>
+                      <p className="text-center text-slate-500">Loading quality data...</p>
                     ) : qualityControls && qualityControls.length > 0 ? (
                       qualityControls.slice(0, 3).map((control: any) => (
                         <div key={control.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <p className="font-medium">{control.testType}</p>
-                            <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
+                            <p className="text-sm text-slate-600">Batch: {control.batchNumber}</p>
                           </div>
                           <div className="text-right">
                             <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                               {control.status}
                             </Badge>
-                            <p className="text-xs text-gray-500 mt-1">{control.testDate}</p>
+                            <p className="text-xs text-slate-500 mt-1">{control.testDate}</p>
                           </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-center text-gray-500">No quality controls</p>
+                      <p className="text-center text-slate-500">No quality controls</p>
                     )}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <Building2 className="w-5 h-5 mr-2 text-purple-600" />
@@ -1593,13 +1593,13 @@ export default function WarehouseInspectorDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     {loadingCompliance ? (
-                      <p className="text-center text-gray-500">Loading compliance data...</p>
+                      <p className="text-center text-slate-500">Loading compliance data...</p>
                     ) : storageCompliance && storageCompliance.length > 0 ? (
                       storageCompliance.map((compliance: any) => (
                         <div key={compliance.category} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <p className="font-medium">{compliance.category}</p>
-                            <p className="text-sm text-gray-600">Last checked: {compliance.lastCheck}</p>
+                            <p className="text-sm text-slate-600">Last checked: {compliance.lastCheck}</p>
                           </div>
                           <div className="text-right">
                             <Badge className="bg-green-100 text-green-800">
@@ -1609,14 +1609,14 @@ export default function WarehouseInspectorDashboard() {
                         </div>
                       ))
                     ) : (
-                      <p className="text-center text-gray-500">No compliance data</p>
+                      <p className="text-center text-slate-500">No compliance data</p>
                     )}
                   </div>
                 </CardContent>
               </Card>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Thermometer className="w-5 h-5 mr-2 text-orange-600" />
@@ -1645,7 +1645,7 @@ export default function WarehouseInspectorDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <MapPin className="w-5 h-5 mr-2 text-blue-600" />
@@ -1675,7 +1675,7 @@ export default function WarehouseInspectorDashboard() {
               </Card>
             </div>
 
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Clock className="w-5 h-5 mr-2 text-purple-600" />
@@ -1687,17 +1687,17 @@ export default function WarehouseInspectorDashboard() {
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <ClipboardCheck className="w-8 h-8 mx-auto text-blue-600 mb-2" />
                     <p className="text-2xl font-bold text-blue-600">{dashboardStats.completedInspections}</p>
-                    <p className="text-sm text-gray-600">Completed This Month</p>
+                    <p className="text-sm text-slate-600">Completed This Month</p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <CheckCircle className="w-8 h-8 mx-auto text-green-600 mb-2" />
                     <p className="text-2xl font-bold text-green-600">{dashboardStats.avgInspectionTime}</p>
-                    <p className="text-sm text-gray-600">Avg Inspection Time</p>
+                    <p className="text-sm text-slate-600">Avg Inspection Time</p>
                   </div>
                   <div className="text-center p-4 bg-red-50 rounded-lg">
                     <AlertTriangle className="w-8 h-8 mx-auto text-red-600 mb-2" />
                     <p className="text-2xl font-bold text-red-600">{dashboardStats.criticalIssues}</p>
-                    <p className="text-sm text-gray-600">Critical Issues</p>
+                    <p className="text-sm text-slate-600">Critical Issues</p>
                   </div>
                 </div>
               </CardContent>
@@ -1708,7 +1708,7 @@ export default function WarehouseInspectorDashboard() {
           <TabsContent value="registration" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* QR Scanner Section */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <QrCode className="w-5 h-5 mr-2 text-blue-600" />
@@ -1742,7 +1742,7 @@ export default function WarehouseInspectorDashboard() {
                         Multiple Lots
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-slate-600">
                       {scanMode === 'single' 
                         ? "Scan one QR code to register a single lot" 
                         : "Scan multiple QR codes of the same product to register as batch"
@@ -1832,7 +1832,7 @@ export default function WarehouseInspectorDashboard() {
                                     ×
                                   </Button>
                                 </div>
-                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
                                   <div><span className="font-medium">Product:</span> {item.product}</div>
                                   <div><span className="font-medium">Weight:</span> {item.weight}{item.unit}</div>
                                   <div><span className="font-medium">Buyer:</span> {item.buyerName}</div>
@@ -1912,7 +1912,7 @@ export default function WarehouseInspectorDashboard() {
               </Card>
 
               {/* Registration Details Section */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Warehouse className="w-5 h-5 mr-2 text-green-600" />
@@ -1927,7 +1927,7 @@ export default function WarehouseInspectorDashboard() {
                     <label className="text-sm font-medium">Daily Storage Rate</label>
                     <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-center">
                       <span className="text-lg font-bold text-green-600">$50.00 per Metric Ton</span>
-                      <p className="text-xs text-gray-600 mt-1">Fixed warehouse storage rate</p>
+                      <p className="text-xs text-slate-600 mt-1">Fixed warehouse storage rate</p>
                     </div>
                   </div>
 
@@ -1985,7 +1985,7 @@ export default function WarehouseInspectorDashboard() {
             </div>
 
             {/* Current Custody Records */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -2015,7 +2015,7 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Storage Inspections Tab */}
           <TabsContent value="inspections" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -2044,7 +2044,7 @@ export default function WarehouseInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {loadingInspections ? (
-                    <p className="text-center text-gray-500">Loading inspections...</p>
+                    <p className="text-center text-slate-500">Loading inspections...</p>
                   ) : pendingInspections && pendingInspections.length > 0 ? (
                     pendingInspections.map((inspection: any) => (
                       <div key={inspection.id} className="border rounded-lg p-4">
@@ -2085,23 +2085,23 @@ export default function WarehouseInspectorDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                             <h4 className="font-medium mb-2">Storage Details</h4>
-                            <p className="text-sm text-gray-600">Facility: {inspection.storageFacility}</p>
-                            <p className="text-sm text-gray-600">Unit: {inspection.storageUnit}</p>
-                            <p className="text-sm text-gray-600">Location: {inspection.warehouseSection}</p>
+                            <p className="text-sm text-slate-600">Facility: {inspection.storageFacility}</p>
+                            <p className="text-sm text-slate-600">Unit: {inspection.storageUnit}</p>
+                            <p className="text-sm text-slate-600">Location: {inspection.warehouseSection}</p>
                           </div>
                           
                           <div>
                             <h4 className="font-medium mb-2">Commodity Details</h4>
-                            <p className="text-sm text-gray-600">Type: {inspection.commodity}</p>
-                            <p className="text-sm text-gray-600">Quantity: {inspection.quantity}</p>
-                            <p className="text-sm text-gray-600">Temperature: {inspection.temperature}°C</p>
+                            <p className="text-sm text-slate-600">Type: {inspection.commodity}</p>
+                            <p className="text-sm text-slate-600">Quantity: {inspection.quantity}</p>
+                            <p className="text-sm text-slate-600">Temperature: {inspection.temperature}°C</p>
                           </div>
                           
                           <div>
                             <h4 className="font-medium mb-2">Inspection Details</h4>
-                            <p className="text-sm text-gray-600">Scheduled: {inspection.scheduledDate}</p>
-                            <p className="text-sm text-gray-600">Type: {inspection.inspectionType}</p>
-                            <p className="text-sm text-gray-600">Duration: {inspection.estimatedDuration}</p>
+                            <p className="text-sm text-slate-600">Scheduled: {inspection.scheduledDate}</p>
+                            <p className="text-sm text-slate-600">Type: {inspection.inspectionType}</p>
+                            <p className="text-sm text-slate-600">Duration: {inspection.estimatedDuration}</p>
                           </div>
                         </div>
                         
@@ -2119,7 +2119,7 @@ export default function WarehouseInspectorDashboard() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No pending inspections</p>
+                    <p className="text-center text-slate-500">No pending inspections</p>
                   )}
                 </div>
               </CardContent>
@@ -2128,7 +2128,7 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Transactions Tab */}
           <TabsContent value="transactions" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
@@ -2141,14 +2141,14 @@ export default function WarehouseInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {warehouseTransactionsLoading ? (
-                    <p className="text-center text-gray-500">Loading transactions...</p>
+                    <p className="text-center text-slate-500">Loading transactions...</p>
                   ) : warehouseTransactions && warehouseTransactions.length > 0 ? (
                     warehouseTransactions.map((transaction: any) => (
                       <div key={transaction.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <h4 className="font-medium">{transaction.transactionType}</h4>
-                            <p className="text-sm text-gray-600">ID: {transaction.transactionId}</p>
+                            <p className="text-sm text-slate-600">ID: {transaction.transactionId}</p>
                           </div>
                           <Badge className={transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
                             {transaction.status}
@@ -2157,21 +2157,21 @@ export default function WarehouseInspectorDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                             <span className="font-medium">Farmer:</span>
-                            <p className="text-gray-600">{transaction.farmerName}</p>
+                            <p className="text-slate-600">{transaction.farmerName}</p>
                           </div>
                           <div>
                             <span className="font-medium">Commodity:</span>
-                            <p className="text-gray-600">{transaction.commodity}</p>
+                            <p className="text-slate-600">{transaction.commodity}</p>
                           </div>
                           <div>
                             <span className="font-medium">Date:</span>
-                            <p className="text-gray-600">{transaction.transactionDate}</p>
+                            <p className="text-slate-600">{transaction.transactionDate}</p>
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No transactions available</p>
+                    <p className="text-center text-slate-500">No transactions available</p>
                   )}
                 </div>
               </CardContent>
@@ -2180,7 +2180,7 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Codes Tab - Only Buyer Acceptance Codes */}
           <TabsContent value="codes" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="w-5 h-5 mr-2 text-blue-600" />
@@ -2201,7 +2201,7 @@ export default function WarehouseInspectorDashboard() {
                 </div>
                 <div className="space-y-4">
                   {warehouseCodesLoading ? (
-                    <p className="text-center text-gray-500">Loading buyer acceptance codes...</p>
+                    <p className="text-center text-slate-500">Loading buyer acceptance codes...</p>
                   ) : warehouseCodes && warehouseCodes.length > 0 ? (
                     warehouseCodes.filter((code: any) => code.codeType === "buyer-acceptance").map((code: any) => (
                       <div key={code.id} className="border rounded-lg p-4 bg-gradient-to-r from-green-50 to-blue-50">
@@ -2219,30 +2219,30 @@ export default function WarehouseInspectorDashboard() {
                           <div className="space-y-2">
                             <div>
                               <span className="font-medium text-gray-700">Transaction ID:</span>
-                              <p className="text-gray-600">{code.transactionId}</p>
+                              <p className="text-slate-600">{code.transactionId}</p>
                             </div>
                             <div>
                               <span className="font-medium text-gray-700">Commodity:</span>
-                              <p className="text-gray-600">{code.commodityType} ({code.quantity} {code.unit})</p>
+                              <p className="text-slate-600">{code.commodityType} ({code.quantity} {code.unit})</p>
                             </div>
                             <div>
                               <span className="font-medium text-gray-700">Value:</span>
-                              <p className="text-gray-600">${code.totalValue.toLocaleString()}</p>
+                              <p className="text-slate-600">${code.totalValue.toLocaleString()}</p>
                             </div>
                           </div>
                           <div className="space-y-2">
                             <div>
                               <span className="font-medium text-gray-700">Buyer:</span>
-                              <p className="text-gray-600">{code.buyerName}</p>
+                              <p className="text-slate-600">{code.buyerName}</p>
                               <p className="text-sm text-blue-600">{code.buyerCounty}</p>
                             </div>
                             <div>
                               <span className="font-medium text-gray-700">Farmer:</span>
-                              <p className="text-gray-600">{code.farmerName}</p>
+                              <p className="text-slate-600">{code.farmerName}</p>
                             </div>
                             <div>
                               <span className="font-medium text-gray-700">Generated:</span>
-                              <p className="text-gray-600">{new Date(code.generatedAt).toLocaleDateString()}</p>
+                              <p className="text-slate-600">{new Date(code.generatedAt).toLocaleDateString()}</p>
                             </div>
                           </div>
                         </div>
@@ -2306,7 +2306,7 @@ export default function WarehouseInspectorDashboard() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No buyer acceptance codes available for your county</p>
+                    <p className="text-center text-slate-500">No buyer acceptance codes available for your county</p>
                   )}
                 </div>
               </CardContent>
@@ -2318,7 +2318,7 @@ export default function WarehouseInspectorDashboard() {
             {/* QR Batch Tracking & Management - Only in Bags Tab */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <Card>
+                <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <FileText className="w-5 h-5 mr-2 text-blue-600" />
@@ -2337,9 +2337,9 @@ export default function WarehouseInspectorDashboard() {
                           Generate QR Batch from Transaction
                         </h3>
                         <div className="mb-4 p-3 bg-white rounded border">
-                          <p className="text-sm text-gray-600 mb-2">Select available transactions for QR batch:</p>
+                          <p className="text-sm text-slate-600 mb-2">Select available transactions for QR batch:</p>
                           {availableTransactionsLoading ? (
-                            <p className="text-center text-gray-500">Loading available transactions...</p>
+                            <p className="text-center text-slate-500">Loading available transactions...</p>
                           ) : availableTransactions && availableTransactions.length > 0 ? (
                             <div className="space-y-2 max-h-48 overflow-y-auto">
                               {availableTransactions.map((transaction: any) => (
@@ -2488,7 +2488,7 @@ export default function WarehouseInspectorDashboard() {
                         <h3 className="font-medium mb-3">Recent QR Batches</h3>
                         <div className="space-y-3">
                           {qrBatchesLoading ? (
-                            <p className="text-center text-gray-500">Loading QR batches...</p>
+                            <p className="text-center text-slate-500">Loading QR batches...</p>
                           ) : qrBatches && qrBatches.length > 0 ? (
                             qrBatches.map((batch: any) => (
                               <div key={batch.batchCode} className="border rounded-lg p-3">
@@ -2524,15 +2524,15 @@ export default function WarehouseInspectorDashboard() {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                                   <div>
                                     <span className="font-medium">Buyer:</span>
-                                    <p className="text-gray-600">{batch.buyerName}</p>
+                                    <p className="text-slate-600">{batch.buyerName}</p>
                                   </div>
                                   <div>
                                     <span className="font-medium">Commodity:</span>
-                                    <p className="text-gray-600">{batch.commodityType}</p>
+                                    <p className="text-slate-600">{batch.commodityType}</p>
                                   </div>
                                   <div>
                                     <span className="font-medium">Total Weight:</span>
-                                    <p className="text-gray-600">{batch.totalWeight} tons</p>
+                                    <p className="text-slate-600">{batch.totalWeight} tons</p>
                                   </div>
                                   <div>
                                     <span className="font-medium">Status:</span>
@@ -2541,13 +2541,13 @@ export default function WarehouseInspectorDashboard() {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="mt-2 text-xs text-gray-500">
+                                <div className="mt-2 text-xs text-slate-500">
                                   Farmer: {batch.farmerName} • Created: {new Date(batch.createdAt).toLocaleDateString()}
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <p className="text-center text-gray-500">No QR batches available</p>
+                            <p className="text-center text-slate-500">No QR batches available</p>
                           )}
                         </div>
                       </div>
@@ -2557,7 +2557,7 @@ export default function WarehouseInspectorDashboard() {
               </div>
 
               <div>
-                <Card>
+                <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
@@ -2569,21 +2569,21 @@ export default function WarehouseInspectorDashboard() {
                       <div className="text-center p-4 bg-green-50 rounded-lg">
                         <CheckCircle className="w-8 h-8 mx-auto text-green-600 mb-2" />
                         <p className="text-2xl font-bold text-green-600">{qrBatches ? qrBatches.length : 0}</p>
-                        <p className="text-sm text-gray-600">Active QR Batches</p>
+                        <p className="text-sm text-slate-600">Active QR Batches</p>
                       </div>
                       <div className="text-center p-4 bg-blue-50 rounded-lg">
                         <Package className="w-8 h-8 mx-auto text-blue-600 mb-2" />
                         <p className="text-2xl font-bold text-blue-600">
                           {qrBatches ? qrBatches.reduce((total: number, batch: any) => total + parseInt(batch.totalBags || 0), 0) : 0}
                         </p>
-                        <p className="text-sm text-gray-600">Total Bags Tracked</p>
+                        <p className="text-sm text-slate-600">Total Bags Tracked</p>
                       </div>
                       <div className="text-center p-4 bg-purple-50 rounded-lg">
                         <FileText className="w-8 h-8 mx-auto text-purple-600 mb-2" />
                         <p className="text-2xl font-bold text-purple-600">
                           {qrBatches ? qrBatches.filter((batch: any) => batch.status === 'printed' || batch.status === 'distributed').length : 0}
                         </p>
-                        <p className="text-sm text-gray-600">QR Codes Printed</p>
+                        <p className="text-sm text-slate-600">QR Codes Printed</p>
                       </div>
                     </div>
                   </CardContent>
@@ -2599,13 +2599,13 @@ export default function WarehouseInspectorDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       {qrBatchesLoading ? (
-                        <p className="text-center text-gray-500">Loading activity...</p>
+                        <p className="text-center text-slate-500">Loading activity...</p>
                       ) : qrBatches && qrBatches.length > 0 ? (
                         qrBatches.slice(0, 3).map((batch: any) => (
                           <div key={batch.batchCode} className="flex items-center justify-between p-2 border rounded">
                             <div className="text-sm">
                               <p className="font-medium">{batch.batchCode}</p>
-                              <p className="text-gray-600">
+                              <p className="text-slate-600">
                                 {batch.status === 'generated' ? 'Generated for processing' : 
                                  batch.status === 'printed' ? 'QR codes printed' : 
                                  batch.status === 'distributed' ? 'Distributed to buyer' : 'In processing'}
@@ -2621,7 +2621,7 @@ export default function WarehouseInspectorDashboard() {
                           </div>
                         ))
                       ) : (
-                        <p className="text-center text-gray-500">No recent activity</p>
+                        <p className="text-center text-slate-500">No recent activity</p>
                       )}
                     </div>
                   </CardContent>
@@ -2630,7 +2630,7 @@ export default function WarehouseInspectorDashboard() {
             </div>
 
             {/* Incoming Bag Requests from Buyers - Now after QR Code Generator */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Truck className="w-5 h-5 mr-2" />
@@ -2644,7 +2644,7 @@ export default function WarehouseInspectorDashboard() {
                 {bagRequestsLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading bag requests...</p>
+                    <p className="mt-2 text-slate-600">Loading bag requests...</p>
                   </div>
                 ) : bagRequests && bagRequests.length > 0 ? (
                   <div className="space-y-4">
@@ -2665,11 +2665,11 @@ export default function WarehouseInspectorDashboard() {
                                   {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                                 </Badge>
                               </h4>
-                              <p className="text-sm text-gray-600">Request ID: {request.requestId}</p>
-                              <p className="text-sm text-gray-600">From: {request.buyerName} ({request.company})</p>
+                              <p className="text-sm text-slate-600">Request ID: {request.requestId}</p>
+                              <p className="text-sm text-slate-600">From: {request.buyerName} ({request.company})</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-slate-500">
                                 {new Date(request.requestedAt).toLocaleString()}
                               </p>
                             </div>
@@ -2677,30 +2677,30 @@ export default function WarehouseInspectorDashboard() {
                           
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                             <div>
-                              <p className="text-sm text-gray-600">Farmer</p>
+                              <p className="text-sm text-slate-600">Farmer</p>
                               <p className="font-medium">{request.farmerName}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-600">Quantity</p>
+                              <p className="text-sm text-slate-600">Quantity</p>
                               <p className="font-medium">{request.quantity} {request.unit}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-600">Total Value</p>
+                              <p className="text-sm text-slate-600">Total Value</p>
                               <p className="font-medium text-green-600">${request.totalValue}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-600">County</p>
+                              <p className="text-sm text-slate-600">County</p>
                               <p className="font-medium">{request.county}</p>
                             </div>
                           </div>
 
                           <div className="mb-4">
-                            <p className="text-sm text-gray-600">Farm Location</p>
+                            <p className="text-sm text-slate-600">Farm Location</p>
                             <p className="text-sm">{request.farmLocation}</p>
                           </div>
 
                           <div className="mb-4">
-                            <p className="text-sm text-gray-600">Verification Code</p>
+                            <p className="text-sm text-slate-600">Verification Code</p>
                             <p className="font-mono text-sm bg-gray-100 p-2 rounded">{request.verificationCode}</p>
                           </div>
 
@@ -2788,7 +2788,7 @@ export default function WarehouseInspectorDashboard() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-slate-500">
                     <Truck className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>No bag requests from buyers at this time.</p>
                     <p className="text-sm">Bag requests will appear here when buyers request bags for validated transactions.</p>
@@ -2800,7 +2800,7 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Inventory Control Tab */}
           <TabsContent value="inventory" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Package className="w-5 h-5 mr-2 text-blue-600" />
@@ -2813,14 +2813,14 @@ export default function WarehouseInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {loadingInventory ? (
-                    <p className="text-center text-gray-500">Loading inventory data...</p>
+                    <p className="text-center text-slate-500">Loading inventory data...</p>
                   ) : inventoryStatus && inventoryStatus.length > 0 ? (
                     inventoryStatus.map((item: any) => (
                       <div key={item.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <h4 className="font-medium">{item.commodity}</h4>
-                            <p className="text-sm text-gray-600">Storage Unit: {item.storageUnit}</p>
+                            <p className="text-sm text-slate-600">Storage Unit: {item.storageUnit}</p>
                           </div>
                           <Badge className={item.status === 'stored' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
                             {item.status}
@@ -2828,22 +2828,22 @@ export default function WarehouseInspectorDashboard() {
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
-                            <p className="text-gray-600">Quantity</p>
+                            <p className="text-slate-600">Quantity</p>
                             <p className="font-medium">{item.quantity} {item.unit}</p>
                           </div>
                           <div>
-                            <p className="text-gray-600">Storage Date</p>
+                            <p className="text-slate-600">Storage Date</p>
                             <p className="font-medium">{item.storageDate}</p>
                           </div>
                           <div>
-                            <p className="text-gray-600">Temperature</p>
+                            <p className="text-slate-600">Temperature</p>
                             <p className="font-medium">{item.temperature}°C</p>
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No inventory data available</p>
+                    <p className="text-center text-slate-500">No inventory data available</p>
                   )}
                 </div>
               </CardContent>
@@ -2852,7 +2852,7 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Validation Tab */}
           <TabsContent value="validation" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Shield className="w-5 h-5 mr-2 text-green-600" />
@@ -2957,7 +2957,7 @@ export default function WarehouseInspectorDashboard() {
                           <Badge className="bg-green-100 text-green-800">Validated</Badge>
                         </div>
                       </div>
-                      <div className="text-center py-4 text-gray-500">
+                      <div className="text-center py-4 text-slate-500">
                         <p className="text-sm">Additional validation history will appear here</p>
                       </div>
                     </div>
@@ -2969,7 +2969,7 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Quality Control Tab */}
           <TabsContent value="quality" className="space-y-6">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
@@ -2982,14 +2982,14 @@ export default function WarehouseInspectorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {loadingQuality ? (
-                    <p className="text-center text-gray-500">Loading quality data...</p>
+                    <p className="text-center text-slate-500">Loading quality data...</p>
                   ) : qualityControls && qualityControls.length > 0 ? (
                     qualityControls.map((control: any) => (
                       <div key={control.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <h4 className="font-medium">{control.testType}</h4>
-                            <p className="text-sm text-gray-600">Batch: {control.batchNumber}</p>
+                            <p className="text-sm text-slate-600">Batch: {control.batchNumber}</p>
                           </div>
                           <Badge className={control.status === 'passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                             {control.status}
@@ -2997,22 +2997,22 @@ export default function WarehouseInspectorDashboard() {
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
-                            <p className="text-gray-600">Test Date</p>
+                            <p className="text-slate-600">Test Date</p>
                             <p className="font-medium">{control.testDate}</p>
                           </div>
                           <div>
-                            <p className="text-gray-600">Inspector</p>
+                            <p className="text-slate-600">Inspector</p>
                             <p className="font-medium">{control.inspector}</p>
                           </div>
                           <div>
-                            <p className="text-gray-600">Score</p>
+                            <p className="text-slate-600">Score</p>
                             <p className="font-medium">{control.score}%</p>
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-gray-500">No quality control data available</p>
+                    <p className="text-center text-slate-500">No quality control data available</p>
                   )}
                 </div>
               </CardContent>
@@ -3022,7 +3022,7 @@ export default function WarehouseInspectorDashboard() {
           {/* Dispatch Tab - Warehouse Dispatch Confirmation System */}
           <TabsContent value="dispatch" className="space-y-6">
             <div className="space-y-6">
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-xl flex items-center">
                     <Truck className="w-6 h-6 mr-3 text-blue-600" />
@@ -3036,7 +3036,7 @@ export default function WarehouseInspectorDashboard() {
                   {dispatchRequestsLoading ? (
                     <div className="flex justify-center items-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-3 text-gray-600">Loading dispatch requests...</span>
+                      <span className="ml-3 text-slate-600">Loading dispatch requests...</span>
                     </div>
                   ) : pendingDispatchRequests && pendingDispatchRequests.length > 0 ? (
                     <div className="space-y-4">
@@ -3094,7 +3094,7 @@ export default function WarehouseInspectorDashboard() {
                             </div>
                             
                             <div className="flex justify-between items-center pt-4 border-t">
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-slate-500">
                                 Requested: {new Date(request.requested_at).toLocaleString()}
                               </div>
                               <div className="flex gap-3">
@@ -3133,8 +3133,8 @@ export default function WarehouseInspectorDashboard() {
                   ) : (
                     <div className="text-center py-12">
                       <Truck className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Pending Dispatch Requests</h3>
-                      <p className="text-gray-500">All dispatch requests have been processed or no new requests are available.</p>
+                      <h3 className="text-lg font-medium text-slate-900 mb-2">No Pending Dispatch Requests</h3>
+                      <p className="text-slate-500">All dispatch requests have been processed or no new requests are available.</p>
                     </div>
                   )}
                 </CardContent>
@@ -3166,14 +3166,14 @@ export default function WarehouseInspectorDashboard() {
                       className="w-full max-w-sm h-auto mx-auto mb-4 border-2 border-gray-200 rounded-lg"
                       style={{ maxHeight: '80vh', objectFit: 'contain' }}
                     />
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-slate-600">
                       Scan this QR code for complete traceability information
                     </p>
                   </div>
                 ) : (
                   <div className="text-center p-8 bg-gray-50 rounded-lg">
                     <QrCode className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-600">QR Code not available</p>
+                    <p className="text-slate-600">QR Code not available</p>
                   </div>
                 )}
               </div>
@@ -3346,10 +3346,10 @@ export default function WarehouseInspectorDashboard() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h3 className="font-semibold text-lg text-gray-900">
+                    <h3 className="font-semibold text-lg text-slate-900">
                       {selectedBagRequest.commodityType}
                     </h3>
-                    <p className="text-sm text-gray-600">Request ID: {selectedBagRequest.requestId}</p>
+                    <p className="text-sm text-slate-600">Request ID: {selectedBagRequest.requestId}</p>
                     <Badge className={`mt-2 ${
                       selectedBagRequest.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       selectedBagRequest.status === 'validated' ? 'bg-green-100 text-green-800' :
@@ -3360,8 +3360,8 @@ export default function WarehouseInspectorDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-green-600">${selectedBagRequest.totalValue}</p>
-                    <p className="text-sm text-gray-600">Total Transaction Value</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-sm text-slate-600">Total Transaction Value</p>
+                    <p className="text-xs text-slate-500 mt-1">
                       Requested: {new Date(selectedBagRequest.requestedAt).toLocaleString()}
                     </p>
                   </div>
@@ -3369,26 +3369,26 @@ export default function WarehouseInspectorDashboard() {
               </div>
 
               {/* Buyer Information */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg">Buyer Information</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">Buyer Name</p>
+                      <p className="text-sm text-slate-600">Buyer Name</p>
                       <p className="font-medium">{selectedBagRequest.buyerName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Company</p>
+                      <p className="text-sm text-slate-600">Company</p>
                       <p className="font-medium">{selectedBagRequest.company}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Buyer ID</p>
+                      <p className="text-sm text-slate-600">Buyer ID</p>
                       <p className="font-mono text-sm">{selectedBagRequest.buyerId}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Contact Information</p>
+                      <p className="text-sm text-slate-600">Contact Information</p>
                       <p className="text-sm">{selectedBagRequest.buyerContact || 'N/A'}</p>
                     </div>
                   </div>
@@ -3396,34 +3396,34 @@ export default function WarehouseInspectorDashboard() {
               </Card>
 
               {/* Farm & Product Details */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg">Farm & Product Information</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">Farmer Name</p>
+                      <p className="text-sm text-slate-600">Farmer Name</p>
                       <p className="font-medium">{selectedBagRequest.farmerName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Farm Location</p>
+                      <p className="text-sm text-slate-600">Farm Location</p>
                       <p className="text-sm">{selectedBagRequest.farmLocation}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">County</p>
+                      <p className="text-sm text-slate-600">County</p>
                       <p className="font-medium">{selectedBagRequest.county}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Harvest Date</p>
+                      <p className="text-sm text-slate-600">Harvest Date</p>
                       <p className="text-sm">{selectedBagRequest.harvestDate ? new Date(selectedBagRequest.harvestDate).toLocaleDateString() : 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Quantity Requested</p>
+                      <p className="text-sm text-slate-600">Quantity Requested</p>
                       <p className="font-medium text-lg">{selectedBagRequest.quantity} {selectedBagRequest.unit}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Quality Grade</p>
+                      <p className="text-sm text-slate-600">Quality Grade</p>
                       <p className="font-medium">{selectedBagRequest.qualityGrade || 'Standard Grade'}</p>
                     </div>
                   </div>
@@ -3431,28 +3431,28 @@ export default function WarehouseInspectorDashboard() {
               </Card>
 
               {/* Transaction Details */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg">Transaction & Payment Details</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">Verification Code</p>
+                      <p className="text-sm text-slate-600">Verification Code</p>
                       <p className="font-mono text-lg bg-blue-100 p-2 rounded font-bold text-blue-800">
                         {selectedBagRequest.verificationCode}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Price per Unit</p>
+                      <p className="text-sm text-slate-600">Price per Unit</p>
                       <p className="font-medium">${selectedBagRequest.pricePerUnit || (selectedBagRequest.totalValue / selectedBagRequest.quantity).toFixed(2)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Payment Terms</p>
+                      <p className="text-sm text-slate-600">Payment Terms</p>
                       <p className="text-sm">{selectedBagRequest.paymentTerms || 'Cash on Delivery'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Delivery Terms</p>
+                      <p className="text-sm text-slate-600">Delivery Terms</p>
                       <p className="text-sm">{selectedBagRequest.deliveryTerms || 'FOB Farm Gate'}</p>
                     </div>
                   </div>
@@ -3460,7 +3460,7 @@ export default function WarehouseInspectorDashboard() {
               </Card>
 
               {/* EUDR Compliance Information */}
-              <Card>
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center">
                     <Shield className="w-5 h-5 mr-2 text-green-600" />
@@ -3476,19 +3476,19 @@ export default function WarehouseInspectorDashboard() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-gray-600">GPS Coordinates</p>
+                        <p className="text-sm text-slate-600">GPS Coordinates</p>
                         <p className="font-mono text-sm">{selectedBagRequest.gpsCoordinates || '6.3106°N, 10.7969°W'}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Land Use Certificate</p>
+                        <p className="text-sm text-slate-600">Land Use Certificate</p>
                         <p className="text-sm">{selectedBagRequest.landCertificate || 'LUC-' + selectedBagRequest.farmerId}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Deforestation Risk</p>
+                        <p className="text-sm text-slate-600">Deforestation Risk</p>
                         <Badge className="bg-green-100 text-green-800">Low Risk</Badge>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Satellite Monitoring</p>
+                        <p className="text-sm text-slate-600">Satellite Monitoring</p>
                         <Badge className="bg-blue-100 text-blue-800">Verified</Badge>
                       </div>
                     </div>
@@ -3498,7 +3498,7 @@ export default function WarehouseInspectorDashboard() {
 
               {/* Additional Notes */}
               {selectedBagRequest.description && (
-                <Card>
+                <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
                   <CardHeader>
                     <CardTitle className="text-lg">Additional Notes</CardTitle>
                   </CardHeader>

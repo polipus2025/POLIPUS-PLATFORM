@@ -195,7 +195,7 @@ export default function CreateLandPlot() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center mb-6">
-          <Link href="/land-inspector-dashboard">
+          <Link href="/unified-land-inspector-dashboard">
             <Button variant="outline" size="sm" className="mr-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard

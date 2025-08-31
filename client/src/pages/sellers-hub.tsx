@@ -518,7 +518,7 @@ export default function SellersHub() {
             <div className="space-y-4">
               <h3 className="font-semibold text-lg border-b pb-2">Product Details</h3>
               <div className="space-y-2">
-                <div><strong>🔗 Custody ID:</strong> <span className="font-mono text-blue-600">{selectedOffer.custodyId}</span></div>
+                <div><strong>🔗 Offer ID:</strong> <span className="font-mono text-blue-600">{selectedOffer.offerId}</span></div>
                 <div><strong>Commodity:</strong> {selectedOffer.commodity}</div>
                 <div><strong>Quality Grade:</strong> {selectedOffer.qualityGrade}</div>
                 <div><strong>Quantity:</strong> {selectedOffer.quantityAvailable}</div>
@@ -788,7 +788,8 @@ export default function SellersHub() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Back Button */}
       <div className="flex items-center mb-4">
         <Link href="/exporter-dashboard">
@@ -805,40 +806,40 @@ export default function SellersHub() {
       </div>
 
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Sellers Hub</h1>
-        <p className="text-slate-600">Browse buyer offers and grow your export business</p>
+      <div className="text-center bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-slate-200">
+        <h1 className="text-4xl font-bold text-slate-900 mb-3">Sellers Hub</h1>
+        <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <TrendingUp className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-slate-800">{offers.length}</div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
+          <CardContent className="p-6 text-center">
+            <TrendingUp className="w-10 h-10 text-blue-500 mx-auto mb-3" />
+            <div className="text-3xl font-bold text-slate-900">{offers.length}</div>
             <div className="text-sm text-slate-600">Active Offers</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Package className="w-8 h-8 text-green-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-slate-800">{myOffers.length}</div>
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
+          <CardContent className="p-6 text-center">
+            <Package className="w-10 h-10 text-green-500 mx-auto mb-3" />
+            <div className="text-3xl font-bold text-slate-900">{myOffers.length}</div>
             <div className="text-sm text-slate-600">For You</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Clock className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-slate-800">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
+          <CardContent className="p-6 text-center">
+            <Clock className="w-10 h-10 text-orange-500 mx-auto mb-3" />
+            <div className="text-3xl font-bold text-slate-900">
               {offers.filter(offer => !isOfferExpired(offer.expiresAt)).length}
             </div>
             <div className="text-sm text-slate-600">Valid</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <DollarSign className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-slate-800">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
+          <CardContent className="p-6 text-center">
+            <DollarSign className="w-10 h-10 text-purple-500 mx-auto mb-3" />
+            <div className="text-3xl font-bold text-slate-900">
               ${offers.reduce((sum, offer) => sum + (typeof offer.totalValue === 'string' ? parseFloat(offer.totalValue) : offer.totalValue || 0), 0).toLocaleString()}
             </div>
             <div className="text-sm text-slate-600">Total Value</div>
@@ -969,6 +970,7 @@ export default function SellersHub() {
       {/* Dialogs */}
       <OfferDetailsDialog />
       <VerificationCodeDialog />
+      </div>
     </div>
   );
 }

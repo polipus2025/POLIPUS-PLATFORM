@@ -64,33 +64,33 @@ export default function SimpleMarketPricing() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <Helmet>
         <title>🔴 LIVE Market Intelligence - AgriTrace360™</title>
       </Helmet>
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white mb-8 rounded-lg">
-        <div className="p-6">
+      <div className="bg-white/95 backdrop-blur-sm shadow-xl border border-slate-200 mb-8 rounded-2xl">
+        <div className="p-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <Globe className="w-7 h-7 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                <Globe className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold flex items-center">
+                <h1 className="text-4xl font-bold flex items-center text-slate-900">
                   <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-3"></span>
                   LIVE Market Intelligence
                 </h1>
-                <p className="text-blue-100">🚨 Real-time commodity pricing dashboard</p>
+                <p className="text-slate-700 text-lg">🚨 Real-time commodity pricing dashboard</p>
               </div>
             </div>
             
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleRefresh}
-              className="text-white hover:bg-white/10"
+              className="bg-white/95 backdrop-blur-sm shadow-lg border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -101,7 +101,7 @@ export default function SimpleMarketPricing() {
 
       {/* Market Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -113,7 +113,7 @@ export default function SimpleMarketPricing() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -125,7 +125,7 @@ export default function SimpleMarketPricing() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -206,7 +206,7 @@ export default function SimpleMarketPricing() {
       </div>
 
       {/* API Status */}
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
+      <div className="bg-white/95 backdrop-blur-sm shadow-xl border border-slate-200 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 rounded-2xl p-8">
         <h3 className="font-medium text-green-900 mb-4">Market Data Sources</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="space-y-2">

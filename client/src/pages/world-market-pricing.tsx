@@ -96,16 +96,16 @@ const WorldMarketPricing = memo(() => {
         <meta name="description" content="Real-time global commodity prices and market intelligence for exporters" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+      <div className="bg-white/95 backdrop-blur-sm shadow-xl border-b border-slate-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center items-center py-6">
+          <div className="flex justify-center items-center py-8">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <DollarSign className="w-7 h-7 text-white" />
               </div>
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-900">World Market Pricing</h1>
-                <p className="text-sm text-slate-600">Real-time global commodity prices and insights</p>
+                <h1 className="text-3xl font-bold text-slate-900">World Market Pricing</h1>
+                <p className="text-lg text-slate-700">Real-time global commodity prices and insights</p>
               </div>
             </div>
           </div>
@@ -118,7 +118,7 @@ const WorldMarketPricing = memo(() => {
         {/* Market Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {marketIndicators.map((indicator, index) => (
-            <Card key={index} className={`bg-gradient-to-r from-${indicator.color}-50 to-${indicator.color}-100 border-${indicator.color}-200`}>
+            <Card key={index} className={`bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-${indicator.color}-50 to-${indicator.color}-100 border-${indicator.color}-200`}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -133,7 +133,7 @@ const WorldMarketPricing = memo(() => {
         </div>
 
         {/* Commodity Prices */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-white/95 backdrop-blur-sm shadow-xl border border-slate-200">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
               <Globe className="h-5 w-5 text-blue-600" />

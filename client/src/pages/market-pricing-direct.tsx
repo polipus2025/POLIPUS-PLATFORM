@@ -102,16 +102,16 @@ export default function MarketPricingDirect() {
       </Helmet>
 
       {/* Standard Exporter Header */}
-      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+      <div className="bg-white/95 backdrop-blur-sm shadow-xl border-b border-slate-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center items-center py-6">
+          <div className="flex justify-center items-center py-8">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">World Market Pricing</h1>
-                <p className="text-slate-600">Real-time commodity intelligence & analytics</p>
+                <h1 className="text-3xl font-bold text-slate-900">World Market Pricing</h1>
+                <p className="text-lg text-slate-700">Real-time commodity intelligence & analytics</p>
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function MarketPricingDirect() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         
         {/* Live Status Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white mb-8 rounded-lg p-6">
+        <div className="bg-white/95 backdrop-blur-sm shadow-xl border border-slate-200 mb-8 rounded-2xl p-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
@@ -144,7 +144,7 @@ export default function MarketPricingDirect() {
 
         {/* Market Performance Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
+          <div className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-600">Total Commodities</p>
@@ -156,7 +156,7 @@ export default function MarketPricingDirect() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-6">
+          <div className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-600">Bullish Markets</p>
@@ -168,7 +168,7 @@ export default function MarketPricingDirect() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-lg p-6">
+          <div className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-red-50 to-rose-50 border-red-200 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-red-600">Bearish Markets</p>
@@ -180,7 +180,7 @@ export default function MarketPricingDirect() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-6">
+          <div className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-purple-600">Open Markets</p>

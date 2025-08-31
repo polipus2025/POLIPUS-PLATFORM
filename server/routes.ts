@@ -17781,14 +17781,13 @@ GENERATED: ${new Date().toLocaleDateString()}`;
           wdr.commodity_type as "commodityType", 
           wdr.quantity, 
           wdr.unit, 
-          COALESCE(wdr.total_value, beo.total_value, fpo.total_value, 0) as "totalValue",
+          COALESCE(wdr.total_value, beo.total_value, 0) as "totalValue",
           wdr.county, 
           wdr.farm_location as "farmLocation",
           wdr.dispatch_date as "dispatchDate", 
           wdr.requested_at as "requestedAt"
         FROM warehouse_dispatch_requests wdr
         LEFT JOIN buyer_exporter_offers beo ON beo.custody_id = wdr.transaction_id
-        LEFT JOIN farmer_product_offers fpo ON fpo.custody_id = wdr.transaction_id
         WHERE wdr.status = 'pending'
         ORDER BY wdr.requested_at DESC
       `);

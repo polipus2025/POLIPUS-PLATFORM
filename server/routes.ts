@@ -14053,16 +14053,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get ALL inspector assignments for DDGOTS - PENDING AND ASSIGNED
   app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
     try {
-      // Get both pending and assigned bookings to show assignment status
-      const allAssignments = await db.select()
-        .from(portInspectionBookings)
-        .where(
-          or(
-            eq(portInspectionBookings.assignmentStatus, 'pending_assignment'),
-            eq(portInspectionBookings.assignmentStatus, 'assigned')
-          )
-        )
-        .orderBy(portInspectionBookings.bookedAt);
+      // Direct database query
+      const allAssignments = await db.select().from(portInspectionBookings);
       
       // Filter to only show bookings that were actually made by exporters with proper request IDs
       const realExporterBookings = allAssignments.filter(booking => 

@@ -4263,6 +4263,18 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAllInspectorAssignments(): Promise<PortInspectionBooking[]> {
+    try {
+      const assignments = await db.select()
+        .from(portInspectionBookings)
+        .orderBy(portInspectionBookings.bookedAt);
+      return assignments;
+    } catch (error) {
+      console.error('Error fetching all inspector assignments:', error);
+      return [];
+    }
+  }
+
   async getPortInspectors(portFacility: string = 'Port of Monrovia'): Promise<Inspector[]> {
     try {
       const inspectorsList = await db.select()

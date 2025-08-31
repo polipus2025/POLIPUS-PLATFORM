@@ -28,9 +28,11 @@ interface Inspector {
   nationalId: string;
   address: string;
   profilePicture: string | null;
+  inspectorType: string; // "land" or "port"
   inspectionAreaCounty: string;
   inspectionAreaDistrict: string | null;
   inspectionAreaDescription: string | null;
+  portFacility: string | null; // for port inspectors
   specializations: string | null;
   certificationLevel: string;
   isActive: boolean;
@@ -632,6 +634,9 @@ export default function InspectorManagement() {
                         <Badge className={getStatusColor(inspector)}>
                           {getStatusText(inspector)}
                         </Badge>
+                        <Badge variant={inspector.inspectorType === 'port' ? 'default' : 'secondary'} className={`text-xs font-medium ${inspector.inspectorType === 'port' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`}>
+                          {inspector.inspectorType === 'port' ? '🚢 PORT INSPECTOR' : '🌾 LAND INSPECTOR'}
+                        </Badge>
                         <Badge variant="outline" className="text-xs">
                           {inspector.certificationLevel.toUpperCase()}
                         </Badge>
@@ -643,7 +648,7 @@ export default function InspectorManagement() {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4" />
-                          <span>{inspector.inspectionAreaCounty} County</span>
+                          <span>{inspector.inspectorType === 'port' && inspector.portFacility ? inspector.portFacility : `${inspector.inspectionAreaCounty} County`}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4" />
@@ -723,15 +728,33 @@ export default function InspectorManagement() {
                                 <label className="text-sm font-medium text-slate-600">Certification Level</label>
                                 <p className="capitalize">{inspector.certificationLevel}</p>
                               </div>
+                              <div>
+                                <label className="text-sm font-medium text-slate-600">Inspector Type</label>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={inspector.inspectorType === 'port' ? 'default' : 'secondary'} className={`text-xs font-medium ${inspector.inspectorType === 'port' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`}>
+                                    {inspector.inspectorType === 'port' ? '🚢 PORT INSPECTOR' : '🌾 LAND INSPECTOR'}
+                                  </Badge>
+                                </div>
+                              </div>
                               <div className="col-span-2">
                                 <label className="text-sm font-medium text-slate-600">Address</label>
                                 <p>{inspector.address}</p>
                               </div>
                               <div className="col-span-2">
-                                <label className="text-sm font-medium text-slate-600">Inspection Area</label>
-                                <p>{inspector.inspectionAreaCounty} County {inspector.inspectionAreaDistrict ? `- ${inspector.inspectionAreaDistrict}` : ''}</p>
-                                {inspector.inspectionAreaDescription && (
-                                  <p className="text-sm text-slate-600 mt-1">{inspector.inspectionAreaDescription}</p>
+                                <label className="text-sm font-medium text-slate-600">{inspector.inspectorType === 'port' ? 'Port Facility' : 'Inspection Area'}</label>
+                                {inspector.inspectorType === 'port' ? (
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                      ⚓ {inspector.portFacility || 'Port of Monrovia'}
+                                    </Badge>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <p>{inspector.inspectionAreaCounty} County {inspector.inspectionAreaDistrict ? `- ${inspector.inspectionAreaDistrict}` : ''}</p>
+                                    {inspector.inspectionAreaDescription && (
+                                      <p className="text-sm text-slate-600 mt-1">{inspector.inspectionAreaDescription}</p>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             </div>

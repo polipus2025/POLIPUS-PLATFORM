@@ -12039,7 +12039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phoneNumber: onboardingData.phoneNumber,
         nationalId: onboardingData.nationalId,
         address: onboardingData.address,
-        inspectorType: onboardingData.inspectorType || 'Land Inspector',
+        inspectorType: onboardingData.inspectorType === 'Port Inspector' ? 'port' : 'land',
         inspectionAreaCounty: onboardingData.inspectionAreaCounty,
         inspectionAreaDistrict: onboardingData.inspectionAreaDistrict,
         inspectionAreaDescription: onboardingData.inspectionAreaDescription,

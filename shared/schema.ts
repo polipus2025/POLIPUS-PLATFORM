@@ -1840,6 +1840,13 @@ export const insertHarvestRecordSchema = createInsertSchema(harvestRecords).omit
   createdAt: true,
 });
 
+// Add missing type exports
+export type CropPlan = typeof cropPlanning.$inferSelect;
+export type InsertCropPlan = z.infer<typeof insertCropPlanSchema>;
+
+export type HarvestRecord = typeof harvestRecords.$inferSelect;
+export type InsertHarvestRecord = z.infer<typeof insertHarvestRecordSchema>;
+
 // ========================================
 // MULTIPLE LAND MAPPING & HARVEST SCHEDULE SYSTEM
 // ========================================
@@ -2810,6 +2817,14 @@ export type InsertBuyerNotification = z.infer<typeof insertBuyerNotificationSche
 export type FarmerBuyerTransaction = typeof farmerBuyerTransactions.$inferSelect;
 export type InsertFarmerBuyerTransaction = z.infer<typeof insertFarmerBuyerTransactionSchema>;
 export type InsertBuyer = z.infer<typeof insertBuyerSchema>;
+
+// Add missing buyer-related type exports
+export type BuyerCredentials = typeof buyerCredentials.$inferSelect;
+export type InsertBuyerCredentials = typeof buyerCredentials.$inferInsert;
+export type BuyerDocument = typeof buyerDocuments.$inferSelect;
+export type InsertBuyerDocument = typeof buyerDocuments.$inferInsert;
+export type BuyerTransaction = typeof buyerTransactions.$inferSelect;
+export type InsertBuyerTransaction = typeof buyerTransactions.$inferInsert;
 
 // Exporter schema types and validation
 export const insertExporterSchema = createInsertSchema(exporters).omit({

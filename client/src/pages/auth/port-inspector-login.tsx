@@ -19,11 +19,18 @@ export default function PortInspectorLogin() {
         body: JSON.stringify({...credentials, inspectorType: "port"})
       });
 
-      if (response.ok) {
-        // Successful login - redirect to port inspector dashboard
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Store the authentication token and inspector data
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userType', 'port-inspector');
+        localStorage.setItem('inspectorType', 'port');
+        localStorage.setItem('inspectorData', JSON.stringify(data.inspector));
+        
+        // For now, redirect directly to dashboard (password change can be handled later)
         setLocation("/port-inspector-dashboard");
       } else {
-        const data = await response.json();
         setError(data.message || "Invalid credentials");
       }
     } catch (err) {

@@ -1,9 +1,10 @@
-import { memo, useCallback, Suspense } from 'react';
+import { memo, useCallback, Suspense, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { 
   ClipboardCheck,
   Calendar,
@@ -22,9 +23,27 @@ import {
 import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
+// 📅 UTILITY: Calculate next working day (Monday-Friday only)
+const getNextWorkingDay = (date: Date): Date => {
+  const nextDay = new Date(date);
+  nextDay.setDate(nextDay.getDate() + 1);
+  
+  // If it falls on Saturday (6) or Sunday (0), move to Monday
+  const dayOfWeek = nextDay.getDay();
+  if (dayOfWeek === 6) { // Saturday
+    nextDay.setDate(nextDay.getDate() + 2); // Move to Monday
+  } else if (dayOfWeek === 0) { // Sunday
+    nextDay.setDate(nextDay.getDate() + 1); // Move to Monday
+  }
+  
+  return nextDay;
+};
+
 // ⚡ INSPECTIONS & PAYMENTS MAIN COMPONENT
 const ExporterInspections = memo(() => {
   const { toast } = useToast();
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedPickup, setSelectedPickup] = useState<any>(null);
   
   // ⚡ SUPER OPTIMIZED USER QUERY - Match dashboard pattern
   const { data: user, isLoading: userLoading } = useQuery({
@@ -68,11 +87,9 @@ const ExporterInspections = memo(() => {
 
   // Handle action buttons
   const handleBookInspection = useCallback((pickup: any) => {
-    toast({
-      title: "Product Inspection Booking",
-      description: `Booking inspection for ${pickup.commodityType} (${pickup.requestId})`,
-    });
-  }, [toast]);
+    setSelectedPickup(pickup);
+    setShowBookingModal(true);
+  }, []);
 
   const handleCertifications = useCallback((pickup: any) => {
     toast({
@@ -87,6 +104,26 @@ const ExporterInspections = memo(() => {
       description: `Confirming payment for ${pickup.commodityType} (${pickup.requestId})`,
     });
   }, [toast]);
+
+  const handleScheduleInspection = useCallback(() => {
+    if (!selectedPickup) return;
+    
+    const pickupDate = new Date(selectedPickup.dispatchDate);
+    const inspectionDate = getNextWorkingDay(pickupDate);
+    
+    toast({
+      title: "Inspection Scheduled Successfully! ✅",
+      description: `Product inspection scheduled for ${inspectionDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric', 
+        month: 'long',
+        day: 'numeric'
+      })}`,
+    });
+    
+    setShowBookingModal(false);
+    setSelectedPickup(null);
+  }, [selectedPickup, toast]);
 
   if (userLoading) {
     return (
@@ -317,6 +354,110 @@ const ExporterInspections = memo(() => {
 
           </div>
         </div>
+
+        {/* 🗓️ BOOK INSPECTION MODAL */}
+        <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-blue-600">
+                <ClipboardCheck className="h-6 w-6 mr-2" />
+                Schedule Product Inspection
+              </DialogTitle>
+              <DialogDescription>
+                Schedule quality inspection for your export product
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedPickup && (
+              <div className="space-y-6 py-4">
+                {/* 📦 PICKUP DETAILS */}
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-slate-800 mb-3">Pickup Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Pickup ID:</span>
+                      <span className="font-mono text-slate-800">{selectedPickup.requestId}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Product:</span>
+                      <span className="font-medium text-slate-800">{selectedPickup.commodityType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Quantity:</span>
+                      <span className="font-medium text-slate-800">{selectedPickup.quantity} {selectedPickup.unit}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Pickup Date:</span>
+                      <span className="font-medium text-slate-800">
+                        {new Date(selectedPickup.dispatchDate).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric', 
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 📅 INSPECTION DATE */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+                    <Calendar className="h-5 w-5 mr-2" />
+                    Proposed Inspection Date
+                  </h4>
+                  <div className="text-lg font-bold text-blue-900">
+                    {getNextWorkingDay(new Date(selectedPickup.dispatchDate)).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric', 
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </div>
+                  <p className="text-sm text-blue-700 mt-2">
+                    📋 Inspection scheduled for the next working day after pickup
+                  </p>
+                </div>
+
+                {/* ⚠️ IMPORTANT NOTES */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-yellow-800 mb-1">Important Notes</h4>
+                      <div className="text-sm text-yellow-700 space-y-1">
+                        <p>• Inspection must be completed before export approval</p>
+                        <p>• Inspector will verify quality standards and compliance</p>
+                        <p>• You will receive confirmation within 2 hours</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 🚀 ACTION BUTTONS */}
+                <div className="flex gap-3 pt-4">
+                  <Button 
+                    onClick={handleScheduleInspection}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    data-testid="schedule-inspection-confirm"
+                  >
+                    <ClipboardCheck className="h-4 w-4 mr-2" />
+                    Schedule Inspection
+                  </Button>
+                  <Button 
+                    onClick={() => setShowBookingModal(false)}
+                    variant="outline"
+                    className="flex-1"
+                    data-testid="schedule-inspection-cancel"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
       </CleanExporterLayout>
     </ErrorBoundary>
   );

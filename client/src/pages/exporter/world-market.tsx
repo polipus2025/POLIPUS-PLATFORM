@@ -96,7 +96,7 @@ const ExporterWorldMarket = memo(() => {
         <meta name="description" content="Real-time global commodity prices and market analysis for agricultural exports" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
@@ -110,7 +110,7 @@ const ExporterWorldMarket = memo(() => {
                 <Globe className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">World Market Prices</h1>
+                <h1 className="text-3xl font-bold text-slate-900">World Market Prices</h1>
                 <p className="text-sm text-slate-600">Live commodity pricing and market intelligence</p>
               </div>
             </div>
@@ -124,7 +124,8 @@ const ExporterWorldMarket = memo(() => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Market Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
@@ -197,7 +198,7 @@ const ExporterWorldMarket = memo(() => {
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">{commodity.commodity}</h3>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-2xl font-bold text-gray-900">
+                          <span className="text-3xl font-bold text-gray-900">
                             {formatPrice(commodity.currentPrice)}
                           </span>
                           <div className={`flex items-center gap-1 ${getTrendColor(commodity.trend)}`}>
@@ -264,6 +265,7 @@ const ExporterWorldMarket = memo(() => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </CleanExporterLayout>

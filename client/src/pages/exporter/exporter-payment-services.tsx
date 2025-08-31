@@ -151,7 +151,7 @@ export default function ExporterPaymentServices() {
         <meta name="description" content="Export permits, EUDR compliance certificates, and licensing services for international agricultural exports" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
@@ -159,7 +159,7 @@ export default function ExporterPaymentServices() {
                 <CreditCard className="w-6 h-6 text-white" />
               </div>
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-900">Payment Services</h1>
+                <h1 className="text-3xl font-bold text-slate-900">Payment Services</h1>
                 <p className="text-sm text-slate-600">Export permits and compliance certificates</p>
               </div>
             </div>
@@ -167,7 +167,8 @@ export default function ExporterPaymentServices() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-6xl mx-auto px-4 py-8">
 
         {/* Exporter Benefits Info */}
         <Card className="mb-8 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
@@ -278,7 +279,7 @@ export default function ExporterPaymentServices() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-3xl font-bold text-blue-600">
                         ${service.basePrice}
                       </div>
                       <div className="text-xs text-gray-500">USD</div>
@@ -370,6 +371,7 @@ export default function ExporterPaymentServices() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </CleanExporterLayout>
   );

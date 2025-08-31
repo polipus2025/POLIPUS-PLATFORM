@@ -83,7 +83,7 @@ const ExporterAnalytics = memo(() => {
         <meta name="description" content="Comprehensive analytics and performance metrics for your export business" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
@@ -91,7 +91,7 @@ const ExporterAnalytics = memo(() => {
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-900">Analytics & Reports</h1>
+                <h1 className="text-3xl font-bold text-slate-900">Analytics & Reports</h1>
                 <p className="text-sm text-slate-600">Performance insights and business intelligence</p>
               </div>
             </div>
@@ -99,7 +99,8 @@ const ExporterAnalytics = memo(() => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
@@ -107,7 +108,7 @@ const ExporterAnalytics = memo(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-green-900">{formatCurrency(analyticsData.revenue.current)}</p>
+                  <p className="text-3xl font-bold text-green-900">{formatCurrency(analyticsData.revenue.current)}</p>
                   <p className="text-sm text-green-600">{formatGrowth(analyticsData.revenue.growth)} vs last year</p>
                 </div>
                 <DollarSign className="h-12 w-12 text-green-600" />
@@ -120,7 +121,7 @@ const ExporterAnalytics = memo(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600">Export Volume</p>
-                  <p className="text-2xl font-bold text-blue-900">{analyticsData.volume.current} MT</p>
+                  <p className="text-3xl font-bold text-blue-900">{analyticsData.volume.current} MT</p>
                   <p className="text-sm text-blue-600">{formatGrowth(analyticsData.volume.growth)} vs last year</p>
                 </div>
                 <Package className="h-12 w-12 text-blue-600" />
@@ -133,7 +134,7 @@ const ExporterAnalytics = memo(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-purple-600">Total Orders</p>
-                  <p className="text-2xl font-bold text-purple-900">{analyticsData.orders.current}</p>
+                  <p className="text-3xl font-bold text-purple-900">{analyticsData.orders.current}</p>
                   <p className="text-sm text-purple-600">{formatGrowth(analyticsData.orders.growth)} vs last year</p>
                 </div>
                 <TrendingUp className="h-12 w-12 text-purple-600" />
@@ -146,7 +147,7 @@ const ExporterAnalytics = memo(() => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-orange-600">Active Markets</p>
-                  <p className="text-2xl font-bold text-orange-900">{analyticsData.markets.current}</p>
+                  <p className="text-3xl font-bold text-orange-900">{analyticsData.markets.current}</p>
                   <p className="text-sm text-orange-600">{formatGrowth(analyticsData.markets.growth)} vs last year</p>
                 </div>
                 <Globe className="h-12 w-12 text-orange-600" />
@@ -249,6 +250,7 @@ const ExporterAnalytics = memo(() => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </CleanExporterLayout>
   );

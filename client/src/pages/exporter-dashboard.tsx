@@ -170,20 +170,20 @@ const ExporterDashboard = memo(() => {
         </Helmet>
         
         {/* ⚡ OPTIMIZED USER PROFILE SECTION */}
-        <div className="bg-white shadow-sm border-b border-gray-100">
+        <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                   <span className="text-white text-xl font-bold">
                     {(user as any)?.exporterId?.slice(-3) || 'EXP'}
                   </span>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
+                  <h1 className="text-3xl font-bold text-slate-900">
                     Welcome, {(user as any)?.companyName || 'Licensed Exporter'}
                   </h1>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                  <div className="flex items-center space-x-4 text-sm text-slate-600">
                     <span>Exporter ID: {(user as any)?.exporterId || 'EXP-DEMO-001'}</span>
                     <span>•</span>
                     <span>License Status: Active</span>
@@ -193,27 +193,30 @@ const ExporterDashboard = memo(() => {
                 </div>
               </div>
               <div className="text-right">
-                <StatusBadge status="verified" />
-                <p className="text-sm text-gray-600 mt-1">Verified Exporter</p>
+                <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 shadow-sm">
+                  <Shield className="w-4 h-4 mr-1" />
+                  Verified Exporter
+                </Badge>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* ⚡ PERFORMANCE METRICS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {metricsData.map((metric, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow duration-200">
+              <Card key={index} className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                      <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+                      <p className="text-sm font-medium text-slate-600">{metric.title}</p>
+                      <p className="text-2xl font-bold text-slate-900">{metric.value}</p>
                       <p className={`text-sm text-${metric.color}-600`}>{metric.change} from last month</p>
                     </div>
-                    <div className={`bg-${metric.color}-100 p-3 rounded-lg`}>
-                      <metric.icon className={`h-6 w-6 text-${metric.color}-600`} />
+                    <div className={`bg-gradient-to-br from-${metric.color}-500 to-${metric.color}-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform`}>
+                      <metric.icon className="h-6 w-6 text-white" />
                     </div>
                   </div>
                 </CardContent>
@@ -223,15 +226,15 @@ const ExporterDashboard = memo(() => {
 
           {/* ⚡ QUICK ACTIONS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="hover:shadow-md transition-shadow duration-200">
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <Ship className="h-6 w-6 text-blue-600" />
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                    <Ship className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Export Orders</h3>
-                    <p className="text-sm text-gray-600">Manage your export orders</p>
+                    <h3 className="font-medium text-slate-900">Export Orders</h3>
+                    <p className="text-sm text-slate-600">Manage your export orders</p>
                     <Link href="/exporter/orders" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                       View Orders →
                     </Link>
@@ -240,15 +243,15 @@ const ExporterDashboard = memo(() => {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow duration-200">
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
-                  <div className="bg-green-100 p-3 rounded-lg">
-                    <ShoppingCart className="h-6 w-6 text-green-600" />
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                    <ShoppingCart className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Marketplace</h3>
-                    <p className="text-sm text-gray-600">Browse available commodities</p>
+                    <h3 className="font-medium text-slate-900">Marketplace</h3>
+                    <p className="text-sm text-slate-600">Browse available commodities</p>
                     <Link href="/exporter/marketplace" className="text-green-600 hover:text-green-800 text-sm font-medium">
                       Explore Market →
                     </Link>
@@ -257,15 +260,15 @@ const ExporterDashboard = memo(() => {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow duration-200">
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
-                  <div className="bg-purple-100 p-3 rounded-lg">
-                    <FileText className="h-6 w-6 text-purple-600" />
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                    <FileText className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Certificates</h3>
-                    <p className="text-sm text-gray-600">Download export certificates</p>
+                    <h3 className="font-medium text-slate-900">Certificates</h3>
+                    <p className="text-sm text-slate-600">Download export certificates</p>
                     <Link href="/exporter/certificates" className="text-purple-600 hover:text-purple-800 text-sm font-medium">
                       View Certificates →
                     </Link>
@@ -288,7 +291,7 @@ const ExporterDashboard = memo(() => {
               <CardContent>
                 <div className="space-y-4">
                   {acceptedDealsData.deals?.map((deal: any) => (
-                    <div key={deal.offer_id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                    <div key={deal.offer_id} className="border border-slate-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Deal Details */}
                         <div className="space-y-2">
@@ -296,24 +299,24 @@ const ExporterDashboard = memo(() => {
                             <Package className="h-4 w-4 text-green-600" />
                             <span className="font-medium">{deal.commodity}</span>
                           </div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-slate-600">
                             Quantity: <span className="font-medium">{deal.quantity_available} MT</span>
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-slate-600">
                             Price: <span className="font-medium">${deal.price_per_unit}/MT</span>
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-slate-600">
                             Total Value: <span className="font-medium text-green-600">${deal.total_value}</span>
                           </p>
                         </div>
 
                         {/* Buyer Contact */}
                         <div className="space-y-2">
-                          <h4 className="font-medium text-gray-900">Buyer Contact</h4>
+                          <h4 className="font-medium text-slate-900">Buyer Contact</h4>
                           <p className="text-sm">
                             <span className="font-medium">{deal.buyer_business_name || deal.buyer_company}</span>
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-slate-600">
                             {deal.contact_person_first_name && deal.contact_person_last_name 
                               ? `${deal.contact_person_first_name} ${deal.contact_person_last_name}`
                               : deal.buyer_contact}
@@ -321,7 +324,7 @@ const ExporterDashboard = memo(() => {
                           <p className="text-sm text-blue-600">
                             {deal.buyer_phone_verified || deal.buyer_phone}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-slate-600">
                             Location: {deal.buyer_county || deal.county}, {deal.buyer_country || 'Liberia'}
                           </p>
                           {deal.custody_id && (
@@ -333,7 +336,7 @@ const ExporterDashboard = memo(() => {
 
                         {/* Transport Arrangement */}
                         <div className="space-y-2">
-                          <h4 className="font-medium text-gray-900">Transport Details</h4>
+                          <h4 className="font-medium text-slate-900">Transport Details</h4>
                           <div className="bg-green-50 p-3 rounded-lg">
                             <p className="text-sm font-medium text-green-800">Verification Code</p>
                             <p className="text-lg font-mono text-green-900">{deal.verification_code}</p>
@@ -377,7 +380,7 @@ const ExporterDashboard = memo(() => {
           )}
 
           {/* ⚡ COMPLIANCE STATUS */}
-          <Card className="mb-8">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all mb-8">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-green-600" />
@@ -386,26 +389,26 @@ const ExporterDashboard = memo(() => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">Export License</h4>
-                    <p className="text-sm text-gray-600">Expires: {complianceData.exportLicense.expiryDate}</p>
+                    <h4 className="font-medium text-slate-900">Export License</h4>
+                    <p className="text-sm text-slate-600">Expires: {complianceData.exportLicense.expiryDate}</p>
                   </div>
                   <StatusBadge status={complianceData.exportLicense.status} />
                 </div>
 
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">LACRA Registration</h4>
-                    <p className="text-sm text-gray-600">{complianceData.lacraRegistration.registrationNumber}</p>
+                    <h4 className="font-medium text-slate-900">LACRA Registration</h4>
+                    <p className="text-sm text-slate-600">{complianceData.lacraRegistration.registrationNumber}</p>
                   </div>
                   <StatusBadge status={complianceData.lacraRegistration.status} />
                 </div>
 
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">EUDR Compliance</h4>
-                    <p className="text-sm text-gray-600">Last Updated: {complianceData.eudrCompliance.lastUpdated}</p>
+                    <h4 className="font-medium text-slate-900">EUDR Compliance</h4>
+                    <p className="text-sm text-slate-600">Last Updated: {complianceData.eudrCompliance.lastUpdated}</p>
                   </div>
                   <StatusBadge status={complianceData.eudrCompliance.status} />
                 </div>
@@ -448,6 +451,7 @@ const ExporterDashboard = memo(() => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </CleanExporterLayout>
     </ErrorBoundary>

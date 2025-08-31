@@ -100,7 +100,7 @@ const ExporterShipments = memo(() => {
         <meta name="description" content="Track your export shipments in real-time" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
@@ -108,7 +108,7 @@ const ExporterShipments = memo(() => {
                 <Ship className="w-6 h-6 text-white" />
               </div>
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-900">Shipment Tracking</h1>
+                <h1 className="text-3xl font-bold text-slate-900">Shipment Tracking</h1>
                 <p className="text-sm text-slate-600">Monitor your exports in real-time</p>
               </div>
             </div>
@@ -116,7 +116,8 @@ const ExporterShipments = memo(() => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Statistics */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
@@ -256,6 +257,7 @@ const ExporterShipments = memo(() => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </CleanExporterLayout>
   );

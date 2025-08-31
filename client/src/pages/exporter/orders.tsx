@@ -71,7 +71,7 @@ const ExporterOrders = memo(() => {
         <meta name="description" content="Manage and track your export orders and shipments" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
@@ -79,7 +79,7 @@ const ExporterOrders = memo(() => {
                 <Package className="w-6 h-6 text-white" />
               </div>
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-900">Export Orders</h1>
+                <h1 className="text-3xl font-bold text-slate-900">Export Orders</h1>
                 <p className="text-sm text-slate-600">Manage and track your export orders</p>
               </div>
             </div>
@@ -88,11 +88,12 @@ const ExporterOrders = memo(() => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Order Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -104,7 +105,7 @@ const ExporterOrders = memo(() => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -116,7 +117,7 @@ const ExporterOrders = memo(() => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -128,7 +129,7 @@ const ExporterOrders = memo(() => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -142,7 +143,7 @@ const ExporterOrders = memo(() => {
         </div>
 
         {/* Orders Table */}
-        <Card>
+        <Card className="bg-white shadow-xl border-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5 text-blue-600" />
@@ -192,6 +193,7 @@ const ExporterOrders = memo(() => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </CleanExporterLayout>
   );

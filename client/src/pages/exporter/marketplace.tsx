@@ -1439,7 +1439,7 @@ const ExporterMarketplace = memo(() => {
         <meta name="description" content="Connect with verified buyers and explore new market opportunities" />
       </Helmet>
 
-      <div className="bg-white shadow-sm border-b border-slate-200 mb-8">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-6">
             <div className="flex items-center space-x-4">
@@ -1447,7 +1447,7 @@ const ExporterMarketplace = memo(() => {
                 <ShoppingCart className="w-6 h-6 text-white" />
               </div>
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-900">Global Marketplace</h1>
+                <h1 className="text-3xl font-bold text-slate-900">Global Marketplace</h1>
                 <p className="text-sm text-slate-600">Connect with verified buyers worldwide</p>
               </div>
             </div>
@@ -1456,7 +1456,8 @@ const ExporterMarketplace = memo(() => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Search and Filters */}
         <div className="mb-8">
@@ -1610,6 +1611,7 @@ const ExporterMarketplace = memo(() => {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </CleanExporterLayout>
   );

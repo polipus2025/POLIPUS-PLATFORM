@@ -84,10 +84,11 @@ const ExporterCertificates = memo(() => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -99,7 +100,7 @@ const ExporterCertificates = memo(() => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -111,7 +112,7 @@ const ExporterCertificates = memo(() => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -192,6 +193,7 @@ const ExporterCertificates = memo(() => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </CleanExporterLayout>

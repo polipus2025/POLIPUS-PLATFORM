@@ -18056,9 +18056,8 @@ GENERATED: ${new Date().toLocaleDateString()}`;
 
       // Get custody details
       const custodyResult = await db.execute(sql`
-        SELECT wc.*, beo.total_value, beo.county, beo.farm_location
+        SELECT wc.*
         FROM warehouse_custody wc
-        LEFT JOIN buyer_exporter_offers beo ON wc.custody_id = ${custodyId}
         WHERE wc.custody_id = ${custodyId}
       `);
       
@@ -18083,8 +18082,8 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         ) VALUES (
           ${requestId}, ${custodyId}, ${verificationCode}, ${buyerId}, 
           ${buyerName || 'Buyer'}, ${buyerCompany || 'Company'}, ${commodityType}, 
-          ${quantity}, ${unit || 'MT'}, ${custody.total_value || 0}, ${custody.county || 'Montserrado'}, 
-          ${custody.farm_location || 'Location not specified'}, ${dispatchDate}, ${exporterWarehouseAddress}, NOW()
+          ${quantity}, ${unit || 'MT'}, ${0}, ${custody.county || 'Montserrado'}, 
+          ${custody.farmLocations?.[0] || 'Location not specified'}, ${dispatchDate}, ${exporterWarehouseAddress}, NOW()
         )
       `);
 

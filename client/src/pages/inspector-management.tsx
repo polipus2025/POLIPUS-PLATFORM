@@ -459,41 +459,53 @@ export default function InspectorManagement() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-white">
-      {/* Navigation Header */}
-      <div className="mb-6">
-        <Button 
-          onClick={handleBackToDashboard}
-          variant="ghost" 
-          className="mb-4 text-slate-600 hover:text-slate-900"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to DDGOTS Dashboard
-        </Button>
-        
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            Inspector Management System
-          </h1>
-          <p className="text-slate-600">
-            Complete inspector onboarding and management solution for agricultural compliance monitoring
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header */}
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-4">
+              <Button 
+                onClick={handleBackToDashboard}
+                variant="ghost" 
+                className="text-slate-600 hover:text-slate-900 mr-4"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to DDGOTS
+              </Button>
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900">Inspector Management System</h1>
+                <p className="text-slate-700 text-lg">DDGOTS Operations & Technical Services</p>
+                <p className="text-slate-600 text-sm">Inspector Registration & Oversight Portal</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="mb-8">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div className="mb-8">
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="onboarding" className="flex items-center gap-2">
-              <UserPlus className="w-4 h-4" />
-              Inspector Onboarding
-            </TabsTrigger>
-            <TabsTrigger value="management" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Inspector Management
-            </TabsTrigger>
-          </TabsList>
+          <Card className="bg-white shadow-xl border-slate-200">
+            <CardContent className="p-2">
+              <TabsList className="grid w-full grid-cols-2 bg-slate-50">
+                <TabsTrigger value="onboarding" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <UserPlus className="w-4 h-4" />
+                  Inspector Onboarding
+                </TabsTrigger>
+                <TabsTrigger value="management" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Users className="w-4 h-4" />
+                  Inspector Management
+                </TabsTrigger>
+              </TabsList>
+            </CardContent>
+          </Card>
 
           <TabsContent value="onboarding" className="mt-6">
             <InspectorOnboardingForm />
@@ -502,10 +514,12 @@ export default function InspectorManagement() {
           <TabsContent value="management" className="mt-6">
             {/* Statistics Cards */}
             <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card>
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <Users className="w-8 h-8 text-blue-600 mr-3" />
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg group-hover:scale-110 transition-transform mr-3">
+                      <Users className="w-5 h-5 text-white" />
+                    </div>
                     <div>
                       <p className="text-sm text-slate-600">Total Inspectors</p>
                       <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
@@ -513,10 +527,12 @@ export default function InspectorManagement() {
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <UserCheck className="w-8 h-8 text-green-600 mr-3" />
+                    <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg group-hover:scale-110 transition-transform mr-3">
+                      <UserCheck className="w-5 h-5 text-white" />
+                    </div>
                     <div>
                       <p className="text-sm text-slate-600">Active Inspectors</p>
                       <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
@@ -524,10 +540,12 @@ export default function InspectorManagement() {
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <XCircle className="w-8 h-8 text-red-600 mr-3" />
+                    <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg group-hover:scale-110 transition-transform mr-3">
+                      <XCircle className="w-5 h-5 text-white" />
+                    </div>
                     <div>
                       <p className="text-sm text-slate-600">Inactive</p>
                       <p className="text-2xl font-bold text-slate-900">{stats.inactive}</p>
@@ -535,10 +553,12 @@ export default function InspectorManagement() {
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardContent className="p-4">
                   <div className="flex items-center">
-                    <Key className="w-8 h-8 text-orange-600 mr-3" />
+                    <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full shadow-lg group-hover:scale-110 transition-transform mr-3">
+                      <Key className="w-5 h-5 text-white" />
+                    </div>
                     <div>
                       <p className="text-sm text-slate-600">Can Login</p>
                       <p className="text-2xl font-bold text-slate-900">{stats.canLogin}</p>

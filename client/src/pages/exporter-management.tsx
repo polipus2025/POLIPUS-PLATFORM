@@ -357,26 +357,42 @@ Please provide these credentials to the exporter. They will be required to chang
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Navigation Header */}
-        <div className="mb-6">
-          <Button 
-            onClick={handleBackToDashboard}
-            variant="ghost" 
-            className="mb-4 text-slate-600 hover:text-slate-900"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to DDGOTS Dashboard
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header */}
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-4">
+              <Button 
+                onClick={handleBackToDashboard}
+                variant="ghost" 
+                className="text-slate-600 hover:text-slate-900 mr-4"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to DDGOTS
+              </Button>
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <FileText className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900">Exporter Management System</h1>
+                <p className="text-slate-700 text-lg">DDGOTS Operations & Technical Services</p>
+                <p className="text-slate-600 text-sm">Export License Registration & Oversight Portal</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Header */}
+        {/* Content Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Exporter Management</h1>
-              <p className="text-slate-600 mt-2">Comprehensive Exporter Onboarding & Credential Management System</p>
+              <h2 className="text-2xl font-bold text-slate-900">Exporter Management Overview</h2>
+              <p className="text-slate-600 mt-2">Register and manage export license holders</p>
             </div>
             <Dialog open={showOnboardingDialog} onOpenChange={setShowOnboardingDialog}>
               <DialogTrigger asChild>
@@ -641,50 +657,58 @@ Please provide these credentials to the exporter. They will be required to chang
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-l-4 border-l-blue-500">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Total Exporters</p>
-                  <p data-testid="text-total-exporters" className="text-3xl font-bold text-slate-800">{exporters.length}</p>
+                  <p data-testid="text-total-exporters" className="text-3xl font-bold text-slate-900">{exporters.length}</p>
                 </div>
-                <Building className="h-8 w-8 text-blue-500" />
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                  <Building className="w-5 h-5 text-white" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-yellow-500">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Pending Review</p>
-                  <p data-testid="text-pending-exporters" className="text-3xl font-bold text-slate-800">{pendingExporters.length}</p>
+                  <p data-testid="text-pending-exporters" className="text-3xl font-bold text-slate-900">{pendingExporters.length}</p>
                 </div>
-                <Clock className="h-8 w-8 text-yellow-500" />
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-green-500">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Approved Exporters</p>
-                  <p data-testid="text-approved-exporters" className="text-3xl font-bold text-slate-800">{approvedExporters.length}</p>
+                  <p data-testid="text-approved-exporters" className="text-3xl font-bold text-slate-900">{approvedExporters.length}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                  <CheckCircle className="w-5 h-5 text-white" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-red-500">
+          <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-600 text-sm font-medium">Suspended</p>
-                  <p data-testid="text-suspended-exporters" className="text-3xl font-bold text-slate-800">{suspendedExporters.length}</p>
+                  <p data-testid="text-suspended-exporters" className="text-3xl font-bold text-slate-900">{suspendedExporters.length}</p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-red-500" />
+                <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                  <AlertCircle className="w-5 h-5 text-white" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -692,12 +716,16 @@ Please provide these credentials to the exporter. They will be required to chang
 
         {/* Main Content */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-            <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-            <TabsTrigger value="pending" data-testid="tab-pending">Pending ({pendingExporters.length})</TabsTrigger>
-            <TabsTrigger value="approved" data-testid="tab-approved">Approved ({approvedExporters.length})</TabsTrigger>
-            <TabsTrigger value="details" data-testid="tab-details">Exporter Details</TabsTrigger>
-          </TabsList>
+          <Card className="bg-white shadow-xl border-slate-200">
+            <CardContent className="p-2">
+              <TabsList className="grid grid-cols-4 w-full bg-slate-50">
+                <TabsTrigger value="overview" data-testid="tab-overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md">Overview</TabsTrigger>
+                <TabsTrigger value="pending" data-testid="tab-pending" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-md">Pending ({pendingExporters.length})</TabsTrigger>
+                <TabsTrigger value="approved" data-testid="tab-approved" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-md">Approved ({approvedExporters.length})</TabsTrigger>
+                <TabsTrigger value="details" data-testid="tab-details" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md">Exporter Details</TabsTrigger>
+              </TabsList>
+            </CardContent>
+          </Card>
 
           <TabsContent value="overview">
             <div className="grid gap-6">

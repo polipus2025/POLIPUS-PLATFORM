@@ -318,24 +318,42 @@ export default function BuyerManagement() {
   };
 
   return (
-    <div className="space-y-6 bg-white min-h-screen p-6">
-      {/* Navigation Header */}
-      <div className="mb-6">
-        <Button 
-          onClick={handleBackToDashboard}
-          variant="ghost" 
-          className="mb-4 text-slate-600 hover:text-slate-900"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to DDGOTS Dashboard
-        </Button>
-      </div>
-      
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-4">
+              <Button 
+                onClick={handleBackToDashboard}
+                variant="ghost" 
+                className="text-slate-600 hover:text-slate-900 mr-4"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to DDGOTS
+              </Button>
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <Building className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900">Buyer Management System</h1>
+                <p className="text-slate-700 text-lg">DDGOTS Operations & Technical Services</p>
+                <p className="text-slate-600 text-sm">Agricultural Buyer Registration & Oversight Portal</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+      
+      {/* Content Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Buyer Management</h1>
-          <p className="text-gray-600 mt-1">Onboard and manage agricultural commodity buyers</p>
+          <h2 className="text-2xl font-bold text-slate-900">Buyer Management Overview</h2>
+          <p className="text-slate-600 mt-1">Register and manage agricultural commodity buyers</p>
         </div>
         <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
           <DialogTrigger asChild>
@@ -352,12 +370,12 @@ export default function BuyerManagement() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <Tabs defaultValue="basic" className="w-full">
-                  <TabsList className="grid w-full grid-cols-5">
-                    <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                    <TabsTrigger value="contact">Contact</TabsTrigger>
-                    <TabsTrigger value="business">Business</TabsTrigger>
-                    <TabsTrigger value="documents">Documents</TabsTrigger>
-                    <TabsTrigger value="compliance">Compliance</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-5 bg-slate-50">
+                    <TabsTrigger value="basic" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white">Basic Info</TabsTrigger>
+                    <TabsTrigger value="contact" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white">Contact</TabsTrigger>
+                    <TabsTrigger value="business" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">Business</TabsTrigger>
+                    <TabsTrigger value="documents" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white">Documents</TabsTrigger>
+                    <TabsTrigger value="compliance" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white">Compliance</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="basic" className="space-y-4">
@@ -912,53 +930,61 @@ export default function BuyerManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-6">
-        <Card>
+        <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Buyers</p>
-                <p className="text-2xl font-bold text-gray-900">{Array.isArray(buyers) ? buyers.length : 0}</p>
+                <p className="text-sm font-medium text-slate-600">Total Buyers</p>
+                <p className="text-2xl font-bold text-slate-900">{Array.isArray(buyers) ? buyers.length : 0}</p>
               </div>
-              <Building className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                <Building className="w-5 h-5 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Approval</p>
-                <p className="text-2xl font-bold text-yellow-600">
+                <p className="text-sm font-medium text-slate-600">Pending Approval</p>
+                <p className="text-2xl font-bold text-slate-900">
                   {Array.isArray(buyers) ? buyers.filter((b: any) => b.complianceStatus === 'pending').length : 0}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-600" />
+              <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                <Clock className="w-5 h-5 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm font-medium text-slate-600">Approved</p>
+                <p className="text-2xl font-bold text-slate-900">
                   {Array.isArray(buyers) ? buyers.filter((b: any) => b.complianceStatus === 'approved').length : 0}
                 </p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                <CheckCircle className="w-5 h-5 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Portal Users</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-sm font-medium text-slate-600">Active Portal Users</p>
+                <p className="text-2xl font-bold text-slate-900">
                   {Array.isArray(buyers) ? buyers.filter((b: any) => b.portalAccess).length : 0}
                 </p>
               </div>
-              <Shield className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>

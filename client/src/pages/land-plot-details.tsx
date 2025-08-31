@@ -22,8 +22,8 @@ export default function LandPlotDetails() {
 
   // Get farmer details to access boundary points
   const { data: farmerData } = useQuery({
-    queryKey: [`/api/farmers/${plot?.farmerId}`],
-    enabled: !!plot?.farmerId,
+    queryKey: [`/api/farmers/${(plot as any)?.farmerId}`],
+    enabled: !!(plot as any)?.farmerId,
     retry: false
   });
 

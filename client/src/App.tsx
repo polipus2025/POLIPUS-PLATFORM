@@ -92,6 +92,7 @@ const EudrAssessment = lazy(() => import("@/pages/eudr-assessment"));
 const GenerateReports = lazy(() => import("@/pages/generate-reports"));
 const FarmersList = lazy(() => import("@/pages/farmers-list"));
 const LandPlotsList = lazy(() => import("@/pages/land-plots-list"));
+const LandPlotDetails = lazy(() => import("@/pages/land-plot-details"));
 
 function App() {
   // COMPREHENSIVE REDIRECT PROTECTION - Always redirect to main Polipus page
@@ -170,6 +171,7 @@ function App() {
             <Route path="/generate-reports" component={createLazyRoute(GenerateReports)} />
             <Route path="/farmers-list" component={createLazyRoute(FarmersList)} />
             <Route path="/land-plots-list" component={createLazyRoute(LandPlotsList)} />
+            <Route path="/land-plot-details/:id" component={createLazyRoute(LandPlotDetails)} />
             
             {/* INSPECTOR PORTALS */}
             <Route path="/warehouse-inspector-dashboard" component={createLazyRoute(WarehouseInspectorDashboard)} />

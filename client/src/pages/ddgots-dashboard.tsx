@@ -580,7 +580,8 @@ export default function DDGOTSDashboard() {
                             <p><span className="font-medium">Commodity:</span> {booking.commodityType}</p>
                             <p><span className="font-medium">Quantity:</span> {booking.quantity} {booking.unit}</p>
                             <p><span className="font-medium">Total Value:</span> ${booking.totalValue}</p>
-                            <p><span className="font-medium">Verification:</span> {booking.verificationCode}</p>
+                            <p><span className="font-medium">Batch Code:</span> {booking.verificationCode}</p>
+                            <p><span className="font-medium">Verification Code:</span> {booking.requestId || 'PENDING'}</p>
                           </div>
                         </div>
 
@@ -600,13 +601,26 @@ export default function DDGOTSDashboard() {
                         <div className="space-y-3">
                           <h4 className="font-semibold text-slate-900 flex items-center gap-2">
                             <Building2 className="w-4 h-4 text-purple-600" />
-                            Export Details
+                            Export & Schedule Details
                           </h4>
                           <div className="space-y-1 text-sm">
                             <p><span className="font-medium">Exporter:</span> {booking.exporterName}</p>
                             <p><span className="font-medium">Company:</span> {booking.exporterCompany}</p>
-                            <p><span className="font-medium">Port:</span> {booking.portFacility}</p>
-                            <p><span className="font-medium">Dispatch:</span> {new Date(booking.dispatchDate).toLocaleDateString()}</p>
+                            <p><span className="font-medium">Warehouse:</span> {booking.portFacility}</p>
+                            <p><span className="font-medium">Dispatch Date:</span> {new Date(booking.dispatchDate).toLocaleDateString()}</p>
+                            <p><span className="font-medium text-blue-600">📅 Inspection Schedule:</span> 
+                              <span className="text-blue-600 font-semibold">
+                                {booking.scheduledDate 
+                                  ? new Date(booking.scheduledDate).toLocaleDateString('en-US', {
+                                      weekday: 'short',
+                                      month: 'short', 
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })
+                                  : 'To be scheduled after assignment'
+                                }
+                              </span>
+                            </p>
                           </div>
                         </div>
                       </div>

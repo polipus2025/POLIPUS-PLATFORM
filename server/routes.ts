@@ -13990,6 +13990,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (dayOfWeek === 6) nextWorkingDay.setDate(nextWorkingDay.getDate() + 2);
       else if (dayOfWeek === 0) nextWorkingDay.setDate(nextWorkingDay.getDate() + 1);
 
+      // Calculate inspection schedule date (2 days after dispatch for preparation)
+      const inspectionScheduleDate = new Date(nextWorkingDay);
+      inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
+      
+      // Ensure inspection is on working day
+      const inspectionDay = inspectionScheduleDate.getDay();
+      if (inspectionDay === 6) inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
+      else if (inspectionDay === 0) inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 1);
+
       const bookingData = {
         bookingId,
         requestId,
@@ -13999,9 +14008,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         unit,
         totalValue,
         dispatchDate: nextWorkingDay,
+        scheduledDate: inspectionScheduleDate, // Add scheduled inspection date
         buyerName,
         buyerCompany,
-        verificationCode,
+        verificationCode, // This will be the batch code for now
         county,
         farmLocation,
         confirmedBy: 'exporter-system',

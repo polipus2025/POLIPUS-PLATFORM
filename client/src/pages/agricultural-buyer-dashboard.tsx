@@ -2408,126 +2408,93 @@ export default function AgriculturalBuyerDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Warehouse Dispatch Date Selection Dialog */}
-      <Dialog 
-        open={dispatchDialog.open} 
-        onOpenChange={(open) => setDispatchDialog(prev => ({...prev, open}))}
-      >
-        <DialogContent className="sm:max-w-md">
+      {/* Buyer Dispatch Scheduling Dialog */}
+      <Dialog open={showDispatchDialog} onOpenChange={setShowDispatchDialog}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Truck className="w-5 h-5 mr-2 text-blue-600" />
-              Schedule Warehouse Dispatch
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-blue-600" />
+              Schedule Warehouse Pickup
             </DialogTitle>
             <DialogDescription>
-              Select the date when you want to schedule warehouse dispatch for this transaction.
+              Schedule pickup for {selectedProductForDispatch?.commodityType} ({selectedProductForDispatch?.totalWeight} {selectedProductForDispatch?.unit})
             </DialogDescription>
           </DialogHeader>
           
-          {dispatchDialog.transaction && (
-            <div className="space-y-6">
-              {/* Transaction Summary */}
-              <div className="p-4 bg-slate-50 rounded-lg border">
-                <h3 className="font-medium text-slate-800 mb-2">Transaction Summary</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div><span className="font-medium">Product:</span> {dispatchDialog.transaction.commodityType}</div>
-                  <div><span className="font-medium">Quantity:</span> {dispatchDialog.transaction.quantityAvailable || dispatchDialog.transaction.quantity} {dispatchDialog.transaction.unit}</div>
-                  <div><span className="font-medium">Value:</span> ${dispatchDialog.transaction.totalValue}</div>
-                  <div><span className="font-medium">County:</span> {dispatchDialog.transaction.county}</div>
-                </div>
-              </div>
-
-              {/* Date Selection */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Select Dispatch Date</Label>
-                <div className="border rounded-lg p-3">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDispatchDate}
-                    onSelect={setSelectedDispatchDate}
-                    disabled={(date) => date < new Date() || date < new Date(Date.now() + 24 * 60 * 60 * 1000)} // At least tomorrow
-                    className="rounded-md border-0"
-                  />
-                </div>
-                {selectedDispatchDate && (
-                  <p className="text-sm text-green-600 font-medium">
-                    Selected: {selectedDispatchDate.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
-                )}
-              </div>
-
-              {/* Exporter Warehouse Address */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Exporter Warehouse Address</Label>
-                <Textarea
-                  placeholder="Enter the complete address where products should be delivered for export processing..."
-                  value={dispatchFormData.exporterWarehouseAddress}
-                  onChange={(e) => setDispatchFormData(prev => ({ ...prev, exporterWarehouseAddress: e.target.value }))}
-                  rows={3}
-                  data-testid="textarea-exporter-address"
-                />
-                <p className="text-xs text-gray-500">
-                  This address will be used by the warehouse for pickup coordination
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => setDispatchDialog({ open: false, transaction: null })}
-                  disabled={warehouseDispatchMutation.isPending}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (!selectedDispatchDate) {
-                      toast({
-                        title: "Date Required",
-                        description: "Please select a dispatch date",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    if (!dispatchFormData.exporterWarehouseAddress.trim()) {
-                      toast({
-                        title: "Address Required", 
-                        description: "Please enter the exporter warehouse address",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    
-                    buyerDispatchMutation.mutate({
-                      lot: dispatchDialog.transaction,
-                      dispatchDate: selectedDispatchDate.toISOString().split('T')[0],
-                      warehouseAddress: dispatchFormData.exporterWarehouseAddress
-                    });
-                  }}
-                  disabled={!selectedDispatchDate || !dispatchFormData.exporterWarehouseAddress.trim() || buyerDispatchMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {buyerDispatchMutation.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Scheduling...
-                    </>
-                  ) : (
-                    <>
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Schedule Dispatch
-                    </>
-                  )}
-                </Button>
-              </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="dispatch-date">Pickup Date</Label>
+              <Input
+                id="dispatch-date"
+                type="date"
+                value={dispatchFormData.dispatchDate}
+                onChange={(e) => setDispatchFormData(prev => ({ ...prev, dispatchDate: e.target.value }))}
+                min={new Date().toISOString().split('T')[0]}
+                data-testid="input-dispatch-date"
+              />
             </div>
-          )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="warehouse-address">Exporter Warehouse Address</Label>
+              <Textarea
+                id="warehouse-address"
+                placeholder="Enter the complete address where products should be delivered for export processing..."
+                value={dispatchFormData.exporterWarehouseAddress}
+                onChange={(e) => setDispatchFormData(prev => ({ ...prev, exporterWarehouseAddress: e.target.value }))}
+                rows={3}
+                data-testid="textarea-warehouse-address"
+              />
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDispatchDialog(false);
+                  setDispatchFormData({ dispatchDate: "", exporterWarehouseAddress: "" });
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!dispatchFormData.dispatchDate) {
+                    toast({
+                      title: "Date Required",
+                      description: "Please select a pickup date",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  if (!dispatchFormData.exporterWarehouseAddress.trim()) {
+                    toast({
+                      title: "Address Required", 
+                      description: "Please enter the exporter warehouse address",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  
+                  buyerDispatchMutation.mutate({
+                    lot: selectedProductForDispatch,
+                    dispatchDate: dispatchFormData.dispatchDate,
+                    warehouseAddress: dispatchFormData.exporterWarehouseAddress
+                  });
+                }}
+                disabled={buyerDispatchMutation.isPending}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                data-testid="button-confirm-dispatch-schedule"
+              >
+                {buyerDispatchMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Truck className="w-4 h-4 mr-2" />
+                )}
+                Schedule Pickup
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

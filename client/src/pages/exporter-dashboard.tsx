@@ -499,7 +499,26 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
   const { toast } = useToast();
   
   // Fetch scheduled pickups for this exporter
-  const { data: scheduledPickupsData, isLoading: pickupsLoading } = useQuery({
+  const { data: scheduledPickupsData, isLoading: pickupsLoading } = useQuery<{
+    success: boolean;
+    data: Array<{
+      requestId: string;
+      transactionId: string;
+      commodityType: string;
+      quantity: string;
+      unit: string;
+      totalValue: string;
+      dispatchDate: string;
+      confirmedBy: string;
+      status: string;
+      buyerName: string;
+      buyerCompany: string;
+      verificationCode: string;
+      county: string;
+      farmLocation: string;
+      confirmedAt: string;
+    }>;
+  }>({
     queryKey: [`/api/exporter/scheduled-pickups/${exporterId}`],
     enabled: !!exporterId,
     staleTime: 60000, // 1 minute cache

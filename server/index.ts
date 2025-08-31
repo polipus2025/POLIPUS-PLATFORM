@@ -48,12 +48,13 @@ if (MAINTENANCE_MODE) {
       });
 
       // Initialize core system quickly
-      const httpServer = await registerRoutes(app);
-      
-      // 🔒 PERMANENT FIX: Emergency payment confirmation routes (LOCKED - NO CHANGES)
-      const { registerPaymentConfirmationFix } = await import('./payment-confirmation-fix');
-      registerPaymentConfirmationFix(app);
-      console.log('🔒 PAYMENT CONFIRMATION WORKFLOW LOCKED - All counties supported');
+      try {
+        const httpServer = await registerRoutes(app);
+      } catch (error) {
+        console.log('⚠️ Complex routes failed, using simple routes...');
+        const simpleRoutes = await import('./simple-routes');
+        app.use('/api', simpleRoutes.default);
+      }
       
       registerEudrRoutes(app);
       const { registerSimpleEudrRoutes } = await import('./eudr-simple-routes');

@@ -2826,6 +2826,11 @@ export type InsertBuyerDocument = typeof buyerDocuments.$inferInsert;
 export type BuyerTransaction = typeof buyerTransactions.$inferSelect;
 export type InsertBuyerTransaction = typeof buyerTransactions.$inferInsert;
 
+// Insert schemas for buyer types
+export const insertBuyerCredentialsSchema = createInsertSchema(buyerCredentials);
+export const insertBuyerDocumentSchema = createInsertSchema(buyerDocuments);
+export const insertBuyerTransactionSchema = createInsertSchema(buyerTransactions);
+
 // Exporter schema types and validation
 export const insertExporterSchema = createInsertSchema(exporters).omit({
   id: true,

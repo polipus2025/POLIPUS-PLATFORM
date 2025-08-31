@@ -831,7 +831,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserLastLogin(id: number): Promise<void> {
-    await db.update(authUsers).set({ lastLogin: new Date() }).where(eq(authUsers.id, id));
+    await db.update(authUsers).set({ updatedAt: new Date() }).where(eq(authUsers.id, id));
   }
 
   // Alert methods

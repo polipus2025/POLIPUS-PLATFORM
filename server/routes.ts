@@ -14057,11 +14057,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Filter to only show bookings that were actually made by exporters with proper request IDs
       const realExporterBookings = assignments.filter(booking => 
-        booking.booked_by === 'exporter-system' && 
-        booking.request_id && 
-        booking.request_id.startsWith('CUSTODY-') &&
-        booking.booking_id && 
-        booking.booking_id.startsWith('PINSP-')
+        booking.bookedBy === 'exporter-system' && 
+        booking.requestId && 
+        booking.requestId.startsWith('CUSTODY-') &&
+        booking.bookingId && 
+        booking.bookingId.startsWith('PINSP-')
       );
       
       res.json({ success: true, data: realExporterBookings });

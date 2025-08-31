@@ -1438,5 +1438,7 @@ export default function BuyerManagement() {
         </DialogContent>
       </Dialog>
     </div>
+    </div>
+  </div>
   );
 }

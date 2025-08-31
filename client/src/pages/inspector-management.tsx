@@ -945,5 +945,6 @@ export default function InspectorManagement() {
         </DialogContent>
       </Dialog>
     </div>
+  </div>
   );
 }

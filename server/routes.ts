@@ -4442,9 +4442,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Test credentials for land inspectors
       const testLandInspectorCredentials: Record<string, { password: string; firstName: string; lastName: string; county: string; inspectorId: string }> = {
-        'vikas.gupta': { password: '82eb75fd71b464c7', firstName: 'Vikas', lastName: 'Gupta', county: 'Nimba County', inspectorId: 'INS-20250831-607' },
-        'rahul.gupta': { password: 'inspector123', firstName: 'Rahul', lastName: 'Gupta', county: 'Nimba County', inspectorId: 'INS-20250831-139' },
-        'ram.gupta': { password: 'inspector123', firstName: 'Ram', lastName: 'Gupta', county: 'Margibi County', inspectorId: 'INS-20250831-221' }
+        'vikas.gupta': { password: 'inspector123', firstName: 'Vikas', lastName: 'Gupta', county: 'Nimba County', inspectorId: 'INS-20250831-607' },
+        'moses.tarwo': { password: 'inspector123', firstName: 'Moses', lastName: 'Tarwo', county: 'Nimba County', inspectorId: 'LAND-NIMBA-001' }
       };
 
       if (testLandInspectorCredentials[username] && testLandInspectorCredentials[username].password === password) {
@@ -4585,7 +4584,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Demo credentials for Port Inspector testing
+      // Test credentials for port inspectors
+      const testPortInspectorCredentials: Record<string, { password: string; firstName: string; lastName: string; county: string; inspectorId: string; portFacility: string }> = {
+        'rahul.gupta': { password: 'inspector123', firstName: 'Rahul', lastName: 'Gupta', county: 'Maryland', inspectorId: 'INS-20250831-139', portFacility: 'Port of Monrovia' },
+        'ram.gupta': { password: 'inspector123', firstName: 'Ram', lastName: 'Gupta', county: 'Margibi', inspectorId: 'INS-20250831-221', portFacility: 'Port of Monrovia' },
+        'port_inspector': { password: 'inspector123', firstName: 'James', lastName: 'Kofi', county: 'Montserrado', inspectorId: 'INS-PORT-001', portFacility: 'Port of Monrovia' }
+      };
+
+      if (testPortInspectorCredentials[username] && testPortInspectorCredentials[username].password === password) {
+        const token = jwt.sign(
+          { 
+            inspectorId: testPortInspectorCredentials[username].inspectorId,
+            username: username,
+            role: 'port_inspector',
+            userType: 'port_inspector',
+            inspectorType: 'port',
+            county: testPortInspectorCredentials[username].county
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            inspectorId: testPortInspectorCredentials[username].inspectorId,
+            username: username,
+            firstName: testPortInspectorCredentials[username].firstName,
+            lastName: testPortInspectorCredentials[username].lastName,
+            role: 'port_inspector',
+            userType: 'port_inspector',
+            inspectorType: 'port',
+            county: testPortInspectorCredentials[username].county,
+            portFacility: testPortInspectorCredentials[username].portFacility
+          }
+        });
+      }
+
+      // Demo credentials for Port Inspector testing (legacy)
       if (username === "PORT-INS-001" && password === "port123") {
         const token = jwt.sign(
           { 

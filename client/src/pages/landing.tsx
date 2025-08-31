@@ -285,10 +285,6 @@ export default function Landing() {
                   <span>Government integration</span>
                 </div>
                 <div className="flex items-start gap-2 text-sm text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-slate-500 mt-2 flex-shrink-0"></div>
-                  <span>User management portal</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
                   <span>Real-time monitoring system</span>
                 </div>

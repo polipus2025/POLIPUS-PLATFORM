@@ -26,7 +26,10 @@ import {
   Smartphone,
   ArrowLeft,
   Mail,
-  Phone
+  Phone,
+  Sun,
+  Cloud,
+  CloudRain
 } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
@@ -76,6 +79,14 @@ export default function SellersHub() {
   const [showMobilePaymentDialog, setShowMobilePaymentDialog] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [activeTab, setActiveTab] = useState("all-offers");
+  
+  // Time, Date, and Weather State
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [weather, setWeather] = useState({
+    condition: 'sunny',
+    temperature: '28°C',
+    location: 'Monrovia, Liberia'
+  });
 
   // Get real authenticated exporter data
   const { data: user, isLoading: userLoading } = useQuery({
@@ -91,6 +102,54 @@ export default function SellersHub() {
       console.log('🔍 Sellers Hub - Current User Data:', user);
     }
   }, [user]);
+
+  // ⚡ OPTIMIZED TIME UPDATES - Prevent unnecessary re-renders
+  useEffect(() => {
+    let animationId: number;
+    const updateTime = () => {
+      setCurrentTime(new Date());
+      animationId = requestAnimationFrame(() => {
+        setTimeout(updateTime, 1000);
+      });
+    };
+    updateTime();
+    return () => cancelAnimationFrame(animationId);
+  }, []);
+
+  // ⚡ OPTIMIZED WEATHER UPDATES - Less frequent updates for performance
+  useEffect(() => {
+    const weatherConditions = [
+      { condition: 'sunny', temperature: '28°C' },
+      { condition: 'cloudy', temperature: '26°C' },
+      { condition: 'partly-cloudy', temperature: '25°C' },
+      { condition: 'rainy', temperature: '24°C' }
+    ];
+    
+    // Update weather less frequently to reduce re-renders
+    const weatherTimer = setInterval(() => {
+      const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+      setWeather(prev => {
+        // Only update if actually different to prevent unnecessary re-renders
+        if (prev.condition !== randomWeather.condition || prev.temperature !== randomWeather.temperature) {
+          return { ...prev, ...randomWeather };
+        }
+        return prev;
+      });
+    }, 600000); // 10 minutes instead of 5 for better performance
+    return () => clearInterval(weatherTimer);
+  }, []);
+
+  const getWeatherIcon = () => {
+    switch (weather.condition) {
+      case 'sunny': return Sun;
+      case 'rainy': return CloudRain;
+      case 'cloudy':
+      case 'partly-cloudy':
+      default: return Cloud;
+    }
+  };
+
+  const WeatherIcon = getWeatherIcon();
 
   // Fetch all active offers with proper typing
   const { data: offers = [], isLoading } = useQuery<BuyerExporterOffer[]>({
@@ -806,9 +865,67 @@ export default function SellersHub() {
       </div>
 
       {/* Header */}
-      <div className="text-center bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-slate-200">
-        <h1 className="text-4xl font-bold text-slate-900 mb-3">Sellers Hub</h1>
-        <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 mb-8">
+        <div className="p-6">
+          <div className="flex justify-between items-center">
+            {/* LEFT: TITLE */}
+            <div className="flex items-center space-x-4">
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900">Sellers Hub</h1>
+                <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
+              </div>
+            </div>
+            
+            {/* CENTER: TIME, DATE, AND WEATHER */}
+            <div className="flex items-center space-x-6 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-3 rounded-lg border border-slate-200 shadow-lg">
+              {/* Date and Time */}
+              <div className="flex items-center space-x-3">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                <div className="text-sm">
+                  <div className="font-semibold text-slate-900">
+                    {currentTime.toLocaleDateString('en-US', { 
+                      weekday: 'short',
+                      month: 'short', 
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <Clock className="h-5 w-5 text-green-600" />
+                <div className="text-sm">
+                  <div className="font-semibold text-slate-900">
+                    {currentTime.toLocaleTimeString('en-US', { 
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Weather */}
+              <div className="flex items-center space-x-3 border-l border-blue-200 pl-4">
+                <WeatherIcon className="h-5 w-5 text-orange-600" />
+                <div className="text-sm">
+                  <div className="font-semibold text-slate-900">{weather.temperature}</div>
+                  <div className="text-xs text-slate-600">{weather.location}</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* RIGHT: PLACEHOLDER */}
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-900">{user?.companyName || 'Loading...'}</p>
+                <p className="text-xs text-slate-500">Export Hub Portal</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}

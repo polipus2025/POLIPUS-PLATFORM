@@ -229,7 +229,7 @@ export default function FrontPage() {
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Platform Modules</h2>
-              <p className="text-sm sm:text-base text-slate-600">Integrated business solutions and enterprise applications</p>
+              <p className="text-sm sm:text-base text-slate-600">Government multi-level integrated system for economy sustainability</p>
             </div>
           </div>
 

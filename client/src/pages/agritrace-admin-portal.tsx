@@ -225,8 +225,8 @@ export default function AgriTraceAdminPortal() {
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#f9fafb'}
-              onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
+              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f9fafb'}
+              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'white'}
             >
               <span>Logout</span>
             </button>
@@ -456,7 +456,7 @@ export default function AgriTraceAdminPortal() {
                     <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
                       System Information
                     </h3>
-                    <div style={{ space: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
                         <span style={{ fontSize: '14px', fontWeight: '500' }}>Platform:</span>
                         <span style={{ fontSize: '14px' }}>{dashboardData.systemInfo.platform}</span>
@@ -487,7 +487,7 @@ export default function AgriTraceAdminPortal() {
                     <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
                       AgriTrace Capabilities
                     </h3>
-                    <div style={{ space: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {dashboardData.capabilities.map((capability, index) => (
                         <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
                           <div style={{
@@ -517,7 +517,7 @@ export default function AgriTraceAdminPortal() {
                     This administrator has limited scope - AgriTrace agricultural module only.
                   </div>
 
-                  <div style={{ space: '16px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {[
                       { label: 'Polipus Platform Access', status: 'Restricted', color: '#dc2626' },
                       { label: 'Other Module Access', status: 'Restricted', color: '#dc2626' },

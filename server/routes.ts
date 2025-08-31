@@ -877,7 +877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .set({ 
             status: "confirmed",
             confirmedAt: new Date(),
-            buyerId: notification.buyerId,
+            buyerId: notification.buyerId.toString(),
             buyerName: notification.buyerName,
             verificationCode: generateVerificationCode()
           })
@@ -887,7 +887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [buyer] = await db
           .select()
           .from(buyers)
-          .where(eq(buyers.buyerId, notification.buyerId.toString()));
+          .where(eq(buyers.buyerId, notification.buyerId));
 
         // Create transaction with unique verification code
         const transactionId = generateTransactionId();
@@ -1085,9 +1085,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentTerms: buyers.paymentTerms,
         })
         .from(buyers)
-        .where(eq(buyers.county, county))
-        .where(eq(buyers.isActive, true))
-        .where(eq(buyers.portalAccess, true))
+        .where(and(
+          eq(buyers.county, county),
+          eq(buyers.isActive, true),
+          eq(buyers.portalAccess, true)
+        ))
         .orderBy(buyers.businessName);
 
       res.json({

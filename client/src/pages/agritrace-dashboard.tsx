@@ -49,13 +49,17 @@ export default function AgriTraceDashboard() {
   // Fetch AgriTrace workflows
   const { data: workflows = [], isLoading } = useQuery<AgriTraceWorkflow[]>({
     queryKey: ["/api/agritrace/workflows"],
-    queryFn: () => apiRequest("GET", "/api/agritrace/workflows"),
+    queryFn: () => apiRequest("/api/agritrace/workflows"),
   });
 
   // Initialize National Mapping Plan mutation
   const initializeMappingMutation = useMutation({
     mutationFn: (data: { lacraAdminId: string }) => 
-      apiRequest("POST", "/api/agritrace/national-mapping", data),
+      apiRequest("/api/agritrace/national-mapping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }),
     onSuccess: () => {
       toast({
         title: "Success",

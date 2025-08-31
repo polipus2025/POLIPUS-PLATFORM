@@ -12,7 +12,6 @@ export function registerPaymentConfirmationFix(app: Express) {
   app.get("/api/buyer/notifications/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
-      console.log(`🚨 EMERGENCY FIX: Fetching notifications for buyer ${buyerId}`);
 
       // Direct SQL to bypass Drizzle issues completely
       const result = await db.execute(sql`
@@ -33,7 +32,6 @@ export function registerPaymentConfirmationFix(app: Express) {
         ORDER BY bn.created_at DESC
       `);
 
-      console.log(`✅ EMERGENCY FIX: Found ${result.rows.length} notifications for buyer ${buyerId}`);
       
       const notifications = result.rows.map((row: any) => ({
         notificationId: row.notificationId,
@@ -97,7 +95,6 @@ export function registerPaymentConfirmationFix(app: Express) {
       const { transactionId } = req.params;
       const { farmerId } = req.body;
       
-      console.log(`🚨 EMERGENCY FIX: Farmer ${farmerId} confirming payment for transaction: ${transactionId}`);
 
       // Generate second verification code using proper format
       const secondVerificationCode = generateSecondVerificationCode();
@@ -172,7 +169,6 @@ export function registerPaymentConfirmationFix(app: Express) {
   app.get("/api/buyer/confirmed-transactions/:buyerId", async (req, res) => {
     try {
       const { buyerId } = req.params;
-      console.log(`🚨 EMERGENCY FIX: Fetching confirmed transactions for buyer: ${buyerId}`);
       
       // Get the internal buyer ID first (Fixed Drizzle syntax)
       const [buyer] = await db
@@ -223,7 +219,6 @@ export function registerPaymentConfirmationFix(app: Express) {
         offerId: transaction.offerId // Also include as offerId for backward compatibility
       }));
 
-      console.log(`✅ EMERGENCY FIX: Returning ${formattedTransactions.length} confirmed transactions with offer IDs`);
       res.json(formattedTransactions);
       
     } catch (error: any) {

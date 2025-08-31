@@ -275,7 +275,7 @@ export default function FarmerDashboard() {
         <TabsContent value="overview" className="space-y-3 mt-3">
           {/* Compact Statistics Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -288,7 +288,7 @@ export default function FarmerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -301,7 +301,7 @@ export default function FarmerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -314,7 +314,7 @@ export default function FarmerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

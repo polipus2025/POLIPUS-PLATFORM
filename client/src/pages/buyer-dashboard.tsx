@@ -144,7 +144,7 @@ export default function BuyerDashboard() {
           <TabsContent value="overview" className="space-y-6">
             {/* Overview Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -157,7 +157,7 @@ export default function BuyerDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-green-50 to-green-100 border-green-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -170,7 +170,7 @@ export default function BuyerDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>

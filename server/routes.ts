@@ -18267,6 +18267,43 @@ GENERATED: ${new Date().toLocaleDateString()}`;
   // BUYER WAREHOUSE CUSTODY ENDPOINTS
   // ========================================
 
+  // Get buyer dispatch requests
+  app.get("/api/buyer/dispatch-requests/:buyerId", async (req, res) => {
+    try {
+      const { buyerId } = req.params;
+      console.log(`🚛 Fetching dispatch requests for buyer: ${buyerId}`);
+      
+      const dispatchRequestsResult = await db
+        .select()
+        .from(warehouseDispatchRequests)
+        .where(eq(warehouseDispatchRequests.buyerId, buyerId))
+        .orderBy(desc(warehouseDispatchRequests.createdAt));
+      
+      const dispatchRequests = dispatchRequestsResult.map((req: any) => ({
+        requestId: req.requestId,
+        transactionId: req.transactionId,
+        custodyId: req.transactionId, // For matching with custody lots
+        status: req.status,
+        dispatchDate: req.dispatchDate,
+        qrBatchCode: req.qrBatchCode,
+        confirmedAt: req.confirmedAt,
+        createdAt: req.createdAt,
+        commodityType: req.commodityType,
+        quantity: req.quantity,
+        unit: req.unit
+      }));
+
+      console.log(`📦 Found ${dispatchRequests.length} dispatch requests for buyer ${buyerId}`);
+      res.json({ data: dispatchRequests });
+    } catch (error: any) {
+      console.error("Error fetching buyer dispatch requests:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch dispatch requests",
+        details: error.message 
+      });
+    }
+  });
+
   // Get buyer's custody lots (for "My Products" menu)
   app.get("/api/buyer/custody-lots/:buyerId", async (req, res) => {
     try {

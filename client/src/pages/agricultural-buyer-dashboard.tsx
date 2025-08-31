@@ -423,6 +423,20 @@ export default function AgriculturalBuyerDashboard() {
   // Get current buyer's county from custodyLots
   const buyerCounty = custodyLots?.data?.[0]?.county || '';
 
+  // Fetch existing dispatch requests for this buyer
+  const { data: dispatchRequests, isLoading: dispatchLoading } = useQuery({
+    queryKey: ['/api/buyer/dispatch-requests', buyerId],
+    queryFn: () => apiRequest(`/api/buyer/dispatch-requests/${buyerId}`),
+    enabled: !!buyerId,
+    staleTime: 30 * 1000,
+  });
+
+  // Helper function to check if custody lot has scheduled pickup
+  const getDispatchStatus = (custodyId: string) => {
+    if (!dispatchRequests?.data) return null;
+    return dispatchRequests.data.find((req: any) => req.transactionId === custodyId || req.custodyId === custodyId);
+  };
+
   // Fetch available exporters for direct offers
   const { data: availableExporters, isLoading: exportersLoading } = useQuery({
     queryKey: ['/api/exporters/available'],
@@ -1638,20 +1652,52 @@ export default function AgriculturalBuyerDashboard() {
                                         </p>
                                       </div>
                                       
-                                      {/* Dispatch Scheduling Button */}
-                                      <Button 
-                                        size="sm"
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" 
-                                        onClick={() => {
-                                          console.log('🚛 Dispatch button clicked for:', lot.custodyId);
-                                          setSelectedProductForDispatch(lot);
-                                          setShowDispatchDialog(true);
-                                        }}
-                                        data-testid={`schedule-warehouse-pickup-${lot.custodyId}`}
-                                      >
-                                        <Truck className="h-4 w-4 mr-2" />
-                                        Schedule Warehouse Pickup
-                                      </Button>
+                                      {/* Dispatch Scheduling Button - Check if already scheduled */}
+                                      {(() => {
+                                        const dispatchStatus = getDispatchStatus(lot.custodyId);
+                                        
+                                        if (dispatchStatus && dispatchStatus.status === 'confirmed') {
+                                          return (
+                                            <Button 
+                                              size="sm"
+                                              disabled
+                                              className="w-full bg-green-600 hover:bg-green-700 text-white mt-2 cursor-default" 
+                                              data-testid={`pickup-scheduled-${lot.custodyId}`}
+                                            >
+                                              <CheckCircle className="h-4 w-4 mr-2" />
+                                              ✅ Pickup Scheduled - {dispatchStatus.requestId}
+                                            </Button>
+                                          );
+                                        } else if (dispatchStatus && dispatchStatus.status === 'pending') {
+                                          return (
+                                            <Button 
+                                              size="sm"
+                                              disabled
+                                              className="w-full bg-orange-500 hover:bg-orange-600 text-white mt-2 cursor-default" 
+                                              data-testid={`pickup-pending-${lot.custodyId}`}
+                                            >
+                                              <Clock className="h-4 w-4 mr-2" />
+                                              ⏳ Pickup Pending - {dispatchStatus.requestId}
+                                            </Button>
+                                          );
+                                        } else {
+                                          return (
+                                            <Button 
+                                              size="sm"
+                                              className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" 
+                                              onClick={() => {
+                                                console.log('🚛 Dispatch button clicked for:', lot.custodyId);
+                                                setSelectedProductForDispatch(lot);
+                                                setShowDispatchDialog(true);
+                                              }}
+                                              data-testid={`schedule-warehouse-pickup-${lot.custodyId}`}
+                                            >
+                                              <Truck className="h-4 w-4 mr-2" />
+                                              Schedule Warehouse Pickup
+                                            </Button>
+                                          );
+                                        }
+                                      })()}
 
                                       {/* Offer Management Buttons */}
                                       {getOfferStatus(lot)?.status === 'accepted' ? (

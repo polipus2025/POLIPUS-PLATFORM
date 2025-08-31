@@ -146,34 +146,6 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data || { data: [] }
   });
 
-  // 🚛 Dispatch confirmation mutation
-  const dispatchConfirmationMutation = useMutation({
-    mutationFn: async ({ requestId, confirmationNotes }: any) => {
-      return await apiRequest('/api/warehouse-inspector/confirm-dispatch', {
-        method: 'POST',
-        body: JSON.stringify({
-          dispatchRequestId: requestId,
-          warehouseId: inspectorData.warehouseId || 'WH-001',
-          inspectorId: inspectorData.inspectorId || inspectorData.username,
-          confirmationNotes
-        })
-      });
-    },
-    onSuccess: (response: any) => {
-      toast({
-        title: "Dispatch Confirmed ✅",
-        description: `QR batch ${response.batchCode} generated successfully`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'] });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to confirm dispatch request",
-        variant: "destructive"
-      });
-    }
-  });
 
   // Product registration mutation
   const registerProductMutation = useMutation({

@@ -4584,9 +4584,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if inspector credentials exist and is of correct type
+      // Check if inspector credentials exist
       const credentials = await storage.getInspectorCredentialsByUsername(username);
-      if (!credentials || credentials.inspectorType !== 'port') {
+      if (!credentials) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid port inspector credentials" 
+        });
+      }
+
+      // Get inspector details to check type
+      const inspector = await storage.getInspectorByInspectorId(credentials.inspectorId);
+      if (!inspector || inspector.inspectorType !== 'port') {
         return res.status(401).json({ 
           success: false, 
           message: "Invalid port inspector credentials" 
@@ -4613,9 +4622,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Get inspector profile
-      const inspector = await storage.getInspectorByInspectorId(credentials.inspectorId);
-      if (!inspector || !inspector.isActive || !inspector.canLogin || inspector.inspectorType !== 'port') {
+      // Check if inspector account is active
+      if (!inspector.isActive || !inspector.canLogin) {
         return res.status(401).json({ 
           success: false, 
           message: "Port inspector account is not active or login is disabled" 

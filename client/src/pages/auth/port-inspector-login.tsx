@@ -13,10 +13,10 @@ export default function PortInspectorLogin() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/port-inspector/login", {
+      const response = await fetch("/api/auth/port-inspector-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify({...credentials, inspectorType: "port"})
       });
 
       if (response.ok) {

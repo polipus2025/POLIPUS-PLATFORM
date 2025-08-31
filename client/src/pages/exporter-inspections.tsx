@@ -16,25 +16,27 @@ import {
   CreditCard,
   Eye,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  FileText
 } from 'lucide-react';
 import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-// 🔐 ENHANCED AUTH HOOK with automatic token management
-const useExporterAuth = () => {
-  const exporterData = JSON.parse(localStorage.getItem('exporter_data') || '{}');
-  return {
-    user: exporterData,
-    exporterId: exporterData?.exporterId || exporterData?.id,
-    isAuthenticated: !!exporterData?.exporterId || !!exporterData?.id
-  };
-};
-
 // ⚡ INSPECTIONS & PAYMENTS MAIN COMPONENT
 const ExporterInspections = memo(() => {
-  const { user, exporterId } = useExporterAuth();
   const { toast } = useToast();
+  
+  // ⚡ SUPER OPTIMIZED USER QUERY - Match dashboard pattern
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 300000, // 5 minutes cache for maximum speed
+    gcTime: 1800000, // 30 minutes garbage collection
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    refetchOnMount: false, // Only fetch if stale
+  });
+
+  const exporterId = (user as any)?.exporterId || (user as any)?.id;
   
   // Fetch scheduled pickups for this exporter
   const { data: scheduledPickupsData, isLoading: pickupsLoading } = useQuery<{
@@ -86,19 +88,16 @@ const ExporterInspections = memo(() => {
     });
   }, [toast]);
 
-  if (!exporterId) {
+  if (userLoading) {
     return (
       <CleanExporterLayout user={user}>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Card className="bg-red-50 border-red-200">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                  <div>
-                    <h3 className="font-semibold text-red-800">Authentication Required</h3>
-                    <p className="text-red-600">Please log in to access inspections and payments.</p>
-                  </div>
+            <Card className="bg-white shadow-xl">
+              <CardContent className="p-8">
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin h-8 w-8 border-4 border-purple-600 border-t-transparent rounded-full"></div>
+                  <span className="ml-3 text-slate-600">Loading exporter data...</span>
                 </div>
               </CardContent>
             </Card>
@@ -251,7 +250,7 @@ const ExporterInspections = memo(() => {
                             className="bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg"
                             data-testid={`certifications-${pickup.requestId}`}
                           >
-                            <FileCheck className="h-5 w-5 mr-2" />
+                            <FileText className="h-5 w-5 mr-2" />
                             International Certifications
                           </Button>
                           <Button 

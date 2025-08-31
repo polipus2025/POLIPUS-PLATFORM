@@ -1652,10 +1652,12 @@ export default function AgriculturalBuyerDashboard() {
                                         </p>
                                       </div>
                                       
-                                      {/* Dispatch Scheduling Button - Check if already scheduled */}
+                                      {/* Dispatch Scheduling Button - Smart workflow logic */}
                                       {(() => {
+                                        const offerStatus = getOfferStatus(lot);
                                         const dispatchStatus = getDispatchStatus(lot.custodyId);
                                         
+                                        // PRIORITY 1: If dispatch already exists, show its status (regardless of offers)
                                         if (dispatchStatus && dispatchStatus.status === 'confirmed') {
                                           return (
                                             <Button 
@@ -1680,13 +1682,16 @@ export default function AgriculturalBuyerDashboard() {
                                               ⏳ Pickup Pending - {dispatchStatus.requestId}
                                             </Button>
                                           );
-                                        } else {
+                                        }
+                                        
+                                        // PRIORITY 2: No dispatch exists - only show scheduling if exporter accepted offer
+                                        if (offerStatus?.status === 'accepted') {
                                           return (
                                             <Button 
                                               size="sm"
                                               className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" 
                                               onClick={() => {
-                                                console.log('🚛 Dispatch button clicked for:', lot.custodyId);
+                                                console.log('🚛 Dispatch button clicked for accepted offer:', lot.custodyId);
                                                 setSelectedProductForDispatch(lot);
                                                 setShowDispatchDialog(true);
                                               }}
@@ -1697,6 +1702,9 @@ export default function AgriculturalBuyerDashboard() {
                                             </Button>
                                           );
                                         }
+                                        
+                                        // PRIORITY 3: No dispatch, no accepted offer - don't show dispatch button
+                                        return null;
                                       })()}
 
                                       {/* Offer Management Buttons */}

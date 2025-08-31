@@ -151,6 +151,7 @@ const ExporterDashboard = memo(() => {
 
   // ⚡ MEMOIZED TAB HANDLER
   const handleTabChange = useCallback((tab: string) => {
+    console.log('🔄 Tab changed to:', tab);
     setActiveTab(tab);
   }, []);
 
@@ -209,13 +210,21 @@ const ExporterDashboard = memo(() => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
           {/* TAB NAVIGATION */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="overview" className="text-sm font-medium">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8 bg-white shadow-lg">
+              <TabsTrigger 
+                value="overview" 
+                className="text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                data-testid="overview-tab"
+              >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="inspections" className="text-sm font-medium">
+              <TabsTrigger 
+                value="inspections" 
+                className="text-sm font-medium data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                data-testid="inspections-tab"
+              >
                 <ClipboardCheck className="w-4 h-4 mr-2" />
                 Inspections & Payments
               </TabsTrigger>

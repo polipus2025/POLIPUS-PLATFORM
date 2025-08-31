@@ -3211,6 +3211,9 @@ export default function WarehouseInspectorDashboard() {
                               Confirmed: {new Date(request.confirmedAt).toLocaleDateString()}
                             </p>
                             <p className="text-xs text-green-700">
+                              📅 Pickup Date: {request.dispatchDate ? new Date(request.dispatchDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Not set'}
+                            </p>
+                            <p className="text-xs text-green-700">
                               By: {request.confirmedBy}
                             </p>
                           </div>

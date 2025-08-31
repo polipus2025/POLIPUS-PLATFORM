@@ -368,7 +368,12 @@ export default function RealMapBoundaryMapper({
     };
 
     const createMapWithTile = (tileInfo: any, centerLat: number, centerLng: number) => {
-      mapRef.current!.innerHTML = `
+      if (!mapRef.current) {
+        console.error('Map container not found');
+        return;
+      }
+      
+      mapRef.current.innerHTML = `
         <style>
           .real-map { 
             height: 400px; 
@@ -433,7 +438,12 @@ export default function RealMapBoundaryMapper({
         </div>
       `;
 
-      const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
+      if (!mapRef.current) {
+        console.error('Map container not found');
+        return;
+      }
+      
+      const mapElement = mapRef.current.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
 
       // Load premium satellite tiles for enhanced coverage
@@ -442,7 +452,13 @@ export default function RealMapBoundaryMapper({
       // Remove any existing click handlers first
       const existingHandlers = mapElement.cloneNode(true);
       mapElement.parentNode?.replaceChild(existingHandlers, mapElement);
-      const cleanMapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
+      
+      if (!mapRef.current) {
+        console.error('Map container not found after handler removal');
+        return;
+      }
+      
+      const cleanMapElement = mapRef.current.querySelector('#real-map') as HTMLElement;
 
       // REAL-TIME INTERACTIVE CLICK MAPPING - Add points instantly with GPS accuracy check
       cleanMapElement.addEventListener('click', (e) => {
@@ -514,7 +530,12 @@ export default function RealMapBoundaryMapper({
     };
 
     const loadFallbackMap = () => {
-      mapRef.current!.innerHTML = `
+      if (!mapRef.current) {
+        console.error('Map container not found for fallback map');
+        return;
+      }
+      
+      mapRef.current.innerHTML = `
         <style>
           .fallback-map { 
             height: 400px; 
@@ -592,7 +613,12 @@ export default function RealMapBoundaryMapper({
         </div>
       `;
 
-      const mapElement = mapRef.current!.querySelector('#fallback-map') as HTMLElement;
+      if (!mapRef.current) {
+        console.error('Map container not found for fallback map element');
+        return;
+      }
+      
+      const mapElement = mapRef.current.querySelector('#fallback-map') as HTMLElement;
       if (!mapElement) return;
 
       // Add click handler with debugging for fallback map
@@ -1482,7 +1508,7 @@ export default function RealMapBoundaryMapper({
                 e.stopPropagation();
                 addCurrentGPSPoint();
               }}
-              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > 2.5)}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy != null && trackingAccuracy > 2.5)}
               size="sm"
               variant="default"
               className={`flex-1 sm:flex-none ${

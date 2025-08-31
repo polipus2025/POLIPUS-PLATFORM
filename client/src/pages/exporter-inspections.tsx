@@ -1,5 +1,5 @@
 import { memo, useCallback, Suspense, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,7 @@ const getNextWorkingDay = (date: Date): Date => {
 // ⚡ INSPECTIONS & PAYMENTS MAIN COMPONENT
 const ExporterInspections = memo(() => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedPickup, setSelectedPickup] = useState<any>(null);
   
@@ -105,25 +106,69 @@ const ExporterInspections = memo(() => {
     });
   }, [toast]);
 
+  // Create inspection booking mutation
+  const bookInspectionMutation = useMutation({
+    mutationFn: async (bookingData: any) => {
+      const response = await fetch('/api/exporter/book-inspection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData)
+      });
+      if (!response.ok) throw new Error('Failed to book inspection');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      const inspectionDate = new Date(data.data.dispatchDate);
+      toast({
+        title: "Inspection Booked Successfully! ✅",
+        description: `Port Inspector will visit warehouse on ${inspectionDate.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric', 
+          month: 'long',
+          day: 'numeric'
+        })}. Booking ID: ${data.data.bookingId}`,
+      });
+      setShowBookingModal(false);
+      setSelectedPickup(null);
+      // Refresh scheduled pickups
+      queryClient.invalidateQueries({ queryKey: [`/api/exporter/scheduled-pickups/${exporterId}`] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Booking Failed",
+        description: "Failed to book inspection. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleScheduleInspection = useCallback(() => {
-    if (!selectedPickup) return;
+    if (!selectedPickup || !user) return;
     
-    const pickupDate = new Date(selectedPickup.dispatchDate);
-    const inspectionDate = getNextWorkingDay(pickupDate);
-    
-    toast({
-      title: "Inspection Scheduled Successfully! ✅",
-      description: `Product inspection scheduled for ${inspectionDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric', 
-        month: 'long',
-        day: 'numeric'
-      })}`,
-    });
-    
-    setShowBookingModal(false);
-    setSelectedPickup(null);
-  }, [selectedPickup, toast]);
+    const bookingData = {
+      requestId: selectedPickup.requestId,
+      transactionId: selectedPickup.transactionId,
+      commodityType: selectedPickup.commodityType,
+      quantity: selectedPickup.quantity,
+      unit: selectedPickup.unit,
+      totalValue: selectedPickup.totalValue,
+      dispatchDate: selectedPickup.dispatchDate,
+      buyerName: selectedPickup.buyerName,
+      buyerCompany: selectedPickup.buyerCompany,
+      verificationCode: selectedPickup.verificationCode,
+      county: selectedPickup.county,
+      farmLocation: selectedPickup.farmLocation,
+      exporterId: (user as any)?.exporterId || (user as any)?.id,
+      exporterName: (user as any)?.fullName || (user as any)?.name,
+      exporterCompany: (user as any)?.company || 'Export Company',
+      warehouseFacility: 'Exporter Warehouse',
+      urgencyLevel: 'normal'
+    };
+
+    bookInspectionMutation.mutate(bookingData);
+  }, [selectedPickup, user, bookInspectionMutation]);
 
   if (userLoading) {
     return (
@@ -438,11 +483,21 @@ const ExporterInspections = memo(() => {
                 <div className="flex gap-3 pt-4">
                   <Button 
                     onClick={handleScheduleInspection}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={bookInspectionMutation.isPending}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                     data-testid="schedule-inspection-confirm"
                   >
-                    <ClipboardCheck className="h-4 w-4 mr-2" />
-                    Schedule Inspection
+                    {bookInspectionMutation.isPending ? (
+                      <>
+                        <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                        Booking Inspection...
+                      </>
+                    ) : (
+                      <>
+                        <ClipboardCheck className="h-4 w-4 mr-2" />
+                        Schedule Inspection
+                      </>
+                    )}
                   </Button>
                   <Button 
                     onClick={() => setShowBookingModal(false)}

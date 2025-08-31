@@ -13954,6 +13954,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PORT INSPECTION BOOKING & ASSIGNMENT ROUTES  
   // ========================================
 
+  // Create inspection booking when exporter books inspection
+  app.post("/api/exporter/book-inspection", async (req, res) => {
+    try {
+      const { 
+        requestId, 
+        transactionId, 
+        commodityType, 
+        quantity, 
+        unit, 
+        totalValue, 
+        dispatchDate,
+        buyerName, 
+        buyerCompany, 
+        verificationCode, 
+        county, 
+        farmLocation,
+        exporterId,
+        exporterName,
+        exporterCompany,
+        warehouseFacility,
+        urgencyLevel 
+      } = req.body;
+
+      // Generate unique booking ID
+      const bookingId = `PINSP-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+      
+      // Calculate next working day for dispatch
+      const dispatchDateObj = new Date(dispatchDate);
+      const nextWorkingDay = new Date(dispatchDateObj);
+      nextWorkingDay.setDate(nextWorkingDay.getDate() + 1);
+      
+      // If it falls on weekend, move to Monday
+      const dayOfWeek = nextWorkingDay.getDay();
+      if (dayOfWeek === 6) nextWorkingDay.setDate(nextWorkingDay.getDate() + 2);
+      else if (dayOfWeek === 0) nextWorkingDay.setDate(nextWorkingDay.getDate() + 1);
+
+      const bookingData = {
+        bookingId,
+        requestId,
+        transactionId,
+        commodityType,
+        quantity,
+        unit,
+        totalValue,
+        dispatchDate: nextWorkingDay,
+        buyerName,
+        buyerCompany,
+        verificationCode,
+        county,
+        farmLocation,
+        confirmedBy: 'exporter-system',
+        confirmedAt: new Date(),
+        exporterId: exporterId || 'EXP-SYS',
+        exporterName: exporterName || 'Exporter',
+        exporterCompany: exporterCompany || 'Export Company',
+        portFacility: warehouseFacility || 'Exporter Warehouse',
+        inspectionType: 'quality_compliance',
+        urgencyLevel: urgencyLevel || 'normal',
+        assignmentStatus: 'pending_assignment',
+        bookedBy: 'exporter-system',
+        bookedAt: new Date()
+      };
+
+      const newBooking = await storage.createPortInspectionBooking(bookingData);
+      
+      res.json({
+        success: true,
+        data: newBooking,
+        message: "Inspection booking created successfully"
+      });
+
+    } catch (error: any) {
+      console.error("Error creating inspection booking:", error);
+      res.status(500).json({ error: "Failed to create inspection booking" });
+    }
+  });
+
   // Get pending inspector assignments for DDGOTS
   app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
     try {

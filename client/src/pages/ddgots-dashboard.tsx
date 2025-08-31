@@ -134,7 +134,7 @@ export default function DDGOTSDashboard() {
           urgencyLevel: 'normal',
           assignmentStatus: 'assigned',
           assignedInspectorId: 'INS-PORT-001',
-          assignedInspectorName: 'Port Inspector',
+          assignedInspectorName: 'James Kofi',
           assignedBy: 'DDGOTS Admin',
           assignedAt: '2025-08-31T14:54:29.160Z',
           ddgotsNotes: 'Test assignment',

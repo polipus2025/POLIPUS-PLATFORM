@@ -18054,10 +18054,11 @@ GENERATED: ${new Date().toLocaleDateString()}`;
 
       console.log(`🛒 Buyer ${buyerId} scheduling warehouse dispatch for custody ${custodyId}`);
 
-      // Get custody details
+      // Get custody details with proper value lookup
       const custodyResult = await db.execute(sql`
-        SELECT wc.*
+        SELECT wc.*, beo.total_value
         FROM warehouse_custody wc
+        LEFT JOIN buyer_exporter_offers beo ON beo.custody_id = wc.custody_id
         WHERE wc.custody_id = ${custodyId}
       `);
       
@@ -18070,19 +18071,30 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         });
       }
 
+      // Get proper buyer details
+      const buyerResult = await db.execute(sql`
+        SELECT buyer_name, buyer_company 
+        FROM buyers 
+        WHERE buyer_id = ${buyerId}
+      `);
+      
+      const buyerDetails = buyerResult.rows?.[0] || buyerResult[0];
+      const finalBuyerName = buyerDetails?.buyer_name || buyerName || 'Unknown Buyer';
+      const finalBuyerCompany = buyerDetails?.buyer_company || buyerCompany || 'Unknown Company';
+
       // Generate dispatch request ID
       const requestId = `WDR-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
 
-      // Create buyer dispatch request  
+      // Create buyer dispatch request with proper data
       await db.execute(sql`
         INSERT INTO warehouse_dispatch_requests (
           request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
           commodity_type, quantity, unit, total_value, county, farm_location, dispatch_date, 
           status, requested_at
         ) VALUES (
-          ${requestId}, ${custodyId}, ${verificationCode}, ${buyerId}, 
-          ${buyerName || 'Buyer'}, ${buyerCompany || 'Company'}, ${commodityType}, 
-          ${quantity}, ${unit || 'MT'}, ${0}, ${custody.county || 'Montserrado'}, 
+          ${requestId}, ${custodyId}, ${verificationCode || 'PENDING'}, ${buyerId}, 
+          ${finalBuyerName}, ${finalBuyerCompany}, ${commodityType}, 
+          ${quantity}, ${unit || 'MT'}, ${custody.total_value || 0}, ${custody.county || 'Montserrado'}, 
           ${exporterWarehouseAddress}, ${dispatchDate}, 'pending', NOW()
         )
       `);

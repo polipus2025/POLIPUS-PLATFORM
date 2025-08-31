@@ -17829,10 +17829,12 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       console.log(`🚛 Warehouse confirming dispatch request ${dispatchRequestId}`);
 
       // Get dispatch request details
-      const [dispatchRequest] = await db.execute(sql`
+      const dispatchResult = await db.execute(sql`
         SELECT * FROM warehouse_dispatch_requests 
         WHERE request_id = ${dispatchRequestId} AND status = 'pending'
       `);
+      
+      const dispatchRequest = dispatchResult.rows?.[0] || dispatchResult[0];
 
       if (!dispatchRequest) {
         return res.status(404).json({

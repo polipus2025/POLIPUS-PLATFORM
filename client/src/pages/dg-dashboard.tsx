@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { 
   Shield, 
   Building2, 
@@ -18,6 +20,7 @@ import {
   Settings,
   LogOut,
   Crown,
+  Activity,
   Globe,
   Target,
   Award,
@@ -28,7 +31,17 @@ import {
   Trees,
   MapPin,
   Link,
-  RefreshCw
+  RefreshCw,
+  Smartphone,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  TrendingDown,
+  Zap,
+  Headphones,
+  Monitor,
+  Radio,
+  Wifi
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -36,6 +49,7 @@ import { useLocation } from "wouter";
 export default function DGDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showMonitoring, setShowMonitoring] = useState(false);
 
   // Fetch executive dashboard data
   const { data: executiveMetrics, isLoading: metricsLoading } = useQuery({
@@ -130,6 +144,14 @@ export default function DGDashboard() {
                 <Shield className="w-4 h-4 mr-1" />
                 Executive Access
               </Badge>
+              <Button 
+                onClick={() => setShowMonitoring(true)} 
+                variant="outline" 
+                className="text-green-600 hover:text-green-800 border-green-300 hover:border-green-500 bg-green-50 hover:bg-green-100"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Monitoring
+              </Button>
               <Button onClick={handleLogout} variant="outline" className="text-slate-600 hover:text-slate-900">
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -748,6 +770,616 @@ export default function DGDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Comprehensive Monitoring Modal */}
+      <Dialog open={showMonitoring} onOpenChange={setShowMonitoring}>
+        <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Activity className="w-6 h-6 text-green-600" />
+              AgriTrace360™ Comprehensive Monitoring System
+            </DialogTitle>
+            <DialogDescription>
+              Real-time monitoring across all 15 Liberian counties with mobile inspector tracking and comprehensive analytics
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Quick Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-green-600">Active Inspectors</p>
+                      <p className="text-2xl font-bold text-green-800">47</p>
+                    </div>
+                    <Smartphone className="w-8 h-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-blue-600">Counties Online</p>
+                      <p className="text-2xl font-bold text-blue-800">15/15</p>
+                    </div>
+                    <MapPin className="w-8 h-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-orange-50 border-orange-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-orange-600">Pending Inspections</p>
+                      <p className="text-2xl font-bold text-orange-800">12</p>
+                    </div>
+                    <Clock className="w-8 h-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-red-50 border-red-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-red-600">Critical Alerts</p>
+                      <p className="text-2xl font-bold text-red-800">3</p>
+                    </div>
+                    <AlertCircle className="w-8 h-8 text-red-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Monitoring Tabs */}
+            <Tabs defaultValue="mobile-inspectors" className="w-full">
+              <TabsList className="grid w-full grid-cols-7">
+                <TabsTrigger value="mobile-inspectors" className="text-xs">Mobile Inspectors</TabsTrigger>
+                <TabsTrigger value="county-reports" className="text-xs">County Reports</TabsTrigger>
+                <TabsTrigger value="supply-chain" className="text-xs">Supply Chain</TabsTrigger>
+                <TabsTrigger value="portal-activity" className="text-xs">Portal Activity</TabsTrigger>
+                <TabsTrigger value="compliance" className="text-xs">Compliance</TabsTrigger>
+                <TabsTrigger value="emergency" className="text-xs">Emergency</TabsTrigger>
+                <TabsTrigger value="analytics" className="text-xs">Analytics</TabsTrigger>
+              </TabsList>
+
+              {/* Mobile Inspector Monitoring */}
+              <TabsContent value="mobile-inspectors" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Smartphone className="w-5 h-5" />
+                      Mobile Inspector Real-Time Tracking
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Inspector Status Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[
+                        { county: "Montserrado", inspectors: 8, active: 7, status: "active" },
+                        { county: "Bong", inspectors: 4, active: 3, status: "active" },
+                        { county: "Nimba", inspectors: 5, active: 4, status: "inspection" },
+                        { county: "Grand Bassa", inspectors: 3, active: 3, status: "active" },
+                        { county: "Lofa", inspectors: 3, active: 2, status: "offline" },
+                        { county: "Margibi", inspectors: 2, active: 2, status: "active" }
+                      ].map((county, i) => (
+                        <Card key={i} className={`${
+                          county.status === 'active' ? 'bg-green-50 border-green-200' :
+                          county.status === 'inspection' ? 'bg-blue-50 border-blue-200' :
+                          'bg-red-50 border-red-200'
+                        }`}>
+                          <CardContent className="p-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="font-semibold text-sm">{county.county}</h4>
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${
+                                  county.status === 'active' ? 'border-green-500 text-green-700' :
+                                  county.status === 'inspection' ? 'border-blue-500 text-blue-700' :
+                                  'border-red-500 text-red-700'
+                                }`}
+                              >
+                                {county.status === 'active' ? '🟢 Active' :
+                                 county.status === 'inspection' ? '🔵 On-site' :
+                                 '🔴 Offline'}
+                              </Badge>
+                            </div>
+                            <div className="text-xs text-slate-600">
+                              <p>{county.active}/{county.inspectors} Inspectors Online</p>
+                              <Progress 
+                                value={(county.active / county.inspectors) * 100} 
+                                className="mt-2 h-1"
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    {/* Inspector Activity Feed */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">Recent Inspector Activities</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {[
+                            { time: "10:45 AM", inspector: "J. Smith", action: "Completed land inspection", county: "Montserrado" },
+                            { time: "10:30 AM", inspector: "M. Johnson", action: "Started warehouse inspection", county: "Bong" },
+                            { time: "10:15 AM", inspector: "K. Williams", action: "Filed compliance report", county: "Nimba" },
+                            { time: "09:55 AM", inspector: "D. Brown", action: "Generated QR batch code", county: "Grand Bassa" },
+                            { time: "09:40 AM", inspector: "S. Davis", action: "Approved harvest registration", county: "Lofa" }
+                          ].map((activity, i) => (
+                            <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0">
+                              <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div>
+                                  <p className="text-sm font-medium">{activity.inspector}</p>
+                                  <p className="text-xs text-slate-600">{activity.action}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-slate-500">{activity.time}</p>
+                                <Badge variant="outline" className="text-xs">{activity.county}</Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* County-Wide Reports */}
+              <TabsContent value="county-reports" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5" />
+                      15-County Comprehensive Reports
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                      {[
+                        "Montserrado", "Bong", "Nimba", "Grand Bassa", "Lofa",
+                        "Margibi", "Grand Cape Mount", "Rivercess", "Sinoe", "Maryland",
+                        "Grand Gedeh", "River Gee", "Grand Kru", "Gbarpolu", "Bomi"
+                      ].map((county, i) => (
+                        <Card key={i} className="hover:shadow-md transition-all cursor-pointer">
+                          <CardContent className="p-3">
+                            <div className="text-center">
+                              <h4 className="font-semibold text-sm mb-2">{county}</h4>
+                              <div className="space-y-1 text-xs">
+                                <div className="flex justify-between">
+                                  <span>Farmers:</span>
+                                  <span className="font-medium">{Math.floor(Math.random() * 500) + 50}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Harvests:</span>
+                                  <span className="font-medium">{Math.floor(Math.random() * 100) + 10}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Exports:</span>
+                                  <span className="font-medium">{Math.floor(Math.random() * 50) + 5}</span>
+                                </div>
+                                <Badge 
+                                  variant="outline" 
+                                  className="text-xs w-full mt-2"
+                                  style={{ background: `hsl(${120 + Math.random() * 60}, 50%, 95%)` }}
+                                >
+                                  {(85 + Math.random() * 15).toFixed(1)}% Compliance
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Supply Chain Monitoring */}
+              <TabsContent value="supply-chain" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Truck className="w-5 h-5" />
+                      18-Point Integration Workflow Tracking
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card className="bg-green-50">
+                        <CardContent className="p-4">
+                          <div className="text-center">
+                            <Sprout className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                            <h4 className="font-semibold mb-2">Farm to Harvest</h4>
+                            <div className="space-y-1 text-sm">
+                              <p>Active Batches: <span className="font-medium">247</span></p>
+                              <p>Auto-Generated Codes: <span className="font-medium">89</span></p>
+                              <Progress value={87} className="mt-2" />
+                              <p className="text-xs text-green-600">87% Complete</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-blue-50">
+                        <CardContent className="p-4">
+                          <div className="text-center">
+                            <Building2 className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                            <h4 className="font-semibold mb-2">Warehouse Processing</h4>
+                            <div className="space-y-1 text-sm">
+                              <p>In Storage: <span className="font-medium">156</span></p>
+                              <p>QR Verifications: <span className="font-medium">23</span></p>
+                              <Progress value={73} className="mt-2" />
+                              <p className="text-xs text-blue-600">73% Processed</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-orange-50">
+                        <CardContent className="p-4">
+                          <div className="text-center">
+                            <Truck className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                            <h4 className="font-semibold mb-2">Export Ready</h4>
+                            <div className="space-y-1 text-sm">
+                              <p>Pending Export: <span className="font-medium">45</span></p>
+                              <p>Documents Ready: <span className="font-medium">32</span></p>
+                              <Progress value={94} className="mt-2" />
+                              <p className="text-xs text-orange-600">94% Ready</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Recent Supply Chain Events */}
+                    <Card className="mt-4">
+                      <CardHeader>
+                        <CardTitle className="text-sm">Live Supply Chain Events</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {[
+                            { time: "11:15 AM", event: "Batch #AGT-2025-0847 approved for warehouse delivery", status: "success" },
+                            { time: "11:00 AM", event: "Payment confirmed for Lot #LOT-0234 - $2,450", status: "success" },
+                            { time: "10:45 AM", event: "Export document generated for Batch #AGT-2025-0845", status: "success" },
+                            { time: "10:30 AM", event: "Quality inspection completed for Warehouse #WH-MB-001", status: "warning" },
+                            { time: "10:15 AM", event: "Port inspection scheduled for tomorrow", status: "info" }
+                          ].map((event, i) => (
+                            <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-b-0">
+                              <div className={`w-2 h-2 rounded-full ${
+                                event.status === 'success' ? 'bg-green-500' :
+                                event.status === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
+                              }`}></div>
+                              <div className="flex-1">
+                                <p className="text-sm">{event.event}</p>
+                                <p className="text-xs text-slate-500">{event.time}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Portal Activity Monitoring */}
+              <TabsContent value="portal-activity" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Monitor className="w-5 h-5" />
+                      Multi-Portal Activity Dashboard
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {[
+                        { portal: "Farmers", active: 1247, sessions: 892, color: "green" },
+                        { portal: "Buyers", active: 89, sessions: 134, color: "blue" },
+                        { portal: "Exporters", active: 23, sessions: 45, color: "orange" },
+                        { portal: "Inspectors", active: 47, sessions: 67, color: "purple" }
+                      ].map((portal, i) => (
+                        <Card key={i} className={`bg-${portal.color}-50 border-${portal.color}-200`}>
+                          <CardContent className="p-4">
+                            <div className="text-center">
+                              <h4 className="font-semibold mb-2">{portal.portal}</h4>
+                              <div className="space-y-2">
+                                <div>
+                                  <p className="text-lg font-bold">{portal.active}</p>
+                                  <p className="text-xs text-slate-600">Active Users</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">{portal.sessions}</p>
+                                  <p className="text-xs text-slate-600">Active Sessions</p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Compliance & Audit */}
+              <TabsContent value="compliance" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5" />
+                      Compliance & Audit Monitoring
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">EUDR Compliance Status</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">LACRA Standards</span>
+                            <div className="flex items-center gap-2">
+                              <Progress value={96.8} className="w-20 h-2" />
+                              <span className="text-sm font-medium">96.8%</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Land Mapping Compliance</span>
+                            <div className="flex items-center gap-2">
+                              <Progress value={89.2} className="w-20 h-2" />
+                              <span className="text-sm font-medium">89.2%</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Quality Inspections</span>
+                            <div className="flex items-center gap-2">
+                              <Progress value={94.1} className="w-20 h-2" />
+                              <span className="text-sm font-medium">94.1%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">Audit Trail Summary</h4>
+                        <div className="space-y-2">
+                          {[
+                            { action: "Payment confirmations verified", count: 23 },
+                            { action: "Land mapping approvals", count: 15 },
+                            { action: "Export documents generated", count: 8 },
+                            { action: "Quality inspections completed", count: 31 }
+                          ].map((audit, i) => (
+                            <div key={i} className="flex justify-between items-center py-2 border-b border-slate-100">
+                              <span className="text-sm">{audit.action}</span>
+                              <Badge variant="outline">{audit.count}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Emergency Response */}
+              <TabsContent value="emergency" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                      Emergency Response & Alert System
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-3 text-red-700">Critical Alerts (3)</h4>
+                        <div className="space-y-2">
+                          {[
+                            { 
+                              alert: "Warehouse storage limit exceeded in Bong County", 
+                              time: "5 min ago", 
+                              severity: "high",
+                              inspector: "Contact: M. Johnson (+231-555-0123)"
+                            },
+                            { 
+                              alert: "Network connectivity issues in Lofa County", 
+                              time: "12 min ago", 
+                              severity: "medium",
+                              inspector: "Contact: K. Williams (+231-555-0145)"
+                            },
+                            { 
+                              alert: "Delayed inspection in Grand Bassa", 
+                              time: "18 min ago", 
+                              severity: "low",
+                              inspector: "Contact: D. Brown (+231-555-0167)"
+                            }
+                          ].map((alert, i) => (
+                            <Card key={i} className={`${
+                              alert.severity === 'high' ? 'bg-red-50 border-red-200' :
+                              alert.severity === 'medium' ? 'bg-orange-50 border-orange-200' :
+                              'bg-yellow-50 border-yellow-200'
+                            }`}>
+                              <CardContent className="p-3">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium">{alert.alert}</p>
+                                    <p className="text-xs text-slate-600 mt-1">{alert.inspector}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge variant="outline" className={`text-xs ${
+                                      alert.severity === 'high' ? 'border-red-500 text-red-700' :
+                                      alert.severity === 'medium' ? 'border-orange-500 text-orange-700' :
+                                      'border-yellow-500 text-yellow-700'
+                                    }`}>
+                                      {alert.severity.toUpperCase()}
+                                    </Badge>
+                                    <p className="text-xs text-slate-500 mt-1">{alert.time}</p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">Emergency Contacts</h4>
+                        <div className="space-y-2">
+                          {[
+                            { role: "Chief Land Inspector", name: "James Smith", phone: "+231-555-0100" },
+                            { role: "Lead Warehouse Inspector", name: "Maria Johnson", phone: "+231-555-0101" },
+                            { role: "Port Authority Chief", name: "Kevin Williams", phone: "+231-555-0102" },
+                            { role: "Emergency Coordinator", name: "Sarah Davis", phone: "+231-555-0103" }
+                          ].map((contact, i) => (
+                            <Card key={i} className="hover:shadow-md cursor-pointer">
+                              <CardContent className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm font-medium">{contact.name}</p>
+                                    <p className="text-xs text-slate-600">{contact.role}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button size="sm" variant="outline">
+                                      <Headphones className="w-3 h-3 mr-1" />
+                                      Call
+                                    </Button>
+                                    <Badge variant="outline" className="text-xs">Online</Badge>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Analytics Dashboard */}
+              <TabsContent value="analytics" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5" />
+                      Advanced Analytics & Performance Reports
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">Performance Metrics</h4>
+                        <div className="space-y-3">
+                          {[
+                            { metric: "System Uptime", value: "99.8%", trend: "up" },
+                            { metric: "Average Response Time", value: "1.2s", trend: "down" },
+                            { metric: "Inspector Efficiency", value: "89.2%", trend: "up" },
+                            { metric: "Error Rate", value: "0.3%", trend: "down" }
+                          ].map((metric, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                              <span className="text-sm">{metric.metric}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{metric.value}</span>
+                                {metric.trend === 'up' ? (
+                                  <TrendingUp className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <TrendingDown className="w-4 h-4 text-red-600" />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">Export Statistics</h4>
+                        <div className="space-y-3">
+                          <div className="text-center p-4 bg-green-50 rounded-lg">
+                            <p className="text-2xl font-bold text-green-800">$2.4M</p>
+                            <p className="text-sm text-green-600">Total Export Value</p>
+                          </div>
+                          <div className="text-center p-4 bg-blue-50 rounded-lg">
+                            <p className="text-2xl font-bold text-blue-800">156</p>
+                            <p className="text-sm text-blue-600">Completed Exports</p>
+                          </div>
+                          <div className="text-center p-4 bg-orange-50 rounded-lg">
+                            <p className="text-2xl font-bold text-orange-800">847</p>
+                            <p className="text-sm text-orange-600">Active Farmers</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">System Health</h4>
+                        <div className="space-y-3">
+                          {[
+                            { service: "Database", status: "healthy", uptime: "99.9%" },
+                            { service: "Mobile APIs", status: "healthy", uptime: "99.7%" },
+                            { service: "Payment Gateway", status: "warning", uptime: "98.2%" },
+                            { service: "Notification Service", status: "healthy", uptime: "99.5%" }
+                          ].map((service, i) => (
+                            <div key={i} className="flex items-center justify-between p-2 border border-slate-200 rounded">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${
+                                  service.status === 'healthy' ? 'bg-green-500' :
+                                  service.status === 'warning' ? 'bg-orange-500' : 'bg-red-500'
+                                }`}></div>
+                                <span className="text-sm">{service.service}</span>
+                              </div>
+                              <span className="text-xs text-slate-600">{service.uptime}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center pt-4 border-t">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-slate-600">Live Monitoring Active</span>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Auto-refresh: 30s
+              </Badge>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Button className="w-4 h-4 mr-1" />
+                Export Report
+              </Button>
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-1" />
+                Configure Alerts
+              </Button>
+              <Button onClick={() => setShowMonitoring(false)} variant="outline" size="sm">
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

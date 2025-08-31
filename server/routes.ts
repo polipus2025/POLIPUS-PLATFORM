@@ -17670,17 +17670,19 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       console.log(`📦 Generating Buyer-Exporter QR code for dispatch request ${dispatchRequestId}`);
 
       // Get dispatch request details
-      const [dispatchRequest] = await db.execute(sql`
+      const dispatchResult = await db.execute(sql`
         SELECT * FROM warehouse_dispatch_requests 
-        WHERE request_id = ${dispatchRequestId} AND status = 'pending'
+        WHERE request_id = ${dispatchRequestId}
       `);
 
-      if (!dispatchRequest) {
+      if (dispatchResult.rows.length === 0) {
         return res.status(404).json({
           success: false,
           message: "Dispatch request not found or already processed"
         });
       }
+
+      const dispatchRequest = dispatchResult.rows[0];
 
       // Generate QR batch code using same format as Farmer-Buyer
       const batchCode = `BE-DISPATCH-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;

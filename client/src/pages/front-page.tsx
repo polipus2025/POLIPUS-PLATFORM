@@ -143,6 +143,10 @@ export default function FrontPage() {
                 }}
               />
             </div>
+            {/* Republic of Liberia text positioned on the right upper side */}
+            <div className="absolute top-2 right-4 sm:top-4 sm:right-6">
+              <p className="text-xs sm:text-sm font-bold text-slate-700 tracking-wider">REPUBLIC OF LIBERIA</p>
+            </div>
             {/* Liberian Flag positioned in the middle of the box on the upper side */}
             <div className="absolute -top-6 sm:-top-4 left-1/2 transform -translate-x-1/2 w-16 h-11 sm:w-24 sm:h-16 rounded-md overflow-hidden shadow-md border border-gray-200">
               <svg viewBox="0 0 190 100" className="w-full h-full">

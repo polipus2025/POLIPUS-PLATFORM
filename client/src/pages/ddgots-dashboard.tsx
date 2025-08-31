@@ -105,7 +105,7 @@ export default function DDGOTSDashboard() {
   });
 
   // Port inspection booking data
-  const { data: pendingAssignments, isLoading: assignmentsLoading } = useQuery({
+  const { data: pendingAssignments, isLoading: pendingAssignmentsLoading } = useQuery({
     queryKey: ['/api/ddgots/pending-inspector-assignments'],
     queryFn: () => apiRequest('/api/ddgots/pending-inspector-assignments'),
   });
@@ -544,7 +544,7 @@ export default function DDGOTSDashboard() {
               </Badge>
             </div>
 
-            {assignmentsLoading ? (
+            {pendingAssignmentsLoading ? (
               <div className="flex items-center justify-center h-32">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>

@@ -18073,17 +18073,17 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       // Generate dispatch request ID
       const requestId = `WDR-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
 
-      // Create buyer dispatch request
+      // Create buyer dispatch request  
       await db.execute(sql`
         INSERT INTO warehouse_dispatch_requests (
           request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
-          commodity_type, quantity, unit, total_value, county, farm_location, dispatch_date,
-          exporter_warehouse_address, requested_at
+          commodity_type, quantity, unit, total_value, county, farm_location, dispatch_date, 
+          status, requested_at
         ) VALUES (
           ${requestId}, ${custodyId}, ${verificationCode}, ${buyerId}, 
           ${buyerName || 'Buyer'}, ${buyerCompany || 'Company'}, ${commodityType}, 
           ${quantity}, ${unit || 'MT'}, ${0}, ${custody.county || 'Montserrado'}, 
-          ${custody.farmLocations?.[0] || 'Location not specified'}, ${dispatchDate}, ${exporterWarehouseAddress}, NOW()
+          ${exporterWarehouseAddress}, ${dispatchDate}, 'pending', NOW()
         )
       `);
 

@@ -3793,7 +3793,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmer001: { password: 'password123', firstName: 'John', lastName: 'Farmer', county: 'Montserrado County' },
         farmer002: { password: 'password123', firstName: 'Mary', lastName: 'Crops', county: 'Bong County' },
         test_farmer: { password: 'password123', firstName: 'Test', lastName: 'Farmer', county: 'Grand Bassa County' },
-        FRM434923: { password: 'Test2025!', firstName: 'Paolo', lastName: 'Jr', county: 'Margibi County' }
+        FRM434923: { password: 'Test2025!', firstName: 'Paolo', lastName: 'Jr', county: 'Margibi County' },
+        'FARMER-1756314707545-846': { password: 'farmer123', firstName: 'Claudio', lastName: 'Big', county: 'Nimba County' }
       };
 
       if (testFarmerCredentials[farmerId] && testFarmerCredentials[farmerId].password === password) {

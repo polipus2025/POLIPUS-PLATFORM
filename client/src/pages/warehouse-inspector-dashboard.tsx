@@ -33,6 +33,7 @@ import {
   QrCode,
   Layers,
   DollarSign,
+  RefreshCw,
   Upload,
   CreditCard,
   XCircle,
@@ -3226,28 +3227,51 @@ export default function WarehouseInspectorDashboard() {
                             <div className="bg-blue-50 p-2 rounded text-xs text-blue-800">
                               Custody: {request.transactionId}
                             </div>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="w-full border-green-600 text-green-600 hover:bg-green-50"
-                              onClick={() => {
-                                const qrBatch = qrBatches?.find((batch: any) => batch.batchCode === request.qrBatchCode);
-                                if (qrBatch) {
-                                  setSelectedQrBatch(qrBatch);
-                                  setShowQrModal(true);
-                                } else {
+                            <div className="space-y-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                                onClick={() => {
+                                  // Force refresh QR batches cache first
+                                  queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/qr-batches'] });
+                                  
+                                  setTimeout(() => {
+                                    const qrBatch = qrBatches?.find((batch: any) => batch.batchCode === request.qrBatchCode);
+                                    if (qrBatch) {
+                                      setSelectedQrBatch(qrBatch);
+                                      setShowQrModal(true);
+                                    } else {
+                                      toast({
+                                        title: "QR Code Not Found",
+                                        description: "QR code data not available",
+                                        variant: "destructive"
+                                      });
+                                    }
+                                  }, 500);
+                                }}
+                                data-testid={`view-qr-${request.requestId}`}
+                              >
+                                <QrCode className="h-4 w-4 mr-1" />
+                                View & Print QR Code
+                              </Button>
+                              
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="w-full text-xs text-blue-600 hover:bg-blue-50"
+                                onClick={() => {
+                                  queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/qr-batches'] });
                                   toast({
-                                    title: "QR Code Not Found",
-                                    description: "QR code data not available",
-                                    variant: "destructive"
+                                    title: "Cache Refreshed",
+                                    description: "QR code data refreshed successfully"
                                   });
-                                }
-                              }}
-                              data-testid={`view-qr-${request.requestId}`}
-                            >
-                              <QrCode className="h-4 w-4 mr-1" />
-                              View & Print QR Code
-                            </Button>
+                                }}
+                              >
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Refresh QR Data
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>

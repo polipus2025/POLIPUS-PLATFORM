@@ -63,12 +63,12 @@ export default function Landing() {
 
       {/* Mobile-Responsive Header */}
       <header className="bg-white shadow-xl border-slate-200 sticky top-0 z-10 mb-0">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 sm:gap-8">
-              <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-4">
                 {/* Liberian Flag */}
-                <div className="w-12 h-8 sm:w-16 sm:h-11 rounded-md overflow-hidden shadow-md border border-gray-200">
+                <div className="w-16 h-11 rounded-lg overflow-hidden shadow-lg border border-slate-300">
                   <svg viewBox="0 0 190 100" className="w-full h-full">
                     {/* Red and white stripes */}
                     <rect width="190" height="100" fill="#BF0A30"/>
@@ -87,14 +87,14 @@ export default function Landing() {
                   </svg>
                 </div>
                 
-                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg overflow-hidden">
+                <div className="w-14 h-14 rounded-lg overflow-hidden shadow-md">
                   <img 
                     src={lacraLogo} 
                     alt="LACRA Official Logo" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg overflow-hidden">
+                <div className="w-12 h-12 rounded-lg overflow-hidden shadow-md">
                   <img 
                     src={agriTraceLogo} 
                     alt="AgriTrace360 Logo" 
@@ -102,19 +102,19 @@ export default function Landing() {
                   />
                 </div>
                 <div>
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">AgriTrace360™</h1>
-                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Liberia Agriculture Commodity Regulatory Authority</p>
-                  <p className="text-xs text-gray-600 sm:hidden">LACRA</p>
+                  <h1 className="text-xl font-bold text-slate-900">AgriTrace360™</h1>
+                  <p className="text-sm text-slate-600 hidden sm:block">Liberia Agriculture Commodity Regulatory Authority</p>
+                  <p className="text-xs text-slate-600 sm:hidden">LACRA</p>
                 </div>
               </div>
               
               {/* Time, Date, and Weather Widget */}
-              <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-blue-50 to-green-50 px-4 py-2 rounded-lg border border-blue-100">
+              <div className="hidden lg:flex items-center space-x-6 bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-2 rounded-lg border border-slate-200 shadow-sm">
                 {/* Date and Time */}
                 <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <Calendar className="h-4 w-4 text-slate-600" />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-slate-900">
                       {currentTime.toLocaleDateString('en-US', { 
                         weekday: 'short',
                         month: 'short', 
@@ -126,9 +126,9 @@ export default function Landing() {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-green-600" />
+                  <Clock className="h-4 w-4 text-slate-600" />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-slate-900">
                       {currentTime.toLocaleTimeString('en-US', { 
                         hour: '2-digit',
                         minute: '2-digit',
@@ -140,33 +140,33 @@ export default function Landing() {
                 </div>
                 
                 {/* Weather */}
-                <div className="flex items-center space-x-2 border-l border-blue-200 pl-4">
-                  <WeatherIcon className="h-4 w-4 text-orange-600" />
+                <div className="flex items-center space-x-2 border-l border-slate-200 pl-4">
+                  <WeatherIcon className="h-4 w-4 text-slate-600" />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">{weather.temperature}</div>
-                    <div className="text-xs text-gray-600">{weather.location}</div>
+                    <div className="font-medium text-slate-900">{weather.temperature}</div>
+                    <div className="text-xs text-slate-600">{weather.location}</div>
                   </div>
                 </div>
               </div>
               
               {/* Mobile compact view */}
-              <div className="lg:hidden flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-green-50 px-3 py-1 rounded-lg border border-blue-100">
-                <Clock className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-gray-900">
+              <div className="lg:hidden flex items-center space-x-3 bg-gradient-to-r from-slate-50 to-blue-50 px-3 py-1 rounded-lg border border-slate-200 shadow-sm">
+                <Clock className="h-4 w-4 text-slate-600" />
+                <span className="text-sm font-medium text-slate-900">
                   {currentTime.toLocaleTimeString('en-US', { 
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true
                   })}
                 </span>
-                <WeatherIcon className="h-4 w-4 text-orange-600" />
-                <span className="text-sm font-medium text-gray-900">{weather.temperature}</span>
+                <WeatherIcon className="h-4 w-4 text-slate-600" />
+                <span className="text-sm font-medium text-slate-900">{weather.temperature}</span>
               </div>
             </div>
             
             <div className="text-right">
-              <p className="text-sm text-gray-600">Republic of Liberia</p>
-              <p className="text-xs text-gray-500">Ministry of Agriculture</p>
+              <p className="text-sm text-slate-600">Republic of Liberia</p>
+              <p className="text-xs text-slate-500">Ministry of Agriculture</p>
             </div>
           </div>
         </div>

@@ -17771,13 +17771,26 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       }
 
       const pendingRequests = await db.execute(sql`
-        SELECT 
-          request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
-          commodity_type, quantity, unit, total_value, county, farm_location,
-          dispatch_date, requested_at, created_at
-        FROM warehouse_dispatch_requests 
-        WHERE status = 'pending'
-        ORDER BY requested_at DESC
+        SELECT DISTINCT
+          wdr.request_id as "requestId", 
+          wdr.transaction_id as "transactionId", 
+          wdr.verification_code as "verificationCode", 
+          wdr.buyer_id as "buyerId", 
+          wdr.buyer_name as "buyerName", 
+          wdr.buyer_company as "buyerCompany",
+          wdr.commodity_type as "commodityType", 
+          wdr.quantity, 
+          wdr.unit, 
+          COALESCE(wdr.total_value, beo.total_value, fpo.total_value, 0) as "totalValue",
+          wdr.county, 
+          wdr.farm_location as "farmLocation",
+          wdr.dispatch_date as "dispatchDate", 
+          wdr.requested_at as "requestedAt"
+        FROM warehouse_dispatch_requests wdr
+        LEFT JOIN buyer_exporter_offers beo ON beo.custody_id = wdr.transaction_id
+        LEFT JOIN farmer_product_offers fpo ON fpo.custody_id = wdr.transaction_id
+        WHERE wdr.status = 'pending'
+        ORDER BY wdr.requested_at DESC
       `);
 
       res.json({
@@ -18084,6 +18097,19 @@ GENERATED: ${new Date().toLocaleDateString()}`;
 
       // Generate dispatch request ID
       const requestId = `WDR-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
+
+      // Check for duplicate requests
+      const existingRequest = await db.execute(sql`
+        SELECT request_id FROM warehouse_dispatch_requests 
+        WHERE transaction_id = ${custodyId} AND buyer_id = ${buyerId} AND status = 'pending'
+      `);
+      
+      if (existingRequest.rows?.length > 0 || existingRequest.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Dispatch request already exists for this product"
+        });
+      }
 
       // Create buyer dispatch request with proper data
       await db.execute(sql`

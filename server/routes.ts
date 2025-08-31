@@ -4440,6 +4440,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Test credentials for land inspectors
+      const testLandInspectorCredentials: Record<string, { password: string; firstName: string; lastName: string; county: string; inspectorId: string }> = {
+        'vikas.gupta': { password: '82eb75fd71b464c7', firstName: 'Vikas', lastName: 'Gupta', county: 'Nimba County', inspectorId: 'INS-20250831-607' },
+        'rahul.gupta': { password: 'inspector123', firstName: 'Rahul', lastName: 'Gupta', county: 'Nimba County', inspectorId: 'INS-20250831-139' },
+        'ram.gupta': { password: 'inspector123', firstName: 'Ram', lastName: 'Gupta', county: 'Margibi County', inspectorId: 'INS-20250831-221' }
+      };
+
+      if (testLandInspectorCredentials[username] && testLandInspectorCredentials[username].password === password) {
+        const token = jwt.sign(
+          { 
+            inspectorId: testLandInspectorCredentials[username].inspectorId,
+            username: username,
+            role: 'land_inspector',
+            userType: 'land_inspector',
+            inspectorType: 'land',
+            county: testLandInspectorCredentials[username].county
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            inspectorId: testLandInspectorCredentials[username].inspectorId,
+            username: username,
+            firstName: testLandInspectorCredentials[username].firstName,
+            lastName: testLandInspectorCredentials[username].lastName,
+            role: 'land_inspector',
+            userType: 'land_inspector',
+            inspectorType: 'land',
+            county: testLandInspectorCredentials[username].county
+          }
+        });
+      }
+
       // Check if inspector credentials exist and is of correct type
       const credentials = await storage.getInspectorCredentialsByUsername(username);
       if (!credentials || credentials.inspectorType !== 'land') {

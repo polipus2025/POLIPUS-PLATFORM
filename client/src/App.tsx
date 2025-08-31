@@ -42,6 +42,7 @@ const BuyerDashboard = lazy(() => import("@/pages/agricultural-buyer-dashboard")
 const WarehouseInspectorDashboard = lazy(() => import("@/pages/warehouse-inspector-dashboard"));
 const PortInspectorDashboard = lazy(() => import("@/pages/port-inspector-dashboard"));
 const ExporterDashboard = lazy(() => import("@/pages/exporter-dashboard"));
+const ExporterInspections = lazy(() => import("@/pages/exporter-inspections"));
 const UnifiedLandInspectorDashboard = lazy(() => import("@/pages/unified-land-inspector-dashboard"));
 const RegulatoryPortalClassic = lazy(() => import("@/pages/regulatory-portal-classic"));
 const OfficeAdministrationPortal = lazy(() => import("@/pages/office-administration-portal"));
@@ -197,6 +198,7 @@ function App() {
             <Route path="/world-market-pricing" component={createLazyRoute(WorldMarketPricing)} />
             <Route path="/sellers-hub" component={createLazyRoute(SellersHub)} />
             <Route path="/exporter/orders" component={createLazyRoute(lazy(() => import('./pages/exporter/orders')))} />
+            <Route path="/exporter/inspections" component={createLazyRoute(ExporterInspections)} />
             <Route path="/exporter/marketplace" component={createLazyRoute(lazy(() => import('./pages/exporter/marketplace')))} />
             <Route path="/exporter/certificates" component={createLazyRoute(lazy(() => import('./pages/exporter/certificates')))} />
             <Route path="/exporter/messages" component={createLazyRoute(lazy(() => import('./pages/exporter/messages')))} />

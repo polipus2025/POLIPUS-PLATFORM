@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Ship, 
   FileText, 
@@ -91,7 +90,6 @@ StatusBadge.displayName = 'StatusBadge';
 
 // ⚡ MAIN EXPORTER DASHBOARD COMPONENT - OPTIMIZED FOR SPEED
 const ExporterDashboard = memo(() => {
-  const [activeTab, setActiveTab] = useState('overview');
   
   // ⚡ ACTIVATE PREFETCHING STRATEGY
   usePagePrefetch();
@@ -149,11 +147,6 @@ const ExporterDashboard = memo(() => {
     { title: 'Compliance Score', value: '98%', change: '+2%', icon: Shield, color: 'emerald' }
   ], []);
 
-  // ⚡ MEMOIZED TAB HANDLER
-  const handleTabChange = useCallback((tab: string) => {
-    console.log('🔄 Tab changed to:', tab);
-    setActiveTab(tab);
-  }, []);
 
   // 🛡️ TOAST FOR USER FEEDBACK
   const { toast } = useToast();
@@ -208,30 +201,6 @@ const ExporterDashboard = memo(() => {
 
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          
-          {/* TAB NAVIGATION */}
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 bg-white shadow-lg">
-              <TabsTrigger 
-                value="overview" 
-                className="text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                data-testid="overview-tab"
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger 
-                value="inspections" 
-                className="text-sm font-medium data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                data-testid="inspections-tab"
-              >
-                <ClipboardCheck className="w-4 h-4 mr-2" />
-                Inspections & Payments
-              </TabsTrigger>
-            </TabsList>
-
-            {/* OVERVIEW TAB CONTENT */}
-            <TabsContent value="overview" className="space-y-6">
           {/* ⚡ PERFORMANCE METRICS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {metricsData.map((metric, index) => (
@@ -486,15 +455,7 @@ const ExporterDashboard = memo(() => {
               </div>
             </div>
           </div>
-            </TabsContent>
-
-            {/* INSPECTIONS & PAYMENTS TAB CONTENT */}
-            <TabsContent value="inspections" className="space-y-6">
-              <InspectionsAndPayments exporterId={(user as any)?.exporterId || (user as any)?.id} />
-            </TabsContent>
-
-          </Tabs>
-        </div>
+          </div>
         </div>
       </CleanExporterLayout>
     </ErrorBoundary>

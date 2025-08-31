@@ -1623,22 +1623,27 @@ export default function AgriculturalBuyerDashboard() {
                                       <CheckCircle className="w-4 h-4 mr-2" />
                                       Request Authorization
                                     </Button>
-                                  ) : lot.authorizationStatus === 'authorized' && lot.storageFees?.paymentStatus === 'paid' ? (
+                                  ) : (
                                     <div className="space-y-2">
+                                      {/* Always show dispatch button for authorized & paid products */}
                                       <div className="text-xs text-center space-y-1">
                                         <p className="font-mono text-green-700 bg-green-50 px-2 py-1 rounded border">
                                           🔗 Custody: {lot.custodyId}
                                         </p>
                                         <p className="font-mono text-blue-700 bg-blue-50 px-2 py-1 rounded border">
+                                          🎯 Code: {getOfferStatus(lot)?.verificationCode || lot.verificationCodes?.[0] || 'Pending'}
+                                        </p>
+                                        <p className="font-mono text-emerald-700 bg-emerald-50 px-2 py-1 rounded border">
                                           ✅ Ready for Pickup
                                         </p>
                                       </div>
                                       
-                                      {/* Dispatch Scheduling for Authorized & Paid Products */}
+                                      {/* Dispatch Scheduling Button */}
                                       <Button 
                                         size="sm"
                                         className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" 
                                         onClick={() => {
+                                          console.log('🚛 Dispatch button clicked for:', lot.custodyId);
                                           setSelectedProductForDispatch(lot);
                                           setShowDispatchDialog(true);
                                         }}
@@ -1647,39 +1652,46 @@ export default function AgriculturalBuyerDashboard() {
                                         <Truck className="h-4 w-4 mr-2" />
                                         Schedule Warehouse Pickup
                                       </Button>
+
+                                      {/* Offer Management Buttons */}
+                                      {getOfferStatus(lot)?.status === 'accepted' ? (
+                                        <Button 
+                                          disabled
+                                          className="w-full bg-green-600 hover:bg-green-700 cursor-default"
+                                          size="sm"
+                                        >
+                                          <CheckCircle className="w-4 h-4 mr-2" />
+                                          ✅ Accepted by {getOfferStatus(lot)?.acceptedBy}
+                                        </Button>
+                                      ) : getOfferStatus(lot)?.status === 'rejected' ? (
+                                        <Button 
+                                          onClick={() => openSellOfferDialog(lot)}
+                                          className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                          size="sm"
+                                        >
+                                          <Send className="w-4 h-4 mr-2" />
+                                          Create New Offer
+                                        </Button>
+                                      ) : getOfferStatus(lot) ? (
+                                        <Button 
+                                          disabled
+                                          className="w-full bg-orange-500 hover:bg-orange-600 cursor-not-allowed"
+                                          size="sm"
+                                        >
+                                          <Clock className="w-4 h-4 mr-2" />
+                                          Offer Created - Waiting Acceptance
+                                        </Button>
+                                      ) : (
+                                        <Button 
+                                          onClick={() => openSellOfferDialog(lot)}
+                                          className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                          size="sm"
+                                        >
+                                          <Send className="w-4 h-4 mr-2" />
+                                          Sell This Lot
+                                        </Button>
+                                      )}
                                     </div>
-                                  ) : getOfferStatus(lot)?.status === 'rejected' ? (
-                                    <div className="space-y-2">
-                                      <Button 
-                                        onClick={() => openSellOfferDialog(lot)}
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700"
-                                        size="sm"
-                                      >
-                                        <Send className="w-4 h-4 mr-2" />
-                                        Create New Offer
-                                      </Button>
-                                      <p className="text-xs text-red-600 text-center">
-                                        Previous offer was rejected
-                                      </p>
-                                    </div>
-                                  ) : getOfferStatus(lot) ? (
-                                    <Button 
-                                      disabled
-                                      className="w-full bg-orange-500 hover:bg-orange-600 cursor-not-allowed"
-                                      size="sm"
-                                    >
-                                      <Clock className="w-4 h-4 mr-2" />
-                                      Offer Created - Waiting Acceptance
-                                    </Button>
-                                  ) : (
-                                    <Button 
-                                      onClick={() => openSellOfferDialog(lot)}
-                                      className="w-full bg-emerald-600 hover:bg-emerald-700"
-                                      size="sm"
-                                    >
-                                      <Send className="w-4 h-4 mr-2" />
-                                      Sell This Lot
-                                    </Button>
                                   )}
 
                                   {/* QR Code Info */}

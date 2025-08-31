@@ -864,67 +864,53 @@ export default function SellersHub() {
         </Link>
       </div>
 
-      {/* Header */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 mb-8">
-        <div className="p-6 space-y-4">
-          {/* TOP: TIME, DATE, AND WEATHER */}
-          <div className="flex justify-center">
-            <div className="flex items-center space-x-6 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-3 rounded-lg border border-slate-200 shadow-lg">
-              {/* Date and Time */}
-              <div className="flex items-center space-x-3">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                <div className="text-sm">
-                  <div className="font-semibold text-slate-900">
-                    {currentTime.toLocaleDateString('en-US', { 
-                      weekday: 'short',
-                      month: 'short', 
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-green-600" />
-                <div className="text-sm">
-                  <div className="font-semibold text-slate-900">
-                    {currentTime.toLocaleTimeString('en-US', { 
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true
-                    })}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Weather */}
-              <div className="flex items-center space-x-3 border-l border-blue-200 pl-4">
-                <WeatherIcon className="h-5 w-5 text-orange-600" />
-                <div className="text-sm">
-                  <div className="font-semibold text-slate-900">{weather.temperature}</div>
-                  <div className="text-xs text-slate-600">{weather.location}</div>
-                </div>
+      {/* TIME, DATE, AND WEATHER - CENTRALIZED IN FREE AREA */}
+      <div className="flex justify-center mb-6">
+        <div className="flex items-center space-x-6 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-3 rounded-lg border border-slate-200 shadow-lg">
+          {/* Date and Time */}
+          <div className="flex items-center space-x-3">
+            <Calendar className="h-5 w-5 text-blue-600" />
+            <div className="text-sm">
+              <div className="font-semibold text-slate-900">
+                {currentTime.toLocaleDateString('en-US', { 
+                  weekday: 'short',
+                  month: 'short', 
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
               </div>
             </div>
           </div>
           
-          {/* BOTTOM: TITLE AND USER INFO */}
-          <div className="flex justify-between items-center">
-            <div className="text-center flex-1">
-              <h1 className="text-4xl font-bold text-slate-900 mb-2">Sellers Hub</h1>
-              <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-900">{user?.companyName || 'Loading...'}</p>
-                <p className="text-xs text-slate-500">Export Hub Portal</p>
+          <div className="flex items-center space-x-3">
+            <Clock className="h-5 w-5 text-green-600" />
+            <div className="text-sm">
+              <div className="font-semibold text-slate-900">
+                {currentTime.toLocaleTimeString('en-US', { 
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: true
+                })}
               </div>
             </div>
           </div>
+          
+          {/* Weather */}
+          <div className="flex items-center space-x-3 border-l border-blue-200 pl-4">
+            <WeatherIcon className="h-5 w-5 text-orange-600" />
+            <div className="text-sm">
+              <div className="font-semibold text-slate-900">{weather.temperature}</div>
+              <div className="text-xs text-slate-600">{weather.location}</div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Header */}
+      <div className="text-center bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-slate-200">
+        <h1 className="text-4xl font-bold text-slate-900 mb-3">Sellers Hub</h1>
+        <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
       </div>
 
       {/* Stats Cards */}

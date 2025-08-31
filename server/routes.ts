@@ -12043,6 +12043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         inspectionAreaCounty: onboardingData.inspectionAreaCounty,
         inspectionAreaDistrict: onboardingData.inspectionAreaDistrict,
         inspectionAreaDescription: onboardingData.inspectionAreaDescription,
+        portFacility: onboardingData.inspectorType === 'Port Inspector' ? 'Port of Monrovia' : null, // Auto-assign port for port inspectors
         specializations: onboardingData.specializations,
         certificationLevel: onboardingData.certificationLevel,
         assignedBy: 'DDGOTS Admin', // Since this is DDGOTS onboarding

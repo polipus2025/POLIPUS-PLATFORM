@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -269,13 +269,12 @@ export default function InspectorDashboard() {
                       <SelectItem value="margibi">Margibi</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button 
-                    className="bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() => window.location.href = '/landmap360/inspections'}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Schedule Inspection
-                  </Button>
+                  <Link href="/unified-land-inspector-dashboard">
+                    <Button className="bg-emerald-600 hover:bg-emerald-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Schedule Inspection
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -355,12 +354,11 @@ export default function InspectorDashboard() {
                       </div>
                       <h3 className="font-semibold text-slate-900 mb-2">Register New Farmer</h3>
                       <p className="text-sm text-slate-600 mb-4">Access full farmer registration system with GPS integration</p>
-                      <Button 
-                        className="w-full bg-purple-600 hover:bg-purple-700"
-                        onClick={() => window.location.href = '/farmers'}
-                      >
-                        Open Farmer Registration
-                      </Button>
+                      <Link href="/onboard-farmer">
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                          Open Farmer Registration
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
 
@@ -371,12 +369,11 @@ export default function InspectorDashboard() {
                       </div>
                       <h3 className="font-semibold text-slate-900 mb-2">GPS Land Mapping</h3>
                       <p className="text-sm text-slate-600 mb-4">Advanced GPS mapping with satellite imagery and boundary detection</p>
-                      <Button 
-                        className="w-full bg-emerald-600 hover:bg-emerald-700"
-                        onClick={() => window.location.href = '/landmap360/land-mapping-manager'}
-                      >
-                        Start GPS Mapping
-                      </Button>
+                      <Link href="/create-land-plot">
+                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                          Start GPS Mapping
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
 
@@ -387,12 +384,11 @@ export default function InspectorDashboard() {
                       </div>
                       <h3 className="font-semibold text-slate-900 mb-2">Farm Inspections</h3>
                       <p className="text-sm text-slate-600 mb-4">Manage livestock and agricultural inspections</p>
-                      <Button 
-                        className="w-full bg-blue-600 hover:bg-blue-700"
-                        onClick={() => window.location.href = '/livetrace/farm-registrations'}
-                      >
-                        View Farm Registry
-                      </Button>
+                      <Link href="/farmers-list">
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                          View Farm Registry
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
                 </div>
@@ -463,32 +459,39 @@ export default function InspectorDashboard() {
                             </div>
                             <div className="flex gap-2 ml-4">
                               {farmer.status === 'pending_gps' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                                  onClick={() => window.location.href = '/landmap360/land-mapping-manager'}
-                                >
-                                  <Map className="h-3 w-3 mr-1" />
-                                  GPS Map
-                                </Button>
+                                <Link href="/create-land-plot">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                                  >
+                                    <Map className="h-3 w-3 mr-1" />
+                                    GPS Map
+                                  </Button>
+                                </Link>
                               )}
                               {farmer.status === 'pending_verification' && (
-                                <Button size="sm" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  Verify
-                                </Button>
+                                <Link href="/unified-land-inspector-dashboard">
+                                  <Button size="sm" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+                                    <Eye className="h-3 w-3 mr-1" />
+                                    Verify
+                                  </Button>
+                                </Link>
                               )}
                               {farmer.status === 'gps_mapped' && (
-                                <Button size="sm" variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Complete
-                                </Button>
+                                <Link href="/unified-land-inspector-dashboard">
+                                  <Button size="sm" variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Complete
+                                  </Button>
+                                </Link>
                               )}
-                              <Button size="sm" variant="outline">
-                                <FileText className="h-3 w-3 mr-1" />
-                                View Details
-                              </Button>
+                              <Link href="/farmers-list">
+                                <Button size="sm" variant="outline">
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  View Details
+                                </Button>
+                              </Link>
                             </div>
                           </div>
                         </div>

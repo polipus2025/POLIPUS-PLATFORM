@@ -31,7 +31,7 @@ import {
   emissionMeasurements,
   carbonOffset,
   environmentalAlerts
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { eq, desc, and, or, like, count, sql } from "drizzle-orm";
 import { z } from "zod";
 

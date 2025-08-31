@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { db } from "./db";
-import { eudrCompliancePacks, eudrComplianceDocuments, commodities } from "@shared/schema";
+import { eudrCompliancePacks, eudrComplianceDocuments, commodities } from "../shared/schema.js";
 import { eq, desc, and } from "drizzle-orm";
 import { z } from "zod";
 import PDFDocument from "pdfkit";

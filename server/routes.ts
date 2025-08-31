@@ -148,7 +148,7 @@ import {
   type StorageFees,
   type AuthorizationRequest,
   type WarehouseDispatchRequest
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { z } from "zod";
 import path from "path";
 import { superBackend } from './super-backend';

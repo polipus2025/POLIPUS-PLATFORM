@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { db } from "./db";
 import { eq, and, isNotNull, sql } from "drizzle-orm";
-import { buyerVerificationCodes, buyers } from "@shared/schema";
+import { buyerVerificationCodes, buyers } from "../shared/schema.js";
 
 // 🔒 PERMANENT COUNTY-FILTERED PAYMENT CONFIRMATION FIX (LOCKED FOR ALL LIBERIAN COUNTIES)
 // This bypasses main routes.ts Drizzle errors and ensures stable payment workflow with county isolation

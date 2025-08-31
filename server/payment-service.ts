@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { paymentServices, paymentTransactions, revenueSplits } from "@shared/payment-schema";
+import { paymentServices, paymentTransactions, revenueSplits } from "../shared/payment-schema.js";
 import { eq, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 

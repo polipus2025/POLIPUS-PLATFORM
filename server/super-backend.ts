@@ -27,7 +27,7 @@ import {
   type InsertEmergencyControl,
   type InsertPerformanceMetric,
   type InsertBackendLog
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { eq, desc, and, gte, lte, count, avg, max, min } from "drizzle-orm";
 import os from 'os';
 import { performance } from 'perf_hooks';

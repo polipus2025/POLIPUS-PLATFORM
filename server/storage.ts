@@ -228,7 +228,7 @@ import {
   type InsertOfferNegotiation,
   type BuyerExporterVerification,
   type InsertBuyerExporterVerification
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";

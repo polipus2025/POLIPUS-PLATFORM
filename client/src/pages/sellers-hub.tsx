@@ -848,9 +848,9 @@ export default function SellersHub() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="container mx-auto px-4 py-4 space-y-6">
       {/* Back Button */}
-      <div className="flex items-center mb-4">
+      <div className="flex items-center mb-2">
         <Link href="/exporter-dashboard">
           <Button 
             variant="ghost" 
@@ -865,7 +865,7 @@ export default function SellersHub() {
       </div>
 
       {/* TIME, DATE, AND WEATHER - CENTRALIZED IN FREE AREA */}
-      <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-4">
         <div className="flex items-center space-x-6 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-3 rounded-lg border border-slate-200 shadow-lg">
           {/* Date and Time */}
           <div className="flex items-center space-x-3">
@@ -908,8 +908,8 @@ export default function SellersHub() {
       </div>
 
       {/* Header */}
-      <div className="text-center bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-slate-200">
-        <h1 className="text-4xl font-bold text-slate-900 mb-3">Sellers Hub</h1>
+      <div className="text-center bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-slate-200">
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">Sellers Hub</h1>
         <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
       </div>
 
